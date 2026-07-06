@@ -11,6 +11,7 @@ const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileResult>("Parent
 export const ParentProfilePothosObject = ParentProfileRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
+    userId: t.exposeString("userId", { authScopes: { superAdmin: true } }),
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),

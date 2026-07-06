@@ -1,6 +1,7 @@
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PaginationControls } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -136,7 +137,14 @@ function TeacherCardActions({
   readonly router: ReturnType<typeof useRouter>;
 }) {
   return (
-    <Box sx={{ display: "flex", gap: 1 }}>
+    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+      {row.userId ? (
+        <ViewAsUserButton
+          variant="link"
+          targetUserId={row.userId}
+          targetUserName={row.name ?? row.email ?? ""}
+        />
+      ) : null}
       <IconButton
         sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
         onClick={() => {

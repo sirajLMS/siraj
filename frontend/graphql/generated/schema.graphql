@@ -998,6 +998,14 @@ type EditQuotaResult {
 """A type representing a validated email address"""
 scalar Email
 
+type EndImpersonationResponse {
+  token: String
+}
+
+type EndPermissionGroupSimulationResponse {
+  token: String
+}
+
 type FileInfo implements StorageObject {
   contentHash: String
   contentType: String
@@ -1155,6 +1163,15 @@ type GroupUser {
   email: String
   id: String
   name: String
+}
+
+type ImpersonationStatus {
+  actorUser: User
+  expiresAt: DateTime
+  isActive: Boolean
+  reason: String
+  startedAt: DateTime
+  targetUser: User
 }
 
 enum InvoiceStatus {
@@ -1369,6 +1386,8 @@ type Mutation {
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
   detachSubjectResource(learningResourceId: ID!, subjectId: ID!): Boolean
+  endImpersonation: EndImpersonationResponse
+  endPermissionGroupSimulation: EndPermissionGroupSimulationResponse
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
   linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocument
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
@@ -1399,6 +1418,8 @@ type Mutation {
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   sendPaymentReminder(studentId: String!): SendPaymentReminderResult
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
+  startImpersonation(reason: String, targetUserId: String!): StartImpersonationResponse
+  startPermissionGroupSimulation(groupSlug: String!): StartPermissionGroupSimulationResponse
   stopClass(classInstanceId: ID!): ClassInstanceDetail
 
   """Submits a new complaint from the authenticated parent."""
@@ -1567,6 +1588,7 @@ type ParentDirectoryRow {
   name: String
   time: String
   unpaidInvoices: Int
+  userId: String
 }
 
 type ParentDocument {
@@ -1649,6 +1671,7 @@ type ParentProfile {
   timezone: String
   twitter: String
   updatedAt: DateTime
+  userId: String
   whatsapp: String
 }
 
@@ -1707,6 +1730,14 @@ type PermissionGroup {
   updatedAt: DateTime
 }
 
+type PermissionGroupSimulationStatus {
+  expiresAt: DateTime
+  groupName: String
+  groupSlug: String
+  isActive: Boolean
+  startedAt: DateTime
+}
+
 """A type representing a validated phone number"""
 scalar PhoneNumber
 
@@ -1751,6 +1782,7 @@ type Query {
   """Generates dynamic attendance and financial reports."""
   generateAttendanceReport(filters: AttendanceReportFiltersInput!): AttendanceReportPayload
   groupClassAudit(classInstanceId: String!): GroupClassAudit
+  impersonationStatus: ImpersonationStatus
 
   """Lists all learning resources available to the academy."""
   learningResources(searchQuery: String): [LearningResourceRow!]
@@ -1782,6 +1814,7 @@ type Query {
 
   """Fetch a single permission group by ID."""
   permissionGroup(id: String!): PermissionGroup
+  permissionGroupSimulationStatus: PermissionGroupSimulationStatus
 
   """List all permission groups with their permission IDs."""
   permissionGroups: [PermissionGroup!]
@@ -1809,6 +1842,7 @@ type Query {
   """
   searchSuggestions(excludeId: String!, query: String!): [SuggestionSearchResult!]
   searchTeacherAvailability(input: AvailabilitySearchInput!): AvailabilitySearchResult
+  simulatablePermissionGroups: [SimulatablePermissionGroup!]
   statusTrackingSchedule(date: String!, search: String, viewerTimezone: String): [StatusTrackingScheduleRow!]
   storageStats(
     """
@@ -1954,6 +1988,25 @@ input RevokePermissionGroupFromUserInput {
 type SendPaymentReminderResult {
   id: String
   success: Boolean
+}
+
+type SimulatablePermissionGroup {
+  description: String
+  name: String
+  slug: String
+}
+
+type StartImpersonationResponse {
+  expiresAt: DateTime
+  impersonationSessionId: String
+  targetUser: User
+  token: String
+}
+
+type StartPermissionGroupSimulationResponse {
+  expiresAt: DateTime
+  groupSlug: String
+  token: String
 }
 
 type StatusTrackingScheduleRow {
@@ -2538,6 +2591,7 @@ type TeacherProfileResult {
   timezone: String
   totalClasses: Int
   updatedAt: String
+  userId: String
   zoomLink: String
   zoomUsername: String
 }

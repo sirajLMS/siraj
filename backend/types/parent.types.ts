@@ -27,6 +27,7 @@ export type ParentDirectoryMetrics = {
  */
 export type ParentDirectoryRawRow = {
   id: string;
+  userId: string;
   name: string;
   email: string;
   avatarUrl: string | null;
@@ -50,6 +51,7 @@ export type ParentDirectoryRawMetrics = {
 
 export type ParentDirectoryRow = {
   id: string;
+  userId: string;
   index: number;
   name: string;
   email: string;

@@ -22,6 +22,7 @@ const ParentDirectoryRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryRow>("Pa
 export const ParentDirectoryRowPothosObject = ParentDirectoryRowRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
+    userId: t.exposeString("userId"),
     index: t.exposeInt("index"),
     name: t.exposeString("name"),
     email: t.exposeString("email"),

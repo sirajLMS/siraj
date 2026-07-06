@@ -1,5 +1,5 @@
 import { StudentRepository } from "@/backend/db/repo";
-import * as Pothos from "@/backend/graphql/pothos";
+import * as Pothos from "../pothos";
 import * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 import { AppPermission } from "@/shared/lib/enum";

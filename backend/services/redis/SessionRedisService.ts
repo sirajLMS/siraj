@@ -92,6 +92,36 @@ export class SessionRedisService {
     if (obj.deviceName !== undefined && typeof obj.deviceName !== "string") {
       return false;
     }
+    if (obj.impersonation !== undefined) {
+      if (typeof obj.impersonation !== "object" || obj.impersonation === null || Array.isArray(obj.impersonation)) {
+        return false;
+      }
+      const imp = obj.impersonation as Record<string, unknown>;
+      if (
+        typeof imp.targetUserId !== "string" ||
+        typeof imp.startedAt !== "string" ||
+        typeof imp.expiresAt !== "string" ||
+        typeof imp.impersonationSessionId !== "string"
+      ) {
+        return false;
+      }
+      if (imp.reason !== undefined && typeof imp.reason !== "string") {
+        return false;
+      }
+    }
+    if (obj.groupSimulation !== undefined) {
+      if (typeof obj.groupSimulation !== "object" || obj.groupSimulation === null || Array.isArray(obj.groupSimulation)) {
+        return false;
+      }
+      const sim = obj.groupSimulation as Record<string, unknown>;
+      if (
+        typeof sim.groupSlug !== "string" ||
+        typeof sim.startedAt !== "string" ||
+        typeof sim.expiresAt !== "string"
+      ) {
+        return false;
+      }
+    }
     return true;
   }
 

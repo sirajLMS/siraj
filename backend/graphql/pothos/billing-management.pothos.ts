@@ -76,7 +76,7 @@ export const DeleteInvoiceResultPothosObject = DeleteInvoiceResultRef.implement(
 gqlSchemaBuilder.mutationField("createManualInvoice", t =>
   t.field({
     type: ManualInvoiceResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { superAdmin: true, notImpersonating: true },
     args: {
       parentId: t.arg.string({ required: true }),
       studentId: t.arg.string({ required: false }),
@@ -116,7 +116,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
 gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
   t.field({
     type: MarkInvoicePaidResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { superAdmin: true, notImpersonating: true },
     args: {
       invoiceId: t.arg.string({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
@@ -144,7 +144,7 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
 gqlSchemaBuilder.mutationField("deleteInvoice", t =>
   t.field({
     type: DeleteInvoiceResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { superAdmin: true, notImpersonating: true },
     args: {
       invoiceId: t.arg.string({ required: true }),
     },
@@ -173,7 +173,7 @@ export const SendPaymentReminderResultPothosObject = SendPaymentReminderResultRe
 gqlSchemaBuilder.mutationField("sendPaymentReminder", t =>
   t.field({
     type: SendPaymentReminderResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { superAdmin: true, notImpersonating: true },
     args: {
       studentId: t.arg.string({ required: true }),
     },

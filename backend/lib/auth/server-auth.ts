@@ -1,24 +1,25 @@
 import { cookies } from "next/headers";
 import { verifyToken } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
+import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
+import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
 import { SessionService } from "@/backend/services/auth/session.service";
 
 export async function getServerUserContext(): Promise<{
   userId: string | null;
+  actorUserId?: string;
+  isImpersonating: boolean;
+  isSimulatingGroup: boolean;
+  simulatedGroupSlug?: string;
   context: UserPermissionContext | null;
 }> {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get("session_id")?.value;
-  // The access_token is set as an httpOnly cookie by setAuthCookies() in
-  // auth.mutation.ts with a 15-minute maxAge matching the JWT expiry.
-  // When it expires, SSR page loads redirect to /login, but the client-side
-  // AuthProvider.checkAuth() runs the refreshToken mutation which sets a fresh
-  // access_token cookie — so subsequent SSR loads succeed without a loop.
   const token = cookieStore.get("access_token")?.value;
 
   if (!sessionId || !token) {
-    return { userId: null, context: null };
+    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 
   let session: Awaited<ReturnType<typeof SessionService.validateSession>>;
@@ -32,17 +33,48 @@ export async function getServerUserContext(): Promise<{
   }
 
   if (!session?.userId) {
-    return { userId: null, context: null };
+    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 
   const payload = await verifyToken(token);
-  // Intentionally validates access tokens only — not refresh tokens.
-  // Server-side auth (SSR) should only use short-lived access tokens;
-  // refresh tokens have their own dedicated flow via the refresh endpoint.
-  if (payload?.type !== "access" || payload.userId !== session.userId) {
-    return { userId: null, context: null };
+  if (payload?.type !== "access") {
+    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 
-  const context = await PermissionsService.getUserContext(payload.userId);
-  return { userId: payload.userId, context };
+  const impersonationIdentity = await ImpersonationService.resolveAuthIdentityFromToken(payload, sessionId);
+  if (!impersonationIdentity) {
+    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
+  }
+
+  if (impersonationIdentity.isImpersonating) {
+    const context = await PermissionsService.getUserContext(impersonationIdentity.effectiveUserId);
+    return {
+      userId: impersonationIdentity.effectiveUserId,
+      actorUserId: impersonationIdentity.actorUserId,
+      isImpersonating: true,
+      isSimulatingGroup: false,
+      context,
+    };
+  }
+
+  const groupSimulationIdentity = await PermissionGroupSimulationService.resolveGroupSimulationFromToken(
+    payload,
+    sessionId
+  );
+  if (!groupSimulationIdentity) {
+    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
+  }
+
+  const context =
+    groupSimulationIdentity.isSimulatingGroup && groupSimulationIdentity.simulatedGroupSlug
+      ? await PermissionsService.getPermissionGroupContext(groupSimulationIdentity.simulatedGroupSlug)
+      : await PermissionsService.getUserContext(groupSimulationIdentity.realUserId);
+
+  return {
+    userId: groupSimulationIdentity.realUserId,
+    isImpersonating: false,
+    isSimulatingGroup: groupSimulationIdentity.isSimulatingGroup,
+    simulatedGroupSlug: groupSimulationIdentity.simulatedGroupSlug,
+    context,
+  };
 }

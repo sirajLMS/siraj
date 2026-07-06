@@ -3,6 +3,7 @@ import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
 
 export interface TeacherProfileData {
   readonly id: string;
+  readonly userId: string;
   readonly fullName: string;
   readonly email: string;
   readonly phone: string;

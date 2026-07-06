@@ -12,6 +12,11 @@ export type BaseContext = {
   permissions: AppPermission[];
   permissionGroups: string[];
   isSuperAdmin: boolean;
+  actorUserId?: string;
+  isImpersonating: boolean;
+  realUserId?: string;
+  isSimulatingGroup: boolean;
+  simulatedGroupSlug?: string;
   refreshToken: string | undefined;
   sessionId: string | undefined;
   ipAddress?: string;
@@ -27,9 +32,19 @@ export type AuthContexts = {
 
 export async function createContext({
   userId,
+  actorUserId,
+  isImpersonating = false,
+  realUserId,
+  isSimulatingGroup = false,
+  simulatedGroupSlug,
   locale = "ar",
 }: {
   userId?: string | null;
+  actorUserId?: string;
+  isImpersonating?: boolean;
+  realUserId?: string;
+  isSimulatingGroup?: boolean;
+  simulatedGroupSlug?: string;
   locale?: string;
 }): Promise<BaseContext> {
   if (!userId) {
@@ -38,6 +53,11 @@ export async function createContext({
       permissions: [],
       permissionGroups: [],
       isSuperAdmin: false,
+      actorUserId: undefined,
+      isImpersonating: false,
+      realUserId: undefined,
+      isSimulatingGroup: false,
+      simulatedGroupSlug: undefined,
       role: UserRole.GUEST,
       refreshToken: undefined,
       sessionId: undefined,
@@ -45,13 +65,22 @@ export async function createContext({
     };
   }
 
-  const permissionContext = await PermissionsService.getUserContext(userId);
+  const effectiveRealUserId = realUserId ?? actorUserId ?? userId;
+  const permissionContext =
+    isSimulatingGroup && simulatedGroupSlug
+      ? await PermissionsService.getPermissionGroupContext(simulatedGroupSlug, locale)
+      : await PermissionsService.getUserContext(userId);
 
   return {
     user: { id: userId },
     permissions: permissionContext.permissions,
     permissionGroups: permissionContext.permissionGroups,
     isSuperAdmin: permissionContext.isSuperAdmin,
+    actorUserId,
+    isImpersonating,
+    realUserId: effectiveRealUserId,
+    isSimulatingGroup,
+    simulatedGroupSlug,
     role: permissionContext.role,
     refreshToken: undefined,
     sessionId: undefined,

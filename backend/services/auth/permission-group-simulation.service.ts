@@ -1,0 +1,339 @@
+import { asc, eq } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
+import { adminAuditLogs, permissionGroups } from "@/backend/db/schema";
+import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
+import { generateAccessToken, generateGroupSimulationAccessToken } from "@/backend/lib/auth/jwt";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { logger } from "@/backend/lib/logger";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type * as Types from "@/backend/types";
+import type { RedisGroupSimulationSessionData } from "@/backend/types/auth.types";
+import { SystemPermissionGroupSlug } from "@/shared/lib/enum";
+
+export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
+
+const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
+function sanitizeIpAddress(ip: string | null | undefined): string | null {
+  if (!ip) return null;
+  const parts = ip.split(":");
+  const cleanIp = parts.length === 2 ? parts[0] : ip;
+  return IPV4_REGEX.test(cleanIp) ? cleanIp : "127.0.0.1";
+}
+
+function getExpiresAt(startedAt: Date): Date {
+  return new Date(startedAt.getTime() + GROUP_SIMULATION_TTL_MS);
+}
+
+async function writeAdminAuditLog(
+  actorUserId: string,
+  action: Types.GroupSimulationAuditAction,
+  metadata: Record<string, unknown>,
+  ipAddress?: string | null
+): Promise<void> {
+  await db.insert(adminAuditLogs).values({
+    actorUserId,
+    targetUserId: actorUserId,
+    action,
+    description:
+      action === "GROUP_SIMULATION_START" ? "Started permission group simulation" : "Ended permission group simulation",
+    newState: metadata,
+    ipAddress: sanitizeIpAddress(ipAddress),
+    createdAt: new Date(),
+  });
+}
+
+async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, locale?: string): Promise<void> {
+  const t = await getBackendTranslations({ locale, namespace: "errors" });
+  const session = await SessionRepository.findSessionById(rawSessionId);
+  if (!session?.userId || session.userId !== actorUserId) {
+    throw new Error(t("auth.groupSimulationSessionInvalid"));
+  }
+}
+
+async function getActiveGroupSimulation(
+  rawSessionId: string,
+  actorUserId: string
+): Promise<{ data: RedisGroupSimulationSessionData; expiresAt: Date } | null> {
+  const active = await SessionRepository.getSessionGroupSimulation(rawSessionId, actorUserId);
+  if (!active) {
+    return null;
+  }
+
+  if (active.expiresAt.getTime() <= Date.now()) {
+    await SessionRepository.clearSessionGroupSimulation(rawSessionId);
+    return null;
+  }
+
+  return active;
+}
+
+async function syncGroupSimulation(
+  rawSessionId: string,
+  groupSimulation: RedisGroupSimulationSessionData
+): Promise<void> {
+  await SessionRepository.setSessionGroupSimulation(rawSessionId, groupSimulation);
+}
+
+export async function clearOptionalRedisGroupSimulation(rawSessionId: string): Promise<void> {
+  await SessionRepository.clearSessionGroupSimulation(rawSessionId);
+}
+
+export namespace PermissionGroupSimulationService {
+  async function getOwnedGroupSlugs(actorUserId: string): Promise<Set<string>> {
+    const actorContext = await PermissionsService.getUserContext(actorUserId);
+    const ownedSlugs = new Set(actorContext.permissionGroups);
+    if (actorContext.isSuperAdmin) {
+      ownedSlugs.add(SystemPermissionGroupSlug.SUPER_ADMIN);
+    }
+    return ownedSlugs;
+  }
+
+  export async function listSimulatableGroups(
+    actorUserId: string
+  ): Promise<Types.SimulatablePermissionGroupReturnType[]> {
+    const ownedSlugs = await getOwnedGroupSlugs(actorUserId);
+
+    const groups = await db
+      .select({
+        slug: permissionGroups.slug,
+        name: permissionGroups.name,
+        description: permissionGroups.description,
+      })
+      .from(permissionGroups)
+      .orderBy(asc(permissionGroups.name));
+
+    return groups
+      .filter(group => !ownedSlugs.has(group.slug))
+      .map(group => ({
+        slug: group.slug,
+        name: group.name,
+        description: group.description,
+      }));
+  }
+
+  export async function assertCanSimulateGroup(actorUserId: string, groupSlug: string, locale?: string): Promise<void> {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+    const actorContext = await PermissionsService.getUserContext(actorUserId);
+    if (!actorContext.isSuperAdmin) {
+      throw new Error(t("auth.groupSimulationNotAllowed"));
+    }
+
+    const ownedSlugs = await getOwnedGroupSlugs(actorUserId);
+    if (ownedSlugs.has(groupSlug)) {
+      throw new Error(t("auth.groupSimulationAlreadyHasGroup"));
+    }
+
+    await PermissionsService.getPermissionGroupContext(groupSlug, locale);
+  }
+
+  export async function startSimulation(
+    input: Types.StartPermissionGroupSimulationInput,
+    locale?: string
+  ): Promise<Types.StartPermissionGroupSimulationReturnType> {
+    await assertCanSimulateGroup(input.actorUserId, input.groupSlug, locale);
+    await assertActorOwnsSession(input.sessionId, input.actorUserId, locale);
+
+    const actorUser = await UserRepository.findById(input.actorUserId);
+    if (!actorUser) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("auth.groupSimulationSessionInvalid"));
+    }
+
+    await ImpersonationRepository.endActiveForActor(input.actorUserId);
+    await clearOptionalRedisImpersonation(input.sessionId);
+
+    const startedAt = new Date();
+    const expiresAt = getExpiresAt(startedAt);
+
+    await syncGroupSimulation(input.sessionId, {
+      groupSlug: input.groupSlug,
+      startedAt: startedAt.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+    });
+
+    const groupSimulationExpiresAt = Math.floor(expiresAt.getTime() / 1000);
+    const token = await generateGroupSimulationAccessToken(
+      input.actorUserId,
+      actorUser.email,
+      input.groupSlug,
+      groupSimulationExpiresAt
+    );
+
+    await writeAdminAuditLog(
+      input.actorUserId,
+      "GROUP_SIMULATION_START",
+      { groupSlug: input.groupSlug },
+      input.ipAddress
+    );
+
+    logger.info("Permission group simulation started", {
+      actorUserId: input.actorUserId,
+      groupSlug: input.groupSlug,
+    });
+
+    return {
+      token,
+      expiresAt,
+      groupSlug: input.groupSlug,
+    };
+  }
+
+  export async function endSimulation(
+    actorUserId: string,
+    rawSessionId: string,
+    locale?: string,
+    ipAddress?: string | null,
+    activeGroupSlug?: string | null
+  ): Promise<Types.EndPermissionGroupSimulationReturnType> {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    await assertActorOwnsSession(rawSessionId, actorUserId, locale);
+
+    const active = await getActiveGroupSimulation(rawSessionId, actorUserId);
+    const groupSlug = active?.data.groupSlug ?? activeGroupSlug ?? undefined;
+
+    if (!groupSlug) {
+      throw new Error(t("auth.groupSimulationNotActive"));
+    }
+
+    await clearOptionalRedisGroupSimulation(rawSessionId);
+
+    const actorUser = await UserRepository.findById(actorUserId);
+    if (!actorUser) {
+      throw new Error(t("auth.groupSimulationSessionInvalid"));
+    }
+
+    const token = await generateAccessToken(actorUser.id, actorUser.email);
+
+    await writeAdminAuditLog(actorUserId, "GROUP_SIMULATION_END", { groupSlug }, ipAddress);
+
+    logger.info("Permission group simulation ended", {
+      actorUserId,
+      groupSlug,
+    });
+
+    return { token };
+  }
+
+  export async function getStatusForSession(
+    rawSessionId: string,
+    actorUserId: string,
+    fallback?: { groupSlug?: string; startedAt?: Date; expiresAt?: Date }
+  ): Promise<Types.PermissionGroupSimulationStatusReturnType> {
+    const active = await getActiveGroupSimulation(rawSessionId, actorUserId);
+    if (!active) {
+      if (fallback?.groupSlug) {
+        const [group] = await db
+          .select({ name: permissionGroups.name })
+          .from(permissionGroups)
+          .where(eq(permissionGroups.slug, fallback.groupSlug))
+          .limit(1);
+
+        return {
+          isActive: true,
+          groupSlug: fallback.groupSlug,
+          groupName: group?.name,
+          startedAt: fallback.startedAt,
+          expiresAt: fallback.expiresAt,
+        };
+      }
+
+      return { isActive: false };
+    }
+
+    const [group] = await db
+      .select({ name: permissionGroups.name })
+      .from(permissionGroups)
+      .where(eq(permissionGroups.slug, active.data.groupSlug))
+      .limit(1);
+
+    return {
+      isActive: true,
+      groupSlug: active.data.groupSlug,
+      groupName: group?.name,
+      startedAt: new Date(active.data.startedAt),
+      expiresAt: active.expiresAt,
+    };
+  }
+
+  export type ResolvedGroupSimulation = {
+    realUserId: string;
+    isSimulatingGroup: boolean;
+    simulatedGroupSlug?: string;
+  };
+
+  export async function resolveGroupSimulationFromToken(
+    payload: CustomJWTPayload,
+    rawSessionId: string | undefined
+  ): Promise<ResolvedGroupSimulation | null> {
+    if (payload.impersonation) {
+      return null;
+    }
+
+    if (!payload.groupSimulation || !payload.groupSimulationSlug) {
+      return { realUserId: payload.userId, isSimulatingGroup: false };
+    }
+
+    if (!rawSessionId) {
+      return null;
+    }
+
+    const session = await SessionRepository.findSessionById(rawSessionId);
+    if (!session?.userId || session.userId !== payload.userId) {
+      return null;
+    }
+
+    if (payload.groupSimulationExpiresAt && payload.groupSimulationExpiresAt * 1000 <= Date.now()) {
+      await clearOptionalRedisGroupSimulation(rawSessionId);
+      return null;
+    }
+
+    const serverActive = await getActiveGroupSimulation(rawSessionId, payload.userId);
+    if (!serverActive || serverActive.data.groupSlug !== payload.groupSimulationSlug) {
+      return null;
+    }
+
+    try {
+      await PermissionsService.getPermissionGroupContext(payload.groupSimulationSlug);
+    } catch {
+      return null;
+    }
+
+    return {
+      realUserId: payload.userId,
+      isSimulatingGroup: true,
+      simulatedGroupSlug: payload.groupSimulationSlug,
+    };
+  }
+
+  export async function issueAccessTokenForSession(actorUserId: string, rawSessionId: string): Promise<string | null> {
+    const session = await SessionRepository.findSessionById(rawSessionId);
+    if (!session?.userId || session.userId !== actorUserId) {
+      return null;
+    }
+
+    const active = await getActiveGroupSimulation(rawSessionId, actorUserId);
+    if (active) {
+      const actorUser = await UserRepository.findById(actorUserId);
+      if (actorUser) {
+        return await generateGroupSimulationAccessToken(
+          actorUserId,
+          actorUser.email,
+          active.data.groupSlug,
+          Math.floor(active.expiresAt.getTime() / 1000)
+        );
+      }
+    }
+
+    return null;
+  }
+}
+
+async function clearOptionalRedisImpersonation(rawSessionId: string): Promise<void> {
+  await SessionRepository.updateRedisSessionData(rawSessionId, data => {
+    const { impersonation: _removed, ...rest } = data;
+    return rest;
+  });
+}

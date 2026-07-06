@@ -5,6 +5,7 @@ import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import { PaginationControls } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
 
 export interface ParentCardListLabels {
@@ -50,16 +51,21 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
             </Typography>
           </Stack>
         </Box>
-        <IconButton
-          size="small"
-          onClick={e => {
-            e.stopPropagation();
-            onOpenSettings(row.id);
-          }}
-          sx={theme => ({ color: theme.palette.onSurfaceVariant })}
-        >
-          <SettingsIcon />
-        </IconButton>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+          {row.userId ? (
+            <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
+          ) : null}
+          <IconButton
+            size="small"
+            onClick={e => {
+              e.stopPropagation();
+              onOpenSettings(row.id);
+            }}
+            sx={theme => ({ color: theme.palette.onSurfaceVariant })}
+          >
+            <SettingsIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

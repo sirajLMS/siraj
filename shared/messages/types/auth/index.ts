@@ -25,6 +25,31 @@ export interface AuthLoginLabels {
   readonly staff: string;
 }
 
+export interface AuthImpersonationLabels {
+  readonly bannerLoggedInAs: string;
+  readonly returnToNormalLogin: string;
+  readonly bannerViewingAs: string;
+  readonly exit: string;
+  readonly loginAs: string;
+  readonly administration: string;
+  readonly actorIdentity: string;
+  readonly viewAsUser: string;
+  readonly confirmTitle: string;
+  readonly confirmMessage: string;
+  readonly reasonLabel: string;
+  readonly reasonPlaceholder: string;
+  readonly confirm: string;
+  readonly cancel: string;
+}
+
+export interface AuthGroupSimulationLabels {
+  readonly switchRoleTo: string;
+  readonly returnToNormalRole: string;
+  readonly bannerSimulatingAs: string;
+}
+
 export interface AuthLabels {
   readonly login: AuthLoginLabels;
+  readonly impersonation: AuthImpersonationLabels;
+  readonly groupSimulation: AuthGroupSimulationLabels;
 }

@@ -1,47 +1,13 @@
-import { UserRepository } from "@/backend/db/repo";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   DemoLoginInput,
   LoginInput,
   LoginResponse,
   RefreshTokenResponse,
-  UserPothosDefinition,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { AppPermissionPothosEnum } from "./enum.pothos";
+import { UserPothosObject } from "./user.pothos";
 
-const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserPothosDefinition>("User");
-
-// User type
-export const UserPothosObject = gqlSchemaBuilder.loadableObject<
-  UserPothosDefinition | Error, // LoadResult
-  string, // Key
-  [], // Interfaces
-  typeof UserPothosObjectRef // NameOrRef
->(UserPothosObjectRef, {
-  load: async (ids: string[]) => UserRepository.loadByIds(ids),
-  sort: user => user.id,
-  fields: t => ({
-    id: t.exposeString("id"),
-    name: t.exposeString("name"),
-    email: t.exposeString("email"),
-    emailVerifiedAt: t.expose("emailVerifiedAt", {
-      type: "DateTime",
-      nullable: true,
-    }),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
-    notificationCount: t.int({ resolve: () => 0 }),
-    permissions: t.field({
-      type: [AppPermissionPothosEnum],
-      resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.permissions),
-    }),
-    role: t.string({
-      resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.role),
-    }),
-  }),
-});
+export { UserPothosObject };
 
 export const LoginInputPothosObject = gqlSchemaBuilder.inputRef<LoginInput>("LoginInput").implement({
   fields: t => ({

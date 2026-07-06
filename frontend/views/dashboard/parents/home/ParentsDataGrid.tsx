@@ -9,6 +9,7 @@ import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { GridPagination } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
@@ -154,12 +155,19 @@ export function ParentsDataGrid({
       {
         field: "actions",
         headerName: labels.options,
-        width: 100,
+        width: 180,
         sortable: false,
         align: "center",
         headerAlign: "center",
         renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
+          <Box sx={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center", gap: 1 }}>
+            {row.userId ? (
+              <ViewAsUserButton
+                variant="link"
+                targetUserId={row.userId}
+                targetUserName={row.name}
+              />
+            ) : null}
             <IconButton
               size="small"
               onClick={e => {

@@ -8,6 +8,7 @@ export { ComplaintRepository } from "./complaint.repository";
 export { ComplaintResponseRepository } from "./complaint-response.repository";
 export { DstMigrationRepository } from "./dst-migration.repository";
 export { GroupClassRepository } from "./group-class.repository";
+export { ImpersonationRepository } from "./impersonation.repository";
 export { LearningResourceRepository } from "./learning-resource.repository";
 export { NotificationRepository } from "./notification.repository";
 export { ParentRepository } from "./parent.repository";

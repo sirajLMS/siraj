@@ -46,6 +46,7 @@ export namespace ParentDirectoryService {
 
       rows.push({
         id: row.id,
+        userId: row.userId,
         index: (pagination?.offset ?? 0) + i + 1,
         name: row.name,
         email: row.email,

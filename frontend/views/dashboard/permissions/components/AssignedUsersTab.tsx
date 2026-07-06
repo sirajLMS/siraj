@@ -7,6 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
+import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import type { GroupUser, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const StyledTabContainer = styled(Box)(({ theme }) => ({
@@ -188,22 +189,32 @@ export function AssignedUsersTab({
       {
         field: "actions",
         headerName: "",
-        width: 100,
+        width: 160,
         align: "right",
         sortable: false,
         renderCell: params => (
-          <StyledRemoveButton
-            size="small"
-            color="error"
-            startIcon={<PersonRemoveOutlined fontSize="small" />}
-            onClick={() => params.row.id && onRevokeUser(params.row.id)}
-          >
-            {t("removeUser")}
-          </StyledRemoveButton>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5 }}>
+            {params.row.id ? (
+              <ViewAsUserButton
+                variant="link"
+                targetUserId={params.row.id}
+                targetUserName={params.row.name ?? params.row.email ?? ""}
+                targetIsSuperAdmin={group.slug === "super_admin"}
+              />
+            ) : null}
+            <StyledRemoveButton
+              size="small"
+              color="error"
+              startIcon={<PersonRemoveOutlined fontSize="small" />}
+              onClick={() => params.row.id && onRevokeUser(params.row.id)}
+            >
+              {t("removeUser")}
+            </StyledRemoveButton>
+          </Box>
         ),
       },
     ];
-  }, [t, group.createdAt, selectedAssignedUserIds, onRevokeUser, onUserToggle]);
+  }, [t, group.createdAt, group.slug, selectedAssignedUserIds, onRevokeUser, onUserToggle]);
 
   return (
     <StyledTabContainer>

@@ -1,3 +1,4 @@
+import "./pothos";
 import "./query";
 import "./mutation";
 import "./pothos/schema.types";

@@ -1043,6 +1043,16 @@ export type EditQuotaResult = {
   version: Maybe<Scalars['Int']['output']>;
 };
 
+export type EndImpersonationResponse = {
+  __typename?: 'EndImpersonationResponse';
+  token: Maybe<Scalars['String']['output']>;
+};
+
+export type EndPermissionGroupSimulationResponse = {
+  __typename?: 'EndPermissionGroupSimulationResponse';
+  token: Maybe<Scalars['String']['output']>;
+};
+
 export type FileInfo = StorageObject & {
   __typename?: 'FileInfo';
   contentHash: Maybe<Scalars['String']['output']>;
@@ -1209,6 +1219,16 @@ export type GroupUser = {
   email: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+};
+
+export type ImpersonationStatus = {
+  __typename?: 'ImpersonationStatus';
+  actorUser: Maybe<User>;
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  reason: Maybe<Scalars['String']['output']>;
+  startedAt: Maybe<Scalars['DateTime']['output']>;
+  targetUser: Maybe<User>;
 };
 
 export enum InvoiceStatus {
@@ -1412,6 +1432,8 @@ export type Mutation = {
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
   detachSubjectResource: Maybe<Scalars['Boolean']['output']>;
+  endImpersonation: Maybe<EndImpersonationResponse>;
+  endPermissionGroupSimulation: Maybe<EndPermissionGroupSimulationResponse>;
   executeDstBulkUpdate: Maybe<DstMigrationReport>;
   linkDocumentToParent: Maybe<ParentDocument>;
   logTeacherSupportRequest: Maybe<SupportRequestResult>;
@@ -1438,6 +1460,8 @@ export type Mutation = {
   revokePermissionGroupFromUser: Maybe<Scalars['Boolean']['output']>;
   sendPaymentReminder: Maybe<SendPaymentReminderResult>;
   setStorageItemProtection: Maybe<FileOperationResult>;
+  startImpersonation: Maybe<StartImpersonationResponse>;
+  startPermissionGroupSimulation: Maybe<StartPermissionGroupSimulationResponse>;
   stopClass: Maybe<ClassInstanceDetail>;
   /** Submits a new complaint from the authenticated parent. */
   submitComplaint: Maybe<Complaint>;
@@ -1811,6 +1835,17 @@ export type MutationSetStorageItemProtectionArgs = {
 };
 
 
+export type MutationStartImpersonationArgs = {
+  reason: InputMaybe<Scalars['String']['input']>;
+  targetUserId: Scalars['String']['input'];
+};
+
+
+export type MutationStartPermissionGroupSimulationArgs = {
+  groupSlug: Scalars['String']['input'];
+};
+
+
 export type MutationStopClassArgs = {
   classInstanceId: Scalars['ID']['input'];
 };
@@ -2059,6 +2094,7 @@ export type ParentDirectoryRow = {
   name: Maybe<Scalars['String']['output']>;
   time: Maybe<Scalars['String']['output']>;
   unpaidInvoices: Maybe<Scalars['Int']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
 };
 
 export type ParentDocument = {
@@ -2146,6 +2182,7 @@ export type ParentProfile = {
   timezone: Maybe<Scalars['String']['output']>;
   twitter: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
   whatsapp: Maybe<Scalars['String']['output']>;
 };
 
@@ -2206,6 +2243,15 @@ export type PermissionGroup = {
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type PermissionGroupSimulationStatus = {
+  __typename?: 'PermissionGroupSimulationStatus';
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  groupName: Maybe<Scalars['String']['output']>;
+  groupSlug: Maybe<Scalars['String']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  startedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   adminBillingSummary: Maybe<AdminBillingSummary>;
@@ -2235,6 +2281,7 @@ export type Query = {
   /** Generates dynamic attendance and financial reports. */
   generateAttendanceReport: Maybe<AttendanceReportPayload>;
   groupClassAudit: Maybe<GroupClassAudit>;
+  impersonationStatus: Maybe<ImpersonationStatus>;
   /** Lists all learning resources available to the academy. */
   learningResources: Maybe<Array<LearningResourceRow>>;
   listFiles: Maybe<StorageObjectList>;
@@ -2258,6 +2305,7 @@ export type Query = {
   parentSuggestions: Maybe<Array<Suggestion>>;
   /** Fetch a single permission group by ID. */
   permissionGroup: Maybe<PermissionGroup>;
+  permissionGroupSimulationStatus: Maybe<PermissionGroupSimulationStatus>;
   /** List all permission groups with their permission IDs. */
   permissionGroups: Maybe<Array<PermissionGroup>>;
   /** List all permission catalog entries. */
@@ -2268,6 +2316,7 @@ export type Query = {
   /** Search suggestions for duplicate marking autocomplete. Requires suggestions.review permission. */
   searchSuggestions: Maybe<Array<SuggestionSearchResult>>;
   searchTeacherAvailability: Maybe<AvailabilitySearchResult>;
+  simulatablePermissionGroups: Maybe<Array<SimulatablePermissionGroup>>;
   statusTrackingSchedule: Maybe<Array<StatusTrackingScheduleRow>>;
   storageStats: Maybe<StorageStats>;
   student: Maybe<Student>;
@@ -2730,6 +2779,28 @@ export type SendPaymentReminderResult = {
   __typename?: 'SendPaymentReminderResult';
   id: Maybe<Scalars['String']['output']>;
   success: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type SimulatablePermissionGroup = {
+  __typename?: 'SimulatablePermissionGroup';
+  description: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+};
+
+export type StartImpersonationResponse = {
+  __typename?: 'StartImpersonationResponse';
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  impersonationSessionId: Maybe<Scalars['String']['output']>;
+  targetUser: Maybe<User>;
+  token: Maybe<Scalars['String']['output']>;
+};
+
+export type StartPermissionGroupSimulationResponse = {
+  __typename?: 'StartPermissionGroupSimulationResponse';
+  expiresAt: Maybe<Scalars['DateTime']['output']>;
+  groupSlug: Maybe<Scalars['String']['output']>;
+  token: Maybe<Scalars['String']['output']>;
 };
 
 export type StatusTrackingScheduleRow = {
@@ -3315,6 +3386,7 @@ export type TeacherProfileResult = {
   timezone: Maybe<Scalars['String']['output']>;
   totalClasses: Maybe<Scalars['Int']['output']>;
   updatedAt: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
   zoomLink: Maybe<Scalars['String']['output']>;
   zoomUsername: Maybe<Scalars['String']['output']>;
 };

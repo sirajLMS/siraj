@@ -54,10 +54,10 @@ export function ManagersDataGrid({
   const columns = useMemo<GridColDef<Manager>[]>(
     () => [
       {
-        field: "id",
+        field: "userId",
         headerName: t("table.hash"),
         width: 80,
-        valueGetter: (_, row) => row.id.replace("MGR-", ""),
+        valueGetter: (_, row) => row.userId.slice(0, 8),
       },
       {
         field: "manager",
@@ -144,6 +144,7 @@ export function ManagersDataGrid({
       <AppDataGrid<Manager>
         rows={managers}
         columns={columns}
+        getRowId={row => row.userId}
         emptyMessage={t("noEntries")}
         autoHeight
         rowHeight={80}

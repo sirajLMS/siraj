@@ -7,6 +7,7 @@ const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnT
 export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
+    userId: t.exposeString("userId", { authScopes: { superAdmin: true } }),
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     phone: t.exposeString("phone", { nullable: true, authScopes: { superAdmin: true } }),

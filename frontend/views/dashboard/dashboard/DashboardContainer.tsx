@@ -37,7 +37,7 @@ export function DashboardContainer() {
   const t = useTranslations("common");
 
   const { data, loading } = useQuery(meQueryDocument, {
-    skip: !!user,
+    skip: !!user?.role,
   });
 
   useEffect(() => {

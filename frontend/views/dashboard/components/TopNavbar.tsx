@@ -3,6 +3,7 @@
 import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
 import { LanguageSwitcher } from "@/frontend/views/dashboard/components/navbar/LanguageSwitcher";
 import { ThemeSwitcher } from "@/frontend/views/dashboard/components/navbar/ThemeSwitcher";
 import { MobileMenuButton } from "./client/MobileMenuButton";
@@ -20,6 +21,10 @@ interface TopNavbarProps {
 
 export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl, notificationCount }: TopNavbarProps) {
   const t = useTranslations("dashboard");
+  const { isSimulatingGroup, status: simulationStatus } = usePermissionGroupSimulation();
+
+  const simulatedRoleName = simulationStatus?.groupName;
+  const secondaryHeaderLine = isSimulatingGroup && simulatedRoleName ? simulatedRoleName : userRole;
 
   return (
     <AppBar
@@ -95,9 +100,10 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
             <Box
               sx={{
                 textAlign: "end",
-                display: { xs: "none", sm: "flex" },
+                display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-end",
+                minWidth: 0,
               }}
             >
               <Typography
@@ -105,21 +111,28 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
                 sx={{
                   fontWeight: 500,
                   lineHeight: 1.2,
+                  display: { xs: "none", sm: "block" },
                 }}
               >
                 {userName}
               </Typography>
               <Typography
-                variant="labelSm"
+                variant={isSimulatingGroup ? "labelMd" : "labelSm"}
                 sx={{
-                  color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
-                  mt: 0.5,
+                  color: theme =>
+                    isSimulatingGroup
+                      ? theme.palette.onHeaderContainer
+                      : alpha(theme.palette.onHeaderContainer, 0.7),
+                  mt: 0.25,
                   lineHeight: 1.2,
+                  fontWeight: isSimulatingGroup ? 600 : 400,
+                  display: { xs: "none", sm: "block" },
                 }}
               >
-                {userRole}
+                {secondaryHeaderLine}
               </Typography>
             </Box>
+
             <UserMenuButton userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />
           </Box>
         </Box>

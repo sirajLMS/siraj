@@ -79,6 +79,7 @@ function useDirectoryRows(
     readonly rows?:
       | readonly {
           readonly id?: string | null;
+          readonly userId?: string | null;
           readonly index?: number | null;
           readonly name?: string | null;
           readonly email?: string | null;
@@ -93,6 +94,7 @@ function useDirectoryRows(
 ) {
   return (directory?.rows ?? []).map(row => ({
     id: row.id ?? "",
+    userId: row.userId ?? "",
     index: row.index ?? 0,
     name: row.name ?? "",
     email: row.email ?? "",

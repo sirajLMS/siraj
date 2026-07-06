@@ -12,6 +12,7 @@ import { getTableConfig } from "drizzle-orm/pg-core";
 import { GraphQLError } from "graphql";
 import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
 import logger from "@/backend/lib/logger";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { AppPermission } from "@/shared/lib/enum";
 import type { Email, PhoneNumber } from "../lib";
 import type { AuthContexts, BaseContext } from "./gqlContext";
@@ -23,6 +24,8 @@ export interface PothosTypes {
     loggedIn: boolean;
     permission: AppPermission;
     superAdmin: boolean;
+    notImpersonating: boolean;
+    notSimulatingGroup: boolean;
   };
   AuthContexts: AuthContexts;
   Scalars: {
@@ -72,11 +75,25 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
     relations,
   },
   scopeAuth: {
-    authScopes: ctx => ({
-      loggedIn: !!ctx.user,
-      permission: (key: AppPermission) => ctx.isSuperAdmin || ctx.permissions.includes(key),
-      superAdmin: ctx.isSuperAdmin,
-    }),
+    authScopes: async ctx => {
+      const realUserId = ctx.realUserId ?? ctx.actorUserId ?? ctx.user?.id;
+      let actorIsSuperAdmin = ctx.isSuperAdmin;
+      if (realUserId) {
+        const actorContext = await PermissionsService.getUserContext(realUserId);
+        actorIsSuperAdmin = actorContext.isSuperAdmin;
+      } else if (ctx.actorUserId) {
+        const actorContext = await PermissionsService.getUserContext(ctx.actorUserId);
+        actorIsSuperAdmin = actorContext.isSuperAdmin;
+      }
+
+      return {
+        loggedIn: !!ctx.user,
+        permission: (key: AppPermission) => ctx.isSuperAdmin || ctx.permissions.includes(key),
+        superAdmin: actorIsSuperAdmin,
+        notImpersonating: !ctx.isImpersonating,
+        notSimulatingGroup: !ctx.isSimulatingGroup,
+      };
+    },
     unauthorizedError: (_parent, _context, _info, result) => {
       const hasLoggedInFailure = (failure: unknown): boolean => {
         if (!failure || typeof failure !== "object") return false;

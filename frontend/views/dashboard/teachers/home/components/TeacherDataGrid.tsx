@@ -2,6 +2,7 @@ import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
+import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
@@ -170,10 +171,30 @@ export function TeacherDataGrid({
     {
       field: "options",
       headerName: t("table.options"),
-      width: 100,
+      width: 180,
       align: "center",
       headerAlign: "center",
-      renderCell: getActionCellRenderer(<SettingsOutlined />, "primary", router, id => `/teachers/${id}/profile`),
+      sortable: false,
+      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, height: "100%" }}>
+          {params.row.userId ? (
+            <ViewAsUserButton
+              variant="link"
+              targetUserId={params.row.userId}
+              targetUserName={params.row.name ?? params.row.email ?? ""}
+            />
+          ) : null}
+          <TeacherActionButton
+            icon={<SettingsOutlined />}
+            variant="primary"
+            onClick={() => {
+              if (params.row.id) {
+                router.push(`/teachers/${params.row.id}/profile`);
+              }
+            }}
+          />
+        </Box>
+      ),
     },
   ];
 

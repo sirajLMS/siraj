@@ -96,7 +96,7 @@ export function ManagersCardList({
       {managers.map(manager => {
         const isStaff = manager.role === "staff";
         return (
-          <StyledManagerCard key={manager.id}>
+          <StyledManagerCard key={manager.userId}>
             <StyledCardActionsBox>
               <ManagerRowActions manager={manager} />
             </StyledCardActionsBox>

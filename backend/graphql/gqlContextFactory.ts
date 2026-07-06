@@ -1,23 +1,62 @@
 import { cookies, headers } from "next/headers";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import logger from "@/backend/lib/logger";
+import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
+import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { type BaseContext, createContext } from "./gqlContext";
 
-/**
- * Extract user ID from authorization header
- */
-async function getUserIdFromRequest(headersList: Headers): Promise<string | null> {
+async function resolveAuthFromRequest(
+  headersList: Headers,
+  sessionId: string | undefined
+): Promise<{
+  effectiveUserId: string | null;
+  actorUserId?: string;
+  isImpersonating: boolean;
+  realUserId?: string;
+  isSimulatingGroup: boolean;
+  simulatedGroupSlug?: string;
+}> {
   const authHeader = headersList.get("authorization");
   const accessToken = extractTokenFromHeader(authHeader);
-
-  if (!accessToken) return null;
-
-  const payload = await verifyToken(accessToken);
-  if (payload?.type === "access") {
-    return payload.userId;
+  if (!accessToken) {
+    return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
   }
 
-  return null;
+  const payload = await verifyToken(accessToken);
+  if (payload?.type !== "access") {
+    return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
+  }
+
+  const impersonationIdentity = await ImpersonationService.resolveAuthIdentityFromToken(payload, sessionId);
+  if (!impersonationIdentity) {
+    return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
+  }
+
+  if (impersonationIdentity.isImpersonating) {
+    return {
+      effectiveUserId: impersonationIdentity.effectiveUserId,
+      actorUserId: impersonationIdentity.actorUserId,
+      isImpersonating: true,
+      realUserId: impersonationIdentity.actorUserId,
+      isSimulatingGroup: false,
+    };
+  }
+
+  const groupSimulationIdentity = await PermissionGroupSimulationService.resolveGroupSimulationFromToken(
+    payload,
+    sessionId
+  );
+  if (!groupSimulationIdentity) {
+    return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
+  }
+
+  return {
+    effectiveUserId: groupSimulationIdentity.realUserId,
+    isImpersonating: false,
+    realUserId: groupSimulationIdentity.realUserId,
+    isSimulatingGroup: groupSimulationIdentity.isSimulatingGroup,
+    simulatedGroupSlug: groupSimulationIdentity.simulatedGroupSlug,
+  };
 }
 
 const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
@@ -74,11 +113,19 @@ export async function createGraphQLContext(): Promise<BaseContext> {
   const locale = getLocale(headersList, cookieStore);
 
   // Get user identity and IP
-  const userId = await getUserIdFromRequest(headersList);
+  const auth = await resolveAuthFromRequest(headersList, sessionId);
   const ipAddress = getIpAddress(headersList);
 
   // Create base context with user information
-  const baseContext = await createContext({ userId, locale });
+  const baseContext = await createContext({
+    userId: auth.effectiveUserId,
+    actorUserId: auth.actorUserId,
+    isImpersonating: auth.isImpersonating,
+    realUserId: auth.realUserId,
+    isSimulatingGroup: auth.isSimulatingGroup,
+    simulatedGroupSlug: auth.simulatedGroupSlug,
+    locale,
+  });
 
   return {
     ...baseContext,

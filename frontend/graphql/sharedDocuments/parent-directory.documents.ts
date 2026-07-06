@@ -20,6 +20,7 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
       }
       rows {
         id
+        userId
         index
         name
         email

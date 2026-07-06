@@ -48,7 +48,8 @@ export function ManagersContainer() {
   const apiMetrics = data?.managerDirectory?.metrics;
 
   const rows = rawRows?.map(row => ({
-    id: row.id ?? "",
+    userId: row.id ?? "",
+    staffProfileId: row.staffProfileId ?? "",
     name: row.name ?? "",
     role: mapManagerRole(row.roleSlug),
     status: mapManagerStatus(row.status),
@@ -56,6 +57,7 @@ export function ManagersContainer() {
     skypeId: row.skypeId ?? "",
     phone: row.phone ?? "",
     avatarUrl: row.avatarUrl ?? "",
+    targetIsSuperAdmin: row.roleSlug === "super_admin",
   })) as Manager[];
 
   const metrics = apiMetrics

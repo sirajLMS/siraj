@@ -1,5 +1,12 @@
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { permissions } from "@/backend/db/schema";
+import {
+  groupPermissions,
+  permissionGroups,
+  permissions,
+  userPermissionGroups,
+  users,
+} from "@/backend/db/schema";
 import type { AppPermission } from "@/shared/lib/enum";
 
 export type UserPermissionContext = {
@@ -9,51 +16,43 @@ export type UserPermissionContext = {
 };
 
 export async function resolveUserPermissions(userId: string): Promise<UserPermissionContext> {
-  const user = await db.query.users.findFirst({
-    columns: {
-      id: true,
-      isSuperAdmin: true,
-    },
-    where: {
-      id: userId,
-    },
-    with: {
-      permissionGroups: {
-        columns: {
-          slug: true,
-        },
-        with: {
-          permissions: {
-            columns: {
-              key: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const [user] = await db
+    .select({ id: users.id, isSuperAdmin: users.isSuperAdmin })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
 
   if (!user) {
     return { permissions: [], permissionGroups: [], isSuperAdmin: false };
   }
 
+  const groupRows = await db
+    .select({ slug: permissionGroups.slug })
+    .from(userPermissionGroups)
+    .innerJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
+    .where(eq(userPermissionGroups.userId, userId));
+
+  const groupSlugs = groupRows.map(row => row.slug);
+
   if (user.isSuperAdmin) {
     const allPermissions = await db.select({ key: permissions.key }).from(permissions);
     return {
       permissions: allPermissions.map(p => p.key),
-      permissionGroups: user.permissionGroups.map(g => g.slug),
+      permissionGroups: groupSlugs,
       isSuperAdmin: true,
     };
   }
 
-  const permissionSet = new Set<AppPermission>();
-  const groupSlugs: string[] = [];
+  const permissionRows = await db
+    .select({ key: permissions.key })
+    .from(userPermissionGroups)
+    .innerJoin(groupPermissions, eq(groupPermissions.groupId, userPermissionGroups.groupId))
+    .innerJoin(permissions, eq(groupPermissions.permissionId, permissions.id))
+    .where(eq(userPermissionGroups.userId, userId));
 
-  for (const group of user.permissionGroups) {
-    groupSlugs.push(group.slug);
-    for (const permission of group.permissions) {
-      permissionSet.add(permission.key);
-    }
+  const permissionSet = new Set<AppPermission>();
+  for (const permission of permissionRows) {
+    permissionSet.add(permission.key);
   }
 
   return {

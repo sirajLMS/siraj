@@ -978,6 +978,87 @@ export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type RefreshTokenMutation = RefreshTokenMutation_Mutation;
 
+export type ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_targetUser_User = { id: string | null, name: string | null, email: string | null };
+
+export type ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_actorUser_User = { id: string | null, name: string | null, email: string | null };
+
+export type ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus = { isActive: boolean | null, startedAt: string | null, expiresAt: string | null, reason: string | null, targetUser: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_targetUser_User | null, actorUser: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_actorUser_User | null };
+
+export type ImpersonationStatusQuery_Query = { impersonationStatus: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus | null };
+
+
+export type ImpersonationStatusQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ImpersonationStatusQuery = ImpersonationStatusQuery_Query;
+
+export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+
+export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse = { token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User | null };
+
+export type StartImpersonationMutation_Mutation = { startImpersonation: StartImpersonationMutation_startImpersonation_StartImpersonationResponse | null };
+
+
+export type StartImpersonationMutationVariables = Exact<{
+  targetUserId: string;
+  reason: string | null | undefined;
+}>;
+
+
+export type StartImpersonationMutation = StartImpersonationMutation_Mutation;
+
+export type EndImpersonationMutation_endImpersonation_EndImpersonationResponse = { token: string | null };
+
+export type EndImpersonationMutation_Mutation = { endImpersonation: EndImpersonationMutation_endImpersonation_EndImpersonationResponse | null };
+
+
+export type EndImpersonationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EndImpersonationMutation = EndImpersonationMutation_Mutation;
+
+export type PermissionGroupSimulationStatusQuery_permissionGroupSimulationStatus_PermissionGroupSimulationStatus = { isActive: boolean | null, groupSlug: string | null, groupName: string | null, startedAt: string | null, expiresAt: string | null };
+
+export type PermissionGroupSimulationStatusQuery_Query = { permissionGroupSimulationStatus: PermissionGroupSimulationStatusQuery_permissionGroupSimulationStatus_PermissionGroupSimulationStatus | null };
+
+
+export type PermissionGroupSimulationStatusQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PermissionGroupSimulationStatusQuery = PermissionGroupSimulationStatusQuery_Query;
+
+export type SimulatablePermissionGroupsQuery_simulatablePermissionGroups_SimulatablePermissionGroup = { slug: string | null, name: string | null, description: string | null };
+
+export type SimulatablePermissionGroupsQuery_Query = { simulatablePermissionGroups: Array<SimulatablePermissionGroupsQuery_simulatablePermissionGroups_SimulatablePermissionGroup> | null };
+
+
+export type SimulatablePermissionGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SimulatablePermissionGroupsQuery = SimulatablePermissionGroupsQuery_Query;
+
+export type StartPermissionGroupSimulationMutation_startPermissionGroupSimulation_StartPermissionGroupSimulationResponse = { token: string | null, expiresAt: string | null, groupSlug: string | null };
+
+export type StartPermissionGroupSimulationMutation_Mutation = { startPermissionGroupSimulation: StartPermissionGroupSimulationMutation_startPermissionGroupSimulation_StartPermissionGroupSimulationResponse | null };
+
+
+export type StartPermissionGroupSimulationMutationVariables = Exact<{
+  groupSlug: string;
+}>;
+
+
+export type StartPermissionGroupSimulationMutation = StartPermissionGroupSimulationMutation_Mutation;
+
+export type EndPermissionGroupSimulationMutation_endPermissionGroupSimulation_EndPermissionGroupSimulationResponse = { token: string | null };
+
+export type EndPermissionGroupSimulationMutation_Mutation = { endPermissionGroupSimulation: EndPermissionGroupSimulationMutation_endPermissionGroupSimulation_EndPermissionGroupSimulationResponse | null };
+
+
+export type EndPermissionGroupSimulationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EndPermissionGroupSimulationMutation = EndPermissionGroupSimulationMutation_Mutation;
+
 export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: Types.DayOfWeek | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null };
 
 export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: Types.Gender | null, timezone: string | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
@@ -1676,7 +1757,7 @@ export type ParentDashboardMetricsQuery = ParentDashboardMetricsQuery_Query;
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, onTrial: number | null, suspended: number | null };
 
-export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: Types.ParentStatus | null, unpaidInvoices: number | null };
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, userId: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: Types.ParentStatus | null, unpaidInvoices: number | null };
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -1732,7 +1813,7 @@ export type CreateParentMutationVariables = Exact<{
 
 export type CreateParentMutation = CreateParentMutation_Mutation;
 
-export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, skype: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
+export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, skype: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type ParentProfileQuery_Query = { parentProfile: ParentProfileQuery_parentProfile_ParentProfile | null };
 
@@ -2087,7 +2168,7 @@ export type StatusTrackingScheduleQuery = StatusTrackingScheduleQuery_Query;
 
 export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_TeacherDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null };
 
-export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_rows_TeacherDirectoryRow = { id: string | null, index: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: Types.AccountStatus | null, zoomLink: string | null };
+export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_rows_TeacherDirectoryRow = { id: string | null, userId: string | null, index: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: Types.AccountStatus | null, zoomLink: string | null };
 
 export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2147,7 +2228,7 @@ export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OnboardingMetricsQuery = OnboardingMetricsQuery_Query;
 
-export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type TeacherProfileForEditQuery_Query = { teacherProfileForEdit: TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult | null };
 
@@ -2159,7 +2240,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 

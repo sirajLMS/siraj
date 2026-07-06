@@ -11,7 +11,8 @@ export type NonNullableManagerDirectoryMetrics = {
 };
 
 export interface Manager {
-  readonly id: string;
+  readonly userId: string;
+  readonly staffProfileId: string;
   readonly name: string;
   readonly role: ManagerRole;
   readonly status: ManagerStatus;
@@ -19,4 +20,5 @@ export interface Manager {
   readonly skypeId: string;
   readonly phone: string;
   readonly avatarUrl: string;
+  readonly targetIsSuperAdmin: boolean;
 }

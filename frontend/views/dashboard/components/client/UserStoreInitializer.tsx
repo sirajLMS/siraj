@@ -34,7 +34,7 @@ export function UserStoreInitializer({ userProfile }: UserStoreInitializerProps)
       createdAt: userProfile.createdAt?.toISOString() ?? null,
       updatedAt: userProfile.updatedAt?.toISOString() ?? null,
       emailVerifiedAt: userProfile.emailVerifiedAt?.toISOString() ?? null,
-      role: null,
+      role: userProfile.role,
     });
   }, [userProfile, setUser, permissions]);
 

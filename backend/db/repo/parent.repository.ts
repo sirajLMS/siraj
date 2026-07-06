@@ -172,6 +172,7 @@ export namespace ParentRepository {
     let rowsQuery = queryDb
       .select({
         id: parents.id,
+        userId: parents.userId,
         name: users.name,
         email: users.email,
         avatarUrl: users.avatarUrl,

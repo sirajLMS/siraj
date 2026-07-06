@@ -3,11 +3,14 @@ import { GraphQLError } from "graphql";
 import { RateLimitRepository, SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/user.repository";
 import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
+import { setAuthCookies as applyAuthCookies } from "@/backend/lib/auth/cookies";
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
+import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
+import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { SessionService } from "@/backend/services/auth/session.service";
 import type { SafeUser, SessionEntity, UserEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
@@ -21,35 +24,7 @@ import {
 } from "../pothos";
 
 function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string, accessToken?: string) {
-  if (!ctx.cookies) return;
-
-  const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-    path: "/",
-  };
-
-  ctx.cookies.set("session_id", sessionId, options);
-  ctx.cookies.set("refresh_token", refreshToken, options);
-
-  // The access_token cookie is required by getServerUserContext() (server-auth.ts)
-  // for Server Component auth checks on SSR page loads. Without it, the dashboard
-  // layout cannot verify the user server-side, causing an infinite redirect loop.
-  // Short-lived (15 min) to match the JWT access token expiry (JWT_ACCESS_TOKEN_EXPIRY
-  // in jwt.ts) — refreshes automatically via the refreshToken mutation called by
-  // AuthProvider.checkAuth(), which triggers rotateTokensAndSession() → setAuthCookies()
-  // with a fresh access token, resetting this cookie for subsequent SSR requests.
-  if (accessToken) {
-    ctx.cookies.set("access_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict" as const,
-      maxAge: 60 * 15, // 15 minutes — matches JWT_ACCESS_TOKEN_EXPIRY
-      path: "/",
-    });
-  }
+  applyAuthCookies(ctx.cookies, sessionId, refreshToken, accessToken);
 }
 
 async function resolveUserFromSession(
@@ -108,7 +83,11 @@ async function rotateTokensAndSession(
   ctx: BaseContext,
   rawSessionId?: string
 ): Promise<{ token: string; user: SafeUser } | null> {
-  const newAccessToken = await generateAccessToken(user.id, user.email);
+  const sessionIdForUpdate = rawSessionId || session.hashedId;
+  const newAccessToken =
+    (rawSessionId ? await ImpersonationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
+    (rawSessionId ? await PermissionGroupSimulationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
+    (await generateAccessToken(user.id, user.email));
   const newRefreshToken = await generateRefreshToken(user.id, user.email);
 
   const newPayload = await verifyToken(newRefreshToken);
@@ -119,7 +98,6 @@ async function rotateTokensAndSession(
 
   // Use the raw (plaintext) session ID for the update call — the repository
   // hashes it internally before storage lookup.
-  const sessionIdForUpdate = rawSessionId || session.hashedId;
   await SessionRepository.update({
     hashedId: sessionIdForUpdate,
     userId: session.userId,
@@ -133,7 +111,10 @@ async function rotateTokensAndSession(
     setAuthCookies(ctx, rawSessionId, newRefreshToken, newAccessToken);
   }
 
-  return { token: newAccessToken, user: AuthUtils.toSafeUser(user) };
+  const effectiveUserId = ctx.isImpersonating && ctx.user ? ctx.user.id : user.id;
+  const effectiveUser = (await UserRepository.findById(effectiveUserId)) ?? user;
+
+  return { token: newAccessToken, user: AuthUtils.toSafeUser(effectiveUser) };
 }
 
 gqlSchemaBuilder.mutationFields(t => ({
@@ -312,12 +293,21 @@ gqlSchemaBuilder.mutationFields(t => ({
       loggedIn: true,
     },
     resolve: async (_parent, _args, ctx) => {
-      if (!ctx.user) {
+      const sessionOwnerId = ctx.actorUserId ?? ctx.user?.id;
+      if (!sessionOwnerId) {
         return false;
       }
 
-      // Delete all sessions for the user
-      await SessionRepository.deleteByUserId(ctx.user.id);
+      if (ctx.isImpersonating && ctx.sessionId) {
+        try {
+          await ImpersonationService.endImpersonation(sessionOwnerId, ctx.sessionId, ctx.locale, ctx.ipAddress);
+        } catch (error) {
+          logger.warn("Failed to end impersonation during logout", { error });
+        }
+      }
+
+      // Delete all sessions for the session owner (admin), not the impersonated user
+      await SessionRepository.deleteByUserId(sessionOwnerId);
 
       // Clear authentication cookies
       if (ctx.cookies) {

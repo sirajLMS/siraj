@@ -7,6 +7,7 @@ export * from "./class-subject";
 export * from "./communications";
 export * from "./enums";
 export * from "./group-class";
+export * from "./impersonation";
 export * from "./parents";
 export * from "./permissions";
 export * from "./scheduling";

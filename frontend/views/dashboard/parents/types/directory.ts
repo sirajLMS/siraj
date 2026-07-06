@@ -8,6 +8,7 @@ export function toParentAccountStatus(status: ParentStatus): ParentAccountStatus
 
 export interface ParentDirectoryRow {
   readonly id: string;
+  readonly userId: string;
   readonly index: number;
   readonly name: string;
   readonly email: string;

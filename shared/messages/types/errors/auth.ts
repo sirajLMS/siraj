@@ -13,4 +13,19 @@ export interface AuthErrorLabels {
   readonly accountLocked: string;
   readonly demoLoginNotEnabled: string;
   readonly demoLoginFailed: string;
+  readonly impersonationNotAllowed: string;
+  readonly cannotImpersonateSelf: string;
+  readonly cannotImpersonateSuperAdmin: string;
+  readonly impersonationTargetNotFound: string;
+  readonly impersonationTargetInactive: string;
+  readonly impersonationSessionInvalid: string;
+  readonly impersonationNotActive: string;
+  readonly impersonationExpired: string;
+  readonly impersonationNotAllowedDuringSession: string;
+  readonly groupSimulationNotAllowed: string;
+  readonly groupSimulationSessionInvalid: string;
+  readonly groupSimulationNotActive: string;
+  readonly groupSimulationNotAllowedDuringSession: string;
+  readonly groupSimulationNotAllowedWhileImpersonating: string;
+  readonly groupSimulationAlreadyHasGroup: string;
 }

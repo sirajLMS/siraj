@@ -61,6 +61,7 @@ export namespace SessionService {
       ...safeUser,
       permissions: permContext.permissions,
       notificationCount: 0,
+      role: permContext.role,
     };
   }
 }

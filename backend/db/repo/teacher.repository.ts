@@ -190,6 +190,7 @@ export namespace TeacherRepository {
     const [teacher] = await queryDb
       .select({
         id: teachers.id,
+        userId: teachers.userId,
         name: users.name,
         email: users.email,
         phone: teachers.phone,
@@ -232,6 +233,7 @@ export namespace TeacherRepository {
 
     return {
       id: teacher.id,
+      userId: teacher.userId,
       name: teacher.name,
       email: teacher.email,
       phone: teacher.phone,

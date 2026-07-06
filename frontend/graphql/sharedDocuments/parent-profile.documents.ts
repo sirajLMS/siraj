@@ -12,6 +12,7 @@ export const parentProfileQueryDocument: TypedDocumentNode<
   query ParentProfile($parentId: String!) {
     parentProfile(parentId: $parentId) {
       id
+      userId
       name
       email
       avatarUrl

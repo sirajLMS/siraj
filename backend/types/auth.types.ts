@@ -12,7 +12,7 @@ import type {
   users,
 } from "@/backend/db/schema";
 import type { Email } from "@/backend/lib/email";
-import type { AppPermission } from "@/shared/lib/enum";
+import type { AppPermission, UserRole } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type UserEntity = typeof users.$inferSelect;
@@ -25,6 +25,7 @@ export type SafeUser = Omit<UserEntity, "password" | "rememberTokenHash" | "dele
 export type CurrentUserProfile = SafeUser & {
   permissions: AppPermission[];
   notificationCount: number;
+  role: UserRole;
 };
 
 export type UserPothosDefinition = SafeUser & {
@@ -100,6 +101,20 @@ export type SessionConfigEntity = typeof sessionConfig.$inferSelect;
 export type SessionConfigEntityInput = typeof sessionConfig.$inferInsert;
 
 // Redis session data structure
+export type RedisImpersonationSessionData = {
+  targetUserId: string;
+  startedAt: string;
+  expiresAt: string;
+  reason?: string;
+  impersonationSessionId: string;
+};
+
+export type RedisGroupSimulationSessionData = {
+  groupSlug: string;
+  startedAt: string;
+  expiresAt: string;
+};
+
 export type RedisSessionData = {
   userId: string;
   hashedId: string;
@@ -110,6 +125,8 @@ export type RedisSessionData = {
   deviceName?: string;
   createdAt: string; // ISO string
   lastActivityAt: string; // ISO string
+  impersonation?: RedisImpersonationSessionData;
+  groupSimulation?: RedisGroupSimulationSessionData;
 };
 
 export type PasswordResetTokenSelectType = typeof passwordResetTokens.$inferSelect;

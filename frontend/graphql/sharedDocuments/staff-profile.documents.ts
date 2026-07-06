@@ -9,6 +9,7 @@ export const teacherProfileForEditQueryDocument: TypedDocumentNode<
   query teacherProfileForEdit($teacherId: ID!) {
     teacherProfileForEdit(teacherId: $teacherId) {
       id
+      userId
       name
       email
       phone
@@ -38,6 +39,7 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
   mutation updateTeacherProfile($teacherId: ID!, $input: TeacherProfileUpdateInput!) {
     updateTeacherProfile(teacherId: $teacherId, input: $input) {
       id
+      userId
       name
       email
       phone

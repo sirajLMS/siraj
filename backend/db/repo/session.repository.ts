@@ -7,6 +7,7 @@ import logger from "@/backend/lib/logger";
 import { getRedisService } from "@/backend/services/redis";
 import { SessionRedisService } from "@/backend/services/redis/SessionRedisService";
 import type {
+  RedisGroupSimulationSessionData,
   RedisSessionData,
   SessionConfigEntity,
   SessionEntity,
@@ -291,9 +292,18 @@ export namespace SessionRepository {
       const now = new Date();
 
       if (!redisSessionsEnabled()) {
+        const postgresUpdates: {
+          lastActivity: bigint;
+          payload?: string;
+        } = {
+          lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
+        };
+        if (input.payload !== undefined) {
+          postgresUpdates.payload = input.payload;
+        }
         const returning = await t
           .update(sessions)
-          .set({ lastActivity: BigInt(Math.floor(now.getTime() / 1000)) })
+          .set(postgresUpdates)
           .where(eq(sessions.hashedId, hashedId))
           .returning();
         if (returning.length === 0) {
@@ -539,4 +549,171 @@ export namespace SessionRepository {
     const redisService = getSessionRedisService();
     return await redisService.getSessionTTL(hashedId);
   };
+
+  /**
+   * Read full Redis session data (including impersonation state).
+   */
+  export const getRedisSessionData = async (rawSessionId: string): Promise<RedisSessionData | null> => {
+    if (!redisSessionsEnabled()) return null;
+    const hashedId = hashSessionId(rawSessionId);
+    const redisService = getSessionRedisService();
+    return await redisService.getSession(hashedId);
+  };
+
+  /**
+   * Patch Redis session data in place (preserves TTL).
+   */
+  export const updateRedisSessionData = async (
+    rawSessionId: string,
+    updater: (data: RedisSessionData) => RedisSessionData,
+    roleName: string = "default"
+  ): Promise<RedisSessionData | null> => {
+    if (!redisSessionsEnabled()) return null;
+
+    const hashedId = hashSessionId(rawSessionId);
+    const redisService = getSessionRedisService();
+    const existing = await redisService.getSession(hashedId);
+    if (!existing) return null;
+
+    const updated = updater(existing);
+    const config = await getSessionConfig(roleName);
+    const ttl = await redisService.getSessionTTL(hashedId);
+    const ttlSeconds = ttl > 0 ? ttl : config.ttlSeconds;
+
+    await redisService.setSession({
+      sessionId: hashedId,
+      data: updated,
+      ttlSeconds,
+    });
+
+    return updated;
+  };
+
+  function parseSessionPayload(payload: string | null | undefined): Record<string, unknown> {
+    if (!payload) return {};
+    try {
+      const parsed: unknown = JSON.parse(payload);
+      return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function readGroupSimulationFromPayload(
+    payload: string | null | undefined
+  ): RedisGroupSimulationSessionData | null {
+    const groupSimulation = parseSessionPayload(payload).groupSimulation;
+    if (!groupSimulation || typeof groupSimulation !== "object" || Array.isArray(groupSimulation)) {
+      return null;
+    }
+    const record = groupSimulation as Record<string, unknown>;
+    if (
+      typeof record.groupSlug !== "string" ||
+      typeof record.startedAt !== "string" ||
+      typeof record.expiresAt !== "string"
+    ) {
+      return null;
+    }
+    return {
+      groupSlug: record.groupSlug,
+      startedAt: record.startedAt,
+      expiresAt: record.expiresAt,
+    };
+  }
+
+  export async function getSessionGroupSimulation(
+    rawSessionId: string,
+    actorUserId: string
+  ): Promise<{ data: RedisGroupSimulationSessionData; expiresAt: Date } | null> {
+    if (redisSessionsEnabled()) {
+      const sessionData = await getRedisSessionData(rawSessionId);
+      if (!sessionData?.groupSimulation || sessionData.userId !== actorUserId) {
+        return null;
+      }
+      const expiresAt = new Date(sessionData.groupSimulation.expiresAt);
+      if (expiresAt.getTime() <= Date.now()) {
+        return null;
+      }
+      return { data: sessionData.groupSimulation, expiresAt };
+    }
+
+    const session = await findSessionById(rawSessionId);
+    if (!session?.userId || session.userId !== actorUserId) {
+      return null;
+    }
+
+    const data = readGroupSimulationFromPayload(session.payload);
+    if (!data) {
+      return null;
+    }
+
+    const expiresAt = new Date(data.expiresAt);
+    if (expiresAt.getTime() <= Date.now()) {
+      return null;
+    }
+
+    return { data, expiresAt };
+  }
+
+  export async function setSessionGroupSimulation(
+    rawSessionId: string,
+    groupSimulation: RedisGroupSimulationSessionData
+  ): Promise<void> {
+    if (redisSessionsEnabled()) {
+      await updateRedisSessionData(rawSessionId, data => ({
+        ...data,
+        groupSimulation,
+        impersonation: undefined,
+      }));
+      return;
+    }
+
+    const session = await findSessionById(rawSessionId);
+    if (!session?.userId) {
+      return;
+    }
+
+    const parsedPayload = parseSessionPayload(session.payload);
+    const { impersonation: _removed, ...restPayload } = parsedPayload;
+    const nextPayload = {
+      ...restPayload,
+      groupSimulation,
+    };
+
+    await update({
+      hashedId: rawSessionId,
+      userId: session.userId,
+      ipAddress: session.ipAddress,
+      userAgent: session.userAgent,
+      payload: JSON.stringify(nextPayload),
+    });
+  }
+
+  export async function clearSessionGroupSimulation(rawSessionId: string): Promise<void> {
+    if (redisSessionsEnabled()) {
+      await updateRedisSessionData(rawSessionId, data => {
+        const { groupSimulation: _removed, ...rest } = data;
+        return rest;
+      });
+      return;
+    }
+
+    const session = await findSessionById(rawSessionId);
+    if (!session?.userId) {
+      return;
+    }
+
+    const nextPayload = parseSessionPayload(session.payload);
+    delete nextPayload.groupSimulation;
+
+    await update({
+      hashedId: rawSessionId,
+      userId: session.userId,
+      ipAddress: session.ipAddress,
+      userAgent: session.userAgent,
+      payload: JSON.stringify(nextPayload),
+    });
+  }
 }

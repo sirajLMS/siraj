@@ -60,7 +60,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   createManager: t.field({
     type: ManagerOnboardingResultPothosObject,
     description: "Create a new manager/staff account (System Admin only)",
-    authScopes: { superAdmin: true },
+    authScopes: { superAdmin: true, notImpersonating: true },
     args: {
       input: t.arg({ type: ManagerOnboardingInputPothosObject, required: true }),
     },

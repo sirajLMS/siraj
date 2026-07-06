@@ -5,6 +5,7 @@ import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { ProfileAdministrationPanel } from "@/frontend/components/auth/ProfileAdministrationPanel";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
@@ -49,6 +50,8 @@ function ParentProfileView({ parent, parentId, onRefetchStudents }: ParentProfil
       <ParentProfileActions parentId={parentId} onEditAvatar={() => setAvatarDialogOpen(true)} />
 
       <ParentProfileDetails parent={parent} />
+
+      <ProfileAdministrationPanel profileUserId={parent.userId} profileUserName={parent.name} />
 
       <SectionPanel
         title={t("sections.parentStudents")}

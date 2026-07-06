@@ -305,6 +305,19 @@ CREATE TABLE "group_classes" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "impersonation_sessions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"actor_user_id" uuid NOT NULL,
+	"target_user_id" uuid NOT NULL,
+	"session_id" varchar(255) NOT NULL,
+	"reason" text,
+	"started_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"ended_at" timestamp(3) with time zone,
+	"ip_address" inet,
+	"user_agent" text,
+	"is_active" boolean DEFAULT true NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "parents" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
@@ -962,6 +975,10 @@ CREATE INDEX "group_class_enrollments_group_class_id_idx" ON "group_class_enroll
 CREATE INDEX "group_class_enrollments_student_id_idx" ON "group_class_enrollments" ("student_id");--> statement-breakpoint
 CREATE INDEX "group_classes_class_instance_id_idx" ON "group_classes" ("class_instance_id");--> statement-breakpoint
 CREATE INDEX "group_classes_status_idx" ON "group_classes" ("status");--> statement-breakpoint
+CREATE INDEX "impersonation_sessions_actor_idx" ON "impersonation_sessions" ("actor_user_id");--> statement-breakpoint
+CREATE INDEX "impersonation_sessions_target_idx" ON "impersonation_sessions" ("target_user_id");--> statement-breakpoint
+CREATE INDEX "impersonation_sessions_session_idx" ON "impersonation_sessions" ("session_id");--> statement-breakpoint
+CREATE INDEX "impersonation_sessions_active_actor_idx" ON "impersonation_sessions" ("actor_user_id","is_active");--> statement-breakpoint
 CREATE INDEX "parents_user_id_idx" ON "parents" ("user_id");--> statement-breakpoint
 CREATE INDEX "parents_status_idx" ON "parents" ("status");--> statement-breakpoint
 CREATE INDEX "group_permissions_group_id_idx" ON "group_permissions" ("group_id");--> statement-breakpoint
@@ -1091,6 +1108,8 @@ ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_NjLYHZgC
 ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_group_class_id_group_classes_id_fkey" FOREIGN KEY ("group_class_id") REFERENCES "group_classes"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "group_classes" ADD CONSTRAINT "group_classes_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "impersonation_sessions" ADD CONSTRAINT "impersonation_sessions_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "impersonation_sessions" ADD CONSTRAINT "impersonation_sessions_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_permission_id_permissions_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE;--> statement-breakpoint

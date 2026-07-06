@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 
+import { ProfileAdministrationPanel } from "@/frontend/components/auth/ProfileAdministrationPanel";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
 import type { MessageSchema } from "@/shared/messages/types/message";
@@ -124,6 +125,8 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
         </FormProvider>
 
         <TeacherProfileStats totalClasses={profile.totalClasses} avgEngagementScore={profile.avgEngagementScore} />
+
+        <ProfileAdministrationPanel profileUserId={profile.userId} profileUserName={profile.fullName} />
       </Box>
     </PageContainer>
   );

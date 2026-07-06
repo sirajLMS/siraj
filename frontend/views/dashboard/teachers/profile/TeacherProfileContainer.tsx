@@ -70,6 +70,7 @@ export function TeacherProfileContainer() {
   const profile: TeacherProfileData | null = data?.teacherProfileForEdit
     ? {
         id: data.teacherProfileForEdit.id ?? "",
+        userId: data.teacherProfileForEdit.userId ?? "",
         fullName: data.teacherProfileForEdit.name ?? "",
         email: data.teacherProfileForEdit.email ?? "",
         phone: data.teacherProfileForEdit.phone ?? "",

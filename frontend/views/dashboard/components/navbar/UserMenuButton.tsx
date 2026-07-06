@@ -1,15 +1,22 @@
 "use client";
 
-import { LogoutOutlined } from "@mui/icons-material";
-import { Avatar, Box, ButtonBase, Menu, MenuItem, Typography } from "@mui/material";
+import { useQuery } from "@apollo/client/react";
+import { GroupsOutlined, LoginOutlined, LogoutOutlined } from "@mui/icons-material";
+import { Avatar, Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { simulatablePermissionGroupsQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
+import { useImpersonation } from "@/frontend/hooks/useImpersonation";
+import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { SystemPermissionGroupSlug, UserRole } from "@/shared/lib/enum";
 
 export interface UserInfoSlotProps {
   readonly name: string;
   readonly mail: string;
+  readonly secondaryLine?: string;
 }
 
 export interface LogoutButtonSlotProps {
@@ -31,7 +38,7 @@ export interface UserMenuButtonProps {
   };
 }
 
-function DefaultUserInfo({ name, mail }: Readonly<UserInfoSlotProps>) {
+function DefaultUserInfo({ name, mail, secondaryLine }: Readonly<UserInfoSlotProps>) {
   return (
     <Box
       sx={{
@@ -50,10 +57,22 @@ function DefaultUserInfo({ name, mail }: Readonly<UserInfoSlotProps>) {
       >
         {name}
       </Typography>
+      {secondaryLine ? (
+        <Typography
+          variant="labelSm"
+          sx={theme => ({
+            color: theme.palette.onSurfaceVariant,
+            mt: 0.25,
+          })}
+        >
+          {secondaryLine}
+        </Typography>
+      ) : null}
       <Typography
         variant="bodyMd"
         sx={theme => ({
           color: theme.palette.onSurfaceVariant,
+          mt: secondaryLine ? 0.5 : 0,
         })}
       >
         {mail}
@@ -88,6 +107,47 @@ function DefaultLogoutButton({ onClick }: Readonly<LogoutButtonSlotProps>) {
   );
 }
 
+function DualAvatarTrigger({
+  primaryAvatarUrl,
+  primaryName,
+  secondaryAvatarUrl,
+  secondaryName,
+}: Readonly<{
+  primaryAvatarUrl: string;
+  primaryName: string;
+  secondaryAvatarUrl?: string;
+  secondaryName?: string;
+}>) {
+  return (
+    <Box sx={{ position: "relative", width: { xs: 40, md: 48 }, height: { xs: 32, md: 40 } }}>
+      <Avatar
+        src={primaryAvatarUrl}
+        alt={primaryName}
+        sx={{
+          width: { xs: 28, md: 34 },
+          height: { xs: 28, md: 34 },
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          border: theme => `2px solid ${theme.palette.headerContainer}`,
+        }}
+      />
+      <Avatar
+        src={secondaryAvatarUrl}
+        alt={secondaryName ?? ""}
+        sx={{
+          width: { xs: 24, md: 28 },
+          height: { xs: 24, md: 28 },
+          position: "absolute",
+          right: 0,
+          top: 0,
+          border: theme => `2px solid ${theme.palette.headerContainer}`,
+        }}
+      />
+    </Box>
+  );
+}
+
 export function UserMenuButton({
   userName,
   userEmail,
@@ -97,8 +157,52 @@ export function UserMenuButton({
   slotProps = {},
 }: Readonly<UserMenuButtonProps>) {
   const { logout } = useAuth();
+  const tCommon = useTranslations("common");
+  const tImpersonation = useTranslations("auth.impersonation");
+  const tGroupSimulation = useTranslations("auth.groupSimulation");
+  const currentUser = useUserStore(state => state.user);
+  const {
+    isImpersonating,
+    status: impersonationStatus,
+    endImpersonation,
+    loading: impersonationLoading,
+  } = useImpersonation();
+  const {
+    isSimulatingGroup,
+    status: simulationStatus,
+    startSimulation,
+    endSimulation,
+    loading: simulationLoading,
+  } = usePermissionGroupSimulation();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [groupMenuAnchor, setGroupMenuAnchor] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const groupMenuOpen = Boolean(groupMenuAnchor);
+
+  const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
+  const showGroupSimulationEntry = isSuperAdmin && !isImpersonating;
+
+  const { data: groupsData, loading: groupsLoading } = useQuery(simulatablePermissionGroupsQueryDocument, {
+    skip: !open || !showGroupSimulationEntry,
+    fetchPolicy: "network-only",
+  });
+
+  const simulatableGroups = useMemo(() => {
+    const groups = groupsData?.simulatablePermissionGroups ?? [];
+    const filtered = isSuperAdmin
+      ? groups.filter(group => group.slug !== SystemPermissionGroupSlug.SUPER_ADMIN)
+      : groups;
+    if (isSimulatingGroup && simulationStatus?.groupSlug) {
+      return filtered.filter(group => group.slug !== simulationStatus.groupSlug);
+    }
+    return filtered;
+  }, [
+    groupsData?.simulatablePermissionGroups,
+    isSuperAdmin,
+    isSimulatingGroup,
+    simulationStatus?.groupSlug,
+  ]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -106,6 +210,7 @@ export function UserMenuButton({
 
   const handleClose = () => {
     setAnchorEl(null);
+    setGroupMenuAnchor(null);
   };
 
   const handleLogoutClick = () => {
@@ -120,15 +225,33 @@ export function UserMenuButton({
   const UserInfo = slots.userInfo ?? DefaultUserInfo;
   const LogoutButton = slots.logoutButton ?? DefaultLogoutButton;
 
+  const targetUser = impersonationStatus?.targetUser;
+  const actorUser = impersonationStatus?.actorUser;
+  const displayName = isImpersonating ? (targetUser?.name ?? userName) : userName;
+  const displayEmail = isImpersonating ? (targetUser?.email ?? userEmail) : userEmail;
+  const actorSecondaryLine = isImpersonating
+    ? actorUser?.name
+      ? tImpersonation("actorIdentity", { name: actorUser.name })
+      : undefined
+    : isSimulatingGroup && simulationStatus?.groupName
+      ? simulationStatus.groupName
+      : undefined;
+
+  const triggerAvatarUrl = avatarUrl;
+  const actorAvatarUrl = avatarUrl;
+
   return (
     <>
       <ButtonBase
         onClick={handleClick}
         sx={theme => ({
-          borderRadius: "50%",
+          borderRadius: isImpersonating || isSimulatingGroup ? 2 : "50%",
           padding: 0.5,
-          border: `2px solid ${theme.palette.onHeaderContainer}`,
+          border: isImpersonating || isSimulatingGroup ? "none" : `2px solid ${theme.palette.onHeaderContainer}`,
           transition: "all 0.2s ease-in-out",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
           "&:hover": {
             transform: "scale(1.05)",
             boxShadow: theme.palette.shadow.cardHover,
@@ -139,14 +262,41 @@ export function UserMenuButton({
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
       >
-        <Avatar
-          src={avatarUrl}
-          alt={userName}
-          sx={{
-            width: { xs: 32, md: 40 },
-            height: { xs: 32, md: 40 },
-          }}
-        />
+        {isSimulatingGroup && simulationStatus?.groupName ? (
+          <Box
+            sx={{
+              display: { xs: "flex", sm: "none" },
+              flexDirection: "column",
+              alignItems: "flex-end",
+              minWidth: 0,
+              maxWidth: 120,
+            }}
+          >
+            <Typography variant="labelMd" noWrap sx={{ fontWeight: 500, lineHeight: 1.2 }}>
+              {userName}
+            </Typography>
+            <Typography variant="labelSm" noWrap sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+              {simulationStatus.groupName}
+            </Typography>
+          </Box>
+        ) : null}
+        {isImpersonating ? (
+          <DualAvatarTrigger
+            primaryAvatarUrl={triggerAvatarUrl}
+            primaryName={displayName}
+            secondaryAvatarUrl={actorAvatarUrl}
+            secondaryName={actorUser?.name ?? undefined}
+          />
+        ) : (
+          <Avatar
+            src={avatarUrl}
+            alt={userName}
+            sx={{
+              width: { xs: 32, md: 40 },
+              height: { xs: 32, md: 40 },
+            }}
+          />
+        )}
       </ButtonBase>
 
       <Menu
@@ -166,7 +316,7 @@ export function UserMenuButton({
           paper: {
             sx: theme => ({
               mt: 1.5,
-              minWidth: 200,
+              minWidth: 240,
               boxShadow: theme.palette.shadow.card,
               border: `1px solid ${theme.palette.outlineVariant}`,
               borderRadius: 2,
@@ -175,8 +325,100 @@ export function UserMenuButton({
           },
         }}
       >
-        <UserInfo name={userName} mail={userEmail} {...slotProps.userInfo} />
-        <LogoutButton onClick={handleLogoutClick} {...slotProps.logoutButton} />
+        <UserInfo name={displayName} mail={displayEmail} secondaryLine={actorSecondaryLine} {...slotProps.userInfo} />
+
+        {isImpersonating ? (
+          <MenuItem
+            onClick={() => {
+              handleClose();
+              void endImpersonation();
+            }}
+            disabled={impersonationLoading}
+            sx={{ gap: 1.5, mx: 1.5, borderRadius: 1 }}
+          >
+            <LoginOutlined fontSize="small" />
+            <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+              {tImpersonation("returnToNormalLogin")}
+            </Typography>
+          </MenuItem>
+        ) : null}
+
+        {isSimulatingGroup ? (
+          <MenuItem
+            onClick={() => {
+              handleClose();
+              void endSimulation();
+            }}
+            disabled={simulationLoading}
+            sx={{ gap: 1.5, mx: 1.5, borderRadius: 1 }}
+          >
+            <LoginOutlined fontSize="small" />
+            <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+              {tGroupSimulation("returnToNormalRole")}
+            </Typography>
+          </MenuItem>
+        ) : null}
+
+        {showGroupSimulationEntry ? (
+          <MenuItem
+            onClick={event => setGroupMenuAnchor(event.currentTarget)}
+            disabled={simulationLoading}
+            sx={{ gap: 1.5, mx: 1.5, borderRadius: 1, mt: isSimulatingGroup ? 0.5 : 0 }}
+          >
+            <GroupsOutlined fontSize="small" />
+            <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
+              {tGroupSimulation("switchRoleTo")}
+            </Typography>
+          </MenuItem>
+        ) : null}
+
+        {showGroupSimulationEntry ? <Divider sx={{ my: 1 }} /> : null}
+
+        {!isImpersonating ? (
+          <>
+            <Divider sx={{ my: 1 }} />
+            <LogoutButton onClick={handleLogoutClick} {...slotProps.logoutButton} />
+          </>
+        ) : null}
+      </Menu>
+
+      <Menu
+        anchorEl={groupMenuAnchor}
+        open={groupMenuOpen}
+        onClose={() => setGroupMenuAnchor(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        slotProps={{
+          paper: {
+            sx: theme => ({
+              ml: -1,
+              minWidth: 220,
+              maxHeight: 320,
+              boxShadow: theme.palette.shadow.card,
+              border: `1px solid ${theme.palette.outlineVariant}`,
+              borderRadius: 2,
+            }),
+          },
+        }}
+      >
+        {groupsLoading ? (
+          <MenuItem disabled>
+            <Typography variant="bodyMd">{tCommon("loading")}</Typography>
+          </MenuItem>
+        ) : (
+          (simulatableGroups).map(group => (
+            <MenuItem
+              key={group.slug}
+              disabled={simulationLoading}
+              onClick={() => {
+                handleClose();
+                void startSimulation(group.slug ?? "");
+              }}
+            >
+              <Typography variant="bodyMd">{group.name}</Typography>
+            </MenuItem>
+          ))
+        )}
       </Menu>
     </>
   );

@@ -76,6 +76,7 @@ export type TeacherProfileReturnType = Omit<
   | "dateOfBirth"
   | "updatedAt"
 > & {
+  userId: string;
   name: string;
   email: string;
   status: AccountStatus;

@@ -48,6 +48,7 @@ function mapStudent(raw: {
 function mapProfileData(
   profile: {
     readonly id: string | null;
+    readonly userId: string | null;
     readonly name: string | null;
     readonly email: string | null;
     readonly avatarUrl: string | null;
@@ -88,6 +89,7 @@ function mapProfileData(
 
   return {
     id: profile.id,
+    userId: profile.userId ?? "",
     name: profile.name,
     email: profile.email,
     avatarUrl: profile.avatarUrl ?? undefined,

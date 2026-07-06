@@ -18,6 +18,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import type { UpdateManagerProfileInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { updateManagerProfileMutationDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import { logger } from "@/frontend/utils/logger";
@@ -90,22 +91,22 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
   const handleEditSubmit = () =>
     executeManagerUpdate(
       updateProfile,
-      manager.id,
+      manager.staffProfileId,
       { phone: editPhone || null, skypeId: editSkypeId || null } as UpdateManagerProfileInput,
       () => setEditDialogOpen(false),
       "Manager profile updated",
-      { staffProfileId: manager.id }
+      { staffProfileId: manager.staffProfileId }
     );
 
   const handleDeactivateSubmit = () => {
     const newStatus = manager.status === "active" ? "DEACTIVATED" : "ACTIVATED";
     return executeManagerUpdate(
       updateProfile,
-      manager.id,
+      manager.staffProfileId,
       { status: newStatus } as UpdateManagerProfileInput,
       () => setDeactivateDialogOpen(false),
       "Manager status updated",
-      { staffProfileId: manager.id, newStatus }
+      { staffProfileId: manager.staffProfileId, newStatus }
     );
   };
 
@@ -118,6 +119,13 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
       </IconButton>
 
       <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
+        <ViewAsUserButton
+          variant="menuItem"
+          targetUserId={manager.userId}
+          targetUserName={manager.name}
+          targetIsSuperAdmin={manager.targetIsSuperAdmin}
+          onMenuClose={handleMenuClose}
+        />
         <MenuItem onClick={handleEditClick}>
           <EditOutlined fontSize="small" sx={theme => ({ mr: 1, color: theme.palette.text.secondary })} />
           {t("actions.editProfile")}

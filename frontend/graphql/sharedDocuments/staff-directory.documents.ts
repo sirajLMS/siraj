@@ -16,6 +16,7 @@ export const teacherDirectoryQueryDocument: TypedDocumentNode<
       }
       rows {
         id
+        userId
         index
         name
         email

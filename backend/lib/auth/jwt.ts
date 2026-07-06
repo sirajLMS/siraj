@@ -16,6 +16,12 @@ export interface CustomJWTPayload extends JoseJWTPayload {
   email: string;
   type: "access" | "refresh";
   jti?: string;
+  actorUserId?: string;
+  impersonation?: true;
+  impersonationExpiresAt?: number;
+  groupSimulation?: true;
+  groupSimulationSlug?: string;
+  groupSimulationExpiresAt?: number;
 }
 
 /**
@@ -51,6 +57,60 @@ export async function generateRefreshToken(userId: string, email: string): Promi
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(JWT_REFRESH_TOKEN_EXPIRY)
+    .sign(secret);
+
+  return token;
+}
+
+/**
+ * Generate an access token for impersonation (effective user = target, actor = admin).
+ */
+export async function generateImpersonationAccessToken(
+  actorUserId: string,
+  targetUserId: string,
+  targetEmail: string,
+  impersonationExpiresAt: number
+): Promise<string> {
+  const jti = randomUUID();
+  const token = await new SignJWT({
+    userId: targetUserId,
+    email: targetEmail,
+    type: "access" as const,
+    jti,
+    actorUserId,
+    impersonation: true as const,
+    impersonationExpiresAt,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(JWT_ACCESS_TOKEN_EXPIRY)
+    .sign(secret);
+
+  return token;
+}
+
+/**
+ * Generate an access token for permission group simulation (identity stays admin).
+ */
+export async function generateGroupSimulationAccessToken(
+  userId: string,
+  email: string,
+  groupSlug: string,
+  groupSimulationExpiresAt: number
+): Promise<string> {
+  const jti = randomUUID();
+  const token = await new SignJWT({
+    userId,
+    email,
+    type: "access" as const,
+    jti,
+    groupSimulation: true as const,
+    groupSimulationSlug: groupSlug,
+    groupSimulationExpiresAt,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(JWT_ACCESS_TOKEN_EXPIRY)
     .sign(secret);
 
   return token;
