@@ -37,7 +37,7 @@ export async function DashboardClientBridge({ children, userProfile, roleLabel }
         activeNavKey={activeNavKey}
         userName={userProfile.name}
         userEmail={userProfile.email}
-        userRole=""
+        userRole={userProfile.role}
         roleLabel={roleLabel}
         avatarUrl={userProfile.avatarUrl || ""}
         notificationCount={userProfile.notificationCount}

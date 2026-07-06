@@ -19,6 +19,10 @@ export async function getServerUserContext(): Promise<{
   const token = cookieStore.get("access_token")?.value;
 
   if (!sessionId || !token) {
+    logger.info("[AuthRedirect] getServerUserContext: no session cookies", {
+      hasSessionId: Boolean(sessionId),
+      hasAccessToken: Boolean(token),
+    });
     return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 
@@ -33,16 +37,23 @@ export async function getServerUserContext(): Promise<{
   }
 
   if (!session?.userId) {
+    logger.info("[AuthRedirect] getServerUserContext: session validation returned no userId", {
+      hasSession: Boolean(session),
+    });
     return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 
   const payload = await verifyToken(token);
   if (payload?.type !== "access") {
+    logger.info("[AuthRedirect] getServerUserContext: access token invalid or wrong type", {
+      tokenType: payload?.type ?? null,
+    });
     return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 
   const impersonationIdentity = await ImpersonationService.resolveAuthIdentityFromToken(payload, sessionId);
   if (!impersonationIdentity) {
+    logger.info("[AuthRedirect] getServerUserContext: impersonation identity resolution failed");
     return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 
@@ -62,6 +73,7 @@ export async function getServerUserContext(): Promise<{
     sessionId
   );
   if (!groupSimulationIdentity) {
+    logger.info("[AuthRedirect] getServerUserContext: group simulation identity resolution failed");
     return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
   }
 

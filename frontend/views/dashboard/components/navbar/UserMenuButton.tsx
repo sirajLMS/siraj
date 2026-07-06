@@ -181,7 +181,8 @@ export function UserMenuButton({
   const groupMenuOpen = Boolean(groupMenuAnchor);
 
   const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
-  const showGroupSimulationEntry = isSuperAdmin && !isImpersonating;
+  const canSwitchRoles = !isImpersonating && (isSimulatingGroup || isSuperAdmin);
+  const showGroupSimulationEntry = canSwitchRoles;
 
   const { data: groupsData, loading: groupsLoading } = useQuery(simulatablePermissionGroupsQueryDocument, {
     skip: !open || !showGroupSimulationEntry,
@@ -190,7 +191,7 @@ export function UserMenuButton({
 
   const simulatableGroups = useMemo(() => {
     const groups = groupsData?.simulatablePermissionGroups ?? [];
-    const filtered = isSuperAdmin
+    const filtered = canSwitchRoles
       ? groups.filter(group => group.slug !== SystemPermissionGroupSlug.SUPER_ADMIN)
       : groups;
     if (isSimulatingGroup && simulationStatus?.groupSlug) {
@@ -199,7 +200,7 @@ export function UserMenuButton({
     return filtered;
   }, [
     groupsData?.simulatablePermissionGroups,
-    isSuperAdmin,
+    canSwitchRoles,
     isSimulatingGroup,
     simulationStatus?.groupSlug,
   ]);

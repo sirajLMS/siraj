@@ -272,17 +272,43 @@ export namespace PermissionGroupSimulationService {
       return null;
     }
 
-    if (!payload.groupSimulation || !payload.groupSimulationSlug) {
-      return { realUserId: payload.userId, isSimulatingGroup: false };
-    }
+    const resolveActiveSessionSimulation = async (
+      actorUserId: string,
+      sessionId: string
+    ): Promise<ResolvedGroupSimulation | null> => {
+      const serverActive = await getActiveGroupSimulation(sessionId, actorUserId);
+      if (!serverActive) {
+        return null;
+      }
+
+      try {
+        await PermissionsService.getPermissionGroupContext(serverActive.data.groupSlug);
+      } catch {
+        return null;
+      }
+
+      return {
+        realUserId: actorUserId,
+        isSimulatingGroup: true,
+        simulatedGroupSlug: serverActive.data.groupSlug,
+      };
+    };
 
     if (!rawSessionId) {
-      return null;
+      if (payload.groupSimulation && payload.groupSimulationSlug) {
+        return null;
+      }
+      return { realUserId: payload.userId, isSimulatingGroup: false };
     }
 
     const session = await SessionRepository.findSessionById(rawSessionId);
     if (!session?.userId || session.userId !== payload.userId) {
       return null;
+    }
+
+    if (!payload.groupSimulation || !payload.groupSimulationSlug) {
+      const fromSession = await resolveActiveSessionSimulation(payload.userId, rawSessionId);
+      return fromSession ?? { realUserId: payload.userId, isSimulatingGroup: false };
     }
 
     if (payload.groupSimulationExpiresAt && payload.groupSimulationExpiresAt * 1000 <= Date.now()) {
@@ -292,7 +318,8 @@ export namespace PermissionGroupSimulationService {
 
     const serverActive = await getActiveGroupSimulation(rawSessionId, payload.userId);
     if (!serverActive || serverActive.data.groupSlug !== payload.groupSimulationSlug) {
-      return null;
+      const fromSession = await resolveActiveSessionSimulation(payload.userId, rawSessionId);
+      return fromSession ?? null;
     }
 
     try {

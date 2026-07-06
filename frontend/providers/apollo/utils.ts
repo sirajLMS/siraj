@@ -98,6 +98,9 @@ export const createConnectivityLink = (
   });
 };
 
+// Prevents multiple concurrent hard-redirects when several queries fail auth at once.
+let isRedirectingToLogin = false;
+
 // Helper to create error link
 function handleAuthError(error: unknown, operationName: string | undefined): boolean {
   if (!CombinedGraphQLErrors.is(error)) return false;
@@ -112,10 +115,30 @@ function handleAuthError(error: unknown, operationName: string | undefined): boo
 
   if (globalThis.window !== undefined) {
     const pathname = globalThis.window.location.pathname;
+    if (pathname === "/login" || pathname.endsWith("/login")) {
+      return false;
+    }
+    if (isRedirectingToLogin) {
+      return true;
+    }
+
     const search = globalThis.window.location.search;
     const currentUrl = `${pathname}${search}`;
     const encodedRedirect = encodeURIComponent(currentUrl);
-    globalThis.window.location.href = `/login?redirect=${encodedRedirect}`;
+    const targetUrl = `/login?redirect=${encodedRedirect}`;
+    logger.warn(
+      { caller: "ApolloErrorLink.handleAuthError" },
+      "[AuthRedirect] GraphQL auth error — redirecting to login",
+      {
+        reason: "operation returned UNAUTHENTICATED or FORBIDDEN",
+        operationName,
+        errorCodes: error.errors.map(err => err.extensions?.code ?? "unknown"),
+        from: currentUrl,
+        to: targetUrl,
+      }
+    );
+    isRedirectingToLogin = true;
+    globalThis.window.location.href = targetUrl;
     return true;
   }
 

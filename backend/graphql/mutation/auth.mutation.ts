@@ -60,7 +60,17 @@ async function resolveUserFromRefreshToken(
   return { session, user };
 }
 
-async function validateRefreshTokenJti(refreshToken: string | undefined, session: SessionEntity): Promise<boolean> {
+async function validateRefreshTokenJti(
+  refreshToken: string | undefined,
+  session: SessionEntity,
+  resolvedViaSessionId = false
+): Promise<boolean> {
+  // Session cookie alone is sufficient when the refresh_token cookie is absent
+  // (e.g. after a parallel refresh race or browser cookie edge case).
+  if (!refreshToken && resolvedViaSessionId) {
+    return true;
+  }
+
   const refreshPayload = refreshToken ? await verifyToken(refreshToken) : null;
   // If no refresh token is present and no JTI is stored in session, there's nothing to validate
   if (!refreshPayload?.jti && !session.payload) return true;
@@ -262,11 +272,13 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       let session: SessionEntity | null = null;
       let user: UserEntity | null = null;
+      let resolvedViaSessionId = false;
 
       if (sessionId) {
         const result = await resolveUserFromSession(sessionId);
         session = result.session;
         user = result.user;
+        resolvedViaSessionId = Boolean(user);
       }
 
       if (!user && refreshToken) {
@@ -279,11 +291,25 @@ gqlSchemaBuilder.mutationFields(t => ({
         return null;
       }
 
-      if (!(await validateRefreshTokenJti(refreshToken, session))) {
+      if (!(await validateRefreshTokenJti(refreshToken, session, resolvedViaSessionId))) {
         return null;
       }
 
-      return rotateTokensAndSession(user, session, ctx, sessionId);
+      // When the session_id cookie is missing or stale but refresh_token is valid,
+      // issue a fresh session so SSR (getServerUserContext) and GraphQL stay in sync.
+      let rawSessionIdForCookies: string | undefined = resolvedViaSessionId ? sessionId : undefined;
+      if (!resolvedViaSessionId) {
+        rawSessionIdForCookies = randomUUID();
+        session = await SessionRepository.create({
+          hashedId: rawSessionIdForCookies,
+          userId: user.id,
+          ipAddress: ctx.ipAddress ?? null,
+          userAgent: null,
+          payload: JSON.stringify({ createdAt: new Date().toISOString() }),
+        });
+      }
+
+      return rotateTokensAndSession(user, session, ctx, rawSessionIdForCookies);
     },
   }),
 

@@ -3,8 +3,6 @@
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
-import { ImpersonationBanner } from "@/frontend/components/auth/ImpersonationBanner";
-import { GroupSimulationBanner } from "@/frontend/components/auth/GroupSimulationBanner";
 import { BottomNavbar } from "./BottomNavbar";
 import { Sidebar } from "./Sidebar";
 import { TopNavbar } from "./TopNavbar";
@@ -84,9 +82,6 @@ export function DashboardLayout({
         avatarUrl={avatarUrl}
         notificationCount={notificationCount}
       />
-
-      <ImpersonationBanner />
-      <GroupSimulationBanner />
 
       <Box
         sx={{

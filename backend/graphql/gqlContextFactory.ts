@@ -7,7 +7,8 @@ import { type BaseContext, createContext } from "./gqlContext";
 
 async function resolveAuthFromRequest(
   headersList: Headers,
-  sessionId: string | undefined
+  sessionId: string | undefined,
+  accessTokenCookie: string | undefined
 ): Promise<{
   effectiveUserId: string | null;
   actorUserId?: string;
@@ -17,7 +18,7 @@ async function resolveAuthFromRequest(
   simulatedGroupSlug?: string;
 }> {
   const authHeader = headersList.get("authorization");
-  const accessToken = extractTokenFromHeader(authHeader);
+  const accessToken = extractTokenFromHeader(authHeader) ?? accessTokenCookie ?? null;
   if (!accessToken) {
     return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
   }
@@ -104,6 +105,7 @@ export async function createGraphQLContext(): Promise<BaseContext> {
 
   // Extract session ID from cookie
   const sessionId = cookieStore.get("session_id")?.value || undefined;
+  const accessTokenCookie = cookieStore.get("access_token")?.value || undefined;
 
   if (!refreshToken && !sessionId) {
     logger.debug("[GraphQL Context] No auth cookies found in request");
@@ -113,7 +115,7 @@ export async function createGraphQLContext(): Promise<BaseContext> {
   const locale = getLocale(headersList, cookieStore);
 
   // Get user identity and IP
-  const auth = await resolveAuthFromRequest(headersList, sessionId);
+  const auth = await resolveAuthFromRequest(headersList, sessionId, accessTokenCookie);
   const ipAddress = getIpAddress(headersList);
 
   // Create base context with user information

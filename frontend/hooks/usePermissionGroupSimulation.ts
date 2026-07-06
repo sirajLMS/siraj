@@ -1,21 +1,17 @@
 "use client";
 
-import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback } from "react";
 import {
   endPermissionGroupSimulationMutationDocument,
-  meQueryDocument,
   permissionGroupSimulationStatusQueryDocument,
   startPermissionGroupSimulationMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import logger from "@/frontend/lib/logger";
-import { useUserStore } from "@/frontend/stores/userStore";
 
 export function usePermissionGroupSimulation() {
-  const client = useApolloClient();
   const { updateAuthToken } = useAuthToken();
-  const setUser = useUserStore(state => state.setUser);
 
   const { data, loading, refetch } = useQuery(permissionGroupSimulationStatusQueryDocument, {
     fetchPolicy: "network-only",
@@ -26,15 +22,6 @@ export function usePermissionGroupSimulation() {
 
   const status = data?.permissionGroupSimulationStatus;
   const isSimulatingGroup = status?.isActive === true;
-
-  const reloadSession = useCallback(async () => {
-    await client.resetStore();
-    const meResult = await client.query({ query: meQueryDocument, fetchPolicy: "network-only" });
-    if (meResult.data?.me) {
-      setUser(meResult.data.me);
-    }
-    await refetch();
-  }, [client, refetch, setUser]);
 
   const startSimulation = useCallback(
     async (groupSlug: string) => {
@@ -55,9 +42,8 @@ export function usePermissionGroupSimulation() {
         updateAuthToken(payload.token);
         logger.info(
           { caller: "usePermissionGroupSimulation.startSimulation" },
-          `Role simulation started for ${groupSlug}, reloading session`
+          `Role simulation started for ${groupSlug}, reloading page`
         );
-        await reloadSession();
         globalThis.location.reload();
         return true;
       } catch (error) {
@@ -69,7 +55,7 @@ export function usePermissionGroupSimulation() {
         return false;
       }
     },
-    [startMutation, updateAuthToken, reloadSession]
+    [startMutation, updateAuthToken]
   );
 
   const endSimulation = useCallback(async () => {
@@ -81,7 +67,6 @@ export function usePermissionGroupSimulation() {
       }
 
       updateAuthToken(token);
-      await reloadSession();
       globalThis.location.reload();
       return true;
     } catch (error) {
@@ -92,7 +77,7 @@ export function usePermissionGroupSimulation() {
       );
       return false;
     }
-  }, [endMutation, updateAuthToken, reloadSession]);
+  }, [endMutation, updateAuthToken]);
 
   return {
     status,
@@ -102,4 +87,4 @@ export function usePermissionGroupSimulation() {
     endSimulation,
     refetchStatus: refetch,
   };
-}
+};

@@ -3,6 +3,7 @@
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import logger from "@/frontend/lib/logger";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface DashboardErrorViewProps {
@@ -22,6 +23,16 @@ export function DashboardErrorView({ errorMessage }: DashboardErrorViewProps) {
   };
 
   const handleLoginRedirect = () => {
+    logger.info(
+      { caller: "DashboardErrorView" },
+      "[AuthRedirect] User clicked login button on dashboard error view",
+      {
+        reason: "unauthenticated dashboard error — user initiated",
+        from: `${globalThis.location.pathname}${globalThis.location.search}`,
+        to: "/login",
+        errorMessage,
+      }
+    );
     router.push("/login");
   };
 

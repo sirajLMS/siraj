@@ -1,21 +1,17 @@
 "use client";
 
-import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback } from "react";
 import {
   endImpersonationMutationDocument,
   impersonationStatusQueryDocument,
-  meQueryDocument,
   startImpersonationMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
-import { useUserStore } from "@/frontend/stores/userStore";
 import logger from "@/frontend/lib/logger";
 
 export function useImpersonation() {
-  const client = useApolloClient();
   const { updateAuthToken } = useAuthToken();
-  const setUser = useUserStore(state => state.setUser);
 
   const { data, loading, refetch } = useQuery(impersonationStatusQueryDocument, {
     fetchPolicy: "network-only",
@@ -26,15 +22,6 @@ export function useImpersonation() {
 
   const status = data?.impersonationStatus;
   const isImpersonating = status?.isActive === true;
-
-  const reloadSession = useCallback(async () => {
-    await client.resetStore();
-    const meResult = await client.query({ query: meQueryDocument, fetchPolicy: "network-only" });
-    if (meResult.data?.me) {
-      setUser(meResult.data.me);
-    }
-    await refetch();
-  }, [client, refetch, setUser]);
 
   const startImpersonation = useCallback(
     async (targetUserId: string, reason?: string) => {
@@ -49,7 +36,6 @@ export function useImpersonation() {
         }
 
         updateAuthToken(payload.token);
-        await reloadSession();
         globalThis.location.reload();
         return true;
       } catch (error) {
@@ -57,7 +43,7 @@ export function useImpersonation() {
         return false;
       }
     },
-    [startMutation, updateAuthToken, reloadSession]
+    [startMutation, updateAuthToken]
   );
 
   const endImpersonation = useCallback(async () => {
@@ -69,14 +55,13 @@ export function useImpersonation() {
       }
 
       updateAuthToken(token);
-      await reloadSession();
       globalThis.location.reload();
       return true;
     } catch (error) {
       logger.error({ caller: "useImpersonation.endImpersonation" }, "Failed to end impersonation", error);
       return false;
     }
-  }, [endMutation, updateAuthToken, reloadSession]);
+  }, [endMutation, updateAuthToken]);
 
   return {
     status,
@@ -86,4 +71,4 @@ export function useImpersonation() {
     endImpersonation,
     refetchStatus: refetch,
   };
-}
+};

@@ -3,12 +3,12 @@
 import { useMutation } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
+import logger from "@/frontend/lib/logger";
 import { isSafeRedirect } from "@/frontend/lib/safeRedirect";
-import { useRouter } from "@/shared/i18n/routing";
 import { LoginView } from "./LoginView";
 import type { LoginFormData } from "./schemas/loginSchema";
 
@@ -19,20 +19,34 @@ export interface LoginContainerProps {
 export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
   const t = useTranslations("auth.login");
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { login, error: authError, isAuthenticated } = useAuth();
   const { updateAuthToken } = useAuthToken();
   const [demoLoginMutation] = useMutation(demoLoginMutationDocument);
 
   const [loginResult, setLoginResult] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const redirectedRef = useRef(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      const redirectUrl = searchParams.get("redirect");
-      const targetUrl = isSafeRedirect(redirectUrl);
-      router.replace(targetUrl);
+    if (!isAuthenticated || redirectedRef.current) {
+      return;
     }
-  }, [isAuthenticated, router, searchParams]);
+
+    redirectedRef.current = true;
+    const redirectUrl = searchParams.get("redirect");
+    const targetUrl = isSafeRedirect(redirectUrl);
+    logger.info(
+      { caller: "LoginContainer" },
+      "[AuthRedirect] Hard-redirecting authenticated user away from login",
+      {
+        reason: "isAuthenticated is true after refreshToken — using full navigation so server reads new cookies",
+        from: `${globalThis.location.pathname}${globalThis.location.search}`,
+        redirectParam: redirectUrl,
+        to: targetUrl,
+      }
+    );
+    // Hard navigation (not router.replace) so the server layout re-runs with Set-Cookie headers applied.
+    globalThis.location.replace(targetUrl);
+  }, [isAuthenticated, searchParams]);
 
   useEffect(() => {
     if (authError) {
@@ -65,7 +79,19 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
       const { data } = await demoLoginMutation({ variables: { input: { groupSlug } } });
       if (data?.demoLogin?.token && data.demoLogin.user) {
         updateAuthToken(data.demoLogin.token);
-        globalThis.location.href = isSafeRedirect(redirectUrl);
+        const targetUrl = isSafeRedirect(redirectUrl);
+        logger.info(
+          { caller: "LoginContainer.handleFastLogin" },
+          "[AuthRedirect] Redirecting after demo login",
+          {
+            reason: "demoLogin mutation succeeded",
+            from: `${globalThis.location.pathname}${globalThis.location.search}`,
+            redirectParam: redirectUrl,
+            groupSlug,
+            to: targetUrl,
+          }
+        );
+        globalThis.location.href = targetUrl;
       } else {
         setLoginResult({ type: "error", message: t("invalidCredentials") });
       }

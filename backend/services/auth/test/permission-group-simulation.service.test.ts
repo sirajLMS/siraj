@@ -1,9 +1,12 @@
 import { describe, expect, spyOn, test } from "bun:test";
+import { SessionRepository } from "@/backend/db/repo";
+import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { UserRole } from "@/shared/lib/enum";
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
+const SESSION_ID = "session-raw-id";
 
 function mockSuperAdminActor() {
   return spyOn(PermissionsService, "getUserContext").mockResolvedValue({
@@ -72,5 +75,52 @@ describe("PermissionGroupSimulationService.assertCanSimulateGroup", () => {
     );
     expect(error.message).toContain("already have");
     actorSpy.mockRestore();
+  });
+});
+
+describe("PermissionGroupSimulationService.resolveGroupSimulationFromToken", () => {
+  test("falls back to session payload when access token lacks simulation claims", async () => {
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    const findSessionSpy = spyOn(SessionRepository, "findSessionById").mockResolvedValue({
+      hashedId: "hashed",
+      userId: ACTOR_ID,
+      ipAddress: null,
+      userAgent: null,
+      payload: JSON.stringify({
+        groupSimulation: {
+          groupSlug: "teacher_default",
+          startedAt: new Date().toISOString(),
+          expiresAt: expiresAt.toISOString(),
+        },
+      }),
+      lastActivity: BigInt(Date.now()),
+    });
+    const getSimulationSpy = spyOn(SessionRepository, "getSessionGroupSimulation").mockResolvedValue({
+      data: {
+        groupSlug: "teacher_default",
+        startedAt: new Date().toISOString(),
+        expiresAt: expiresAt.toISOString(),
+      },
+      expiresAt,
+    });
+    const groupSpy = mockGroupContext();
+
+    const payload = {
+      userId: ACTOR_ID,
+      email: "admin@example.com",
+      type: "access",
+    } as CustomJWTPayload;
+
+    const resolved = await PermissionGroupSimulationService.resolveGroupSimulationFromToken(payload, SESSION_ID);
+
+    expect(resolved).toEqual({
+      realUserId: ACTOR_ID,
+      isSimulatingGroup: true,
+      simulatedGroupSlug: "teacher_default",
+    });
+
+    findSessionSpy.mockRestore();
+    getSimulationSpy.mockRestore();
+    groupSpy.mockRestore();
   });
 });
