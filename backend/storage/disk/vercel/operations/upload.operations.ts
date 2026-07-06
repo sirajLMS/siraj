@@ -20,6 +20,7 @@ export async function prepareUpload(
       id: sessionId,
       url: `${ctx.baseUrl}/api/storage/vercel-upload`,
       uploadType: Types.UploadType.VERCEL_BLOB_CLIENT,
+      access: ctx.access,
     };
   });
 }
@@ -34,7 +35,7 @@ export async function uploadFile(
     const blob = await put(cleanedFilePath, buffer, {
       token: ctx.token,
       contentType: contentType,
-      access: "public",
+      access: ctx.access,
     });
 
     const hash = calculateHash(buffer);

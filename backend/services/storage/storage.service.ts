@@ -27,11 +27,7 @@ export namespace StorageAuthService {
    * Ownership is determined by checking file usages for a user reference.
    * Throws a localized error if neither condition is met.
    */
-  export async function requireStorageManageOrOwner(
-    userId: string,
-    filePath: string,
-    locale?: string
-  ): Promise<void> {
+  export async function requireStorageManageOrOwner(userId: string, filePath: string, locale?: string): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STORAGE_MANAGE);
     if (hasPermission) return;
 

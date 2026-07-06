@@ -5,7 +5,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, UploadType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   deleteLearningResourceMutationDocument,
   learningResourcesQueryDocument,
@@ -137,24 +137,35 @@ export function ResourcesContainer() {
         return;
       }
 
-      const { id: fileId, url } = prepData.prepareUpload;
+      const { id: fileId, url, uploadType } = prepData.prepareUpload;
 
-      const uploadUrl = url;
+      if (uploadType === UploadType.VercelBlobClient) {
+        const { upload } = await import("@vercel/blob/client");
+        await upload(filePath, file, {
+          access: "public",
+          handleUploadUrl: url,
+          clientPayload: JSON.stringify({
+            sessionId: fileId,
+            fileSize: file.size,
+            contentType,
+          }),
+        });
+      } else {
+        const putResponse = await fetch(url, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "Content-Type": contentType,
+            "Content-MD5": contentHash,
+          },
+        });
 
-      const putResponse = await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": contentType,
-          "Content-MD5": contentHash,
-        },
-      });
-
-      if (!putResponse.ok) {
-        const errorText = await putResponse.text().catch(() => "Upload failed");
-        logger.error("File upload failed", { status: putResponse.status, errorText });
-        notifications.show(t("notification.uploadFailed"), { severity: "error", autoHideDuration: 4000 });
-        return;
+        if (!putResponse.ok) {
+          const errorText = await putResponse.text().catch(() => "Upload failed");
+          logger.error("File upload failed", { status: putResponse.status, errorText });
+          notifications.show(t("notification.uploadFailed"), { severity: "error", autoHideDuration: 4000 });
+          return;
+        }
       }
 
       const { data: uploadData } = await uploadResourceMutation({

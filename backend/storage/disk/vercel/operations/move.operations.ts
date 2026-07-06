@@ -70,7 +70,7 @@ async function moveSingleFile(ctx: VercelContext, sourcePath: string, destPath: 
 
   const newBlob = await copy(sourceBlob.url, destPath, {
     token: ctx.token,
-    access: "public",
+    access: ctx.access,
   });
 
   logger.info("📋 moveSingleFile: Copied blob", {
@@ -100,7 +100,7 @@ async function moveDirectory(ctx: VercelContext, sourcePath: string, destPath: s
     try {
       await copy(blob.url, newFilePath, {
         token: ctx.token,
-        access: "public",
+        access: ctx.access,
       });
 
       await del(blob.url, { token: ctx.token });

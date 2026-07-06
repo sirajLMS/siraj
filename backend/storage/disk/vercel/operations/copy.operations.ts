@@ -39,7 +39,7 @@ async function copySingleFile(ctx: VercelContext, sourcePath: string, destPath: 
 
   const newBlob = await copy(sourceBlob.url, destPath, {
     token: ctx.token,
-    access: "public",
+    access: ctx.access,
   });
 
   logger.info("📋 copySingleFile: Copied blob", {
@@ -65,7 +65,7 @@ async function copyDirectory(ctx: VercelContext, sourcePath: string, destPath: s
     try {
       await copy(blob.url, newFilePath, {
         token: ctx.token,
-        access: "public",
+        access: ctx.access,
       });
 
       logger.info("📋 copyDirectory: Copied file", {

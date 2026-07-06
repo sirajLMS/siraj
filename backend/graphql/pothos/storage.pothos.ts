@@ -23,6 +23,7 @@ export const UploadPreparationPothosObject = gqlSchemaBuilder
         type: UploadTypePothosObject,
         nullable: false,
       }),
+      access: t.exposeString("access", { nullable: true }),
     }),
   });
 

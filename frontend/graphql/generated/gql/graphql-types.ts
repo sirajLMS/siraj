@@ -3597,6 +3597,7 @@ export type UpdateTeacherNoteInput = {
 
 export type UploadPreparation = {
   __typename?: 'UploadPreparation';
+  access: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   uploadType: UploadType;
   url: Scalars['String']['output'];

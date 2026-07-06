@@ -11,9 +11,11 @@ export class VercelAdapter extends BaseAdapter<VercelContext> {
       throw new Error("BLOB_READ_WRITE_TOKEN environment variable is required for Vercel Blob storage");
     }
 
+    const access = (process.env.VERCEL_BLOB_ACCESS || "public") as "public" | "private";
     const context: VercelContext = {
       baseUrl: NEXT_PUBLIC_BASE_URL,
       token,
+      access,
     };
 
     super(context, ops);

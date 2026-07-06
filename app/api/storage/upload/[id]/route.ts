@@ -6,8 +6,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { SignedUrlRepository } from "@/backend/db/repo";
 import { StorageDbRepository } from "@/backend/db/repo/storage.repository";
 import logger from "@/backend/lib/logger";
-import { resolveLocalStoragePath } from "@/backend/lib/storage/local-storage-path";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
+import { resolveLocalStoragePath } from "@/backend/lib/storage/local-storage-path";
 
 interface SignedUrlData {
   contentType: string;

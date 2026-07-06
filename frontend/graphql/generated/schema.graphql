@@ -2791,6 +2791,7 @@ input UpdateTeacherNoteInput {
 }
 
 type UploadPreparation {
+  access: String
   id: String!
   uploadType: UploadType!
   url: String!

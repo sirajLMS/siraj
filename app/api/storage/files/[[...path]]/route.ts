@@ -2,15 +2,15 @@ import { createReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
-import { StorageDbRepository } from "@/backend/db/repo/storage.repository";
-import type * as StorageTypes from "@/backend/types";
-import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
-import { ParentRepository } from "@/backend/db/repo/parent.repository";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { UserRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parent.repository";
+import { StorageDbRepository } from "@/backend/db/repo/storage.repository";
+import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import logger from "@/backend/lib/logger";
 import { resolveLocalStoragePath, resolvePublicStoragePath } from "@/backend/lib/storage/local-storage-path";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type * as StorageTypes from "@/backend/types";
 import { extToMime } from "@/shared/utils/storage.utils";
 
 /**
@@ -177,11 +177,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       const absolutePath = resolvePublicStoragePath(subPath);
 
       try {
-          await fs.access(absolutePath);
-          return buildFileResponse(absolutePath, relativePath, request.headers.get("range"));
+        await fs.access(absolutePath);
+        return buildFileResponse(absolutePath, relativePath, request.headers.get("range"));
       } catch {
-          logger.warn("Public file not found", { path: relativePath, absolutePath });
-          return NextResponse.json({ error: "File not found" }, { status: 404 });
+        logger.warn("Public file not found", { path: relativePath, absolutePath });
+        return NextResponse.json({ error: "File not found" }, { status: 404 });
       }
     }
 

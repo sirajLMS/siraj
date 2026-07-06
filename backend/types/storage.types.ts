@@ -296,6 +296,11 @@ export interface UploadPreparationResult {
    * Upload flow type
    */
   uploadType: UploadType;
+
+  /**
+   * Upload access level (for Vercel Blob)
+   */
+  access?: string;
 }
 
 export type InvoiceFileSelectType = typeof invoiceFiles.$inferSelect;
