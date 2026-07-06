@@ -6,6 +6,7 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ClassExecutionState } from "@/shared/lib/enum";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
+import { classDetailsSectionStackSx } from "../classDetailsMobileLayout";
 import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
 import { ActivityHeatmap } from "./ActivityHeatmap";
 import { AdminActionsBar } from "./AdminActionsBar";
@@ -85,7 +86,7 @@ export function ClassDetailsAdminView({
   const heatmapData = toNumberArray(performance?.heatmapData);
 
   return (
-    <Box>
+    <Box sx={classDetailsSectionStackSx}>
       <ClassDetailsToolbarArea
         instance={instance}
         isWarningDismissed={isWarningDismissed}
@@ -114,7 +115,7 @@ export function ClassDetailsAdminView({
         />
       </RequirePermission>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container rowSpacing={{ xs: 2, lg: 3 }} columnSpacing={{ xs: 0, lg: 3 }}>
         <Grid size={{ xs: 12, md: 8 }}>
           <ClassInfoCard
             courseName={instance.courseName ?? ""}

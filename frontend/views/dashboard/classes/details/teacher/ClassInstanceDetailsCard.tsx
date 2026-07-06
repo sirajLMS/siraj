@@ -87,7 +87,7 @@ export function ClassInstanceDetailsCard({
   const statusLabel = labels.statusLabels[status];
 
   return (
-    <BaseCard>
+    <BaseCard edgeToEdge>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}>
         <StyledCardHeading
           variant="headlineMd"

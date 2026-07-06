@@ -4,6 +4,8 @@ import { Box, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { BaseCard } from "@/frontend/components/ui";
+import { mergeSx } from "@/frontend/components/ui/mergeSx";
+import { classDetailsCardInnerPaddingSx, classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
 
 interface ActivityHeatmapProps {
   readonly data: readonly number[];
@@ -23,7 +25,6 @@ interface Bar {
 const StyledHeatmapHeader = styled(Stack)(({ theme }) => ({
   justifyContent: "space-between",
   alignItems: "center",
-  paddingInline: theme.spacing(3),
   paddingBlock: theme.spacing(2.5),
   borderBottom: 1,
   borderColor: theme.palette.border.light,
@@ -69,8 +70,8 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
   const hasData = bars.length > 0;
 
   return (
-    <BaseCard sx={{ p: 0, overflow: "hidden", mt: 3 }}>
-      <StyledHeatmapHeader direction="row">
+    <BaseCard edgeToEdge edgeToEdgePadding={false} sx={{ py: 0, overflow: "hidden" }}>
+      <StyledHeatmapHeader direction="row" sx={classDetailsCardInnerPaddingSx}>
         <StyledSectionTitle variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
           {labels.activityHeatmap}
         </StyledSectionTitle>
@@ -86,7 +87,7 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
         </Stack>
       </StyledHeatmapHeader>
 
-      <Box sx={{ px: 4, pb: 4, pt: 2, height: 300, position: "relative" }}>
+      <Box sx={mergeSx({ pb: 4, pt: 2, height: 300, position: "relative" }, classDetailsContentPaddingSx)}>
         {hasData ? (
           <>
             <Box

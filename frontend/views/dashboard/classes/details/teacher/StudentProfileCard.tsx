@@ -38,7 +38,7 @@ const StyledViewProfileButton = styled(Link)(() => ({
 export function StudentProfileCard({ student, labels }: StudentProfileCardProps) {
   if (!student.id) {
     return (
-      <BaseCard sx={{ position: "relative", overflow: "hidden", pt: 4 }}>
+      <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", pt: 4 }}>
         <StyledTopAccentBar />
         <Typography variant="titleLg">{student.name}</Typography>
       </BaseCard>
@@ -48,7 +48,7 @@ export function StudentProfileCard({ student, labels }: StudentProfileCardProps)
   const profileHref = `/students/${student.id}`;
 
   return (
-    <BaseCard sx={{ position: "relative", overflow: "hidden", pt: 4 }}>
+    <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", pt: 4 }}>
       <StyledTopAccentBar />
       <Box sx={{ mb: 3 }}>
         <StudentEntityLink studentId={student.id} name={student.name} avatarUrl={student.avatarUrl} showAvatar />

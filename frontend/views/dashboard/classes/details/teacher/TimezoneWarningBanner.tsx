@@ -4,6 +4,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Alert, Box, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { edgeToEdgeSx } from "@/frontend/components/ui/edgeToEdgeSx";
+import { mergeSx } from "@/frontend/components/ui/mergeSx";
+import { classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
 
 interface TimezoneWarningBannerProps {
   readonly studentTimezone: string;
@@ -16,7 +19,6 @@ interface TimezoneWarningBannerProps {
 
 // Error-container-tinted alert with pulsing animation and canceled-border accent
 const StyledTimezoneWarningAlert = styled(Alert)(({ theme }) => ({
-  borderRadius: 2,
   borderLeft: 4,
   borderColor: theme.palette.status.cancelled,
   backgroundColor: theme.palette.errorContainer,
@@ -36,7 +38,7 @@ export function TimezoneWarningBanner({ studentTimezone, onDismiss, labels }: Ti
     <StyledTimezoneWarningAlert
       icon={<WarningAmberIcon />}
       severity="error"
-      sx={{ mb: 3 }}
+      sx={mergeSx({ mb: { xs: 0, lg: 3 } }, edgeToEdgeSx, classDetailsContentPaddingSx)}
       action={
         <IconButton
           aria-label="close"

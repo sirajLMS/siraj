@@ -262,7 +262,18 @@ export function ClassDetailsContainer() {
   };
 
   const actionFeedbackAlert = feedbackState ? (
-    <Alert severity={feedbackState.severity} sx={{ mb: 2 }}>
+    <Alert
+      severity={feedbackState.severity}
+      sx={theme => ({
+        mb: 2,
+        [theme.breakpoints.down("lg")]: {
+          borderRadius: 0,
+          paddingInline: theme.spacing(2),
+          borderInlineStart: "none",
+          borderInlineEnd: "none",
+        },
+      })}
+    >
       {feedbackState.message}
     </Alert>
   ) : null;
@@ -286,7 +297,7 @@ export function ClassDetailsContainer() {
     <PageContainer>
       {pageHeader}
       {actionFeedbackAlert}
-      <RequirePermission permissions={AppPermission.SessionOverrideActions}>
+      {canOverride ? (
         <AdminView
           instance={instance}
           isWarningDismissed={isWarningDismissed}
@@ -298,20 +309,21 @@ export function ClassDetailsContainer() {
           onDelete={handleDeleteRequest}
           {...sessionActionProps}
         />
-      </RequirePermission>
-      <RequirePermission permissions={AppPermission.SessionViewDetails}>
-        <TeacherView
-          instance={instance}
-          viewMode={isParentView ? "parent" : "teacher"}
-          isWarningDismissed={isWarningDismissed}
-          onDismissWarning={() => setIsWarningDismissed(true)}
-          onActivate={handleActivate}
-          onStop={handleStop}
-          onInfoEdit={handleInfoEdit}
-          onDelete={handleDeleteRequest}
-          {...sessionActionProps}
-        />
-      </RequirePermission>
+      ) : (
+        <RequirePermission permissions={AppPermission.SessionViewDetails}>
+          <TeacherView
+            instance={instance}
+            viewMode={isParentView ? "parent" : "teacher"}
+            isWarningDismissed={isWarningDismissed}
+            onDismissWarning={() => setIsWarningDismissed(true)}
+            onActivate={handleActivate}
+            onStop={handleStop}
+            onInfoEdit={handleInfoEdit}
+            onDelete={handleDeleteRequest}
+            {...sessionActionProps}
+          />
+        </RequirePermission>
+      )}
       {deleteDialog}
     </PageContainer>
   );

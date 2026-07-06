@@ -27,7 +27,7 @@ const StyledRemarksQuoteBlock = styled(Box)(() => ({
 
 export function RemarksCard({ remarks, labels }: RemarksCardProps) {
   return (
-    <BaseCard>
+    <BaseCard edgeToEdge>
       <StyledRemarksTitle variant="caption" sx={theme => ({ mb: 1.5, color: theme.palette.header })}>
         {labels.remarksTitle}
       </StyledRemarksTitle>

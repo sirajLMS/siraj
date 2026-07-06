@@ -3,6 +3,7 @@
 import { Box, Grid } from "@mui/material";
 import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
+import { classDetailsSectionStackSx } from "../classDetailsMobileLayout";
 import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
 import type { ClassDetailsViewMode } from "../types";
 import type { TeacherViewLabels } from "../useClassDetailsLabels";
@@ -70,7 +71,7 @@ export function ClassDetailsTeacherView({
   const showActionsPanel = viewMode === "teacher";
 
   return (
-    <Box>
+    <Box sx={classDetailsSectionStackSx}>
       <ClassDetailsToolbarArea
         instance={instance}
         isWarningDismissed={isWarningDismissed}
@@ -87,9 +88,9 @@ export function ClassDetailsTeacherView({
         error={error}
       />
 
-      <Grid container spacing={3}>
+      <Grid container rowSpacing={{ xs: 2, lg: 3 }} columnSpacing={{ xs: 0, lg: 3 }}>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, lg: 3 } }}>
             <ClassInstanceDetailsCard
               instanceId={instance.id ?? ""}
               studentId={instance.student?.id ?? ""}
@@ -113,7 +114,7 @@ export function ClassDetailsTeacherView({
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, lg: 3 } }}>
             {showActionsPanel ? (
               <ActionsPanel
                 onActivate={onActivate}

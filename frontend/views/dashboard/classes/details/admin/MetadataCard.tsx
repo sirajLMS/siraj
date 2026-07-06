@@ -96,7 +96,7 @@ export function MetadataCard({
   labels,
 }: MetadataCardProps) {
   return (
-    <BaseCard sx={{ height: "100%" }}>
+    <BaseCard edgeToEdge sx={{ height: "100%" }}>
       <StyledMetadataHeader variant="labelUppercase" sx={theme => ({ mb: 2, color: theme.palette.onSurfaceVariant })}>
         {labels.metadata}
       </StyledMetadataHeader>

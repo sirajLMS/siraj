@@ -3,6 +3,7 @@
 import { alpha, Box, Paper, type SxProps, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import { edgeToEdgeSx } from "./edgeToEdgeSx";
 import { mergeSx } from "./mergeSx";
 
 interface SectionPanelProps {
@@ -13,12 +14,6 @@ interface SectionPanelProps {
   readonly edgeToEdge?: boolean;
   readonly sx?: SxProps<Theme>;
 }
-
-const edgeToEdgeSx: SxProps<Theme> = {
-  borderRadius: { xs: 0, md: undefined },
-  borderInlineStart: { xs: "none", md: undefined },
-  borderInlineEnd: { xs: "none", md: undefined },
-};
 
 /**
  * Standard section shell: bordered Paper with optional title bar + actions.
@@ -33,8 +28,8 @@ export function SectionPanel({ title, subTitle, actions, children, edgeToEdge = 
           borderRadius: theme => theme.layout.radius.section,
           border: theme => `1px solid ${theme.palette.outlineVariant}`,
           overflow: "hidden",
-          ...(edgeToEdge ? edgeToEdgeSx : {}),
         },
+        edgeToEdge ? edgeToEdgeSx : undefined,
         sx
       )}
     >

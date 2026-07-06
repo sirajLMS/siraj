@@ -2,10 +2,14 @@
 
 import { Card, type CardProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { edgeToEdgeCardPaddingSx, edgeToEdgeCardShellSx } from "./edgeToEdgeSx";
 import { mergeSx } from "./mergeSx";
 
 interface BaseCardProps extends CardProps {
   readonly interactive?: boolean;
+  readonly edgeToEdge?: boolean;
+  /** When false, only the shell is flush; children supply their own inner padding. */
+  readonly edgeToEdgePadding?: boolean;
 }
 
 const baseCardSx =
@@ -29,9 +33,25 @@ const baseCardSx =
 /**
  * Low-level card wrapper enforcing theme tokens for radius, border, and shadow.
  */
-export function BaseCard({ interactive = false, sx, children, ...props }: Readonly<BaseCardProps>) {
+export function BaseCard({
+  interactive = false,
+  edgeToEdge = false,
+  edgeToEdgePadding = true,
+  sx,
+  children,
+  ...props
+}: Readonly<BaseCardProps>) {
   return (
-    <Card elevation={0} {...props} sx={mergeSx(baseCardSx(interactive), sx)}>
+    <Card
+      elevation={0}
+      {...props}
+      sx={mergeSx(
+        baseCardSx(interactive),
+        edgeToEdge ? edgeToEdgeCardShellSx : undefined,
+        edgeToEdge && edgeToEdgePadding ? edgeToEdgeCardPaddingSx : undefined,
+        sx
+      )}
+    >
       {children}
     </Card>
   );

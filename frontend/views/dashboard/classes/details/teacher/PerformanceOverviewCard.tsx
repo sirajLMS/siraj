@@ -60,7 +60,7 @@ export function PerformanceOverviewCard({
   labels,
 }: PerformanceOverviewCardProps) {
   return (
-    <BaseCard>
+    <BaseCard edgeToEdge>
       <Typography variant="titleLg" sx={theme => ({ mb: 2.5, color: theme.palette.text.primary })}>
         {labels.previousPerformanceOverview}
       </Typography>

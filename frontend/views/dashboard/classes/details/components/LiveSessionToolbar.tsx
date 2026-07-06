@@ -376,7 +376,7 @@ export function LiveSessionToolbar({
   };
 
   return (
-    <Box sx={{ width: "100%", mb: 3 }}>
+    <Box sx={{ width: "100%", mb: { xs: 0, lg: 3 } }}>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}

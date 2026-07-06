@@ -17,6 +17,8 @@ const METRIC_ICONS: Record<string, SvgIconComponent> = {
   health: FavoriteIcon,
 };
 
+import { classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
+
 interface LivePerformanceGridProps {
   readonly metrics: readonly PerformanceMetric[];
   readonly hasData: boolean;
@@ -55,7 +57,7 @@ export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanc
   }));
 
   return (
-    <Box>
+    <Box sx={classDetailsContentPaddingSx}>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <StyledSectionTitle variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
           {labels.livePerformanceOverview}

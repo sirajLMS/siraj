@@ -18,10 +18,7 @@ export function getForceActivateDisabledTooltip(
   }
 }
 
-export function getStopDisabledTooltip(
-  executionState: string,
-  tooltips: DisabledTooltips["stop"]
-): string | null {
+export function getStopDisabledTooltip(executionState: string, tooltips: DisabledTooltips["stop"]): string | null {
   switch (executionState) {
     case "NOT_ACTIVATED":
       return tooltips.notActivated;

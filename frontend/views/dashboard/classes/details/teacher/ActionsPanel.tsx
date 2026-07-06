@@ -10,7 +10,9 @@ import { alpha, Box, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/components/ui";
+import { mergeSx } from "@/frontend/components/ui/mergeSx";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
 
 interface ActionConfig {
   readonly key: string;
@@ -63,7 +65,6 @@ interface ActionsPanelProps {
 const StyledActionsHeader = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.header,
   paddingBlock: theme.spacing(2),
-  paddingInline: theme.spacing(3),
 }));
 
 const StyledActionsTitle = styled(Typography)(({ theme }) => ({
@@ -109,15 +110,15 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
   };
 
   return (
-    <BaseCard sx={{ p: 0, overflow: "hidden" }}>
-      <StyledActionsHeader>
+    <BaseCard edgeToEdge edgeToEdgePadding={false} sx={{ py: 0, overflow: "hidden" }}>
+      <StyledActionsHeader sx={classDetailsContentPaddingSx}>
         <StyledActionsTitle variant="titleLg">
           <BoltIcon />
           {labels.actions}
         </StyledActionsTitle>
       </StyledActionsHeader>
 
-      <Box sx={{ p: 3 }}>
+      <Box sx={mergeSx({ p: 3 }, classDetailsContentPaddingSx)}>
         <Grid container spacing={2}>
           {ACTION_CONFIGS.map(config => {
             const Icon = config.icon;

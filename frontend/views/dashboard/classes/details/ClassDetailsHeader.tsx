@@ -1,8 +1,10 @@
 "use client";
 
+import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ClassInstanceDetailReturnType as ClassInstanceDetail } from "@/backend/types/class-instance-detail.types";
 import { PageHeader } from "@/frontend/components/ui";
+import { classDetailsContentPaddingSx } from "./classDetailsMobileLayout";
 
 interface ClassDetailsHeaderProps {
   readonly instance: ClassInstanceDetail;
@@ -14,19 +16,21 @@ export const ClassDetailsHeader = ({ instance, canOverride, isMobile }: ClassDet
   const t = useTranslations("dashboard.classDetails");
 
   return (
-    <PageHeader
-      title={instance.courseName ?? ""}
-      subtitle={canOverride ? t("pageSubtitleAdmin") : t("pageSubtitleTeacher")}
-      titleVariant={isMobile ? "headlineMd" : "headlineLg"}
-      breadcrumbs={
-        isMobile
-          ? undefined
-          : [
-              { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
-              { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
-              { label: instance.courseName ?? "", current: true },
-            ]
-      }
-    />
+    <Box sx={classDetailsContentPaddingSx}>
+      <PageHeader
+        title={instance.courseName ?? ""}
+        subtitle={canOverride ? t("pageSubtitleAdmin") : t("pageSubtitleTeacher")}
+        titleVariant={isMobile ? "headlineMd" : "headlineLg"}
+        breadcrumbs={
+          isMobile
+            ? undefined
+            : [
+                { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
+                { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
+                { label: instance.courseName ?? "", current: true },
+              ]
+        }
+      />
+    </Box>
   );
 };

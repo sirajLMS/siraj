@@ -9,6 +9,8 @@ import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactElement } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { edgeToEdgeCardShellSx } from "@/frontend/components/ui/edgeToEdgeSx";
+import { mergeSx } from "@/frontend/components/ui/mergeSx";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
 import { getForceActivateDisabledTooltip, getStopDisabledTooltip } from "./adminActionTooltips";
@@ -44,7 +46,6 @@ const StyledDeleteIconButton = styled(IconButton)(() => ({
 const StyledAdminActionsBar = styled(Box)(() => ({
   paddingInline: 2,
   paddingBlock: 1.5,
-  borderRadius: 2,
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -88,7 +89,10 @@ function LeftAdminActions({
   onForceActivate,
   onStop,
 }: {
-  readonly labels: Pick<AdminActionLabels, "administrativeActions" | "forceActivate" | "stopPause" | "disabledTooltips">;
+  readonly labels: Pick<
+    AdminActionLabels,
+    "administrativeActions" | "forceActivate" | "stopPause" | "disabledTooltips"
+  >;
   readonly executionState: string;
   readonly onForceActivate: () => void;
   readonly onStop: () => void;
@@ -254,14 +258,17 @@ export function AdminActionsBar({
 }: AdminActionsBarProps) {
   return (
     <StyledAdminActionsBar
-      sx={theme => ({
-        mb: 3,
-        backgroundColor: theme.palette.headerContainer,
-        color: theme.palette.onHeaderContainer,
-        paddingInline: theme.spacing(2),
-        paddingBlock: theme.spacing(1.5),
-        boxShadow: theme.palette.shadow.card,
-      })}
+      sx={mergeSx(
+        theme => ({
+          mb: { xs: 0, lg: 3 },
+          backgroundColor: theme.palette.headerContainer,
+          color: theme.palette.onHeaderContainer,
+          paddingInline: theme.spacing(2),
+          paddingBlock: theme.spacing(1.5),
+          boxShadow: theme.palette.shadow.card,
+        }),
+        edgeToEdgeCardShellSx
+      )}
     >
       <LeftAdminActions
         labels={labels}

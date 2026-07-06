@@ -133,7 +133,7 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
   const teacherHref = teacher.id ? `/teachers/${teacher.id}/profile` : undefined;
 
   return (
-    <BaseCard sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
+    <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
       <Stack
         direction="row"
         sx={theme => ({ justifyContent: "space-between", alignItems: "flex-start", mb: theme.spacing(4) })}

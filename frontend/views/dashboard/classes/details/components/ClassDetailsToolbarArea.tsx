@@ -1,12 +1,13 @@
 "use client";
 
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { classDetailsContentPaddingSx, classDetailsSectionStackSx } from "../classDetailsMobileLayout";
 import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
 import { LiveSessionToolbar } from "./LiveSessionToolbar";
 
@@ -56,7 +57,7 @@ export function ClassDetailsToolbarArea({
   };
 
   return (
-    <>
+    <Box sx={classDetailsSectionStackSx}>
       {!isWarningDismissed && instance.hasTimezoneMismatch && (
         <RequirePermission permissions={[AppPermission.ScheduleViewTimezones]}>
           <TimezoneWarningBanner
@@ -68,26 +69,28 @@ export function ClassDetailsToolbarArea({
       )}
 
       {zoomMeetingUrl ? (
-        <Stack direction="row" sx={theme => ({ mb: theme.spacing(2) })}>
+        <Stack direction="row" sx={classDetailsContentPaddingSx}>
           <PrimaryPageAction startIcon={<VideocamOutlined />} onClick={handleJoinZoom} id={`join-zoom-${instance.id}`}>
             {t("joinZoom")}
           </PrimaryPageAction>
         </Stack>
       ) : null}
 
-      <LiveSessionToolbar
-        classInstanceId={instance.id ?? ""}
-        executionState={instance.executionState ?? "NOT_ACTIVATED"}
-        onStart={onStart}
-        onAbsent={onAbsent}
-        onLeave={onLeave}
-        onReset={onReset}
-        isStarting={isStarting}
-        isMarkingAbsent={isMarkingAbsent}
-        isProcessingLeave={isProcessingLeave}
-        isResetting={isResetting}
-        error={error}
-      />
-    </>
+      <Box sx={classDetailsContentPaddingSx}>
+        <LiveSessionToolbar
+          classInstanceId={instance.id ?? ""}
+          executionState={instance.executionState ?? "NOT_ACTIVATED"}
+          onStart={onStart}
+          onAbsent={onAbsent}
+          onLeave={onLeave}
+          onReset={onReset}
+          isStarting={isStarting}
+          isMarkingAbsent={isMarkingAbsent}
+          isProcessingLeave={isProcessingLeave}
+          isResetting={isResetting}
+          error={error}
+        />
+      </Box>
+    </Box>
   );
 }

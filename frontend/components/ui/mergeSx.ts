@@ -1,9 +1,13 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 
-export function mergeSx(base: SxProps<Theme>, extra?: SxProps<Theme>): SxProps<Theme> {
-  if (!extra) {
-    return base;
+export function mergeSx(...styles: Array<SxProps<Theme> | undefined>): SxProps<Theme> {
+  const defined = styles.filter((style): style is SxProps<Theme> => style != null);
+  if (defined.length === 0) {
+    return {};
+  }
+  if (defined.length === 1) {
+    return defined[0];
   }
 
-  return [base, extra] as unknown as SxProps<Theme>;
+  return defined as unknown as SxProps<Theme>;
 }
