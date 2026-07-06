@@ -21,8 +21,8 @@ function resolveFeedIcon(icon: StudentProgressFeedItem["icon"]) {
 
 export function StudentProgressFeed({ items, title }: Readonly<StudentProgressFeedProps>) {
   return (
-    <Box sx={{ pb: 2 }}>
-      <Typography sx={{ typography: "titleLg", color: theme => theme.palette.primary.main, mb: 2 }}>{title}</Typography>
+    <Stack sx={{ gap: 2 }}>
+      <Typography sx={{ typography: "titleLg", color: theme => theme.palette.primary.main }}>{title}</Typography>
       <Paper variant="outlined" sx={{ overflow: "hidden", borderColor: theme => theme.palette.border.light }}>
         <Stack divider={<Box sx={{ borderBottom: theme => `1px solid ${theme.palette.border.light}` }} />}>
           {items.map(item => {
@@ -47,6 +47,6 @@ export function StudentProgressFeed({ items, title }: Readonly<StudentProgressFe
           })}
         </Stack>
       </Paper>
-    </Box>
+    </Stack>
   );
 }

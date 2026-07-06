@@ -19,7 +19,6 @@ import {
   PaymentsOutlined,
   PersonAddAltOutlined,
   PersonOutlineOutlined,
-  PowerSettingsNewOutlined,
   ReceiptLongOutlined,
   ReportProblemOutlined,
   SchoolOutlined,
@@ -47,17 +46,9 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     key: "teacher-dashboard",
     labelKey: "dashboard.nav.teacherDashboard",
     icon: DashboardOutlined,
-    href: "/dashboard?mode=teacher",
+    href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDashboard,
-  },
-  teacherDashboardActive: {
-    key: "teacher-dashboard-active",
-    labelKey: "dashboard.nav.teacherDashboardActive",
-    icon: PowerSettingsNewOutlined,
-    href: "/dashboard?mode=teacher-active",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherDashboardActive,
   },
   teachers: {
     key: "teachers",
@@ -221,7 +212,6 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
 export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   COMMON_NAV_ITEMS.home,
   COMMON_NAV_ITEMS.teacherDashboard,
-  COMMON_NAV_ITEMS.teacherDashboardActive,
   {
     key: "schedule-search",
     labelKey: "dashboard.nav.scheduleSearch",

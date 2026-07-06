@@ -1,13 +1,15 @@
 "use client";
 
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, Tooltip } from "@mui/material";
 
 interface SessionActivateButtonProps {
   readonly disabled: boolean;
   readonly isConnecting: boolean;
   readonly activateLabel: string;
   readonly connectingLabel: string;
+  readonly tooltip: string;
   readonly onActivate: () => void;
+  readonly fullWidth?: boolean;
 }
 
 export function SessionActivateButton({
@@ -15,37 +17,47 @@ export function SessionActivateButton({
   isConnecting,
   activateLabel,
   connectingLabel,
+  tooltip,
   onActivate,
+  fullWidth = true,
 }: Readonly<SessionActivateButtonProps>) {
   if (isConnecting) {
     return (
-      <Button
-        fullWidth
-        size="small"
-        variant="outlined"
-        disabled
-        startIcon={<CircularProgress size={16} color="inherit" />}
-        sx={theme => ({
-          typography: "labelUppercase",
-          color: theme.palette.error.main,
-          borderColor: theme.palette.error.main,
-        })}
-      >
-        {connectingLabel}
-      </Button>
+      <Tooltip title={tooltip}>
+        <span>
+          <Button
+            fullWidth={fullWidth}
+            size="small"
+            variant="outlined"
+            disabled
+            startIcon={<CircularProgress size={16} color="inherit" />}
+            sx={theme => ({
+              typography: "labelUppercase",
+              color: theme.palette.error.main,
+              borderColor: theme.palette.error.main,
+            })}
+          >
+            {connectingLabel}
+          </Button>
+        </span>
+      </Tooltip>
     );
   }
 
   return (
-    <Button
-      fullWidth
-      size="small"
-      variant="contained"
-      disabled={disabled}
-      onClick={onActivate}
-      sx={{ typography: "labelUppercase" }}
-    >
-      {activateLabel}
-    </Button>
+    <Tooltip title={tooltip}>
+      <span>
+        <Button
+          fullWidth={fullWidth}
+          size="small"
+          variant="contained"
+          disabled={disabled}
+          onClick={onActivate}
+          sx={{ typography: "labelUppercase" }}
+        >
+          {activateLabel}
+        </Button>
+      </span>
+    </Tooltip>
   );
 }

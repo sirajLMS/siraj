@@ -62,6 +62,13 @@ export const dashboard: TeacherDashboardLabels = {
     joinVideo: "انضم للحصة المرئية",
     downloadHandbook: "تحميل الدليل",
     contactCoordinator: "تواصل مع المنسق",
+    disabledTooltips: {
+      activateBeforeWindow: "يفتح التفعيل قبل 5 دقائق من وقت بدء الحصة المجدول",
+      activateAfterWindow: "انتهت نافذة التفعيل لهذه الحصة",
+      activateConnecting: "جاري تفعيل الحصة",
+      joinVideoUnavailable: "لا يوجد رابط اجتماع لهذه الحصة",
+      markAbsentWaitingPeriod: "يمكن تسجيل الغياب بعد 30 دقيقة من وقت بدء الحصة المجدول",
+    },
   },
   activeControls: {
     liveNow: "مباشر الآن",

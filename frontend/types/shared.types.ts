@@ -97,8 +97,12 @@ export interface TeacherScheduleRow {
   readonly studentInitials: string;
   readonly timeRange: string;
   readonly status: TeacherSessionStatus;
+  readonly executionState?: string;
+  readonly outcome?: string;
   readonly videoEnabled: boolean;
   readonly activateEnabled: boolean;
+  readonly activateDisabledReason?: "before_window" | "after_window" | null;
+  readonly markAbsentEnabled?: boolean;
   readonly durationMinutes?: number;
   readonly courseTitle?: string;
   readonly locationLabel?: string;

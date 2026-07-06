@@ -1865,7 +1865,6 @@ type Query {
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
-  teacherActiveDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
   teacherFutureSchedule(teacherId: String): TeacherFutureSchedule

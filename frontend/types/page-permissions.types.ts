@@ -5,7 +5,6 @@ export type PagePermissions = readonly AppPermission[];
 export const PAGE_PERMISSIONS = {
   dashboard: [AppPermission.DashboardView, AppPermission.DashboardViewMetrics] as PagePermissions,
   teacherDashboard: [AppPermission.TeacherViewDashboard] as PagePermissions,
-  teacherDashboardActive: [AppPermission.SessionActivateClass] as PagePermissions,
   searchSchedule: [AppPermission.ScheduleSearchAvailability] as PagePermissions,
   scheduleTracking: [AppPermission.SessionReschedule] as PagePermissions,
   statusTracking: [AppPermission.ScheduleViewAll] as PagePermissions,

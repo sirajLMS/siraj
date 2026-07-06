@@ -3,8 +3,8 @@ export interface TeacherDashboardLabels {
   readonly pageSubtitle: string;
   readonly overviewTitle: string;
   readonly todayChip: string;
-  readonly updatedJustNow: string;
-  readonly updatedMinutesAgo: string;
+  readonly updatedJustNow?: string;
+  readonly updatedMinutesAgo?: string;
   readonly metrics: {
     readonly totalClasses: string;
     readonly missedSlots: string;
@@ -60,6 +60,13 @@ export interface TeacherDashboardLabels {
     readonly joinVideo: string;
     readonly downloadHandbook: string;
     readonly contactCoordinator: string;
+    readonly disabledTooltips: {
+      readonly activateBeforeWindow: string;
+      readonly activateAfterWindow: string;
+      readonly activateConnecting: string;
+      readonly joinVideoUnavailable: string;
+      readonly markAbsentWaitingPeriod: string;
+    };
   };
   readonly activeControls: {
     readonly liveNow: string;

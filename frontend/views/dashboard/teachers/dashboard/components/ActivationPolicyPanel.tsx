@@ -26,7 +26,6 @@ export function ActivationPolicyPanel({
       variant="outlined"
       sx={theme => ({
         p: compact ? 2 : 3,
-        mt: 4,
         borderStyle: compact ? "solid" : "dashed",
         borderColor: theme.palette.border.light,
         backgroundColor: theme.palette.surfaceContainerLowest,

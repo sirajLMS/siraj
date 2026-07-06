@@ -2330,7 +2330,6 @@ export type Query = {
   students: StudentsWithFiltersResponse;
   /** Returns contributor statistics for the suggestion social proof display. */
   suggestionContributorStats: Maybe<SuggestionContributorStats>;
-  teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
   teacherDirectory: Maybe<TeacherDirectory>;
   teacherFutureSchedule: Maybe<TeacherFutureSchedule>;
@@ -2601,12 +2600,6 @@ export type QueryStudentsArgs = {
 
 export type QuerySuggestionContributorStatsArgs = {
   days: Scalars['Int']['input'];
-};
-
-
-export type QueryTeacherActiveDashboardArgs = {
-  date: Scalars['String']['input'];
-  pagination: InputMaybe<PaginationArgs>;
 };
 
 

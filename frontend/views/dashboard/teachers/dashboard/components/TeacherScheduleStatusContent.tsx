@@ -6,6 +6,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
+import { resolveTeacherScheduleActionTooltips } from "../utils/resolveTeacherScheduleActionTooltips";
 import { SessionActivateButton } from "./SessionActivateButton";
 
 export function TeacherScheduleStatusContent({
@@ -20,6 +21,7 @@ export function TeacherScheduleStatusContent({
   onActivate?: (id: string) => void;
 }>) {
   if (canActivate && (row.status === "pending" || row.status === "connecting")) {
+    const tooltips = resolveTeacherScheduleActionTooltips(row, labels);
     return (
       <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
         <SessionActivateButton
@@ -27,6 +29,7 @@ export function TeacherScheduleStatusContent({
           isConnecting={row.status === "connecting"}
           activateLabel={labels.actions.activate}
           connectingLabel={labels.actions.connecting}
+          tooltip={tooltips.activate}
           onActivate={() => onActivate?.(row.id)}
         />
       </RequirePermission>

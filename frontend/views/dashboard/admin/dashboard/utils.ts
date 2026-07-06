@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import { buildClassInstanceStatusLabels } from "@/frontend/views/dashboard/utils/classInstanceStatusLabels";
 
 export const useAdminDashboardLabels = () => {
   const t = useTranslations("dashboard");
@@ -17,16 +17,7 @@ export const useAdminDashboardLabels = () => {
     history: t("admin.history"),
   };
 
-  const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
-    [ClassOutcome.Pending]: t("admin.statusLabels.PENDING"),
-    [ClassOutcome.Taken]: t("admin.statusLabels.TAKEN"),
-    [ClassOutcome.Absent]: t("admin.statusLabels.ABSENT"),
-    [ClassOutcome.Leave]: t("admin.statusLabels.LEAVE"),
-    [ClassExecutionState.NotActivated]: t("admin.statusLabels.NOT_ACTIVATED"),
-    [ClassExecutionState.Activated]: t("admin.statusLabels.ACTIVATED"),
-    [ClassExecutionState.Running]: t("admin.statusLabels.RUNNING"),
-    [ClassExecutionState.Completed]: t("admin.statusLabels.COMPLETED"),
-  };
+  const statusLabels = buildClassInstanceStatusLabels(t);
 
   return { headers, statusLabels };
 };

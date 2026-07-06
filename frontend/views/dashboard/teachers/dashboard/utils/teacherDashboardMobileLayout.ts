@@ -7,7 +7,7 @@ export const teacherDashboardContentPaddingSx: SxProps<Theme> = theme => ({
   },
 });
 
-/** PageContainer gap override: flush sections on mobile, default rhythm on desktop. */
-export const teacherDashboardPageContainerSx: SxProps<Theme> = {
-  gap: { xs: 0, md: undefined },
-};
+/** Fixed vertical rhythm between top-level page sections (mobile + desktop). */
+export const teacherDashboardPageContainerSx: SxProps<Theme> = theme => ({
+  gap: theme.layout.sectionGap,
+});

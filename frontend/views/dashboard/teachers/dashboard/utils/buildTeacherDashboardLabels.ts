@@ -1,9 +1,11 @@
 import type { useTranslations } from "next-intl";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import { buildClassInstanceStatusLabels } from "@/frontend/views/dashboard/utils/classInstanceStatusLabels";
+import type { TeacherDashboardLabels, TeacherDashboardViewLabels } from "../types/teacherDashboardLabels";
 
 type TeacherDashboardTranslator = ReturnType<typeof useTranslations<"dashboard.teacherDashboard">>;
+type DashboardTranslator = ReturnType<typeof useTranslations<"dashboard">>;
 
-function buildMetricsLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["metrics"] {
+function buildMetricsLabels(t: TeacherDashboardTranslator): TeacherDashboardViewLabels["metrics"] {
   return {
     totalClasses: t("metrics.totalClasses"),
     missedSlots: t("metrics.missedSlots"),
@@ -65,6 +67,13 @@ function buildActionLabels(t: TeacherDashboardTranslator): TeacherDashboardLabel
     joinVideo: t("actions.joinVideo"),
     downloadHandbook: t("actions.downloadHandbook"),
     contactCoordinator: t("actions.contactCoordinator"),
+    disabledTooltips: {
+      activateBeforeWindow: t("actions.disabledTooltips.activateBeforeWindow"),
+      activateAfterWindow: t("actions.disabledTooltips.activateAfterWindow"),
+      activateConnecting: t("actions.disabledTooltips.activateConnecting"),
+      joinVideoUnavailable: t("actions.disabledTooltips.joinVideoUnavailable"),
+      markAbsentWaitingPeriod: t("actions.disabledTooltips.markAbsentWaitingPeriod"),
+    },
   };
 }
 
@@ -161,14 +170,17 @@ function buildManualClassEntryLabels(t: TeacherDashboardTranslator): TeacherDash
   };
 }
 
-export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels {
+export function buildTeacherDashboardLabels(
+  t: TeacherDashboardTranslator,
+  dashboardT: DashboardTranslator
+): TeacherDashboardViewLabels {
+  const instanceStatusLabels = buildClassInstanceStatusLabels(dashboardT);
+
   return {
     pageTitle: t("pageTitle"),
     pageSubtitle: t("pageSubtitle"),
     overviewTitle: t("overviewTitle"),
     todayChip: t("todayChip"),
-    updatedJustNow: t("updatedJustNow"),
-    updatedMinutesAgo: t("updatedMinutesAgo"),
     metrics: buildMetricsLabels(t),
     activeMetrics: buildActiveMetricsLabels(t),
     activeWelcome: buildActiveWelcomeLabels(t),
@@ -184,5 +196,6 @@ export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): Teac
     errors: buildErrorLabels(t),
     manualClassEntry: buildManualClassEntryLabels(t),
     supportRequestSubmitted: t.raw("supportRequestSubmitted") as string,
+    instanceStatusLabels,
   };
 }

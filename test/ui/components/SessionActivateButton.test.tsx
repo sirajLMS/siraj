@@ -15,6 +15,7 @@ afterEach(() => {
 const mockLabels = {
   activateLabel: "Activate Session",
   connectingLabel: "Connecting...",
+  tooltip: "Activate Session",
 };
 
 function renderButton(options: { disabled?: boolean; isConnecting?: boolean; onActivate?: () => void }) {

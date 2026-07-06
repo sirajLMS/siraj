@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useTranslations } from "next-intl";
 import { create } from "zustand";
 import type {
@@ -8,79 +9,10 @@ import type {
 } from "@/frontend/stores/teacherDashboardTypes";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { getTodayScheduleFilterDate } from "@/frontend/utils/scheduleFilterDate";
-import { TeacherDashboardActiveView } from "./TeacherDashboardActiveView";
 import { TeacherDashboardView } from "./TeacherDashboardView";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
 
-const STANDARD_INITIAL_STATE: TeacherDashboardState = {
-  metrics: {
-    totalClasses: 8,
-    missedSlots: 2,
-    completed: 3,
-    studentsToday: 14,
-  },
-  scheduleRows: [
-    {
-      id: "teacher-session-1",
-      rowNumber: 1,
-      classId: "SLMS-9821",
-      studentName: "Zaid Salman",
-      studentInitials: "ZS",
-      timeRange: "08:00 AM - 09:00 AM",
-      status: "missed",
-      videoEnabled: true,
-      activateEnabled: false,
-    },
-    {
-      id: "teacher-session-2",
-      rowNumber: 2,
-      classId: "SLMS-4412",
-      studentName: "Laila Mansour",
-      studentInitials: "LM",
-      timeRange: "10:30 AM - 11:30 AM",
-      status: "upcoming",
-      videoEnabled: true,
-      activateEnabled: false,
-    },
-    {
-      id: "teacher-session-3",
-      rowNumber: 3,
-      classId: "SLMS-3390",
-      studentName: "Omar Abbas",
-      studentInitials: "OA",
-      timeRange: "12:00 PM - 01:00 PM",
-      status: "upcoming",
-      videoEnabled: true,
-      activateEnabled: false,
-    },
-    {
-      id: "teacher-session-4",
-      rowNumber: 4,
-      classId: "SLMS-1102",
-      studentName: "Fatima Hadi",
-      studentInitials: "FH",
-      timeRange: "02:30 PM - 03:30 PM",
-      status: "completed",
-      videoEnabled: false,
-      activateEnabled: false,
-    },
-  ],
-  missedAlert: {
-    classId: "SLMS-9821",
-    scheduledTime: "08:00 AM",
-  },
-  scheduleDateLabel: "Monday, October 23, 2023",
-  totalScheduledToday: 8,
-};
-
-interface TeacherDashboardActiveState extends TeacherDashboardState {
-  readonly progressFeed: readonly StudentProgressFeedItem[];
-  readonly welcomeDateSummary: string;
-  readonly sessionsScheduledToday: number;
-  readonly activateSession: (id: string) => void;
-}
-
-const ACTIVE_INITIAL_ROWS: TeacherScheduleRow[] = [
+const INITIAL_ROWS: TeacherScheduleRow[] = [
   {
     id: "teacher-active-live",
     rowNumber: 1,
@@ -92,21 +24,25 @@ const ACTIVE_INITIAL_ROWS: TeacherScheduleRow[] = [
     locationLabel: "Batch A-2023 \u2022 Room 402",
     durationMinutes: 60,
     status: "activated",
+    executionState: ClassExecutionState.Activated,
+    outcome: ClassOutcome.Pending,
     videoEnabled: true,
     activateEnabled: false,
     isLive: true,
     isCurrent: true,
   },
   {
-    id: "teacher-active-done",
+    id: "teacher-session-1",
     rowNumber: 2,
-    classId: "SLMS-1102",
-    studentName: "Ahmed Khalid",
-    studentInitials: "AK",
-    timeRange: "08:00 AM",
+    classId: "SLMS-9821",
+    studentName: "Zaid Salman",
+    studentInitials: "ZS",
+    timeRange: "08:00 AM - 09:00 AM",
     durationMinutes: 60,
-    status: "completed",
-    videoEnabled: false,
+    status: "missed",
+    executionState: ClassExecutionState.NotActivated,
+    outcome: ClassOutcome.Absent,
+    videoEnabled: true,
     activateEnabled: false,
   },
   {
@@ -120,12 +56,28 @@ const ACTIVE_INITIAL_ROWS: TeacherScheduleRow[] = [
     locationLabel: "Batch B-2023 \u2022 Room 105",
     durationMinutes: 90,
     status: "pending",
+    executionState: ClassExecutionState.NotActivated,
+    outcome: ClassOutcome.Pending,
     videoEnabled: true,
     activateEnabled: true,
   },
+  {
+    id: "teacher-session-4",
+    rowNumber: 4,
+    classId: "SLMS-1102",
+    studentName: "Fatima Hadi",
+    studentInitials: "FH",
+    timeRange: "02:30 PM - 03:30 PM",
+    durationMinutes: 60,
+    status: "completed",
+    executionState: ClassExecutionState.Completed,
+    outcome: ClassOutcome.Taken,
+    videoEnabled: false,
+    activateEnabled: false,
+  },
 ];
 
-const ACTIVE_PROGRESS_FEED: StudentProgressFeedItem[] = [
+const PROGRESS_FEED: StudentProgressFeedItem[] = [
   {
     id: "feed-1",
     studentName: "John Doe",
@@ -177,23 +129,29 @@ function applyActivatedState(rows: readonly TeacherScheduleRow[], id: string): T
   });
 }
 
-const useTeacherDashboardStore = create<TeacherDashboardState>(() => STANDARD_INITIAL_STATE);
+interface TeacherDashboardStoryState extends TeacherDashboardState {
+  readonly progressFeed: readonly StudentProgressFeedItem[];
+  readonly welcomeDateSummary: string;
+  readonly activateSession: (id: string) => void;
+}
 
-const useTeacherDashboardActiveStore = create<TeacherDashboardActiveState>(set => ({
+const useTeacherDashboardStore = create<TeacherDashboardStoryState>(set => ({
   metrics: {
-    totalClasses: 148,
-    activeSessions: 6,
-    missedSlots: 2,
-    completed: 112,
-    studentsToday: 12,
+    totalClasses: 8,
+    activeSessions: 1,
+    missedSlots: 1,
+    completed: 1,
+    studentsToday: 4,
   },
-  scheduleRows: ACTIVE_INITIAL_ROWS,
-  missedAlert: null,
-  scheduleDateLabel: "Tuesday, 24th October 2023",
-  totalScheduledToday: 6,
-  welcomeDateSummary: "Tuesday, 24th October 2023",
-  sessionsScheduledToday: 6,
-  progressFeed: ACTIVE_PROGRESS_FEED,
+  scheduleRows: INITIAL_ROWS,
+  missedAlert: {
+    classId: "SLMS-9821",
+    scheduledTime: "08:00 AM",
+  },
+  scheduleDateLabel: "Monday, October 23, 2023",
+  totalScheduledToday: 8,
+  welcomeDateSummary: "Monday, October 23, 2023",
+  progressFeed: PROGRESS_FEED,
   activateSession: (id: string) => {
     set(state => ({
       scheduleRows: applyConnectingState(state.scheduleRows, id),
@@ -207,64 +165,37 @@ const useTeacherDashboardActiveStore = create<TeacherDashboardActiveState>(set =
   },
 }));
 
-interface MockTeacherDashboardContainerProps {
-  readonly mode?: "standard" | "active";
-}
-
-export function MockTeacherDashboardContainer({ mode = "standard" }: MockTeacherDashboardContainerProps) {
+export function MockTeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
+  const dashboardT = useTranslations("dashboard");
   const userName = useUserStore(state => state.name);
-
-  const standardStore = useTeacherDashboardStore();
-  const activeStore = useTeacherDashboardActiveStore();
-  const labels = buildTeacherDashboardLabels(t);
-
-  if (mode === "active") {
-    const feed = activeStore.progressFeed.map(f => ({
-      id: f.id,
-      studentName: f.studentName,
-      studentInitials: f.studentInitials,
-      summary: f.summary,
-      timeAgo: f.timeAgo,
-      icon: f.icon,
-    }));
-
-    return (
-      <TeacherDashboardActiveView
-        userName={userName}
-        metrics={activeStore.metrics}
-        scheduleRows={activeStore.scheduleRows}
-        progressFeed={feed}
-        welcomeDateSummary={activeStore.welcomeDateSummary}
-        sessionsScheduledToday={activeStore.sessionsScheduledToday}
-        labels={labels}
-        lastUpdated="Updated just now"
-        onActivate={id => alert(`Activated session ${id}`)}
-        onNewSession={() => alert("New session clicked")}
-        onStartSession={id => alert(`Start session ${id}`)}
-        onMarkAbsent={id => alert(`Mark absent ${id}`)}
-        onRequestLeave={id => alert(`Request leave ${id}`)}
-        dateValue={getTodayScheduleFilterDate()}
-        onDateChange={() => {}}
-      />
-    );
-  }
+  const store = useTeacherDashboardStore();
+  const labels = buildTeacherDashboardLabels(t, dashboardT);
 
   return (
     <TeacherDashboardView
-      metrics={standardStore.metrics}
-      scheduleRows={standardStore.scheduleRows}
-      missedAlert={standardStore.missedAlert}
-      scheduleDateLabel={standardStore.scheduleDateLabel}
+      userName={userName}
+      metrics={store.metrics}
+      scheduleRows={store.scheduleRows}
+      progressFeed={store.progressFeed}
+      missedAlert={store.missedAlert}
+      scheduleDateLabel={store.scheduleDateLabel}
+      welcomeDateSummary={store.welcomeDateSummary}
       labels={labels}
       lastUpdated="Updated just now"
+      activationError={null}
       canActivate={true}
       canManualEntry={true}
       canPrintSchedule={true}
       onPrintSchedule={() => globalThis.print()}
       onManualEntry={() => alert("Manual entry clicked")}
+      onNewSession={() => alert("New session clicked")}
       onJoinVideo={id => alert(`Join video for ${id}`)}
-      onActivate={id => alert(`Activated session ${id}`)}
+      onActivate={id => store.activateSession(id)}
+      onStartSession={id => alert(`Start session ${id}`)}
+      onMarkAbsent={id => alert(`Mark absent ${id}`)}
+      onRequestLeave={id => alert(`Request leave ${id}`)}
+      onViewAll={() => alert("View all clicked")}
       onDownloadHandbook={() => alert("Download handbook clicked")}
       onContactCoordinator={() => alert("Contact coordinator clicked")}
       onSupport={() => alert("Live support clicked")}
@@ -286,14 +217,4 @@ const meta: Meta<typeof MockTeacherDashboardContainer> = {
 export default meta;
 type Story = StoryObj<typeof MockTeacherDashboardContainer>;
 
-export const Standard: Story = {
-  args: {
-    mode: "standard",
-  },
-};
-
-export const Active: Story = {
-  args: {
-    mode: "active",
-  },
-};
+export const Default: Story = {};

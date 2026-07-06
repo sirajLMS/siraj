@@ -9,15 +9,10 @@ import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 interface TeacherActiveMetricsRowProps {
   readonly metrics: TeacherDashboardMetrics;
   readonly labels: TeacherDashboardLabels["activeMetrics"];
-  readonly isMobile: boolean;
 }
 
-export function TeacherActiveMetricsRow({ metrics, labels, isMobile }: Readonly<TeacherActiveMetricsRowProps>) {
+export function TeacherActiveMetricsRow({ metrics, labels }: Readonly<TeacherActiveMetricsRowProps>) {
   const activeSessions = metrics.activeSessions ?? 0;
-
-  if (isMobile) {
-    return null;
-  }
 
   return (
     <Grid container spacing={3}>

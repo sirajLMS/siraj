@@ -1,0 +1,107 @@
+"use client";
+
+import { VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
+import { Box, IconButton, Tooltip } from "@mui/material";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
+import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import { resolveTeacherScheduleActionTooltips } from "../utils/resolveTeacherScheduleActionTooltips";
+import { SessionActivateButton } from "./SessionActivateButton";
+import { TeacherActiveSessionControls } from "./TeacherActiveSessionControls";
+
+interface TeacherScheduleSessionActionsCellProps {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardLabels;
+  readonly canActivate: boolean;
+  readonly onJoinVideo: (id: string) => void;
+  readonly onActivate?: (id: string) => void;
+  readonly onStartSession?: (id: string) => void;
+  readonly onMarkAbsent?: (id: string) => void;
+  readonly onRequestLeave?: (id: string) => void;
+}
+
+export function TeacherScheduleSessionActionsCell({
+  row,
+  labels,
+  canActivate,
+  onJoinVideo,
+  onActivate,
+  onStartSession,
+  onMarkAbsent,
+  onRequestLeave,
+}: Readonly<TeacherScheduleSessionActionsCellProps>) {
+  const actions = resolveTeacherScheduleSessionActions({
+    executionState: row.executionState as ClassExecutionState | undefined,
+    outcome: row.outcome as ClassOutcome | undefined,
+    activateEnabled: row.activateEnabled,
+    canActivate,
+    videoEnabled: row.videoEnabled,
+    isConnecting: row.status === "connecting",
+  });
+
+  const tooltips = resolveTeacherScheduleActionTooltips(row, labels);
+  const hasSessionControls = actions.start || actions.markAbsent || actions.requestLeave;
+  const activateDisabled = !row.activateEnabled || row.status === "connecting";
+  const joinVideoDisabled = !row.videoEnabled;
+  const markAbsentDisabled = row.markAbsentEnabled === false;
+
+  if (!actions.activate && !hasSessionControls && !actions.joinVideo) {
+    return null;
+  }
+
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+      {actions.activate ? (
+        <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
+          <SessionActivateButton
+            disabled={activateDisabled}
+            isConnecting={row.status === "connecting"}
+            activateLabel={labels.actions.activate}
+            connectingLabel={labels.actions.connecting}
+            tooltip={tooltips.activate}
+            fullWidth={false}
+            onActivate={() => onActivate?.(row.id)}
+          />
+        </RequirePermission>
+      ) : null}
+
+      {hasSessionControls ? (
+        <TeacherActiveSessionControls
+          labels={labels.activeControls}
+          showStart={actions.start}
+          showMarkAbsent={actions.markAbsent}
+          showRequestLeave={actions.requestLeave}
+          startTooltip={tooltips.start}
+          markAbsentTooltip={tooltips.markAbsent}
+          requestLeaveTooltip={tooltips.requestLeave}
+          markAbsentDisabled={markAbsentDisabled}
+          onStart={() => onStartSession?.(row.id)}
+          onMarkAbsent={() => onMarkAbsent?.(row.id)}
+          onRequestLeave={() => onRequestLeave?.(row.id)}
+        />
+      ) : null}
+
+      {actions.joinVideo ? (
+        <Tooltip title={tooltips.joinVideo}>
+          <span>
+            <IconButton
+              size="small"
+              disabled={joinVideoDisabled}
+              onClick={() => {
+                if (!joinVideoDisabled) {
+                  onJoinVideo(row.id);
+                }
+              }}
+              aria-label={labels.actions.joinVideo}
+            >
+              {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
+            </IconButton>
+          </span>
+        </Tooltip>
+      ) : null}
+    </Box>
+  );
+}

@@ -111,7 +111,7 @@ export function ResourcesContainer() {
           : (extToMime[fileNameOnly.split(".").pop()?.toLowerCase() ?? ""] ?? "application/octet-stream");
 
       if (!isAllowedMimeType(contentType)) {
-        notifications.show(t("notification.fileTypeNotAllowed", { contentType }), {
+        notifications.show(labels.notification.fileTypeNotAllowed.replace("{type}", contentType), {
           severity: "error",
           autoHideDuration: 4000,
         });

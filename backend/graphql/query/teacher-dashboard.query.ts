@@ -7,8 +7,7 @@ import { TeacherDashboardPothosObject, TeacherHandbookUrlPothosObject } from "..
 
 async function resolveTeacherDashboard(
   ctx: { user?: { id: string } | null; locale?: string },
-  args: { date: string; pagination?: Record<string, unknown> | null },
-  mode: "teacher" | "teacher-active"
+  args: { date: string; pagination?: Record<string, unknown> | null }
 ) {
   if (!ctx.user) {
     const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
@@ -17,7 +16,7 @@ async function resolveTeacherDashboard(
   const pagination = args.pagination
     ? new PaginationArgs(args.pagination as ConstructorParameters<typeof PaginationArgs>[0])
     : null;
-  const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, mode, ctx.locale, pagination);
+  const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher", ctx.locale, pagination);
   return {
     ...result,
     scheduleRows: result.scheduleRows.map(r => ({
@@ -42,19 +41,7 @@ gqlSchemaBuilder.queryField("teacherDashboard", t =>
       pagination: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => resolveTeacherDashboard(ctx, args, "teacher"),
-  })
-);
-
-gqlSchemaBuilder.queryField("teacherActiveDashboard", t =>
-  t.field({
-    type: TeacherDashboardPothosObject,
-    args: {
-      date: t.arg.string({ required: true }),
-      pagination: t.arg({ type: PaginationArgsObject, required: false }),
-    },
-    authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => resolveTeacherDashboard(ctx, args, "teacher-active"),
+    resolve: async (_parent, args, ctx) => resolveTeacherDashboard(ctx, args),
   })
 );
 

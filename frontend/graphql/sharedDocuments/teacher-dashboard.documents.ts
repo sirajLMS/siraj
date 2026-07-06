@@ -54,58 +54,6 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const teacherActiveDashboardQueryDocument: TypedDocumentNode<
-  Operations.TeacherActiveDashboardQuery,
-  Types.QueryTeacherActiveDashboardArgs
-> = gql`
-  query teacherActiveDashboard($date: String!, $pagination: PaginationArgs) {
-    teacherActiveDashboard(date: $date, pagination: $pagination) {
-      id
-      metrics {
-        total
-        regular
-        trial
-        advance
-        rescheduled
-        suspended
-        taken
-        pending
-        activated
-        running
-        absent
-        leave
-      }
-      scheduleRows {
-        id
-        studentId
-        studentName
-        scheduledStartAt
-        durationMinutes
-        executionState
-        outcome
-        zoomMeetingUrl
-        yourTimeFormatted
-      }
-      progressFeed {
-        id
-        title
-        type
-      }
-      totalCount
-      pageInfo {
-        count
-        currentPage
-        firstItem
-        lastItem
-        hasMorePages
-        lastPage
-        perPage
-        total
-      }
-    }
-  }
-`;
-
 export const createTeacherManualClassEntryMutationDocument: TypedDocumentNode<
   Operations.CreateTeacherManualClassEntryMutation,
   Types.MutationCreateTeacherManualClassEntryArgs

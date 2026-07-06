@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -9,7 +8,6 @@ import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documen
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ParentDashboardContainer } from "@/frontend/views/dashboard/parents/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
-import { shouldRenderTeacherDashboard } from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMode";
 import { AdminDashboardContainer } from "../admin/dashboard/AdminDashboardContainer";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
@@ -18,22 +16,15 @@ function shouldShowParentDashboard(permissions: readonly AppPermission[]): boole
   );
 }
 
-function shouldShowTeacherDashboard(permissions: readonly AppPermission[], modeParam: string | null): boolean {
-  if (shouldRenderTeacherDashboard(permissions, modeParam)) {
-    return true;
-  }
+function shouldShowTeacherDashboard(permissions: readonly AppPermission[]): boolean {
   return (
     permissions.includes(AppPermission.TeacherViewDashboard) &&
     !permissions.includes(AppPermission.DashboardViewMetrics)
   );
 }
 
-// Dashboard Container - root orchestrator that determines which dashboard type to render
-// Based on user permissions and mode parameters, delegates to ParentTeacherAdmin dashboards
 export function DashboardContainer() {
   const { user, setUser } = useUserStore();
-  const searchParams = useSearchParams();
-  const modeParam = searchParams.get("mode");
   const t = useTranslations("common");
 
   const { data, loading } = useQuery(meQueryDocument, {
@@ -47,7 +38,7 @@ export function DashboardContainer() {
   }, [data, setUser]);
 
   if (!user && loading) {
-    return <div>{t("loading")}</div>; // Render a loading state while fetching the profile
+    return <div>{t("loading")}</div>;
   }
 
   const permissions = user?.permissions || [];
@@ -56,10 +47,9 @@ export function DashboardContainer() {
     return <ParentDashboardContainer />;
   }
 
-  if (shouldShowTeacherDashboard(permissions, modeParam)) {
+  if (shouldShowTeacherDashboard(permissions)) {
     return <TeacherDashboardContainer />;
   }
 
-  // Default: render admin dashboard with metrics, filters, and schedule overview
   return <AdminDashboardContainer />;
 }

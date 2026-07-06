@@ -1,22 +1,27 @@
 "use client";
 
-import { MoreVertOutlined, VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
-import { IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/dashboard/components/ScheduleInstanceStatusBadge";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
-import { TeacherScheduleStatusContent } from "./TeacherScheduleStatusContent";
 import { TeacherScheduleStudentCell } from "./TeacherScheduleStudentCell";
+import { TeacherScheduleSessionActionsCell } from "./TeacherScheduleSessionActionsCell";
 
 interface TeacherScheduleDataGridProps {
   readonly rows: readonly TeacherScheduleRow[];
   readonly labels: TeacherDashboardLabels;
+  readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly canActivate: boolean;
   readonly emptyMessage: string;
   readonly onJoinVideo: (id: string) => void;
   readonly onActivate?: (id: string) => void;
+  readonly onStartSession?: (id: string) => void;
+  readonly onMarkAbsent?: (id: string) => void;
+  readonly onRequestLeave?: (id: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -27,22 +32,24 @@ function formatRowNumber(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-function renderStatusCell(
-  row: TeacherScheduleRow,
-  labels: TeacherDashboardLabels,
-  canActivate: boolean,
-  onActivate?: (id: string) => void
-) {
-  return <TeacherScheduleStatusContent row={row} labels={labels} canActivate={canActivate} onActivate={onActivate} />;
+function formatDuration(minutes: number | undefined, template: string): string {
+  if (!minutes) {
+    return "—";
+  }
+  return template.replace("{minutes}", String(minutes));
 }
 
 export function TeacherScheduleDataGrid({
   rows,
   labels,
+  instanceStatusLabels,
   canActivate,
   emptyMessage,
   onJoinVideo,
   onActivate,
+  onStartSession,
+  onMarkAbsent,
+  onRequestLeave,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -57,17 +64,6 @@ export function TeacherScheduleDataGrid({
         renderCell: ({ row }) => formatRowNumber(row.rowNumber),
       },
       {
-        field: "classId",
-        headerName: labels.schedule.classId,
-        flex: 1,
-        minWidth: 120,
-        renderCell: ({ row }) => (
-          <Typography sx={{ typography: "bodyMd", fontWeight: 700, color: theme => theme.palette.header }}>
-            {row.classId}
-          </Typography>
-        ),
-      },
-      {
         field: "studentName",
         headerName: labels.schedule.student,
         flex: 1.2,
@@ -79,6 +75,23 @@ export function TeacherScheduleDataGrid({
         headerName: labels.schedule.time,
         flex: 1,
         minWidth: 160,
+        renderCell: ({ row }) => (
+          <Box>
+            <Typography sx={{ typography: "bodyMd", fontWeight: 700 }}>{row.timeRange}</Typography>
+            {row.isCurrent && (
+              <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
+                {labels.schedule.current}
+              </Typography>
+            )}
+          </Box>
+        ),
+      },
+      {
+        field: "durationMinutes",
+        headerName: labels.schedule.duration,
+        flex: 0.8,
+        minWidth: 100,
+        renderCell: ({ row }) => formatDuration(row.durationMinutes, labels.schedule.durationValue),
       },
       {
         field: "status",
@@ -86,47 +99,37 @@ export function TeacherScheduleDataGrid({
         flex: 1,
         minWidth: 140,
         sortable: false,
-        renderCell: ({ row }) => renderStatusCell(row, labels, canActivate, onActivate),
-      },
-      {
-        field: "contact",
-        headerName: labels.schedule.contact,
-        width: 90,
-        align: "center",
-        headerAlign: "center",
-        sortable: false,
         renderCell: ({ row }) => (
-          <Tooltip title={labels.actions.joinVideo}>
-            <span>
-              <IconButton
-                size="small"
-                disabled={!row.videoEnabled}
-                onClick={() => {
-                  onJoinVideo(row.id);
-                }}
-                aria-label={labels.actions.joinVideo}
-              >
-                {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
-              </IconButton>
-            </span>
-          </Tooltip>
+          <ScheduleInstanceStatusBadge
+            outcome={row.outcome as ClassOutcome | undefined}
+            executionState={row.executionState as ClassExecutionState | undefined}
+            statusLabels={instanceStatusLabels}
+          />
         ),
       },
       {
         field: "actions",
         headerName: labels.schedule.actions,
-        width: 80,
-        align: "right",
-        headerAlign: "right",
+        flex: 1.4,
+        minWidth: 200,
+        align: "center",
+        headerAlign: "center",
         sortable: false,
-        renderCell: () => (
-          <IconButton size="small" aria-label={labels.schedule.actions}>
-            <MoreVertOutlined />
-          </IconButton>
+        renderCell: ({ row }) => (
+          <TeacherScheduleSessionActionsCell
+            row={row}
+            labels={labels}
+            canActivate={canActivate}
+            onJoinVideo={onJoinVideo}
+            onActivate={onActivate}
+            onStartSession={onStartSession}
+            onMarkAbsent={onMarkAbsent}
+            onRequestLeave={onRequestLeave}
+          />
         ),
       },
     ];
-  }, [canActivate, labels, onActivate, onJoinVideo]);
+  }, [canActivate, instanceStatusLabels, labels, onActivate, onJoinVideo, onMarkAbsent, onRequestLeave, onStartSession]);
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 

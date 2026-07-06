@@ -2,17 +2,10 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import * as Types from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
-import { useRouter } from "@/shared/i18n/routing";
-
-type SupportRequestType = "COORDINATOR" | "SUPPORT";
-type SnackbarSeverity = "success" | "error" | "info";
-
 import {
   activateClassMutationDocument,
   updateSessionStatusAbsentMutationDocument,
@@ -22,7 +15,6 @@ import {
 import {
   createTeacherManualClassEntryMutationDocument,
   logTeacherSupportRequestMutationDocument,
-  teacherActiveDashboardQueryDocument,
   teacherDashboardQueryDocument,
   teacherHandbookUrlQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/teacher-dashboard.documents";
@@ -30,13 +22,17 @@ import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStor
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { TeacherScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
+import { useRouter } from "@/shared/i18n/routing";
 import { ManualClassEntryDialog } from "./components/ManualClassEntryDialog";
-import { TeacherDashboardActiveView } from "./TeacherDashboardActiveView";
 import { TeacherDashboardView } from "./TeacherDashboardView";
-import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
-import { resolveTeacherDashboardMode, shouldRenderTeacherDashboard } from "./utils/teacherDashboardMode";
 import { useTeacherDashboardLastUpdated } from "./utils/useTeacherDashboardLastUpdated";
+
+type SupportRequestType = "COORDINATOR" | "SUPPORT";
+type SnackbarSeverity = "success" | "error" | "info";
+
+const ACTIVATION_WINDOW_BEFORE_MINUTES = 5;
+const ABSENT_WAITING_MINUTES = 30;
 
 interface RawRow {
   readonly id?: string | null;
@@ -56,42 +52,45 @@ interface RawFeedItem {
   readonly type?: string | null;
 }
 
-function mapRows(
-  rows: readonly RawRow[] | null | undefined,
-  todayDateStr: string,
-  mode: "standard" | "active" | null
-): TeacherScheduleRow[] {
+function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: string): TeacherScheduleRow[] {
   if (!rows) return [];
   return rows.map((row, idx) => {
     const startAt = new Date(row.scheduledStartAt || todayDateStr);
     const endAt = new Date(startAt.getTime() + (row.durationMinutes || 60) * 60000);
-    const startWindow = new Date(startAt.getTime() - 5 * 60000);
+    const startWindow = new Date(startAt.getTime() - ACTIVATION_WINDOW_BEFORE_MINUTES * 60000);
     const now = new Date();
 
-    let status: TeacherScheduleRow["status"] = "upcoming";
-    if (row.outcome === "TAKEN" || row.outcome === "COMPLETED") {
-      status = "completed";
-    } else if (
-      row.outcome === "ABSENT" ||
-      row.outcome === "LEAVE" ||
-      row.outcome === "CANCELLED" ||
-      row.outcome === "MISSED"
-    ) {
-      status = "missed";
-    } else if (row.executionState === "ACTIVATED") {
-      status = "activated";
-    } else if (row.executionState === "IN_PROGRESS") {
-      status = "active";
-    } else if (mode === "active") {
-      status = "pending";
+    const executionState = row.executionState ?? "NOT_ACTIVATED";
+    const outcome = row.outcome ?? "PENDING";
+    const activateEnabled =
+      now >= startWindow && now <= endAt && executionState === "NOT_ACTIVATED" && outcome === "PENDING";
+
+    let activateDisabledReason: TeacherScheduleRow["activateDisabledReason"] = null;
+    if (executionState === "NOT_ACTIVATED" && outcome === "PENDING" && !activateEnabled) {
+      activateDisabledReason = now < startWindow ? "before_window" : "after_window";
     }
 
-    const activateEnabled = now >= startWindow && now <= endAt && row.executionState === "NOT_ACTIVATED";
+    const isLiveSession = executionState === "ACTIVATED" || executionState === "RUNNING";
+    const absentWaitingDeadline = new Date(startAt.getTime() + ABSENT_WAITING_MINUTES * 60000);
+    const markAbsentEnabled = !isLiveSession || now >= absentWaitingDeadline;
+
+    let status: TeacherScheduleRow["status"] = "upcoming";
+    if (outcome === "TAKEN" || executionState === "COMPLETED") {
+      status = "completed";
+    } else if (outcome === "ABSENT" || outcome === "LEAVE") {
+      status = "missed";
+    } else if (executionState === "ACTIVATED") {
+      status = "activated";
+    } else if (executionState === "RUNNING") {
+      status = "active";
+    } else if (executionState === "NOT_ACTIVATED" && outcome === "PENDING") {
+      status = activateEnabled ? "pending" : "upcoming";
+    }
 
     return {
       id: row.id || `row-${idx}`,
       rowNumber: idx + 1,
-      classId: `#CLS-${row.id}`,
+      classId: row.id || "",
       studentId: row.studentId || "",
       studentName: row.studentName || "Unknown",
       studentInitials: row.studentName
@@ -104,71 +103,22 @@ function mapRows(
         : "ST",
       timeRange: row.yourTimeFormatted || startAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       status,
+      executionState,
+      outcome,
       videoEnabled: !!row.zoomMeetingUrl,
       activateEnabled,
+      activateDisabledReason,
+      markAbsentEnabled,
       durationMinutes: row.durationMinutes ?? undefined,
       zoomMeetingUrl: row.zoomMeetingUrl ?? null,
-      isLive: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
-      isCurrent: row.executionState === "ACTIVATED" || row.executionState === "IN_PROGRESS",
+      isLive: isLiveSession,
+      isCurrent: isLiveSession,
     };
   });
 }
 
-interface ActiveDashboardWrapperProps {
-  readonly userName: string;
-  readonly activeData: Operations.TeacherActiveDashboardQuery | undefined;
-  readonly filterDate: string;
-  readonly labels: TeacherDashboardLabels;
-  readonly activationError: string | null;
-  readonly handleActivate: (id: string) => Promise<void>;
-  readonly setManualEntryDefaultActive: (val: boolean) => void;
-  readonly setManualEntryOpen: (val: boolean) => void;
-  readonly startClass: (options: {
-    readonly variables: Types.MutationUpdateSessionStatusStartArgs;
-  }) => Promise<unknown>;
-  readonly markAbsent: (options: {
-    readonly variables: Types.MutationUpdateSessionStatusAbsentArgs;
-  }) => Promise<unknown>;
-  readonly requestLeave: (options: {
-    readonly variables: Types.MutationUpdateSessionStatusLeaveArgs;
-  }) => Promise<unknown>;
-  readonly refetchActive: (variables?: Partial<Types.QueryTeacherActiveDashboardArgs>) => Promise<{
-    readonly data?: Operations.TeacherActiveDashboardQuery | null;
-    readonly error?: unknown;
-  }>;
-  readonly onDateChange: (date: string) => void;
-  readonly onViewAll: () => void;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly onPageChange: (page: number) => void;
-  readonly lastUpdated: string;
-}
-
-function ActiveDashboardWrapper({
-  userName,
-  activeData,
-  filterDate,
-  labels,
-  activationError,
-  handleActivate,
-  setManualEntryDefaultActive,
-  setManualEntryOpen,
-  startClass,
-  markAbsent,
-  requestLeave,
-  refetchActive,
-  onDateChange,
-  onViewAll,
-  page,
-  pageSize,
-  onPageChange,
-  lastUpdated,
-}: Readonly<ActiveDashboardWrapperProps>) {
-  const activeMetrics = activeData?.teacherActiveDashboard?.metrics;
-  const scheduleRows = mapRows(activeData?.teacherActiveDashboard?.scheduleRows, filterDate, "active");
-  const totalCount = activeData?.teacherActiveDashboard?.totalCount ?? 0;
-
-  const feed = (activeData?.teacherActiveDashboard?.progressFeed || []).map((f: RawFeedItem) => {
+function mapProgressFeed(feed: readonly RawFeedItem[] | null | undefined) {
+  return (feed || []).map((f: RawFeedItem) => {
     let icon: "grade" | "login" | "description" = "description";
     const fType = f.type?.toLowerCase();
     if (fType === "quiz") {
@@ -186,168 +136,12 @@ function ActiveDashboardWrapper({
       icon,
     };
   });
-
-  const activeViewMetrics = {
-    totalClasses: activeMetrics?.total ?? 0,
-    activeSessions: activeMetrics?.running ?? 0,
-    missedSlots: activeMetrics?.absent ?? 0,
-    completed: activeMetrics?.taken ?? 0,
-    studentsToday: new Set(scheduleRows.map(r => r.studentId)).size,
-  };
-
-  return (
-    <TeacherDashboardActiveView
-      userName={userName}
-      metrics={activeViewMetrics}
-      scheduleRows={scheduleRows}
-      progressFeed={feed}
-      welcomeDateSummary={filterDate}
-      sessionsScheduledToday={scheduleRows.length}
-      labels={labels}
-      lastUpdated={lastUpdated}
-      onActivate={handleActivate}
-      dateValue={filterDate}
-      onDateChange={onDateChange}
-      onNewSession={() => {
-        setManualEntryDefaultActive(true);
-        setManualEntryOpen(true);
-      }}
-      onStartSession={async id => {
-        try {
-          await startClass({ variables: { classInstanceId: id } });
-          await refetchActive();
-        } catch (err) {
-          logger.error("Error starting session:", err);
-        }
-      }}
-      onMarkAbsent={async id => {
-        try {
-          await markAbsent({ variables: { classInstanceId: id } });
-          await refetchActive();
-        } catch (err) {
-          logger.error("Error marking absent:", err);
-        }
-      }}
-      onRequestLeave={async id => {
-        try {
-          await requestLeave({
-            variables: { classInstanceId: id, leaveReason: "Teacher requested leave from active dashboard" },
-          });
-          await refetchActive();
-        } catch (err) {
-          logger.error("Error requesting leave:", err);
-        }
-      }}
-      activationError={activationError}
-      onViewAll={onViewAll}
-      page={page}
-      pageSize={pageSize}
-      totalCount={totalCount}
-      onPageChange={onPageChange}
-    />
-  );
-}
-
-interface StandardDashboardWrapperProps {
-  readonly standardData: Operations.TeacherDashboardQuery | undefined;
-  readonly filterDate: string;
-  readonly permissions: readonly Types.AppPermission[];
-  readonly labels: TeacherDashboardLabels;
-  readonly handleActivate: (id: string) => Promise<void>;
-  readonly handleDownloadHandbook: () => Promise<void>;
-  readonly handleSupportRequest: (type: SupportRequestType) => Promise<void>;
-  readonly showSnackbar: (message: string, severity: SnackbarSeverity) => void;
-  readonly t: ReturnType<typeof useTranslations<"dashboard.teacherDashboard">>;
-  readonly setManualEntryDefaultActive: (val: boolean) => void;
-  readonly setManualEntryOpen: (val: boolean) => void;
-  readonly onDateChange: (date: string) => void;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly onPageChange: (page: number) => void;
-  readonly lastUpdated: string;
-}
-
-function StandardDashboardWrapper({
-  standardData,
-  filterDate,
-  permissions,
-  labels,
-  handleActivate,
-  handleDownloadHandbook,
-  handleSupportRequest,
-  showSnackbar,
-  t: tFunc,
-  setManualEntryDefaultActive,
-  setManualEntryOpen,
-  onDateChange,
-  page,
-  pageSize,
-  onPageChange,
-  lastUpdated,
-}: Readonly<StandardDashboardWrapperProps>) {
-  const standardMetrics = standardData?.teacherDashboard?.metrics;
-  const scheduleRows = mapRows(standardData?.teacherDashboard?.scheduleRows, filterDate, "standard");
-  const totalCount = standardData?.teacherDashboard?.totalCount ?? 0;
-  const missedRow = scheduleRows.find(r => r.status === "missed");
-  const missedAlert = missedRow
-    ? {
-        classId: missedRow.classId,
-        scheduledTime: missedRow.timeRange,
-      }
-    : null;
-
-  const viewMetrics = {
-    totalClasses: standardMetrics?.total ?? 0,
-    missedSlots: standardMetrics?.absent ?? 0,
-    completed: standardMetrics?.taken ?? 0,
-    studentsToday: new Set(scheduleRows.map(r => r.studentId)).size,
-  };
-
-  return (
-    <TeacherDashboardView
-      metrics={viewMetrics}
-      scheduleRows={scheduleRows}
-      missedAlert={missedAlert}
-      scheduleDateLabel={filterDate}
-      labels={labels}
-      lastUpdated={lastUpdated}
-      canActivate={permissions.includes(Types.AppPermission.SessionActivateClass)}
-      canManualEntry={permissions.includes(Types.AppPermission.SessionActivateClass)}
-      canPrintSchedule={true}
-      onPrintSchedule={() => {
-        globalThis.print();
-      }}
-      onManualEntry={() => {
-        setManualEntryDefaultActive(false);
-        setManualEntryOpen(true);
-      }}
-      onJoinVideo={id => {
-        const row = scheduleRows.find(r => r.id === id);
-        if (row?.zoomMeetingUrl) {
-          globalThis.open(row.zoomMeetingUrl, "_blank");
-        } else {
-          showSnackbar(tFunc("errors.meetingUrlNotAvailable"), "error");
-        }
-      }}
-      onActivate={handleActivate}
-      onDownloadHandbook={handleDownloadHandbook}
-      onContactCoordinator={() => handleSupportRequest("COORDINATOR")}
-      onSupport={() => handleSupportRequest("SUPPORT")}
-      dateValue={filterDate}
-      onDateChange={onDateChange}
-      page={page}
-      pageSize={pageSize}
-      totalCount={totalCount}
-      onPageChange={onPageChange}
-    />
-  );
 }
 
 export function TeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
+  const dashboardT = useTranslations("dashboard");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const modeParam = searchParams.get("mode");
   const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
 
@@ -359,7 +153,6 @@ export function TeacherDashboardContainer() {
   const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("info");
 
   const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
-  const mode = resolveTeacherDashboardMode(permissions, modeParam);
 
   const paginationArgs: Types.PaginationArgs = {
     first: pageSize,
@@ -371,26 +164,18 @@ export function TeacherDashboardContainer() {
     skip: null,
   };
 
-  const { data: standardData, refetch: refetchStandard } = useQuery(teacherDashboardQueryDocument, {
+  const { data: dashboardData, refetch } = useQuery(teacherDashboardQueryDocument, {
     variables: { date: filterDate, pagination: paginationArgs },
-    skip: mode !== "standard",
-    fetchPolicy: "cache-and-network",
-  });
-
-  const { data: activeData, refetch: refetchActive } = useQuery(teacherActiveDashboardQueryDocument, {
-    variables: { date: filterDate, pagination: paginationArgs },
-    skip: mode !== "active",
     fetchPolicy: "cache-and-network",
   });
 
   const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
 
   useEffect(() => {
-    const hasData = mode === "active" ? activeData?.teacherActiveDashboard : standardData?.teacherDashboard;
-    if (hasData) {
+    if (dashboardData?.teacherDashboard) {
       setDataArrivedAt(Date.now());
     }
-  }, [activeData, standardData, mode]);
+  }, [dashboardData]);
 
   const lastUpdated = useTeacherDashboardLastUpdated(dataArrivedAt);
 
@@ -419,25 +204,39 @@ export function TeacherDashboardContainer() {
   const [createManualEntry] = useMutation(createTeacherManualClassEntryMutationDocument);
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
 
-  if (!shouldRenderTeacherDashboard(permissions, modeParam)) {
-    return null;
-  }
+  const labels = buildTeacherDashboardLabels(t, dashboardT);
+  const canActivate = permissions.includes(Types.AppPermission.SessionActivateClass);
 
-  const labels = buildTeacherDashboardLabels(t);
-  const canControl = permissions.includes(Types.AppPermission.SessionActivateClass);
-
-  const dashboardId = standardData?.teacherDashboard?.id || activeData?.teacherActiveDashboard?.id || "";
+  const dashboardId = dashboardData?.teacherDashboard?.id || "";
   const teacherId = dashboardId.split("-")[2] || "";
+
+  const scheduleRows = mapRows(dashboardData?.teacherDashboard?.scheduleRows, filterDate);
+  const totalCount = dashboardData?.teacherDashboard?.totalCount ?? 0;
+  const dashboardMetrics = dashboardData?.teacherDashboard?.metrics;
+
+  const missedRow = scheduleRows.find(r => r.status === "missed");
+  const missedAlert = missedRow
+    ? {
+        classId: missedRow.classId,
+        scheduledTime: missedRow.timeRange,
+      }
+    : null;
+
+  const viewMetrics = {
+    totalClasses: dashboardMetrics?.total ?? 0,
+    activeSessions: dashboardMetrics?.running ?? 0,
+    missedSlots: dashboardMetrics?.absent ?? 0,
+    completed: dashboardMetrics?.taken ?? 0,
+    studentsToday: new Set(scheduleRows.map(r => r.studentId)).size,
+  };
+
+  const progressFeed = mapProgressFeed(dashboardData?.teacherDashboard?.progressFeed);
 
   const handleActivate = async (id: string) => {
     setActivationError(null);
     try {
       await activateClass({ variables: { classInstanceId: id } });
-      if (mode === "active") {
-        await refetchActive();
-      } else {
-        await refetchStandard();
-      }
+      await refetch();
     } catch (err) {
       const error = err as Error;
       logger.error("Error activating class:", error);
@@ -471,11 +270,7 @@ export function TeacherDashboardContainer() {
         },
       },
     });
-    if (mode === "active") {
-      await refetchActive();
-    } else {
-      await refetchStandard();
-    }
+    await refetch();
   };
 
   const handleSupportRequest = async (type: SupportRequestType) => {
@@ -495,14 +290,6 @@ export function TeacherDashboardContainer() {
     }
   };
 
-  const handleDownloadHandbook = async () => {
-    setHandbookRequested(true);
-  };
-
-  const handleViewAll = () => {
-    router.push("/schedule");
-  };
-
   const showSnackbar = (message: string, severity: SnackbarSeverity) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
@@ -511,47 +298,81 @@ export function TeacherDashboardContainer() {
 
   return (
     <RequirePermission permissions={[Types.AppPermission.TeacherViewDashboard]}>
-      {mode === "active" && canControl ? (
-        <ActiveDashboardWrapper
-          userName={userName}
-          activeData={activeData}
-          filterDate={filterDate}
-          labels={labels}
-          activationError={activationError}
-          handleActivate={handleActivate}
-          setManualEntryDefaultActive={setManualEntryDefaultActive}
-          setManualEntryOpen={setManualEntryOpen}
-          startClass={startClass}
-          markAbsent={markAbsent}
-          requestLeave={requestLeave}
-          refetchActive={refetchActive}
-          onDateChange={setFilterDate}
-          onViewAll={handleViewAll}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          lastUpdated={lastUpdated}
-        />
-      ) : (
-        <StandardDashboardWrapper
-          standardData={standardData}
-          filterDate={filterDate}
-          permissions={permissions}
-          labels={labels}
-          handleActivate={handleActivate}
-          handleDownloadHandbook={handleDownloadHandbook}
-          handleSupportRequest={handleSupportRequest}
-          showSnackbar={showSnackbar}
-          t={t}
-          setManualEntryDefaultActive={setManualEntryDefaultActive}
-          setManualEntryOpen={setManualEntryOpen}
-          onDateChange={setFilterDate}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          lastUpdated={lastUpdated}
-        />
-      )}
+      <TeacherDashboardView
+        userName={userName}
+        metrics={viewMetrics}
+        scheduleRows={scheduleRows}
+        progressFeed={progressFeed}
+        missedAlert={missedAlert}
+        scheduleDateLabel={filterDate}
+        welcomeDateSummary={filterDate}
+        labels={labels}
+        lastUpdated={lastUpdated}
+        activationError={activationError}
+        canActivate={canActivate}
+        canManualEntry={canActivate}
+        canPrintSchedule={true}
+        onPrintSchedule={() => {
+          globalThis.print();
+        }}
+        onManualEntry={() => {
+          setManualEntryDefaultActive(false);
+          setManualEntryOpen(true);
+        }}
+        onNewSession={() => {
+          setManualEntryDefaultActive(true);
+          setManualEntryOpen(true);
+        }}
+        onJoinVideo={id => {
+          const row = scheduleRows.find(r => r.id === id);
+          if (row?.zoomMeetingUrl) {
+            globalThis.open(row.zoomMeetingUrl, "_blank");
+          } else {
+            showSnackbar(t("errors.meetingUrlNotAvailable"), "error");
+          }
+        }}
+        onActivate={handleActivate}
+        onStartSession={async id => {
+          try {
+            await startClass({ variables: { classInstanceId: id } });
+            await refetch();
+          } catch (err) {
+            logger.error("Error starting session:", err);
+          }
+        }}
+        onMarkAbsent={async id => {
+          try {
+            await markAbsent({ variables: { classInstanceId: id } });
+            await refetch();
+          } catch (err) {
+            logger.error("Error marking absent:", err);
+          }
+        }}
+        onRequestLeave={async id => {
+          try {
+            await requestLeave({
+              variables: { classInstanceId: id, leaveReason: "Teacher requested leave from teacher dashboard" },
+            });
+            await refetch();
+          } catch (err) {
+            logger.error("Error requesting leave:", err);
+          }
+        }}
+        onViewAll={() => {
+          router.push("/schedule");
+        }}
+        onDownloadHandbook={() => {
+          setHandbookRequested(true);
+        }}
+        onContactCoordinator={() => handleSupportRequest("COORDINATOR")}
+        onSupport={() => handleSupportRequest("SUPPORT")}
+        dateValue={filterDate}
+        onDateChange={setFilterDate}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onPageChange={setPage}
+      />
       <ManualClassEntryDialog
         open={manualEntryOpen}
         onClose={() => setManualEntryOpen(false)}

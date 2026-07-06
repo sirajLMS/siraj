@@ -1,6 +1,7 @@
+import type { useTranslations } from "next-intl";
 import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 
-type ResourcesTranslator = (key: string) => string;
+type ResourcesTranslator = ReturnType<typeof useTranslations<"dashboard.resources">>;
 
 export function buildResourcesLabels(t: ResourcesTranslator): ResourcesLabels {
   return {
@@ -35,7 +36,7 @@ export function buildResourcesLabels(t: ResourcesTranslator): ResourcesLabels {
     },
     deleteDialog: {
       title: t("deleteDialog.title"),
-      body: t("deleteDialog.body"),
+      body: t.raw("deleteDialog.body"),
       confirm: t("deleteDialog.confirm"),
       cancel: t("deleteDialog.cancel"),
     },
@@ -44,7 +45,7 @@ export function buildResourcesLabels(t: ResourcesTranslator): ResourcesLabels {
       fileRequired: t("validation.fileRequired"),
     },
     notification: {
-      fileTypeNotAllowed: t("notification.fileTypeNotAllowed"),
+      fileTypeNotAllowed: t.raw("notification.fileTypeNotAllowed"),
       uploadPrepareFailed: t("notification.uploadPrepareFailed"),
       uploadFailed: t("notification.uploadFailed"),
       createRecordFailed: t("notification.createRecordFailed"),

@@ -6,5 +6,5 @@ interface TeacherDashboardRedirectPageProps {
 
 export default async function TeacherDashboardRedirectPage({ params }: TeacherDashboardRedirectPageProps) {
   const { locale } = await params;
-  redirect({ href: "/dashboard?mode=teacher", locale });
+  redirect({ href: "/dashboard", locale });
 }

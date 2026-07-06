@@ -1,13 +1,5 @@
 import type { SvgIconComponent } from "@mui/icons-material";
-import {
-  CalendarTodayOutlined,
-  CheckCircleOutlined,
-  EventBusyOutlined,
-  EventOutlined,
-  GroupsOutlined,
-  SensorsOutlined,
-  VerifiedOutlined,
-} from "@mui/icons-material";
+import { CalendarTodayOutlined, EventBusyOutlined, SensorsOutlined, VerifiedOutlined } from "@mui/icons-material";
 import type { TeacherDashboardMetrics } from "@/frontend/stores/teacherDashboardTypes";
 import type { MetricItem } from "@/frontend/types/shared.types";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
@@ -63,42 +55,6 @@ export function buildTeacherActiveMetricItems(
       icon: VerifiedOutlined,
       label: labels.completed,
       count: m => m.completed,
-    },
-  ];
-
-  return toMetricItems(definitions, metrics);
-}
-
-export function buildTeacherStandardMetricItems(
-  metrics: TeacherDashboardMetrics,
-  labels: TeacherDashboardLabels["metrics"]
-): MetricItem[] {
-  const definitions: readonly TeacherMetricDefinition[] = [
-    {
-      key: "totalClasses",
-      icon: EventOutlined,
-      label: labels.totalClasses,
-      count: m => m.totalClasses,
-    },
-    {
-      key: "missedSlots",
-      icon: EventBusyOutlined,
-      label: labels.missedSlots,
-      variant: "error",
-      count: m => m.missedSlots,
-    },
-    {
-      key: "completed",
-      icon: CheckCircleOutlined,
-      label: labels.completed,
-      variant: "highlight",
-      count: m => m.completed,
-    },
-    {
-      key: "studentsToday",
-      icon: GroupsOutlined,
-      label: labels.studentsToday,
-      count: m => m.studentsToday,
     },
   ];
 

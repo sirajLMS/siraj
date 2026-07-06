@@ -2001,6 +2001,14 @@ const en: MessageSchema = {
         joinVideo: "Join video session",
         downloadHandbook: "Download Handbook",
         contactCoordinator: "Contact Coordinator",
+        disabledTooltips: {
+          activateBeforeWindow: "Activation opens 5 minutes before the scheduled start time",
+          activateAfterWindow: "The activation window for this class has passed",
+          activateConnecting: "Activation is in progress",
+          joinVideoUnavailable: "No meeting link is available for this class",
+          markAbsentWaitingPeriod:
+            "You can mark a student absent 30 minutes after the scheduled start time",
+        },
       },
       activeControls: {
         liveNow: "LIVE NOW",
