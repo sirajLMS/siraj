@@ -84,6 +84,10 @@ function buildActiveControlsLabels(t: TeacherDashboardTranslator): TeacherDashbo
     startSession: t("activeControls.startSession"),
     markAbsent: t("activeControls.markAbsent"),
     requestLeave: t("activeControls.requestLeave"),
+    markAbsentDialogTitle: t("activeControls.markAbsentDialogTitle"),
+    markAbsentConfirmation: t("activeControls.markAbsentConfirmation"),
+    markAbsentConfirm: t("activeControls.markAbsentConfirm"),
+    cancel: t("activeControls.cancel"),
   };
 }
 

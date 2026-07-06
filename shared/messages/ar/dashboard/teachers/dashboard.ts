@@ -67,6 +67,10 @@ export const dashboard: TeacherDashboardLabels = {
     startSession: "بدء الحصة",
     markAbsent: "تسجيل غياب",
     requestLeave: "طلب إجازة",
+    markAbsentDialogTitle: "تسجيل غياب؟",
+    markAbsentConfirmation: "هل أنت متأكد من تسجيل غياب هذا الطالب؟ سيتم إكمال الجلسة بتسجيل غياب.",
+    markAbsentConfirm: "تسجيل غياب",
+    cancel: "إلغاء",
   },
   progressFeed: {
     title: "موجز تقدم الطلاب",

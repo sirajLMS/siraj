@@ -18,6 +18,18 @@ export const classDetails: ClassDetailsLabels = {
     forceActivate: "فرض التفعيل",
     stopPause: "إيقاف/تعليق",
     deleteInstance: "حذف الحصة",
+    disabledTooltips: {
+      forceActivate: {
+        activated: "لا يمكنك فرض التفعيل لأن الحصة مفعّلة بالفعل.",
+        running: "لا يمكنك فرض التفعيل لأن الجلسة قيد التشغيل.",
+        completed: "لا يمكنك فرض التفعيل لأن الحصة مكتملة.",
+      },
+      stop: {
+        notActivated: "لا يمكنك الإيقاف لأن الحصة لم تُفعّل بعد.",
+        activated: "لا يمكنك الإيقاف لأن الجلسة لم تبدأ بعد. ابدأ الجلسة أولاً.",
+        completed: "لا يمكنك الإيقاف لأن الحصة مكتملة.",
+      },
+    },
   },
   classInfo: {
     liveInstance: "حصة مباشرة",
@@ -86,6 +98,9 @@ export const classDetails: ClassDetailsLabels = {
     resetButton: "إعادة تعيين الجلسة",
     leaveReasonPrompt: "الرجاء إدخال سبب الانصراف:",
     resetConfirmation: "هل أنت متأكد من إعادة تعيين هذه الجلسة؟ سيتم حذف جميع البيانات.",
+    absentDialogTitle: "تسجيل غياب؟",
+    absentConfirmation: "هل أنت متأكد من تسجيل غياب هذا الطالب؟ سيتم إكمال الجلسة بتسجيل غياب.",
+    absentConfirm: "تسجيل غياب",
     leaveDialogTitle: "طلب إذن انصراف/غياب",
     leaveReasonLabel: "سبب الغياب/الانصراف",
     leaveSubmit: "إرسال",

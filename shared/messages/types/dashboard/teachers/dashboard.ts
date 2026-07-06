@@ -65,6 +65,10 @@ export interface TeacherDashboardLabels {
     readonly startSession: string;
     readonly markAbsent: string;
     readonly requestLeave: string;
+    readonly markAbsentDialogTitle: string;
+    readonly markAbsentConfirmation: string;
+    readonly markAbsentConfirm: string;
+    readonly cancel: string;
   };
   readonly progressFeed: {
     readonly title: string;

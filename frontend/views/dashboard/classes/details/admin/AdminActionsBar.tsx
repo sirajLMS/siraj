@@ -5,25 +5,24 @@ import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined
 import DeleteIcon from "@mui/icons-material/Delete";
 import PauseIcon from "@mui/icons-material/Pause";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { ReactElement } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AdminViewLabels } from "@/shared/messages/types/message";
+import { getForceActivateDisabledTooltip, getStopDisabledTooltip } from "./adminActionTooltips";
+
+type AdminActionLabels = AdminViewLabels["adminActions"];
 
 interface AdminActionsBarProps {
+  readonly executionState: string;
   readonly onForceActivate: () => void;
   readonly onStop: () => void;
   readonly onGenerateLog: () => void;
   readonly onReschedule: () => void;
   readonly onDelete: () => void;
-  readonly labels: {
-    readonly administrativeActions: string;
-    readonly generateLog: string;
-    readonly reschedule: string;
-    readonly forceActivate: string;
-    readonly stopPause: string;
-    readonly deleteInstance: string;
-  };
+  readonly labels: AdminActionLabels;
 }
 
 const StyledActionsDivider = styled(Box)(() => ({}));
@@ -51,28 +50,71 @@ const StyledAdminActionsBar = styled(Box)(() => ({
   justifyContent: "space-between",
 }));
 
+function ActionIconButtonWithTooltip({
+  ariaLabel,
+  enabledTitle,
+  disabledTitle,
+  disabled,
+  onClick,
+  icon,
+  ButtonComponent,
+  sx,
+}: {
+  readonly ariaLabel: string;
+  readonly enabledTitle: string;
+  readonly disabledTitle: string | null;
+  readonly disabled: boolean;
+  readonly onClick: () => void;
+  readonly icon: ReactElement;
+  readonly ButtonComponent: typeof StyledForceActivateButton;
+  readonly sx: Parameters<typeof StyledForceActivateButton>[0]["sx"];
+}) {
+  const tooltipTitle = disabled && disabledTitle ? disabledTitle : enabledTitle;
+
+  return (
+    <Tooltip title={tooltipTitle}>
+      <Box component="span" data-testid={`tooltip-target-${ariaLabel}`} sx={{ display: "inline-flex" }}>
+        <ButtonComponent aria-label={ariaLabel} disabled={disabled} onClick={onClick} sx={sx}>
+          {icon}
+        </ButtonComponent>
+      </Box>
+    </Tooltip>
+  );
+}
+
 function LeftAdminActions({
   labels,
+  executionState,
   onForceActivate,
   onStop,
 }: {
-  readonly labels: {
-    readonly administrativeActions: string;
-    readonly forceActivate: string;
-    readonly stopPause: string;
-  };
+  readonly labels: Pick<AdminActionLabels, "administrativeActions" | "forceActivate" | "stopPause" | "disabledTooltips">;
+  readonly executionState: string;
   readonly onForceActivate: () => void;
   readonly onStop: () => void;
 }) {
+  const canForceActivate = executionState === "NOT_ACTIVATED";
+  const canStop = executionState === "RUNNING";
+
+  const forceActivateDisabledTooltip = getForceActivateDisabledTooltip(
+    executionState,
+    labels.disabledTooltips.forceActivate
+  );
+  const stopDisabledTooltip = getStopDisabledTooltip(executionState, labels.disabledTooltips.stop);
+
   return (
     <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
       <Typography variant="labelUppercase">{labels.administrativeActions}</Typography>
       <StyledActionsDivider sx={theme => ({ width: 1, height: 16, backgroundColor: theme.palette.outlineVariant })} />
       <Stack direction="row" sx={{ gap: 1 }}>
-        <StyledForceActivateButton
-          aria-label="force-activate"
-          title={labels.forceActivate}
+        <ActionIconButtonWithTooltip
+          ariaLabel="force-activate"
+          enabledTitle={labels.forceActivate}
+          disabledTitle={forceActivateDisabledTooltip}
+          disabled={!canForceActivate}
           onClick={onForceActivate}
+          icon={<PowerSettingsNewIcon />}
+          ButtonComponent={StyledForceActivateButton}
           sx={theme => ({
             backgroundColor: theme.palette.status.activeContainer,
             color: theme.palette.status.onActiveContainer,
@@ -83,14 +125,21 @@ function LeftAdminActions({
             "&:active": {
               transform: "scale(0.95)",
             },
+            "&.Mui-disabled": {
+              opacity: 0.45,
+              color: theme.palette.status.onActiveContainer,
+              backgroundColor: theme.palette.status.activeContainer,
+            },
           })}
-        >
-          <PowerSettingsNewIcon />
-        </StyledForceActivateButton>
-        <StyledStopPauseButton
-          aria-label="stop-pause"
-          title={labels.stopPause}
+        />
+        <ActionIconButtonWithTooltip
+          ariaLabel="stop-pause"
+          enabledTitle={labels.stopPause}
+          disabledTitle={stopDisabledTooltip}
+          disabled={!canStop}
           onClick={onStop}
+          icon={<PauseIcon />}
+          ButtonComponent={StyledStopPauseButton}
           sx={theme => ({
             backgroundColor: theme.palette.status.cancelledContainer,
             color: theme.palette.status.onCancelledContainer,
@@ -101,10 +150,13 @@ function LeftAdminActions({
             "&:active": {
               transform: "scale(0.95)",
             },
+            "&.Mui-disabled": {
+              opacity: 0.45,
+              color: theme.palette.status.onCancelledContainer,
+              backgroundColor: theme.palette.status.cancelledContainer,
+            },
           })}
-        >
-          <PauseIcon />
-        </StyledStopPauseButton>
+        />
       </Stack>
     </Stack>
   );
@@ -192,6 +244,7 @@ function RightAdminActions({
 }
 
 export function AdminActionsBar({
+  executionState,
   onForceActivate,
   onStop,
   onGenerateLog,
@@ -210,7 +263,12 @@ export function AdminActionsBar({
         boxShadow: theme.palette.shadow.card,
       })}
     >
-      <LeftAdminActions labels={labels} onForceActivate={onForceActivate} onStop={onStop} />
+      <LeftAdminActions
+        labels={labels}
+        executionState={executionState}
+        onForceActivate={onForceActivate}
+        onStop={onStop}
+      />
       <RightAdminActions
         labels={labels}
         onReschedule={onReschedule}

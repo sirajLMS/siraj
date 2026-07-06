@@ -160,6 +160,36 @@ function LeaveDialog({ open, reason, isProcessing, onReasonChange, onClose, onSu
   );
 }
 
+interface AbsentDialogProps {
+  readonly open: boolean;
+  readonly isMarkingAbsent: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: () => void;
+  readonly labels: {
+    readonly title: string;
+    readonly confirmation: string;
+    readonly cancel: string;
+    readonly submit: string;
+  };
+}
+
+function AbsentDialog({ open, isMarkingAbsent, onClose, onSubmit, labels }: AbsentDialogProps) {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{labels.title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{labels.confirmation}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{labels.cancel}</Button>
+        <Button onClick={onSubmit} variant="contained" color="warning" disabled={isMarkingAbsent}>
+          {labels.submit}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 interface ResetDialogProps {
   readonly open: boolean;
   readonly isResetting: boolean;
@@ -199,7 +229,7 @@ interface ActionButtonsGroupProps {
   readonly isProcessingLeave: boolean;
   readonly isResetting: boolean;
   readonly onStart: () => void;
-  readonly onAbsent: () => void;
+  readonly onAbsentClick: () => void;
   readonly onLeaveClick: () => void;
   readonly onResetClick: () => void;
   readonly labels: {
@@ -219,7 +249,7 @@ function ActionButtonsGroup({
   isProcessingLeave,
   isResetting,
   onStart,
-  onAbsent,
+  onAbsentClick,
   onLeaveClick,
   onResetClick,
   labels,
@@ -242,7 +272,7 @@ function ActionButtonsGroup({
             id={`live-absent-${classInstanceId}`}
             disabled={isAnyLoading}
             isLoading={isMarkingAbsent}
-            onClick={onAbsent}
+            onClick={onAbsentClick}
             label={labels.absentButton}
             permission={AppPermission.SessionUpdateStatusAbsent}
             icon={<HighlightOffOutlined />}
@@ -293,6 +323,7 @@ export function LiveSessionToolbar({
 
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [leaveReason, setLeaveReason] = useState("");
+  const [absentDialogOpen, setAbsentDialogOpen] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   // Only show toolbar when session is ACTIVATED or RUNNING
@@ -316,6 +347,19 @@ export function LiveSessionToolbar({
       onLeave(leaveReason.trim());
       setLeaveDialogOpen(false);
     }
+  };
+
+  const handleAbsentClick = () => {
+    setAbsentDialogOpen(true);
+  };
+
+  const handleAbsentClose = () => {
+    setAbsentDialogOpen(false);
+  };
+
+  const handleAbsentSubmit = () => {
+    onAbsent();
+    setAbsentDialogOpen(false);
   };
 
   const handleResetClick = () => {
@@ -348,7 +392,7 @@ export function LiveSessionToolbar({
         isProcessingLeave={isProcessingLeave}
         isResetting={isResetting}
         onStart={onStart}
-        onAbsent={onAbsent}
+        onAbsentClick={handleAbsentClick}
         onLeaveClick={handleLeaveClick}
         onResetClick={handleResetClick}
         labels={{
@@ -356,6 +400,20 @@ export function LiveSessionToolbar({
           absentButton: t("absentButton"),
           leaveButton: t("leaveButton"),
           resetButton: t("resetButton"),
+        }}
+      />
+
+      {/* Mark Absent Confirmation Dialog */}
+      <AbsentDialog
+        open={absentDialogOpen}
+        isMarkingAbsent={isMarkingAbsent}
+        onClose={handleAbsentClose}
+        onSubmit={handleAbsentSubmit}
+        labels={{
+          title: t("absentDialogTitle"),
+          confirmation: t("absentConfirmation"),
+          cancel: t("cancel"),
+          submit: t("absentConfirm"),
         }}
       />
 

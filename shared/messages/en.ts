@@ -885,6 +885,18 @@ const en: MessageSchema = {
         forceActivate: "Force Activate",
         stopPause: "Stop/Pause",
         deleteInstance: "Delete Instance",
+        disabledTooltips: {
+          forceActivate: {
+            activated: "You cannot force activate because this class is already activated.",
+            running: "You cannot force activate because the session is running.",
+            completed: "You cannot force activate because this class is completed.",
+          },
+          stop: {
+            notActivated: "You cannot stop because this class has not been activated yet.",
+            activated: "You cannot stop because the session has not started. Start the session first.",
+            completed: "You cannot stop because this class is completed.",
+          },
+        },
       },
       classInfo: {
         liveInstance: "Live Instance",
@@ -954,6 +966,10 @@ const en: MessageSchema = {
         resetButton: "Reset Session",
         leaveReasonPrompt: "Please enter the reason for leave:",
         resetConfirmation: "Are you sure you want to reset this session? All data will be cleared.",
+        absentDialogTitle: "Mark Absent?",
+        absentConfirmation:
+          "Are you sure you want to mark this student as absent? This will complete the session with an absent outcome.",
+        absentConfirm: "Mark Absent",
         leaveDialogTitle: "Request Leave",
         leaveReasonLabel: "Reason for leave",
         leaveSubmit: "Submit",
@@ -1953,6 +1969,11 @@ const en: MessageSchema = {
         startSession: "Start Session",
         markAbsent: "Mark Absent",
         requestLeave: "Request Leave",
+        markAbsentDialogTitle: "Mark Absent?",
+        markAbsentConfirmation:
+          "Are you sure you want to mark this student as absent? This will complete the session with an absent outcome.",
+        markAbsentConfirm: "Mark Absent",
+        cancel: "Cancel",
       },
       progressFeed: {
         title: "Student Progress Feed",

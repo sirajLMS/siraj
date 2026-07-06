@@ -20,6 +20,18 @@ export interface AdminViewLabels {
     readonly forceActivate: string;
     readonly stopPause: string;
     readonly deleteInstance: string;
+    readonly disabledTooltips: {
+      readonly forceActivate: {
+        readonly activated: string;
+        readonly running: string;
+        readonly completed: string;
+      };
+      readonly stop: {
+        readonly notActivated: string;
+        readonly activated: string;
+        readonly completed: string;
+      };
+    };
   };
   readonly classInfo: {
     readonly liveInstance: string;

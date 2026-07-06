@@ -51,6 +51,9 @@ export interface ClassDetailsLabels {
     readonly resetButton: string;
     readonly leaveReasonPrompt: string;
     readonly resetConfirmation: string;
+    readonly absentDialogTitle: string;
+    readonly absentConfirmation: string;
+    readonly absentConfirm: string;
     readonly leaveDialogTitle: string;
     readonly leaveReasonLabel: string;
     readonly leaveSubmit: string;

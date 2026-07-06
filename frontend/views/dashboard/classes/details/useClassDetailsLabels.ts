@@ -59,6 +59,18 @@ export const useAdminViewLabels = (timezone: string): AdminViewLabels => {
         forceActivate: t("adminActions.forceActivate"),
         stopPause: t("adminActions.stopPause"),
         deleteInstance: t("adminActions.deleteInstance"),
+        disabledTooltips: {
+          forceActivate: {
+            activated: t("adminActions.disabledTooltips.forceActivate.activated"),
+            running: t("adminActions.disabledTooltips.forceActivate.running"),
+            completed: t("adminActions.disabledTooltips.forceActivate.completed"),
+          },
+          stop: {
+            notActivated: t("adminActions.disabledTooltips.stop.notActivated"),
+            activated: t("adminActions.disabledTooltips.stop.activated"),
+            completed: t("adminActions.disabledTooltips.stop.completed"),
+          },
+        },
       },
       classInfo: {
         liveInstance: t("classInfo.liveInstance"),

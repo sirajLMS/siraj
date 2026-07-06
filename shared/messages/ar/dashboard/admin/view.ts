@@ -22,6 +22,18 @@ export const adminView: AdminViewLabels = {
     forceActivate: "فرض التفعيل",
     stopPause: "إيقاف/تعليق",
     deleteInstance: "حذف الحصة",
+    disabledTooltips: {
+      forceActivate: {
+        activated: "لا يمكنك فرض التفعيل لأن الحصة مفعّلة بالفعل.",
+        running: "لا يمكنك فرض التفعيل لأن الجلسة قيد التشغيل.",
+        completed: "لا يمكنك فرض التفعيل لأن الحصة مكتملة.",
+      },
+      stop: {
+        notActivated: "لا يمكنك الإيقاف لأن الحصة لم تُفعّل بعد.",
+        activated: "لا يمكنك الإيقاف لأن الجلسة لم تبدأ بعد. ابدأ الجلسة أولاً.",
+        completed: "لا يمكنك الإيقاف لأن الحصة مكتملة.",
+      },
+    },
   },
   classInfo: {
     liveInstance: "حصة مباشرة",

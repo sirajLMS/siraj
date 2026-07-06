@@ -163,7 +163,10 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
   );
 }
 
-function mapMockToReal(mock: ClassInstance): ClassInstanceDetailReturnType {
+function mapMockToReal(
+  mock: ClassInstance,
+  executionState: ClassExecutionState = ClassExecutionState.NOT_ACTIVATED
+): ClassInstanceDetailReturnType {
   return {
     id: mock.id,
     instanceId: mock.instanceId,
@@ -173,13 +176,13 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetailReturnType {
     startTime: mock.startTime,
     endTime: mock.endTime,
     durationMinutes: mock.durationMinutes,
-    status: ClassExecutionState.NOT_ACTIVATED,
+    status: executionState,
     remarks: mock.remarks,
     hasTimezoneMismatch: mock.hasTimezoneMismatch,
     studentTimezone: mock.studentTimezone,
     teacherTimezone: null,
     zoomMeetingUrl: "",
-    executionState: ClassExecutionState.NOT_ACTIVATED,
+    executionState,
     isRescheduled: false,
     outcome: ClassOutcome.PENDING,
     payrollCredited: false,
@@ -213,7 +216,11 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetailReturnType {
   };
 }
 
-export function MockClassDetailsContainer() {
+export function MockClassDetailsContainer({
+  executionState = ClassExecutionState.NOT_ACTIVATED,
+}: {
+  readonly executionState?: ClassExecutionState;
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const permissions = useUserStore(state => state.permissions);
@@ -224,7 +231,7 @@ export function MockClassDetailsContainer() {
   const canOverride = permissions.includes(AppPermission.SessionOverrideActions);
   const canView = permissions.includes(AppPermission.SessionViewDetails);
 
-  const instance = mapMockToReal(mockInstance);
+  const instance = mapMockToReal(mockInstance, executionState);
 
   const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
@@ -267,4 +274,16 @@ type Story = StoryObj<typeof MockClassDetailsContainer>;
 
 export const Default: Story = {
   args: {},
+};
+
+export const ForceActivateEnabled: Story = {
+  args: {
+    executionState: ClassExecutionState.NOT_ACTIVATED,
+  },
+};
+
+export const ForceActivateDisabled: Story = {
+  args: {
+    executionState: ClassExecutionState.ACTIVATED,
+  },
 };

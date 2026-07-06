@@ -75,6 +75,11 @@ const TeacherView = (props: TeacherViewProps) => {
   return <ClassDetailsTeacherView {...props} labels={labels} />;
 };
 
+interface ActionFeedbackState {
+  readonly message: string;
+  readonly severity: "success" | "error";
+}
+
 export function ClassDetailsContainer() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -88,7 +93,7 @@ export function ClassDetailsContainer() {
   const hasPermission = useUserStore(state => state.hasPermission);
 
   const [isWarningDismissed, setIsWarningDismissed] = useState(false);
-  const [errorState, setErrorState] = useState<string | null>(null);
+  const [feedbackState, setFeedbackState] = useState<ActionFeedbackState | null>(null);
   const [shouldLoadEvents, setShouldLoadEvents] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -116,10 +121,10 @@ export function ClassDetailsContainer() {
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
-        setErrorState(t("actionFeedback.generateLogSuccess"));
+        setFeedbackState({ message: t("actionFeedback.generateLogSuccess"), severity: "success" });
       } catch (err) {
         logger.error("Error generating log:", err);
-        setErrorState(t("actionFeedback.generateLogError"));
+        setFeedbackState({ message: t("actionFeedback.generateLogError"), severity: "error" });
       } finally {
         setShouldLoadEvents(false);
       }
@@ -129,7 +134,7 @@ export function ClassDetailsContainer() {
   useEffect(() => {
     if (shouldLoadEvents && eventsError) {
       logger.error("Error fetching class status events:", eventsError);
-      setErrorState(t("loadError"));
+      setFeedbackState({ message: t("loadError"), severity: "error" });
       setShouldLoadEvents(false);
     }
   }, [eventsError, shouldLoadEvents, t]);
@@ -149,7 +154,7 @@ export function ClassDetailsContainer() {
     isResetting,
   } = useClassMutations({
     id,
-    onError: error => setErrorState(error),
+    onError: message => setFeedbackState({ message, severity: "error" }),
   });
 
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
@@ -190,30 +195,27 @@ export function ClassDetailsContainer() {
   const handleForceActivate = async () => {
     try {
       await forceActivate();
-      setErrorState(null);
-    } catch (err) {
-      logger.error("Error in forceActivate:", err);
-      setErrorState(t("actionFeedback.forceActivateError"));
+      setFeedbackState({ message: t("actionFeedback.forceActivateSuccess"), severity: "success" });
+    } catch {
+      // Error feedback is handled by useClassMutations onError
     }
   };
 
   const handleStop = async () => {
     try {
       await stopClassMutation();
-      setErrorState(null);
-    } catch (err) {
-      logger.error("Error in stopClass:", err);
-      setErrorState(t("actionFeedback.stopError"));
+      setFeedbackState({ message: t("actionFeedback.stopSuccess"), severity: "success" });
+    } catch {
+      // Error feedback is handled by useClassMutations onError
     }
   };
 
   const handleActivate = async () => {
     try {
       await activate();
-      setErrorState(null);
-    } catch (err) {
-      logger.error("Error in activate:", err);
-      setErrorState(t("actionFeedback.activateError"));
+      setFeedbackState({ message: t("actionFeedback.activateSuccess"), severity: "success" });
+    } catch {
+      // Error feedback is handled by useClassMutations onError
     }
   };
 
@@ -221,9 +223,8 @@ export function ClassDetailsContainer() {
     try {
       await deleteClassMutation();
       router.push("/dashboard");
-    } catch (err) {
-      logger.error("Error in deleteClass:", err);
-      setErrorState(t("actionFeedback.deleteError"));
+    } catch {
+      setFeedbackState({ message: t("actionFeedback.deleteError"), severity: "error" });
     }
   };
 
@@ -257,8 +258,14 @@ export function ClassDetailsContainer() {
     isMarkingAbsent,
     isProcessingLeave,
     isResetting,
-    error: errorState,
+    error: null,
   };
+
+  const actionFeedbackAlert = feedbackState ? (
+    <Alert severity={feedbackState.severity} sx={{ mb: 2 }}>
+      {feedbackState.message}
+    </Alert>
+  ) : null;
 
   const deleteDialog = (
     <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
@@ -278,6 +285,7 @@ export function ClassDetailsContainer() {
   return (
     <PageContainer>
       {pageHeader}
+      {actionFeedbackAlert}
       <RequirePermission permissions={AppPermission.SessionOverrideActions}>
         <AdminView
           instance={instance}

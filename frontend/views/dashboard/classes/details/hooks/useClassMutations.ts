@@ -13,6 +13,7 @@ import {
   updateSessionStatusLeaveMutationDocument,
   updateSessionStatusStartMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { getGraphQLErrorMessage } from "@/frontend/utils/errorUtils";
 import { logger } from "@/frontend/utils/logger";
 
 interface UseClassMutationsOptions {
@@ -39,13 +40,17 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
   const t = useTranslations("dashboard.classDetails");
   const client = useApolloClient();
 
+  const reportMutationError = (context: string, err: unknown, fallbackKey: string) => {
+    logger.error(context, { err });
+    onError?.(getGraphQLErrorMessage(err, t(fallbackKey)));
+  };
+
   const [activateClass] = useMutation(activateClassMutationDocument, {
     onCompleted: () => {
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      logger.error("Activate class failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Activate class failed:", err, "actionFeedback.activateError");
     },
   });
 
@@ -54,8 +59,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      logger.error("Activate override class failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Activate override class failed:", err, "actionFeedback.forceActivateError");
     },
   });
 
@@ -64,15 +68,13 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      logger.error("Stop class failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Stop class failed:", err, "actionFeedback.stopError");
     },
   });
 
   const [deleteClassMutation] = useMutation(deleteClassInstanceMutationDocument, {
     onError: err => {
-      logger.error("Delete class failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Delete class failed:", err, "actionFeedback.deleteError");
     },
   });
 
@@ -81,8 +83,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      logger.error("Start session failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Start session failed:", err, "actionFeedback.startError");
     },
   });
 
@@ -91,8 +92,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      logger.error("Mark absent failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Mark absent failed:", err, "actionFeedback.markAbsentError");
     },
   });
 
@@ -101,8 +101,7 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      logger.error("Process leave failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Process leave failed:", err, "actionFeedback.leaveError");
     },
   });
 
@@ -111,78 +110,44 @@ export function useClassMutations({ id, onError }: UseClassMutationsOptions): Us
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
     onError: err => {
-      logger.error("Reset session failed:", { err });
-      onError?.(t("loadError"));
+      reportMutationError("Reset session failed:", err, "actionFeedback.resetError");
     },
   });
 
   const forceActivate = async () => {
-    try {
-      await activateOverrideClass({ variables: { classInstanceId: id } });
-      logger.info("Admin force-activated session:", id);
-    } catch (err) {
-      logger.error("Error in activateOverrideClass:", err);
-    }
+    await activateOverrideClass({ variables: { classInstanceId: id } });
+    logger.info("Admin force-activated session:", id);
   };
 
   const activate = async () => {
-    try {
-      await activateClass({ variables: { classInstanceId: id } });
-      logger.info("Teacher activated session:", id);
-    } catch (err) {
-      logger.error("Error in activateClass:", err);
-    }
+    await activateClass({ variables: { classInstanceId: id } });
+    logger.info("Teacher activated session:", id);
   };
 
   const stopClass = async () => {
-    try {
-      await stopClassMutation({ variables: { classInstanceId: id } });
-      logger.info("Stopped session:", id);
-    } catch (err) {
-      logger.error("Error in stopClass:", err);
-    }
+    await stopClassMutation({ variables: { classInstanceId: id } });
+    logger.info("Stopped session:", id);
   };
 
   const deleteClass = async () => {
-    try {
-      await deleteClassMutation({ variables: { classInstanceId: id } });
-      logger.warn("Deleted class instance:", id);
-    } catch (err) {
-      logger.error("Error in deleteClass:", err);
-      throw err; // Re-throw to handle in the component for navigation
-    }
+    await deleteClassMutation({ variables: { classInstanceId: id } });
+    logger.warn("Deleted class instance:", id);
   };
 
   const startSession = async () => {
-    try {
-      await startSessionMutation({ variables: { classInstanceId: id } });
-    } catch (err) {
-      logger.error("Error starting session:", err);
-    }
+    await startSessionMutation({ variables: { classInstanceId: id } });
   };
 
   const markAbsent = async () => {
-    try {
-      await markAbsentMutation({ variables: { classInstanceId: id } });
-    } catch (err) {
-      logger.error("Error marking absent:", err);
-    }
+    await markAbsentMutation({ variables: { classInstanceId: id } });
   };
 
   const processLeave = async (reason: string) => {
-    try {
-      await processLeaveMutation({ variables: { classInstanceId: id, leaveReason: reason } });
-    } catch (err) {
-      logger.error("Error processing leave:", err);
-    }
+    await processLeaveMutation({ variables: { classInstanceId: id, leaveReason: reason } });
   };
 
   const resetSession = async () => {
-    try {
-      await resetSessionMutation({ variables: { classInstanceId: id } });
-    } catch (err) {
-      logger.error("Error resetting session:", err);
-    }
+    await resetSessionMutation({ variables: { classInstanceId: id } });
   };
 
   return {

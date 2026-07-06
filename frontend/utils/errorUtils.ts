@@ -1,6 +1,24 @@
+import { CombinedGraphQLErrors } from "@apollo/client";
+
 /**
  * Utility functions for error handling
  */
+
+/**
+ * Extracts a user-facing message from a GraphQL or generic error.
+ */
+export function getGraphQLErrorMessage(error: unknown, fallback: string): string {
+  if (CombinedGraphQLErrors.is(error)) {
+    const first = error.errors[0];
+    if (first?.message) {
+      return first.message;
+    }
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+}
 
 /**
  * Checks if an error is an abort error (e.g., from a cancelled request)

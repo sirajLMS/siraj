@@ -104,6 +104,7 @@ export function ClassDetailsAdminView({
 
       <RequirePermission permissions={[AppPermission.SessionOverrideActions]}>
         <AdminActionsBar
+          executionState={instance.executionState ?? "NOT_ACTIVATED"}
           onForceActivate={onForceActivate}
           onStop={onStop}
           onGenerateLog={onGenerateLog}

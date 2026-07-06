@@ -1,7 +1,17 @@
 "use client";
 
 import { CalendarTodayOutlined, LogoutOutlined, PlayArrowOutlined } from "@mui/icons-material";
-import { IconButton, Tooltip } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
+import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
@@ -19,6 +29,13 @@ export function TeacherActiveSessionControls({
   onMarkAbsent,
   onRequestLeave,
 }: Readonly<TeacherActiveSessionControlsProps>) {
+  const [absentDialogOpen, setAbsentDialogOpen] = useState(false);
+
+  const handleAbsentConfirm = () => {
+    onMarkAbsent();
+    setAbsentDialogOpen(false);
+  };
+
   return (
     <>
       <RequirePermission permissions={[AppPermission.SessionUpdateStatusStart]}>
@@ -42,7 +59,7 @@ export function TeacherActiveSessionControls({
       <RequirePermission permissions={[AppPermission.SessionUpdateStatusAbsent]}>
         <Tooltip title={labels.markAbsent}>
           <IconButton
-            onClick={onMarkAbsent}
+            onClick={() => setAbsentDialogOpen(true)}
             aria-label={labels.markAbsent}
             sx={theme => ({
               width: 40,
@@ -74,6 +91,19 @@ export function TeacherActiveSessionControls({
           </IconButton>
         </Tooltip>
       </RequirePermission>
+
+      <Dialog open={absentDialogOpen} onClose={() => setAbsentDialogOpen(false)}>
+        <DialogTitle>{labels.markAbsentDialogTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{labels.markAbsentConfirmation}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAbsentDialogOpen(false)}>{labels.cancel}</Button>
+          <Button onClick={handleAbsentConfirm} variant="contained" color="warning">
+            {labels.markAbsentConfirm}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
