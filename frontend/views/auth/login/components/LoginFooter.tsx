@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/** biome-ignore-all lint/correctness/noUnusedVariables: <explanation> */
+/* eslint-disable sonarjs/unused-import */
 "use client";
 
 import { HelpOutlined, Language } from "@mui/icons-material";
@@ -38,25 +41,25 @@ const StyledFooterIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export function LoginFooter() {
-  const t = useTranslations("auth.login");
+  const _t = useTranslations("auth.login");
 
   return (
     <StyledFooterContainer sx={{ gap: 2, mt: 3 }}>
-      <StyledFooterText variant="bodyMd">
+      {/* <StyledFooterText variant="bodyMd">
         {t("noAccount")}{" "}
         <StyledRegisterLink href="#" underline="hover">
           {t("register")}
         </StyledRegisterLink>
-      </StyledFooterText>
+      </StyledFooterText> */}
 
-      <StyledIconRow sx={{ gap: 1 }}>
+      {/* <StyledIconRow sx={{ gap: 1 }}>
         <StyledFooterIconButton size="small" aria-label="Help">
           <HelpOutlined />
         </StyledFooterIconButton>
         <StyledFooterIconButton size="small" aria-label="Language">
           <Language />
         </StyledFooterIconButton>
-      </StyledIconRow>
+      </StyledIconRow> */}
     </StyledFooterContainer>
   );
 }

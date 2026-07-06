@@ -109,6 +109,17 @@ export async function seedOrGet() {
     logger.error("Failed to seed teacher handbook:", error);
   }
 
+  logger.info("Seeding parent handbook...");
+  const parentHandbookFileName = "parent-handbook.pdf";
+  const parentHandbookPath = path.join(__dirname, "assets", "documents", "sample-resource.pdf");
+  try {
+    const parentFileBuffer = await fs.readFile(parentHandbookPath);
+    await SystemSettingsService.uploadParentHandbook(null, parentHandbookFileName, parentFileBuffer);
+    logger.info("Parent handbook seeded successfully.");
+  } catch (error) {
+    logger.error("Failed to seed parent handbook:", error);
+  }
+
   logger.info("Seeding system settings...");
   const now = new Date();
   const results = [];

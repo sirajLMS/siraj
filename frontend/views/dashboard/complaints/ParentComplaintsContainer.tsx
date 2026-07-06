@@ -7,12 +7,12 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ParentAssociatedStudentsQuery, ParentComplaintsQuery } from "@/frontend/graphql/generated/gql/operations";
+import type { ParentAssignedStudentsQuery, ParentComplaintsQuery } from "@/frontend/graphql/generated/gql/operations";
 import {
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/complaint.documents";
-import { parentAssociatedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-profile.documents";
+import { parentAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
 import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentComplaintsView } from "./ParentComplaintsView";
@@ -29,10 +29,10 @@ export interface ParentComplaintsContainerProps {
 }
 
 function mapStudentOptions(
-  students: ParentAssociatedStudentsQuery["parentAssociatedStudents"] | null | undefined
+  students: ParentAssignedStudentsQuery["parentAssignedStudents"] | null | undefined
 ): ParentStudentOption[] {
-  if (!students) return [];
-  return students.map(student => ({
+  if (!students?.rows) return [];
+  return students.rows.map(student => ({
     id: student.id ?? "",
     label: student.name ?? "",
   }));
@@ -120,10 +120,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
     fetchPolicy: "cache-and-network",
   });
 
-  const { data: studentsData } = useQuery(parentAssociatedStudentsQueryDocument, {
-    variables: { parentId: parentId ?? "" },
-    skip: !parentId,
-  });
+  const { data: studentsData } = useQuery(parentAssignedStudentsQueryDocument);
 
   const [submitComplaint] = useMutation(submitComplaintMutationDocument, {
     onCompleted: () => {
@@ -137,8 +134,8 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
   });
 
   const studentOptions = useMemo(
-    () => mapStudentOptions(studentsData?.parentAssociatedStudents),
-    [studentsData?.parentAssociatedStudents]
+    () => mapStudentOptions(studentsData?.parentAssignedStudents),
+    [studentsData?.parentAssignedStudents]
   );
 
   const records = useMemo(() => mapComplaintRecords(data?.parentComplaints), [data?.parentComplaints]);

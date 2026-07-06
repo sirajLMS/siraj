@@ -502,6 +502,8 @@ export enum AppPermission {
   PARENT_VIEW_DIRECTORY = "parent.view_directory",
   // Parent Profile & Account Lifecycle Management
   PARENT_VIEW_PROFILE = "parent.view_profile",
+  PARENT_VIEW_STUDENTS = "parent.view_students",
+  PARENT_VIEW_OWN_PROFILE = "parent.view_own_profile",
   PARENT_MANAGE_STATUS = "parent.manage_status",
   STUDENT_VIEW_ASSOCIATED = "student.view_associated",
   STUDENT_EDIT_QUOTA = "student.edit_quota",

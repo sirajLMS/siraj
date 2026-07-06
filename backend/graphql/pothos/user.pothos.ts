@@ -40,5 +40,12 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
         return TeacherPortalService.resolveTeacherIdForUser(user.id);
       },
     }),
+    parentId: t.string({
+      nullable: true,
+      resolve: async user => {
+        const { ParentPortalService } = await import("@/backend/services/parent/parent-portal.service");
+        return ParentPortalService.resolveParentIdForUser(user.id);
+      },
+    }),
   }),
 });

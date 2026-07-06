@@ -76,7 +76,7 @@ export function TeacherScheduleDataGrid({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <Box>
+          <Box sx={{ alignSelf: "center", display: "flex", alignItems: "center", height: "100%" }}>
             <Typography sx={{ typography: "bodyMd", fontWeight: 700 }}>{row.timeRange}</Typography>
             {row.isCurrent && (
               <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>

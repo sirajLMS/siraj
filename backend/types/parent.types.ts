@@ -169,6 +169,33 @@ export interface ParentProfileResult {
   readonly updatedAt: Date;
 }
 
+export type ParentAssignedStudentReturnType = {
+  id: string;
+  name: string;
+  status: string;
+  teacherName: string | null;
+  hoursPerWeek: string;
+  classesRemaining: number;
+  classesTotal: number;
+};
+
+export type ParentAssignedStudentsResult = {
+  rows: ParentAssignedStudentReturnType[];
+  totalCount: number;
+};
+
+export type ParentOwnProfileReturnType = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  facebook: string | null;
+  whatsapp: string | null;
+  twitter: string | null;
+  skype: string | null;
+  defaultZoomLink: string | null;
+};
+
 export interface DeactivateParentResult {
   readonly id: string;
   readonly userId: string;

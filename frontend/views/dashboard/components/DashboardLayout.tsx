@@ -2,7 +2,9 @@
 
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
+import { getActiveNavKey } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
+import { usePathname } from "@/shared/i18n/routing";
 import { BottomNavbar } from "./BottomNavbar";
 import { Sidebar } from "./Sidebar";
 import { TopNavbar } from "./TopNavbar";
@@ -11,7 +13,6 @@ interface DashboardLayoutProps {
   readonly children: ReactNode;
   readonly sidebarItems: readonly NavItem[];
   readonly bottomNavItems: readonly NavItem[];
-  readonly activeNavKey: string;
   readonly userName: string;
   readonly userEmail: string;
   readonly userRole: string;
@@ -62,7 +63,6 @@ export function DashboardLayout({
   children,
   sidebarItems,
   bottomNavItems,
-  activeNavKey,
   userName,
   userEmail,
   userRole,
@@ -72,6 +72,9 @@ export function DashboardLayout({
   sidebarWidth = "260px",
   navbarHeight = "64px",
 }: DashboardLayoutProps) {
+  const pathname = usePathname();
+  const activeNavKey = getActiveNavKey(pathname, sidebarItems);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
       <TopNavbar

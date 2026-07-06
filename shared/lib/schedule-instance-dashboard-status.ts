@@ -114,13 +114,10 @@ export function resolveClassInstanceDashboardStatusFromRow(
   row: ClassInstanceDashboardStatusInput,
   options?: ClassInstanceStatusResolveOptions
 ): ClassInstanceDashboardStatus {
-  return resolveClassInstanceDashboardStatus(
-    row.outcome,
-    row.executionState,
-    row.actualStartAt,
-    row.actualEndAt,
-    { scheduledEndAt: row.scheduledEndAt, ...options }
-  );
+  return resolveClassInstanceDashboardStatus(row.outcome, row.executionState, row.actualStartAt, row.actualEndAt, {
+    scheduledEndAt: row.scheduledEndAt,
+    ...options,
+  });
 }
 
 function dashboardStatusMatchesMetric(

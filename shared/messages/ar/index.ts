@@ -35,15 +35,15 @@ import { subjects as subjectsLabels } from "./dashboard/subjects";
 import { suggestions as suggestionsLabels } from "./dashboard/suggestions";
 import {
   availability as teacherAvailability,
+  classList as teacherClassList,
   teacherCreateRecurringClass,
   dashboard as teacherDashboard,
-  classList as teacherClassList,
-  ownProfile as teacherOwnProfile,
-  students as teacherStudents,
   futureSchedule as teacherFutureSchedule,
   onboarding as teacherOnboarding,
+  ownProfile as teacherOwnProfile,
   profile as teacherProfile,
   reassignment as teacherReassignment,
+  students as teacherStudents,
   directory as teachersDirectory,
   weeklySchedule as teacherWeeklySchedule,
 } from "./dashboard/teachers";

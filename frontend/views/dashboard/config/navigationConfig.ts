@@ -3,7 +3,6 @@ import {
   BadgeOutlined,
   CalendarTodayOutlined,
   CategoryOutlined,
-  ClassOutlined,
   DashboardOutlined,
   DescriptionOutlined,
   Diversity1Outlined,
@@ -21,6 +20,7 @@ import {
   SchoolOutlined,
   SearchOutlined,
   SecurityOutlined,
+  ShareOutlined,
   TimelineOutlined,
   UpdateOutlined,
 } from "@mui/icons-material";
@@ -53,7 +53,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "regular-schedule",
     labelKey: "dashboard.nav.regularSchedule",
     icon: EventRepeatOutlined,
-    href: "/teachers/me/schedule/weekly",
+    href: "/schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
   },
@@ -61,7 +61,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "your-students",
     labelKey: "dashboard.nav.yourStudents",
     icon: GroupOutlined,
-    href: "/teachers/me/students",
+    href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherStudents,
   },
@@ -69,18 +69,18 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "teacher-salary",
     labelKey: "dashboard.nav.salaryDetails",
     icon: PaymentsOutlined,
-    href: "/teachers/me/profile",
+    href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
   },
-  {
-    key: "teacher-class-details",
-    labelKey: "dashboard.nav.classDetails",
-    icon: ClassOutlined,
-    href: "/teachers/me/classes",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherClassDetails,
-  },
+  // {
+  //   key: "teacher-class-details",
+  //   labelKey: "dashboard.nav.classDetails",
+  //   icon: ClassOutlined,
+  //   href: "/classes",
+  //   section: "main",
+  //   permission: PAGE_PERMISSIONS.teacherClassDetails,
+  // },
   {
     key: "teacher-rules",
     labelKey: "dashboard.nav.teacherRules",
@@ -88,6 +88,46 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/teachers/rules",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherRules,
+  },
+  {
+    key: "parent-today-classes",
+    labelKey: "dashboard.nav.todayClasses",
+    icon: CalendarTodayOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentDashboard,
+  },
+  {
+    key: "parent-your-students",
+    labelKey: "dashboard.nav.yourStudents",
+    icon: GroupOutlined,
+    href: "/parents/me/students",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentStudents,
+  },
+  {
+    key: "parent-suggest",
+    labelKey: "dashboard.nav.suggest",
+    icon: LightbulbOutlined,
+    href: "/suggestions",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentSuggest,
+  },
+  {
+    key: "parent-rules",
+    labelKey: "dashboard.nav.parentRules",
+    icon: DescriptionOutlined,
+    href: "/parents/rules",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentRules,
+  },
+  {
+    key: "parent-social",
+    labelKey: "dashboard.nav.socialMedia",
+    icon: ShareOutlined,
+    href: "/parents/me/social",
+    section: "footer",
+    permission: PAGE_PERMISSIONS.parentOwnProfile,
   },
   {
     key: "search-schedule",
@@ -195,7 +235,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-parent",
-    labelKey: "dashboard.nav.billingParent",
+    labelKey: "dashboard.nav.invoices",
     icon: ReceiptLongOutlined,
     href: "/billing/invoices",
     section: "main",
@@ -274,7 +314,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     key: "regular-schedule",
     labelKey: "dashboard.nav.regularSchedule",
     icon: EventRepeatOutlined,
-    href: "/teachers/me/schedule/weekly",
+    href: "/schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
   },
@@ -282,7 +322,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     key: "your-students",
     labelKey: "dashboard.nav.yourStudents",
     icon: GroupOutlined,
-    href: "/teachers/me/students",
+    href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherStudents,
   },
@@ -314,7 +354,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     key: "teacher-salary",
     labelKey: "dashboard.nav.salaryDetails",
     icon: PaymentsOutlined,
-    href: "/teachers/me/profile",
+    href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
   },
@@ -368,19 +408,35 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "billing-parent",
-    labelKey: "dashboard.nav.billingParent",
+    labelKey: "dashboard.nav.invoices",
     icon: ReceiptLongOutlined,
     href: "/billing/invoices",
     section: "main",
     permission: PAGE_PERMISSIONS.billingParent,
   },
   {
-    key: "suggestions-submit",
-    labelKey: "dashboard.nav.suggestionsSubmit",
+    key: "parent-today-classes",
+    labelKey: "dashboard.nav.todayClasses",
+    icon: CalendarTodayOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentDashboard,
+  },
+  {
+    key: "parent-your-students",
+    labelKey: "dashboard.nav.yourStudents",
+    icon: GroupOutlined,
+    href: "/parents/me/students",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentStudents,
+  },
+  {
+    key: "parent-suggest",
+    labelKey: "dashboard.nav.suggest",
     icon: LightbulbOutlined,
     href: "/suggestions",
     section: "main",
-    permission: PAGE_PERMISSIONS.suggestionsSubmit,
+    permission: PAGE_PERMISSIONS.parentSuggest,
   },
   {
     key: "complaints-submit",
@@ -404,7 +460,22 @@ export function getNavItemsForPermissions(items: readonly NavItem[], permissions
     return item.permission.some(p => permissions.includes(p));
   });
 
-  return applyTeacherNavOverrides(filtered, permissions);
+  return applyParentNavOverrides(applyTeacherNavOverrides(filtered, permissions), permissions);
+}
+
+function isParentPortalUser(permissions: readonly AppPermission[]): boolean {
+  return (
+    permissions.includes(AppPermission.ScheduleViewFamily) && !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
+}
+
+export function applyParentNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
+  if (!isParentPortalUser(permissions)) {
+    return [...items];
+  }
+
+  const hiddenKeys = new Set(["home", "teacher-class-details", "suggestions-submit", "schedule"]);
+  return items.filter(item => !hiddenKeys.has(item.key));
 }
 
 function isTeacherPortalUser(permissions: readonly AppPermission[]): boolean {

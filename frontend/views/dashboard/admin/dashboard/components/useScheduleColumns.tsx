@@ -5,6 +5,7 @@ import { Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
+import { ActionIconLink as StyledHistoryIconLink } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import {
@@ -16,7 +17,6 @@ import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,
   StyledGridDetailsLink,
-  StyledHistoryIconLink,
   StyledMonospaceLabel,
   StyledScheduleNameLink,
   StyledScheduleTeacherLink,

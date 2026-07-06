@@ -16,7 +16,7 @@ export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
       avatarUrl
       notificationCount
       teacherId
-      teacherId
+      parentId
     }
   }
 `;
@@ -35,6 +35,7 @@ export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.Qu
       avatarUrl
       notificationCount
       teacherId
+      parentId
     }
   }
 `;
@@ -53,6 +54,7 @@ export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery> = gql`
       avatarUrl
       notificationCount
       teacherId
+      parentId
     }
   }
 `;
@@ -73,6 +75,7 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
         avatarUrl
         notificationCount
       teacherId
+      parentId
       }
     }
   }
@@ -95,6 +98,7 @@ export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMu
         avatarUrl
         notificationCount
       teacherId
+      parentId
       }
     }
   }
@@ -122,6 +126,7 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
         avatarUrl
         notificationCount
       teacherId
+      parentId
       }
     }
   }
@@ -166,6 +171,7 @@ export const startImpersonationMutationDocument: TypedDocumentNode<
         avatarUrl
         notificationCount
       teacherId
+      parentId
       }
     }
   }

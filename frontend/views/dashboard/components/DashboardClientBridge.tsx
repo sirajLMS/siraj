@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import type { CurrentUserProfile } from "@/backend/types";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { getDashboardLayoutData } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
-import { getDashboardPathname } from "@/frontend/views/dashboard/lib/getDashboardPathname";
 import { AppPermission as BackendAppPermission } from "@/shared/lib/enum";
 import { UserStoreInitializer } from "./client/UserStoreInitializer";
 import { DashboardLayout } from "./DashboardLayout";
@@ -19,14 +18,13 @@ function isFrontendPermission(key: string): key is AppPermission {
 }
 
 export async function DashboardClientBridge({ children, userProfile, roleLabel }: DashboardClientBridgeProps) {
-  const pathname = await getDashboardPathname();
   const permissions = userProfile.permissions
     .map(p => {
       const entry = Object.entries(BackendAppPermission).find(([_, val]) => val === p);
       return entry ? entry[0] : "";
     })
     .filter(isFrontendPermission);
-  const { sidebarItems, bottomNavItems, activeNavKey } = getDashboardLayoutData(pathname, permissions);
+  const { sidebarItems, bottomNavItems } = getDashboardLayoutData(permissions);
 
   return (
     <NotificationsProvider>
@@ -34,7 +32,6 @@ export async function DashboardClientBridge({ children, userProfile, roleLabel }
       <DashboardLayout
         sidebarItems={sidebarItems}
         bottomNavItems={bottomNavItems}
-        activeNavKey={activeNavKey}
         userName={userProfile.name}
         userEmail={userProfile.email}
         userRole={userProfile.role}

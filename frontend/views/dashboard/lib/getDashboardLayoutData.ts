@@ -15,20 +15,19 @@ export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem
     }
   }
 
-  return sidebarItems.find(item => pathname.startsWith(item.href))?.key ?? "home";
+  const match = sidebarItems
+    .filter(item => pathname.startsWith(item.href))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+
+  return match?.key ?? "home";
 }
 
-export function getDashboardLayoutData(
-  pathname: string,
-  permissions: readonly AppPermission[]
-): {
+export function getDashboardLayoutData(permissions: readonly AppPermission[]): {
   readonly sidebarItems: NavItem[];
   readonly bottomNavItems: NavItem[];
-  readonly activeNavKey: string;
 } {
   const sidebarItems = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, permissions);
   const bottomNavItems = getNavItemsForPermissions(BOTTOM_NAV_ITEMS, permissions);
-  const activeNavKey = getActiveNavKey(pathname, sidebarItems);
 
-  return { sidebarItems, bottomNavItems, activeNavKey };
+  return { sidebarItems, bottomNavItems };
 }

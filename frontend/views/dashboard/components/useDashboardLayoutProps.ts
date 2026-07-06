@@ -3,6 +3,7 @@
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useLayoutStore } from "@/frontend/stores/layoutStore";
 import { getNavItemsForPermissions } from "@/frontend/views/dashboard/config/navigationConfig";
+import { getActiveNavKey } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 import { usePathname, useRouter } from "@/shared/i18n/routing";
 
@@ -25,7 +26,7 @@ export function useDashboardLayoutProps({
   const sidebarItems = getNavItemsForPermissions(sidebarNavItems, permissions);
   const filteredBottomNavItems = getNavItemsForPermissions(bottomNavItems, permissions);
 
-  const activeNavKey = sidebarItems.find(item => pathname.startsWith(item.href))?.key ?? "home";
+  const activeNavKey = getActiveNavKey(pathname, sidebarItems);
 
   const handleNavigate = (href: string) => {
     router.push(href);

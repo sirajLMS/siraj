@@ -27,6 +27,7 @@ export type CurrentUserProfile = SafeUser & {
   notificationCount: number;
   role: UserRole;
   teacherId: string | null;
+  parentId: string | null;
 };
 
 export type UserPothosDefinition = SafeUser & {

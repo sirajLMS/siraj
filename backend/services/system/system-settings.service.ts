@@ -6,6 +6,7 @@ import { getStorageService } from "@/backend/storage/storage.service";
 import { AppPermission } from "@/shared/lib/enum";
 
 const HANDBOOK_SETTING_KEY = "teacher_handbook_url";
+const PARENT_HANDBOOK_SETTING_KEY = "parent_handbook_url";
 
 export namespace SystemSettingsService {
   /**
@@ -44,6 +45,64 @@ export namespace SystemSettingsService {
     }
 
     return fileInfo.url;
+  }
+
+  export async function getParentHandbookDownloadUrl(userId: string, locale?: string): Promise<string> {
+    const isParent = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_FAMILY);
+    const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.PARENTS_EDIT);
+    if (!isParent && !isAdmin) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("unauthorizedAction"));
+    }
+
+    const setting = await SystemSettingsRepository.getByKey(PARENT_HANDBOOK_SETTING_KEY);
+    if (!setting?.value) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("notFound"));
+    }
+
+    const path = setting.value;
+    const storageService = await getStorageService();
+    const fileInfo = await storageService.fileInfoByPath(path);
+    if (!fileInfo?.url) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("notFound"));
+    }
+
+    return fileInfo.url;
+  }
+
+  export async function uploadParentHandbook(
+    userId: string | null,
+    fileName: string,
+    fileBuffer: Buffer,
+    locale?: string
+  ): Promise<void> {
+    if (userId) {
+      const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.RESOURCES_UPLOAD);
+      const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.PARENTS_EDIT);
+      if (!isAuthorized && !isAdmin) {
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("unauthorizedAction"));
+      }
+    }
+
+    const bucketPath = `public/docs/${fileName || "parent-handbook.pdf"}`;
+    logger.info(`Uploading parent handbook to storage path: ${bucketPath}`);
+    const storageService = await getStorageService();
+    const uploadResult = await storageService.uploadFile(bucketPath, "application/pdf", fileBuffer);
+    if (!uploadResult.success) {
+      throw new Error(`Failed to upload parent handbook: ${uploadResult.message}`);
+    }
+
+    await SystemSettingsRepository.upsertSetting({
+      key: PARENT_HANDBOOK_SETTING_KEY,
+      value: bucketPath,
+      dataType: "string",
+      description: "Default download URL for the parent handbook",
+      category: "system",
+      updatedByUserId: userId,
+    });
   }
 
   /**

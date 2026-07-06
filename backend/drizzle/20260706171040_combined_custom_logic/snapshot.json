@@ -1,7 +1,7 @@
 {
-  "id": "76d93be1-fa2f-4461-9760-9ee55c14123a",
+  "id": "fc5cbdaa-b1d7-454b-95be-15e12d584305",
   "prevIds": [
-    "2b3e73c3-39c2-4c9c-ae58-573c47d536cd"
+    "f26a5716-d370-4e74-bed1-8b7dae5476d0"
   ],
   "version": "8",
   "dialect": "postgres",
@@ -106,6 +106,8 @@
         "system.bulk_update_dst",
         "parent.view_directory",
         "parent.view_profile",
+        "parent.view_students",
+        "parent.view_own_profile",
         "parent.manage_status",
         "student.view_associated",
         "student.edit_quota",

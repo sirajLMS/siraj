@@ -36,6 +36,7 @@ export function UserStoreInitializer({ userProfile }: UserStoreInitializerProps)
       emailVerifiedAt: userProfile.emailVerifiedAt?.toISOString() ?? null,
       role: userProfile.role,
       teacherId: userProfile.teacherId,
+      parentId: userProfile.parentId,
     });
   }, [userProfile, setUser, permissions]);
 

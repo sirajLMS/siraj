@@ -25,8 +25,8 @@ export function SectionPanel({ title, subTitle, actions, children, edgeToEdge = 
       sx={mergeSx(
         {
           backgroundColor: theme => alpha(theme.palette.surfaceContainer, 0.95),
-          borderRadius: theme => theme.layout.radius.section,
-          border: theme => `1px solid ${theme.palette.outlineVariant}`,
+          // borderRadius: theme => theme.layout.radius.section,
+          // border: theme => `1px solid ${theme.palette.outlineVariant}`,
           overflow: "hidden",
         },
         edgeToEdge ? edgeToEdgeSx : undefined,

@@ -93,7 +93,9 @@ enum AppPermission {
   PARENTS_LIST
   PARENT_MANAGE_STATUS
   PARENT_VIEW_DIRECTORY
+  PARENT_VIEW_OWN_PROFILE
   PARENT_VIEW_PROFILE
+  PARENT_VIEW_STUDENTS
   PERMISSION_GROUPS_ASSIGN
   PERMISSION_GROUPS_MANAGE
   REPORTS_GENERATE
@@ -1505,6 +1507,22 @@ input PaginationArgs {
   skip: Int
 }
 
+type ParentAssignedStudent {
+  classesRemaining: Int
+  classesTotal: Int
+  hoursPerWeek: String
+  id: String
+  name: String
+  status: String
+  teacherName: String
+}
+
+type ParentAssignedStudentsResult {
+  id: String
+  rows: [ParentAssignedStudent!]
+  totalCount: Int
+}
+
 type ParentBillingSummary {
   activeStudents: Int
   id: String
@@ -1604,6 +1622,11 @@ type ParentDocument {
   usageType: String
 }
 
+type ParentHandbookUrl {
+  id: String
+  url: String
+}
+
 type ParentInvoiceHistoryResult {
   id: String
   pageInfo: PageInfo
@@ -1653,6 +1676,18 @@ type ParentOnboardingResult {
   parentId: String
   status: String
   userId: String
+}
+
+type ParentOwnProfile {
+  defaultZoomLink: String
+  email: String
+  facebook: String
+  id: String
+  name: String
+  phone: String
+  skype: String
+  twitter: String
+  whatsapp: String
 }
 
 type ParentProfile {
@@ -1799,6 +1834,7 @@ type Query {
 
   """Returns onboarding metrics for staff accounts."""
   onboardingMetrics: OnboardingMetrics
+  parentAssignedStudents: ParentAssignedStudentsResult
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
   parentBillingSummary(parentId: String, userId: String): ParentBillingSummary
 
@@ -1808,7 +1844,9 @@ type Query {
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
   parentDirectory(paginationArgs: PaginationArgs, search: String, statusFilter: ParentStatus): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
+  parentHandbookUrl: ParentHandbookUrl
   parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String, userId: String): ParentInvoiceHistoryResult
+  parentOwnProfile: ParentOwnProfile
   parentProfile(parentId: String!): ParentProfile
 
   """
@@ -2764,6 +2802,7 @@ type User {
   id: String
   name: String
   notificationCount: Int
+  parentId: String
   permissions: [AppPermission!]
   role: String
   teacherId: String

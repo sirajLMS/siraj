@@ -3,7 +3,7 @@
 import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from "@apollo/client";
 import { PersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { ApolloProvider } from "@apollo/client/react";
-import { CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -133,7 +133,9 @@ export function AppApolloProvider({ children }: { readonly children: React.React
   );
 
   if (!apolloClient) {
-    return <CircularProgress />;
+    return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+    <CircularProgress />
+    </Box>
   }
 
   if (!initialCheckDone || !isConnected) {

@@ -1,7 +1,7 @@
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
-  DEFAULT_MISSED_GRACE_MINUTES,
   type ClassInstanceStatusResolveOptions,
+  DEFAULT_MISSED_GRACE_MINUTES,
   resolveClassInstanceDashboardStatus,
 } from "@/shared/lib/schedule-instance-dashboard-status";
 

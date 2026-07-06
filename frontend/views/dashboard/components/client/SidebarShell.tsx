@@ -210,6 +210,7 @@ function SidebarMobileDrawer({
           backgroundColor: theme.palette.background.paper,
           color: theme.palette.onSurface,
           borderRight: `1px solid ${theme.palette.border.light}`,
+          pt: theme.layout.navbarHeight,
         },
       })}
     >

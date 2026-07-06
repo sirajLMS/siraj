@@ -46,6 +46,10 @@ export const nav: DashboardNavigationLabels = {
   yourStudents: "طلابك",
   salaryDetails: "تفاصيل الراتب",
   teacherRules: "القواعد",
+  suggest: "اقتراح",
+  invoices: "الفواتير",
+  parentRules: "القواعد",
+  socialMedia: "وسائل التواصل",
   permissions: "الصلاحيات",
   booksAndBags: "الكتب والحقائب",
 };

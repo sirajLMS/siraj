@@ -59,7 +59,9 @@ export type AppPermission =
   | 'PARENTS_LIST'
   | 'PARENT_MANAGE_STATUS'
   | 'PARENT_VIEW_DIRECTORY'
+  | 'PARENT_VIEW_OWN_PROFILE'
   | 'PARENT_VIEW_PROFILE'
+  | 'PARENT_VIEW_STUDENTS'
   | 'PERMISSION_GROUPS_ASSIGN'
   | 'PERMISSION_GROUPS_MANAGE'
   | 'REPORTS_GENERATE'
@@ -900,7 +902,7 @@ export type UserOverrideInput = {
   state: OverrideState;
 };
 
-export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
+export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type MeQuery_Query = { me: MeQuery_me_User | null };
 
@@ -910,7 +912,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = MeQuery_Query;
 
-export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
+export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type UserQuery_Query = { user: UserQuery_user_User | null };
 
@@ -922,7 +924,7 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = UserQuery_Query;
 
-export type UsersQuery_users_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
+export type UsersQuery_users_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type UsersQuery_Query = { users: Array<UsersQuery_users_User> | null };
 
@@ -932,7 +934,7 @@ export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type UsersQuery = UsersQuery_Query;
 
-export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
+export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type LoginMutation_login_LoginResponse = { token: string | null, user: LoginMutation_login_LoginResponse_user_User | null };
 
@@ -946,7 +948,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = LoginMutation_Mutation;
 
-export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
+export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type DemoLoginMutation_demoLogin_LoginResponse = { token: string | null, user: DemoLoginMutation_demoLogin_LoginResponse_user_User | null };
 
@@ -968,7 +970,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = LogoutMutation_Mutation;
 
-export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
+export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type RefreshTokenMutation_refreshToken_RefreshTokenResponse = { token: string | null, user: RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User | null };
 
@@ -994,7 +996,7 @@ export type ImpersonationStatusQueryVariables = Exact<{ [key: string]: never; }>
 
 export type ImpersonationStatusQuery = ImpersonationStatusQuery_Query;
 
-export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
+export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse = { token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User | null };
 
@@ -1814,6 +1816,38 @@ export type CreateParentMutationVariables = Exact<{
 
 
 export type CreateParentMutation = CreateParentMutation_Mutation;
+
+export type ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent = { id: string | null, name: string | null, status: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
+
+export type ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent> | null };
+
+export type ParentAssignedStudentsQuery_Query = { parentAssignedStudents: ParentAssignedStudentsQuery_parentAssignedStudents_ParentAssignedStudentsResult | null };
+
+
+export type ParentAssignedStudentsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ParentAssignedStudentsQuery = ParentAssignedStudentsQuery_Query;
+
+export type ParentOwnProfileQuery_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, skype: string | null, defaultZoomLink: string | null };
+
+export type ParentOwnProfileQuery_Query = { parentOwnProfile: ParentOwnProfileQuery_parentOwnProfile_ParentOwnProfile | null };
+
+
+export type ParentOwnProfileQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ParentOwnProfileQuery = ParentOwnProfileQuery_Query;
+
+export type ParentHandbookUrlQuery_parentHandbookUrl_ParentHandbookUrl = { id: string | null, url: string | null };
+
+export type ParentHandbookUrlQuery_Query = { parentHandbookUrl: ParentHandbookUrlQuery_parentHandbookUrl_ParentHandbookUrl | null };
+
+
+export type ParentHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ParentHandbookUrlQuery = ParentHandbookUrlQuery_Query;
 
 export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, skype: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
 

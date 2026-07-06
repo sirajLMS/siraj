@@ -710,6 +710,24 @@ VALUES (
     ),
     (
         gen_random_uuid (),
+        'parent.view_students',
+        'parent',
+        'view_students',
+        'View students assigned to the logged-in parent',
+        'Parents',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'parent.view_own_profile',
+        'parent',
+        'view_own_profile',
+        'View own parent profile and social links (read-only)',
+        'Parents',
+        true
+    ),
+    (
+        gen_random_uuid (),
         'parent.manage_status',
         'parent',
         'manage_status',
@@ -1089,6 +1107,8 @@ AND permission_id IN (
         'user.view_profile',
         'parent.view_directory',
         'parent.view_profile',
+        'parent.view_students',
+        'parent.view_own_profile',
         'parent.manage_status',
         'student.view_associated',
         'student.edit_quota',
@@ -1189,6 +1209,8 @@ WHERE
         'system.bulk_update_dst',
         'parent.view_directory',
         'parent.view_profile',
+        'parent.view_students',
+        'parent.view_own_profile',
         'parent.manage_status',
         'student.view_associated',
         'student.edit_quota',
@@ -1251,6 +1273,8 @@ WHERE
         'staff.edit_profile',
         'parent.view_directory',
         'parent.view_profile',
+        'parent.view_students',
+        'parent.view_own_profile',
         'parent.manage_status',
         'student.view_associated',
         'student.edit_quota',
@@ -1315,7 +1339,10 @@ WHERE
         'session.update_status.leave',
         'support.submit_complaint',
         'support.view_history',
-        'communication.submit_suggestion'
+        'communication.submit_suggestion',
+        'billing.view_history',
+        'parent.view_students',
+        'parent.view_own_profile'
     );
 
 INSERT INTO

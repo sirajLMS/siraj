@@ -4,13 +4,14 @@ export type {
   DailyScheduleResult,
   FutureClassRow,
   StatusTrackingRow,
+  TeacherAssignedClassRow,
   UpcomingClassRow,
   WeeklyScheduleGridRow,
-  TeacherAssignedClassRow,
 } from "./scheduling-queries.repository";
 export {
   bulkFreezeStudentClasses,
   bulkUnfreezeStudentClasses,
+  findExpiredPendingInstances,
   getAdminDashboardSchedule,
   getClassStatusEvents,
   getDailyMetrics,
@@ -24,7 +25,6 @@ export {
   getTeacherFutureClasses,
   getTeacherLeaveQuotaUsage,
   getTeacherProgressFeed,
-  findExpiredPendingInstances,
   getUpcomingClassesForStudent,
   getWeeklyScheduleGrid,
   getWeeklyWorkloadMetrics,

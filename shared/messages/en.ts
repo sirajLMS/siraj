@@ -316,6 +316,10 @@ const en: MessageSchema = {
       yourStudents: "Your Students",
       salaryDetails: "Salary Details",
       teacherRules: "Rules",
+      suggest: "Suggest",
+      invoices: "Invoices",
+      parentRules: "Rules",
+      socialMedia: "Social Media",
       permissions: "Permissions",
       booksAndBags: "Books & Bags",
     },
@@ -2107,6 +2111,48 @@ const en: MessageSchema = {
       errors: {
         failedToLoad: "Failed to load your profile.",
       },
+    },
+    parentStudents: {
+      pageTitle: "Your Students",
+      pageSubtitle: "Students linked to your family account.",
+      noStudents: "No students are linked to your account yet.",
+      statusLabel: "Status: {status}",
+      teacherLabel: "Teacher: {teacher}",
+      quotaLabel: "Classes remaining: {remaining} / {total}",
+      hoursLabel: "Hours per week: {hours}",
+      errors: {
+        failedToLoad: "Failed to load your students.",
+      },
+    },
+    parentSocial: {
+      pageTitle: "Social Media",
+      pageSubtitle: "Your registered contact and social channels.",
+      sections: {
+        contact: "Contact",
+        social: "Social Media",
+      },
+      fields: {
+        phone: "Phone",
+        zoom: "Zoom link",
+        facebook: "Facebook",
+        whatsapp: "WhatsApp",
+        twitter: "Twitter",
+        skype: "Skype",
+      },
+      errors: {
+        failedToLoad: "Failed to load your social profile.",
+      },
+    },
+    parentRules: {
+      pageTitle: "Rules & Policies",
+      pageSubtitle: "Family handbook and LMS policies.",
+      sections: {
+        policies: "Policies",
+      },
+      policyIntro: "Please review the parent handbook and follow LMS policies for scheduling, leave, and billing.",
+      policyLeave: "Leave requests must be submitted before the scheduled class start time.",
+      policyBilling: "Invoices are issued monthly. Contact support for billing questions.",
+      downloadHandbook: "Download Parent Handbook",
     },
     teacherClassList: {
       pageTitle: "Class Details",

@@ -119,7 +119,9 @@ export enum AppPermission {
   ParentsList = 'PARENTS_LIST',
   ParentManageStatus = 'PARENT_MANAGE_STATUS',
   ParentViewDirectory = 'PARENT_VIEW_DIRECTORY',
+  ParentViewOwnProfile = 'PARENT_VIEW_OWN_PROFILE',
   ParentViewProfile = 'PARENT_VIEW_PROFILE',
+  ParentViewStudents = 'PARENT_VIEW_STUDENTS',
   PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',
   PermissionGroupsManage = 'PERMISSION_GROUPS_MANAGE',
   ReportsGenerate = 'REPORTS_GENERATE',
@@ -2002,6 +2004,24 @@ export type PaginationArgs = {
   skip: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type ParentAssignedStudent = {
+  __typename?: 'ParentAssignedStudent';
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  hoursPerWeek: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+};
+
+export type ParentAssignedStudentsResult = {
+  __typename?: 'ParentAssignedStudentsResult';
+  id: Maybe<Scalars['String']['output']>;
+  rows: Maybe<Array<ParentAssignedStudent>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 export type ParentBillingSummary = {
   __typename?: 'ParentBillingSummary';
   activeStudents: Maybe<Scalars['Int']['output']>;
@@ -2111,6 +2131,12 @@ export type ParentDocument = {
   usageType: Maybe<Scalars['String']['output']>;
 };
 
+export type ParentHandbookUrl = {
+  __typename?: 'ParentHandbookUrl';
+  id: Maybe<Scalars['String']['output']>;
+  url: Maybe<Scalars['String']['output']>;
+};
+
 export type ParentInvoiceHistoryResult = {
   __typename?: 'ParentInvoiceHistoryResult';
   id: Maybe<Scalars['String']['output']>;
@@ -2163,6 +2189,19 @@ export type ParentOnboardingResult = {
   parentId: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
   userId: Maybe<Scalars['String']['output']>;
+};
+
+export type ParentOwnProfile = {
+  __typename?: 'ParentOwnProfile';
+  defaultZoomLink: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  facebook: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  phone: Maybe<Scalars['String']['output']>;
+  skype: Maybe<Scalars['String']['output']>;
+  twitter: Maybe<Scalars['String']['output']>;
+  whatsapp: Maybe<Scalars['String']['output']>;
 };
 
 export type ParentProfile = {
@@ -2295,6 +2334,7 @@ export type Query = {
   notificationAlerts: Maybe<NotificationAlertsResult>;
   /** Returns onboarding metrics for staff accounts. */
   onboardingMetrics: Maybe<OnboardingMetrics>;
+  parentAssignedStudents: Maybe<ParentAssignedStudentsResult>;
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
   parentBillingSummary: Maybe<ParentBillingSummary>;
   /** Returns the authenticated parent's complaint history with pagination. */
@@ -2303,7 +2343,9 @@ export type Query = {
   parentDashboardSchedule: Maybe<ParentDashboardScheduleResult>;
   parentDirectory: Maybe<ParentDirectory>;
   parentDocuments: Maybe<Array<ParentDocument>>;
+  parentHandbookUrl: Maybe<ParentHandbookUrl>;
   parentInvoiceHistory: Maybe<ParentInvoiceHistoryResult>;
+  parentOwnProfile: Maybe<ParentOwnProfile>;
   parentProfile: Maybe<ParentProfile>;
   /** Returns the authenticated parent's suggestion history with review status. */
   parentSuggestions: Maybe<Array<Suggestion>>;
@@ -3567,6 +3609,7 @@ export type User = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   notificationCount: Maybe<Scalars['Int']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
   permissions: Maybe<Array<AppPermission>>;
   role: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;

@@ -14,4 +14,5 @@ import "./billing-alerts.query";
 import "./availability-search.query";
 import "./parent-directory.query";
 import "./parent-dashboard.query";
+import "./parent-portal.query";
 import "./class-category.query";

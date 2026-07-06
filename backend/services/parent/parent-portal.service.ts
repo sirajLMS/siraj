@@ -1,0 +1,70 @@
+import { ParentRepository } from "@/backend/db/repo";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType } from "@/backend/types/parent.types";
+import { AppPermission } from "@/shared/lib/enum";
+
+export namespace ParentPortalService {
+  async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
+    const isAuthorized = await PermissionsService.hasPermission(userId, permission);
+    if (!isAuthorized) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("unauthorizedAction"));
+    }
+  }
+
+  async function resolveParentForUser(userId: string, locale?: string) {
+    const parent = await ParentRepository.findByUserId(userId);
+    if (!parent) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("notFound"));
+    }
+    return parent;
+  }
+
+  export async function listAssignedStudents(userId: string, locale?: string): Promise<ParentAssignedStudentsResult> {
+    await assertPermission(userId, AppPermission.PARENT_VIEW_STUDENTS, locale);
+    const parent = await resolveParentForUser(userId, locale);
+    const rows = await ParentRepository.getAssociatedStudents(parent.id);
+
+    return {
+      rows: rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        status: row.status,
+        teacherName: row.teacherName,
+        hoursPerWeek: row.hoursPerWeek,
+        classesRemaining: row.classesRemaining,
+        classesTotal: row.classesTotal,
+      })),
+      totalCount: rows.length,
+    };
+  }
+
+  export async function getOwnProfile(userId: string, locale?: string): Promise<ParentOwnProfileReturnType> {
+    await assertPermission(userId, AppPermission.PARENT_VIEW_OWN_PROFILE, locale);
+    const parent = await resolveParentForUser(userId, locale);
+    const profile = await ParentRepository.getParentProfile(parent.id);
+    if (!profile) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("notFound"));
+    }
+
+    return {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+      facebook: profile.facebook,
+      whatsapp: profile.whatsapp,
+      twitter: profile.twitter,
+      skype: profile.skype,
+      defaultZoomLink: profile.defaultZoomLink,
+    };
+  }
+
+  export async function resolveParentIdForUser(userId: string): Promise<string | null> {
+    const parent = await ParentRepository.findByUserId(userId);
+    return parent?.id ?? null;
+  }
+}

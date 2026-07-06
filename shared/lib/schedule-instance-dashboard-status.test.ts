@@ -59,10 +59,16 @@ describe("schedule-instance-dashboard-status", () => {
     const now = new Date(scheduledEndAt.getTime() + (DEFAULT_MISSED_GRACE_MINUTES + 1) * 60_000);
 
     expect(
-      resolveClassInstanceDashboardStatus(ClassOutcome.PENDING, ClassExecutionState.NOT_ACTIVATED, undefined, undefined, {
-        scheduledEndAt,
-        now,
-      })
+      resolveClassInstanceDashboardStatus(
+        ClassOutcome.PENDING,
+        ClassExecutionState.NOT_ACTIVATED,
+        undefined,
+        undefined,
+        {
+          scheduledEndAt,
+          now,
+        }
+      )
     ).toBe(ClassOutcome.ABSENT);
 
     expect(
@@ -82,11 +88,17 @@ describe("schedule-instance-dashboard-status", () => {
     const now = new Date(scheduledEndAt.getTime() + 5 * 60_000);
 
     expect(
-      resolveClassInstanceDashboardStatus(ClassOutcome.PENDING, ClassExecutionState.NOT_ACTIVATED, undefined, undefined, {
-        scheduledEndAt,
-        now,
-        missedGraceMinutes: DEFAULT_MISSED_GRACE_MINUTES,
-      })
+      resolveClassInstanceDashboardStatus(
+        ClassOutcome.PENDING,
+        ClassExecutionState.NOT_ACTIVATED,
+        undefined,
+        undefined,
+        {
+          scheduledEndAt,
+          now,
+          missedGraceMinutes: DEFAULT_MISSED_GRACE_MINUTES,
+        }
+      )
     ).toBe(ClassOutcome.PENDING);
   });
 

@@ -1,5 +1,12 @@
 import type { teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
-import type { AccountStatus, ClassExecutionState, ClassOutcome, Gender, PaymentMethod, StudentStatus } from "@/shared/lib/enum";
+import type {
+  AccountStatus,
+  ClassExecutionState,
+  ClassOutcome,
+  Gender,
+  PaymentMethod,
+  StudentStatus,
+} from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 import type { ClassSessionMetrics } from "./schedule.types";
 
