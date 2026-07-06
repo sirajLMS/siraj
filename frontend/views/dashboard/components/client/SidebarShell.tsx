@@ -132,11 +132,9 @@ function SidebarContent({
         flex: 1,
         minHeight: 0,
         overflow: "hidden",
-        py: 2,
-        overscrollBehavior: "contain",
       }}
     >
-      <List
+      <Box
         ref={navListRef}
         sx={theme => ({
           flex: 1,
@@ -144,6 +142,7 @@ function SidebarContent({
           flexBasis: 0,
           overflow: "auto",
           overscrollBehavior: "contain",
+          py: 2,
           px: 1.5,
           "&::-webkit-scrollbar": { width: 4 },
           "&::-webkit-scrollbar-thumb": {
@@ -151,17 +150,18 @@ function SidebarContent({
             borderRadius: 10,
           },
         })}
-        component="nav"
       >
-        {mainItems.map(item => (
-          <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={isCollapsed} />
-        ))}
-      </List>
+        <List component="nav" sx={{ p: 0 }}>
+          {mainItems.map(item => (
+            <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={isCollapsed} />
+          ))}
+        </List>
+      </Box>
 
       {footerItems.length > 0 && (
         <>
           <Divider sx={theme => ({ borderColor: theme.palette.outlineVariant, mx: 1.5 })} />
-          <List sx={{ px: 1.5, pt: 1, flexShrink: 0 }} component="nav">
+          <List sx={{ px: 1.5, pt: 1, pb: 2, flexShrink: 0 }} component="nav">
             {footerItems.map(item => (
               <SidebarNavItem key={item.key} item={item} isCollapsed={isCollapsed} isFooter />
             ))}
@@ -289,14 +289,15 @@ function SidebarDesktop({
   return (
     <Box
       sx={theme => ({
-        display: { xs: "none", md: "block" },
+        display: { xs: "none", md: "flex" },
+        flexDirection: "column",
         width: isCollapsed ? collapsedWidth : sidebarWidth,
         flexShrink: 0,
+        height: "100%",
+        minHeight: 0,
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.onSurface,
         borderRight: `1px solid ${theme.palette.border.light}`,
-        alignSelf: "stretch",
-        minHeight: 0,
         overflow: "hidden",
         position: "relative",
         transition: "width 0.3s ease",
