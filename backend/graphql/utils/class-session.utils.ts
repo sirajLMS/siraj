@@ -1,8 +1,9 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType } from "@/backend/types";
-import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
-import { ClassExecutionState as ExecState } from "@/shared/lib/enum";
+import type { ClassInstanceDetailReturnType } from "@/backend/types";
+import type { ClassInstancePerformanceSelectType } from "@/backend/types/class-instance-performance.types";
+import type { ClassOutcome, ClassType } from "@/shared/lib/enum";
+import { ClassExecutionState } from "@/shared/lib/enum";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
 
@@ -16,12 +17,12 @@ function resolveClassInstanceStatus(
   executionState: ClassExecutionState | null | undefined,
   _outcome: ClassOutcome | null | undefined
 ): ClassExecutionState {
-  const state = (executionState ?? ExecState.NOT_ACTIVATED) as ClassExecutionState;
+  const state = (executionState ?? ClassExecutionState.NOT_ACTIVATED) as ClassExecutionState;
 
-  if (state === ExecState.COMPLETED) return ExecState.COMPLETED;
-  if (state === ExecState.ACTIVATED) return ExecState.ACTIVATED;
-  if (state === ExecState.RUNNING) return ExecState.RUNNING;
-  return ExecState.NOT_ACTIVATED;
+  if (state === ClassExecutionState.COMPLETED) return ClassExecutionState.COMPLETED;
+  if (state === ClassExecutionState.ACTIVATED) return ClassExecutionState.ACTIVATED;
+  if (state === ClassExecutionState.RUNNING) return ClassExecutionState.RUNNING;
+  return ClassExecutionState.NOT_ACTIVATED;
 }
 
 function truncateQualifications(value: string | null | undefined, maxLength = 80): string | null {
@@ -53,28 +54,25 @@ export async function buildClassInstanceDetail(
   const hasTimezoneMismatch =
     teacherTimezone !== null && studentTimezone !== null && teacherTimezone !== studentTimezone;
 
+  const startTime = start.toISOString().split("T")[1].substring(0, 5);
+  const endTime = end.toISOString().split("T")[1].substring(0, 5);
   return {
-    id: instance.id,
+    ...instance,
+    instanceId: instance.id,
     courseName,
     classType,
-    instanceId: instance.id,
     scheduledDate: start.toISOString().split("T")[0],
-    startTime: start.toISOString(),
-    endTime: end.toISOString(),
-    durationMinutes: instance.durationMinutes,
+    startTime,
+    endTime,
+    remarks: instance.remarks ?? null,
     status: resolveClassInstanceStatus(
       instance.executionState as ClassExecutionState,
       instance.outcome as ClassOutcome
     ),
-    remarks: instance.remarks ?? null,
     hasTimezoneMismatch,
     studentTimezone,
     teacherTimezone,
     zoomMeetingUrl: instance.zoomMeetingUrl ?? null,
-    payrollCredited: instance.payrollCredited ?? false,
-    isRescheduled: instance.isRescheduled ?? false,
-    executionState: instance.executionState as ClassExecutionState,
-    outcome: (instance.outcome || "PENDING") as ClassOutcome,
     student: {
       id: instance.student?.id || instance.studentId,
       name: instance.student?.name || unknownName,

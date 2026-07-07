@@ -1,4 +1,4 @@
-import type { SafeUser, UserEntity } from "@/backend/types";
+import type { UserReturnType } from "@/backend/types";
 
 export namespace AuthUtils {
   export const validateUserName = (name: string) => {
@@ -7,7 +7,7 @@ export namespace AuthUtils {
     }
   };
 
-  export const toSafeUser = (user: UserEntity): SafeUser => {
+  export const toSafeUser = (user: UserReturnType): UserReturnType => {
     return {
       id: user.id,
       name: user.name,

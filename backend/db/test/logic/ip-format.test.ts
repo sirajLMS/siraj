@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { AdminAuditLogInsertInput, SessionEntityInput } from "../../../types";
+import type { AdminAuditLogInsertType, SessionInsertType } from "../../../types/auth.types";
 import { adminAuditLogs, sessions, users } from "../../schema";
 import { IP_ADDRESS_1 } from "../const";
 import { runInRollback } from "../test-utils";
@@ -25,7 +25,7 @@ describe("IP Address Formatting", () => {
         })
         .returning();
 
-      const validSession: SessionEntityInput = {
+      const validSession: SessionInsertType = {
         hashedId: `session-${randomUUID()}`,
         userId: user.id,
         ipAddress: IP_ADDRESS_1,
@@ -54,7 +54,7 @@ describe("IP Address Formatting", () => {
         })
         .returning();
 
-      const invalidSession: SessionEntityInput = {
+      const invalidSession: SessionInsertType = {
         hashedId: `session-${randomUUID()}`,
         userId: user.id,
         ipAddress: "invalid-ip-format",
@@ -94,7 +94,7 @@ describe("IP Address Formatting", () => {
         })
         .returning();
 
-      const validAuditLog: AdminAuditLogInsertInput = {
+      const validAuditLog: AdminAuditLogInsertType = {
         actorUserId: user.id,
         action: "TEST_ACTION",
         description: "Testing IP format",
@@ -123,7 +123,7 @@ describe("IP Address Formatting", () => {
         })
         .returning();
 
-      const invalidAuditLog: AdminAuditLogInsertInput = {
+      const invalidAuditLog: AdminAuditLogInsertType = {
         actorUserId: user.id,
         action: "TEST_ACTION",
         description: "Testing IP format",

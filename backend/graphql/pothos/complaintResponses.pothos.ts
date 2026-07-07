@@ -1,8 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponseService } from "@/backend/services";
-import type { ComplaintResponse, ComplaintResponseInput } from "@/backend/types";
+import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
 
-const ComplaintResponseRef = gqlSchemaBuilder.objectRef<ComplaintResponse>("ComplaintResponse");
+const ComplaintResponseRef = gqlSchemaBuilder.objectRef<ComplaintResponseReturnType>("ComplaintResponse");
 
 export const ComplaintResponsePothosObject = ComplaintResponseRef.implement({
   description: "A single response to a complaint.",
@@ -17,7 +17,7 @@ export const ComplaintResponsePothosObject = ComplaintResponseRef.implement({
 });
 
 export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
-  .inputRef<ComplaintResponseInput>("RespondToComplaintInput")
+  .inputRef<ComplaintResponseSubmitInput>("RespondToComplaintInput")
   .implement({
     description: "Input for responding to a complaint.",
     fields: t => ({

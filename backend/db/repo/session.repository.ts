@@ -1,19 +1,17 @@
 import { and, eq, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
+import { getBackendTranslations, logger } from "@/backend/lib";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import logger from "@/backend/lib/logger";
-import { getRedisService } from "@/backend/services/redis";
-import { SessionRedisService } from "@/backend/services/redis/SessionRedisService";
+import { getRedisService, SessionRedisService } from "@/backend/services";
 import type {
   RedisGroupSimulationSessionData,
   RedisSessionData,
-  SessionConfigEntity,
-  SessionEntity,
-  SessionEntityInput,
-  SessionMetadataEntity,
-} from "@/backend/types";
+  SessionConfigSelectType,
+  SessionInsertType,
+  SessionMetadataSelectType,
+  SessionSelectType,
+} from "@/backend/types/auth.types";
 import type { DBTransaction } from "../db.types";
 
 // Default session configuration
@@ -58,7 +56,7 @@ export namespace SessionRepository {
   export const getSessionConfig = async (
     roleName: string = "default",
     tx?: DBTransaction
-  ): Promise<SessionConfigEntity> => {
+  ): Promise<SessionConfigSelectType> => {
     const runner = tx || db;
     const configs = await runner.select().from(sessionConfig).where(eq(sessionConfig.roleName, roleName)).limit(1);
 
@@ -78,9 +76,9 @@ export namespace SessionRepository {
    * Create or update session configuration
    */
   export const upsertSessionConfig = async (
-    input: Omit<SessionConfigEntity, "id" | "createdAt" | "updatedAt">,
+    input: Omit<SessionConfigSelectType, "id" | "createdAt" | "updatedAt">,
     tx?: DBTransaction
-  ): Promise<SessionConfigEntity> => {
+  ): Promise<SessionConfigSelectType> => {
     const runner = async (t: DBTransaction) => {
       const existing = await t.select().from(sessionConfig).where(eq(sessionConfig.roleName, input.roleName)).limit(1);
 
@@ -107,7 +105,7 @@ export namespace SessionRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const findSessionById = async (rawSessionId: string): Promise<SessionEntity | null> => {
+  export const findSessionById = async (rawSessionId: string): Promise<SessionSelectType | null> => {
     const hashedId = hashSessionId(rawSessionId);
     try {
       if (redisSessionsEnabled()) {
@@ -146,14 +144,14 @@ export namespace SessionRepository {
       const sessionPromises = sessionIds.map(id => redisService.getSession(id));
       const found = await Promise.all(sessionPromises);
 
-      return found.filter((s): s is RedisSessionData => s !== null);
+      return found.filter((s: RedisSessionData | null): s is RedisSessionData => s !== null);
     } catch (error) {
       logger.error("Error finding sessions by user ID:", error);
       return [];
     }
   };
 
-  export const findByUserId = async (userId: string): Promise<SessionEntity | null> => {
+  export const findByUserId = async (userId: string): Promise<SessionSelectType | null> => {
     const sessionsList = await findSessionsByUserId(userId);
     if (sessionsList.length === 0) return null;
 
@@ -172,7 +170,7 @@ export namespace SessionRepository {
     };
   };
 
-  export interface SessionCreationOptions extends Omit<SessionEntityInput, "lastActivity"> {
+  export interface SessionCreationOptions extends Omit<SessionInsertType, "lastActivity"> {
     deviceType?: string;
     deviceName?: string;
     roleName?: string;
@@ -184,7 +182,7 @@ export namespace SessionRepository {
   async function createPostgresSession(
     t: DBTransaction | typeof db,
     input: SessionCreationOptions
-  ): Promise<SessionEntity> {
+  ): Promise<SessionSelectType> {
     const now = BigInt(Math.floor(Date.now() / 1000));
     const [created] = await t
       .insert(sessions)
@@ -210,7 +208,7 @@ export namespace SessionRepository {
     input: SessionCreationOptions,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<SessionEntity> => {
+  ): Promise<SessionSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (!input.userId) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -278,10 +276,10 @@ export namespace SessionRepository {
    * it will be hashed before lookup.
    */
   export const update = async (
-    input: Omit<SessionEntityInput, "lastActivity"> & { roleName?: string },
+    input: Omit<SessionInsertType, "lastActivity"> & { roleName?: string },
     tx?: DBTransaction,
     locale?: string
-  ): Promise<SessionEntity> => {
+  ): Promise<SessionSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (!input.userId) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -342,7 +340,10 @@ export namespace SessionRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const deleteSessionById = async (rawSessionId: string, tx?: DBTransaction): Promise<SessionEntity | null> => {
+  export const deleteSessionById = async (
+    rawSessionId: string,
+    tx?: DBTransaction
+  ): Promise<SessionSelectType | null> => {
     const hashedId = hashSessionId(rawSessionId);
     const runner = async (t: DBTransaction) => {
       const existingSession = await findSessionById(rawSessionId);
@@ -389,7 +390,10 @@ export namespace SessionRepository {
    * The sessionId parameter is the raw (plaintext) session ID from the cookie —
    * it will be hashed before looking up the stored record.
    */
-  export const validate = async (rawSessionId: string, roleName: string = "default"): Promise<SessionEntity | null> => {
+  export const validate = async (
+    rawSessionId: string,
+    roleName: string = "default"
+  ): Promise<SessionSelectType | null> => {
     const hashedId = hashSessionId(rawSessionId);
     if (!redisSessionsEnabled()) {
       const session = await findSessionById(rawSessionId);
@@ -437,7 +441,7 @@ export namespace SessionRepository {
    * Look up a session by its pre-computed HMAC hash.
    * This is a primitive data-access method — callers compute the hash.
    */
-  export const findByHmacHash = async (hmacHash: string): Promise<SessionEntity | null> => {
+  export const findByHmacHash = async (hmacHash: string): Promise<SessionSelectType | null> => {
     try {
       if (redisSessionsEnabled()) {
         const redisService = getSessionRedisService();
@@ -469,7 +473,7 @@ export namespace SessionRepository {
    * Look up a session by its pre-computed legacy SHA-256 hash.
    * This is a primitive data-access method — callers compute the hash.
    */
-  export const findByLegacyHash = async (legacyHash: string): Promise<SessionEntity | null> => {
+  export const findByLegacyHash = async (legacyHash: string): Promise<SessionSelectType | null> => {
     try {
       // Legacy sessions predate Redis migration — always check PostgreSQL.
       // Redis keys use the HMAC hash, so a legacy-hash key will never exist in Redis.
@@ -530,7 +534,7 @@ export namespace SessionRepository {
   export const getUserSessionMetadata = async (
     userId: string,
     tx?: DBTransaction
-  ): Promise<SessionMetadataEntity[]> => {
+  ): Promise<SessionMetadataSelectType[]> => {
     const runner = tx || db;
     return await runner
       .select()
@@ -674,7 +678,7 @@ export namespace SessionRepository {
     }
 
     const parsedPayload = parseSessionPayload(session.payload);
-    const { impersonation: _removed, ...restPayload } = parsedPayload;
+    const { impersonation, ...restPayload } = parsedPayload;
     const nextPayload = {
       ...restPayload,
       groupSimulation,
@@ -692,7 +696,7 @@ export namespace SessionRepository {
   export async function clearSessionGroupSimulation(rawSessionId: string): Promise<void> {
     if (redisSessionsEnabled()) {
       await updateRedisSessionData(rawSessionId, data => {
-        const { groupSimulation: _removed, ...rest } = data;
+        const { groupSimulation, ...rest } = data;
         return rest;
       });
       return;

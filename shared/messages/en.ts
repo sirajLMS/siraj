@@ -219,6 +219,38 @@ const en: MessageSchema = {
     atLeastOneDayRequired: "At least one day must be selected",
     failedToCreateRecurringClass: "Failed to create recurring class",
   },
+  profile: {
+    shell: {
+      error: {
+        retry: "Please refresh the page or try again later.",
+      },
+      tabs: {
+        profile: "Profile",
+        banking: "Banking",
+        students: "Students",
+        notifications: "Notifications",
+        permissions: "Permissions",
+      },
+      loading: "Loading profile...",
+    },
+    role: {
+      teacher: "Teacher",
+      parent: "Parent",
+      staff: "Staff",
+    },
+    tab: {
+      overview: "Overview",
+      students: "Students",
+      billing: "Billing",
+      classes: "Classes",
+      schedule: "Schedule",
+      settings: "Settings",
+      payments: "Payments",
+      history: "History",
+      editing: "Editing",
+      reassignment: "Reassignment",
+    },
+  },
   auth: {
     login: {
       title: "Siraj LMS",
@@ -2800,58 +2832,6 @@ const en: MessageSchema = {
       REGULAR: "Regular Class",
       TRIAL: "Trial Class",
       ADVANCE: "Advance Class",
-    },
-  },
-  profile: {
-    pageTitle: "Profile",
-    editTitle: "Edit Profile",
-    notSet: "Not set",
-    adminEditHint: "Use the staff profile tools for full administrative editing.",
-    actions: {
-      edit: "Edit Profile",
-      save: "Save Changes",
-    },
-    errors: {
-      failedToLoad: "Failed to load profile.",
-      notFound: "Profile not found.",
-    },
-    teacher: {
-      subtitle: "View your official profile and compensation details.",
-      sections: {
-        contact: "Contact Information",
-        salary: "Salary Details",
-      },
-      baseSalary: "Base salary: {amount} {currency}",
-      paymentMethod: "Payment method: {method}",
-      fields: {
-        phone: "Phone",
-        zoomLink: "Zoom link",
-      },
-    },
-    parent: {
-      subtitle: "Manage your contact and communication details.",
-      sections: {
-        contact: "Contact Information",
-        social: "Social & Communication",
-      },
-      fields: {
-        phone: "Phone",
-        whatsapp: "WhatsApp",
-        facebook: "Facebook",
-        twitter: "Twitter",
-        skype: "Skype",
-        defaultZoomLink: "Default Zoom link",
-      },
-    },
-    staff: {
-      subtitle: "View your staff profile details.",
-      sections: {
-        contact: "Contact Information",
-      },
-      fields: {
-        phone: "Phone",
-        skypeId: "Skype ID",
-      },
     },
   },
 };

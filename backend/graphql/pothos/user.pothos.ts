@@ -1,13 +1,13 @@
 import { UserRepository } from "@/backend/db/repo";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { UserPothosDefinition } from "@/backend/types";
+import type { UserReturnType } from "@/backend/types/auth.types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { AppPermissionPothosEnum } from "./enum.pothos";
 
-const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserPothosDefinition>("User");
+const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");
 
 export const UserPothosObject = gqlSchemaBuilder.loadableObject<
-  UserPothosDefinition | Error,
+  UserReturnType | Error,
   string,
   [],
   typeof UserPothosObjectRef

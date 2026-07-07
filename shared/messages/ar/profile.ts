@@ -1,6 +1,19 @@
 import type { ProfileLabels } from "../types/profile";
 
 export const profile: ProfileLabels = {
+  shell: {
+    tabs: {
+      profile: "الملف الشخصي",
+      banking: "الحسابات البنكية",
+      students: "الطلاب",
+      notifications: "الإشعارات",
+      permissions: "الصلاحيات",
+    },
+    loading: "جارٍ تحميل الملف الشخصي...",
+    error: {
+      retry: "أعد المحاولة",
+    },
+  },
   pageTitle: "Profile",
   editTitle: "Edit Profile",
   notSet: "Not set",

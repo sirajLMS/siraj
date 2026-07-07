@@ -25,9 +25,9 @@ export type GroupClassAuditReturnType = {
   registeredStudentCount: number;
   totalStudentCount: number;
   students: GroupClassStudentReturnType[];
-  meetingInfo: OnlineMeetingInfoReturnType;
-  communications: CommunicationLogEntryReturnType[];
-  adminNote: AdminNoteReturnType;
+  meetingInfo: GroupClassOnlineMeetingInfoReturnType;
+  communications: GroupClassCommunicationLogEntryReturnType[];
+  adminNote: GroupClassAdminNoteReturnType;
 };
 
 export type GroupClassStudentReturnType = {
@@ -39,13 +39,13 @@ export type GroupClassStudentReturnType = {
   avatarUrl: string | null;
 };
 
-export type OnlineMeetingInfoReturnType = {
+export type GroupClassOnlineMeetingInfoReturnType = {
   platform: string;
   meetingId: string | null;
   joinUrl: string | null;
 };
 
-export type CommunicationLogEntryReturnType = {
+export type GroupClassCommunicationLogEntryReturnType = {
   id: string;
   type: string;
   title: string;
@@ -55,7 +55,7 @@ export type CommunicationLogEntryReturnType = {
   timestamp: string | null;
 };
 
-export type AdminNoteReturnType = {
+export type GroupClassAdminNoteReturnType = {
   content: string;
   lastUpdated: string;
 };

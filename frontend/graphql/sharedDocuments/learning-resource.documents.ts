@@ -3,16 +3,15 @@ import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
 export const learningResourceRowFragment = gql`
-  fragment LearningResourceRowFragment on LearningResourceRow {
-    id
-    displayName
-    filePath
-    uploadedByUserId
-    uploadedByUserName
-    fileSize
-    contentType
-    createdAt
-  }
+fragment LearningResourceRowFragment on LearningResourceRow {
+  id
+  displayName
+  uploadedByUserId
+  uploadedByUserName
+  fileSize
+  contentType
+  createdAt
+}
 `;
 
 export const learningResourcesQueryDocument: TypedDocumentNode<

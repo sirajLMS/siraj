@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { PasswordResetTokenInsertInput } from "../../../types";
+import type { PasswordResetTokenInsertType } from "../../../types/auth.types";
 import { passwordResetTokens } from "../../schema";
 import { runInRollback } from "../test-utils";
 
@@ -13,14 +13,14 @@ describe("Password Reset Tokens", () => {
       const now = new Date();
       const expires = new Date(now.getTime() + 3600000); // 1 hour later
 
-      const tokenInput1: PasswordResetTokenInsertInput = {
+      const tokenInput1: PasswordResetTokenInsertType = {
         email,
         hashedToken: "hash123",
         createdAt: now,
         expiresAt: expires,
       };
 
-      const tokenInput2: PasswordResetTokenInsertInput = {
+      const tokenInput2: PasswordResetTokenInsertType = {
         email,
         hashedToken: "hash456",
         createdAt: now,

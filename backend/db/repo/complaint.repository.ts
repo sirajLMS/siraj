@@ -8,7 +8,7 @@ import type {
   ComplaintMetrics,
   ComplaintQueuePaginatedResult,
   ComplaintQueueResult,
-  ComplaintResponse,
+  ComplaintResponseReturnType,
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitInput,
@@ -177,7 +177,7 @@ export namespace ComplaintRepository {
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       studentName: r.studentName ?? null,
-      responses: [] as ReadonlyArray<ComplaintResponse>,
+      responses: [] as ReadonlyArray<ComplaintResponseReturnType>,
     }));
 
     const pageInfo = PaginationUtils.buildPageInfoFromArgs(pagination, complaintsList.length, total);

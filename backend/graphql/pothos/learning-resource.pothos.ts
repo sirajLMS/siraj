@@ -1,4 +1,5 @@
 import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
+import type { LearningResourceReturnType } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── Input Types ──────────────────────────────────────────────────────────────
@@ -13,24 +14,12 @@ const ResourceUploadInput = gqlSchemaBuilder.inputType("ResourceUploadInput", {
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-export interface LearningResourceRowDefinition {
-  readonly id: string;
-  readonly displayName: string;
-  readonly filePath: string;
-  readonly uploadedByUserId: string;
-  readonly uploadedByUserName: string | null;
-  readonly fileSize: number | null;
-  readonly contentType: string | null;
-  readonly createdAt: Date;
-}
-
-const LearningResourceRowRef = gqlSchemaBuilder.objectRef<LearningResourceRowDefinition>("LearningResourceRow");
+const LearningResourceRowRef = gqlSchemaBuilder.objectRef<LearningResourceReturnType>("LearningResourceRow");
 
 export const LearningResourceRowPothosObject = LearningResourceRowRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     displayName: t.exposeString("displayName"),
-    filePath: t.exposeString("filePath"),
     uploadedByUserId: t.exposeString("uploadedByUserId"),
     uploadedByUserName: t.exposeString("uploadedByUserName", { nullable: true }),
     fileSize: t.exposeFloat("fileSize", { nullable: true }),

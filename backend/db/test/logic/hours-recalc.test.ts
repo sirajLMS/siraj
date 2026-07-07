@@ -1,15 +1,16 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import type { UserReturnType } from "@/backend/types/user.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
+import type { ParentEntity, StudentEntity, TeacherEntity } from "../../../types";
 import { db } from "../../drizzleDb";
 import { SoftDeleteRepository } from "../../repo";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "../../schema";
 
 describe("hoursPerWeek Recalculation Triggers", () => {
-  let parentUser: UserEntity | null = null;
-  let teacherUser: UserEntity | null = null;
+  let parentUser: Pick<UserReturnType, "id"> | null = null;
+  let teacherUser: Pick<UserReturnType, "id"> | null = null;
   let testParent: ParentEntity | null = null;
   let testTeacher: TeacherEntity | null = null;
   let testStudent: StudentEntity | null = null;
@@ -19,7 +20,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
   let dayWednesdayId: string;
 
   async function verifyStudentHours(expected: number) {
-    if (!testStudent) throw new Error("testStudent not initialized");
+    if (!testStudent || !testParent || !testTeacher) throw new Error("test entities not initialized");
     const [student] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(student.hoursPerWeek)).toBe(expected);
   }
@@ -124,7 +125,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
   });
 
   test("Schedule Insert: Create schedule with 60 minutes duration (no days active yet)", async () => {
-    if (!testStudent || !testTeacher) throw new Error("testStudent or testTeacher not initialized");
+    if (!testStudent || !testParent || !testTeacher) throw new Error("test entities not initialized");
     const now = new Date();
     testLogger.info("Inserting recurring schedule for student...");
     const [schedule] = await db

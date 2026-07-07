@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import type { UserEntity } from "@/backend/types";
+import type { UserReturnType } from "@/backend/types/user.types";
+import { AccountStatus, UserRole } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 import { db } from "../drizzleDb";
 import { users } from "../schema";
@@ -52,7 +53,7 @@ export function testInRollback(name: string, fn: (tx: DBTransaction) => Promise<
 export async function createTestUser(
   tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
-): Promise<UserEntity> {
+): Promise<UserReturnType> {
   const now = new Date();
   const [user] = (await tx
     .insert(users)
@@ -60,12 +61,27 @@ export async function createTestUser(
       name: overrides.name || "Test User",
       email: overrides.email || `user-${randomUUID()}@example.com`,
       password: overrides.password || "password",
+      rememberTokenHash: overrides.rememberTokenHash || null,
+      avatarFilePath: overrides.avatarFilePath || null,
+      avatarUrl: overrides.avatarUrl || null,
+      isActive: overrides.isActive !== undefined ? overrides.isActive : true,
+      isSuperAdmin: overrides.isSuperAdmin || false,
+      lastLoginAt: overrides.lastLoginAt || null,
+      emailVerifiedAt: overrides.emailVerifiedAt || null,
       createdAt: overrides.createdAt || now,
       updatedAt: overrides.updatedAt || now,
+      deletedAt: overrides.deletedAt || null,
       ...overrides,
     })
-    .returning()) as [UserEntity];
-  return user;
+    .returning()) as [typeof users.$inferSelect];
+
+  return {
+    ...user,
+    role: UserRole.PARENT,
+    status: AccountStatus.ACTIVATED,
+    teacherId: null,
+    parentId: null,
+  };
 }
 
 /**

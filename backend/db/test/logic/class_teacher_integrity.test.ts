@@ -2,16 +2,19 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import type { ParentEntity } from "@/backend/types/parent.types";
+import type { StudentEntity } from "@/backend/types/student.types";
+import type { TeacherEntity } from "@/backend/types/teacher.types";
+import type { UserSelectType } from "@/backend/types/user.types";
 import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { SchedulingRepository } from "../../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, name: string, email: string) {
   const now = new Date();
-  const [user] = (await tx
+  const [user] = ((await tx
     .insert(users)
     .values({
       name,
@@ -20,7 +23,7 @@ async function createTestUser(tx: DBTransaction, name: string, email: string) {
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [UserEntity];
+    .returning()) as [UserSelectType]) ?? [{} as UserSelectType];
   return { user, now };
 }
 

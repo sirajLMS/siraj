@@ -1,5 +1,4 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import {
   groupPermissions,
   permissionGroups,
@@ -7,14 +6,14 @@ import {
   userPermissionGroups,
   userPermissionOverrides,
   users,
-} from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { logger } from "@/backend/lib/logger";
+} from "@/backend/db";
+import { db } from "@/backend/db/drizzleDb";
+import { getBackendTranslations, logger } from "@/backend/lib";
 import type {
   CreateGroupInput,
   GroupUserEntity,
   GroupWithPermissionIds,
-  PermissionEntity,
+  PermissionReturnType,
   UpdateGroupInput,
   UserOverrideEntity,
   UserOverrideInput,
@@ -27,8 +26,9 @@ export namespace PermissionManagementRepository {
    * NOTE: The is_system field for permissions is protected by a database trigger (trg_protect_system_permissions).
    * Creating any new permission with is_system = true or updating an existing custom permission
    * to be a system permission is strictly prohibited by the database schema.
+   * @returns PermissionReturnType[]
    */
-  export async function listAllPermissions(tx?: DBTransaction): Promise<PermissionEntity[]> {
+  export async function listAllPermissions(tx?: DBTransaction): Promise<PermissionReturnType[]> {
     try {
       const client = tx ?? db;
       return await client

@@ -1260,6 +1260,7 @@ export type ImpersonationStatus = {
   __typename?: 'ImpersonationStatus';
   actorUser: Maybe<User>;
   expiresAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['ID']['output']>;
   isActive: Maybe<Scalars['Boolean']['output']>;
   reason: Maybe<Scalars['String']['output']>;
   startedAt: Maybe<Scalars['DateTime']['output']>;
@@ -1283,7 +1284,6 @@ export type LearningResourceRow = {
   contentType: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   displayName: Maybe<Scalars['String']['output']>;
-  filePath: Maybe<Scalars['String']['output']>;
   fileSize: Maybe<Scalars['Float']['output']>;
   id: Maybe<Scalars['String']['output']>;
   uploadedByUserId: Maybe<Scalars['String']['output']>;
@@ -2922,6 +2922,7 @@ export type StaffOwnProfileUpdateInput = {
 export type StartImpersonationResponse = {
   __typename?: 'StartImpersonationResponse';
   expiresAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['ID']['output']>;
   impersonationSessionId: Maybe<Scalars['String']['output']>;
   targetUser: Maybe<User>;
   token: Maybe<Scalars['String']['output']>;

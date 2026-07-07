@@ -1680,9 +1680,9 @@ export type ResendClassNotificationsMutationVariables = Exact<{
 
 export type ResendClassNotificationsMutation = ResendClassNotificationsMutation_Mutation;
 
-export type LearningResourceRowFragmentFragment = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+export type LearningResourceRowFragmentFragment = { id: string | null, displayName: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 
-export type LearningResourcesQuery_learningResources_LearningResourceRow = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+export type LearningResourcesQuery_learningResources_LearningResourceRow = { id: string | null, displayName: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 
 export type LearningResourcesQuery_Query = { learningResources: Array<LearningResourcesQuery_learningResources_LearningResourceRow> | null };
 
@@ -1694,7 +1694,7 @@ export type LearningResourcesQueryVariables = Exact<{
 
 export type LearningResourcesQuery = LearningResourcesQuery_Query;
 
-export type UploadLearningResourceMutation_uploadLearningResource_LearningResourceRow = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+export type UploadLearningResourceMutation_uploadLearningResource_LearningResourceRow = { id: string | null, displayName: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 
 export type UploadLearningResourceMutation_Mutation = { uploadLearningResource: UploadLearningResourceMutation_uploadLearningResource_LearningResourceRow | null };
 

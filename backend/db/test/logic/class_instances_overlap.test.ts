@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { StudentEntity, TeacherEntity, UserEntity } from "../../../types";
+import type { StudentEntity, TeacherEntity } from "../../../types";
 import { SchedulingRepository } from "../../repo";
 import { students, teacherAssignments, teachers, users } from "../../schema";
 import { createTestParent, createTestUser } from "../entity-setup";
@@ -25,7 +25,7 @@ async function createTestTeachers(tx: DBTransaction, now: Date) {
 
   const createdTeachers: TeacherEntity[] = [];
   for (const data of teachersData) {
-    const [user] = (await tx
+    const [user] = await tx
       .insert(users)
       .values({
         name: data.name,
@@ -34,7 +34,7 @@ async function createTestTeachers(tx: DBTransaction, now: Date) {
         createdAt: now,
         updatedAt: now,
       })
-      .returning()) as [UserEntity];
+      .returning();
 
     const [teacher] = (await tx
       .insert(teachers)

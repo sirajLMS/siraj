@@ -7,21 +7,16 @@ import type {
   EndImpersonationReturnType,
   ImpersonationStatusReturnType,
   StartImpersonationReturnType,
-} from "@/backend/types/impersonation.types";
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { UserPothosObject } from "./user.pothos";
 
-export type ImpersonationStatusPothosDefinition = ImpersonationStatusReturnType;
-
-export type StartImpersonationResponsePothosDefinition = StartImpersonationReturnType & {
-  targetUserId: string;
-};
-
 const ImpersonationStatusPothosObjectRef =
-  gqlSchemaBuilder.objectRef<ImpersonationStatusPothosDefinition>("ImpersonationStatus");
+  gqlSchemaBuilder.objectRef<ImpersonationStatusReturnType>("ImpersonationStatus");
 
 export const ImpersonationStatusPothosObject = ImpersonationStatusPothosObjectRef.implement({
   fields: t => ({
+    id: t.exposeID("targetUserId", { nullable: true }),
     isActive: t.exposeBoolean("isActive"),
     startedAt: t.expose("startedAt", { type: "DateTime", nullable: true }),
     expiresAt: t.expose("expiresAt", { type: "DateTime", nullable: true }),
@@ -39,11 +34,13 @@ export const ImpersonationStatusPothosObject = ImpersonationStatusPothosObjectRe
   }),
 });
 
-const StartImpersonationResponsePothosObjectRef =
-  gqlSchemaBuilder.objectRef<StartImpersonationResponsePothosDefinition>("StartImpersonationResponse");
+const StartImpersonationResponsePothosObjectRef = gqlSchemaBuilder.objectRef<
+  StartImpersonationReturnType & { targetUserId: string }
+>("StartImpersonationResponse");
 
 export const StartImpersonationResponsePothosObject = StartImpersonationResponsePothosObjectRef.implement({
   fields: t => ({
+    id: t.exposeID("impersonationSessionId"),
     token: t.exposeString("token"),
     expiresAt: t.expose("expiresAt", { type: "DateTime" }),
     impersonationSessionId: t.exposeString("impersonationSessionId"),

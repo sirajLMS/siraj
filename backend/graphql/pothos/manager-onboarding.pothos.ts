@@ -1,27 +1,45 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type { Email } from "@/backend/lib/email";
 import type {
   ManagerOnboardingInput,
   ManagerOnboardingResult,
 } from "@/backend/services/staff/manager-onboarding.service";
+import type { ManagerOnboardingReturnType } from "@/backend/types";
 
 export const ManagerAccountTypePothosEnum = gqlSchemaBuilder.enumType(
   { admin: "admin" as const, manager: "manager" as const },
   { name: "ManagerAccountType", description: "Account type for new manager" }
 );
 
-export interface ManagerOnboardingGqlInput extends Omit<ManagerOnboardingInput, "email" | "accountType"> {
-  email: Email;
-  accountType: "admin" | "manager";
-}
+const ManagerOnboardingRef = gqlSchemaBuilder.objectRef<ManagerOnboardingReturnType>("ManagerOnboarding");
+
+export const ManagerOnboardingPothosObject = ManagerOnboardingRef.implement({
+  description: "Manager/Staff account details",
+  fields: t => ({
+    id: t.exposeString("id"),
+    userId: t.exposeString("userId"),
+    staffProfileId: t.exposeString("staffProfileId"),
+    name: t.exposeString("name"),
+    email: t.string({
+      resolve: parent => parent.email.value,
+      nullable: false,
+    }),
+    status: t.exposeString("status"),
+    assignedGroupSlug: t.exposeString("assignedGroupSlug"),
+  }),
+});
 
 export const ManagerOnboardingInputPothosObject = gqlSchemaBuilder
-  .inputRef<ManagerOnboardingGqlInput>("ManagerOnboardingInput")
+  .inputRef<
+    Omit<ManagerOnboardingInput, "email" | "accountType"> & {
+      email: string;
+      accountType: "admin" | "manager";
+    }
+  >("ManagerOnboardingInput")
   .implement({
     description: "Input for creating a new manager/staff account with RBAC assignment",
     fields: t => ({
       name: t.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
-      email: t.field({ type: "Email", required: true }),
+      email: t.string({ required: true }),
       password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
       phone: t.string({ directives: { constraint: { maxLength: 512 } } }),
       skypeId: t.string({ directives: { constraint: { maxLength: 512 } } }),

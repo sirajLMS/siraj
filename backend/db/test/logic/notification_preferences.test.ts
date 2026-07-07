@@ -2,9 +2,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
+import type { UserNotificationPreferenceSelectType, UserReturnType } from "@/backend/types";
 import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { UserEntity, UserNotificationPreferenceSelectType } from "../../../types";
 import { userNotificationPreferences, users } from "../../schema";
 import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
@@ -62,7 +62,7 @@ describe("User Notification Preferences", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning()) as UserReturnType[];
 
       await tx.insert(userNotificationPreferences).values({
         userId: user.id,

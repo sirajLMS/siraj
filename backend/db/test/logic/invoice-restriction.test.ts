@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { InvoiceInsertInput } from "../../../types";
+import type { InvoiceInsertType } from "../../../types";
 import { invoices, parents, students, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
@@ -50,7 +50,7 @@ describe("Invoice Referential Integrity", () => {
         .returning();
 
       // 3. Create invoice record referencing both parent and student
-      const invoiceInput: InvoiceInsertInput = {
+      const invoiceInput: InvoiceInsertType = {
         parentId: parentRecord.id,
         studentId: studentRecord.id,
         issueDate: "2026-06-09",

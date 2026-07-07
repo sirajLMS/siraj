@@ -14,8 +14,8 @@
  * ```
  */
 
-export type { IRedisService, RedisProvider } from "./IRedisService";
+export * from "./IRedisService";
 export { LocalRedisAdapter } from "./LocalRedisAdapter";
-export { checkRedisHealth, getRedisService, redisService, resetRedisService } from "./RedisServiceFactory";
+export * from "./RedisServiceFactory";
 export { SessionRedisService } from "./SessionRedisService";
 export { UpstashRedisAdapter } from "./UpstashRedisAdapter";

@@ -1,15 +1,12 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  PermissionManagementRepository,
-  TeacherBankingRepository,
-  TeacherRepository,
-  UserRepository,
-} from "@/backend/db/repo";
+import { PermissionManagementRepository, TeacherBankingRepository, TeacherRepository } from "@/backend/db/repo";
+import * as UserRepository from "@/backend/db/repo/user.repository";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { TeacherCreateResult, UserEntity } from "@/backend/types";
+import type { TeacherCreateResult } from "@/backend/types/teacher.types";
+import type { UserReturnType } from "@/backend/types/user.types";
 import { AppPermission, SystemPermissionGroupSlug } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
 
@@ -54,7 +51,7 @@ export namespace TeacherOnboardingService {
     input: TeacherOnboardingInput,
     locale: string | undefined,
     txObj: DBTransaction
-  ): Promise<{ user: UserEntity; teacher: TeacherCreateResult }> {
+  ): Promise<{ user: UserReturnType; teacher: TeacherCreateResult }> {
     const user = await UserRepository.create(
       { name: input.name, email: { value: input.email }, password: input.password },
       locale,
@@ -92,7 +89,7 @@ export namespace TeacherOnboardingService {
   }
 
   async function assignTeacherPermissionGroup(
-    user: UserEntity,
+    user: UserReturnType,
     actorUserId: string,
     t: TranslationFn<ErrorsLabels>,
     txObj: DBTransaction

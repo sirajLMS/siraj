@@ -4,10 +4,11 @@ import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
+import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types/user.types";
 import { AppPermission } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import { getErrorMessage } from "@/shared/utils/error";
-import type * as Types from "../../../types";
 import { db } from "../../drizzleDb";
 import { DstMigrationRepository, SchedulingRepository } from "../../repo";
 import {
@@ -24,11 +25,11 @@ import {
 } from "../../schema";
 
 describe("Timezone Handling & DST Adjustment", () => {
-  let testUser: Types.UserEntity | null = null;
-  let testParentUser: Types.UserEntity | null = null;
-  let testTeacher: Types.TeacherEntity | null = null;
-  let testParent: Types.ParentEntity | null = null;
-  let testStudent: Types.StudentEntity | null = null;
+  let testUser: UserSelectType | null = null;
+  let testParentUser: UserSelectType | null = null;
+  let testTeacher: TeacherEntity | null = null;
+  let testParent: ParentEntity | null = null;
+  let testStudent: StudentEntity | null = null;
 
   beforeAll(async () => {
     testLogger.info("Setting up timezone test data...");
@@ -212,7 +213,7 @@ describe("Timezone Handling & DST Adjustment", () => {
         idempotencyKey: randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as Types.ClassInstanceInsertInput)
+      } as ClassInstanceInsertInput)
       .returning();
 
     testLogger.info(`Created drifted class with ID: ${driftedClass.id}`);

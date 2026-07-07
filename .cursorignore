@@ -51,7 +51,6 @@ backend/db/seeds/
 backend/db/scripts/
 frontend/graphql/test/
 docs/
-*.md
 *.ps1
 *.sh
 .github/
@@ -70,7 +69,6 @@ docs/
 .prettierignore
 .prettierrc
 biome.json
-.ai
 .gitwandrc
 *.txt
 .playwright-cli

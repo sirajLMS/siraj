@@ -4,19 +4,10 @@ import { learningResources } from "@/backend/db/schema";
 import { learningResourceFiles } from "@/backend/db/schema/storage";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-import type { PaginationArgs } from "@/backend/types";
+import type { LearningResourceReturnType, PaginationArgs } from "@/backend/types";
 import type { DBTransaction } from "../db.types";
 
-export interface LearningResourceRow {
-  readonly id: string;
-  readonly displayName: string;
-  readonly filePath: string;
-  readonly uploadedByUserId: string;
-  readonly uploadedByUserName: string | null;
-  readonly fileSize: number | null;
-  readonly contentType: string | null;
-  readonly createdAt: Date;
-}
+export type LearningResourceRow = LearningResourceReturnType;
 
 export interface LearningResourceCreateInput {
   readonly displayName: string;
@@ -130,14 +121,10 @@ export namespace LearningResourceRepository {
       });
 
       return {
-        id: resource.id,
-        displayName: resource.displayName,
-        filePath: resource.filePath,
-        uploadedByUserId: resource.uploadedByUserId,
+        ...resource,
         uploadedByUserName: null,
         fileSize: null,
         contentType: null,
-        createdAt: resource.createdAt,
       };
     };
 

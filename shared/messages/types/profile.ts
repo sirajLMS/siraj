@@ -3,6 +3,19 @@ export interface ProfileLabels {
   readonly editTitle: string;
   readonly notSet: string;
   readonly adminEditHint: string;
+  readonly shell: {
+    readonly tabs: {
+      readonly profile: string;
+      readonly banking: string;
+      readonly students: string;
+      readonly notifications: string;
+      readonly permissions: string;
+    };
+    readonly loading: string;
+    readonly error: {
+      readonly retry: string;
+    };
+  };
   readonly actions: {
     readonly edit: string;
     readonly save: string;

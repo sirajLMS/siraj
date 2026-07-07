@@ -4,18 +4,18 @@
  * service and exposed through the notification-alerts GraphQL object.
  */
 
-export interface SystemAlert {
+export type NotificationAlertReturnType = {
   id: string;
   type: "complaint" | "notification" | "system";
   title: string;
   body: string | null;
   createdAt: Date;
   severity: "info" | "warning" | "error";
-}
+};
 
-export interface NotificationAlertsResult {
+export type NotificationAlertsPaginatedReturnType = {
   id: string;
-  alerts: SystemAlert[];
+  alerts: NotificationAlertReturnType[];
   totalCount: number;
   unreadCount: number;
-}
+};

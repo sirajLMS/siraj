@@ -3,6 +3,7 @@ export * from "./billing";
 export * from "./communication";
 export * from "./parent";
 export * from "./profile";
+export * from "./redis";
 export * from "./staff";
 export * from "./storage";
 export * from "./student";

@@ -46,12 +46,9 @@ export const ParentOwnProfilePothosObject = ParentOwnProfileRef.implement({
   }),
 });
 
-export type ParentHandbookUrlDefinition = {
-  id: string;
-  url: string;
-};
+import type { ParentHandbookUrlReturnType } from "@/backend/types";
 
-const ParentHandbookUrlRef = gqlSchemaBuilder.objectRef<ParentHandbookUrlDefinition>("ParentHandbookUrl");
+const ParentHandbookUrlRef = gqlSchemaBuilder.objectRef<ParentHandbookUrlReturnType>("ParentHandbookUrl");
 
 export const ParentHandbookUrlPothosObject = ParentHandbookUrlRef.implement({
   fields: t => ({

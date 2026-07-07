@@ -7,25 +7,123 @@
 // (e.g., insert types with password fields, encryption key types). Only import what you
 // need via deep imports (e.g., `import type { ... } from "@/backend/types/auth.types"`)
 // rather than importing from this index file in frontend or public-facing code.
+
+export type {
+  ActorType,
+  AuditAction,
+  AuditEntityType,
+  AuditLogFilterInput,
+  AuditLogQueryResult,
+  AuditLogReturnType as AuditLogEntity,
+  AuditLogSubmitInput,
+  CreateAuditLogInput,
+} from "./audit.types";
 export * from "./audit.types";
-export * from "./auth.types";
+
+// Auth types (includes session, permission, and user-related types)
+export type {
+  AuthRateLimitSelectType as AuthRateLimitEntityInput,
+  PermissionGroupSelectType as PermissionGroupEntity,
+  SessionConfigSelectType as SessionConfigEntity,
+  SessionMetadataSelectType as SessionMetadataEntity,
+  SessionSelectType as SessionEntity,
+  SessionSubmitInput as SessionEntityInput,
+} from "./auth.types";
+export type {
+  AdminBillingSummaryResult,
+  CreateManualInvoiceInput,
+  CurrencyExchangeRateInsertType,
+  DeleteInvoiceReturnType,
+  InvoiceHistoryPaginatedResult,
+  InvoiceHistoryRow,
+  InvoiceInsertType,
+  InvoiceSelectType,
+  ManualInvoiceResult,
+  MarkInvoicePaidReturnType,
+  ParentBillingSummaryResult,
+  PaymentInsertType,
+  PaymentSelectType,
+  SendPaymentReminderResult,
+  StudentCreditRow,
+  UnpaidInvoiceSummaryItem,
+  UnpaidInvoicesSummaryResult,
+} from "./billing.types";
+// Billing types
 export * from "./billing.types";
-export * from "./book.types";
+// Class-instance-detail types (already exported, but remove duplicate ClassInstancePerformanceReturnType)
 export * from "./class-category.types";
 export * from "./class-instance-detail.types";
-export * from "./class-instance-performance.types";
+// Class Instance Performance types
+export type {
+  ClassInstancePerformanceInsertType,
+  ClassInstancePerformanceSelectType as ClassInstancePerformanceEntity,
+} from "./class-instance-performance.types";
 export * from "./class-subject.types";
+// Communications types
 export * from "./communications.types";
+// Complaint types
 export * from "./complaint.types";
-export * from "./complaintResponses.types";
+export type {
+  ComplaintResponseReturnType,
+  ComplaintResponseSubmitInput,
+} from "./complaintResponses.types";
+export type {
+  DstCheckedEmptyItemReturnType,
+  DstConflictGroupReturnType,
+  DstConflictItemReturnType,
+  DstMigrationReportReturnType,
+  DstUpdatedSessionReturnType,
+} from "./dst-migration.types";
+// DST Migration types
 export * from "./dst-migration.types";
+export type {
+  ClassCommunicationInsertType,
+  ClassCommunicationSelectType,
+  GroupClassAuditReturnType,
+  GroupClassCommunicationLogEntryReturnType as CommunicationLogEntryReturnType,
+  GroupClassEnrollmentInsertType,
+  GroupClassEnrollmentSelectType,
+  GroupClassInsertType,
+  GroupClassOnlineMeetingInfoReturnType as OnlineMeetingInfoReturnType,
+  GroupClassSelectType,
+  GroupClassStudentReturnType,
+} from "./group-class.types";
+// Group Class types
 export * from "./group-class.types";
+export type {
+  EndImpersonationReturnType,
+  ImpersonationAuditAction,
+  ImpersonationSessionReturnType,
+  ImpersonationStatusReturnType,
+  RedisImpersonationData,
+  StartImpersonationInput,
+  StartImpersonationReturnType,
+} from "./impersonation.types";
+// Impersonation types
 export * from "./impersonation.types";
+export * from "./learning-resources.types";
+export * from "./manager-onboarding.types";
+export type {
+  NotificationAlertReturnType as SystemAlert,
+  NotificationAlertsPaginatedReturnType as NotificationAlertsResult,
+} from "./notification-alerts.types";
+// Notification Alerts types
 export * from "./notification-alerts.types";
 export * from "./notificationDeliveries.types";
 export * from "./pagination.types";
 export * from "./parent.types";
+export * from "./parentHandbook.types";
+export * from "./permission.types";
 export * from "./permission-group-simulation.types";
+// Permission management types
+export type {
+  CreateGroupInput,
+  GroupUserEntity,
+  GroupWithPermissionIds,
+  UpdateGroupInput,
+  UserOverrideInput,
+  UserOverrideReturnType,
+} from "./permission-management.types";
 export * from "./permission-management.types";
 export * from "./profile.types";
 export * from "./schedule.types";
@@ -43,5 +141,8 @@ export * from "./system-settings.types";
 export * from "./teacher.types";
 export * from "./teacher-availability.types";
 export * from "./teacher-notes.types";
+export * from "./teacher-onboarding.types";
+// User types (export UserEntity and SafeUser from user.types.ts)
+// User types
 export * from "./userDeviceTokens.types";
 export * from "./userNotificationPreferences.types";

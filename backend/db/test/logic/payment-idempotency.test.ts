@@ -4,7 +4,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { InvoiceInsertInput, PaymentInsertInput } from "../../../types";
+import type { InvoiceInsertType, PaymentInsertType } from "../../../types";
 import { invoices, parents, payments, students, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
@@ -60,7 +60,7 @@ async function createTestInvoice(args: {
   now: Date;
 }) {
   const { tx, parentId, studentId, suffix, now } = args;
-  const invoiceInput: InvoiceInsertInput = {
+  const invoiceInput: InvoiceInsertType = {
     parentId,
     studentId,
     issueDate: "2026-06-09",
@@ -101,7 +101,7 @@ describe("Payment Idempotency", () => {
 
       // 4. Insert first payment record
       const idempotencyKey = `idemp-${uniqueSuffix}`;
-      const paymentInput1: PaymentInsertInput = {
+      const paymentInput1: PaymentInsertType = {
         invoiceId: invoiceRecord.id,
         amount: "100.00",
         currency: "USD",
@@ -115,7 +115,7 @@ describe("Payment Idempotency", () => {
       expect(payment1).toBeDefined();
 
       // 5. Insert second payment record with the same idempotency key (should fail)
-      const paymentInput2: PaymentInsertInput = {
+      const paymentInput2: PaymentInsertType = {
         invoiceId: invoiceRecord.id,
         amount: "100.00",
         currency: "USD",

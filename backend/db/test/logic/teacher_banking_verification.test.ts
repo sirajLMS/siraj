@@ -3,19 +3,19 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { TeacherEntity, UserEntity } from "../../../types";
+import type { TeacherEntity, UserReturnType } from "../../../types";
 import { TeacherBankingRepository } from "../../repo/teacher-banking.repository";
 import { teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
   teacher: TeacherEntity;
-  teacherUser: UserEntity;
-  adminUser: UserEntity;
+  teacherUser: UserReturnType;
+  adminUser: UserReturnType;
 }> {
   const now = new Date();
 
-  const [teacherUser] = (await tx
+  const teacherUsers = (await tx
     .insert(users)
     .values({
       name: "Banking Teacher",
@@ -24,9 +24,10 @@ async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [UserEntity];
+    .returning()) as UserReturnType[];
+  const teacherUser = teacherUsers[0];
 
-  const [adminUser] = (await tx
+  const adminUsers = (await tx
     .insert(users)
     .values({
       name: "Banking Admin",
@@ -35,7 +36,8 @@ async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [UserEntity];
+    .returning()) as UserReturnType[];
+  const adminUser = adminUsers[0];
 
   const [teacher] = (await tx
     .insert(teachers)

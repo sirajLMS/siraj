@@ -35,9 +35,8 @@ export type ClassInstanceTeacherReturnType = {
   avatarUrl: string | null;
 };
 
-export type ClassInstanceDetailReturnType = Omit<ClassInstanceSelectType,
-  "deletedAt" | "createdAt" | "updatedAt"
-> & {
+export type ClassInstanceDetailReturnType = Omit<ClassInstanceSelectType, "deletedAt" | "createdAt" | "updatedAt"> & {
+  courseName?: string | null;
   classType: ClassType | null;
   instanceId: string;
   scheduledDate: string;

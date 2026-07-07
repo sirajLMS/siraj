@@ -3,13 +3,17 @@ import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { OrderSortDirectionPothosObject } from "./enum.pothos";
 
 // File type enum
-export const FileTypePothosObject = gqlSchemaBuilder.enumType("FileType", {
-  values: Object.values(Types.FileTypes),
+export const FileTypePothosObject = gqlSchemaBuilder.enumType(Types.FileTypes, {
+  name: "FileType",
 });
 
 // Upload type enum
-export const UploadTypePothosObject = gqlSchemaBuilder.enumType("UploadType", {
-  values: Object.values(Types.UploadType),
+export const UploadTypePothosObject = gqlSchemaBuilder.enumType(Types.UploadType, {
+  name: "UploadType",
+});
+
+export const SortByPothosObject = gqlSchemaBuilder.enumType(Types.FileSortField, {
+  name: "FileSortField",
 });
 
 // Upload preparation result
@@ -119,13 +123,6 @@ export const StorageObjectListPothosObject = gqlSchemaBuilder
       limit: t.exposeInt("limit", { nullable: false }),
     }),
   });
-
-export const SortByValues = Object.values(Types.FileSortField);
-
-export const SortByPothosObject = gqlSchemaBuilder.enumType("FileSortField", {
-  values: SortByValues,
-});
-
 export const ListFileInputPothosObject = gqlSchemaBuilder
   .inputRef<Types.FilesListSearchInput>("FilesListInput")
   .implement({
@@ -155,13 +152,13 @@ export const ListFileInputPothosObject = gqlSchemaBuilder
 // File type breakdown for storage stats
 export const FileTypeBreakdownPothosObject = gqlSchemaBuilder
   .objectRef<{
-    type: Types.FileTypes;
+    type: string;
     count: number;
     size: bigint;
   }>("FileTypeBreakdown")
   .implement({
     fields: t => ({
-      type: t.expose("type", { type: FileTypePothosObject }),
+      type: t.exposeString("type"),
       count: t.exposeInt("count"),
       size: t.field({
         type: "String",

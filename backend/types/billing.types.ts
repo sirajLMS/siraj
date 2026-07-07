@@ -1,40 +1,45 @@
 import type { currencyExchangeRates, invoices, payments } from "@/backend/db/schema";
-import type { PageInfo } from "./pagination.types";
 import type { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
+import type { PageInfo } from "./pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
 export type InvoiceInsertType = typeof invoices.$inferInsert;
 
-export type InvoiceReturnType = Omit<InvoiceSelectType,
+export type InvoiceReturnType = Omit<
+  InvoiceSelectType,
   "deletedAt" | "idempotencyKey" | "version" | "createdByUserId"
 > & {
   status: InvoiceStatus;
   invoiceType: InvoiceType;
 };
 
-export type InvoiceSubmitInput = Omit<InvoiceInsertType,
-  "id" | "createdAt" | "updatedAt" | "deletedAt" | "idempotencyKey" | "version" | "createdByUserId" | "status" | "paidDate"
+export type InvoiceSubmitInput = Omit<
+  InvoiceInsertType,
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+  | "idempotencyKey"
+  | "version"
+  | "createdByUserId"
+  | "status"
+  | "paidDate"
 >;
 
 export type PaymentSelectType = typeof payments.$inferSelect;
 export type PaymentInsertType = typeof payments.$inferInsert;
 
-export type PaymentReturnType = Omit<PaymentSelectType,
-  "deletedAt" | "idempotencyKey" | "refundedAmount"
->;
+export type PaymentReturnType = Omit<PaymentSelectType, "deletedAt" | "idempotencyKey" | "refundedAmount">;
 
-export type PaymentSubmitInput = Omit<PaymentInsertType,
+export type PaymentSubmitInput = Omit<
+  PaymentInsertType,
   "id" | "createdAt" | "updatedAt" | "deletedAt" | "idempotencyKey" | "refundedAmount"
 >;
 
 export type CurrencyExchangeRateSelectType = typeof currencyExchangeRates.$inferSelect;
 export type CurrencyExchangeRateInsertType = typeof currencyExchangeRates.$inferInsert;
 
-export type CurrencyExchangeRateReturnType = CurrencyExchangeRateSelectType;
-
-export type CurrencyExchangeRateSubmitInput = Omit<CurrencyExchangeRateInsertType,
-  "id" | "createdAt" | "updatedAt"
->;
+export type CurrencyExchangeRateSubmitInput = Omit<CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type UnpaidInvoiceSummaryItem = {
   id: string;

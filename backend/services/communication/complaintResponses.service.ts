@@ -1,7 +1,7 @@
 import { ComplaintRepository, ComplaintResponseRepository, ParentRepository } from "@/backend/db/repo";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
-import type { ComplaintResponse, ComplaintResponseInput } from "@/backend/types";
+import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
 import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
 
 type ComplaintById = NonNullable<Awaited<ReturnType<typeof ComplaintRepository.getComplaintById>>>;
@@ -27,7 +27,7 @@ async function assertCanRespondToComplaint(
 }
 
 async function dispatchResponseNotifications(
-  response: ComplaintResponse,
+  response: ComplaintResponseReturnType,
   complaint: ComplaintById,
   responderUserId: string,
   locale?: string
@@ -62,10 +62,10 @@ async function dispatchResponseNotifications(
 
 export namespace ComplaintResponseService {
   export async function respondToComplaint(
-    input: ComplaintResponseInput,
+    input: ComplaintResponseSubmitInput,
     responderUserId: string,
     locale?: string
-  ): Promise<ComplaintResponse> {
+  ): Promise<ComplaintResponseReturnType> {
     const { complaintId, body } = input;
 
     const complaint = await assertCanRespondToComplaint(responderUserId, complaintId, locale);

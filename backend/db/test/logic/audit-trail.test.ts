@@ -14,16 +14,18 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import type { CreateAuditLogInput } from "@/backend/types";
+import type { UserReturnType } from "@/backend/types/user.types";
+import { type AccountStatus, StudentStatus, type UserRole } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type * as Types from "../../../types";
 import { db } from "../../drizzleDb";
 import { AuditRepository } from "../../repo";
 import { auditLogs, users } from "../../schema";
 import { IP_ADDRESS_1 } from "../const";
 
 describe("Audit Trail System", () => {
-  let testUser1: Types.UserEntity;
-  let testUser2: Types.UserEntity;
+  let testUser1: UserReturnType;
+  let testUser2: UserReturnType;
 
   beforeAll(async () => {
     testLogger.info("Setting up test users for audit trail tests");
@@ -34,7 +36,7 @@ describe("Audit Trail System", () => {
       const uniqueId1 = randomUUID();
       const uniqueId2 = randomUUID();
 
-      [testUser1] = await tx
+      const [user1] = await tx
         .insert(users)
         .values({
           name: "Audit Test User 1",
@@ -45,7 +47,7 @@ describe("Audit Trail System", () => {
         })
         .returning();
 
-      [testUser2] = await tx
+      const [user2] = await tx
         .insert(users)
         .values({
           name: "Audit Test User 2",
@@ -56,19 +58,36 @@ describe("Audit Trail System", () => {
         })
         .returning();
 
+      // Construct UserReturnType with resolved fields
+      testUser1 = {
+        ...user1,
+        role: "SUPER_ADMIN" as UserRole,
+        status: "ACTIVATED" as AccountStatus,
+        teacherId: null,
+        parentId: null,
+      };
+
+      testUser2 = {
+        ...user2,
+        role: "SUPER_ADMIN" as UserRole,
+        status: "ACTIVATED" as AccountStatus,
+        teacherId: null,
+        parentId: null,
+      };
+
       testLogger.info("Test users created", { user1: testUser1.id, user2: testUser2.id });
     });
   });
 
   test("should create a basic audit log entry", async () => {
-    const input: Types.CreateAuditLogInput = {
+    const input = {
       actorUserId: testUser1.id,
       actorType: "USER",
       entityType: "STUDENT",
       entityId: "00000000-0000-0000-0000-000000000001",
       action: "CREATE",
       description: "Created new student",
-    };
+    } as CreateAuditLogInput;
 
     const auditLog = await AuditRepository.createAuditLog(input);
 
@@ -83,7 +102,7 @@ describe("Audit Trail System", () => {
   });
 
   test("should create audit log with state changes", async () => {
-    const input: Types.CreateAuditLogInput = {
+    const input = {
       actorUserId: testUser1.id,
       actorType: "USER",
       entityType: "INVOICE",
@@ -93,7 +112,7 @@ describe("Audit Trail System", () => {
       previousState: { amount: 100, currency: "USD" },
       newState: { amount: 150, currency: "USD" },
       changes: { amount: { from: 100, to: 150 } },
-    };
+    } as CreateAuditLogInput;
 
     const auditLog = await AuditRepository.createAuditLog(input);
 
@@ -105,7 +124,7 @@ describe("Audit Trail System", () => {
   });
 
   test("should create audit log with metadata", async () => {
-    const input: Types.CreateAuditLogInput = {
+    const input = {
       actorUserId: null,
       actorType: "SYSTEM",
       entityType: "PAYMENT",
@@ -119,7 +138,7 @@ describe("Audit Trail System", () => {
         currency: "USD",
         reason: "Duplicate payment",
       },
-    };
+    } as CreateAuditLogInput;
 
     const auditLog = await AuditRepository.createAuditLog(input);
 
@@ -217,8 +236,8 @@ describe("Audit Trail System", () => {
 
     const auditLog = await AuditRepository.logStudentStatusChange({
       studentId,
-      oldStatus: "ACTIVE",
-      newStatus: "INACTIVE",
+      oldStatus: StudentStatus.REGULAR,
+      newStatus: StudentStatus.SUSPENDED,
       actorUserId: testUser1.id,
       description: "Student requested suspension",
     });

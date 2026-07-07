@@ -1203,6 +1203,7 @@ type GroupUser {
 type ImpersonationStatus {
   actorUser: User
   expiresAt: DateTime
+  id: ID
   isActive: Boolean
   reason: String
   startedAt: DateTime
@@ -1228,7 +1229,6 @@ type LearningResourceRow {
   contentType: String
   createdAt: DateTime
   displayName: String
-  filePath: String
   fileSize: Float
   id: String
   uploadedByUserId: String
@@ -2115,6 +2115,7 @@ input StaffOwnProfileUpdateInput {
 
 type StartImpersonationResponse {
   expiresAt: DateTime
+  id: ID
   impersonationSessionId: String
   targetUser: User
   token: String

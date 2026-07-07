@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { AdminAuditLogInsertInput } from "../../../types";
 import { adminAuditLogs, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
@@ -26,14 +25,15 @@ describe("Audit Log Immutability", () => {
         .returning();
 
       // 2. Insert audit log record
-      const auditInput: AdminAuditLogInsertInput = {
-        actorUserId: actorUser.id,
-        action: "INITIAL_INSERT",
-        description: "Test log for immutability",
-        createdAt: now,
-      };
-
-      const [auditRecord] = await tx.insert(adminAuditLogs).values(auditInput).returning();
+      const [auditRecord] = await tx
+        .insert(adminAuditLogs)
+        .values({
+          actorUserId: actorUser.id,
+          action: "INITIAL_INSERT",
+          description: "Test log for immutability",
+          createdAt: now,
+        })
+        .returning();
       expect(auditRecord).toBeDefined();
 
       // 3. Attempt UPDATE on the audit log record (should fail)

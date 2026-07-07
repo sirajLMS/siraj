@@ -2,7 +2,7 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { ComplaintResponse, ComplaintResponseInput } from "@/backend/types";
+import type { ComplaintResponseInput, ComplaintResponseReturnType } from "@/backend/types/complaintResponses.types";
 import { ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
@@ -46,7 +46,7 @@ export namespace ComplaintResponseRepository {
   export const getResponsesByComplaint = async (
     complaintId: string,
     tx?: DBTransaction
-  ): Promise<ComplaintResponse[]> => {
+  ): Promise<ComplaintResponseReturnType[]> => {
     const queryDb = tx ?? db;
 
     return await queryDb
@@ -67,7 +67,7 @@ export namespace ComplaintResponseRepository {
   export const getResponsesByComplaints = async (
     complaintIds: readonly string[],
     tx?: DBTransaction
-  ): Promise<Map<string, ComplaintResponse[]>> => {
+  ): Promise<Map<string, ComplaintResponseReturnType[]>> => {
     const queryDb = tx ?? db;
 
     if (complaintIds.length === 0) {
@@ -88,7 +88,7 @@ export namespace ComplaintResponseRepository {
       .where(inArray(complaintResponses.complaintId, [...complaintIds]))
       .orderBy(desc(complaintResponses.createdAt));
 
-    const result = new Map<string, ComplaintResponse[]>();
+    const result = new Map<string, ComplaintResponseReturnType[]>();
     for (const id of complaintIds) {
       result.set(
         id,

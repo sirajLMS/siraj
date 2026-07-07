@@ -18,9 +18,9 @@ import type { PaginationArgs } from "@/backend/types";
 import type { InvoiceStatus, InvoiceType, StudentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
-type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertInput, "id" | "createdAt" | "updatedAt">;
-type InvoiceCreateInput = Omit<Types.InvoiceInsertInput, "id" | "createdAt" | "updatedAt">;
-type PaymentRecordInput = Omit<Types.PaymentInsertInput, "id" | "createdAt" | "updatedAt">;
+type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;
+type InvoiceCreateInput = Omit<Types.InvoiceInsertType, "id" | "createdAt" | "updatedAt">;
+type PaymentRecordInput = Omit<Types.PaymentInsertType, "id" | "createdAt" | "updatedAt">;
 
 export namespace BillingRepository {
   async function acquireInvoiceLock(tx: DBTransaction, invoiceId: string): Promise<void> {

@@ -36,9 +36,9 @@ export type DailyScheduleMetricFilter =
   | "absent"
   | "leave";
 
-export type DailyScheduleResult = Types.ClassInstanceEntity & {
+export type DailyScheduleResult = Types.ClassInstanceDetailReturnType & {
   student?: Types.StudentEntity;
-  teacher?: Types.TeacherEntity & { user: Types.UserEntity };
+  teacher?: Types.TeacherEntity & { user: Types.UserReturnType };
   yourTimeFormatted?: string;
 };
 
@@ -98,11 +98,43 @@ async function hydrateDailyScheduleRows(
     teachersData.map(teacherRow => [teacherRow.teacher.id, { ...teacherRow.teacher, user: teacherRow.user }])
   );
 
-  return instances.map(instance => ({
-    ...instance,
-    student: studentMap.get(instance.studentId),
-    teacher: teacherMap.get(instance.teacherId),
-  }));
+  return instances.map(instance => {
+    const student = studentMap.get(instance.studentId);
+    const teacher = teacherMap.get(instance.teacherId);
+
+    return {
+      ...instance,
+      courseName: null, // No direct mapping from DB
+      instanceId: instance.id,
+      scheduledDate: instance.scheduledStartAt.toISOString().split("T")[0],
+      startTime: instance.scheduledStartAt.toISOString(),
+      endTime: instance.scheduledEndAt.toISOString(),
+      durationMinutes: Math.round(
+        (instance.scheduledEndAt.getTime() - instance.scheduledStartAt.getTime()) / (1000 * 60)
+      ),
+      classType: instance.classType as Types.ClassType | null,
+      status: instance.executionState as Types.ClassExecutionState | null,
+      outcome: instance.outcome as Types.ClassOutcome | null,
+      executionState: instance.executionState as Types.ClassExecutionState | null,
+      rescheduleDateLabel: instance.rescheduleDateLabel as Types.RescheduleDateLabel | null,
+      student: student
+        ? {
+            id: student.id,
+            name: student.name,
+            grade: null, // No direct mapping
+            level: null, // No direct mapping
+            avatarUrl: student.avatarUrl,
+          }
+        : undefined,
+      teacher: teacher
+        ? {
+            ...teacher,
+            user: teacher.user,
+          }
+        : undefined,
+      yourTimeFormatted: instance.yourTimeFormatted,
+    };
+  });
 }
 
 async function fetchDailyScheduleBaseRows(
@@ -149,7 +181,7 @@ async function fetchDailyScheduleBaseRows(
   return hydrateDailyScheduleRows(
     t,
     rows.map(row => row.classInstance)
-  );
+  ) as unknown as DailyScheduleResult[];
 }
 
 async function applyViewerTimezoneFormatting(

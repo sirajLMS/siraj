@@ -1,9 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { Email } from "@/backend/lib/email";
-import type {
-  TeacherOnboardingInput,
-  TeacherOnboardingResult,
-} from "@/backend/services/teacher/teacher-onboarding.service";
+import type { TeacherOnboardingInput } from "@/backend/services/teacher/teacher-onboarding.service";
+import type { TeacherOnboardingReturnType } from "@/backend/types/teacher-onboarding.types";
 import type { CountryCode, Gender } from "@/shared/lib/enum";
 import { CountryCodePothosObject, GenderPothosObject } from "./enum.pothos";
 
@@ -85,15 +83,34 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-export const TeacherOnboardingResultPothosObject = gqlSchemaBuilder
-  .objectRef<TeacherOnboardingResult>("TeacherOnboardingResult")
-  .implement({
-    description: "Result of teacher onboarding operation",
-    fields: t => ({
-      userId: t.exposeString("userId", { description: "Created user ID" }),
-      teacherId: t.exposeString("teacherId", { description: "Created teacher profile ID" }),
-      name: t.exposeString("name", { description: "Teacher name" }),
-      email: t.exposeString("email", { description: "Teacher email" }),
-      status: t.exposeString("status", { description: "Teacher account status" }),
+const TeacherOnboardingRef = gqlSchemaBuilder.objectRef<TeacherOnboardingReturnType>("TeacherOnboarding");
+
+export const TeacherOnboardingPothosObject = TeacherOnboardingRef.implement({
+  description: "Teacher onboarding profile with resolved metadata",
+  fields: t => ({
+    id: t.exposeString("teacherId", {
+      description: "Unique identifier for the teacher profile",
     }),
-  });
+    userId: t.exposeString("userId", {
+      description: "Created user ID for the onboarded teacher",
+    }),
+    name: t.exposeString("name", {
+      description: "Resolved teacher display name",
+    }),
+    email: t.exposeString("email", {
+      description: "Teacher email address",
+    }),
+    status: t.exposeString("status", {
+      description: "Current teacher account status",
+    }),
+    gender: t.expose("gender", {
+      type: GenderPothosObject,
+      nullable: true,
+      description: "Teacher gender",
+    }),
+    timezoneDisplay: t.exposeString("timezoneDisplay", {
+      nullable: true,
+      description: "Formatted timezone display string",
+    }),
+  }),
+});

@@ -5,6 +5,8 @@ export type ImpersonationSessionInsertType = typeof impersonationSessions.$infer
 
 export type ImpersonationSessionReturnType = ImpersonationSessionSelectType;
 
+export type ImpersonationSessionSubmitInput = Omit<ImpersonationSessionInsertType, "id" | "startedAt" | "isActive">;
+
 export type RedisImpersonationData = {
   targetUserId: string;
   startedAt: string;

@@ -5,11 +5,11 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
-  AdminNoteReturnType,
-  CommunicationLogEntryReturnType,
+  GroupClassAdminNoteReturnType,
   GroupClassAuditReturnType,
+  GroupClassCommunicationLogEntryReturnType,
+  GroupClassOnlineMeetingInfoReturnType,
   GroupClassStudentReturnType,
-  OnlineMeetingInfoReturnType,
 } from "@/backend/types";
 import {
   AppPermission,
@@ -69,7 +69,7 @@ export namespace GroupClassService {
       avatarUrl: e.studentAvatarUrl,
     }));
 
-    const communicationLogs: CommunicationLogEntryReturnType[] = communications.map(c => ({
+    const communicationLogs: GroupClassCommunicationLogEntryReturnType[] = communications.map(c => ({
       id: c.id,
       type: c.type,
       title: c.title,
@@ -79,13 +79,13 @@ export namespace GroupClassService {
       timestamp: c.timestamp ? c.timestamp.toISOString() : null,
     }));
 
-    const meetingInfo: OnlineMeetingInfoReturnType = {
+    const meetingInfo: GroupClassOnlineMeetingInfoReturnType = {
       platform: "zoom",
       meetingId: classInstance.zoomMeetingUrl ? extractZoomMeetingId(classInstance.zoomMeetingUrl) : null,
       joinUrl: classInstance.zoomMeetingUrl ?? null,
     };
 
-    const adminNote: AdminNoteReturnType = {
+    const adminNote: GroupClassAdminNoteReturnType = {
       content: classInstance.adminNotes ?? "",
       lastUpdated: classInstance.updatedAt.toISOString(),
     };

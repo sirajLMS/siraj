@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { CurrencyExchangeRateInsertInput } from "../../../types";
+import type { CurrencyExchangeRateInsertType } from "../../../types";
 import { currencyExchangeRates } from "../../schema";
 import { runInRollback } from "../test-utils";
 
@@ -12,7 +12,7 @@ describe("Currency Exchange Rates", () => {
       // Use integer hour/date to avoid floating millisecond differences
       const effectiveDate = new Date(Date.UTC(2026, 5, 9, 12, 0, 0));
 
-      const exchangeRateInput1: CurrencyExchangeRateInsertInput = {
+      const exchangeRateInput1: CurrencyExchangeRateInsertType = {
         fromCurrency: "USD",
         toCurrency: "EUR",
         rate: "0.920000",
@@ -21,7 +21,7 @@ describe("Currency Exchange Rates", () => {
         updatedAt: now,
       };
 
-      const exchangeRateInput2: CurrencyExchangeRateInsertInput = {
+      const exchangeRateInput2: CurrencyExchangeRateInsertType = {
         fromCurrency: "USD",
         toCurrency: "EUR",
         rate: "0.930000",

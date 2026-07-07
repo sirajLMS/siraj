@@ -4,6 +4,39 @@ import type { NotificationChannel, NotificationDeliveryStatus, NotificationEvent
 export type NotificationDeliverySelectType = typeof notificationDeliveries.$inferSelect;
 export type NotificationDeliveryInsertType = typeof notificationDeliveries.$inferInsert;
 
+export type NotificationDeliveryReturnType = Omit<
+  NotificationDeliverySelectType,
+  // audit fields
+  | "createdAt"
+  | "updatedAt"
+  // internal / sensitive fields
+  | "failureReason"
+  | "webhookPayload"
+  | "providerMessageId"
+> & {
+  // enums properly typed
+  channel: NotificationChannel;
+  eventType: NotificationEventType;
+  status: NotificationDeliveryStatus;
+};
+
+export type NotificationDeliverySubmitInput = Omit<
+  NotificationDeliveryInsertType,
+  // auto-generated
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  // status lifecycle fields set by server
+  | "status"
+  | "sentAt"
+  | "deliveredAt"
+  | "openedAt"
+  | "failedAt"
+  | "providerMessageId"
+  | "failureReason"
+  | "webhookPayload"
+>;
+
 export type NotificationDeliveryStatusCount = Pick<NotificationDeliverySelectType, "status"> & {
   count: number;
 };

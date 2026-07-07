@@ -2,31 +2,33 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/shared/lib/enum";
-import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
+import type { ParentEntity, StudentEntity, TeacherEntity, UserReturnType } from "../../../types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "../../repo";
 import { parents, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
-async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserEntity> {
+async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserReturnType> {
   const now = new Date();
-  const [user] = (await tx
-    .insert(users)
-    .values({
-      name,
-      email: `${emailPrefix}-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
+  const user = (
+    await tx
+      .insert(users)
+      .values({
+        name,
+        email: `${emailPrefix}-${randomUUID()}@example.com`,
+        password: "password",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+  )[0] as UserReturnType;
   return user;
 }
 
 async function createBookingFixture(tx: DBTransaction): Promise<{
   teacher: TeacherEntity;
   student: StudentEntity;
-  teacherUser: UserEntity;
-  adminUser: UserEntity;
+  teacherUser: UserReturnType;
+  adminUser: UserReturnType;
 }> {
   const now = new Date();
 

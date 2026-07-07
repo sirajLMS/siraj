@@ -2,6 +2,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import type { UserReturnType } from "@/backend/types/auth.types";
 import {
   DevicePlatform,
   NotificationChannel,
@@ -9,7 +10,6 @@ import {
   NotificationEventType,
 } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { UserEntity } from "../../../types";
 import { NotificationRepository } from "../../repo/notification.repository";
 import { notificationDeliveries, userDeviceTokens, users } from "../../schema";
 import { createTestUser, runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
@@ -101,7 +101,7 @@ describe("Notification Delivery Tracking", () => {
     testLogger.info("Testing delivery webhook handler...");
     await runInRollback(async tx => {
       const now = new Date();
-      const [user] = (await tx
+      const [rawUser] = await tx
         .insert(users)
         .values({
           name: "Webhook Test User",
@@ -110,7 +110,8 @@ describe("Notification Delivery Tracking", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const user = rawUser as unknown as UserReturnType;
 
       const providerMessageId = `provider-${randomUUID()}`;
       const delivery = await NotificationRepository.createDelivery(
@@ -152,7 +153,7 @@ describe("Notification Delivery Tracking", () => {
     testLogger.info("Testing notification delivery analytics...");
     await runInRollback(async tx => {
       const now = new Date();
-      const [user] = (await tx
+      const [rawUser] = await tx
         .insert(users)
         .values({
           name: "Analytics Test User",
@@ -161,7 +162,8 @@ describe("Notification Delivery Tracking", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const user = rawUser as unknown as UserReturnType;
 
       const openedDelivery = await NotificationRepository.createDelivery(
         {

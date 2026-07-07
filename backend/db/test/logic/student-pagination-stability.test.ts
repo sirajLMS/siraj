@@ -1,9 +1,10 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { AppLanguage, Gender, OrderSortDirection, ParentStatus } from "@/shared/lib/enum";
+import type { UserReturnType } from "@/backend/types/auth.types";
+import { AccountStatus, AppLanguage, Gender, OrderSortDirection, ParentStatus, UserRole } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, StudentFilterArgs, UserEntity } from "../../../types";
+import type { ParentEntity, StudentEntity, StudentFilterArgs } from "../../../types";
 import { PaginationArgs, StudentsOrderByColumn } from "../../../types";
 import { db } from "../../drizzleDb";
 import { StudentRepository } from "../../repo";
@@ -11,11 +12,11 @@ import { parents, students, users } from "../../schema";
 
 describe("Issue #25: Student Pagination Cursor Stability", () => {
   let testParent: ParentEntity;
-  let testUser: UserEntity;
+  let testUser: UserReturnType;
 
   beforeAll(async () => {
     testLogger.info("Setting up test parent for pagination stability tests...");
-    const [user] = (await db
+    const userResult = await db
       .insert(users)
       .values({
         name: "Pagination Test User",
@@ -24,8 +25,14 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       })
-      .returning()) as [UserEntity];
-    testUser = user;
+      .returning();
+    const user = userResult[0];
+    testUser = {
+      ...user,
+      role: UserRole.PARENT,
+      status: AccountStatus.ACTIVATED,
+      parentId: testParent.id,
+    };
 
     const [parent] = (await db
       .insert(parents)

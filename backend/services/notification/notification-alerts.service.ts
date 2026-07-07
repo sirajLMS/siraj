@@ -4,13 +4,11 @@ import { complaints, notificationDeliveries } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { NotificationAlertsResult, SystemAlert } from "@/backend/types";
+import type { NotificationAlertReturnType, NotificationAlertsPaginatedReturnType } from "@/backend/types";
 import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/shared/lib/enum";
 
-export type { NotificationAlertsResult, SystemAlert } from "@/backend/types";
-
 export namespace NotificationAlertsService {
-  export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsResult> {
+  export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsPaginatedReturnType> {
     try {
       const canViewAlerts = await PermissionsService.hasPermission(userId, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
@@ -44,7 +42,7 @@ export namespace NotificationAlertsService {
         .orderBy(desc(notificationDeliveries.createdAt))
         .limit(20);
 
-      const alerts: SystemAlert[] = [];
+      const alerts: NotificationAlertReturnType[] = [];
 
       for (const complaint of unansweredComplaints) {
         alerts.push({

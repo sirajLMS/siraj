@@ -1,9 +1,9 @@
-import type { LearningResourceListResult, LearningResourceRow } from "@/backend/db/repo/learning-resource.repository";
 import { LearningResourceRepository } from "@/backend/db/repo/learning-resource.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
+import type { LearningResourceListResult, LearningResourceReturnType } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export interface CreateResourceInput {
@@ -40,7 +40,7 @@ export namespace LearningResourceService {
     actorUserId: string,
     input: CreateResourceInput,
     locale?: string
-  ): Promise<LearningResourceRow> {
+  ): Promise<LearningResourceReturnType> {
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     // Step 0: Validate input

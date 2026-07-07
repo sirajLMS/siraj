@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import type { ParentEntity, StudentEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, UserEntity } from "../../../types";
 import type { DBTransaction } from "../../db.types";
 import { db } from "../../drizzleDb";
 import { parents, students, users } from "../../schema";
@@ -17,16 +17,18 @@ async function setupTestData(tx: DBTransaction) {
   const parentBEmail = `parent-b-${randomUUID()}@example.com`;
 
   // 1. Create Parent A
-  const [parentAUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Parent A",
-      email: parentAEmail,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
+  const parentAUser = (
+    await tx
+      .insert(users)
+      .values({
+        name: "Parent A",
+        email: parentAEmail,
+        password: "password",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+  )[0];
 
   const [parentA] = (await tx
     .insert(parents)
@@ -39,16 +41,18 @@ async function setupTestData(tx: DBTransaction) {
     .returning()) as [ParentEntity];
 
   // 2. Create Parent B
-  const [parentBUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Parent B",
-      email: parentBEmail,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
+  const parentBUser = (
+    await tx
+      .insert(users)
+      .values({
+        name: "Parent B",
+        email: parentBEmail,
+        password: "password",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+  )[0];
 
   const [parentB] = (await tx
     .insert(parents)

@@ -5,10 +5,7 @@ export type AuditLogInsertType = typeof auditLogs.$inferInsert;
 
 export type AuditLogReturnType = Omit<AuditLogSelectType, "deletedAt">;
 
-export type AuditLogSubmitInput = Omit<
-  AuditLogInsertType,
-  "id" | "createdAt" | "actorUserId"
->;
+export type AuditLogSubmitInput = Omit<AuditLogInsertType, "id" | "createdAt" | "actorUserId">;
 
 /**
  * Actor type for audit logs

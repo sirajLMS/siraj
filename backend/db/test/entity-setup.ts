@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import type { AppPermission } from "@/shared/lib/enum";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
+import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserReturnType } from "../../types";
 import type { DBTransaction } from "../db.types";
 import { classInstances, parents, permissions, students, teacherAssignments, teachers, users } from "../schema";
 
 export async function createTestUser(
   tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
-): Promise<UserEntity> {
+): Promise<UserReturnType> {
   const now = new Date();
-  const [user] = (await tx
+  const [user] = await tx
     .insert(users)
     .values({
       name: "Test User",
@@ -19,7 +19,7 @@ export async function createTestUser(
       updatedAt: now,
       ...overrides,
     })
-    .returning()) as [UserEntity];
+    .returning();
   return user;
 }
 
@@ -107,7 +107,7 @@ export async function setupTeacher(
   tx: DBTransaction,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   teacherOverrides: Partial<typeof teachers.$inferInsert> = {}
-): Promise<{ user: UserEntity; teacher: TeacherEntity }> {
+): Promise<{ user: UserReturnType; teacher: TeacherEntity }> {
   const user = await createTestUser(tx, userOverrides);
   const teacher = await createTestTeacher(tx, user.id, teacherOverrides);
   return { user, teacher };
@@ -118,7 +118,7 @@ export async function setupStudent(
   userOverrides: Partial<typeof users.$inferInsert> = {},
   parentOverrides: Partial<typeof parents.$inferInsert> = {},
   studentOverrides: Partial<typeof students.$inferInsert> = {}
-): Promise<{ user: UserEntity; parent: ParentEntity; student: StudentEntity }> {
+): Promise<{ user: UserReturnType; parent: ParentEntity; student: StudentEntity }> {
   const user = await createTestUser(tx, userOverrides);
   const parent = await createTestParent(tx, user.id, parentOverrides);
   const student = await createTestStudent(tx, parent.id, studentOverrides);
@@ -160,10 +160,10 @@ export async function setupTestEntities(
   prefix: string,
   options: { skipInstance?: boolean; classesRemaining?: number } = {}
 ): Promise<{
-  parentUser: UserEntity;
+  parentUser: UserReturnType;
   parent: ParentEntity;
   student: StudentEntity;
-  teacherUser: UserEntity;
+  teacherUser: UserReturnType;
   teacher: TeacherEntity;
   assignment: typeof teacherAssignments.$inferSelect;
   instance: ClassInstanceEntity | null;

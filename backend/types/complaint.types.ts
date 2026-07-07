@@ -1,6 +1,6 @@
 import type { complaints } from "@/backend/db/schema";
 import type { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
-import type { ComplaintResponse } from "./complaintResponses.types";
+import type { ComplaintResponseReturnType } from "./complaintResponses.types";
 import type { PageInfo } from "./pagination.types";
 
 export type ComplaintSelectType = typeof complaints.$inferSelect;
@@ -42,7 +42,7 @@ export type ComplaintReturnType = Omit<
   parentAvatarUrl?: string | null;
   studentName?: string | null;
   responseCount?: number | null;
-  responses?: ReadonlyArray<ComplaintResponse> | null;
+  responses?: ReadonlyArray<ComplaintResponseReturnType> | null;
   files?: ReadonlyArray<ComplaintFileReturnType> | null;
 };
 

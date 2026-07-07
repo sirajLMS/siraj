@@ -1,14 +1,14 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { UserReturnType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { UserEntity } from "../../../types";
 import { db } from "../../drizzleDb";
 import { SoftDeleteRepository, StorageDbRepository } from "../../repo";
 import { storageFiles, userFiles, users } from "../../schema";
 
 describe("Consolidated File Usage Integrity (Junction Tables)", () => {
-  let testUser: UserEntity | null = null;
+  let testUser: UserReturnType | null = null;
   const testPath = `/uploads/test-file-${randomUUID()}.png`;
 
   beforeAll(async () => {

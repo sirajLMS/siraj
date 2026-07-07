@@ -1,5 +1,13 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
-import * as Types from "@/backend/types";
+import type {
+  PartialStudentUpdateInput,
+  Student,
+  StudentCreateInput,
+  StudentFilterArgs,
+  StudentsOrderByClause,
+  StudentsWithFiltersResponse,
+} from "@/backend/types";
+import { StudentsOrderByColumn } from "@/backend/types";
 import { OrderSortDirection } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
@@ -11,7 +19,7 @@ import {
 } from "../pothos";
 
 export const StudentPothosObject = gqlSchemaBuilder
-  .loadableObjectRef<Types.Student, string>("Student", {
+  .loadableObjectRef<Student, string>("Student", {
     load: async (ids: string[]) => StudentRepository.loadByIds(ids),
     sort: s => s.id,
   })
@@ -61,7 +69,7 @@ export const StudentPothosObject = gqlSchemaBuilder
   });
 
 export const StudentCreateInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.StudentCreateInput>("StudentCreateInput")
+  .inputRef<StudentCreateInput>("StudentCreateInput")
   .implement({
     fields: t => ({
       parentId: t.string({ required: true }),
@@ -90,7 +98,7 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
   });
 
 export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
-  .inputRef<Types.PartialStudentUpdateInput>("PartialStudentUpdateInput")
+  .inputRef<PartialStudentUpdateInput>("PartialStudentUpdateInput")
   .implement({
     fields: t => ({
       id: t.string({ required: true }),
@@ -119,7 +127,7 @@ export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
   });
 
 export const StudentsWithFiltersPothosObject = gqlSchemaBuilder
-  .objectRef<Types.StudentsWithFiltersResponse>("StudentsWithFiltersResponse")
+  .objectRef<StudentsWithFiltersResponse>("StudentsWithFiltersResponse")
   .implement({
     fields: t => ({
       data: t.expose("data", { type: [StudentPothosObject], nullable: false }),
@@ -128,7 +136,7 @@ export const StudentsWithFiltersPothosObject = gqlSchemaBuilder
   });
 
 export const StudentFilterArgsPothosObject = gqlSchemaBuilder
-  .inputRef<Types.StudentFilterArgs>("StudentFilterArgs")
+  .inputRef<StudentFilterArgs>("StudentFilterArgs")
   .implement({
     fields: t => ({
       name: t.string(),
@@ -170,12 +178,12 @@ export const StudentFilterArgsPothosObject = gqlSchemaBuilder
     }),
   });
 
-export const StudentsOrderByColumnPothosObject = gqlSchemaBuilder.enumType("StudentsOrderByColumn", {
-  values: Object.values(Types.StudentsOrderByColumn),
+export const StudentsOrderByColumnPothosObject = gqlSchemaBuilder.enumType(StudentsOrderByColumn, {
+  name: "StudentsOrderByColumn",
 });
 
 export const StudentsOrderByClausePothosObject = gqlSchemaBuilder
-  .inputRef<Types.StudentsOrderByClause>("StudentsOrderByClause")
+  .inputRef<StudentsOrderByClause>("StudentsOrderByClause")
   .implement({
     fields: t => ({
       column: t.field({
