@@ -31,10 +31,11 @@ debug-storybook.log
 /storage/
 /storage
 
-# tests & documentation (not needed for deployment)
+# tests, seeds & dev scripts (not needed for deployment)
 test/
 backend/db/test/
 backend/db/seeds/
+backend/db/scripts/
 frontend/graphql/test/
 docs/
 *.md
