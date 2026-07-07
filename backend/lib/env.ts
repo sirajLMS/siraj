@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { getGlobalSingleton } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import { sanitizeUrlCredentials } from "./utils/url";
 
@@ -250,5 +251,30 @@ export function getEnv(name: string, defaultValue: string): string {
   return process.env[name] || defaultValue;
 }
 
-// Auto-validate on module import
-validateEnvironment();
+const ENV_KEY = Symbol.for("siraj.env");
+
+let cachedConfig: EnvironmentConfig | undefined;
+
+function warnIfVercelDatabaseUrlNotPooled(databaseUrl: string): void {
+  if (!process.env.VERCEL || !databaseUrl) return;
+
+  const isPooled = databaseUrl.includes("-pooler.") || databaseUrl.includes("pooler=true");
+  if (!isPooled) {
+    logger.warn("⚠️  On Vercel, use a Neon pooled connection string (-pooler host) with Fluid compute TCP pooling.");
+  }
+}
+
+/**
+ * Validate environment once per process (survives Turbopack module re-evaluation).
+ */
+export function ensureEnvironmentValidated(): EnvironmentConfig {
+  return getGlobalSingleton(ENV_KEY, () => {
+    cachedConfig = validateEnvironment();
+    warnIfVercelDatabaseUrlNotPooled(cachedConfig.databaseUrl);
+    return cachedConfig;
+  });
+}
+
+export function getEnvironmentConfig(): EnvironmentConfig {
+  return cachedConfig ?? ensureEnvironmentValidated();
+}

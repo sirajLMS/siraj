@@ -91,6 +91,7 @@
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "@vercel/blob": "^2.4.0",
+    "@vercel/functions": "^3.7.5",
     "@vercel/speed-insights": "^2.0.0",
     "@xyflow/react": "^12.10.2",
     "@yaacovcr/transform": "^0.0.3",

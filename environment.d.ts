@@ -24,6 +24,7 @@ declare global {
 
       // Database Configuration
       DB_PROVIDER?: "postgres" | "neon";
+      DB_CONNECTION_MODE?: "auto" | "pg" | "neon";
       DATABASE_URL: string;
       DATABASE_ENCRYPTION_KEY: string;
 

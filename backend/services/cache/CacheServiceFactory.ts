@@ -1,10 +1,21 @@
+import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import type { CacheProvider, ICacheService } from "./ICacheService";
 import { PostgresCacheAdapter } from "./PostgresCacheAdapter";
 
-// Module-level state replaces the static class properties
-let instance: ICacheService | null = null;
-let initializationPromise: Promise<ICacheService> | null = null;
+const CACHE_STATE_KEY = Symbol.for("siraj.cacheState");
+
+type CacheState = {
+  instance: ICacheService | null;
+  initializationPromise: Promise<ICacheService> | null;
+};
+
+function getCacheState(): CacheState {
+  return getGlobalSingleton(CACHE_STATE_KEY, () => ({
+    instance: null,
+    initializationPromise: null,
+  }));
+}
 
 /**
  * Get cache provider from environment variable
@@ -64,37 +75,38 @@ async function createCacheService(): Promise<ICacheService> {
  * Get cache service instance (singleton)
  */
 export const getCacheService = async (): Promise<ICacheService> => {
-  // If already fully initialized, return the instance immediately
-  if (instance) {
-    return instance;
+  const state = getCacheState();
+
+  if (state.instance) {
+    return state.instance;
   }
 
-  // Cache the initialization promise to prevent race conditions
-  // causing multiple connections during startup
-  initializationPromise ??= (async () => {
+  state.initializationPromise ??= (async () => {
     try {
       const service = await createCacheService();
-      instance = service;
-      return instance;
+      state.instance = service;
+      return state.instance;
     } catch (error) {
-      initializationPromise = null;
+      state.initializationPromise = null;
       logger.error("Failed to initialize cache service", error);
       throw error;
     }
   })();
 
-  return initializationPromise;
+  return state.initializationPromise;
 };
 
 /**
  * Reset instance (useful for testing)
  */
 export const resetCacheService = (): void => {
-  if (instance) {
-    instance.disconnect();
-    instance = null;
+  const state = getCacheState();
+  if (state.instance) {
+    state.instance.disconnect();
+    state.instance = null;
   }
-  initializationPromise = null;
+  state.initializationPromise = null;
+  clearGlobalSingleton(CACHE_STATE_KEY);
 };
 
 /**

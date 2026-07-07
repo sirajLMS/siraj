@@ -1,11 +1,11 @@
+import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 import type { IRedisService } from "./IRedisService";
 import { LocalRedisAdapter } from "./LocalRedisAdapter";
 import { UpstashRedisAdapter } from "./UpstashRedisAdapter";
 
-// Module-level state replaces the static class properties
-let instance: IRedisService | null = null;
+const REDIS_KEY = Symbol.for("siraj.redis");
 
 /**
  * Create local Redis adapter
@@ -63,18 +63,18 @@ function createRedisService(): IRedisService {
  * Get Redis service instance (lazy-loaded singleton)
  */
 export const getRedisService = (): IRedisService => {
-  instance ??= createRedisService();
-  return instance;
+  return getGlobalSingleton(REDIS_KEY, createRedisService);
 };
 
 /**
  * Reset instance (useful for testing)
  */
 export const resetRedisService = (): void => {
+  const instance = getGlobalSingletonIfExists<IRedisService>(REDIS_KEY);
   if (instance) {
     instance.disconnect();
-    instance = null;
   }
+  clearGlobalSingleton(REDIS_KEY);
 };
 
 /**

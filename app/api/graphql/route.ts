@@ -11,11 +11,14 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createGraphQLContext } from "@/backend/graphql/gqlContextFactory";
 import { graphQLSchema } from "@/backend/graphql/gqlSchema";
+import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backend/lib/ratelimit";
 import { ApolloCacheAdapter } from "@/backend/services/cache";
 import { IdempotencyService } from "@/backend/services/idempotency.service";
+
+ensureEnvironmentValidated();
 
 const isProduction = process.env.NODE_ENV === "production";
 const MAX_GRAPHQL_DEPTH = 7;

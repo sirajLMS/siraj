@@ -5,6 +5,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   reactStrictMode: true,
+  serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
   turbopack: {
     resolveAlias: {
       "next-intl/config": "./shared/i18n/request.ts",

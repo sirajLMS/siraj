@@ -94,3 +94,5 @@ storybook-static
 .aider*
 ai/.archive
 prompt/
+.gitwandrc
+*.txt

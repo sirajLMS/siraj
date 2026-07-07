@@ -19,6 +19,9 @@ tsconfig.tsbuildinfo
 .gemini/
 .agent-sandbox/
 .opencode/
+.codex
+opencode.json
+
 
 # development logs
 *.log
@@ -49,3 +52,8 @@ docs/
 .env.vercel
 .env.test
 .env.redis
+
+# ai
+.ai
+.gitwandrc
+*.txt
