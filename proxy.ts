@@ -10,6 +10,7 @@ export default function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
+  requestHeaders.set("x-nonce", nonce);
 
   const intlResponse = intlMiddleware(request);
 
@@ -23,11 +24,23 @@ export default function proxy(request: NextRequest) {
     request: { headers: requestHeaders },
   });
 
+  const isDev = process.env.NODE_ENV === "development";
+  const cspValue =
+    `default-src 'self'; ` +
+    `script-src 'self' 'nonce-${nonce}'` +
+    (isDev ? " 'unsafe-eval' 'unsafe-inline'" : "") +
+    `; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ` +
+    `font-src 'self' https://fonts.gstatic.com; ` +
+    `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; ` +
+    `connect-src 'self' https://*.upstash.com; ` +
+    `frame-ancestors 'none';`;
+
   intlResponse.headers.forEach((value, key) => {
     response.headers.set(key, value);
   });
   response.headers.set("x-pathname", pathname);
   response.headers.set("x-nonce", nonce);
+  response.headers.set("Content-Security-Policy", cspValue);
 
   return response;
 }

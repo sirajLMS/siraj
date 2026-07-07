@@ -114,7 +114,7 @@ export const useApolloConnectivity = () => {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       void checkConnectivity();
-    }, 5000);
+    }, 0);
     return () => clearTimeout(timeoutId);
   }, [checkConnectivity]);
 

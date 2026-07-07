@@ -68,7 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const client = useApolloClient();
   const [loginMutation] = useMutation(Document.loginMutationDocument);
   const [logoutMutation] = useMutation(Document.logoutMutationDocument);
-  const [refreshTokenMutation] = useMutation(Document.refreshTokenMutationDocument);
 
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -78,7 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = useCallback(async () => {
     const currentUrl = `${globalThis.location.pathname}${globalThis.location.search}`;
     try {
-      const { data } = await dedupedRefreshToken(() => refreshTokenMutation());
+      const { data } = await dedupedRefreshToken(() =>
+        client.mutate({
+          mutation: Document.refreshTokenMutationDocument,
+        })
+      );
 
       if (data?.refreshToken?.token && data.refreshToken.user) {
         updateAuthToken(data.refreshToken.token);
@@ -112,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         errorMessage: error instanceof Error ? error.message : String(error),
       });
     }
-  }, [refreshTokenMutation, updateAuthToken, clearAuthData]);
+  }, [client, updateAuthToken, clearAuthData]);
 
   const logout = useCallback(async () => {
     try {

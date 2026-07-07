@@ -1,5 +1,5 @@
-import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
-import { migrate as migrateNeon } from "drizzle-orm/neon-http/migrator";
+import type { NeonDatabase } from "drizzle-orm/neon-serverless";
+import { migrate as migrateNeon } from "drizzle-orm/neon-serverless/migrator";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
 import logger from "@/backend/lib/logger";
@@ -20,7 +20,7 @@ export async function runMigrations(closePool: boolean) {
       migrationsFolder: "./backend/drizzle",
     });
   } else {
-    await migrateNeon(db as NeonHttpDatabase, {
+    await migrateNeon(db as NeonDatabase, {
       migrationsFolder: "./backend/drizzle",
     });
   }

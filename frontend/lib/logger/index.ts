@@ -13,8 +13,8 @@ class ClientLogger {
   private batchTimer: NodeJS.Timeout | null;
 
   constructor() {
-    // Only enable in development
-    const enabled = process.env.NODE_ENV === "development";
+    // Enable in development, or when NEXT_PUBLIC_ENABLE_LOGGING is explicitly set to true
+    const enabled = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_ENABLE_LOGGING === "true";
 
     this.sessionId = this.generateSessionId();
     this.sequenceNumber = 0;

@@ -8,10 +8,13 @@ export function setAuthCookies(
 ): void {
   if (!cookies) return;
 
+  const isSecure =
+    process.env.NODE_ENV === "production" && (process.env.ALLOWED_ORIGIN?.startsWith("https://") ?? false);
+
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
+    secure: isSecure,
+    sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   };
@@ -22,8 +25,8 @@ export function setAuthCookies(
   if (accessToken) {
     cookies.set("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict" as const,
+      secure: isSecure,
+      sameSite: "lax" as const,
       maxAge: 60 * 15, // 15 minutes — matches JWT_ACCESS_TOKEN_EXPIRY
       path: "/",
     });

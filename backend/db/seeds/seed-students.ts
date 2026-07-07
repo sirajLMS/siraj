@@ -1,4 +1,3 @@
-import * as path from "node:path";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { StorageDbRepository } from "@/backend/db/repo";
@@ -15,6 +14,7 @@ import {
   getStudentAvatarFileName,
   getTotalStudents,
   loadSeedConfig,
+  resolveAssetPath,
   type SeedConfig,
 } from "./lib";
 
@@ -104,7 +104,7 @@ async function seedAvatarAssets(): Promise<Map<string, string | null>> {
     for (let i = 1; i <= 8; i++) {
       const fileName = `${String(i).padStart(2, "0")}.png`;
       const bucketPath = `public/avatars/students/${fileName}`;
-      const localFilePath = path.join(__dirname, "..", "assets", "avatars", "students", fileName);
+      const localFilePath = resolveAssetPath(`avatars/students/${fileName}`);
 
       // Check if the file exists locally before seeding
       try {

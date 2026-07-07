@@ -13,8 +13,8 @@ export abstract class BaseLogger {
   protected writeToFileEnabled: boolean;
 
   constructor(logKey: string, writeToFileEnabled = true) {
-    // Only enable in development
-    this.enabled = process.env.NODE_ENV !== "production";
+    // Enable in non-production, or when ENABLE_LOGGING is explicitly set to true
+    this.enabled = process.env.NODE_ENV !== "production" || process.env.ENABLE_LOGGING === "true";
     this.logsDir = join(process.cwd(), "logs");
     this.logKey = logKey;
     this.writeToFileEnabled = writeToFileEnabled;
