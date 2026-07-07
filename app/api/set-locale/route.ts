@@ -1,12 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"];
+const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_BASE_URL, process.env.ALLOWED_ORIGIN, "http://localhost:3000"].filter(
+  Boolean
+) as string[];
 
 export async function POST(request: NextRequest) {
   try {
     // CSRF protection: validate Origin header
     const origin = request.headers.get("origin");
-    if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+    const sameOrigin = request.nextUrl.origin;
+    if (!origin || (origin !== sameOrigin && !ALLOWED_ORIGINS.includes(origin))) {
       return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
     }
 
