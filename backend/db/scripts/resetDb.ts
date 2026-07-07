@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import logger from "@/backend/lib/logger";
+import { assertDestructiveDbCommandAllowed } from "@/scripts/lib/destructiveDbGuard";
 import { runMigrations } from "./migrate";
 
 function parseDatabaseUrl(url: string) {
@@ -37,16 +38,10 @@ async function resetDatabase() {
     process.exit(1);
   }
 
-  if (process.env.NODE_ENV === "production") {
-    logger.error("Database reset is not allowed in production environment");
-    process.exit(1);
-  }
-
-  const provider = process.env.DB_PROVIDER || "postgres";
-
-  if (provider === "neon") {
-    logger.error("Database reset is not supported for Neon provider");
-    logger.error("Please reset your Neon database manually through the Neon console");
+  try {
+    assertDestructiveDbCommandAllowed();
+  } catch (error) {
+    logger.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 

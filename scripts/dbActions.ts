@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, rmSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createInterface, type Interface } from "node:readline";
+import { assessDestructiveDbCommandSafety, formatDestructiveDbBlockMessage } from "./lib/destructiveDbGuard";
 
 /**
  * DB Actions Script
@@ -18,6 +19,22 @@ const ACTIONS: Record<string, { label: string; name: string }> = {
   "7": { label: "Open Drizzle Studio", name: "studio" },
   "8": { label: "Clean Generate (Reset -> Gen -> Migrate -> Seed)", name: "cleanGenerate" },
 };
+
+const DESTRUCTIVE_ACTION_KEYS = new Set(["1", "4", "8"]);
+const DISABLED_ACTION_SUFFIX = " (disabled — cloud/production env)";
+
+function isDestructiveActionBlocked(key: string): boolean {
+  if (!DESTRUCTIVE_ACTION_KEYS.has(key)) {
+    return false;
+  }
+
+  return assessDestructiveDbCommandSafety().blocked;
+}
+
+function printDestructiveActionBlock(): void {
+  const { reasons } = assessDestructiveDbCommandSafety();
+  globalThis.console.error(formatDestructiveDbBlockMessage(reasons));
+}
 
 /**
  * Runs a bun command.
@@ -135,6 +152,11 @@ async function cleanGenerate(): Promise<number> {
  * Dispatches the action based on internal key (1-8).
  */
 async function dispatchAction(key: string): Promise<number> {
+  if (isDestructiveActionBlocked(key)) {
+    printDestructiveActionBlock();
+    return 1;
+  }
+
   switch (key) {
     case "1":
       return runBunCommand(["run", "backend/db/scripts/resetDb.ts"]);
@@ -164,7 +186,8 @@ async function dispatchAction(key: string): Promise<number> {
 function displayMenu(): void {
   globalThis.console.log("\n--- Database Actions ---");
   for (const [key, action] of Object.entries(ACTIONS)) {
-    globalThis.console.log(`${key}. ${action.label}`);
+    const suffix = isDestructiveActionBlocked(key) ? DISABLED_ACTION_SUFFIX : "";
+    globalThis.console.log(`${key}. ${action.label}${suffix}`);
   }
   globalThis.console.log("0. Exit");
 }
@@ -201,6 +224,17 @@ function showHelp(): void {
 async function executeAction(key: string, rl?: Interface): Promise<void> {
   const action = ACTIONS[key];
   if (!action) return;
+
+  if (isDestructiveActionBlocked(key)) {
+    globalThis.console.log(`\nRunning: ${action.label}...\n`);
+    printDestructiveActionBlock();
+    globalThis.console.log("\n✗ Failed (code 1)");
+
+    if (rl) {
+      await askQuestion(rl, "\nPress Enter to continue...");
+    }
+    return;
+  }
 
   globalThis.console.log(`\nRunning: ${action.label}...\n`);
   const code = await dispatchAction(key);

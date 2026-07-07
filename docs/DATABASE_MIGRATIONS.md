@@ -31,6 +31,16 @@ bun db cleanGenerate    # Reset → regenerate drizzle folders → migrate → s
 
 Custom SQL lives in `backend/db/migration/`. Generated artifacts live in `backend/drizzle/`.
 
+## Safety guard
+
+Destructive commands — `reset`, `drop`, and `cleanGenerate` — are **disabled** when the current environment looks like production or cloud infrastructure. The guard in [`scripts/lib/destructiveDbGuard.ts`](../scripts/lib/destructiveDbGuard.ts) checks signals such as:
+
+- `NODE_ENV=production`
+- Cloud providers (`DB_PROVIDER=neon`, non-local `STORAGE_PROVIDER`, Upstash Redis, GCP/Vercel Blob config)
+- Managed Postgres hosts in `DATABASE_URL` (e.g. `neon.tech`, `supabase.co`, `rds.amazonaws.com`)
+
+Blocked commands remain listed in `bun db` but exit with a clear error. Use a local `.env` (`postgres` + `local` storage + localhost `DATABASE_URL`) for destructive workflows.
+
 ## The block: `CREATE INDEX CONCURRENTLY` inside a transaction
 
 ### Symptom
