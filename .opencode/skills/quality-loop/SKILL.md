@@ -1,39 +1,70 @@
 ---
 name: quality-loop
-description: Use ONLY when running the quality gate loop (tsgo, biome, lint) to fix issues iteratively. Triggers on quality-gate, lint, biome, tsgo failures.
+description: >
+  Run the project quality gate loop (tsgo, biome:check, lint) repeatedly until all pass clean.
+  Use when asked to run quality checks, fix lint issues, clean up the code, or validate changes.
+allowed-tools: shell
 ---
 
-# Quality Loop Skill
+## Quality Loop Workflow
 
-Run `tsgo` → `biome:check` → `lint` in a loop until all pass. Use the lint queue server at `http://localhost:4777` if available.
+Run these three checks in sequence. If any fails, fix the issues and re-run from the failed step. Continue until a complete round has zero issues.
 
-## Workflow
+### Step 1: TypeScript
 
-1. Run `bun tsgo`. If errors, fix type errors and re-run until clean.
-2. Run `bun biome:check`. If errors, run `bun run format` to auto-fix, then re-run biome:check until clean.
-3. For lint (NEVER run `bun run lint` directly — always use the lint queue client):
-   - Check if the lint queue server is running: `Invoke-RestMethod -Uri http://localhost:4777/status`
-   - If NOT running, start it: `~/.bun/bin/bun run scripts/lint-queue-server.ts &`
-   - Submit lint request to the queue server:
-     ```powershell
-     $files = @("<file1>", "<file2>")
-     $body = @{ id = "quality-loop"; files = $files } | ConvertTo-Json
-     Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
-     ```
-     Or via curl:
-     ```bash
-     curl -s -X POST http://localhost:4777/lint \
-       -H "Content-Type: application/json" \
-       -d '{"id":"quality-loop","files":["<file1>","<file2>"]}'
-     ```
-4. If lint errors found, fix them and re-run lint.
-5. Repeat the full loop (tsgo → biome → lint) until all three pass with zero errors.
-6. Do NOT run `bun quality-gate` — that includes codescene and sonar which are out of scope for this skill.
+```bash
+bun tsgo
+```
 
-## Key Rules
+Fix all type errors before proceeding. `tsgo` is safe to run concurrently with other processes.
 
-- tsgo and biome:check are safe to run concurrently.
-- `bun run lint` is heavyweight and MUST NOT be run concurrently by multiple agents. NEVER run it directly — always use the lint queue server/client.
-- After fixing lint errors, re-run only lint (not the full loop) until lint passes, then run the full loop once more to confirm everything is clean.
-- Auto-fixable issues: `bun run format` for biome, lint via queue client (with --fix) for ESLint auto-fix.
-- For ESLint, prefer fixing manually over relying on auto-fix when the rule requires contextual judgment.
+### Step 2: Biome
+
+```bash
+bun biome:check
+```
+
+Fix formatting and lint issues. `biome:check` is safe to run concurrently.
+
+### Step 3: Lint (via lint queue client — NEVER run `bun lint` directly)
+
+**NEVER run `bun run lint` directly.** Always use the lint queue server/client.
+
+First, check if the lint queue server is running:
+
+```powershell
+Invoke-RestMethod -Uri http://localhost:4777/status
+```
+
+If the server is NOT running, start it first:
+
+```bash
+~/.bun/bin/bun run scripts/lint-queue-server.ts &
+```
+
+Then submit via the queue:
+
+**PowerShell:**
+```powershell
+$files = @("file1.ts","file2.ts")
+$body = @{ id = "quality-loop"; files = $files } | ConvertTo-Json
+Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
+```
+
+**Bash / curl:**
+```bash
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"quality-loop","files":["file1.ts","file2.ts"]}'
+```
+
+### Loop
+
+If any step reports issues, fix them and restart the loop from the failing step. A clean round is when all three pass without errors.
+
+### Final Report
+
+When a full round passes clean, report:
+- Which steps passed
+- How many iterations were needed
+- Any issues that required manual fixes

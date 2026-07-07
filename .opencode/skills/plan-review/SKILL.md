@@ -1,53 +1,57 @@
 ---
 name: plan-review
-description: Use ONLY when reviewing an implementation plan against project architecture rules. Triggers on plan review, architecture checks, layer rule validation.
+description: >
+  Review an implementation plan against AGENTS.md and layer-specific rules before implementation.
+  Checks for architecture violations, missing i18n, type pattern compliance, and AGENTS.md adherence.
+  Use when asked to review a plan, validate an approach, or check if implementation matches conventions.
 ---
 
-# Plan Review Skill
+## Plan Review Workflow
 
-Read an implementation plan, identify touched layers, read corresponding AGENTS.md files, check the plan against layer rules, and report mismatches.
+### Step 1: Read the plan
 
-## Workflow
+Read the plan file or extract the plan from the conversation. Identify every file path and layer the plan touches.
 
-1. Read the implementation plan (provided as input or from a file path).
-2. Identify all layers the plan touches based on file paths mentioned:
-   - `app/` → App Router layer
-   - `frontend/views/`, `frontend/stores/`, `frontend/graphql/`, `frontend/components/` → Frontend layer
-   - `backend/services/` → Services layer
-   - `backend/graphql/` → GraphQL/Pothos layer
-   - `backend/db/repo/` → Repository layer
-   - `backend/db/schema/` → Schema layer
-   - `backend/types/` → Types layer
-   - `scripts/`, `.github/`, root config → Config layer
-3. For each touched layer, read the corresponding AGENTS.md file from the layer hierarchy table in the root AGENTS.md.
-4. Cross-reference the plan against each layer's rules and check for:
-   - **Type imports**: Are types imported from `@/backend/types` instead of defined locally?
-   - **Service boundaries**: Does the plan respect the service layer? No business logic in repos, no direct repo calls from resolvers.
-   - **MUI v9**: Are style props placed in `sx` instead of as direct props?
-   - **i18n**: Are user-facing strings using `next-intl`? Are `locale` parameters propagated?
-   - **Test conventions**: Are DB tests wrapped in `runInRollback`? Are `tx` parameters passed correctly?
-   - **GraphQL documents**: Are documents in `sharedDocuments/`? Named correctly? Include `id` fields?
-   - **Data flow**: Do Server Components call services directly? Do Client Components use Apollo hooks?
-   - **Theme/styling**: Are colors from theme palette? No hardcoded values?
-   - **Logging**: Are `logger` imports used instead of `console.*`?
-5. Report all mismatches as violations.
+### Step 2: Identify affected architecture layers
 
-## Output Format
+Map each file path to its architecture layer:
 
-Report each mismatch as:
+| Path prefix | Layer AGENTS.md |
+|---|---|
+| `app/` | `app/AGENTS.md` |
+| `frontend/views/` | `frontend/views/AGENTS.md` |
+| `frontend/stores/` | `frontend/stores/AGENTS.md` |
+| `frontend/graphql/` | `frontend/graphql/AGENTS.md` |
+| `backend/services/` | `backend/services/AGENTS.md` |
+| `backend/graphql/` | `backend/graphql/AGENTS.md` |
+| `backend/db/repo/` | `backend/db/repo/AGENTS.md` |
+| `backend/db/seeds/` | `backend/db/seeds/AGENTS.md` |
+| `backend/types/` | `backend/types/AGENTS.md` |
+
+### Step 3: Read layer-specific AGENTS.md files
+
+Read every AGENTS.md for each affected layer.
+
+### Step 4: Check plan against rules
+
+Verify compliance on these cross-cutting dimensions:
+
+- **Type imports**: All types must come from `@/backend/types/{entity}.types.ts` — no local type definitions in Pothos or other layers
+- **Service boundaries**: Server Components call services directly; Client Components use Apollo hooks
+- **MUI v9**: Style props are NOT valid on MUI components — must use `sx` prop
+- **i18n**: All user-facing strings must use `next-intl`, no hardcoded text
+- **Logging**: Never `console.*` — must use `logger` from `@/frontend/utils/logger` or `@/backend/lib/logger`
+- **Test conventions**: Database tests must use `runInRollback`, pass `tx`, no `expect().rejects.toThrow()`
+- **GraphQL documents**: Named `{Entity}QueryDocument`/`{Entity}MutationDocument`, must include `id` field, import from `@apollo/client/react`
+
+### Step 5: Report findings
+
+Output a structured list of violations:
 
 ```
-MISMATCH|LAYER|RULE_DESCRIPTION|PLAN_VIOLATION
+[LAYER] file_path: rule_description
+  → Expected: ...
+  → Plan has: ...
 ```
 
-Example:
-```
-MISMATCH|backend/graphql|Types must come from @/backend/types|Plan defines local type in Pothos file
-MISMATCH|frontend|Style props must use sx prop|Plan uses fontWeight as direct prop on Typography
-MISMATCH|backend/db/repo|DB tests must use runInRollback|Plan describes test without transaction wrapper
-```
-
-If no mismatches are found, output:
-```
-CLEAN|Plan adheres to all layer rules
-```
+If no violations found, report: "Plan passes all AGENTS.md rules for affected layers."
