@@ -64,20 +64,23 @@ export function SearchScheduleContainer() {
         sx={theme => ({
           display: "flex",
           flexDirection: "column",
+          gap: { xs: 1, md: theme.layout.sectionGap },
           minHeight: {
             xs: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.bottomNavHeight} - ${theme.spacing(4)})`,
             md: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.pageMargin} * 2)`,
           },
         })}
       >
-        <PageHeader title={t("pageTitle")} titleVariant="headlineLg" />
+        <Box sx={{ px: { xs: 2, md: 0 } }}>
+          <PageHeader title={t("pageTitle")} titleVariant="headlineLg" />
+        </Box>
         <Box
           sx={{
-            mt: 3,
+            mt: { xs: 0, md: 2 },
             display: "flex",
             flexDirection: "column",
             flex: 1,
-            gap: 2,
+            gap: { xs: 1, md: 2 },
             minHeight: 0,
           }}
         >

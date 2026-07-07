@@ -45,16 +45,14 @@ export function SearchScheduleForm({ draft, isSearching, onDraftChange, onSearch
       <Box
         component="form"
         onSubmit={handleSubmit}
-        sx={theme => ({
+        sx={{
           display: "flex",
           flexWrap: "wrap",
           alignItems: "center",
           gap: 1,
-          p: 1.5,
-          borderRadius: 2,
-          backgroundColor: theme.palette.surfaceContainerLow,
-          mb: 3,
-        })}
+          px: { xs: 2, md: 0 },
+          mb: { xs: 1, md: 2 },
+        }}
       >
         <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 200px" }, minWidth: { sm: 200 } }}>
           <AppDateRangePicker

@@ -6,6 +6,8 @@ import { addDays, differenceInCalendarDays, format, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { HorizontalScrollRow } from "@/frontend/components/ui";
+import { edgeToEdgeCardShellSx } from "@/frontend/components/ui/edgeToEdgeSx";
+import { mergeSx } from "@/frontend/components/ui/mergeSx";
 import type { SearchScheduleResultItem } from "./SearchScheduleView";
 import { TeacherAvailabilityDayPill } from "./TeacherAvailabilityDayPill";
 import { TeacherAvailabilityMonthDrawer } from "./TeacherAvailabilityMonthDrawer";
@@ -46,15 +48,23 @@ export function TeacherAvailabilityGrid({ teacher, fromDate, toDate }: Readonly<
     <>
       <Paper
         elevation={0}
-        sx={theme => ({
-          p: 1.5,
-          borderRadius: 2,
-          border: `1px solid ${theme.palette.outlineVariant}`,
-          backgroundColor: theme.palette.surface,
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-        })}
+        sx={mergeSx(
+          theme => ({
+            p: 1.5,
+            borderRadius: 2,
+            border: `1px solid ${theme.palette.outlineVariant}`,
+            backgroundColor: theme.palette.surface,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            [theme.breakpoints.down("lg")]: {
+              px: 2,
+              py: 1.5,
+              border: "none",
+            },
+          }),
+          edgeToEdgeCardShellSx
+        )}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
@@ -85,7 +95,7 @@ export function TeacherAvailabilityGrid({ teacher, fromDate, toDate }: Readonly<
           </Tooltip>
         </Box>
 
-        <Box sx={{ mx: { xs: -1.5, md: 0 } }}>
+        <Box sx={{ mx: { xs: -2, md: 0 } }}>
           <HorizontalScrollRow
             showScrollbar="desktop"
             sx={{

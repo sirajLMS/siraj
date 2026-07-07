@@ -82,15 +82,21 @@ export function SearchScheduleView({ result, fromDate, toDate, isInitialLoading 
   }
 
   return (
-    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.text.secondary })}>
+    <Box sx={{ mt: { xs: 1, md: 3 }, display: "flex", flexDirection: "column", gap: { xs: 1, md: 2 } }}>
+      <Typography
+        variant="titleLg"
+        sx={theme => ({
+          px: { xs: 2, md: 0 },
+          color: theme.palette.text.secondary,
+        })}
+      >
         {t("resultsCount", {
           count: result?.totalCount ?? activeTeachers.length,
           gaps: totalGaps,
         })}
       </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 1.5 } }}>
         {activeTeachers.map(teacher => (
           <TeacherAvailabilityGrid key={teacher.id ?? ""} teacher={teacher} fromDate={fromDate} toDate={toDate} />
         ))}
