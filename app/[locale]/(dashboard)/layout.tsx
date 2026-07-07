@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
+import type { AppPermission, User } from "@/frontend/graphql/generated/gql/graphql-types";
 import { DashboardLayoutContainer } from "@/frontend/views/dashboard/components/DashboardLayoutContainer";
 import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
 
@@ -33,5 +34,24 @@ export default async function DashboardLayout({
 
   const userProfile = await getCurrentUser(userId, context);
 
-  return <DashboardLayoutContainer userProfile={userProfile}>{children}</DashboardLayoutContainer>;
+  const mappedUser: User = {
+    id: userProfile.id,
+    name: userProfile.name,
+    email: userProfile.email,
+    avatarUrl: userProfile.avatarUrl,
+    permissions: userProfile.permissions as unknown as AppPermission[],
+    role: userProfile.role,
+    notificationCount: userProfile.notificationCount,
+    teacherId: userProfile.teacherId,
+    parentId: userProfile.parentId,
+    createdAt: userProfile.createdAt?.toISOString() ?? null,
+    updatedAt: userProfile.updatedAt?.toISOString() ?? null,
+    emailVerifiedAt: userProfile.emailVerifiedAt?.toISOString() ?? null,
+  };
+
+  return (
+    <DashboardLayoutContainer userProfile={mappedUser} isSuperAdmin={userProfile.isSuperAdmin}>
+      {children}
+    </DashboardLayoutContainer>
+  );
 }

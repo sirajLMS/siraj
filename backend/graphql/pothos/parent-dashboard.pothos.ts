@@ -1,6 +1,7 @@
 import type {
-  PageInfo,
+  ParentDashboardMetricsReturnType,
   ParentDashboardMetricsType,
+  ParentDashboardSchedulePaginatedResult,
   ParentDashboardScheduleRow,
   StudentProgressReturnType,
   WorkshopPromoReturnType,
@@ -32,14 +33,7 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
   }),
 });
 
-export type ParentDashboardScheduleResultDefinition = {
-  id: string;
-  rows: ParentDashboardScheduleRow[];
-  totalCount: number;
-  pageInfo: PageInfo | null;
-};
-
-const ParentDashboardScheduleResultRef = gqlSchemaBuilder.objectRef<ParentDashboardScheduleResultDefinition>(
+const ParentDashboardScheduleResultRef = gqlSchemaBuilder.objectRef<ParentDashboardSchedulePaginatedResult>(
   "ParentDashboardScheduleResult"
 );
 
@@ -88,15 +82,8 @@ export const WorkshopPromoPothosObject = WorkshopPromoRef.implement({
   }),
 });
 
-export type ParentDashboardMetricsResultDefinition = {
-  id: string;
-  metrics: ParentDashboardMetricsType;
-  studentProgress: StudentProgressReturnType[];
-  workshopPromo: WorkshopPromoReturnType | null;
-};
-
 const ParentDashboardMetricsResultRef =
-  gqlSchemaBuilder.objectRef<ParentDashboardMetricsResultDefinition>("ParentDashboardMetricsResult");
+  gqlSchemaBuilder.objectRef<ParentDashboardMetricsReturnType>("ParentDashboardMetricsResult");
 
 export const ParentDashboardMetricsResultPothosObject = ParentDashboardMetricsResultRef.implement({
   fields: t => ({

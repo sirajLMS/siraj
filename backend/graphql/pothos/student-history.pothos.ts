@@ -1,9 +1,14 @@
-import type { StudentHistoryMetricsDefinition } from "@/backend/types";
+import type {
+  StudentClassHistory,
+  StudentHistoryMetricsType,
+  StudentHistorySession,
+  StudentSessionDetail,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── Metrics ──────────────────────────────────────────────────────────────────
 
-const StudentHistoryMetricsRef = gqlSchemaBuilder.objectRef<StudentHistoryMetricsDefinition>("StudentHistoryMetrics");
+const StudentHistoryMetricsRef = gqlSchemaBuilder.objectRef<StudentHistoryMetricsType>("StudentHistoryMetrics");
 
 export const StudentHistoryMetricsPothosObject = StudentHistoryMetricsRef.implement({
   fields: t => ({
@@ -19,20 +24,7 @@ export const StudentHistoryMetricsPothosObject = StudentHistoryMetricsRef.implem
 
 // ─── Session ──────────────────────────────────────────────────────────────────
 
-export type StudentHistorySessionDefinition = {
-  id: string;
-  title: string;
-  time: string;
-  duration: number;
-  status: string;
-  instructor: string;
-  timeSlot: string;
-  room: string | null;
-  notes: string;
-  dayOfMonth: number;
-};
-
-const StudentHistorySessionRef = gqlSchemaBuilder.objectRef<StudentHistorySessionDefinition>("StudentHistorySession");
+const StudentHistorySessionRef = gqlSchemaBuilder.objectRef<StudentHistorySession>("StudentHistorySession");
 
 export const StudentHistorySessionPothosObject = StudentHistorySessionRef.implement({
   fields: t => ({
@@ -51,14 +43,7 @@ export const StudentHistorySessionPothosObject = StudentHistorySessionRef.implem
 
 // ─── Class History ────────────────────────────────────────────────────────────
 
-export type StudentClassHistoryDefinition = {
-  id: string;
-  studentName: string;
-  metrics: StudentHistoryMetricsDefinition;
-  sessions: StudentHistorySessionDefinition[];
-};
-
-const StudentClassHistoryRef = gqlSchemaBuilder.objectRef<StudentClassHistoryDefinition>("StudentClassHistory");
+const StudentClassHistoryRef = gqlSchemaBuilder.objectRef<StudentClassHistory>("StudentClassHistory");
 
 export const StudentClassHistoryPothosObject = StudentClassHistoryRef.implement({
   fields: t => ({
@@ -71,19 +56,7 @@ export const StudentClassHistoryPothosObject = StudentClassHistoryRef.implement(
 
 // ─── Session Detail ───────────────────────────────────────────────────────────
 
-export type StudentSessionDetailDefinition = {
-  id: string;
-  durationMinutes: number;
-  executionState: string;
-  outcome: string | null;
-  remarks: string | null;
-  zoomMeetingUrl: string | null;
-  teacherName: string;
-  scheduledStartAt: Date | string;
-  scheduledEndAt: Date | string;
-};
-
-const StudentSessionDetailRef = gqlSchemaBuilder.objectRef<StudentSessionDetailDefinition>("StudentSessionDetail");
+const StudentSessionDetailRef = gqlSchemaBuilder.objectRef<StudentSessionDetail>("StudentSessionDetail");
 
 export const StudentSessionDetailPothosObject = StudentSessionDetailRef.implement({
   fields: t => ({

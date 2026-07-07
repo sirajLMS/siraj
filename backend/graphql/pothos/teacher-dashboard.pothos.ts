@@ -1,10 +1,12 @@
 import type {
   ClassSessionMetrics,
+  CreateManualClassEntryInput,
+  LogSupportRequestInput,
   TeacherDashboardPaginatedResult,
   TeacherDashboardScheduleRow,
+  TeacherHandbookUrl,
   TeacherProgressFeedItem,
 } from "@/backend/types";
-import type { ClassType } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject } from "../pothos/pagination.objects";
 import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
@@ -77,17 +79,8 @@ export const TeacherDashboardPothosObject = TeacherDashboardRef.implement({
   }),
 });
 
-export type CreateManualClassEntryInputDefinition = {
-  studentId: string;
-  teacherId: string;
-  scheduledStartAt: string;
-  scheduledEndAt: string;
-  durationMinutes: number;
-  classType?: ClassType | null;
-};
-
 export const CreateManualClassEntryInputPothosObject = gqlSchemaBuilder
-  .inputRef<CreateManualClassEntryInputDefinition>("CreateManualClassEntryInput")
+  .inputRef<CreateManualClassEntryInput>("CreateManualClassEntryInput")
   .implement({
     fields: t => ({
       studentId: t.id({ required: true }),
@@ -99,24 +92,15 @@ export const CreateManualClassEntryInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-export type LogSupportRequestInputDefinition = {
-  reason: string;
-};
-
 export const LogSupportRequestInputPothosObject = gqlSchemaBuilder
-  .inputRef<LogSupportRequestInputDefinition>("LogSupportRequestInput")
+  .inputRef<LogSupportRequestInput>("LogSupportRequestInput")
   .implement({
     fields: t => ({
       reason: t.string({ required: true }),
     }),
   });
 
-export type TeacherHandbookUrlDefinition = {
-  id: string;
-  url: string;
-};
-
-const TeacherHandbookUrlRef = gqlSchemaBuilder.objectRef<TeacherHandbookUrlDefinition>("TeacherHandbookUrl");
+const TeacherHandbookUrlRef = gqlSchemaBuilder.objectRef<TeacherHandbookUrl>("TeacherHandbookUrl");
 
 export const TeacherHandbookUrlPothosObject = TeacherHandbookUrlRef.implement({
   fields: t => ({

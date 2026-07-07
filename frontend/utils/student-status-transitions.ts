@@ -1,7 +1,4 @@
-// NOTE: This frontend utility imports directly from backend types.
-// Consider creating a shared frontend-friendly types layer to avoid cross-layer coupling.
-import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types/student-lifecycle.types";
-import { StudentStatus } from "@/shared/lib/enum";
+import { ALLOWED_STATUS_TRANSITIONS, StudentStatus } from "@/shared/lib/enum";
 
 const STATUS_KEY_MAP: Record<string, StudentStatus> = {
   ON_TRIAL: StudentStatus.ON_TRIAL,

@@ -11,6 +11,7 @@ export type StaffProfileCreateResult = Pick<
 >;
 
 export interface ManagerDirectoryResult {
+  readonly id?: string;
   readonly metrics: ManagerDirectoryMetrics;
   readonly rows: ManagerDirectoryRow[];
   readonly totalCount: number;
@@ -48,4 +49,10 @@ export interface OnboardingMetricsResult {
   readonly activeStaff: number;
   readonly pendingApproval: number;
   readonly avgOnboardingDays: number;
+}
+
+export interface UpdateManagerProfileInput {
+  phone?: string | null;
+  skypeId?: string | null;
+  status?: AccountStatus | null;
 }

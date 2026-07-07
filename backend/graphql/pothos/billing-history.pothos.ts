@@ -1,6 +1,7 @@
 import { BillingHistoryService } from "@/backend/services/billing/billing-history.service";
 import type {
   AdminBillingSummaryResult,
+  InvoiceHistoryPaginatedResult,
   InvoiceHistoryRow,
   PaginationInput,
   ParentBillingSummaryResult,
@@ -44,15 +45,8 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
   }),
 });
 
-type InvoiceHistoryResultType = {
-  id: string;
-  rows: InvoiceHistoryRow[];
-  totalCount: number;
-  pageInfo: import("@/backend/types").PageInfo | null;
-};
-
 const ParentInvoiceHistoryResultRef =
-  gqlSchemaBuilder.objectRef<InvoiceHistoryResultType>("ParentInvoiceHistoryResult");
+  gqlSchemaBuilder.objectRef<InvoiceHistoryPaginatedResult>("ParentInvoiceHistoryResult");
 
 export const ParentInvoiceHistoryResultPothosObject = ParentInvoiceHistoryResultRef.implement({
   fields: t => ({
@@ -63,7 +57,8 @@ export const ParentInvoiceHistoryResultPothosObject = ParentInvoiceHistoryResult
   }),
 });
 
-const AdminInvoiceHistoryResultRef = gqlSchemaBuilder.objectRef<InvoiceHistoryResultType>("AdminInvoiceHistoryResult");
+const AdminInvoiceHistoryResultRef =
+  gqlSchemaBuilder.objectRef<InvoiceHistoryPaginatedResult>("AdminInvoiceHistoryResult");
 
 export const AdminInvoiceHistoryResultPothosObject = AdminInvoiceHistoryResultRef.implement({
   fields: t => ({

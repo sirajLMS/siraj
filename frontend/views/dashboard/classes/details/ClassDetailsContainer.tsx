@@ -17,10 +17,9 @@ import {
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import type { ClassInstanceDetailReturnType as ClassInstanceDetail } from "@/backend/types/class-instance-detail.types";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, classStatusEventsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

@@ -94,6 +94,7 @@ export type ParentDashboardScheduleInput = {
 };
 
 export type ParentDashboardSchedulePaginatedResult = {
+  id?: string;
   rows: ParentDashboardScheduleRow[];
   totalCount: number;
   pageInfo: PageInfo | null;
@@ -201,3 +202,12 @@ export interface DeactivateParentResult {
   readonly userId: string;
   readonly status: string;
 }
+
+export type ParentDocument = {
+  id: string;
+  fileId: string;
+  filePath: string;
+  isProtected: boolean;
+  usageType: string;
+  createdAt: Date;
+};

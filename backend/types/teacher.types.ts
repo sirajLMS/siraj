@@ -3,6 +3,7 @@ import type {
   AccountStatus,
   ClassExecutionState,
   ClassOutcome,
+  ClassType,
   Gender,
   PaymentMethod,
   StudentStatus,
@@ -146,6 +147,14 @@ export type TeacherDirectoryMetrics = {
   deactivated: number;
 };
 
+export type TeacherDirectoryReturnType = {
+  id: string;
+  metrics: TeacherDirectoryMetrics;
+  rows: TeacherDirectoryRow[];
+  totalTeachers: number;
+  pageInfo: PageInfo | null;
+};
+
 export type TeacherAssignedStudentReturnType = {
   id: string;
   name: string;
@@ -185,4 +194,27 @@ export type TeacherAssignedClassReturnType = {
 export type TeacherAssignedClassesResult = {
   rows: TeacherAssignedClassReturnType[];
   totalCount: number;
+};
+
+export type CreateManualClassEntryInput = {
+  studentId: string;
+  teacherId: string;
+  scheduledStartAt: string;
+  scheduledEndAt: string;
+  durationMinutes: number;
+  classType?: ClassType | null;
+};
+
+export type LogSupportRequestInput = {
+  reason: string;
+};
+
+export type TeacherHandbookUrl = {
+  id: string;
+  url: string;
+};
+
+export type TeacherSimple = {
+  id: string;
+  name: string;
 };

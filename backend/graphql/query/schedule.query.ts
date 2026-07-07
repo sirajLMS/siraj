@@ -1,6 +1,6 @@
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
-import { PaginationArgs } from "@/backend/types";
+import { PaginationArgs, type PaginationInput } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { LeaveRequestStatusPothosObject } from "../pothos/enum.pothos";
 import { PaginationArgsObject } from "../pothos/pagination.objects";
@@ -15,17 +15,7 @@ import {
 import { WeeklyScheduleGridPothosObject, WeeklyWorkloadMetricsPothosObject } from "../pothos/weekly-schedule.pothos";
 import { requireAuth } from "../utils/requireAuth";
 
-type PaginationArgsInput = {
-  first?: number | null;
-  skip?: number | null;
-  after?: string | null;
-  before?: string | null;
-  last?: number | null;
-  page?: number | null;
-  maxCount?: number | null;
-};
-
-function toPaginationArgs(input?: PaginationArgsInput | null): PaginationArgs | null {
+function toPaginationArgs(input?: PaginationInput | null): PaginationArgs | null {
   if (!input) return null;
   return new PaginationArgs({
     first: input.first ?? null,

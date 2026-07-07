@@ -1,11 +1,7 @@
+import type { TeacherSimple } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-export type TeacherSimpleDefinition = {
-  id: string;
-  name: string;
-};
-
-const TeacherSimpleObjectRef = gqlSchemaBuilder.objectRef<TeacherSimpleDefinition>("TeacherSimple");
+const TeacherSimpleObjectRef = gqlSchemaBuilder.objectRef<TeacherSimple>("TeacherSimple");
 
 export const TeacherSimplePothosObject = TeacherSimpleObjectRef.implement({
   fields: t => ({

@@ -1,10 +1,12 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
-import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { ClassExecutionState } from "@/shared/lib/enum";
+import {
+  AppPermission,
+  ClassExecutionState,
+  type ClassInstanceDetail,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
 import { classDetailsSectionStackSx } from "../classDetailsMobileLayout";
 import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
@@ -14,8 +16,8 @@ import { ClassInfoCard } from "./ClassInfoCard";
 import { LivePerformanceGrid } from "./LivePerformanceGrid";
 import { MetadataCard } from "./MetadataCard";
 
-interface ClassDetailsAdminViewProps {
-  readonly instance: ClassInstanceDetailReturnType;
+export interface ClassDetailsAdminViewProps {
+  readonly instance: ClassInstanceDetail;
   readonly formattedScheduledDate: string;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
@@ -133,7 +135,7 @@ export function ClassDetailsAdminView({
               title: instance.teacher?.title ?? "",
               avatarUrl: instance.teacher?.avatarUrl ?? "",
             }}
-            isActive={instance.status === ClassExecutionState.ACTIVATED}
+            isActive={instance.status === ClassExecutionState.Activated}
             labels={labels.classInfo}
           />
         </Grid>

@@ -91,3 +91,55 @@ export type WeeklyWorkloadMetricsReturnType = {
   totalMinutes: number;
   classCount: number;
 };
+
+export type DailyScheduleListUserItem = {
+  id: string;
+  name: string;
+};
+
+export type DailyScheduleListReturnType = {
+  id: string;
+  studentTime: string;
+  teacherTime: string;
+  yourTime: string;
+  duration: number;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  status: ClassExecutionState;
+  outcome: ClassOutcome;
+  executionState: ClassExecutionState;
+  student: DailyScheduleListUserItem;
+  teacher: DailyScheduleListUserItem;
+};
+
+export type AdminDashboardScheduleInputType = {
+  date: string;
+  teacherId?: string | null;
+  search?: string | null;
+  metricFilter?: string | null;
+  paginationArgs?: import("./pagination.types").PaginationInput | null;
+};
+
+export type AdminDashboardScheduleReturnType = {
+  id: string;
+  totalCount: number;
+  metrics: ClassSessionMetrics;
+  rows: DailyScheduleListReturnType[];
+  pageInfo: import("./pagination.types").PageInfo | null;
+};
+
+export type StatusTrackingScheduleRow = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentInitials: string;
+  studentStatus: import("@/shared/lib/enum").StudentStatus;
+  teacherId: string;
+  teacherName: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome;
+  isFrozen: boolean;
+};

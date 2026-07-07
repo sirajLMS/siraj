@@ -1,13 +1,12 @@
+import type {
+  CreateRecurringClassInput,
+  CreateRecurringClassReturnType,
+  RecurringClassDayInput,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-export type RecurringClassDayInputDefinition = {
-  dayOfWeek: string;
-  startTime: string;
-  isActive: boolean;
-};
-
 export const RecurringClassDayInputPothosObject = gqlSchemaBuilder
-  .inputRef<RecurringClassDayInputDefinition>("RecurringClassDayInput")
+  .inputRef<RecurringClassDayInput>("RecurringClassDayInput")
   .implement({
     fields: t => ({
       dayOfWeek: t.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
@@ -16,22 +15,8 @@ export const RecurringClassDayInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-export type CreateRecurringClassInputDefinition = {
-  studentId: string;
-  teacherId: string;
-  durationMinutes: number;
-  defaultStartTime: string;
-  timezone: string;
-  timezoneId?: number | null;
-  effectiveFrom?: string | null;
-  effectiveUntil?: string | null;
-  days: RecurringClassDayInputDefinition[];
-  classType?: string | null;
-  generateInstancesForWeeks?: number | null;
-};
-
 export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
-  .inputRef<CreateRecurringClassInputDefinition>("CreateRecurringClassInput")
+  .inputRef<CreateRecurringClassInput>("CreateRecurringClassInput")
   .implement({
     fields: t => ({
       studentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
@@ -52,15 +37,8 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-export type CreateRecurringClassResultDefinition = {
-  id: string;
-  recurringScheduleId: string;
-  classInstanceIds: string[];
-  classInstanceCount: number;
-};
-
 const CreateRecurringClassResultRef =
-  gqlSchemaBuilder.objectRef<CreateRecurringClassResultDefinition>("CreateRecurringClassResult");
+  gqlSchemaBuilder.objectRef<CreateRecurringClassReturnType>("CreateRecurringClassResult");
 
 export const CreateRecurringClassResultPothosObject = CreateRecurringClassResultRef.implement({
   fields: t => ({

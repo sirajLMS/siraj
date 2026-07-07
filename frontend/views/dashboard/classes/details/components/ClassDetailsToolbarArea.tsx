@@ -3,16 +3,15 @@
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import { Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classDetailsContentPaddingSx, classDetailsSectionStackSx } from "../classDetailsMobileLayout";
 import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
 import { LiveSessionToolbar } from "./LiveSessionToolbar";
 
 export interface ClassDetailsToolbarAreaProps {
-  readonly instance: ClassInstanceDetailReturnType;
+  readonly instance: ClassInstanceDetail;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
   readonly labels: {

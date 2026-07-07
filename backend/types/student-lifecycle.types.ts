@@ -1,4 +1,6 @@
-import { StudentStatus } from "@/shared/lib/enum";
+import type { StudentStatus } from "@/shared/lib/enum";
+
+export { ALLOWED_STATUS_TRANSITIONS } from "@/shared/lib/enum";
 
 export interface LeaveProcessingResult {
   readonly processedCount: number;
@@ -16,11 +18,3 @@ export interface ChangeStudentStatusResult {
   readonly status: StudentStatus;
   readonly version: number;
 }
-
-export const ALLOWED_STATUS_TRANSITIONS: Record<StudentStatus, readonly StudentStatus[]> = {
-  [StudentStatus.ON_TRIAL]: [StudentStatus.REGULAR, StudentStatus.DEACTIVATED],
-  [StudentStatus.REGULAR]: [StudentStatus.SUSPENDED, StudentStatus.ON_LEAVE, StudentStatus.DEACTIVATED],
-  [StudentStatus.SUSPENDED]: [StudentStatus.REGULAR, StudentStatus.DEACTIVATED],
-  [StudentStatus.ON_LEAVE]: [StudentStatus.REGULAR, StudentStatus.DEACTIVATED],
-  [StudentStatus.DEACTIVATED]: [StudentStatus.REGULAR],
-};

@@ -1,13 +1,17 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
-import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import { PageContainer } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  ClassExecutionState,
+  type ClassInstanceDetail,
+  ClassOutcome,
+  ClassType,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ClassInstance } from "@/frontend/views/dashboard/types/dashboard";
-import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
@@ -69,7 +73,7 @@ const useMockClassDetailsStore = create<MockClassDetailsState>(set => ({
 
 interface MockViewProps {
   readonly pageHeader: React.ReactNode;
-  readonly instance: ClassInstanceDetailReturnType;
+  readonly instance: ClassInstanceDetail;
   readonly isWarningDismissed: boolean;
   readonly dismissWarning: () => void;
 }
@@ -165,13 +169,13 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
 
 function mapMockToReal(
   mock: ClassInstance,
-  executionState: ClassExecutionState = ClassExecutionState.NOT_ACTIVATED
-): ClassInstanceDetailReturnType {
+  executionState: ClassExecutionState = ClassExecutionState.NotActivated
+): ClassInstanceDetail {
   return {
     id: mock.id,
     instanceId: mock.instanceId,
     courseName: mock.courseName,
-    classType: ClassType.REGULAR,
+    classType: ClassType.Regular,
     scheduledDate: mock.scheduledDate,
     startTime: mock.startTime,
     endTime: mock.endTime,
@@ -184,7 +188,7 @@ function mapMockToReal(
     zoomMeetingUrl: "",
     executionState,
     isRescheduled: false,
-    outcome: ClassOutcome.PENDING,
+    outcome: ClassOutcome.Pending,
     payrollCredited: false,
     student: {
       id: mock.student.id,
@@ -217,7 +221,7 @@ function mapMockToReal(
 }
 
 export function MockClassDetailsContainer({
-  executionState = ClassExecutionState.NOT_ACTIVATED,
+  executionState = ClassExecutionState.NotActivated,
 }: {
   readonly executionState?: ClassExecutionState;
 }) {
@@ -278,12 +282,12 @@ export const Default: Story = {
 
 export const ForceActivateEnabled: Story = {
   args: {
-    executionState: ClassExecutionState.NOT_ACTIVATED,
+    executionState: ClassExecutionState.NotActivated,
   },
 };
 
 export const ForceActivateDisabled: Story = {
   args: {
-    executionState: ClassExecutionState.ACTIVATED,
+    executionState: ClassExecutionState.Activated,
   },
 };

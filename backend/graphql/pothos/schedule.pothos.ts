@@ -1,12 +1,16 @@
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
-import type { ClassSessionMetrics, PageInfo, PaginationInput } from "@/backend/types";
 import type {
-  ClassExecutionState,
-  ClassOutcome,
-  LeaveRequestStatus,
-  RescheduleDateLabel,
-  StudentStatus,
-} from "@/shared/lib/enum";
+  AdminDashboardScheduleInputType,
+  AdminDashboardScheduleReturnType,
+  ClassSessionMetrics,
+  DailyScheduleListReturnType,
+  DailyScheduleListUserItem,
+  RescheduleTrackingInput,
+  RescheduleTrackingMetrics,
+  RescheduleTrackingPaginatedResult,
+  RescheduleTrackingRow,
+  StatusTrackingScheduleRow,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   ClassExecutionStatePothosObject,
@@ -37,11 +41,6 @@ export const DailyScheduleMetricsPothosObject = DailyScheduleMetricsObjectRef.im
   }),
 });
 
-export type DailyScheduleListUserItem = {
-  id: string;
-  name: string;
-};
-
 const DailyScheduleListUserItemRef = gqlSchemaBuilder.objectRef<DailyScheduleListUserItem>("DailyScheduleListUserItem");
 const DailyScheduleListUserItemObject = DailyScheduleListUserItemRef.implement({
   fields: t => ({
@@ -50,22 +49,7 @@ const DailyScheduleListUserItemObject = DailyScheduleListUserItemRef.implement({
   }),
 });
 
-export type DailyScheduleListDefinition = {
-  id: string;
-  studentTime: string;
-  teacherTime: string;
-  yourTime: string;
-  duration: number;
-  scheduledStartAt: Date;
-  scheduledEndAt: Date;
-  status: ClassExecutionState;
-  outcome: ClassOutcome;
-  executionState: ClassExecutionState;
-  student: DailyScheduleListUserItem;
-  teacher: DailyScheduleListUserItem;
-};
-
-const DailyScheduleListObjectRef = gqlSchemaBuilder.objectRef<DailyScheduleListDefinition>("DailyScheduleList");
+const DailyScheduleListObjectRef = gqlSchemaBuilder.objectRef<DailyScheduleListReturnType>("DailyScheduleList");
 
 export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implement({
   fields: t => ({
@@ -84,16 +68,8 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
   }),
 });
 
-export type AdminDashboardScheduleInputDefinition = {
-  date: string;
-  teacherId?: string | null;
-  search?: string | null;
-  metricFilter?: string | null;
-  paginationArgs?: PaginationInput | null;
-};
-
 export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
-  .inputRef<AdminDashboardScheduleInputDefinition>("AdminDashboardScheduleInput")
+  .inputRef<AdminDashboardScheduleInputType>("AdminDashboardScheduleInput")
   .implement({
     fields: t => ({
       date: t.string({ required: true }),
@@ -104,16 +80,8 @@ export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-export type AdminDashboardScheduleResultDefinition = {
-  id: string;
-  totalCount: number;
-  metrics: ClassSessionMetrics;
-  rows: DailyScheduleListDefinition[];
-  pageInfo: PageInfo | null;
-};
-
 const AdminDashboardScheduleResultRef =
-  gqlSchemaBuilder.objectRef<AdminDashboardScheduleResultDefinition>("AdminDashboardScheduleResult");
+  gqlSchemaBuilder.objectRef<AdminDashboardScheduleReturnType>("AdminDashboardScheduleResult");
 
 export const AdminDashboardScheduleResultPothosObject = AdminDashboardScheduleResultRef.implement({
   fields: t => ({
@@ -125,22 +93,7 @@ export const AdminDashboardScheduleResultPothosObject = AdminDashboardScheduleRe
   }),
 });
 
-export type RescheduleTrackingRowDefinition = {
-  id: string;
-  originalClassId: string | null;
-  teacherId: string;
-  teacherName: string;
-  teacherAvatarUrl: string | null;
-  studentId: string;
-  studentName: string;
-  scheduledStartAt: Date;
-  scheduledEndAt: Date;
-  status: LeaveRequestStatus;
-  dateLabel: RescheduleDateLabel;
-  remarks: string | null;
-};
-
-const RescheduleTrackingRowRef = gqlSchemaBuilder.objectRef<RescheduleTrackingRowDefinition>("RescheduleTrackingRow");
+const RescheduleTrackingRowRef = gqlSchemaBuilder.objectRef<RescheduleTrackingRow>("RescheduleTrackingRow");
 
 export const RescheduleTrackingRowPothosObject = RescheduleTrackingRowRef.implement({
   fields: t => ({
@@ -159,17 +112,7 @@ export const RescheduleTrackingRowPothosObject = RescheduleTrackingRowRef.implem
   }),
 });
 
-export type RescheduleTrackingMetricsDefinition = {
-  id: string;
-  pending: number;
-  approved: number;
-  leave: number;
-  rescheduled: number;
-  cancelled: number;
-};
-
-const RescheduleTrackingMetricsRef =
-  gqlSchemaBuilder.objectRef<RescheduleTrackingMetricsDefinition>("RescheduleTrackingMetrics");
+const RescheduleTrackingMetricsRef = gqlSchemaBuilder.objectRef<RescheduleTrackingMetrics>("RescheduleTrackingMetrics");
 
 export const RescheduleTrackingMetricsPothosObject = RescheduleTrackingMetricsRef.implement({
   fields: t => ({
@@ -182,13 +125,8 @@ export const RescheduleTrackingMetricsPothosObject = RescheduleTrackingMetricsRe
   }),
 });
 
-export type RescheduleTrackingInputDefinition = {
-  search?: string | null;
-  status?: LeaveRequestStatus | null;
-};
-
 export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
-  .inputRef<RescheduleTrackingInputDefinition>("RescheduleTrackingInput")
+  .inputRef<RescheduleTrackingInput>("RescheduleTrackingInput")
   .implement({
     fields: t => ({
       search: t.string(),
@@ -196,15 +134,8 @@ export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-export type RescheduleTrackingResultDefinition = {
-  id: string;
-  rows: RescheduleTrackingRowDefinition[];
-  totalCount: number;
-  pageInfo: PageInfo | null;
-};
-
 const RescheduleTrackingResultRef =
-  gqlSchemaBuilder.objectRef<RescheduleTrackingResultDefinition>("RescheduleTrackingResult");
+  gqlSchemaBuilder.objectRef<RescheduleTrackingPaginatedResult>("RescheduleTrackingResult");
 export const RescheduleTrackingResultPothosObject = RescheduleTrackingResultRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
@@ -223,24 +154,7 @@ export const RescheduleTrackingResultPothosObject = RescheduleTrackingResultRef.
  * Fields include student status and isFrozen flag to support the
  * frontend's mapToSessionStatus() logic in StatusTrackingContainer.
  */
-export type StatusTrackingScheduleRowDefinition = {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentInitials: string;
-  studentStatus: StudentStatus;
-  teacherId: string;
-  teacherName: string;
-  scheduledStartAt: Date;
-  scheduledEndAt: Date;
-  durationMinutes: number;
-  executionState: ClassExecutionState;
-  outcome: ClassOutcome;
-  isFrozen: boolean;
-};
-
-const StatusTrackingScheduleRowRef =
-  gqlSchemaBuilder.objectRef<StatusTrackingScheduleRowDefinition>("StatusTrackingScheduleRow");
+const StatusTrackingScheduleRowRef = gqlSchemaBuilder.objectRef<StatusTrackingScheduleRow>("StatusTrackingScheduleRow");
 
 export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRef.implement({
   fields: t => ({

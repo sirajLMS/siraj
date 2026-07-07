@@ -1,8 +1,8 @@
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
 import type {
-  DeleteInvoiceResult,
+  DeleteInvoiceReturnType,
   ManualInvoiceResult,
-  MarkInvoicePaidResult,
+  MarkInvoicePaidReturnType,
   SendPaymentReminderResult,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
@@ -12,9 +12,7 @@ import { InvoiceStatusPothosObject, InvoiceTypePothosObject } from "./enum.potho
 
 // ─── ManualInvoiceResult Object ──────────────────────────────────────────────
 
-type ManualInvoiceResultGraphQLType = ManualInvoiceResult;
-
-const ManualInvoiceResultRef = gqlSchemaBuilder.objectRef<ManualInvoiceResultGraphQLType>("ManualInvoiceResult");
+const ManualInvoiceResultRef = gqlSchemaBuilder.objectRef<ManualInvoiceResult>("ManualInvoiceResult");
 
 export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement({
   fields: t => ({
@@ -36,11 +34,7 @@ export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement(
 // ─── MarkInvoicePaidResult Object ────────────────────────────────────────────
 // GraphQL flattens service's nested { invoice: {...} } shape to top-level fields.
 
-type MarkInvoicePaidGraphQLType = Omit<MarkInvoicePaidResult["invoice"], "deletedAt"> & {
-  notificationSummaryUpdated: boolean;
-};
-
-const MarkInvoicePaidResultRef = gqlSchemaBuilder.objectRef<MarkInvoicePaidGraphQLType>("MarkInvoicePaidResult");
+const MarkInvoicePaidResultRef = gqlSchemaBuilder.objectRef<MarkInvoicePaidReturnType>("MarkInvoicePaidResult");
 
 export const MarkInvoicePaidResultPothosObject = MarkInvoicePaidResultRef.implement({
   fields: t => ({
@@ -56,11 +50,7 @@ export const MarkInvoicePaidResultPothosObject = MarkInvoicePaidResultRef.implem
 // ─── DeleteInvoiceResult Object ──────────────────────────────────────────────
 // GraphQL flattens service's nested { invoice: {...} } shape to top-level fields.
 
-type DeleteInvoiceGraphQLType = Omit<DeleteInvoiceResult["invoice"], "deletedAt"> & {
-  notificationSummaryUpdated: boolean;
-};
-
-const DeleteInvoiceResultRef = gqlSchemaBuilder.objectRef<DeleteInvoiceGraphQLType>("DeleteInvoiceResult");
+const DeleteInvoiceResultRef = gqlSchemaBuilder.objectRef<DeleteInvoiceReturnType>("DeleteInvoiceResult");
 
 export const DeleteInvoiceResultPothosObject = DeleteInvoiceResultRef.implement({
   fields: t => ({

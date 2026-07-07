@@ -1,7 +1,15 @@
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
-import type { OnboardingMetricsResult, PageInfo, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
+import type {
+  ManagerDirectoryMetrics,
+  ManagerDirectoryResult,
+  ManagerDirectoryRow,
+  OnboardingMetricsResult,
+  TeacherDirectoryMetrics,
+  TeacherDirectoryReturnType,
+  TeacherDirectoryRow,
+  UpdateManagerProfileInput,
+} from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
-import type { AccountStatus } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { requireAuth } from "../utils/requireAuth";
 import { AccountStatusPothosObject } from "./enum.pothos";
@@ -39,15 +47,7 @@ export const TeacherDirectoryMetricsPothosObject = TeacherDirectoryMetricsRef.im
   }),
 });
 
-export type TeacherDirectoryDefinition = {
-  id: string;
-  metrics: TeacherDirectoryMetrics;
-  rows: TeacherDirectoryRow[];
-  totalTeachers: number;
-  pageInfo: PageInfo | null;
-};
-
-const TeacherDirectoryRef = gqlSchemaBuilder.objectRef<TeacherDirectoryDefinition>("TeacherDirectory");
+const TeacherDirectoryRef = gqlSchemaBuilder.objectRef<TeacherDirectoryReturnType>("TeacherDirectory");
 
 export const TeacherDirectoryPothosObject = TeacherDirectoryRef.implement({
   fields: t => ({
@@ -61,20 +61,7 @@ export const TeacherDirectoryPothosObject = TeacherDirectoryRef.implement({
 
 // ─── Manager Directory Types & Queries ──────────────────────────────────────────
 
-export type ManagerDirectoryRowDefinition = {
-  id: string;
-  staffProfileId: string;
-  name: string;
-  email: string;
-  avatarUrl: string | null;
-  phone: string | null;
-  skypeId: string | null;
-  status: AccountStatus;
-  roleSlug: string | null;
-  roleName: string | null;
-};
-
-const ManagerDirectoryRowRef = gqlSchemaBuilder.objectRef<ManagerDirectoryRowDefinition>("ManagerDirectoryRow");
+const ManagerDirectoryRowRef = gqlSchemaBuilder.objectRef<ManagerDirectoryRow>("ManagerDirectoryRow");
 
 export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement({
   fields: t => ({
@@ -91,16 +78,7 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
   }),
 });
 
-export type ManagerDirectoryMetricsDefinition = {
-  id: string;
-  totalAdmin: number;
-  systemStaff: number;
-  activeNow: number;
-  alerts: number;
-};
-
-const ManagerDirectoryMetricsRef =
-  gqlSchemaBuilder.objectRef<ManagerDirectoryMetricsDefinition>("ManagerDirectoryMetrics");
+const ManagerDirectoryMetricsRef = gqlSchemaBuilder.objectRef<ManagerDirectoryMetrics>("ManagerDirectoryMetrics");
 
 export const ManagerDirectoryMetricsPothosObject = ManagerDirectoryMetricsRef.implement({
   fields: t => ({
@@ -112,16 +90,7 @@ export const ManagerDirectoryMetricsPothosObject = ManagerDirectoryMetricsRef.im
   }),
 });
 
-export type ManagerDirectoryResultDefinition = {
-  id: string;
-  metrics: ManagerDirectoryMetricsDefinition;
-  rows: ManagerDirectoryRowDefinition[];
-  totalCount: number;
-  pageInfo: PageInfo | null;
-};
-
-const ManagerDirectoryResultRef =
-  gqlSchemaBuilder.objectRef<ManagerDirectoryResultDefinition>("ManagerDirectoryResult");
+const ManagerDirectoryResultRef = gqlSchemaBuilder.objectRef<ManagerDirectoryResult>("ManagerDirectoryResult");
 
 export const ManagerDirectoryResultPothosObject = ManagerDirectoryResultRef.implement({
   fields: t => ({
@@ -210,14 +179,8 @@ gqlSchemaBuilder.queryField("onboardingMetrics", t =>
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
-export interface UpdateManagerProfileInputDefinition {
-  phone?: string | null;
-  skypeId?: string | null;
-  status?: AccountStatus | null;
-}
-
 export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
-  .inputRef<UpdateManagerProfileInputDefinition>("UpdateManagerProfileInput")
+  .inputRef<UpdateManagerProfileInput>("UpdateManagerProfileInput")
   .implement({
     fields: t => ({
       phone: t.string({ required: false }),

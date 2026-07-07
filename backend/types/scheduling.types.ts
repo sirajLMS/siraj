@@ -44,7 +44,44 @@ export type RescheduleTrackingInput = {
 };
 
 export type RescheduleTrackingPaginatedResult = {
+  id?: string;
   rows: RescheduleTrackingRow[];
   totalCount: number;
   pageInfo: PageInfo | null;
+};
+
+export type RescheduleTrackingMetrics = {
+  id: string;
+  pending: number;
+  approved: number;
+  leave: number;
+  rescheduled: number;
+  cancelled: number;
+};
+
+export type RecurringClassDayInput = {
+  dayOfWeek: string;
+  startTime: string;
+  isActive: boolean;
+};
+
+export type CreateRecurringClassInput = {
+  studentId: string;
+  teacherId: string;
+  durationMinutes: number;
+  defaultStartTime: string;
+  timezone: string;
+  timezoneId?: number | null;
+  effectiveFrom?: string | null;
+  effectiveUntil?: string | null;
+  days: RecurringClassDayInput[];
+  classType?: string | null;
+  generateInstancesForWeeks?: number | null;
+};
+
+export type CreateRecurringClassReturnType = {
+  id: string;
+  recurringScheduleId: string;
+  classInstanceIds: string[];
+  classInstanceCount: number;
 };

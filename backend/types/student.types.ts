@@ -35,8 +35,10 @@ export type StudentDirectory = Omit<
 >;
 
 export interface StudentDirectoryResult {
+  readonly id?: string;
   readonly rows: StudentDirectory[];
   readonly totalCount: number;
+  readonly pageInfo?: PageInfo | null;
 }
 
 export type StudentCreateInput = Omit<
@@ -121,9 +123,41 @@ export enum StudentsOrderByColumn {
   UPDATED_AT = "UPDATED_AT",
 }
 
-export type StudentHistoryMetricsDefinition = {
+export type StudentHistoryMetricsType = {
   totalClasses: number;
   attendanceRate: number;
   hoursStudied: number;
   performance: number;
+};
+
+export type StudentHistorySession = {
+  id: string;
+  title: string;
+  time: string;
+  duration: number;
+  status: string;
+  instructor: string;
+  timeSlot: string;
+  room: string | null;
+  notes: string;
+  dayOfMonth: number;
+};
+
+export type StudentClassHistory = {
+  id: string;
+  studentName: string;
+  metrics: StudentHistoryMetricsType;
+  sessions: StudentHistorySession[];
+};
+
+export type StudentSessionDetail = {
+  id: string;
+  durationMinutes: number;
+  executionState: string;
+  outcome: string | null;
+  remarks: string | null;
+  zoomMeetingUrl: string | null;
+  teacherName: string;
+  scheduledStartAt: Date | string;
+  scheduledEndAt: Date | string;
 };

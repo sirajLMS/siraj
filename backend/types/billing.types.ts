@@ -134,3 +134,19 @@ export interface CreateManualInvoiceInput {
   readonly sendEmail?: boolean | null;
   readonly idempotencyKey?: string;
 }
+
+export interface MarkInvoicePaidReturnType {
+  readonly id: string;
+  readonly parentId: string;
+  readonly status: InvoiceStatus;
+  readonly paidDate: string | null;
+  readonly version: number;
+  readonly notificationSummaryUpdated: boolean;
+}
+
+export interface DeleteInvoiceReturnType {
+  readonly id: string;
+  readonly parentId: string;
+  readonly version: number;
+  readonly notificationSummaryUpdated: boolean;
+}

@@ -1,17 +1,7 @@
+import type { UnpaidInvoiceSummaryItem, UnpaidInvoicesSummaryResult } from "@/backend/types/billing.types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-export type UnpaidInvoiceItemDefinition = {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  totalUnpaidAmount: string;
-  currency: string;
-  overdueCount: number;
-  oldestDueDate: string;
-};
-
-const UnpaidInvoiceItemRef = gqlSchemaBuilder.objectRef<UnpaidInvoiceItemDefinition>("UnpaidInvoiceItem");
+const UnpaidInvoiceItemRef = gqlSchemaBuilder.objectRef<UnpaidInvoiceSummaryItem>("UnpaidInvoiceItem");
 
 export const UnpaidInvoiceItemPothosObject = UnpaidInvoiceItemRef.implement({
   fields: t => ({
@@ -26,14 +16,7 @@ export const UnpaidInvoiceItemPothosObject = UnpaidInvoiceItemRef.implement({
   }),
 });
 
-export type UnpaidInvoicesSummaryDefinition = {
-  id: string;
-  totalOverdueInvoices: number;
-  totalOverdueAmount: string;
-  items: UnpaidInvoiceItemDefinition[];
-};
-
-const UnpaidInvoicesSummaryRef = gqlSchemaBuilder.objectRef<UnpaidInvoicesSummaryDefinition>("UnpaidInvoicesSummary");
+const UnpaidInvoicesSummaryRef = gqlSchemaBuilder.objectRef<UnpaidInvoicesSummaryResult>("UnpaidInvoicesSummary");
 
 export const UnpaidInvoicesSummaryPothosObject = UnpaidInvoicesSummaryRef.implement({
   fields: t => ({

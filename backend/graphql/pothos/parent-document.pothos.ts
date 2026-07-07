@@ -1,16 +1,8 @@
 import { ParentDocumentService } from "@/backend/services/parent/parent-document.service";
+import type { ParentDocument } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-export type ParentDocumentDefinition = {
-  id: string;
-  fileId: string;
-  filePath: string;
-  isProtected: boolean;
-  usageType: string;
-  createdAt: Date;
-};
-
-const ParentDocumentRef = gqlSchemaBuilder.objectRef<ParentDocumentDefinition>("ParentDocument");
+const ParentDocumentRef = gqlSchemaBuilder.objectRef<ParentDocument>("ParentDocument");
 
 export const ParentDocumentPothosObject = ParentDocumentRef.implement({
   fields: t => ({

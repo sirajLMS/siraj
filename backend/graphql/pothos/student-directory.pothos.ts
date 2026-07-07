@@ -1,8 +1,8 @@
 import { StudentDirectoryService } from "@/backend/services";
-import type { PageInfo } from "@/backend/types";
 import {
   PaginationArgs,
   type StudentDirectory,
+  type StudentDirectoryResult,
   type StudentFilterArgs,
   type StudentsOrderByClause,
 } from "@/backend/types";
@@ -34,15 +34,7 @@ export const StudentDirectoryRowPothosObject = gqlSchemaBuilder
     }),
   });
 
-type StudentDirectoryPayloadDefinition = {
-  id: string;
-  rows: StudentDirectory[];
-  totalCount: number;
-  pageInfo: PageInfo | null;
-};
-
-const StudentDirectoryPayloadRef =
-  gqlSchemaBuilder.objectRef<StudentDirectoryPayloadDefinition>("StudentDirectoryPayload");
+const StudentDirectoryPayloadRef = gqlSchemaBuilder.objectRef<StudentDirectoryResult>("StudentDirectoryPayload");
 
 export const StudentDirectoryPayloadPothosObject = StudentDirectoryPayloadRef.implement({
   fields: t => ({
