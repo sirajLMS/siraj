@@ -3,7 +3,6 @@
 import { Box, Typography } from "@mui/material";
 import { differenceInCalendarDays, parse } from "date-fns";
 import { useTranslations } from "next-intl";
-import { PaginationControls } from "@/frontend/components/ui/PaginationControls";
 import { SearchScheduleResultsSkeleton } from "./SearchScheduleResultsSkeleton";
 import { TeacherAvailabilityGrid } from "./TeacherAvailabilityGrid";
 
@@ -28,7 +27,7 @@ export interface SearchScheduleResultItem {
     | null;
 }
 
-interface SearchSchedulePageInfo {
+export interface SearchSchedulePageInfo {
   readonly count?: number | null;
   readonly currentPage?: number | null;
   readonly hasMorePages?: boolean | null;
@@ -50,7 +49,6 @@ interface SearchScheduleViewProps {
   readonly fromDate: string;
   readonly toDate: string;
   readonly isInitialLoading: boolean;
-  readonly onPageChange: (page: number) => void;
 }
 
 function getColumnCount(fromDate: string, toDate: string): number {
@@ -59,13 +57,7 @@ function getColumnCount(fromDate: string, toDate: string): number {
   return Math.max(differenceInCalendarDays(end, start) + 1, 1);
 }
 
-export function SearchScheduleView({
-  result,
-  fromDate,
-  toDate,
-  isInitialLoading,
-  onPageChange,
-}: Readonly<SearchScheduleViewProps>) {
+export function SearchScheduleView({ result, fromDate, toDate, isInitialLoading }: Readonly<SearchScheduleViewProps>) {
   const t = useTranslations("dashboard.searchSchedule");
   const columnCount = getColumnCount(fromDate, toDate);
 
@@ -75,7 +67,6 @@ export function SearchScheduleView({
 
   const teachers = result?.teachers ?? [];
   const totalGaps = result?.totalGaps ?? 0;
-  const pageInfo = result?.pageInfo;
   const activeTeachers = teachers.filter((teacher): teacher is SearchScheduleResultItem => {
     return teacher !== null && teacher !== undefined;
   });
@@ -91,31 +82,19 @@ export function SearchScheduleView({
   }
 
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.text.secondary, mb: 2 })}>
+    <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.text.secondary })}>
         {t("resultsCount", {
           count: result?.totalCount ?? activeTeachers.length,
           gaps: totalGaps,
         })}
       </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         {activeTeachers.map(teacher => (
           <TeacherAvailabilityGrid key={teacher.id ?? ""} teacher={teacher} fromDate={fromDate} toDate={toDate} />
         ))}
       </Box>
-
-      {pageInfo && (pageInfo.total ?? 0) > 0 && (
-        <Box sx={{ mt: 3 }}>
-          <PaginationControls
-            page={(pageInfo.currentPage ?? 1) - 1}
-            pageCount={pageInfo.lastPage ?? 1}
-            rowCount={pageInfo.total ?? 0}
-            pageSize={pageInfo.perPage ?? activeTeachers.length}
-            onPageChange={onPageChange}
-          />
-        </Box>
-      )}
     </Box>
   );
 }

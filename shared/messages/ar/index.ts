@@ -48,6 +48,7 @@ import {
   weeklySchedule as teacherWeeklySchedule,
 } from "./dashboard/teachers";
 import { errors } from "./errors";
+import { profile as profileLabels } from "./profile";
 
 export const session: SessionLabels = {
   leaveProcessedDescription: "تمت معالجة طلب الإجازة، أعيدت جدولته إلى الجلسة {successorId}.",
@@ -75,6 +76,7 @@ export const arTranslations = {
   common,
   auth,
   errors,
+  profile: profileLabels,
   session,
   dashboard: {
     nav,

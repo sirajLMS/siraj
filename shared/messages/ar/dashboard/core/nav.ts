@@ -44,6 +44,7 @@ export const nav: DashboardNavigationLabels = {
   todayClasses: "حصص اليوم",
   regularSchedule: "الجدول الدائم",
   yourStudents: "طلابك",
+  yourProfile: "ملفك الشخصي",
   salaryDetails: "تفاصيل الراتب",
   teacherRules: "القواعد",
   suggest: "اقتراح",

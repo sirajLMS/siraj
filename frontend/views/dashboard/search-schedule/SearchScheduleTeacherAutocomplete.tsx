@@ -5,16 +5,19 @@ import { Autocomplete, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
-import {
-  type SearchScheduleTeacherOption,
-  useSearchScheduleStore,
-} from "@/frontend/stores/searchScheduleStore";
+import { type SearchScheduleTeacherOption, useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 
 const DEBOUNCE_MS = 300;
 const MIN_SEARCH_LENGTH = 2;
 const TEACHER_SEARCH_LIMIT = 10;
 
-export function SearchScheduleTeacherAutocomplete() {
+interface SearchScheduleTeacherAutocompleteProps {
+  readonly size?: "small" | "medium";
+}
+
+export function SearchScheduleTeacherAutocomplete({
+  size = "small",
+}: Readonly<SearchScheduleTeacherAutocompleteProps>) {
   const t = useTranslations("dashboard.searchSchedule");
 
   const teacherSearchInput = useSearchScheduleStore(state => state.teacherSearchInput);
@@ -83,6 +86,7 @@ export function SearchScheduleTeacherAutocomplete() {
           {...params}
           label={t("teacherName")}
           placeholder={t("teacherNamePlaceholder")}
+          size={size}
           slotProps={{
             ...params.slotProps,
             htmlInput: {

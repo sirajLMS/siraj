@@ -11,6 +11,7 @@ import { AppPermission, type AvailabilitySearchInput } from "@/frontend/graphql/
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 import { SearchScheduleForm } from "./SearchScheduleForm";
+import { SearchSchedulePaginationFooter } from "./SearchSchedulePaginationFooter";
 import { SearchScheduleView } from "./SearchScheduleView";
 
 export function SearchScheduleContainer() {
@@ -52,11 +53,34 @@ export function SearchScheduleContainer() {
   );
   const activeToDate = useMemo(() => activeInput?.toDate ?? draft.toDate, [activeInput?.toDate, draft.toDate]);
 
+  const searchResult = displayData?.searchTeacherAvailability;
+  const pageInfo = searchResult?.pageInfo;
+  const teacherCount = searchResult?.teachers?.length ?? 0;
+  const showPaginationFooter = Boolean(pageInfo && (pageInfo.total ?? 0) > 0);
+
   return (
     <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
-      <PageContainer>
+      <PageContainer
+        sx={theme => ({
+          display: "flex",
+          flexDirection: "column",
+          minHeight: {
+            xs: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.bottomNavHeight} - ${theme.spacing(4)})`,
+            md: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.pageMargin} * 2)`,
+          },
+        })}
+      >
         <PageHeader title={t("pageTitle")} titleVariant="headlineLg" />
-        <Box sx={{ mt: 3 }}>
+        <Box
+          sx={{
+            mt: 3,
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            gap: 2,
+            minHeight: 0,
+          }}
+        >
           <SearchScheduleForm
             draft={draft}
             isSearching={isRefetching || isInitialLoading}
@@ -64,21 +88,22 @@ export function SearchScheduleContainer() {
             onSearch={commitSearch}
           />
 
-          {error && (
-            <Typography color="error" sx={{ mt: 2 }}>
-              {t("errorLoading")}
-            </Typography>
+          {error ? <Typography color="error">{t("errorLoading")}</Typography> : null}
+
+          {(hasSearched || searchResult) && (
+            <Box sx={{ display: "flex", flexDirection: "column", flex: 1, gap: 2, minHeight: 0 }}>
+              <SearchScheduleView
+                result={searchResult}
+                fromDate={activeFromDate}
+                toDate={activeToDate}
+                isInitialLoading={isInitialLoading}
+              />
+            </Box>
           )}
 
-          {(hasSearched || displayData?.searchTeacherAvailability) && (
-            <SearchScheduleView
-              result={displayData?.searchTeacherAvailability}
-              fromDate={activeFromDate}
-              toDate={activeToDate}
-              isInitialLoading={isInitialLoading}
-              onPageChange={setPage}
-            />
-          )}
+          {showPaginationFooter && pageInfo ? (
+            <SearchSchedulePaginationFooter pageInfo={pageInfo} teacherCount={teacherCount} onPageChange={setPage} />
+          ) : null}
         </Box>
       </PageContainer>
     </RequirePermission>

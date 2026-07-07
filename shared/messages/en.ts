@@ -314,6 +314,7 @@ const en: MessageSchema = {
       todayClasses: "Today Classes",
       regularSchedule: "Regular Schedule",
       yourStudents: "Your Students",
+      yourProfile: "Your Profile",
       salaryDetails: "Salary Details",
       teacherRules: "Rules",
       suggest: "Suggest",
@@ -346,8 +347,14 @@ const en: MessageSchema = {
       toDate: "To date",
       fromTime: "From",
       toTime: "To",
-      gender: "Gender",
+      teacherGender: "Teacher gender",
       allGenders: "All",
+      dateRange: "Date range",
+      timeRange: "Time range",
+      filters: "Filters",
+      applyFilters: "Apply",
+      clearFilters: "Clear filters",
+      sort: "Sort",
       male: "Male",
       female: "Female",
       teacherName: "Teacher name",
@@ -363,7 +370,13 @@ const en: MessageSchema = {
       resultsCount: "{count} teachers with {gaps} available slots",
       availableDaysCount: "{count} days",
       errorLoading: "Failed to load availability data.",
-      sort: {
+      viewMonthSchedule: "View month schedule",
+      monthScheduleTitle: "{name} — monthly availability",
+      monthScheduleError: "Failed to load monthly availability.",
+      closeMonthSchedule: "Close month schedule",
+      previousMonth: "Previous month",
+      nextMonth: "Next month",
+      sortOptions: {
         mostAvailableDays: "Most available days",
         mostGaps: "Most gaps",
         nameAsc: "Name (A-Z)",
@@ -378,6 +391,17 @@ const en: MessageSchema = {
         friday: "Fri",
         saturday: "Sat",
         sunday: "Sun",
+      },
+      calendar: {
+        days: {
+          sun: "Sun",
+          mon: "Mon",
+          tue: "Tue",
+          wed: "Wed",
+          thu: "Thu",
+          fri: "Fri",
+          sat: "Sat",
+        },
       },
     },
 
@@ -2776,6 +2800,58 @@ const en: MessageSchema = {
       REGULAR: "Regular Class",
       TRIAL: "Trial Class",
       ADVANCE: "Advance Class",
+    },
+  },
+  profile: {
+    pageTitle: "Profile",
+    editTitle: "Edit Profile",
+    notSet: "Not set",
+    adminEditHint: "Use the staff profile tools for full administrative editing.",
+    actions: {
+      edit: "Edit Profile",
+      save: "Save Changes",
+    },
+    errors: {
+      failedToLoad: "Failed to load profile.",
+      notFound: "Profile not found.",
+    },
+    teacher: {
+      subtitle: "View your official profile and compensation details.",
+      sections: {
+        contact: "Contact Information",
+        salary: "Salary Details",
+      },
+      baseSalary: "Base salary: {amount} {currency}",
+      paymentMethod: "Payment method: {method}",
+      fields: {
+        phone: "Phone",
+        zoomLink: "Zoom link",
+      },
+    },
+    parent: {
+      subtitle: "Manage your contact and communication details.",
+      sections: {
+        contact: "Contact Information",
+        social: "Social & Communication",
+      },
+      fields: {
+        phone: "Phone",
+        whatsapp: "WhatsApp",
+        facebook: "Facebook",
+        twitter: "Twitter",
+        skype: "Skype",
+        defaultZoomLink: "Default Zoom link",
+      },
+    },
+    staff: {
+      subtitle: "View your staff profile details.",
+      sections: {
+        contact: "Contact Information",
+      },
+      fields: {
+        phone: "Phone",
+        skypeId: "Skype ID",
+      },
     },
   },
 };

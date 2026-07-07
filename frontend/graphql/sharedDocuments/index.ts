@@ -19,6 +19,7 @@ export * from "./parent-documents.documents";
 export { createParentMutationDocument } from "./parent-onboarding.documents";
 export * from "./parent-profile.documents";
 export * from "./permission-management.documents";
+export * from "./profile.documents";
 export * from "./recurring-class.documents";
 export * from "./report.documents";
 export * from "./schedule.documents";

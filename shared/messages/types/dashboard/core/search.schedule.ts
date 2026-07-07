@@ -4,8 +4,14 @@ export interface SearchScheduleLabels {
   readonly toDate: string;
   readonly fromTime: string;
   readonly toTime: string;
-  readonly gender: string;
+  readonly teacherGender: string;
   readonly allGenders: string;
+  readonly dateRange: string;
+  readonly timeRange: string;
+  readonly filters: string;
+  readonly applyFilters: string;
+  readonly clearFilters: string;
+  readonly sort: string;
   readonly male: string;
   readonly female: string;
   readonly teacherName: string;
@@ -21,7 +27,13 @@ export interface SearchScheduleLabels {
   readonly resultsCount: string;
   readonly availableDaysCount: string;
   readonly errorLoading: string;
-  readonly sort: {
+  readonly viewMonthSchedule: string;
+  readonly monthScheduleTitle: string;
+  readonly monthScheduleError: string;
+  readonly closeMonthSchedule: string;
+  readonly previousMonth: string;
+  readonly nextMonth: string;
+  readonly sortOptions: {
     readonly mostAvailableDays: string;
     readonly mostGaps: string;
     readonly nameAsc: string;
@@ -36,5 +48,16 @@ export interface SearchScheduleLabels {
     readonly friday: string;
     readonly saturday: string;
     readonly sunday: string;
+  };
+  readonly calendar: {
+    readonly days: {
+      readonly sun: string;
+      readonly mon: string;
+      readonly tue: string;
+      readonly wed: string;
+      readonly thu: string;
+      readonly fri: string;
+      readonly sat: string;
+    };
   };
 }

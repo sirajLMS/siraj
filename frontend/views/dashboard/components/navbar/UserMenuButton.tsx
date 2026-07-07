@@ -1,16 +1,18 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { GroupsOutlined, LoginOutlined, LogoutOutlined } from "@mui/icons-material";
+import { GroupsOutlined, LoginOutlined, LogoutOutlined, PersonOutlineOutlined } from "@mui/icons-material";
 import { Avatar, Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useMemo, useState } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { simulatablePermissionGroupsQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
 import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { useRouter } from "@/shared/i18n/routing";
 
 export interface UserInfoSlotProps {
   readonly name: string;
@@ -156,10 +158,13 @@ export function UserMenuButton({
   slotProps = {},
 }: Readonly<UserMenuButtonProps>) {
   const { logout } = useAuth();
+  const router = useRouter();
   const tCommon = useTranslations("common");
+  const tProfile = useTranslations("profile");
   const tImpersonation = useTranslations("auth.impersonation");
   const tGroupSimulation = useTranslations("auth.groupSimulation");
   const actorIsSuperAdmin = useUserStore(state => state.actorIsSuperAdmin);
+  const canViewOwnProfile = useUserStore(state => state.hasPermission(AppPermission.AuthViewOwnProfile));
   const {
     isImpersonating,
     status: impersonationStatus,
@@ -202,6 +207,11 @@ export function UserMenuButton({
   const handleClose = () => {
     setAnchorEl(null);
     setGroupMenuAnchor(null);
+  };
+
+  const handleProfileClick = () => {
+    handleClose();
+    router.push("/profile");
   };
 
   const handleLogoutClick = () => {
@@ -317,6 +327,15 @@ export function UserMenuButton({
         }}
       >
         <UserInfo name={displayName} mail={displayEmail} secondaryLine={actorSecondaryLine} {...slotProps.userInfo} />
+
+        {canViewOwnProfile ? (
+          <MenuItem onClick={handleProfileClick} sx={{ gap: 1.5, mx: 1.5, borderRadius: 1 }}>
+            <PersonOutlineOutlined fontSize="small" />
+            <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
+              {tProfile("pageTitle")}
+            </Typography>
+          </MenuItem>
+        ) : null}
 
         {isImpersonating ? (
           <MenuItem

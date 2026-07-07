@@ -175,9 +175,7 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
   );
 }
 
-export function MockClassDetailsContainer({
-}: {
-}) {
+export function MockClassDetailsContainer() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const permissions = useUserStore(state => state.permissions);

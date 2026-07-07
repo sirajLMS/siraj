@@ -96,3 +96,4 @@ ai/.archive
 prompt/
 .gitwandrc
 *.txt
+.playwright-cli

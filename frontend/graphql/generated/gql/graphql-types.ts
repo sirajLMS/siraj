@@ -81,6 +81,7 @@ export enum AppLanguage {
 }
 
 export enum AppPermission {
+  AuthEditOwnProfile = 'AUTH_EDIT_OWN_PROFILE',
   AuthLogin = 'AUTH_LOGIN',
   AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
   BillingCreateInvoice = 'BILLING_CREATE_INVOICE',
@@ -117,6 +118,7 @@ export enum AppPermission {
   ParentsCreate = 'PARENTS_CREATE',
   ParentsEdit = 'PARENTS_EDIT',
   ParentsList = 'PARENTS_LIST',
+  ParentEditOwnProfile = 'PARENT_EDIT_OWN_PROFILE',
   ParentManageStatus = 'PARENT_MANAGE_STATUS',
   ParentViewDirectory = 'PARENT_VIEW_DIRECTORY',
   ParentViewOwnProfile = 'PARENT_VIEW_OWN_PROFILE',
@@ -191,12 +193,14 @@ export enum AppPermission {
   TeachersEdit = 'TEACHERS_EDIT',
   TeachersList = 'TEACHERS_LIST',
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
+  TeacherEditOwnProfile = 'TEACHER_EDIT_OWN_PROFILE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
   TeacherViewOwnProfile = 'TEACHER_VIEW_OWN_PROFILE',
   TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
   TestSystemOnly = 'TEST_SYSTEM_ONLY',
+  UserEditProfile = 'USER_EDIT_PROFILE',
   UserViewProfile = 'USER_VIEW_PROFILE'
 }
 
@@ -611,6 +615,12 @@ export type ComplaintSubmitInput = {
   files: InputMaybe<Array<ComplaintFileMetadataInput>>;
   studentId: InputMaybe<Scalars['String']['input']>;
   submitterEmail: Scalars['String']['input'];
+};
+
+export type CoreUserProfileFieldsInput = {
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
+  email: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum CountryCode {
@@ -1498,6 +1508,7 @@ export type Mutation = {
   updateDirectoryPermissions: Maybe<FileOperationResult>;
   /** Updates a manager's profile fields. */
   updateManagerProfile: Maybe<ManagerDirectoryRow>;
+  updateOwnProfile: Maybe<UnifiedProfile>;
   updatePermissionGroup: Maybe<PermissionGroup>;
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
@@ -1506,6 +1517,7 @@ export type Mutation = {
   updateTeacherImportantNote: Maybe<TeacherImportantNote>;
   updateTeacherProfile: Maybe<TeacherProfileResult>;
   updateUserOverrides: Maybe<Scalars['Boolean']['output']>;
+  updateUserProfile: Maybe<UnifiedProfile>;
   /** Uploads a new learning resource to the academy library. */
   uploadLearningResource: Maybe<LearningResourceRow>;
 };
@@ -1915,6 +1927,11 @@ export type MutationUpdateManagerProfileArgs = {
 };
 
 
+export type MutationUpdateOwnProfileArgs = {
+  input: UpdateOwnProfileInput;
+};
+
+
 export type MutationUpdatePermissionGroupArgs = {
   input: UpdatePermissionGroupInput;
 };
@@ -1957,6 +1974,12 @@ export type MutationUpdateTeacherProfileArgs = {
 
 export type MutationUpdateUserOverridesArgs = {
   overrides: Array<UserOverrideInput>;
+  userId: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateUserProfileArgs = {
+  input: UpdateUserProfileInput;
   userId: Scalars['String']['input'];
 };
 
@@ -2021,6 +2044,22 @@ export type PaginationArgs = {
   maxCount: InputMaybe<Scalars['Int']['input']>;
   page: InputMaybe<Scalars['Int']['input']>;
   skip: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ParentAdminProfileUpdateInput = {
+  address: InputMaybe<Scalars['String']['input']>;
+  currency: InputMaybe<Scalars['String']['input']>;
+  defaultZoomLink: InputMaybe<Scalars['String']['input']>;
+  facebook: InputMaybe<Scalars['String']['input']>;
+  feeAmount: InputMaybe<Scalars['String']['input']>;
+  invoiceType: InputMaybe<Scalars['String']['input']>;
+  nationality: InputMaybe<Scalars['String']['input']>;
+  paymentMethod: InputMaybe<Scalars['String']['input']>;
+  phone: InputMaybe<Scalars['String']['input']>;
+  skype: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
+  twitter: InputMaybe<Scalars['String']['input']>;
+  whatsapp: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ParentAssignedStudent = {
@@ -2223,6 +2262,15 @@ export type ParentOwnProfile = {
   whatsapp: Maybe<Scalars['String']['output']>;
 };
 
+export type ParentOwnProfileUpdateInput = {
+  defaultZoomLink: InputMaybe<Scalars['String']['input']>;
+  facebook: InputMaybe<Scalars['String']['input']>;
+  phone: InputMaybe<Scalars['String']['input']>;
+  skype: InputMaybe<Scalars['String']['input']>;
+  twitter: InputMaybe<Scalars['String']['input']>;
+  whatsapp: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ParentProfile = {
   __typename?: 'ParentProfile';
   address: Maybe<Scalars['String']['output']>;
@@ -2314,6 +2362,17 @@ export type PermissionGroupSimulationStatus = {
   startedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
+export enum ProfileAudience {
+  Parent = 'parent',
+  Staff = 'staff',
+  Teacher = 'teacher'
+}
+
+export enum ProfileScope {
+  Other = 'other',
+  Own = 'own'
+}
+
 export type Query = {
   __typename?: 'Query';
   adminBillingSummary: Maybe<AdminBillingSummary>;
@@ -2375,6 +2434,7 @@ export type Query = {
   permissionGroups: Maybe<Array<PermissionGroup>>;
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
+  profileByUserId: Maybe<UnifiedProfile>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
   rescheduleTrackingRows: Maybe<RescheduleTrackingResult>;
   searchFiles: Maybe<StorageObjectList>;
@@ -2584,6 +2644,11 @@ export type QueryParentSuggestionsArgs = {
 
 export type QueryPermissionGroupArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type QueryProfileByUserIdArgs = {
+  userId: Scalars['String']['input'];
 };
 
 
@@ -2847,6 +2912,11 @@ export type SimulatablePermissionGroup = {
   description: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   slug: Maybe<Scalars['String']['output']>;
+};
+
+export type StaffOwnProfileUpdateInput = {
+  phone: InputMaybe<Scalars['String']['input']>;
+  skypeId: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StartImpersonationResponse = {
@@ -3477,6 +3547,11 @@ export type TeacherOwnProfile = {
   zoomLink: Maybe<Scalars['String']['output']>;
 };
 
+export type TeacherOwnProfileUpdateInput = {
+  phone: InputMaybe<Scalars['String']['input']>;
+  zoomLink: InputMaybe<Scalars['String']['input']>;
+};
+
 export type TeacherProfileResult = {
   __typename?: 'TeacherProfileResult';
   address: Maybe<Scalars['String']['output']>;
@@ -3573,6 +3648,25 @@ export type TestSuperAdmin = {
   userId: Maybe<Scalars['String']['output']>;
 };
 
+export type UnifiedProfile = {
+  __typename?: 'UnifiedProfile';
+  audience: Maybe<ProfileAudience>;
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  parentAdminProfile: Maybe<ParentProfile>;
+  parentId: Maybe<Scalars['String']['output']>;
+  parentOwnProfile: Maybe<ParentOwnProfile>;
+  scope: Maybe<ProfileScope>;
+  staffProfile: Maybe<ManagerDirectoryRow>;
+  staffProfileId: Maybe<Scalars['String']['output']>;
+  teacherAdminProfile: Maybe<TeacherProfileResult>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherOwnProfile: Maybe<TeacherOwnProfile>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
 export type UnpaidInvoiceItem = {
   __typename?: 'UnpaidInvoiceItem';
   currency: Maybe<Scalars['String']['output']>;
@@ -3599,6 +3693,13 @@ export type UpdateManagerProfileInput = {
   status: InputMaybe<AccountStatus>;
 };
 
+export type UpdateOwnProfileInput = {
+  core: InputMaybe<CoreUserProfileFieldsInput>;
+  parent: InputMaybe<ParentOwnProfileUpdateInput>;
+  staff: InputMaybe<StaffOwnProfileUpdateInput>;
+  teacher: InputMaybe<TeacherOwnProfileUpdateInput>;
+};
+
 export type UpdatePermissionGroupInput = {
   description: InputMaybe<Scalars['String']['input']>;
   groupId: Scalars['String']['input'];
@@ -3613,6 +3714,13 @@ export type UpdateTeacherNoteInput = {
   priority: InputMaybe<Scalars['Int']['input']>;
   startsAt: InputMaybe<Scalars['DateTime']['input']>;
   title: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateUserProfileInput = {
+  core: InputMaybe<CoreUserProfileFieldsInput>;
+  parent: InputMaybe<ParentAdminProfileUpdateInput>;
+  staff: InputMaybe<StaffOwnProfileUpdateInput>;
+  teacher: InputMaybe<TeacherProfileUpdateInput>;
 };
 
 export type UploadPreparation = {

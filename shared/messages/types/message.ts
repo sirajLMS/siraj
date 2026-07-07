@@ -50,6 +50,7 @@ import type {
   TeacherWeeklyScheduleLabels,
 } from "./dashboard/teachers";
 import type { ErrorsLabels } from "./errors";
+import type { ProfileLabels } from "./profile";
 import type { SessionLabels } from "./session";
 
 export type {
@@ -97,6 +98,7 @@ export type MessageSchema = {
   common: CommonLabels;
   auth: AuthLabels;
   errors: ErrorsLabels;
+  profile: ProfileLabels;
   session: SessionLabels;
   dashboard: {
     readonly nav: DashboardNavigationLabels;

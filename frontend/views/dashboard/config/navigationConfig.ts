@@ -69,9 +69,9 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     audience: "teacher",
   },
   {
-    key: "teacher-salary",
-    labelKey: "dashboard.nav.salaryDetails",
-    icon: PaymentsOutlined,
+    key: "teacher-profile",
+    labelKey: "dashboard.nav.yourProfile",
+    icon: PersonOutlineOutlined,
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
@@ -128,6 +128,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/parents/rules",
     section: "main",
     permission: PAGE_PERMISSIONS.parentRules,
+    audience: "parent",
+  },
+  {
+    key: "parent-profile",
+    labelKey: "dashboard.nav.yourProfile",
+    icon: PersonOutlineOutlined,
+    href: "/profile",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentProfile,
     audience: "parent",
   },
   {
@@ -303,6 +312,14 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.permissions,
   },
   {
+    key: "own-profile",
+    labelKey: "dashboard.nav.yourProfile",
+    icon: PersonOutlineOutlined,
+    href: "/profile",
+    section: "footer",
+    permission: PAGE_PERMISSIONS.profile,
+  },
+  {
     key: "logout",
     labelKey: "dashboard.nav.logout",
     icon: LogoutOutlined,
@@ -367,9 +384,9 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.resources,
   },
   {
-    key: "teacher-salary",
-    labelKey: "dashboard.nav.salaryDetails",
-    icon: PaymentsOutlined,
+    key: "teacher-profile",
+    labelKey: "dashboard.nav.yourProfile",
+    icon: PersonOutlineOutlined,
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
@@ -460,6 +477,15 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     audience: "parent",
   },
   {
+    key: "parent-profile",
+    labelKey: "dashboard.nav.yourProfile",
+    icon: PersonOutlineOutlined,
+    href: "/profile",
+    section: "main",
+    permission: PAGE_PERMISSIONS.parentProfile,
+    audience: "parent",
+  },
+  {
     key: "complaints-submit",
     labelKey: "dashboard.nav.complaintsSubmit",
     icon: ReportProblemOutlined,
@@ -467,6 +493,14 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsSubmit,
     audience: "parent",
+  },
+  {
+    key: "own-profile",
+    labelKey: "dashboard.nav.yourProfile",
+    icon: PersonOutlineOutlined,
+    href: "/profile",
+    section: "main",
+    permission: PAGE_PERMISSIONS.profile,
   },
   {
     key: "suggestions-manage",
@@ -500,7 +534,18 @@ export function getNavItemsForPermissions(items: readonly NavItem[], permissions
     return item.permission.some(p => permissions.includes(p));
   });
 
-  return applyParentNavOverrides(applyTeacherNavOverrides(filtered, permissions), permissions);
+  return applyProfileNavOverrides(
+    applyParentNavOverrides(applyTeacherNavOverrides(filtered, permissions), permissions),
+    permissions
+  );
+}
+
+function applyProfileNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
+  if (isTeacherPortalUser(permissions) || isParentPortalUser(permissions)) {
+    return items.filter(item => item.key !== "own-profile");
+  }
+
+  return [...items];
 }
 
 function isParentPortalUser(permissions: readonly AppPermission[]): boolean {

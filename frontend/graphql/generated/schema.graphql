@@ -55,6 +55,7 @@ enum AppLanguage {
 }
 
 enum AppPermission {
+  AUTH_EDIT_OWN_PROFILE
   AUTH_LOGIN
   AUTH_VIEW_OWN_PROFILE
   BILLING_CREATE_INVOICE
@@ -91,6 +92,7 @@ enum AppPermission {
   PARENTS_CREATE
   PARENTS_EDIT
   PARENTS_LIST
+  PARENT_EDIT_OWN_PROFILE
   PARENT_MANAGE_STATUS
   PARENT_VIEW_DIRECTORY
   PARENT_VIEW_OWN_PROFILE
@@ -165,12 +167,14 @@ enum AppPermission {
   TEACHERS_EDIT
   TEACHERS_LIST
   TEACHERS_MANAGE_SCHEDULE
+  TEACHER_EDIT_OWN_PROFILE
   TEACHER_VIEW_DASHBOARD
   TEACHER_VIEW_OWN_PROFILE
   TEACHER_VIEW_STUDENTS
   TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
+  USER_EDIT_PROFILE
   USER_VIEW_PROFILE
 }
 
@@ -567,6 +571,12 @@ input ComplaintSubmitInput {
   files: [ComplaintFileMetadataInput!]
   studentId: String
   submitterEmail: String!
+}
+
+input CoreUserProfileFieldsInput {
+  avatarUrl: String
+  email: String
+  name: String
 }
 
 enum CountryCode {
@@ -1459,6 +1469,7 @@ type Mutation {
 
   """Updates a manager's profile fields."""
   updateManagerProfile(input: UpdateManagerProfileInput!, staffProfileId: ID!): ManagerDirectoryRow
+  updateOwnProfile(input: UpdateOwnProfileInput!): UnifiedProfile
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
@@ -1467,6 +1478,7 @@ type Mutation {
   updateTeacherImportantNote(id: ID!, input: UpdateTeacherNoteInput!): TeacherImportantNote
   updateTeacherProfile(input: TeacherProfileUpdateInput!, teacherId: ID!): TeacherProfileResult
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
+  updateUserProfile(input: UpdateUserProfileInput!, userId: String!): UnifiedProfile
 
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
@@ -1524,6 +1536,22 @@ input PaginationArgs {
   maxCount: Int = 100
   page: Int
   skip: Int
+}
+
+input ParentAdminProfileUpdateInput {
+  address: String
+  currency: String
+  defaultZoomLink: String
+  facebook: String
+  feeAmount: String
+  invoiceType: String
+  nationality: String
+  paymentMethod: String
+  phone: String
+  skype: String
+  timezone: String
+  twitter: String
+  whatsapp: String
 }
 
 type ParentAssignedStudent {
@@ -1709,6 +1737,15 @@ type ParentOwnProfile {
   whatsapp: String
 }
 
+input ParentOwnProfileUpdateInput {
+  defaultZoomLink: String
+  facebook: String
+  phone: String
+  skype: String
+  twitter: String
+  whatsapp: String
+}
+
 type ParentProfile {
   address: String
   avatarUrl: String
@@ -1799,6 +1836,17 @@ type PermissionGroupSimulationStatus {
 """A type representing a validated phone number"""
 scalar PhoneNumber
 
+enum ProfileAudience {
+  parent
+  staff
+  teacher
+}
+
+enum ProfileScope {
+  other
+  own
+}
+
 type Query {
   adminBillingSummary: AdminBillingSummary
 
@@ -1882,6 +1930,7 @@ type Query {
 
   """List all permission catalog entries."""
   permissions: [Permission!]
+  profileByUserId(userId: String!): UnifiedProfile
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
   rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: LeaveRequestStatus): RescheduleTrackingResult
   searchFiles(
@@ -2057,6 +2106,11 @@ type SimulatablePermissionGroup {
   description: String
   name: String
   slug: String
+}
+
+input StaffOwnProfileUpdateInput {
+  phone: String
+  skypeId: String
 }
 
 type StartImpersonationResponse {
@@ -2680,6 +2734,11 @@ type TeacherOwnProfile {
   zoomLink: String
 }
 
+input TeacherOwnProfileUpdateInput {
+  phone: String
+  zoomLink: String
+}
+
 type TeacherProfileResult {
   address: String
   avgEngagementScore: Float
@@ -2770,6 +2829,24 @@ type TestSuperAdmin {
   userId: String
 }
 
+type UnifiedProfile {
+  audience: ProfileAudience
+  avatarUrl: String
+  email: String
+  id: String
+  name: String
+  parentAdminProfile: ParentProfile
+  parentId: String
+  parentOwnProfile: ParentOwnProfile
+  scope: ProfileScope
+  staffProfile: ManagerDirectoryRow
+  staffProfileId: String
+  teacherAdminProfile: TeacherProfileResult
+  teacherId: String
+  teacherOwnProfile: TeacherOwnProfile
+  userId: String
+}
+
 type UnpaidInvoiceItem {
   currency: String
   id: String
@@ -2794,6 +2871,13 @@ input UpdateManagerProfileInput {
   status: AccountStatus
 }
 
+input UpdateOwnProfileInput {
+  core: CoreUserProfileFieldsInput
+  parent: ParentOwnProfileUpdateInput
+  staff: StaffOwnProfileUpdateInput
+  teacher: TeacherOwnProfileUpdateInput
+}
+
 input UpdatePermissionGroupInput {
   description: String
   groupId: String!
@@ -2808,6 +2892,13 @@ input UpdateTeacherNoteInput {
   priority: Int
   startsAt: DateTime
   title: String
+}
+
+input UpdateUserProfileInput {
+  core: CoreUserProfileFieldsInput
+  parent: ParentAdminProfileUpdateInput
+  staff: StaffOwnProfileUpdateInput
+  teacher: TeacherProfileUpdateInput
 }
 
 type UploadPreparation {
