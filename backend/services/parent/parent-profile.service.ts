@@ -1,9 +1,14 @@
-import { ParentRepository, SessionRepository } from "@/backend/db/repo";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { AssociatedStudentResult, DeactivateParentResult, ParentProfileResult } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
+import { ParentRepository, SessionRepository } from "@/backend/db";
+import { getBackendTranslations, logger } from "@/backend/lib";
+import { PermissionsService } from "@/backend/services";
+import type {
+  AssociatedStudentResult,
+  DeactivateParentResult,
+  ParentOwnProfileUpdateInput,
+  ParentProfileResult,
+  ParentProfileUpdateInput,
+} from "@/backend/types";
+import { AppPermission } from "@/shared/lib";
 
 export type {
   AssociatedStudentResult,
@@ -136,5 +141,49 @@ export namespace ParentProfileService {
       userId: result.userId,
       status: result.status,
     };
+  }
+
+  /**
+   * Updates own parent profile fields (contact/social only).
+   * Requires: parent.edit_own_profile permission.
+   */
+  export async function updateOwnProfile(
+    actorUserId: string,
+    parentId: string,
+    input: ParentOwnProfileUpdateInput,
+    locale?: string
+  ): Promise<ParentProfileResult> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_EDIT_OWN_PROFILE);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const parent = await ParentRepository.findByUserId(actorUserId);
+    if (!parent || parent.id !== parentId) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    return ParentRepository.updateParentProfile(parentId, input, locale);
+  }
+
+  /**
+   * Updates a parent profile (admin/staff).
+   * Requires: parents.edit permission.
+   */
+  export async function updateProfile(
+    actorUserId: string,
+    parentId: string,
+    input: ParentProfileUpdateInput,
+    locale?: string
+  ): Promise<ParentProfileResult> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENTS_EDIT);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    return ParentRepository.updateParentProfile(parentId, input, locale);
   }
 }

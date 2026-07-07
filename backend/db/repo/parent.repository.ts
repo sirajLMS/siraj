@@ -21,6 +21,7 @@ import type {
   ParentDirectoryRawMetrics,
   ParentDirectoryRawRow,
   ParentEntityInput,
+  ParentProfileUpdateInput,
   StudentProgressReturnType,
   WorkshopPromoReturnType,
 } from "@/backend/types";
@@ -310,6 +311,47 @@ export namespace ParentRepository {
       .limit(1);
 
     return results[0] ?? null;
+  };
+
+  export const updateParentProfile = async (
+    parentId: string,
+    input: ParentProfileUpdateInput,
+    locale?: string,
+    tx?: DBTransaction
+  ): Promise<ParentProfileResult> => {
+    const queryDb = tx ?? db;
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+
+    const existing = await getParentProfile(parentId, tx);
+    if (!existing) {
+      throw new Error(tFunc("parentNotFound", { id: parentId }));
+    }
+
+    const now = new Date();
+    const parentUpdate: Record<string, unknown> = { updatedAt: now };
+
+    if (input.phone !== undefined) parentUpdate.phone = input.phone;
+    if (input.nationality !== undefined) parentUpdate.nationality = input.nationality;
+    if (input.address !== undefined) parentUpdate.address = input.address;
+    if (input.facebook !== undefined) parentUpdate.facebook = input.facebook;
+    if (input.whatsapp !== undefined) parentUpdate.whatsapp = input.whatsapp;
+    if (input.twitter !== undefined) parentUpdate.twitter = input.twitter;
+    if (input.skype !== undefined) parentUpdate.skype = input.skype;
+    if (input.defaultZoomLink !== undefined) parentUpdate.defaultZoomLink = input.defaultZoomLink;
+    if (input.invoiceType !== undefined) parentUpdate.invoiceType = input.invoiceType;
+    if (input.feeAmount !== undefined) parentUpdate.feeAmount = input.feeAmount;
+    if (input.paymentMethod !== undefined) parentUpdate.paymentMethod = input.paymentMethod;
+    if (input.currency !== undefined) parentUpdate.currency = input.currency;
+    if (input.timezone !== undefined) parentUpdate.timezone = input.timezone;
+
+    await queryDb.update(parents).set(parentUpdate).where(eq(parents.id, parentId));
+
+    const updated = await getParentProfile(parentId, tx);
+    if (!updated) {
+      throw new Error(tFunc("parentNotFound", { id: parentId }));
+    }
+
+    return updated;
   };
 
   export const findByUserId = async (userId: string, tx?: DBTransaction) => {

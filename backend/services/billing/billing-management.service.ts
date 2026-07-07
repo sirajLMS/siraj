@@ -1,10 +1,7 @@
 import { createHash } from "node:crypto";
 import { BillingRepository, ParentRepository } from "@/backend/db/repo";
-import { ForbiddenError, NotFoundError } from "@/backend/lib/errors";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
+import { ForbiddenError, getBackendTranslations, logger, NotFoundError } from "@/backend/lib";
+import { NotificationSyncService, PermissionsService } from "@/backend/services";
 import type * as Types from "@/backend/types";
 import type {
   CreateManualInvoiceInput,
@@ -13,9 +10,7 @@ import type {
   MarkInvoicePaidResult,
   SendPaymentReminderResult,
 } from "@/backend/types";
-import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/shared/lib/enum";
-
-export type { CreateManualInvoiceInput } from "@/backend/types";
+import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/shared/lib";
 
 function deriveIdempotencyKey(input: {
   parentId: string;

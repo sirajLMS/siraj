@@ -1,6 +1,6 @@
-import type { currencyExchangeRates, invoices, payments } from "@/backend/db/schema";
-import type { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
-import type { PageInfo } from "./pagination.types";
+import type { currencyExchangeRates, invoices, payments } from "@/backend/db";
+import type { PageInfo } from "@/backend/types";
+import type { InvoiceStatus, InvoiceType } from "@/shared/lib";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
 export type InvoiceInsertInput = typeof invoices.$inferInsert;

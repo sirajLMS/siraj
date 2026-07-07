@@ -1,14 +1,13 @@
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { StudentRepository } from "@/backend/db/repo/student.repository";
-import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { SchedulingRepository, StudentRepository, TeacherRepository } from "@/backend/db";
+import { getBackendTranslations } from "@/backend/lib";
+import { PermissionsService } from "@/backend/services";
 import type {
   TeacherAssignedClassesResult,
   TeacherAssignedStudentsResult,
   TeacherOwnProfileReturnType,
-} from "@/backend/types/teacher.types";
-import { AppPermission } from "@/shared/lib/enum";
+  TeacherOwnProfileUpdateInput,
+} from "@/backend/types";
+import { AppPermission } from "@/shared/lib";
 
 export namespace TeacherPortalService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
@@ -78,5 +77,32 @@ export namespace TeacherPortalService {
   export async function resolveTeacherIdForUser(userId: string): Promise<string | null> {
     const teacher = await TeacherRepository.findByUserId(userId);
     return teacher?.id ?? null;
+  }
+
+  export async function updateOwnProfile(
+    userId: string,
+    teacherId: string,
+    input: TeacherOwnProfileUpdateInput,
+    locale?: string
+  ): Promise<TeacherOwnProfileReturnType> {
+    await assertPermission(userId, AppPermission.TEACHER_EDIT_OWN_PROFILE, locale);
+    const teacher = await resolveTeacherForUser(userId, locale);
+
+    if (teacher.id !== teacherId) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("unauthorizedAction"));
+    }
+
+    const success = await TeacherRepository.updateTeacherProfile(teacherId, {
+      phone: input.phone ?? undefined,
+      zoomLink: input.zoomLink ?? undefined,
+    });
+
+    if (!success) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("notFound"));
+    }
+
+    return getOwnProfile(userId, locale);
   }
 }

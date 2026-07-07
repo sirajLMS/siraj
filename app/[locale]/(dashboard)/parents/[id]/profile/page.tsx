@@ -1,23 +1,27 @@
-import { getMessages } from "next-intl/server";
-import ParentProfileContainer from "@/frontend/views/dashboard/parent/profile/ParentProfileContainer";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import { setRequestLocale } from "next-intl/server";
+import { getServerUserContext } from "@/backend/lib";
+import { ProfileService } from "@/backend/services";
+import { redirect } from "@/shared/i18n";
 
 interface PageProps {
-  readonly params: Promise<{
-    readonly id: string;
-    readonly locale: string;
-  }>;
+  readonly params: Promise<{ readonly id: string; readonly locale: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps) {
-  const { locale } = await params;
-  const messages = (await getMessages({ locale })) as unknown as MessageSchema;
-  return {
-    title: `${messages.dashboard.parentProfile.pageTitle} | Siraj LMS`,
-  };
-}
+export default async function ParentProfileRedirectPage({ params }: PageProps) {
+  const { id, locale } = await params;
+  setRequestLocale(locale);
 
-export default async function ParentProfilePage({ params }: PageProps) {
-  const { id } = await params;
-  return <ParentProfileContainer id={id} />;
+  const { userId } = await getServerUserContext();
+  if (!userId) {
+    redirect({ href: "/login", locale });
+    return;
+  }
+
+  const targetUserId = await ProfileService.resolveUserIdForParentId(id);
+  if (!targetUserId) {
+    redirect({ href: "/dashboard", locale });
+    return;
+  }
+
+  redirect({ href: `/users/${targetUserId}/profile`, locale });
 }

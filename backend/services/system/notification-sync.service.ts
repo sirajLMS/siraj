@@ -1,5 +1,5 @@
-import { BillingRepository } from "@/backend/db/repo";
-import { logger } from "@/backend/lib/logger";
+import { BillingRepository } from "@/backend/db";
+import { logger } from "@/backend/lib";
 import type * as Types from "@/backend/types";
 
 export namespace NotificationSyncService {

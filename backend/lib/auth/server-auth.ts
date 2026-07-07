@@ -1,10 +1,12 @@
 import { cookies } from "next/headers";
-import { verifyToken } from "@/backend/lib/auth/jwt";
-import { logger } from "@/backend/lib/logger";
-import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
-import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
-import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import { SessionService } from "@/backend/services/auth/session.service";
+import { logger, verifyToken } from "@/backend/lib";
+import {
+  ImpersonationService,
+  PermissionGroupSimulationService,
+  PermissionsService,
+  SessionService,
+  type UserPermissionContext,
+} from "@/backend/services";
 
 export async function getServerUserContext(): Promise<{
   userId: string | null;

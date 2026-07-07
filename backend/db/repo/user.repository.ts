@@ -187,4 +187,66 @@ export namespace UserRepository {
     const { entity } = await SoftDeleteRepository.softDeleteUser(id, actorUserId);
     return entity;
   };
+
+  export type UserProfileUpdateInput = {
+    readonly name?: string;
+    readonly email?: string;
+    readonly avatarUrl?: string | null;
+  };
+
+  export const updateProfileFields = async (
+    userId: string,
+    input: UserProfileUpdateInput,
+    locale?: string,
+    tx?: DBTransaction
+  ): Promise<SafeUser> => {
+    const queryDb = tx ?? db;
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+    const existing = await findSafeById(userId);
+    if (!existing) {
+      throw new Error(t("userNotFound", { id: userId }));
+    }
+
+    const updateSet: Partial<typeof users.$inferInsert> = {
+      updatedAt: new Date(),
+    };
+
+    if (input.name !== undefined) {
+      AuthUtils.validateUserName(input.name);
+      updateSet.name = input.name;
+    }
+
+    if (input.email !== undefined) {
+      const emailExists = await existsByEmail(input.email, tx);
+      if (emailExists && existing.email !== input.email) {
+        throw new Error(t("userEmailExists", { email: input.email }));
+      }
+      updateSet.email = input.email;
+    }
+
+    if (input.avatarUrl !== undefined) {
+      updateSet.avatarUrl = input.avatarUrl;
+    }
+
+    const [updated] = await queryDb.update(users).set(updateSet).where(eq(users.id, userId)).returning({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      emailVerifiedAt: users.emailVerifiedAt,
+      avatarFilePath: users.avatarFilePath,
+      avatarUrl: users.avatarUrl,
+      isActive: users.isActive,
+      isSuperAdmin: users.isSuperAdmin,
+      lastLoginAt: users.lastLoginAt,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    });
+
+    if (!updated) {
+      throw new Error(t("userNotFound", { id: userId }));
+    }
+
+    return updated;
+  };
 }

@@ -1,18 +1,12 @@
-import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { TeacherOwnProfileContainer } from "@/frontend/views/dashboard/teachers/own-profile/TeacherOwnProfileContainer";
-import { redirect } from "@/shared/i18n/routing";
-
-export const metadata: Metadata = {
-  title: "Salary Details - Siraj LMS",
-};
+import { getServerUserContext } from "@/backend/lib";
+import { redirect } from "@/shared/i18n";
 
 interface PageProps {
   readonly params: Promise<{ readonly locale: string }>;
 }
 
-export default async function TeacherMeProfilePage({ params }: PageProps) {
+export default async function TeacherMeProfileRedirectPage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
@@ -22,5 +16,5 @@ export default async function TeacherMeProfilePage({ params }: PageProps) {
     return;
   }
 
-  return <TeacherOwnProfileContainer />;
+  redirect({ href: "/profile", locale });
 }

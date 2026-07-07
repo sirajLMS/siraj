@@ -1,9 +1,9 @@
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import {
   classInstanceFiles,
   complaintFiles,
+  type DBTransaction,
+  db,
   invoiceFiles,
   learningResourceFiles,
   parentFiles,
@@ -14,9 +14,8 @@ import {
   studentFiles,
   teacherFiles,
   userFiles,
-} from "@/backend/db/schema/storage";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import logger from "@/backend/lib/logger";
+} from "@/backend/db";
+import { getBackendTranslations, logger } from "@/backend/lib";
 import type * as StorageTypes from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 
@@ -719,5 +718,81 @@ export namespace StorageDbRepository {
       .returning();
 
     return result;
+  };
+
+  /**
+   * Validate upload parameters (path, size, contentType).
+   * Returns an error message if validation fails, or null if valid.
+   */
+  export const validateUpload = (params: { path: string; size: number; contentType: string }): string | null => {
+    const { path, size, contentType } = params;
+
+    // Check for path traversal attempts
+    if (path.includes("..") || path.startsWith("/")) {
+      return "Invalid file path";
+    }
+
+    // Check file size (max 100MB)
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (size > maxSize) {
+      return `File size exceeds maximum allowed (${maxSize / (1024 * 1024)}MB)`;
+    }
+
+    // Check content type is provided
+    if (!contentType) {
+      return "Content type is required";
+    }
+
+    // Additional validation can be added here (e.g., allowed content types)
+
+    return null;
+  };
+
+  /**
+   * Clean up expired or unused file records.
+   * Removes files that have no usages and are older than a certain threshold.
+   */
+  export const cleanupExpiredFiles = async (): Promise<void> => {
+    // Delete files that have no references - no age filter since storageFiles has no createdAt field
+    // First, find file IDs that have no usages
+    const unusedFileIds = await db
+      .select({ id: storageFiles.id })
+      .from(storageFiles)
+      .leftJoin(invoiceFiles, eq(storageFiles.id, invoiceFiles.fileId))
+      .leftJoin(parentFiles, eq(storageFiles.id, parentFiles.fileId))
+      .leftJoin(userFiles, eq(storageFiles.id, userFiles.fileId))
+      .leftJoin(teacherFiles, eq(storageFiles.id, teacherFiles.fileId))
+      .leftJoin(studentFiles, eq(storageFiles.id, studentFiles.fileId))
+      .leftJoin(complaintFiles, eq(storageFiles.id, complaintFiles.fileId))
+      .leftJoin(learningResourceFiles, eq(storageFiles.id, learningResourceFiles.fileId))
+      .leftJoin(staffProfileFiles, eq(storageFiles.id, staffProfileFiles.fileId))
+      .leftJoin(recurringScheduleFiles, eq(storageFiles.id, recurringScheduleFiles.fileId))
+      .leftJoin(classInstanceFiles, eq(storageFiles.id, classInstanceFiles.fileId))
+      .where(
+        and(
+          isNull(invoiceFiles.id),
+          isNull(parentFiles.id),
+          isNull(userFiles.id),
+          isNull(teacherFiles.id),
+          isNull(studentFiles.id),
+          isNull(complaintFiles.id),
+          isNull(learningResourceFiles.id),
+          isNull(staffProfileFiles.id),
+          isNull(recurringScheduleFiles.id),
+          isNull(classInstanceFiles.id)
+        )
+      );
+
+    if (unusedFileIds.length === 0) {
+      logger.info("No unused files to clean up");
+      return;
+    }
+
+    const fileIds = unusedFileIds.map(f => f.id);
+
+    // Delete the files
+    await db.delete(storageFiles).where(inArray(storageFiles.id, fileIds));
+
+    logger.info(`Cleaned up ${fileIds.length} unused files`);
   };
 }

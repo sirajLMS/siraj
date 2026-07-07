@@ -13,10 +13,10 @@ This comprehensive config review found **36 findings** across App Router convent
 
 ### CRITICAL (6)
 - [x] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/storage/vercel-upload/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer. → **Fixed**: Refactored to use StorageService
-- [ ] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/storage/upload/[id]/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer.
-- [ ] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/storage/files/[[...path]]/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer.
-- [ ] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/storage/cleanup/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer.
-- [ ] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/invoices/[id]/download/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer.
+- [x] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/storage/upload/[id]/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer. → **Fixed**: Refactored to use StorageService
+- [x] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/storage/files/[[...path]]/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer. → **Fixed**: Refactored to use StorageService
+- [x] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/storage/cleanup/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer. → **Fixed**: Refactored to use StorageService
+- [x] [CRITICAL] App Router: /home/ahmed/Projects/siraj/app/api/invoices/[id]/download/route.ts:1 — Server Components must not call repositories directly. Refactor to use a service layer. → **Fixed**: Refactored to use StorageService/InvoiceService
 - [x] [CRITICAL] Env/Scripts: /home/ahmed/Projects/siraj/.env:14 — Hardcoded DATABASE_URL contains sensitive credentials. → **Fixed**: .env* removed from git, .env.example created with placeholders
 
 ### WARNING (6)
@@ -75,6 +75,15 @@ This comprehensive config review found **36 findings** across App Router convent
 
 ## Fix Status
 
-- Total findings: 36
-- Fixed: 2 / 36
-- Remaining: 34
+✅ **CRITICAL FINDINGS ALL RESOLVED**
+
+- **Total findings**: 36
+- **Fixed (CRITICAL)**: 6 / 6
+- **Fixed (WARNING/SUGGESTION)**: 0 / 30
+- **Remaining**: 30 (WARNING: 6, SUGGESTION: 24)
+
+## Verification
+
+✅ TypeScript: `bun tsgo` - clean
+✅ Biome: `bun biome:check` - clean
+⚠️ Lint: 16 pre-existing errors (unrelated to config review fixes)

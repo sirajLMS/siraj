@@ -1,0 +1,26 @@
+import { cache } from "react";
+import { getCurrentUser } from "@/backend/lib";
+import { isRedirect, ProfileService, type UserPermissionContext } from "@/backend/services";
+import type { ProfileMode, ProfilePageContext, ProfilePageResolution } from "@/backend/types";
+
+export { isRedirect };
+
+export const resolveProfilePageContext = cache(
+  async (
+    actorUserId: string,
+    permissionContext: UserPermissionContext | null,
+    options: { readonly targetUserId?: string; readonly mode: ProfileMode }
+  ): Promise<ProfilePageResolution> => {
+    await getCurrentUser(actorUserId, permissionContext);
+    return ProfileService.resolvePageContext(actorUserId, options);
+  }
+);
+
+export type ResolvedProfilePage = ProfilePageContext | { readonly redirect: string };
+
+export function toProfileRedirect(result: ProfilePageResolution): string | null {
+  if (isRedirect(result)) {
+    return result.redirect;
+  }
+  return null;
+}

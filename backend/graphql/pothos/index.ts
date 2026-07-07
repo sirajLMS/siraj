@@ -23,6 +23,7 @@ export * from "./parent-profile.pothos";
 export * from "./permission-group-simulation.objects.pothos";
 export * from "./permission-group-simulation.pothos";
 export * from "./permission-management.pothos";
+export * from "./profile.pothos";
 export * from "./recurring-class.pothos";
 export * from "./report.pothos";
 export * from "./schedule.pothos";

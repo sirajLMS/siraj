@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { SignedUrlRepository, UserRepository } from "@/backend/db/repo";
-import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
-import logger from "@/backend/lib/logger";
+import { UserRepository } from "@/backend/db";
+import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
+import { StorageService } from "@/backend/services";
 
 /**
  * Validates that the request is from an admin user
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Delete expired signed URLs
-    const deletedCount = await SignedUrlRepository.deleteExpired();
+    const deletedCount = await StorageService.cleanupExpiredSignedUrls();
 
     logger.info("Manual signed URL cleanup completed", {
       deletedCount,

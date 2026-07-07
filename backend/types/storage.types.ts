@@ -123,6 +123,18 @@ export enum FileSortField {
 
 // Input types
 /** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+
+/**
+ * Parameters for upload validation (path, size, contentType).
+ * Used by StorageService.validateUpload.
+ */
+export interface StorageUploadValidationParams {
+  path: string;
+  size: number;
+  contentType: string;
+}
+
+/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface FolderCreateInput {
   /** @remarks Must be validated against path traversal attacks before use */
   path: string;

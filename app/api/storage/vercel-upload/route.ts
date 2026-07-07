@@ -1,9 +1,8 @@
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
-import { SignedUrlRepository, StorageDbRepository } from "@/backend/db/repo";
-import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
-import logger from "@/backend/lib/logger";
-import { StorageUtils } from "@/backend/utils";
+import { SignedUrlRepository } from "@/backend/db";
+import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
+import { StorageService } from "@/backend/services";
 
 export type VercelUploadUrlClientPlayload = {
   sessionId: string;
@@ -24,11 +23,11 @@ async function getUserIdFromRequest(request: NextRequest): Promise<string | null
   return null;
 }
 
-function validateUploadPayload(
+async function validateUploadPayload(
   pathName: string,
   clientPayload: VercelUploadUrlClientPlayload,
   userId: string
-): NextResponse | null {
+): Promise<NextResponse | null> {
   if (!pathName) {
     logger.warn("Missing pathname in upload request", { userId });
     return NextResponse.json({ error: "Missing pathname in upload request" }, { status: 400 });
@@ -136,7 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       : ({} as VercelUploadUrlClientPlayload);
     const pathName = body.payload.pathname;
 
-    const payloadValidationError = validateUploadPayload(pathName, clientPlayload, userId);
+    const payloadValidationError: NextResponse | null = await validateUploadPayload(pathName, clientPlayload, userId);
     if (payloadValidationError) return payloadValidationError;
 
     const { sessionId, fileSize, contentType } = clientPlayload;
@@ -148,7 +147,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     // Step 3: Validate upload request
-    const validationError = StorageUtils.validateUpload({
+    const validationError = StorageService.validateUpload({
       path: pathName,
       size: fileSize,
       contentType,
@@ -164,14 +163,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Step 4: Check directory permissions
     const directoryPath = pathName.substring(0, pathName.lastIndexOf("/"));
-    const dbDirectory = await StorageDbRepository.directoryByPath(directoryPath);
+    const directoryError = await StorageService.checkDirectoryUploadPermissions(directoryPath);
 
-    if (dbDirectory && !dbDirectory.allowUploads) {
+    if (directoryError) {
       logger.warn("Uploads not allowed in directory", {
         pathname: pathName,
         directory: directoryPath,
       });
-      return NextResponse.json({ error: "Uploads not allowed in this directory" }, { status: 403 });
+      return NextResponse.json({ error: directoryError }, { status: 403 });
     }
 
     // Step 6: Validate existing session
@@ -215,11 +214,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
           // Mark session as used
           if (sessionId) {
-            await SignedUrlRepository.claimSignedUrl(sessionId);
+            await StorageService.claimSignedUrl(sessionId);
           }
 
           // Create file record in database
-          await StorageDbRepository.createFile(blob.pathname);
+          await StorageService.createFile(blob.pathname);
 
           logger.info("✅ [VERCEL UPLOAD] File record created", {
             pathname: blob.pathname,

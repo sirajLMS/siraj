@@ -197,6 +197,22 @@ export type ParentOwnProfileReturnType = {
   defaultZoomLink: string | null;
 };
 
+export type ParentProfileUpdateInput = {
+  readonly phone?: string | null;
+  readonly nationality?: string | null;
+  readonly address?: string | null;
+  readonly facebook?: string | null;
+  readonly whatsapp?: string | null;
+  readonly twitter?: string | null;
+  readonly skype?: string | null;
+  readonly defaultZoomLink?: string | null;
+  readonly invoiceType?: string | null;
+  readonly feeAmount?: string | null;
+  readonly paymentMethod?: string | null;
+  readonly currency?: string | null;
+  readonly timezone?: string | null;
+};
+
 export interface DeactivateParentResult {
   readonly id: string;
   readonly userId: string;

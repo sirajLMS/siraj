@@ -12,3 +12,4 @@ import "./onboarding.mutation";
 import "./class-category.mutation";
 import "./class-subject.mutation";
 import "./teacher-notes.mutation";
+import "./profile.mutation";

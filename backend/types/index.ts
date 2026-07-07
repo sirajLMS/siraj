@@ -27,6 +27,7 @@ export * from "./pagination.types";
 export * from "./parent.types";
 export * from "./permission-group-simulation.types";
 export * from "./permission-management.types";
+export * from "./profile.types";
 export * from "./schedule.types";
 export * from "./scheduling.types";
 export * from "./soft-delete.types";

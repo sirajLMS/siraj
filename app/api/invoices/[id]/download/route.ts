@@ -1,10 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { StorageDbRepository } from "@/backend/db/repo";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { ForbiddenError, NotFoundError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
-import { StorageUtils } from "@/backend/utils/storage.utils";
+import { ForbiddenError, getServerUserContext, logger, NotFoundError } from "@/backend/lib";
+import { BillingManagementService, StorageService } from "@/backend/services";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: invoiceId } = await params;
@@ -17,14 +13,14 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   try {
     await BillingManagementService.verifyInvoiceAccess(userId, invoiceId, context);
 
-    const files = await StorageDbRepository.getFilesForInvoice(invoiceId, "invoice_pdf", undefined, 50);
+    const files = await StorageService.getFilesForInvoice(invoiceId, "invoice_pdf", 50);
     const pdfFile = files[0];
 
     if (!pdfFile?.filePath) {
       return NextResponse.json({ error: "No PDF available for this invoice" }, { status: 404 });
     }
 
-    if (!StorageUtils.validatePath(pdfFile.filePath)) {
+    if (!StorageService.validatePath(pdfFile.filePath)) {
       logger.error("Invoice PDF filePath failed validation", { invoiceId });
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }

@@ -3,11 +3,8 @@ import { createWriteStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
-import { SignedUrlRepository } from "@/backend/db/repo";
-import { StorageDbRepository } from "@/backend/db/repo/storage.repository";
-import logger from "@/backend/lib/logger";
-import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
-import { resolveLocalStoragePath } from "@/backend/lib/storage/local-storage-path";
+import { logger, resolveLocalStoragePath } from "@/backend/lib";
+import { StorageService } from "@/backend/services";
 
 interface SignedUrlData {
   contentType: string;
@@ -92,9 +89,9 @@ async function streamToFile(stream: ReadableStream<Uint8Array>, filePath: string
  */
 async function finalizeUpload(signedUrl: SignedUrlData, absolutePath: string, tokenId: string): Promise<NextResponse> {
   try {
-    const fileEntity = await StorageDbRepository.createFile(signedUrl.filePath, false);
+    const fileEntity = await StorageService.createFileAndGet(signedUrl.filePath, false);
     const stats = await fs.stat(absolutePath);
-    const baseUrl = NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
     logger.info("File uploaded successfully via signed URL", { tokenId, path: signedUrl.filePath });
 
@@ -124,7 +121,7 @@ async function finalizeUpload(signedUrl: SignedUrlData, absolutePath: string, to
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: tokenId } = await params;
-    const signedUrl = await SignedUrlRepository.claimSignedUrl(tokenId);
+    const signedUrl = await StorageService.claimSignedUrl(tokenId);
 
     if (!signedUrl) {
       logger.warn("Invalid or expired signed URL token", { tokenId });

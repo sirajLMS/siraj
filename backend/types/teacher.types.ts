@@ -181,6 +181,11 @@ export type TeacherOwnProfileReturnType = {
   zoomLink: string | null;
 };
 
+export type TeacherOwnProfileUpdateInput = {
+  readonly phone?: string | null;
+  readonly zoomLink?: string | null;
+};
+
 export type TeacherAssignedClassReturnType = {
   id: string;
   studentName: string;

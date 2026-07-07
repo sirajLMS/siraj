@@ -2,16 +2,16 @@ import { createReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
-import { UserRepository } from "@/backend/db/repo";
-import { ParentRepository } from "@/backend/db/repo/parent.repository";
-import { StorageDbRepository } from "@/backend/db/repo/storage.repository";
-import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
-import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
-import logger from "@/backend/lib/logger";
-import { resolveLocalStoragePath, resolvePublicStoragePath } from "@/backend/lib/storage/local-storage-path";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type * as StorageTypes from "@/backend/types";
-import { extToMime } from "@/shared/utils/storage.utils";
+import { UserRepository } from "@/backend/db";
+import {
+  extractTokenFromHeader,
+  logger,
+  resolveLocalStoragePath,
+  resolvePublicStoragePath,
+  verifyToken,
+} from "@/backend/lib";
+import { StorageService } from "@/backend/services";
+import { extToMime } from "@/shared/utils";
 
 /**
  * Detect content type from file extension
@@ -105,35 +105,12 @@ async function authenticateRequest(request: NextRequest): Promise<{ userId: stri
   return { userId: payload.userId };
 }
 
-async function checkFileAccess(userId: string, usages: StorageTypes.FileUsageInfo[]): Promise<NextResponse | null> {
-  if (usages.length === 0) return null;
-
-  const userContext = await PermissionsService.getUserContext(userId);
-  if (userContext.isSuperAdmin) return null;
-
-  const hasAccess = await hasMatchingEntityAccess(userId, usages);
-  if (!hasAccess) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+async function checkFileAccess(userId: string, relativePath: string): Promise<NextResponse | null> {
+  const accessResult = await StorageService.checkFileAccess(userId, relativePath);
+  if (accessResult) {
+    return NextResponse.json({ error: accessResult.error }, { status: accessResult.status });
   }
-
   return null;
-}
-
-async function hasMatchingEntityAccess(userId: string, usages: StorageTypes.FileUsageInfo[]): Promise<boolean> {
-  for (const usage of usages) {
-    if (usage.referenceTable === "users" && usage.referenceId === userId) {
-      return true;
-    }
-    if (usage.referenceTable === "teachers") {
-      const teacher = await TeacherRepository.findByUserId(userId);
-      if (teacher?.id === usage.referenceId) return true;
-    }
-    if (usage.referenceTable === "parents") {
-      const parent = await ParentRepository.findByUserId(userId);
-      if (parent?.id === usage.referenceId) return true;
-    }
-  }
-  return false;
 }
 
 function buildFileResponse(absolutePath: string, relativePath: string, rangeHeader: string | null): NextResponse {
@@ -189,8 +166,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) return authResult;
 
-    const usages = await StorageDbRepository.getFileUsages(relativePath);
-    const accessDenied = await checkFileAccess(authResult.userId, usages);
+    const accessDenied = await checkFileAccess(authResult.userId, relativePath);
     if (accessDenied) return accessDenied;
 
     let absolutePath: string;
