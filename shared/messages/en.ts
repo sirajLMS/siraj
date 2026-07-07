@@ -220,6 +220,10 @@ const en: MessageSchema = {
     failedToCreateRecurringClass: "Failed to create recurring class",
   },
   profile: {
+    pageTitle: "Profile",
+    editTitle: "Edit Profile",
+    notSet: "Not set",
+    adminEditHint: "Changes will apply immediately across the platform",
     shell: {
       error: {
         retry: "Please refresh the page or try again later.",
@@ -233,22 +237,51 @@ const en: MessageSchema = {
       },
       loading: "Loading profile...",
     },
-    role: {
-      teacher: "Teacher",
-      parent: "Parent",
-      staff: "Staff",
+    teacher: {
+      subtitle: "Manage institutional credentials and administrative details for faculty members.",
+      sections: {
+        contact: "Contact Information",
+        salary: "Salary Details",
+      },
+      baseSalary: "Base Salary",
+      paymentMethod: "Payment Method",
+      fields: {
+        phone: "Phone Number",
+        zoomLink: "Personal Zoom Link",
+      },
     },
-    tab: {
-      overview: "Overview",
-      students: "Students",
-      billing: "Billing",
-      classes: "Classes",
-      schedule: "Schedule",
-      settings: "Settings",
-      payments: "Payments",
-      history: "History",
-      editing: "Editing",
-      reassignment: "Reassignment",
+    parent: {
+      subtitle: "Manage contact and communication details for the student's primary guardian.",
+      sections: {
+        contact: "Contact Information",
+        social: "Social Media",
+      },
+      fields: {
+        phone: "Phone",
+        whatsapp: "WhatsApp",
+        facebook: "Facebook",
+        twitter: "Twitter",
+        skype: "Skype ID",
+        defaultZoomLink: "Personal Zoom Link (Parent)",
+      },
+    },
+    staff: {
+      subtitle: "Manage system-wide roles and access controls for administrative staff.",
+      sections: {
+        contact: "Contact Information",
+      },
+      fields: {
+        phone: "Phone",
+        skypeId: "Skype ID",
+      },
+    },
+    actions: {
+      edit: "Edit Profile",
+      save: "Save Profile",
+    },
+    errors: {
+      failedToLoad: "Failed to load profile",
+      notFound: "Profile not found",
     },
   },
   auth: {
