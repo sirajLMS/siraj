@@ -26,7 +26,7 @@ export type ClassSubjectUpdateInput = {
 export type SubjectResourceSelectType = typeof subjectResources.$inferSelect;
 export type SubjectResourceInsertType = typeof subjectResources.$inferInsert;
 
-export type SubjectResourceReturnType = Omit<SubjectResourceSelectType, "createdAt"> & {
+export type SubjectResourceReturnType = Omit<SubjectResourceSelectType, "createdAt" | "updatedAt" | "deletedAt"> & {
   displayName?: string | null;
   filePath?: string | null;
 };

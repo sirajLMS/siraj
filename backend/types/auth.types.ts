@@ -15,11 +15,19 @@ import type { Email } from "@/backend/lib/email";
 import type { AppPermission, UserRole } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
-export type UserEntity = typeof users.$inferSelect;
-export type UserEntityInput = typeof users.$inferInsert;
+export type UserSelectType = typeof users.$inferSelect;
+export type UserInsertType = typeof users.$inferInsert;
+
+export type UserReturnType = Omit<UserSelectType,
+  "password" | "rememberTokenHash" | "deletedAt"
+>;
+
+export type UserSubmitInput = Omit<UserInsertType,
+  "id" | "createdAt" | "updatedAt" | "password" | "rememberTokenHash" | "deletedAt"
+>;
 
 /** @remarks isSuperAdmin should only be used for UI rendering decisions — ALL auth checks must use server-side session/permissions */
-export type SafeUser = Omit<UserEntity, "password" | "rememberTokenHash" | "deletedAt">;
+export type SafeUser = UserReturnType;
 
 // Note: role field exists on PermissionsService.getUserContext() and DashboardLayout — needs cleanup (see .ai/task-files/fix-user-role.md)
 export type CurrentUserProfile = SafeUser & {
@@ -28,12 +36,6 @@ export type CurrentUserProfile = SafeUser & {
   role: UserRole;
   teacherId: string | null;
   parentId: string | null;
-};
-
-export type UserPothosDefinition = SafeUser & {
-  permissionGroups?: PermissionGroupPothosDefinition[];
-  userPermissionGroups?: UserPermissionGroupPothosDefinition[];
-  sessions?: SessionPothosDefinition[];
 };
 
 export type UserCreateInput = {
@@ -54,53 +56,50 @@ export type PaginatedUsersResponseSelectType = {
 };
 
 export type PaginatedUsersResponse = {
-  data: UserPothosDefinition[];
+  data: SafeUser[];
   pageInfo: PageInfo;
 };
 
-export type PermissionEntity = typeof permissions.$inferSelect;
-export type PermissionEntityInput = typeof permissions.$inferInsert;
+export type PermissionSelectType = typeof permissions.$inferSelect;
+export type PermissionInsertType = typeof permissions.$inferInsert;
 
-export type PermissionGroupEntity = typeof permissionGroups.$inferSelect;
-export type PermissionGroupEntityInput = typeof permissionGroups.$inferInsert;
+export type PermissionReturnType = PermissionSelectType;
 
-export type PermissionGroupPothosDefinition = PermissionGroupEntity & {
-  permissions?: PermissionPothosDefinition[];
-  groupPermissions?: GroupPermissionPothosDefinition[];
-};
+export type PermissionSubmitInput = Omit<PermissionInsertType, "id" | "createdAt" | "updatedAt">;
 
-export type PermissionPothosDefinition = PermissionEntity & {
-  permissionGroups?: PermissionGroupPothosDefinition[];
-};
+export type PermissionGroupSelectType = typeof permissionGroups.$inferSelect;
+export type PermissionGroupInsertType = typeof permissionGroups.$inferInsert;
 
-export type GroupPermissionEntity = typeof groupPermissions.$inferSelect;
-export type GroupPermissionEntityInput = typeof groupPermissions.$inferInsert;
+export type PermissionGroupReturnType = PermissionGroupSelectType;
 
-export type GroupPermissionPothosDefinition = GroupPermissionEntity & {
-  permissionGroup?: PermissionGroupPothosDefinition;
-  permission?: PermissionPothosDefinition;
-};
+export type PermissionGroupSubmitInput = Omit<PermissionGroupInsertType, "id" | "createdAt" | "updatedAt">;
 
-export type UserPermissionGroupEntity = typeof userPermissionGroups.$inferSelect;
-export type UserPermissionGroupEntityInput = typeof userPermissionGroups.$inferInsert;
+export type GroupPermissionSelectType = typeof groupPermissions.$inferSelect;
+export type GroupPermissionInsertType = typeof groupPermissions.$inferInsert;
 
-export type UserPermissionGroupPothosDefinition = UserPermissionGroupEntity & {
-  user?: UserPothosDefinition;
-  permissionGroup?: PermissionGroupPothosDefinition;
-};
+export type GroupPermissionReturnType = GroupPermissionSelectType;
 
-export type SessionEntity = typeof sessions.$inferSelect;
-export type SessionEntityInput = typeof sessions.$inferInsert;
+export type GroupPermissionSubmitInput = Omit<GroupPermissionInsertType, "id" | "createdAt" | "updatedAt">;
 
-export type SessionPothosDefinition = SessionEntity & {
-  user?: UserPothosDefinition;
-};
+export type UserPermissionGroupSelectType = typeof userPermissionGroups.$inferSelect;
+export type UserPermissionGroupInsertType = typeof userPermissionGroups.$inferInsert;
 
-export type SessionMetadataEntity = typeof sessionMetadata.$inferSelect;
-export type SessionMetadataEntityInput = typeof sessionMetadata.$inferInsert;
+export type UserPermissionGroupReturnType = UserPermissionGroupSelectType;
 
-export type SessionConfigEntity = typeof sessionConfig.$inferSelect;
-export type SessionConfigEntityInput = typeof sessionConfig.$inferInsert;
+export type UserPermissionGroupSubmitInput = Omit<UserPermissionGroupInsertType, "id" | "createdAt" | "updatedAt">;
+
+export type SessionSelectType = typeof sessions.$inferSelect;
+export type SessionInsertType = typeof sessions.$inferInsert;
+
+export type SessionReturnType = SessionSelectType;
+
+export type SessionSubmitInput = Omit<SessionInsertType, "id" | "createdAt" | "updatedAt">;
+
+export type SessionMetadataSelectType = typeof sessionMetadata.$inferSelect;
+export type SessionMetadataInsertType = typeof sessionMetadata.$inferInsert;
+
+export type SessionConfigSelectType = typeof sessionConfig.$inferSelect;
+export type SessionConfigInsertType = typeof sessionConfig.$inferInsert;
 
 // Redis session data structure
 export type RedisImpersonationSessionData = {
@@ -132,9 +131,11 @@ export type RedisSessionData = {
 };
 
 export type PasswordResetTokenSelectType = typeof passwordResetTokens.$inferSelect;
-export type PasswordResetTokenInsertInput = typeof passwordResetTokens.$inferInsert;
+export type PasswordResetTokenInsertType = typeof passwordResetTokens.$inferInsert;
 
-// PasswordResetTokenReturnType removed — was unused. Re-create from PasswordResetTokenSelectType if needed.
+export type PasswordResetTokenReturnType = Omit<PasswordResetTokenSelectType, "deletedAt">;
+
+export type PasswordResetTokenSubmitInput = Omit<PasswordResetTokenInsertType, "id" | "createdAt" | "updatedAt" | "deletedAt">;
 
 export type LoginInput = {
   email: Email;
@@ -146,17 +147,17 @@ export type DemoLoginInput = {
 };
 
 export type LoginResponse = {
-  user: UserPothosDefinition;
+  user: SafeUser;
   token: string;
 };
 
 export type RefreshTokenResponse = {
   token: string;
-  user: UserPothosDefinition;
+  user: SafeUser;
 };
 
-export type AuthRateLimitEntity = typeof authRateLimits.$inferSelect;
-export type AuthRateLimitEntityInput = typeof authRateLimits.$inferInsert;
+export type AuthRateLimitSelectType = typeof authRateLimits.$inferSelect;
+export type AuthRateLimitInsertType = typeof authRateLimits.$inferInsert;
 
 export type AdminAuditLogSelectType = typeof adminAuditLogs.$inferSelect;
-export type AdminAuditLogInsertInput = typeof adminAuditLogs.$inferInsert;
+export type AdminAuditLogInsertType = typeof adminAuditLogs.$inferInsert;

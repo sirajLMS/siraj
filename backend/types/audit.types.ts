@@ -1,7 +1,14 @@
 import type { auditLogs } from "@/backend/db/schema";
 
-export type AuditLogEntity = typeof auditLogs.$inferSelect;
-export type AuditLogEntityInput = typeof auditLogs.$inferInsert;
+export type AuditLogSelectType = typeof auditLogs.$inferSelect;
+export type AuditLogInsertType = typeof auditLogs.$inferInsert;
+
+export type AuditLogReturnType = Omit<AuditLogSelectType, "deletedAt">;
+
+export type AuditLogSubmitInput = Omit<
+  AuditLogInsertType,
+  "id" | "createdAt" | "actorUserId"
+>;
 
 /**
  * Actor type for audit logs
@@ -89,7 +96,7 @@ export type AuditLogFilterInput = {
  * Result of audit log query with pagination
  */
 export type AuditLogQueryResult = {
-  logs: AuditLogEntity[];
+  logs: AuditLogReturnType[];
   total: number;
   hasMore: boolean;
 };

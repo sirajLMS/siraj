@@ -1,4 +1,9 @@
+import type { classInstances } from "@/backend/db/schema/scheduling";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
+
+// Foundation types from schema
+export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
+export type ClassInstanceInsertType = typeof classInstances.$inferInsert;
 
 export type ClassInstancePerformanceReturnType = {
   id: string;
@@ -30,9 +35,9 @@ export type ClassInstanceTeacherReturnType = {
   avatarUrl: string | null;
 };
 
-export type ClassInstanceDetailReturnType = {
-  id: string;
-  courseName: string;
+export type ClassInstanceDetailReturnType = Omit<ClassInstanceSelectType,
+  "deletedAt" | "createdAt" | "updatedAt"
+> & {
   classType: ClassType | null;
   instanceId: string;
   scheduledDate: string;
