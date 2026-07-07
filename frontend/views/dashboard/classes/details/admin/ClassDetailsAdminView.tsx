@@ -122,19 +122,8 @@ export function ClassDetailsAdminView({
           <ClassInfoCard
             courseName={instance.courseName ?? ""}
             instanceId={instance.instanceId ?? ""}
-            student={{
-              id: instance.student?.id ?? "",
-              name: instance.student?.name ?? "",
-              grade: "",
-              level: 0,
-              avatarUrl: instance.student?.avatarUrl ?? "",
-            }}
-            teacher={{
-              id: instance.teacher?.id ?? "",
-              name: instance.teacher?.name ?? "",
-              title: instance.teacher?.title ?? "",
-              avatarUrl: instance.teacher?.avatarUrl ?? "",
-            }}
+            student={instance.student ?? { id: "", name: "", grade: null, level: null, avatarUrl: null }}
+            teacher={instance.teacher ?? { id: null, name: "", title: null, avatarUrl: null }}
             isActive={instance.status === ClassExecutionState.Activated}
             labels={labels.classInfo}
           />

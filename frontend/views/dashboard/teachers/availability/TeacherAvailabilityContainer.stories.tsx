@@ -8,6 +8,16 @@ const MOCK_RESULT = {
   __typename: "AvailabilitySearchResult" as const,
   id: "availability-search-08:00-17:00",
   totalGaps: 5,
+  totalCount: 2,
+  pageInfo: {
+    __typename: "PageInfo" as const,
+    count: 2,
+    currentPage: 1,
+    hasMorePages: false,
+    lastPage: 1,
+    perPage: 10,
+    total: 2,
+  },
   teachers: [
     {
       __typename: "AvailabilitySearchTeacher" as const,
@@ -15,6 +25,7 @@ const MOCK_RESULT = {
       name: "Sarah Johnson",
       gender: "FEMALE",
       timezone: "AST",
+      availableDaysCount: 2,
       gaps: [
         {
           __typename: "TeacherAvailabilityGap" as const,
@@ -23,6 +34,7 @@ const MOCK_RESULT = {
           teacherName: "Sarah Johnson",
           teacherGender: "FEMALE",
           dayOfWeek: DayOfWeek.Monday,
+          calendarDate: "2026-01-05",
           gapStartTime: "09:00",
           gapEndTime: "10:00",
           timezone: "AST",
@@ -34,6 +46,7 @@ const MOCK_RESULT = {
           teacherName: "Sarah Johnson",
           teacherGender: "FEMALE",
           dayOfWeek: DayOfWeek.Wednesday,
+          calendarDate: "2026-01-07",
           gapStartTime: "11:00",
           gapEndTime: "12:00",
           timezone: "AST",
@@ -46,6 +59,7 @@ const MOCK_RESULT = {
       name: "Ahmed Hassan",
       gender: "MALE",
       timezone: "EST",
+      availableDaysCount: 1,
       gaps: [
         {
           __typename: "TeacherAvailabilityGap" as const,
@@ -54,6 +68,7 @@ const MOCK_RESULT = {
           teacherName: "Ahmed Hassan",
           teacherGender: "MALE",
           dayOfWeek: DayOfWeek.Tuesday,
+          calendarDate: "2026-01-06",
           gapStartTime: "10:00",
           gapEndTime: "11:00",
           timezone: "EST",

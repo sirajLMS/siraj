@@ -10,17 +10,28 @@ export const searchTeacherAvailabilityQueryDocument: TypedDocumentNode<
     searchTeacherAvailability(input: $input) {
       id
       totalGaps
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        hasMorePages
+        lastPage
+        perPage
+        total
+      }
       teachers {
         id
         name
         gender
         timezone
+        availableDaysCount
         gaps {
           id
           teacherId
           teacherName
           teacherGender
           dayOfWeek
+          calendarDate
           gapStartTime
           gapEndTime
           timezone

@@ -247,18 +247,37 @@ enum AttendanceStatus {
 }
 
 input AvailabilitySearchInput {
+  daysOfWeek: [DayOfWeek!]
+  fromDate: String
   fromTime: String!
   gender: Gender
+  minAvailableDays: Int
+  minTotalGaps: Int
+  paginationArgs: PaginationArgs
+  sortBy: AvailabilitySearchSortBy
+  teacherNameSearch: String
+  toDate: String
   toTime: String!
 }
 
 type AvailabilitySearchResult {
   id: String
+  pageInfo: PageInfo
   teachers: [AvailabilitySearchTeacher!]
+  totalCount: Int
   totalGaps: Int
 }
 
+enum AvailabilitySearchSortBy {
+  MOST_AVAILABLE_DAYS
+  MOST_GAPS
+  NAME_ASC
+  NAME_DESC
+  TIMEZONE_ASC
+}
+
 type AvailabilitySearchTeacher {
+  availableDaysCount: Int
   gaps: [TeacherAvailabilityGap!]
   gender: Gender
   id: String
@@ -2454,6 +2473,7 @@ type TeacherAssignedStudentsResult {
 }
 
 type TeacherAvailabilityGap {
+  calendarDate: String
   dayOfWeek: DayOfWeek
   gapEndTime: String
   gapStartTime: String

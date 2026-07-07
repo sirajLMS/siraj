@@ -3,12 +3,12 @@
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
-import type { StudentInfo } from "@/frontend/views/dashboard/types/dashboard";
+import type { ClassInstanceStudentInfo } from "@/frontend/graphql/generated/gql/graphql-types";
 import { Link } from "@/shared/i18n/routing";
 import { StudentEntityLink } from "../components/EntityLinks";
 
 interface StudentProfileCardProps {
-  readonly student: StudentInfo;
+  readonly student: ClassInstanceStudentInfo;
   readonly labels: {
     readonly viewFullProfile: string;
   };
@@ -51,7 +51,12 @@ export function StudentProfileCard({ student, labels }: StudentProfileCardProps)
     <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", pt: 4 }}>
       <StyledTopAccentBar />
       <Box sx={{ mb: 3 }}>
-        <StudentEntityLink studentId={student.id} name={student.name} avatarUrl={student.avatarUrl} showAvatar />
+        <StudentEntityLink
+          studentId={student.id}
+          name={student.name ?? ""}
+          avatarUrl={student.avatarUrl ?? undefined}
+          showAvatar
+        />
       </Box>
 
       <StyledViewProfileButton

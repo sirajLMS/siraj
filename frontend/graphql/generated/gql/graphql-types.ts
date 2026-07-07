@@ -271,20 +271,39 @@ export enum AttendanceStatus {
 }
 
 export type AvailabilitySearchInput = {
+  daysOfWeek: InputMaybe<Array<DayOfWeek>>;
+  fromDate: InputMaybe<Scalars['String']['input']>;
   fromTime: Scalars['String']['input'];
   gender: InputMaybe<Gender>;
+  minAvailableDays: InputMaybe<Scalars['Int']['input']>;
+  minTotalGaps: InputMaybe<Scalars['Int']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
+  sortBy: InputMaybe<AvailabilitySearchSortBy>;
+  teacherNameSearch: InputMaybe<Scalars['String']['input']>;
+  toDate: InputMaybe<Scalars['String']['input']>;
   toTime: Scalars['String']['input'];
 };
 
 export type AvailabilitySearchResult = {
   __typename?: 'AvailabilitySearchResult';
   id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
   teachers: Maybe<Array<AvailabilitySearchTeacher>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
   totalGaps: Maybe<Scalars['Int']['output']>;
 };
 
+export enum AvailabilitySearchSortBy {
+  MostAvailableDays = 'MOST_AVAILABLE_DAYS',
+  MostGaps = 'MOST_GAPS',
+  NameAsc = 'NAME_ASC',
+  NameDesc = 'NAME_DESC',
+  TimezoneAsc = 'TIMEZONE_ASC'
+}
+
 export type AvailabilitySearchTeacher = {
   __typename?: 'AvailabilitySearchTeacher';
+  availableDaysCount: Maybe<Scalars['Int']['output']>;
   gaps: Maybe<Array<TeacherAvailabilityGap>>;
   gender: Maybe<Gender>;
   id: Maybe<Scalars['String']['output']>;
@@ -3268,6 +3287,7 @@ export type TeacherAssignedStudentsResult = {
 
 export type TeacherAvailabilityGap = {
   __typename?: 'TeacherAvailabilityGap';
+  calendarDate: Maybe<Scalars['String']['output']>;
   dayOfWeek: Maybe<DayOfWeek>;
   gapEndTime: Maybe<Scalars['String']['output']>;
   gapStartTime: Maybe<Scalars['String']['output']>;

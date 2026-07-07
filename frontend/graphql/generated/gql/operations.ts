@@ -163,10 +163,25 @@ export type AttendanceReportFiltersInput = {
 };
 
 export type AvailabilitySearchInput = {
+  daysOfWeek: Array<DayOfWeek> | null | undefined;
+  fromDate: string | null | undefined;
   fromTime: string;
   gender: Gender | null | undefined;
+  minAvailableDays: number | null | undefined;
+  minTotalGaps: number | null | undefined;
+  paginationArgs: PaginationArgs | null | undefined;
+  sortBy: AvailabilitySearchSortBy | null | undefined;
+  teacherNameSearch: string | null | undefined;
+  toDate: string | null | undefined;
   toTime: string;
 };
+
+export type AvailabilitySearchSortBy =
+  | 'MOST_AVAILABLE_DAYS'
+  | 'MOST_GAPS'
+  | 'NAME_ASC'
+  | 'NAME_DESC'
+  | 'TIMEZONE_ASC';
 
 export type BillingMonthInput = {
   month: number;
@@ -1072,11 +1087,13 @@ export type EndPermissionGroupSimulationMutationVariables = Exact<{ [key: string
 
 export type EndPermissionGroupSimulationMutation = EndPermissionGroupSimulationMutation_Mutation;
 
-export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: Types.DayOfWeek | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_pageInfo_PageInfo = { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
 
-export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: Types.Gender | null, timezone: string | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: Types.DayOfWeek | null, calendarDate: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null };
 
-export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult = { id: string | null, totalGaps: number | null, teachers: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher> | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: Types.Gender | null, timezone: string | null, availableDaysCount: number | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
+
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult = { id: string | null, totalGaps: number | null, totalCount: number | null, pageInfo: SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_pageInfo_PageInfo | null, teachers: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher> | null };
 
 export type SearchTeacherAvailabilityQuery_Query = { searchTeacherAvailability: SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult | null };
 

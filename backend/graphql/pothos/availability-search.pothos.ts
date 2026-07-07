@@ -5,7 +5,8 @@ import type {
   TeacherAvailabilityGap,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { DayOfWeekPothosObject, GenderPothosObject } from "./enum.pothos";
+import { AvailabilitySearchSortByPothosObject, DayOfWeekPothosObject, GenderPothosObject } from "./enum.pothos";
+import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 const TeacherAvailabilityGapRef = gqlSchemaBuilder.objectRef<TeacherAvailabilityGap>("TeacherAvailabilityGap");
 
@@ -16,6 +17,7 @@ export const TeacherAvailabilityGapPothosObject = TeacherAvailabilityGapRef.impl
     teacherName: t.exposeString("teacherName"),
     teacherGender: t.exposeString("teacherGender", { nullable: true }),
     dayOfWeek: t.expose("dayOfWeek", { type: DayOfWeekPothosObject }),
+    calendarDate: t.exposeString("calendarDate"),
     gapStartTime: t.exposeString("gapStartTime"),
     gapEndTime: t.exposeString("gapEndTime"),
     timezone: t.exposeString("timezone"),
@@ -30,6 +32,7 @@ export const AvailabilitySearchTeacherPothosObject = AvailabilitySearchTeacherRe
     name: t.exposeString("name"),
     gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     timezone: t.exposeString("timezone"),
+    availableDaysCount: t.exposeInt("availableDaysCount"),
     gaps: t.expose("gaps", { type: [TeacherAvailabilityGapPothosObject] }),
   }),
 });
@@ -41,6 +44,8 @@ export const AvailabilitySearchResultPothosObject = AvailabilitySearchResultRef.
     id: t.exposeString("id"),
     teachers: t.expose("teachers", { type: [AvailabilitySearchTeacherPothosObject] }),
     totalGaps: t.exposeInt("totalGaps"),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
   }),
 });
 
@@ -50,6 +55,14 @@ export const AvailabilitySearchInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       fromTime: t.string({ required: true }),
       toTime: t.string({ required: true }),
+      fromDate: t.string({ required: false }),
+      toDate: t.string({ required: false }),
       gender: t.field({ type: GenderPothosObject, required: false }),
+      minAvailableDays: t.int({ required: false }),
+      minTotalGaps: t.int({ required: false }),
+      teacherNameSearch: t.string({ required: false }),
+      daysOfWeek: t.field({ type: [DayOfWeekPothosObject], required: false }),
+      sortBy: t.field({ type: AvailabilitySearchSortByPothosObject, required: false }),
+      paginationArgs: t.field({ type: PaginationArgsObject, required: false }),
     }),
   });

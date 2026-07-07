@@ -125,13 +125,7 @@ export function ClassDetailsTeacherView({
               />
             ) : null}
             <StudentProfileCard
-              student={{
-                id: instance.student?.id ?? "",
-                name: instance.student?.name ?? "",
-                grade: "",
-                level: 0,
-                avatarUrl: instance.student?.avatarUrl ?? "",
-              }}
+              student={instance.student ?? { id: "", name: "", grade: null, level: null, avatarUrl: null }}
               labels={labels.studentProfile}
             />
           </Box>

@@ -2,6 +2,9 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import type {
   AppPermission,
   ClassExecutionState,
+  ClassInstanceDetail,
+  ClassInstanceStudentInfo,
+  ClassInstanceTeacherInfo,
   ClassOutcome,
   DailyScheduleList,
 } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -26,48 +29,15 @@ export interface NavItem {
 
 export type ClassInstanceStatus = "active" | "scheduled" | "pending" | "completed" | "cancelled";
 
-export interface StudentInfo {
-  readonly id: string;
-  readonly name: string;
-  readonly grade: string;
-  readonly level: number;
-  readonly avatarUrl: string;
-}
-
-export interface TeacherInfo {
-  readonly id?: string;
-  readonly name: string;
-  readonly title: string;
-  readonly avatarUrl: string;
-}
+// Re-export generated GraphQL types to replace local duplicates
+export type StudentInfo = ClassInstanceStudentInfo;
+export type TeacherInfo = ClassInstanceTeacherInfo;
+export type ClassInstance = ClassInstanceDetail;
 
 export interface PerformanceMetric {
   readonly key: string;
   readonly labelKey: string;
   readonly value: string;
-}
-
-export interface ClassInstance {
-  readonly id: string;
-  readonly instanceId: string;
-  readonly courseName: string;
-  readonly student: StudentInfo;
-  readonly teacher: TeacherInfo;
-  readonly scheduledDate: string;
-  readonly startTime: string;
-  readonly endTime: string;
-  readonly durationMinutes: number;
-  readonly status: ClassInstanceStatus;
-  readonly latencyMs: number;
-  readonly authorization: string;
-  readonly remarks: string;
-  readonly hasTimezoneMismatch: boolean;
-  readonly studentTimezone: string;
-  readonly performanceMetrics: readonly PerformanceMetric[];
-  readonly heatmapData: readonly number[];
-  readonly attendanceRate: number;
-  readonly avgGrade: string;
-  readonly lastClassDaysAgo: number;
 }
 
 export interface ScheduleOverviewData {

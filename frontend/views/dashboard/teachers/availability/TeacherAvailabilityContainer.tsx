@@ -4,11 +4,12 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { addDays, format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/graphql/generated/gql/graphql";
-import { AppPermission, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { logger } from "@/frontend/utils/logger";
 import { TeacherAvailabilityView } from "./TeacherAvailabilityView";
@@ -26,7 +27,20 @@ function buildGraphQLInput(formData: AvailabilitySearchFormData) {
   const toTime = formData.toTime
     ? `${String(formData.toTime.getHours()).padStart(2, "0")}:${String(formData.toTime.getMinutes()).padStart(2, "0")}`
     : "";
-  return { fromTime, toTime, gender: formData.gender };
+
+  return {
+    fromTime,
+    toTime,
+    fromDate: format(new Date(), "yyyy-MM-dd"),
+    toDate: format(addDays(new Date(), 7), "yyyy-MM-dd"),
+    gender: formData.gender,
+    minAvailableDays: null,
+    minTotalGaps: null,
+    teacherNameSearch: null,
+    daysOfWeek: null,
+    sortBy: AvailabilitySearchSortBy.MostAvailableDays,
+    paginationArgs: null,
+  };
 }
 
 type AvailabilitySearchData = NonNullable<SearchTeacherAvailabilityQuery["searchTeacherAvailability"]>;
@@ -128,7 +142,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
 
   const graphqlInput = hasSearched
     ? buildGraphQLInput(searchInput)
-    : { fromTime: "", toTime: "", gender: null as Gender | null };
+    : buildGraphQLInput({ fromTime: null, toTime: null, gender: null });
 
   const { data, loading, error, refetch } = useQuery(searchTeacherAvailabilityQueryDocument, {
     variables: { input: graphqlInput },

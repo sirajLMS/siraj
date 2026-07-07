@@ -1,35 +1,56 @@
 "use client";
 
+import { NetworkStatus } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type AvailabilitySearchInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
+import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 import { SearchScheduleForm } from "./SearchScheduleForm";
 import { SearchScheduleView } from "./SearchScheduleView";
 
 export function SearchScheduleContainer() {
   const t = useTranslations("dashboard.searchSchedule");
 
-  const [searchInput, setSearchInput] = useState<{
-    fromTime: string;
-    toTime: string;
-    gender: Gender | null;
-  } | null>(null);
+  const draft = useSearchScheduleStore(state => state.draft);
+  const setDraft = useSearchScheduleStore(state => state.setDraft);
+  const activeInput = useSearchScheduleStore(state => state.activeInput);
+  const commitSearch = useSearchScheduleStore(state => state.commitSearch);
+  const setPage = useSearchScheduleStore(state => state.setPage);
+  const hasSearched = useSearchScheduleStore(state => state.hasSearched);
+  const hasHydrated = useSearchScheduleStore(state => state._hasHydrated);
 
-  const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {
-    variables: {
-      input: {
-        fromTime: searchInput?.fromTime ?? "",
-        toTime: searchInput?.toTime ?? "",
-        gender: searchInput?.gender ?? null,
-      },
-    },
-    skip: !searchInput,
+  useEffect(() => {
+    if (!hasHydrated || hasSearched) {
+      return;
+    }
+
+    commitSearch();
+  }, [commitSearch, hasHydrated, hasSearched]);
+
+  const { data, loading, error, networkStatus, previousData } = useQuery(searchTeacherAvailabilityQueryDocument, {
+    variables: activeInput ? { input: activeInput } : { input: {} as AvailabilitySearchInput },
+    skip: activeInput === null,
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network",
   });
+
+  const displayData = data ?? previousData;
+  const isInitialLoading = loading && !displayData;
+  const isRefetching =
+    loading &&
+    !!displayData &&
+    (networkStatus === NetworkStatus.refetch || networkStatus === NetworkStatus.setVariables);
+
+  const activeFromDate = useMemo(
+    () => activeInput?.fromDate ?? draft.fromDate,
+    [activeInput?.fromDate, draft.fromDate]
+  );
+  const activeToDate = useMemo(() => activeInput?.toDate ?? draft.toDate, [activeInput?.toDate, draft.toDate]);
 
   return (
     <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
@@ -37,16 +58,11 @@ export function SearchScheduleContainer() {
         <PageHeader title={t("pageTitle")} titleVariant="headlineLg" />
         <Box sx={{ mt: 3 }}>
           <SearchScheduleForm
-            onSearch={(fromTime, toTime, gender) => {
-              setSearchInput({ fromTime, toTime, gender });
-            }}
+            draft={draft}
+            isSearching={isRefetching || isInitialLoading}
+            onDraftChange={setDraft}
+            onSearch={commitSearch}
           />
-
-          {loading && (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress />
-            </Box>
-          )}
 
           {error && (
             <Typography color="error" sx={{ mt: 2 }}>
@@ -54,7 +70,15 @@ export function SearchScheduleContainer() {
             </Typography>
           )}
 
-          {data?.searchTeacherAvailability && <SearchScheduleView result={data.searchTeacherAvailability} />}
+          {(hasSearched || displayData?.searchTeacherAvailability) && (
+            <SearchScheduleView
+              result={displayData?.searchTeacherAvailability}
+              fromDate={activeFromDate}
+              toDate={activeToDate}
+              isInitialLoading={isInitialLoading}
+              onPageChange={setPage}
+            />
+          )}
         </Box>
       </PageContainer>
     </RequirePermission>

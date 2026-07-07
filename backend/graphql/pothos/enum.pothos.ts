@@ -3,6 +3,7 @@ import {
   AppLanguage,
   AppPermission,
   AttendanceStatus,
+  AvailabilitySearchSortBy,
   AvailabilityStatus,
   BookingStatus,
   ClassExecutionState,
@@ -110,4 +111,8 @@ export const OverrideStatePothosObject = gqlSchemaBuilder.enumType(OverrideState
 
 export const ClassTypePothosObject = gqlSchemaBuilder.enumType(ClassType, {
   name: "ClassType",
+});
+
+export const AvailabilitySearchSortByPothosObject = gqlSchemaBuilder.enumType(AvailabilitySearchSortBy, {
+  name: "AvailabilitySearchSortBy",
 });

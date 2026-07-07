@@ -1,25 +1,8 @@
 import fs from "node:fs/promises";
+import { getDetectedServerlessEnv } from "@/backend/lib/runtime";
 import { getLocalStorageBasePath } from "@/backend/lib/storage/local-storage-path";
 import type { StorageService } from "../storage.service.interface";
 import { LocalAdapter } from "./adapter";
-
-const SERVERLESS_ENV_VARS = [
-  "VERCEL",
-  "NETLIFY",
-  "AWS_LAMBDA_FUNCTION_NAME",
-  "K_SERVICE",
-  "FUNCTION_TARGET",
-  "FUNCTIONS_WORKER_RUNTIME",
-  "CF_PAGES",
-  "RAILWAY_ENVIRONMENT",
-];
-
-/**
- * Checks if the current environment is a known serverless platform
- */
-function getDetectedServerlessEnv(): string[] {
-  return SERVERLESS_ENV_VARS.filter(envVar => !!process.env[envVar]);
-}
 
 /**
  * Validates that local storage is not used in serverless environments

@@ -3,7 +3,8 @@ import type {
   teacherRecurringUnavailability,
   teacherVacationRequests,
 } from "@/backend/db/schema";
-import type { DayOfWeek, Gender } from "@/shared/lib/enum";
+import type { AvailabilitySearchSortBy, DayOfWeek, Gender } from "@/shared/lib/enum";
+import type { PageInfo, PaginationInput } from "./pagination.types";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;
 export type TeacherAvailabilityWindowInsertInput = typeof teacherAvailabilityWindows.$inferInsert;
@@ -45,7 +46,15 @@ export type ProcessVacationRequestInput = {
 export interface CrossStaffSearchInput {
   fromTime: string;
   toTime: string;
+  fromDate?: string | null;
+  toDate?: string | null;
   gender?: Gender | null;
+  minAvailableDays?: number | null;
+  minTotalGaps?: number | null;
+  teacherNameSearch?: string | null;
+  daysOfWeek?: DayOfWeek[] | null;
+  sortBy?: AvailabilitySearchSortBy | null;
+  paginationArgs?: PaginationInput | null;
 }
 
 export interface TeacherAvailabilityGap {
@@ -54,6 +63,7 @@ export interface TeacherAvailabilityGap {
   teacherName: string;
   teacherGender: string | null;
   dayOfWeek: DayOfWeek;
+  calendarDate: string;
   gapStartTime: string;
   gapEndTime: string;
   timezone: string;
@@ -64,6 +74,7 @@ export interface AvailabilitySearchTeacher {
   name: string;
   gender: Gender | null;
   timezone: string;
+  availableDaysCount: number;
   gaps: TeacherAvailabilityGap[];
 }
 
@@ -71,4 +82,6 @@ export interface AvailabilitySearchResult {
   id: string;
   teachers: AvailabilitySearchTeacher[];
   totalGaps: number;
+  totalCount: number;
+  pageInfo: PageInfo | null;
 }

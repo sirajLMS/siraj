@@ -1,26 +1,41 @@
 "use client";
 
 import { Box, Chip, Paper, Typography } from "@mui/material";
+import { addDays, differenceInCalendarDays, format, parse } from "date-fns";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import type { SearchScheduleResultItem } from "./SearchScheduleView";
 
 interface TeacherAvailabilityGridProps {
   readonly teacher: SearchScheduleResultItem;
+  readonly fromDate: string;
+  readonly toDate: string;
 }
 
-export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilityGridProps>) {
+function buildDateColumns(fromDate: string, toDate: string): string[] {
+  const start = parse(fromDate, "yyyy-MM-dd", new Date());
+  const end = parse(toDate, "yyyy-MM-dd", new Date());
+  const dayCount = differenceInCalendarDays(end, start) + 1;
+
+  return Array.from({ length: dayCount }, (_, index) => format(addDays(start, index), "yyyy-MM-dd"));
+}
+
+export function TeacherAvailabilityGrid({ teacher, fromDate, toDate }: Readonly<TeacherAvailabilityGridProps>) {
   const t = useTranslations("dashboard.searchSchedule");
 
-  const gaps = teacher.gaps ?? [];
-  const DAYS_OF_WEEK = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
+  const dateColumns = useMemo(() => buildDateColumns(fromDate, toDate), [fromDate, toDate]);
 
-  // Filter out any null/undefined gaps and map them by day
-  const gapsByDay = new Map<string, typeof gaps>();
-  for (const gap of gaps) {
-    if (!gap?.dayOfWeek) continue;
-    const existing = gapsByDay.get(gap.dayOfWeek) ?? [];
-    gapsByDay.set(gap.dayOfWeek, [...existing, gap]);
-  }
+  const gapsByDate = useMemo(() => {
+    const grouped = new Map<string, NonNullable<SearchScheduleResultItem["gaps"]>>();
+    for (const gap of teacher.gaps ?? []) {
+      if (!gap?.calendarDate) {
+        continue;
+      }
+      const existing = grouped.get(gap.calendarDate) ?? [];
+      grouped.set(gap.calendarDate, [...existing, gap]);
+    }
+    return grouped;
+  }, [teacher.gaps]);
 
   return (
     <Paper
@@ -39,6 +54,12 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
         {teacher.gender && (
           <Chip label={teacher.gender === "MALE" ? t("male") : t("female")} size="small" variant="outlined" />
         )}
+        <Chip
+          label={t("availableDaysCount", { count: teacher.availableDaysCount ?? 0 })}
+          size="small"
+          color="primary"
+          variant="outlined"
+        />
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           ({teacher.timezone ?? ""})
         </Typography>
@@ -47,15 +68,22 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "repeat(7, 1fr)" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: `repeat(${Math.min(dateColumns.length, 7)}, minmax(0, 1fr))`,
+          },
           gap: 1.5,
+          overflowX: { md: dateColumns.length > 7 ? "auto" : "visible" },
         }}
       >
-        {DAYS_OF_WEEK.map(day => {
-          const dayGaps = gapsByDay.get(day) ?? [];
+        {dateColumns.map(calendarDate => {
+          const dayGaps = gapsByDate.get(calendarDate) ?? [];
+          const parsedDate = parse(calendarDate, "yyyy-MM-dd", new Date());
+          const dayLabel = format(parsedDate, "EEE d MMM");
+
           return (
             <Box
-              key={day}
+              key={calendarDate}
               sx={theme => ({
                 p: 1.5,
                 borderRadius: 1.5,
@@ -76,11 +104,13 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
                   display: "block",
                 })}
               >
-                {t(`day.${day.toLowerCase()}`)}
+                {dayLabel}
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
                 {dayGaps.map(gap => {
-                  if (!gap) return null;
+                  if (!gap) {
+                    return null;
+                  }
                   return (
                     <Box
                       key={gap.id ?? ""}

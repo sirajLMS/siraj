@@ -5,16 +5,19 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { Avatar, Box, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
+import type {
+  ClassInstanceStudentInfo,
+  ClassInstanceTeacherInfo,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { avatarInitials } from "@/frontend/utils/avatar";
-import type { StudentInfo, TeacherInfo } from "@/frontend/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n/routing";
 import { StudentEntityLink, TeacherEntityLink } from "../components/EntityLinks";
 
 interface ClassInfoCardProps {
   readonly courseName: string;
   readonly instanceId: string;
-  readonly student: StudentInfo;
-  readonly teacher: TeacherInfo;
+  readonly student: ClassInstanceStudentInfo;
+  readonly teacher: ClassInstanceTeacherInfo;
   readonly isActive: boolean;
   readonly labels: {
     readonly liveInstance: string;
@@ -129,7 +132,7 @@ function LinkedAvatar({
 }
 
 export function ClassInfoCard({ courseName, instanceId, student, teacher, isActive, labels }: ClassInfoCardProps) {
-  const studentHref = student.id ? `/students/${student.id}` : undefined;
+  const studentHref = student.id ?? undefined;
   const teacherHref = teacher.id ? `/teachers/${teacher.id}/profile` : undefined;
 
   return (
@@ -183,16 +186,21 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
 
       <Stack direction="row" sx={theme => ({ gap: theme.spacing(4), mt: theme.spacing(2), alignItems: "center" })}>
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <LinkedAvatar href={studentHref} name={student.name} avatarUrl={student.avatarUrl} variant="student" />
+          <LinkedAvatar
+            href={studentHref}
+            name={student.name ?? ""}
+            avatarUrl={student.avatarUrl ?? undefined}
+            variant="student"
+          />
           <Box>
             <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
               {labels.student}
             </StyledPersonRoleCaption>
             {student.id ? (
-              <StudentEntityLink studentId={student.id} name={student.name} />
+              <StudentEntityLink studentId={student.id} name={student.name ?? ""} />
             ) : (
               <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-                {student.name}
+                {student.name ?? ""}
               </Typography>
             )}
             {student.id ? (
@@ -206,15 +214,20 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
         <Divider orientation="vertical" flexItem />
 
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <LinkedAvatar href={teacherHref} name={teacher.name} avatarUrl={teacher.avatarUrl} variant="teacher" />
+          <LinkedAvatar
+            href={teacherHref}
+            name={teacher.name ?? ""}
+            avatarUrl={teacher.avatarUrl ?? undefined}
+            variant="teacher"
+          />
           <Box>
             <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
               {labels.moduleInstructor}
             </StyledPersonRoleCaption>
             {teacher.id ? (
-              <TeacherEntityLink teacherId={teacher.id} name={teacher.name} />
+              <TeacherEntityLink teacherId={teacher.id} name={teacher.name ?? ""} />
             ) : (
-              <Typography variant="titleLg">{teacher.name}</Typography>
+              <Typography variant="titleLg">{teacher.name ?? ""}</Typography>
             )}
             {teacher.title ? (
               <StyledPersonDetailCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>

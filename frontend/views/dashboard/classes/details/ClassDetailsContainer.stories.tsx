@@ -11,27 +11,42 @@ import {
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import type { ClassInstance } from "@/frontend/views/dashboard/types/dashboard";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
 import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
 
 interface MockClassDetailsState {
-  instance: ClassInstance;
+  instance: ClassInstanceDetail;
   isWarningDismissed: boolean;
   dismissWarning: () => void;
 }
 
-const mockInstance: ClassInstance = {
+const mockInstance: ClassInstanceDetail = {
   id: "cls-9921",
   instanceId: "SRJ-449-AA",
   courseName: "Advanced Arabic Grammar",
+  classType: ClassType.Regular,
+  scheduledDate: "Oct 24, 2023",
+  startTime: "24 Oct 2023, 09:00 AM",
+  endTime: "24 Oct 2023, 10:30 AM",
+  durationMinutes: 90,
+  status: ClassExecutionState.NotActivated,
+  remarks:
+    "Student requested focus on Surah .. verses 120-140. Please ensure high-quality audio recording for parent review.",
+  hasTimezoneMismatch: true,
+  studentTimezone: "GMT+3",
+  teacherTimezone: null,
+  zoomMeetingUrl: "",
+  executionState: ClassExecutionState.NotActivated,
+  isRescheduled: false,
+  outcome: ClassOutcome.Pending,
+  payrollCredited: false,
   student: {
     id: "88290",
     name: "Ahmed Omar",
     grade: "Grade 12",
-    level: 4,
+    level: "4",
     avatarUrl: "/demo/avatars/01.png",
   },
   teacher: {
@@ -40,27 +55,20 @@ const mockInstance: ClassInstance = {
     title: "Senior Linguist • PH.D",
     avatarUrl: "/demo/avatars/04.png",
   },
-  scheduledDate: "Oct 24, 2023",
-  startTime: "24 Oct 2023, 09:00 AM",
-  endTime: "24 Oct 2023, 10:30 AM",
-  durationMinutes: 90,
-  status: "pending",
-  latencyMs: 14,
-  authorization: "OAuth 2.0 SSL",
-  remarks:
-    "Student requested focus on Surah .. verses 120-140. Please ensure high-quality audio recording for parent review.",
-  hasTimezoneMismatch: true,
-  studentTimezone: "GMT+3",
-  performanceMetrics: [
-    { key: "engagement", labelKey: "engagementScore", value: "92%" },
-    { key: "assessment", labelKey: "assessmentProgress", value: "14/20" },
-    { key: "focus", labelKey: "focusLevel", value: "High" },
-    { key: "health", labelKey: "sessionHealth", value: "Stable" },
-  ],
-  heatmapData: [40, 60, 30, 80, 55, 45, 90, 70, 40, 60, 35, 85, 50, 40, 95, 75, 40, 60, 20, 80],
-  attendanceRate: 94,
-  avgGrade: "A-",
-  lastClassDaysAgo: 3,
+  performance: {
+    id: "perf-1",
+    engagementScore: 92,
+    assessmentProgress: 14,
+    assessmentTotal: 20,
+    focusLevel: "High",
+    sessionHealth: "Stable",
+    latencyMs: 14,
+    authorizationLabel: "OAuth 2.0 SSL",
+    attendanceRate: 94,
+    avgGrade: "A-",
+    lastClassDaysAgo: 3,
+    heatmapData: [40, 60, 30, 80, 55, 45, 90, 70, 40, 60, 35, 85, 50, 40, 95, 75, 40, 60, 20, 80],
+  },
 };
 
 const useMockClassDetailsStore = create<MockClassDetailsState>(set => ({
@@ -167,63 +175,8 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
   );
 }
 
-function mapMockToReal(
-  mock: ClassInstance,
-  executionState: ClassExecutionState = ClassExecutionState.NotActivated
-): ClassInstanceDetail {
-  return {
-    id: mock.id,
-    instanceId: mock.instanceId,
-    courseName: mock.courseName,
-    classType: ClassType.Regular,
-    scheduledDate: mock.scheduledDate,
-    startTime: mock.startTime,
-    endTime: mock.endTime,
-    durationMinutes: mock.durationMinutes,
-    status: executionState,
-    remarks: mock.remarks,
-    hasTimezoneMismatch: mock.hasTimezoneMismatch,
-    studentTimezone: mock.studentTimezone,
-    teacherTimezone: null,
-    zoomMeetingUrl: "",
-    executionState,
-    isRescheduled: false,
-    outcome: ClassOutcome.Pending,
-    payrollCredited: false,
-    student: {
-      id: mock.student.id,
-      name: mock.student.name,
-      grade: mock.student.grade,
-      level: String(mock.student.level),
-      avatarUrl: mock.student.avatarUrl,
-    },
-    teacher: {
-      id: "teacher-id",
-      name: mock.teacher.name,
-      title: mock.teacher.title,
-      avatarUrl: mock.teacher.avatarUrl,
-    },
-    performance: {
-      id: "perf-1",
-      engagementScore: 92,
-      assessmentProgress: 14,
-      assessmentTotal: 20,
-      focusLevel: "High",
-      sessionHealth: "Stable",
-      latencyMs: mock.latencyMs,
-      authorizationLabel: mock.authorization,
-      attendanceRate: mock.attendanceRate,
-      avgGrade: mock.avgGrade,
-      lastClassDaysAgo: mock.lastClassDaysAgo,
-      heatmapData: [...mock.heatmapData],
-    },
-  };
-}
-
 export function MockClassDetailsContainer({
-  executionState = ClassExecutionState.NotActivated,
 }: {
-  readonly executionState?: ClassExecutionState;
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -235,7 +188,7 @@ export function MockClassDetailsContainer({
   const canOverride = permissions.includes(AppPermission.SessionOverrideActions);
   const canView = permissions.includes(AppPermission.SessionViewDetails);
 
-  const instance = mapMockToReal(mockInstance, executionState);
+  const instance = mockInstance;
 
   const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
@@ -281,13 +234,9 @@ export const Default: Story = {
 };
 
 export const ForceActivateEnabled: Story = {
-  args: {
-    executionState: ClassExecutionState.NotActivated,
-  },
+  args: {},
 };
 
 export const ForceActivateDisabled: Story = {
-  args: {
-    executionState: ClassExecutionState.Activated,
-  },
+  args: {},
 };

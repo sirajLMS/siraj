@@ -119,6 +119,14 @@ export enum DayOfWeek {
   SUNDAY = "SUNDAY",
 }
 
+export enum AvailabilitySearchSortBy {
+  NAME_ASC = "NAME_ASC",
+  NAME_DESC = "NAME_DESC",
+  MOST_GAPS = "MOST_GAPS",
+  MOST_AVAILABLE_DAYS = "MOST_AVAILABLE_DAYS",
+  TIMEZONE_ASC = "TIMEZONE_ASC",
+}
+
 export enum DstMigrationResult {
   UPDATED = "UPDATED",
   CONFLICT = "CONFLICT",
