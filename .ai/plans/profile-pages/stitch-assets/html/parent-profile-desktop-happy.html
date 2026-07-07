@@ -1,0 +1,507 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Parent Profile - EduCore Unified</title>
+<!-- Google Fonts: Inter & Hanken Grotesk -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#006b5f",
+                        "surface-subtle": "#F8FAFC",
+                        "on-secondary-fixed-variant": "#005047",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#000000",
+                        "primary": "#000000",
+                        "secondary-fixed": "#62fae3",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "on-primary-fixed-variant": "#474746",
+                        "on-secondary-fixed": "#00201c",
+                        "on-background": "#0b1c30",
+                        "surface-container-highest": "#d3e4fe",
+                        "inverse-surface": "#213145",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary-container": "#858383",
+                        "primary-container": "#1c1b1b",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary-container": "#1c1b1a",
+                        "teacher-blue": "#2563EB",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#1c1b1b",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "border-muted": "#E2E8F0",
+                        "outline-variant": "#c4c7c7",
+                        "secondary-container": "#62fae3",
+                        "on-surface": "#0b1c30",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-container": "#007165",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#e6e2df",
+                        "primary-fixed": "#e5e2e1",
+                        "on-tertiary-fixed": "#1c1b1a",
+                        "parent-green": "#16A34A",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline": "#747878",
+                        "on-error": "#ffffff",
+                        "background": "#f8f9ff",
+                        "admin-accent": "#1E1E1E",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "staff-purple": "#7C3AED",
+                        "on-tertiary-container": "#868382",
+                        "surface-tint": "#5f5e5e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed-dim": "#cac6c4",
+                        "inverse-primary": "#c8c6c5",
+                        "surface": "#f8f9ff",
+                        "on-surface-variant": "#444748"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "lg": "32px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "md": "24px",
+                        "sm": "16px",
+                        "xs": "8px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "xl": "48px"
+                    },
+                    "fontFamily": {
+                        "display": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "display": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Animations and Transitions */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmerPulse {
+            0% { opacity: 0.85; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.85; transform: scale(1); }
+        }
+
+        .animate-fade-in-down {
+            animation: fadeInDown 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+        
+        .animate-fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        .animate-shimmer-pulse {
+            animation: shimmerPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Hover Transitions */
+        .card-hover-fx {
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .card-hover-fx:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-hover-fx {
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .btn-hover-fx:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-hover-fx:active {
+            transform: scale(0.98);
+        }
+
+        /* Stagger Delays */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+    </style>
+</head>
+<body class="bg-surface-subtle text-on-surface font-body-md text-body-md h-screen flex overflow-hidden antialiased">
+<!-- SideNavBar (Shared Component) -->
+<nav class="hidden md:flex bg-surface-subtle border-r border-border-muted docked left-0 h-screen w-64 flex-col p-sm space-y-xs z-20">
+<!-- Brand/Header -->
+<div class="mb-lg px-sm pt-sm">
+<div class="flex items-center gap-sm mb-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-border-muted relative group cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="A small, professional portrait photograph of an academic administrator, male, wearing a light blue dress shirt, set against a neutral gray background. The lighting is soft and corporate, creating a trustworthy and structured mood suitable for an educational software platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfuKCgY97D-d8GmV4DG1qtQLlyVyEFiFJy-zgbGBq9chE0pMgp4gFpWsM4ocxX_7GMaTuQoA-lPyC1Ggxf0jdqhMasO-kJ-6AhdbL86YP6PhkL4-R3kdf00eXZoDBM-2-E6jYs-iKaQugZRYSXnh4pypsLPvyTWBrc6MfQNBDnvtra1L8tpEUhs3-PogG9PROc86utHtUpRipU2ejw4crMdLaS0OeCqWIP0Ej04LepNRGRFdj9sGE-">
+<div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-on-primary text-[18px]">upload</span>
+</div>
+</div>
+<div>
+<h2 class="text-headline-md font-headline-md text-primary">Julian Academic</h2>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Senior Administrator</p>
+</div>
+</div>
+<button class="w-full bg-surface-container-highest hover:bg-surface-dim text-on-surface font-label-md text-label-md py-2 rounded-lg border border-border-muted btn-hover-fx">
+                Edit Profile
+            </button>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 space-y-base overflow-y-auto">
+<!-- Active Tab: Profile -->
+<a class="flex items-center gap-sm px-sm py-2 bg-secondary-container text-on-secondary-container font-bold rounded-lg translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-label-md font-label-md">Profile</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-label-md font-label-md">Assigned Students</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-label-md font-label-md">Banking</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="text-label-md font-label-md">Permissions</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-label-md font-label-md">Notifications</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex flex-col flex-1 h-screen overflow-hidden relative">
+<!-- TopAppBar (Shared Component) -->
+<header class="bg-surface border-b border-border-muted docked full-width top z-10 flex justify-between items-center w-full px-margin-desktop max-w-full h-16 shrink-0">
+<div class="flex items-center gap-md">
+<!-- Mobile Menu Button (hidden on desktop) -->
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="text-title-lg font-display font-bold text-primary">EduCore Unified</h1>
+</div>
+<div class="flex items-center gap-md">
+<!-- Search Box (on_right) -->
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-subtle border border-border-muted rounded-full text-body-sm font-body-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary w-64 transition-all" placeholder="Search platform..." type="text">
+</div>
+<!-- Trailing Icon Actions -->
+<div class="flex items-center gap-sm text-on-surface-variant">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:text-primary hover:bg-surface-container transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:text-primary hover:bg-surface-container transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:text-primary hover:bg-surface-container transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<main class="flex-1 overflow-y-auto w-full bg-surface-subtle">
+<div class="px-margin-mobile md:px-margin-desktop py-lg max-w-7xl mx-auto space-y-lg">
+<!-- Page Title -->
+<div class="flex items-center justify-between mb-md animate-fade-in-down">
+<h1 class="text-headline-lg font-headline-lg text-primary">Parent Profile</h1>
+<button class="px-3 py-1 bg-surface-container border border-border-muted rounded-lg text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2 btn-hover-fx">
+<span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                        Admin View
+                    </button>
+</div>
+<!-- Profile Header component -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl p-md flex flex-col md:flex-row items-start md:items-center gap-md animate-fade-in-down card-hover-fx">
+<div class="w-24 h-24 rounded-full border border-border-muted overflow-hidden shrink-0 relative group">
+<img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" data-alt="A professional portrait photo of a middle-aged female parent, smiling warmly. She is wearing a smart casual beige blouse. The background is a soft, out-of-focus park setting, evoking a friendly and approachable mood consistent with a modern educational portal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDP7Haf3i3nwWoQw0J6xZ_zzXb--rPfMVCuCq5GLwFQ0zciM-8Em5dnUbKOUM8sl7J8bdleHQgA3vXOA4R7OyZlOpzWpNAnUDg29Q5uaJudJPzD5q6VBgj_NIQvRS-irFtqiZaj4IoBzDk61qTwBIvAg0jjOgEr2xwO9OoXmsaWkl6dI9GZha70HbrwKzq3h9P8G_sQ1Gxa8f7xaFYRxdEFw1MbzvWDTdmewNT6nZakHA4zlYk_GpTY">
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-1">
+<h2 class="text-headline-md font-headline-md text-primary">Sarah Parent</h2>
+<span class="px-2 py-0.5 bg-parent-green/10 text-parent-green font-label-sm text-label-sm rounded-full border border-parent-green/20">Parent</span>
+<span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant font-label-sm text-label-sm rounded-full border border-border-muted">ID: P-8492</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">mail</span> sarah.p@example.com
+                        </p>
+</div>
+<div class="flex gap-sm w-full md:w-auto mt-4 md:mt-0">
+<button class="flex-1 md:flex-none px-4 py-2 border border-border-muted bg-surface-container-lowest text-primary font-label-md text-label-md rounded-lg btn-hover-fx hover:bg-surface-subtle flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span> Edit
+                        </button>
+<button class="flex-1 md:flex-none px-4 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg btn-hover-fx hover:bg-tertiary-container flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">chat</span> Message
+                        </button>
+</div>
+</div>
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Core Info -->
+<div class="lg:col-span-4 space-y-gutter">
+<!-- Account Details Card -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl overflow-hidden animate-fade-in-up delay-100 card-hover-fx">
+<div class="px-md py-sm border-b border-border-muted bg-surface-subtle flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">manage_accounts</span>
+<h3 class="text-title-lg font-title-lg text-primary">Account Details</h3>
+</div>
+<div class="p-md space-y-4">
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Full Name</label>
+<div class="px-3 py-2 bg-surface-subtle border border-border-muted rounded-lg text-body-md font-body-md text-on-surface">Sarah Parent</div>
+</div>
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Primary Email</label>
+<div class="px-3 py-2 bg-surface-subtle border border-border-muted rounded-lg text-body-md font-body-md text-on-surface">sarah.p@example.com</div>
+</div>
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Portal Access Level</label>
+<div class="px-3 py-2 bg-surface-subtle border border-border-muted rounded-lg text-body-md font-body-md text-on-surface flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div> Active
+                                    </div>
+</div>
+</div>
+</div>
+<!-- Contact & Social Card -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl overflow-hidden animate-fade-in-up delay-200 card-hover-fx">
+<div class="px-md py-sm border-b border-border-muted bg-surface-subtle flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">connect_without_contact</span>
+<h3 class="text-title-lg font-title-lg text-primary">Contact &amp; Social</h3>
+</div>
+<div class="p-md space-y-4">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-subtle transition-colors duration-200">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">phone</span></div>
+<div class="flex-1">
+<p class="text-label-sm font-label-sm text-on-surface-variant">Mobile Phone</p>
+<p class="text-body-sm font-body-sm text-on-surface">+1 (555) 123-4567</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-subtle transition-colors duration-200">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">chat</span></div>
+<div class="flex-1">
+<p class="text-label-sm font-label-sm text-on-surface-variant">WhatsApp</p>
+<p class="text-body-sm font-body-sm text-on-surface">+1 (555) 123-4567</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-subtle transition-colors duration-200">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+<!-- Fallback generic social icon -->
+<span class="material-symbols-outlined text-[18px]">public</span>
+</div>
+<div class="flex-1">
+<p class="text-label-sm font-label-sm text-on-surface-variant">Facebook</p>
+<p class="text-body-sm font-body-sm text-on-surface text-secondary hover:underline cursor-pointer transition-all">facebook.com/sarah.parent</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-subtle transition-colors duration-200">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">call</span>
+</div>
+<div class="flex-1">
+<p class="text-label-sm font-label-sm text-on-surface-variant">Skype</p>
+<p class="text-body-sm font-body-sm text-on-surface">sarah.p.edu</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Admin & Related Entities -->
+<div class="lg:col-span-8 space-y-gutter">
+<!-- Admin-only Sections Wrapper (Sunken area approach) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Admin-only: Identity -->
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden relative shadow-sm animate-fade-in-up delay-300 card-hover-fx">
+<div class="absolute top-0 right-0 bg-admin-accent text-on-primary text-[10px] uppercase font-bold px-2 py-1 rounded-bl-lg tracking-wider animate-shimmer-pulse">Admin Only</div>
+<div class="px-md py-sm border-b border-border-muted flex items-center gap-2">
+<span class="material-symbols-outlined text-admin-accent">badge</span>
+<h3 class="text-title-lg font-title-lg text-primary">Identity Details</h3>
+</div>
+<div class="p-md space-y-4">
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Nationality</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest border border-border-muted rounded-lg text-body-md font-body-md text-on-surface focus:outline-none" readonly="" type="text" value="United States">
+</div>
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Residential Address</label>
+<textarea class="w-full px-3 py-2 bg-surface-container-lowest border border-border-muted rounded-lg text-body-md font-body-md text-on-surface focus:outline-none resize-none" readonly="" rows="3">123 Maple Street, Apt 4B
+Springfield, IL 62704
+United States</textarea>
+</div>
+</div>
+</div>
+<!-- Admin-only: Billing -->
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden relative shadow-sm animate-fade-in-up delay-400 card-hover-fx">
+<div class="absolute top-0 right-0 bg-admin-accent text-on-primary text-[10px] uppercase font-bold px-2 py-1 rounded-bl-lg tracking-wider animate-shimmer-pulse">Admin Only</div>
+<div class="px-md py-sm border-b border-border-muted flex items-center gap-2">
+<span class="material-symbols-outlined text-admin-accent">receipt_long</span>
+<h3 class="text-title-lg font-title-lg text-primary">Billing Profile</h3>
+</div>
+<div class="p-md grid grid-cols-2 gap-4">
+<div class="col-span-2">
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Invoice Type</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest border border-border-muted rounded-lg text-body-md font-body-md text-on-surface focus:outline-none" readonly="" type="text" value="Consolidated Family">
+</div>
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Currency</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest border border-border-muted rounded-lg text-body-md font-body-md text-on-surface focus:outline-none" readonly="" type="text" value="USD ($)">
+</div>
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Base Fee Amount</label>
+<input class="w-full px-3 py-2 bg-surface-container-lowest border border-border-muted rounded-lg text-body-md font-body-md text-on-surface font-semibold focus:outline-none" readonly="" type="text" value="$12,500.00">
+</div>
+<div class="col-span-2">
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-1">Default Payment Method</label>
+<div class="flex items-center gap-3 px-3 py-2 bg-surface-container-lowest border border-border-muted rounded-lg transition-colors hover:bg-surface-subtle cursor-default">
+<span class="material-symbols-outlined text-on-surface-variant">credit_card</span>
+<span class="text-body-md font-body-md text-on-surface">Visa ending in ****4242</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Associated Students Section (Data Grid) -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl overflow-hidden animate-fade-in-up delay-500 card-hover-fx">
+<div class="px-md py-sm border-b border-border-muted flex justify-between items-center bg-surface-subtle">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">school</span>
+<h3 class="text-title-lg font-title-lg text-primary">Associated Students</h3>
+</div>
+<span class="bg-surface-container text-on-surface-variant text-label-sm font-label-sm px-2 py-0.5 rounded-full border border-border-muted">2 Records</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-subtle border-b border-border-muted">
+<th class="p-sm text-label-sm font-label-sm text-on-surface-variant font-semibold">Student Name</th>
+<th class="p-sm text-label-sm font-label-sm text-on-surface-variant font-semibold">Grade Level</th>
+<th class="p-sm text-label-sm font-label-sm text-on-surface-variant font-semibold">Status</th>
+<th class="p-sm text-label-sm font-label-sm text-on-surface-variant font-semibold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-muted">
+<tr class="hover:bg-surface-container-low transition-colors duration-200 ease-in-out group cursor-pointer">
+<td class="p-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container border border-border-muted overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A small portrait photo of a young male student, smiling, wearing a school uniform shirt. Clean, bright educational setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4-2po06H4h5m-33xC1wEc8lzTYOy9hrFzdqJAFQY9rEG1ifYhvQFECIMDDJKv-UDLO5wlY_KYrZLKIuhivAArjKPBukqtQodI1fGCvE1NoOsrkJcIAAbYZxb1A-jXc_bCBtq4bFhL2o4H0ua7E9dBWknRBePX0JelANviZz9k5d5FazJplk5bvQihmMZnsu50FpJArmjXc547OXyFdhMHVwLCZHZsFuREck0WAIa49_KVlZtZ0mJm">
+</div>
+<div>
+<p class="text-body-md font-body-md text-primary font-medium group-hover:text-secondary transition-colors">Leo Parent</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">ID: S-10294</p>
+</div>
+</div>
+</td>
+<td class="p-sm text-body-sm font-body-sm text-on-surface">10th Grade</td>
+<td class="p-sm">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary/10 text-secondary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Enrolled
+                                                </span>
+</td>
+<td class="p-sm text-right">
+<button class="p-1.5 text-on-surface-variant hover:text-secondary rounded-lg hover:bg-surface-container transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-110">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors duration-200 ease-in-out group cursor-pointer bg-surface-subtle/50">
+<td class="p-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container border border-border-muted overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A small portrait photo of a young female student, smiling, wearing a school uniform. Clean, bright educational setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLM4J5PKoXwzU4oI2xmutCIkHVN7cXVyDyV1j5LDKN5hmgeSy9ssQCNHbeLUUFGqTgzze9DaQGV_LP5CxVbNoVdqMb_bebIzE7eTayevxgrKDnWzE7Hph35lTxsDl9yzrXAQgu7vCroQ9ylIsNHXR7YoIjr5ic7PFCvtDqjMb3Zh8JT246h32PVvEnHAWPb8PDLAli9g8YSsYXjOTKAZUKP_AOaNETvO92S995pTuE-CtL9ZM5FWym">
+</div>
+<div>
+<p class="text-body-md font-body-md text-primary font-medium group-hover:text-secondary transition-colors">Mia Parent</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">ID: S-10295</p>
+</div>
+</div>
+</td>
+<td class="p-sm text-body-sm font-body-sm text-on-surface">8th Grade</td>
+<td class="p-sm">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary/10 text-secondary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Enrolled
+                                                </span>
+</td>
+<td class="p-sm text-right">
+<button class="p-1.5 text-on-surface-variant hover:text-secondary rounded-lg hover:bg-surface-container transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:scale-110">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer (Shared Component) -->
+<footer class="bg-surface-subtle border-t border-border-muted w-full py-md px-margin-desktop flex flex-col md:flex-row justify-between items-center mt-xl gap-4">
+<div class="flex items-center gap-2">
+<span class="text-label-md font-label-md font-bold text-primary">EduCore Unified</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">© 2024 EduCore Systems. All rights reserved.</span>
+</div>
+<div class="flex items-center gap-4 text-label-sm font-label-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors duration-200" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors duration-200" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors duration-200" href="#">Security</a>
+<a class="hover:text-primary transition-colors duration-200" href="#">Accessibility</a>
+</div>
+</footer>
+</main>
+</div>
+</body></html>

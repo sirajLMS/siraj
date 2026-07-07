@@ -1,0 +1,317 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>EduCore Unified - Profile Empty State</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "tertiary": "#000000",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#005047",
+                        "on-primary-fixed": "#1c1b1b",
+                        "surface-subtle": "#F8FAFC",
+                        "on-tertiary-container": "#868382",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#dce9ff",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#213145",
+                        "primary-fixed": "#e5e2e1",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "admin-accent": "#1E1E1E",
+                        "outline-variant": "#c4c7c7",
+                        "surface-container": "#e5eeff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#62fae3",
+                        "secondary-container": "#62fae3",
+                        "on-primary-fixed-variant": "#474746",
+                        "border-muted": "#E2E8F0",
+                        "on-primary-container": "#858383",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "inverse-on-surface": "#eaf1ff",
+                        "secondary": "#006b5f",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "outline": "#747878",
+                        "staff-purple": "#7C3AED",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e6e2df",
+                        "surface-variant": "#d3e4fe",
+                        "primary": "#000000",
+                        "inverse-primary": "#c8c6c5",
+                        "tertiary-fixed-dim": "#cac6c4",
+                        "on-secondary-container": "#007165",
+                        "teacher-blue": "#2563EB",
+                        "tertiary-container": "#1c1b1a",
+                        "primary-container": "#1c1b1b",
+                        "on-secondary-fixed": "#00201c",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "parent-green": "#16A34A",
+                        "on-tertiary-fixed": "#1c1b1a",
+                        "surface-tint": "#5f5e5e",
+                        "surface-dim": "#cbdbf5",
+                        "on-surface-variant": "#444748",
+                        "background": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xl": "48px",
+                        "sm": "16px",
+                        "base": "4px",
+                        "md": "24px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "xs": "8px",
+                        "lg": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "display": ["Hanken Grotesk"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2DD4BF;
+            box-shadow: 0 0 0 1px #2DD4BF;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md h-screen flex flex-col overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface text-primary dark:text-primary-fixed border-b border-border-muted dark:border-outline-variant flex justify-between items-center w-full px-margin-desktop max-w-full h-16 shrink-0">
+<div class="text-title-lg font-display font-bold text-primary dark:text-primary-fixed">EduCore Unified</div>
+<div class="flex-1 max-w-md mx-8 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-subtle border border-border-muted rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary transition-all" placeholder="Search..." type="text">
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-surface-subtle dark:bg-surface-dim border-r border-border-muted dark:border-outline-variant flex flex-col h-full p-sm space-y-xs w-64 shrink-0 hidden md:flex">
+<div class="flex flex-col items-center p-md mb-md border-b border-border-muted pb-md">
+<div class="relative w-20 h-20 rounded-full bg-surface-container flex items-center justify-center mb-xs text-on-surface-variant border border-border-muted">
+<span class="material-symbols-outlined text-[40px]">person</span>
+<button class="absolute bottom-0 right-0 bg-surface border border-border-muted rounded-full p-1 hover:bg-surface-container-high shadow-sm">
+<span class="material-symbols-outlined text-[16px]">photo_camera</span>
+</button>
+</div>
+<div class="text-label-md font-label-md font-bold text-center mt-2 text-on-surface-variant">Unassigned</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant mt-1 text-center">New Profile</div>
+<button class="mt-4 w-full bg-surface border border-border-muted text-on-surface text-label-sm font-label-md py-2 rounded-lg hover:bg-surface-container-high transition-colors">
+                    Edit Profile
+                </button>
+</div>
+<a class="flex items-center px-4 py-3 rounded-lg bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed font-bold translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mr-3">person</span>
+<span class="text-label-md font-label-md">Profile</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">group</span>
+<span class="text-label-md font-label-md">Assigned Students</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">payments</span>
+<span class="text-label-md font-label-md">Banking</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">verified_user</span>
+<span class="text-label-md font-label-md">Permissions</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined mr-3">notifications</span>
+<span class="text-label-md font-label-md">Notifications</span>
+</a>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto bg-surface-subtle p-margin-desktop md:p-margin-desktop">
+<div class="max-w-6xl mx-auto space-y-lg">
+<!-- Profile Header Card (Empty) -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl p-md flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-md">
+<div class="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant border border-border-muted border-dashed">
+<span class="material-symbols-outlined text-[48px] opacity-50">account_circle</span>
+</div>
+<div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-xs opacity-50 italic">No Name Provided</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mb-sm opacity-50">No email associated</p>
+<div class="flex gap-sm">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg text-label-md font-label-md opacity-50 cursor-not-allowed">Edit Profile</button>
+<button class="bg-surface text-on-surface border border-border-muted px-4 py-2 rounded-lg text-label-md font-label-md flex items-center opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[18px] mr-2">download</span> Export Data
+                                </button>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant border border-border-muted">
+                            Status: Unassigned
+                        </span>
+</div>
+</div>
+<!-- Empty State Illustration -->
+<div class="flex flex-col items-center justify-center py-xl text-center bg-surface-container-lowest rounded-xl border border-border-muted border-dashed h-64">
+<span class="material-symbols-outlined text-[64px] text-on-surface-variant opacity-20 mb-md">person_off</span>
+<h2 class="text-headline-md font-headline-md text-on-surface mb-xs">Profile Not Setup</h2>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-md">No profile details have been provided yet. Please fill out the account information and contact details to complete this profile.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Left Column: Forms (Empty) -->
+<div class="lg:col-span-2 space-y-md">
+<!-- Account Information (Empty) -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl overflow-hidden shadow-sm">
+<div class="px-md py-sm border-b border-border-muted bg-surface-bright flex items-center">
+<span class="material-symbols-outlined mr-2 text-on-surface-variant">person</span>
+<h2 class="text-title-lg font-title-lg text-on-surface">Account Information</h2>
+</div>
+<div class="p-md grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Full Name</label>
+<input class="w-full border border-border-muted rounded-lg px-3 py-2 text-body-md font-body-md bg-surface-subtle" disabled="" placeholder="Enter full name" type="text">
+</div>
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Email Address</label>
+<input class="w-full border border-border-muted rounded-lg px-3 py-2 text-body-md font-body-md bg-surface-subtle" disabled="" placeholder="Enter email address" type="email">
+</div>
+<div class="space-y-1 md:col-span-2">
+<label class="text-label-sm font-label-sm text-on-surface-variant mb-2 block">Status</label>
+<div class="inline-flex items-center px-3 py-1 rounded-full bg-surface border border-border-muted text-on-surface-variant text-label-sm">
+<span class="material-symbols-outlined text-[16px] mr-1">pending</span> Pending Verification
+                                    </div>
+</div>
+</div>
+</div>
+<!-- Contact Details (Empty) -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl overflow-hidden shadow-sm">
+<div class="px-md py-sm border-b border-border-muted bg-surface-bright flex items-center">
+<span class="material-symbols-outlined mr-2 text-on-surface-variant">contact_mail</span>
+<h2 class="text-title-lg font-title-lg text-on-surface">Contact Details</h2>
+</div>
+<div class="p-md grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Phone Number</label>
+<input class="w-full border border-border-muted rounded-lg px-3 py-2 text-body-md font-body-md bg-surface-subtle" disabled="" placeholder="e.g. +1 (555) 000-0000" type="tel">
+</div>
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Timezone</label>
+<select class="w-full border border-border-muted rounded-lg px-3 py-2 text-body-md font-body-md bg-surface-subtle text-on-surface-variant" disabled="">
+<option>Select Timezone...</option>
+</select>
+</div>
+<div class="space-y-1 md:col-span-2">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Personal Zoom Link</label>
+<input class="w-full border border-border-muted rounded-lg px-3 py-2 text-body-md font-body-md bg-surface-subtle" disabled="" placeholder="https://" type="url">
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Stats & Admin (Empty) -->
+<div class="space-y-md">
+<!-- Stats Cards (Empty) -->
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl p-md flex items-center shadow-sm opacity-50">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center mr-md">
+<span class="material-symbols-outlined text-on-surface-variant">school</span>
+</div>
+<div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Total Classes</div>
+<div class="text-headline-md font-headline-md text-on-surface">0</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-muted rounded-xl p-md flex items-center shadow-sm opacity-50">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center mr-md">
+<span class="material-symbols-outlined text-on-surface-variant">trending_up</span>
+</div>
+<div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Avg. Engagement</div>
+<div class="text-headline-md font-headline-md text-on-surface">-- <span class="text-body-sm text-on-surface-variant">/5</span></div>
+</div>
+</div>
+<!-- Admin Only: Identity Verification (Empty) -->
+<div class="bg-surface-subtle border border-border-muted rounded-xl overflow-hidden shadow-sm relative">
+<div class="absolute top-2 right-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Admin Only</div>
+<div class="px-md py-sm border-b border-border-muted bg-surface-container-lowest flex items-center">
+<span class="material-symbols-outlined mr-2 text-on-surface-variant">badge</span>
+<h3 class="text-title-lg font-title-lg text-on-surface">Identity Verification</h3>
+</div>
+<div class="p-md flex flex-col items-center justify-center h-32 text-center bg-surface-bright border-t border-border-muted">
+<span class="material-symbols-outlined text-[32px] text-on-surface-variant mb-2">policy</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Not Verified</p>
+</div>
+</div>
+<!-- Admin Only: Compensation (Empty) -->
+<div class="bg-surface-subtle border border-border-muted rounded-xl overflow-hidden shadow-sm relative">
+<div class="absolute top-2 right-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Admin Only</div>
+<div class="px-md py-sm border-b border-border-muted bg-surface-container-lowest flex items-center">
+<span class="material-symbols-outlined mr-2 text-on-surface-variant">payments</span>
+<h3 class="text-title-lg font-title-lg text-on-surface">Compensation</h3>
+</div>
+<div class="p-md flex flex-col items-center justify-center h-32 text-center bg-surface-bright border-t border-border-muted">
+<span class="material-symbols-outlined text-[32px] text-on-surface-variant mb-2">account_balance_wallet</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant">No compensation data provided.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
