@@ -66,11 +66,67 @@ export class SessionRedisService {
   }
 
   /**
+   * Validate that a value is a plain object (not null, not array)
+   */
+  private isPlainObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
+  /**
+   * Validate optional string fields on a record.
+   * Returns false if any field is present but not a string.
+   */
+  private validateOptionalStrings(obj: Record<string, unknown>, fields: string[]): boolean {
+    for (const field of fields) {
+      if (obj[field] !== undefined && typeof obj[field] !== "string") {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Validate the impersonation sub-object
+   */
+  private validateImpersonation(obj: Record<string, unknown>): boolean {
+    if (obj.impersonation === undefined) {
+      return true;
+    }
+    if (!this.isPlainObject(obj.impersonation)) {
+      return false;
+    }
+    const imp = obj.impersonation as Record<string, unknown>;
+    if (
+      typeof imp.targetUserId !== "string" ||
+      typeof imp.startedAt !== "string" ||
+      typeof imp.expiresAt !== "string" ||
+      typeof imp.impersonationSessionId !== "string"
+    ) {
+      return false;
+    }
+    return imp.reason === undefined || typeof imp.reason === "string";
+  }
+
+  /**
+   * Validate the groupSimulation sub-object
+   */
+  private validateGroupSimulation(obj: Record<string, unknown>): boolean {
+    if (obj.groupSimulation === undefined) {
+      return true;
+    }
+    if (!this.isPlainObject(obj.groupSimulation)) {
+      return false;
+    }
+    const sim = obj.groupSimulation as Record<string, unknown>;
+    return typeof sim.groupSlug === "string" && typeof sim.startedAt === "string" && typeof sim.expiresAt === "string";
+  }
+
+  /**
    * Validate that parsed data conforms to RedisSessionData shape.
    * Prevents corrupted/tampered Redis data from bypassing type assertions.
    */
   private validateSessionData(data: unknown, _sessionId: string): data is RedisSessionData {
-    if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    if (!this.isPlainObject(data)) {
       return false;
     }
     const obj = data as Record<string, unknown>;
@@ -80,47 +136,14 @@ export class SessionRedisService {
     if (typeof obj.createdAt !== "string" || typeof obj.lastActivityAt !== "string") {
       return false;
     }
-    if (obj.ipAddress !== undefined && typeof obj.ipAddress !== "string") {
+    if (!this.validateOptionalStrings(obj, ["ipAddress", "userAgent", "deviceType", "deviceName"])) {
       return false;
     }
-    if (obj.userAgent !== undefined && typeof obj.userAgent !== "string") {
+    if (!this.validateImpersonation(obj)) {
       return false;
     }
-    if (obj.deviceType !== undefined && typeof obj.deviceType !== "string") {
+    if (!this.validateGroupSimulation(obj)) {
       return false;
-    }
-    if (obj.deviceName !== undefined && typeof obj.deviceName !== "string") {
-      return false;
-    }
-    if (obj.impersonation !== undefined) {
-      if (typeof obj.impersonation !== "object" || obj.impersonation === null || Array.isArray(obj.impersonation)) {
-        return false;
-      }
-      const imp = obj.impersonation as Record<string, unknown>;
-      if (
-        typeof imp.targetUserId !== "string" ||
-        typeof imp.startedAt !== "string" ||
-        typeof imp.expiresAt !== "string" ||
-        typeof imp.impersonationSessionId !== "string"
-      ) {
-        return false;
-      }
-      if (imp.reason !== undefined && typeof imp.reason !== "string") {
-        return false;
-      }
-    }
-    if (obj.groupSimulation !== undefined) {
-      if (
-        typeof obj.groupSimulation !== "object" ||
-        obj.groupSimulation === null ||
-        Array.isArray(obj.groupSimulation)
-      ) {
-        return false;
-      }
-      const sim = obj.groupSimulation as Record<string, unknown>;
-      if (typeof sim.groupSlug !== "string" || typeof sim.startedAt !== "string" || typeof sim.expiresAt !== "string") {
-        return false;
-      }
     }
     return true;
   }

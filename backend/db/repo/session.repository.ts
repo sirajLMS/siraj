@@ -678,9 +678,9 @@ export namespace SessionRepository {
     }
 
     const parsedPayload = parseSessionPayload(session.payload);
-    const { impersonation, ...restPayload } = parsedPayload;
+    delete parsedPayload.impersonation;
     const nextPayload = {
-      ...restPayload,
+      ...parsedPayload,
       groupSimulation,
     };
 
@@ -696,7 +696,8 @@ export namespace SessionRepository {
   export async function clearSessionGroupSimulation(rawSessionId: string): Promise<void> {
     if (redisSessionsEnabled()) {
       await updateRedisSessionData(rawSessionId, data => {
-        const { groupSimulation, ...rest } = data;
+        const rest: RedisSessionData = { ...data };
+        delete rest.groupSimulation;
         return rest;
       });
       return;

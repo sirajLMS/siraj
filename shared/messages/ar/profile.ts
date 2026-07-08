@@ -71,4 +71,34 @@ export const profile: ProfileLabels = {
       skypeId: "Skype ID",
     },
   },
+  banking: {
+    title: "Banking & Payment Details",
+    adminOnly: "Admin Only",
+    encryptedNotice: "This information is encrypted and only visible to authorized administrators.",
+    sections: {
+      banking: "Primary Account Information",
+      verification: "Verification",
+    },
+    fields: {
+      beneficiaryName: "Beneficiary Name",
+      bankName: "Bank Name",
+      accountNumber: "Account Number",
+      routingNumber: "Routing Number",
+      swiftBic: "SWIFT/BIC",
+      iban: "IBAN",
+      verifiedAt: "Verified At",
+      verifiedBy: "Verified By",
+    },
+    verified: "Verified",
+    notVerified: "Pending verification",
+    notProvided: "Not provided",
+    empty: {
+      title: "No banking details on file",
+      description: "This teacher has not submitted banking information yet.",
+    },
+    actions: {
+      manage: "Manage Banking Details",
+      editHint: "Banking updates require closing the current record and submitting new details through staff tools.",
+    },
+  },
 };

@@ -2,6 +2,7 @@ import type { AppPermission } from "@/shared/lib/enum";
 import type { ParentOwnProfileReturnType, ParentProfileResult } from "./parent.types";
 import type { ManagerDirectoryRow } from "./staff-profile.types";
 import type {
+  TeacherBankingSummaryReturnType,
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
   TeacherProfileReturnType,
@@ -94,4 +95,5 @@ export type UnifiedProfileReturnType = {
   readonly parentOwnProfile: ParentOwnProfileReturnType | null;
   readonly parentAdminProfile: ParentProfileResult | null;
   readonly staffProfile: ManagerDirectoryRow | null;
+  readonly bankingSummary: TeacherBankingSummaryReturnType | null;
 };

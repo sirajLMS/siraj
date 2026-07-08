@@ -8,6 +8,7 @@ import {
   StaffProfileService,
   TeacherPortalService,
 } from "@/backend/services";
+import { loadTeacherBankingSummary } from "@/backend/services/profile/banking-summary";
 import type {
   ParentAdminProfileUpdateInput,
   ParentOwnProfileUpdateInput,
@@ -251,6 +252,13 @@ export namespace ProfileService {
       staffProfile = await StaffProfileRepository.findByStaffProfileId(roleIds.staffProfileId);
     }
 
+    const bankingSummary = await loadTeacherBankingSummary(
+      actorUserId,
+      scope,
+      roleIds.audience,
+      roleIds.teacherId ?? null
+    );
+
     return {
       id: targetUserId,
       userId: targetUserId,
@@ -267,6 +275,7 @@ export namespace ProfileService {
       parentOwnProfile,
       parentAdminProfile,
       staffProfile,
+      bankingSummary,
     };
   }
 

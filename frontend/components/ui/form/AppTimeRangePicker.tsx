@@ -2,7 +2,7 @@
 
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Popover, TextField } from "@mui/material";
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { AppTimePicker } from "./AppTimePicker";
 
 export interface AppTimeRangePickerProps {
@@ -58,7 +58,7 @@ export function AppTimeRangePicker({
   size = "small",
 }: Readonly<AppTimeRangePickerProps>) {
   const inputId = useId();
-  const anchorRef = useRef<HTMLDivElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
 
   const selectedFrom = parseTimeString(fromTime);
@@ -95,7 +95,7 @@ export function AppTimeRangePicker({
     <>
       <TextField
         id={inputId}
-        ref={anchorRef}
+        ref={setAnchorEl}
         label={label}
         value={displayValue}
         size={size}
@@ -116,7 +116,7 @@ export function AppTimeRangePicker({
 
       <Popover
         open={open}
-        anchorEl={anchorRef.current}
+        anchorEl={anchorEl}
         onClose={() => setOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}

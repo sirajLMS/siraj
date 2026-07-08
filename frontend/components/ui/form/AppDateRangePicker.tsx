@@ -5,7 +5,7 @@ import { Box, InputAdornment, Popover, TextField } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useLocale } from "next-intl";
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { AppDatePicker } from "./AppDatePicker";
 
 const DATE_STORAGE_FORMAT = "yyyy-MM-dd";
@@ -60,7 +60,7 @@ export function AppDateRangePicker({
 }: Readonly<AppDateRangePickerProps>) {
   const locale = useLocale();
   const inputId = useId();
-  const anchorRef = useRef<HTMLDivElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
 
   const selectedFrom = parseStorageDate(fromDate);
@@ -93,7 +93,7 @@ export function AppDateRangePicker({
     <>
       <TextField
         id={inputId}
-        ref={anchorRef}
+        ref={setAnchorEl}
         label={label}
         value={displayValue}
         size={size}
@@ -114,7 +114,7 @@ export function AppDateRangePicker({
 
       <Popover
         open={open}
-        anchorEl={anchorRef.current}
+        anchorEl={anchorEl}
         onClose={() => setOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}

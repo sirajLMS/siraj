@@ -2551,6 +2551,19 @@ type TeacherAvailabilityGap {
   timezone: String
 }
 
+type TeacherBankingSummary {
+  accountNumber: String
+  bankName: String
+  beneficiaryName: String
+  iban: String
+  id: String
+  routingNumber: String
+  swiftBic: String
+  verifiedAt: String
+  verifiedByName: String
+  verifiedByUserId: String
+}
+
 type TeacherDashboard {
   id: String
   metrics: TeacherDashboardMetrics
@@ -2851,6 +2864,7 @@ type TestSuperAdmin {
 type UnifiedProfile {
   audience: ProfileAudience
   avatarUrl: String
+  bankingSummary: TeacherBankingSummary
   email: String
   id: String
   name: String

@@ -17,7 +17,18 @@ export type TeacherEntityInput = typeof teachers.$inferInsert;
 export type TeacherBankingDetailsHistorySelectType = typeof teacherBankingDetailsHistory.$inferSelect;
 export type TeacherBankingDetailsHistoryInsertInput = typeof teacherBankingDetailsHistory.$inferInsert;
 
-/** BankingDetailsHistoryReturnType removed — was unused. Re-create from TeacherBankingDetailsHistorySelectType if needed (Omit sensitive fields: accountNumber, routingNumber, swiftBic, iban, beneficiaryName). */
+export type TeacherBankingSummaryReturnType = {
+  readonly id: string;
+  readonly beneficiaryName: string;
+  readonly bankName: string;
+  readonly accountNumber: string;
+  readonly routingNumber: string | null;
+  readonly swiftBic: string;
+  readonly iban: string | null;
+  readonly verifiedAt: string | null;
+  readonly verifiedByUserId: string | null;
+  readonly verifiedByName: string | null;
+};
 
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
 export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;

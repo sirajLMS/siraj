@@ -14,6 +14,12 @@ export const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
 
 const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 
+function omit<T extends Record<string, unknown>, K extends keyof T>(obj: T, key: K): Omit<T, K> {
+  const result = { ...obj };
+  delete result[key];
+  return result;
+}
+
 function sanitizeIpAddress(ip: string | null | undefined): string | null {
   if (!ip) return null;
   const parts = ip.split(":");
@@ -80,10 +86,7 @@ async function syncOptionalRedisImpersonation(
 }
 
 async function clearOptionalRedisImpersonation(rawSessionId: string): Promise<void> {
-  await SessionRepository.updateRedisSessionData(rawSessionId, data => {
-    const { impersonation: _removed, ...rest } = data;
-    return rest;
-  });
+  await SessionRepository.updateRedisSessionData(rawSessionId, data => omit(data, "impersonation"));
 }
 
 export namespace ImpersonationService {
@@ -154,10 +157,7 @@ export namespace ImpersonationService {
       impersonationSessionId: dbSession.id,
     });
 
-    await SessionRepository.updateRedisSessionData(input.sessionId, data => {
-      const { groupSimulation: _removed, ...rest } = data;
-      return rest;
-    });
+    await SessionRepository.updateRedisSessionData(input.sessionId, data => omit(data, "groupSimulation"));
 
     const impersonationExpiresAt = Math.floor(expiresAt.getTime() / 1000);
     const token = await generateImpersonationAccessToken(

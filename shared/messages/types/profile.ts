@@ -69,4 +69,34 @@ export interface ProfileLabels {
       readonly skypeId: string;
     };
   };
+  readonly banking: {
+    readonly title: string;
+    readonly adminOnly: string;
+    readonly encryptedNotice: string;
+    readonly sections: {
+      readonly banking: string;
+      readonly verification: string;
+    };
+    readonly fields: {
+      readonly beneficiaryName: string;
+      readonly bankName: string;
+      readonly accountNumber: string;
+      readonly routingNumber: string;
+      readonly swiftBic: string;
+      readonly iban: string;
+      readonly verifiedAt: string;
+      readonly verifiedBy: string;
+    };
+    readonly verified: string;
+    readonly notVerified: string;
+    readonly notProvided: string;
+    readonly empty: {
+      readonly title: string;
+      readonly description: string;
+    };
+    readonly actions: {
+      readonly manage: string;
+      readonly editHint: string;
+    };
+  };
 }

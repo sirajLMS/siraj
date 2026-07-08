@@ -3382,6 +3382,20 @@ export type TeacherAvailabilityGap = {
   timezone: Maybe<Scalars['String']['output']>;
 };
 
+export type TeacherBankingSummary = {
+  __typename?: 'TeacherBankingSummary';
+  accountNumber: Maybe<Scalars['String']['output']>;
+  bankName: Maybe<Scalars['String']['output']>;
+  beneficiaryName: Maybe<Scalars['String']['output']>;
+  iban: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  routingNumber: Maybe<Scalars['String']['output']>;
+  swiftBic: Maybe<Scalars['String']['output']>;
+  verifiedAt: Maybe<Scalars['String']['output']>;
+  verifiedByName: Maybe<Scalars['String']['output']>;
+  verifiedByUserId: Maybe<Scalars['String']['output']>;
+};
+
 export type TeacherDashboard = {
   __typename?: 'TeacherDashboard';
   id: Maybe<Scalars['String']['output']>;
@@ -3670,6 +3684,7 @@ export type UnifiedProfile = {
   __typename?: 'UnifiedProfile';
   audience: Maybe<ProfileAudience>;
   avatarUrl: Maybe<Scalars['String']['output']>;
+  bankingSummary: Maybe<TeacherBankingSummary>;
   email: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;

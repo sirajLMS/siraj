@@ -39,7 +39,7 @@ export function TeacherAvailabilityDayPill({ calendarDate, gaps }: Readonly<Teac
         px: 1,
         py: 0.75,
         borderRadius: 1.5,
-        border: `1px solid ${hasGaps ? theme.palette.outlineVariant : theme.palette.outlineVariant}`,
+        border: `1px solid ${theme.palette.outlineVariant}`,
         backgroundColor: hasGaps ? theme.palette.surfaceContainerLow : theme.palette.surfaceContainerLowest,
       })}
     >

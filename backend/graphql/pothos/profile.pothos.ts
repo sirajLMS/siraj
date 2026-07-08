@@ -8,6 +8,7 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
+import type { TeacherBankingSummaryReturnType } from "@/backend/types/teacher.types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { ParentOwnProfilePothosObject } from "./parent-portal.pothos";
 import { ParentProfilePothosObject } from "./parent-profile.pothos";
@@ -21,6 +22,23 @@ export const ProfileAudiencePothosEnum = gqlSchemaBuilder.enumType("ProfileAudie
 
 export const ProfileScopePothosEnum = gqlSchemaBuilder.enumType("ProfileScope", {
   values: ["own", "other"] as const,
+});
+
+const TeacherBankingSummaryRef = gqlSchemaBuilder.objectRef<TeacherBankingSummaryReturnType>("TeacherBankingSummary");
+
+export const TeacherBankingSummaryPothosObject = TeacherBankingSummaryRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    beneficiaryName: t.exposeString("beneficiaryName"),
+    bankName: t.exposeString("bankName"),
+    accountNumber: t.exposeString("accountNumber"),
+    routingNumber: t.exposeString("routingNumber", { nullable: true }),
+    swiftBic: t.exposeString("swiftBic"),
+    iban: t.exposeString("iban", { nullable: true }),
+    verifiedAt: t.exposeString("verifiedAt", { nullable: true }),
+    verifiedByUserId: t.exposeString("verifiedByUserId", { nullable: true }),
+    verifiedByName: t.exposeString("verifiedByName", { nullable: true }),
+  }),
 });
 
 const UnifiedProfileRef = gqlSchemaBuilder.objectRef<UnifiedProfileReturnType>("UnifiedProfile");
@@ -42,6 +60,7 @@ export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
     parentOwnProfile: t.expose("parentOwnProfile", { type: ParentOwnProfilePothosObject, nullable: true }),
     parentAdminProfile: t.expose("parentAdminProfile", { type: ParentProfilePothosObject, nullable: true }),
     staffProfile: t.expose("staffProfile", { type: ManagerDirectoryRowPothosObject, nullable: true }),
+    bankingSummary: t.expose("bankingSummary", { type: TeacherBankingSummaryPothosObject, nullable: true }),
   }),
 });
 

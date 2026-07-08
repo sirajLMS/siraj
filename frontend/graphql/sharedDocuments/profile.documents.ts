@@ -93,6 +93,18 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         roleSlug
         roleName
       }
+      bankingSummary {
+        id
+        beneficiaryName
+        bankName
+        accountNumber
+        routingNumber
+        swiftBic
+        iban
+        verifiedAt
+        verifiedByUserId
+        verifiedByName
+      }
     }
   }
 `;

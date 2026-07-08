@@ -7,17 +7,19 @@ import {
 
 export type ScheduleInstanceDisplayStatus = ClassOutcome | ClassExecutionState;
 
+type DateLike = Date | string | null;
+
 export interface ScheduleInstanceDisplayInput {
   readonly outcome: ClassOutcome | null | undefined;
   readonly executionState: ClassExecutionState | null | undefined;
-  readonly actualStartAt?: Date | string | null;
-  readonly actualEndAt?: Date | string | null;
-  readonly scheduledEndAt?: Date | string | null;
-  readonly scheduledStartAt?: Date | string | null;
+  readonly actualStartAt?: DateLike;
+  readonly actualEndAt?: DateLike;
+  readonly scheduledEndAt?: DateLike;
+  readonly scheduledStartAt?: DateLike;
   readonly durationMinutes?: number | null;
 }
 
-function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): Date | string | null | undefined {
+function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): DateLike | undefined {
   if (input.scheduledEndAt) {
     return input.scheduledEndAt;
   }
@@ -31,11 +33,11 @@ function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): Date | stri
 export function resolveScheduleInstanceDisplayStatus(
   outcome: ClassOutcome | null | undefined,
   executionState: ClassExecutionState | null | undefined,
-  actualStartAt?: Date | string | null,
-  actualEndAt?: Date | string | null,
+  actualStartAt?: DateLike,
+  actualEndAt?: DateLike,
   options?: ClassInstanceStatusResolveOptions & {
-    scheduledEndAt?: Date | string | null;
-    scheduledStartAt?: Date | string | null;
+    scheduledEndAt?: DateLike;
+    scheduledStartAt?: DateLike;
     durationMinutes?: number | null;
   }
 ): ScheduleInstanceDisplayStatus {

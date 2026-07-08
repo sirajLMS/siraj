@@ -7,17 +7,19 @@ import {
 
 export type ScheduleInstanceDisplayStatus = ClassOutcome | ClassExecutionState;
 
+type DateStringNullable = Date | string | null;
+
 export interface ScheduleInstanceDisplayInput {
   readonly outcome: ClassOutcome | null | undefined;
   readonly executionState: ClassExecutionState | null | undefined;
-  readonly actualStartAt?: Date | string | null;
-  readonly actualEndAt?: Date | string | null;
-  readonly scheduledEndAt?: Date | string | null;
-  readonly scheduledStartAt?: Date | string | null;
+  readonly actualStartAt?: DateStringNullable;
+  readonly actualEndAt?: DateStringNullable;
+  readonly scheduledEndAt?: DateStringNullable;
+  readonly scheduledStartAt?: DateStringNullable;
   readonly durationMinutes?: number | null;
 }
 
-function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): Date | string | null | undefined {
+function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): DateStringNullable | undefined {
   if (input.scheduledEndAt) {
     return input.scheduledEndAt;
   }
@@ -31,11 +33,11 @@ function resolveScheduledEndAt(input: ScheduleInstanceDisplayInput): Date | stri
 export function resolveScheduleInstanceDisplayStatus(
   outcome: ClassOutcome | null | undefined,
   executionState: ClassExecutionState | null | undefined,
-  actualStartAt?: Date | string | null,
-  actualEndAt?: Date | string | null,
+  actualStartAt?: DateStringNullable,
+  actualEndAt?: DateStringNullable,
   options?: ClassInstanceStatusResolveOptions & {
-    scheduledEndAt?: Date | string | null;
-    scheduledStartAt?: Date | string | null;
+    scheduledEndAt?: DateStringNullable;
+    scheduledStartAt?: DateStringNullable;
     durationMinutes?: number | null;
   }
 ): ScheduleInstanceDisplayStatus {

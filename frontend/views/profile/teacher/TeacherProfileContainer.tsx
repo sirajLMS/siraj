@@ -14,6 +14,7 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
+import { TeacherBankingTab } from "./banking/TeacherBankingTab";
 import { type TeacherOwnEditFormData, TeacherProfileEditForm } from "./TeacherProfileEditForm";
 import { TeacherProfileView } from "./TeacherProfileView";
 
@@ -35,6 +36,7 @@ export function TeacherProfileContainer({
   targetUserId,
   activeTab: _activeTab = "profile",
 }: TeacherProfileContainerProps) {
+  const activeTab = _activeTab;
   const tc = useTranslations("profile");
   const router = useRouter();
 
@@ -78,6 +80,10 @@ export function TeacherProfileContainer({
     await updateUserProfile({ variables: { userId: targetUserId, input: { teacher: teacherInput } } });
     router.push(`/users/${targetUserId}/profile`);
   };
+
+  if (activeTab === "banking" && scope === "other") {
+    return <TeacherBankingTab targetUserId={targetUserId} mode={mode} />;
+  }
 
   if (loading) {
     return null;

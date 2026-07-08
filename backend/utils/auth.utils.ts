@@ -14,7 +14,8 @@ export namespace AuthUtils {
     user: UserSelectType,
     resolved: Partial<UserResolvedFields> = {}
   ): UserReturnType => {
-    const { deletedAt: _deletedAt, ...rest } = user;
+    const rest: Omit<UserSelectType, "deletedAt"> = { ...user };
+    delete (rest as Record<string, unknown>).deletedAt;
     return {
       ...rest,
       role: resolved.role ?? UserRole.USER,
@@ -26,7 +27,9 @@ export namespace AuthUtils {
 
   export const toSafeUser = (user: UserReturnType | UserSelectType): SafeUser => {
     const resolved = "role" in user && "status" in user ? user : toUserReturnType(user);
-    const { password: _password, rememberTokenHash: _rememberTokenHash, ...safeUser } = resolved;
+    const safeUser: SafeUser = { ...resolved };
+    delete (safeUser as Record<string, unknown>).password;
+    delete (safeUser as Record<string, unknown>).rememberTokenHash;
     return safeUser;
   };
 }
