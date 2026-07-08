@@ -9,7 +9,6 @@ export interface ManagerOnboardingLabels {
     readonly fullName: string;
     readonly email: string;
     readonly phone: string;
-    readonly skypeId: string;
     readonly accountType: string;
     readonly department: string;
     readonly password: string;
@@ -18,7 +17,6 @@ export interface ManagerOnboardingLabels {
     readonly fullName: string;
     readonly email: string;
     readonly phone: string;
-    readonly skypeId: string;
     readonly department: string;
     readonly password: string;
   };

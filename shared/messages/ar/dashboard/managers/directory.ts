@@ -22,14 +22,12 @@ export const managersDirectory: ManagersDirectoryLabels = {
     hash: "#",
     manager: "المدير",
     contactDetails: "بيانات الاتصال",
-    skypeId: "معرف سكايب",
     phone: "الهاتف",
     roleType: "نوع الدور",
     options: "خيارات",
   },
   fields: {
     phone: "الهاتف",
-    skypeId: "معرف سكايب",
   },
   actions: {
     addManager: "إضافة مدير جديد",

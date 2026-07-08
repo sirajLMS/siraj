@@ -10,7 +10,6 @@ const ownParentSchema = z.object({
   facebook: z.string().optional(),
   whatsapp: z.string().optional(),
   twitter: z.string().optional(),
-  skype: z.string().optional(),
   defaultZoomLink: z.string().optional(),
 });
 
@@ -37,7 +36,6 @@ export type ParentEditData = {
   readonly facebook?: string | null;
   readonly whatsapp?: string | null;
   readonly twitter?: string | null;
-  readonly skype?: string | null;
   readonly defaultZoomLink?: string | null;
   readonly nationality?: string | null;
   readonly address?: string | null;

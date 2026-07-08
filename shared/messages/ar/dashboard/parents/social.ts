@@ -13,7 +13,6 @@ export const parentSocial: ParentSocialLabels = {
     facebook: "فيسبوك",
     whatsapp: "واتساب",
     twitter: "تويتر",
-    skype: "سكايب",
   },
   errors: {
     failedToLoad: "تعذر تحميل ملف التواصل الاجتماعي.",

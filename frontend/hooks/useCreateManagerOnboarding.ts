@@ -18,7 +18,6 @@ export function useCreateManagerOnboarding() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone || null,
-        skypeId: formData.skypeId || null,
         accountType: formData.accountType,
         password: formData.password,
       };

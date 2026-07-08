@@ -23,7 +23,6 @@ export function useCreateParentOnboarding() {
         whatsapp: formData.whatsapp || null,
         facebook: formData.facebook || null,
         twitter: formData.twitter || null,
-        skype: formData.skype || null,
         defaultZoomLink: formData.defaultZoomLink || null,
         invoiceType: formData.invoiceType,
         feeAmount: formData.feeAmount,

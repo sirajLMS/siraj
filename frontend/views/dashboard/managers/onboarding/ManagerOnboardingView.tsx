@@ -69,7 +69,7 @@ interface Props {
  * │  ├── PageHeader (title, subtitle)                           │
  * │  ├── Box (form element)                                     │
  * │  │    └── StyledFormWrapper                                 │
- * │  │         ├── StaffInfoSection (name, email, skype fields) │
+ * │  │         ├── StaffInfoSection (name, email fields) │
  * │  │         ├── SystemAccessSection (account type, dept)     │
  * │  │         └── StyledFormActions                            │
  * │  │              ├── StyledSubmitButton (primary)            │
@@ -83,7 +83,7 @@ interface Props {
  * - PageHeader: Page title and subtitle
  * - Box (form): HTML form element for React Hook Form submission
  * - StyledFormWrapper: Flex container for form sections
- * - StaffInfoSection: Personal info fields (name, email, skype)
+ * - StaffInfoSection: Personal info fields (name, email)
  * - SystemAccessSection: Account type toggle and department select
  * - StyledFormActions: Container for submit/cancel buttons
  * - OnboardingMetricsOverview: Key metrics displayed below form

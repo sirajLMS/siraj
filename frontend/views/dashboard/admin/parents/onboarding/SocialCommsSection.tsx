@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  AlternateEmailOutlined,
-  ChatOutlined,
-  GroupsOutlined,
-  MeetingRoomOutlined,
-  VideoCallOutlined,
-} from "@mui/icons-material";
+import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined, MeetingRoomOutlined } from "@mui/icons-material";
 import { Grid, Input, InputAdornment } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
@@ -64,21 +58,6 @@ export function SocialCommsSection({ register }: Props) {
               startAdornment={
                 <InputAdornment position="start">
                   <AlternateEmailOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
-                </InputAdornment>
-              }
-            />
-          </FieldWrapper>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <FieldWrapper label={t("fields.skype")}>
-            <Input
-              {...register("skype")}
-              placeholder={t("placeholders.skype")}
-              fullWidth
-              sx={standardInputSx}
-              startAdornment={
-                <InputAdornment position="start">
-                  <VideoCallOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
                 </InputAdornment>
               }
             />

@@ -1,7 +1,6 @@
 "use client";
 
-import { ChatOutlined } from "@mui/icons-material";
-import { Box, Grid, Input, InputAdornment, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Grid, Input, MenuItem, Select, Typography } from "@mui/material";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { labelSx, outlinedInputSx, standardInputSx } from "@/frontend/components/ui/form";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
@@ -13,7 +12,6 @@ interface OfficialDetailsSectionProps {
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
   readonly labels: {
     readonly fields: {
-      readonly skypeId: string;
       readonly zoomLink: string;
       readonly country: string;
       readonly zoomUsername: string;
@@ -21,7 +19,6 @@ interface OfficialDetailsSectionProps {
       readonly timezone: string;
     };
     readonly placeholders: {
-      readonly skypeId: string;
       readonly zoomLink: string;
       readonly zoomUsername: string;
       readonly zoomPassword: string;
@@ -32,22 +29,6 @@ interface OfficialDetailsSectionProps {
 export function OfficialDetailsSection({ register, errors, labels }: Readonly<OfficialDetailsSectionProps>) {
   return (
     <Grid container spacing={3} sx={{ p: 3 }}>
-      <Grid size={{ xs: 12, md: 3 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.skypeId}
-        </Box>
-        <Input
-          {...register("skypeId")}
-          placeholder={labels.placeholders.skypeId}
-          fullWidth
-          sx={standardInputSx}
-          startAdornment={
-            <InputAdornment position="start">
-              <ChatOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
-            </InputAdornment>
-          }
-        />
-      </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <Box component="label" sx={labelSx}>
           {labels.fields.zoomLink}

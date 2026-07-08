@@ -21,7 +21,6 @@ const MOCK_CONTACT: SupportContactData = {
   role: "Faculty Coordinator",
   avatarUrl: "/demo/avatars/01.png",
   phone: null,
-  skypeId: null,
 };
 
 const MOCK_CLASSES = [

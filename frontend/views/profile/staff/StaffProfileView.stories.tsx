@@ -14,7 +14,6 @@ const staffProfile = {
   email: "robert.s@educore.edu",
   avatarUrl: null,
   phone: "+1 (555) 123-4567",
-  skypeId: "live:robert.staff_edu",
   status: AccountStatus.Activated,
   roleSlug: "senior-admin",
   roleName: "Senior Administrator",

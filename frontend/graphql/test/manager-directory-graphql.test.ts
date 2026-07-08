@@ -116,13 +116,10 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     if (!staffMgr?.staffProfileId) throw new Error("No manager found to update");
 
     const uniquePhone = `+1999${crypto.randomInt(1000000, 9999999)}`;
-    const uniqueSkype = `skype_staff_${Date.now()}`;
-
     const updateData = await authenticatedRequest(superAdminToken, "mutate", updateManagerProfileMutationDocument, {
       staffProfileId: staffMgr.staffProfileId,
       input: {
         phone: uniquePhone,
-        skypeId: uniqueSkype,
         status: null,
       },
     });
@@ -132,7 +129,6 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
     expect(updated.staffProfileId).toBe(staffMgr.staffProfileId);
     expect(updated.phone).toBe(uniquePhone);
-    expect(updated.skypeId).toBe(uniqueSkype);
   });
 
   test("Admin denied from updating Super Admin profile", async () => {
@@ -147,7 +143,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
         mutation: updateManagerProfileMutationDocument,
         variables: {
           staffProfileId: "00000000-0000-0000-0000-000000000000",
-          input: { phone: "+15555555555", skypeId: "hacker_skype", status: null },
+          input: { phone: "+15555555555", status: null },
         },
         errorPolicy: "all",
         context: { headers: { Authorization: `Bearer ${adminToken}` } },
@@ -162,7 +158,6 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
         staffProfileId: superAdmin.staffProfileId,
         input: {
           phone: "+15555555555",
-          skypeId: "hacker_skype",
           status: null,
         },
       },
@@ -189,7 +184,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
       mutation: updateManagerProfileMutationDocument,
       variables: {
         staffProfileId: staffMgr.staffProfileId,
-        input: { phone: "+15555555555", skypeId: "denied_skype", status: null },
+        input: { phone: "+15555555555", status: null },
       },
       errorPolicy: "all",
       context: { headers: { Authorization: `Bearer ${adminToken}` } },
@@ -207,7 +202,6 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
         staffProfileId: fakeProfileId,
         input: {
           phone: "+10000000000",
-          skypeId: "nonexistent",
           status: null,
         },
       },

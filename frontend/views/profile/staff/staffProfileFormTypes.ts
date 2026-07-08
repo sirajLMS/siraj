@@ -8,7 +8,6 @@ const coreSchema = z.object({
 
 const ownStaffSchema = z.object({
   phone: z.string().optional(),
-  skypeId: z.string().optional(),
 });
 
 const adminStaffSchema = ownStaffSchema.extend({

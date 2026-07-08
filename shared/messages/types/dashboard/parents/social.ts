@@ -11,7 +11,6 @@ export interface ParentSocialLabels {
     readonly facebook: string;
     readonly whatsapp: string;
     readonly twitter: string;
-    readonly skype: string;
   };
   readonly errors: {
     readonly failedToLoad: string;

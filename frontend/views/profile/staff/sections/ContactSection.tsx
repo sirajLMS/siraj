@@ -27,7 +27,6 @@ export function ContactSection(props: ContactSectionProps) {
       <SectionPanel title={t("sections.contact")}>
         <Stack spacing={2}>
           <TextField label={t("fields.phone")} fullWidth size="small" {...props.register("phone")} />
-          <TextField label={t("fields.skypeId")} fullWidth size="small" {...props.register("skypeId")} />
         </Stack>
       </SectionPanel>
     );
@@ -37,7 +36,6 @@ export function ContactSection(props: ContactSectionProps) {
     <SectionPanel title={t("sections.contact")}>
       <Stack spacing={2}>
         <InfoField label={t("fields.phone")} value={toDisplayValue(props.staffData.phone, tc("notSet"))} />
-        <InfoField label={t("fields.skypeId")} value={toDisplayValue(props.staffData.skypeId, tc("notSet"))} />
       </Stack>
     </SectionPanel>
   );

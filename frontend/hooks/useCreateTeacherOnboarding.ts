@@ -28,7 +28,6 @@ export function useCreateTeacherOnboarding() {
         gender: formData.gender,
         address: formData.address || null,
         qualifications: formData.qualifications || null,
-        skypeId: formData.skypeId || null,
         zoomLink: formData.zoomLink || null,
         countryCode: formData.countryCode,
         zoomUsername: formData.zoomUsername || null,

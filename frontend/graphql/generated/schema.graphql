@@ -1295,7 +1295,6 @@ type ManagerDirectoryRow {
   phone: String
   roleName: String
   roleSlug: String
-  skypeId: String
   staffProfileId: String
   status: AccountStatus
 }
@@ -1318,7 +1317,6 @@ input ManagerOnboardingInput {
   name: String!
   password: String!
   phone: String
-  skypeId: String
 }
 
 """Result of manager onboarding operation"""
@@ -1592,7 +1590,6 @@ input ParentAdminProfileUpdateInput {
   nationality: String
   paymentMethod: String
   phone: String
-  skype: String
   timezone: String
   twitter: String
   whatsapp: String
@@ -1756,7 +1753,6 @@ input ParentOnboardingInput {
   password: String!
   paymentMethod: PaymentMethod
   phone: String
-  skype: String
   timezone: String
   twitter: String
   whatsapp: String
@@ -1780,7 +1776,6 @@ type ParentOwnProfile {
   id: String
   name: String
   phone: String
-  skype: String
   twitter: String
   whatsapp: String
 }
@@ -1789,7 +1784,6 @@ input ParentOwnProfileUpdateInput {
   defaultZoomLink: String
   facebook: String
   phone: String
-  skype: String
   twitter: String
   whatsapp: String
 }
@@ -1809,7 +1803,6 @@ type ParentProfile {
   nationality: String
   paymentMethod: String
   phone: String
-  skype: String
   status: String
   timezone: String
   twitter: String
@@ -2159,13 +2152,11 @@ type SimulatablePermissionGroup {
 
 input StaffAdminProfileUpdateInput {
   phone: String
-  skypeId: String
   status: String
 }
 
 input StaffOwnProfileUpdateInput {
   phone: String
-  skypeId: String
 }
 
 type StaffPermissionGroup {
@@ -2550,7 +2541,6 @@ type SupportContact {
   name: String
   phone: String
   role: String
-  skypeId: String
 }
 
 type SupportRequestResult {
@@ -2795,9 +2785,6 @@ input TeacherOnboardingInput {
   """Bank routing number"""
   routingNumber: String
 
-  """Teacher Skype ID"""
-  skypeId: String
-
   """SWIFT/BIC code"""
   swiftBic: String
 
@@ -2848,7 +2835,6 @@ type TeacherProfileResult {
   phone: String
   qualifications: String
   rateCurrency: String
-  skypeId: String
   status: AccountStatus
   timezone: String
   totalClasses: Int
@@ -2868,7 +2854,7 @@ input TeacherProfileUpdateInput {
   phone: String
   qualifications: String
   rateCurrency: String
-  skypeId: String
+  status: AccountStatus
   timezone: String
   zoomLink: String
   zoomPassword: String
@@ -2967,7 +2953,6 @@ type UnpaidInvoicesSummary {
 
 input UpdateManagerProfileInput {
   phone: String
-  skypeId: String
   status: AccountStatus
 }
 

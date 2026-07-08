@@ -74,7 +74,6 @@ export function ParentSocialContainer() {
                   <SocialLink label={t("fields.facebook")} value={profile.facebook} />
                   <SocialLink label={t("fields.whatsapp")} value={profile.whatsapp} />
                   <SocialLink label={t("fields.twitter")} value={profile.twitter} />
-                  <SocialLink label={t("fields.skype")} value={profile.skype} />
                 </Stack>
               </SectionPanel>
             </Grid>

@@ -32,7 +32,6 @@ export function StaffProfileEditForm({
       name: "",
       email: "",
       phone: "",
-      skypeId: "",
       status: AccountStatus.Activated,
     },
   });
@@ -42,7 +41,6 @@ export function StaffProfileEditForm({
       name: staffData.name ?? "",
       email: staffData.email ?? "",
       phone: staffData.phone ?? "",
-      skypeId: staffData.skypeId ?? "",
       status: staffData.status ?? AccountStatus.Activated,
     });
   }, [form, staffData]);

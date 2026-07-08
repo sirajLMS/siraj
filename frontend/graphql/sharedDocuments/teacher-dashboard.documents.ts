@@ -128,7 +128,6 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
         role
         avatarUrl
         phone
-        skypeId
       }
     }
   }

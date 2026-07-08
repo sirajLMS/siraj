@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatBubbleOutlineOutlined, MailOutlined, PhoneOutlined } from "@mui/icons-material";
+import { MailOutlined, PhoneOutlined } from "@mui/icons-material";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
@@ -131,10 +131,6 @@ export function ManagersCardList({
               <StyledContactItemBox direction="row" spacing={1.5}>
                 <MailOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
                 <Typography variant="bodyMd">{manager.email}</Typography>
-              </StyledContactItemBox>
-              <StyledContactItemBox direction="row" spacing={1.5}>
-                <ChatBubbleOutlineOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
-                <Typography variant="bodyMd">{manager.skypeId}</Typography>
               </StyledContactItemBox>
               <StyledContactItemBox direction="row" spacing={1.5}>
                 <PhoneOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />

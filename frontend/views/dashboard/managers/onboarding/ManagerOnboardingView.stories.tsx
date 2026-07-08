@@ -8,7 +8,6 @@ const defaultValues: ManagerOnboardingFormData = {
   name: "",
   email: "",
   phone: "",
-  skypeId: "",
   accountType: ManagerAccountType.Manager,
   password: "",
 };

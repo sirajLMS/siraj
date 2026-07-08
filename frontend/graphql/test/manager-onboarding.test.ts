@@ -22,7 +22,6 @@ const createMinimalManagerInput = (
   password: "TestPassword123!",
   accountType: overrides?.accountType ?? ManagerAccountType.Manager,
   phone: null,
-  skypeId: null,
 });
 
 describe("Manager Onboarding GraphQL API", () => {

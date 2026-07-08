@@ -29,7 +29,6 @@ const createMinimalParentInput = (
   defaultZoomLink: null,
   facebook: null,
   nationality: null,
-  skype: null,
   twitter: null,
   whatsapp: null,
 });
@@ -67,7 +66,6 @@ const createFullParentInput = (
   facebook: overrides?.facebook ?? "facebook.com/testparent",
   whatsapp: overrides?.whatsapp ?? "+1234567890",
   twitter: overrides?.twitter ?? "@testparent",
-  skype: overrides?.skype ?? "testparent",
   nationality: overrides?.nationality ?? "US",
 });
 

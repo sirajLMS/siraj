@@ -24,7 +24,6 @@ export interface TeachersDirectoryLabels {
   };
   readonly fields: {
     readonly phone: string;
-    readonly skypeId: string;
   };
   readonly status: {
     readonly active: string;

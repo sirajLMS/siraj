@@ -105,12 +105,6 @@ export function ManagersDataGrid({
         ),
       },
       {
-        field: "skypeId",
-        headerName: t("table.skypeId"),
-        flex: 1,
-        minWidth: 150,
-      },
-      {
         field: "phone",
         headerName: t("table.phone"),
         flex: 1,

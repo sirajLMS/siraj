@@ -1,11 +1,13 @@
 "use client";
 
-import { Stack, TextField } from "@mui/material";
+import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined, MeetingRoomOutlined } from "@mui/icons-material";
+import { InputAdornment, Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
+import { ProfileFieldRow } from "@/frontend/views/profile/shared/ProfileFieldRow";
+import { buildSocialLink } from "@/shared/lib/social-links";
 import type { ParentAdminEditFormData } from "../parentProfileFormTypes";
-import { InfoField } from "./InfoField";
 import { type ParentViewData, toDisplayValue } from "./parentProfileTypes";
 
 type SocialSectionProps =
@@ -18,6 +20,13 @@ type SocialSectionProps =
       readonly register: UseFormRegister<ParentAdminEditFormData>;
     };
 
+const SOCIAL_FIELDS = [
+  { key: "facebook", platform: "facebook", icon: GroupsOutlined },
+  { key: "whatsapp", platform: "whatsapp", icon: ChatOutlined },
+  { key: "twitter", platform: "twitter", icon: AlternateEmailOutlined },
+  { key: "defaultZoomLink", platform: "zoom", icon: MeetingRoomOutlined },
+] as const;
+
 export function SocialSection(props: SocialSectionProps) {
   const t = useTranslations("profile.parent");
   const tc = useTranslations("profile");
@@ -25,17 +34,25 @@ export function SocialSection(props: SocialSectionProps) {
   if (props.mode === "edit") {
     return (
       <SectionPanel title={t("sections.social")}>
-        <Stack spacing={2}>
-          <TextField label={t("fields.facebook")} fullWidth size="small" {...props.register("facebook")} />
-          <TextField label={t("fields.whatsapp")} fullWidth size="small" {...props.register("whatsapp")} />
-          <TextField label={t("fields.twitter")} fullWidth size="small" {...props.register("twitter")} />
-          <TextField label={t("fields.skype")} fullWidth size="small" {...props.register("skype")} />
-          <TextField
-            label={t("fields.defaultZoomLink")}
-            fullWidth
-            size="small"
-            {...props.register("defaultZoomLink")}
-          />
+        <Stack spacing={2.5}>
+          {SOCIAL_FIELDS.map(({ key, icon: Icon }) => (
+            <TextField
+              key={key}
+              label={t(`fields.${key}`)}
+              fullWidth
+              size="small"
+              {...props.register(key)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Icon sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          ))}
         </Stack>
       </SectionPanel>
     );
@@ -43,15 +60,22 @@ export function SocialSection(props: SocialSectionProps) {
 
   return (
     <SectionPanel title={t("sections.social")}>
-      <Stack spacing={2}>
-        <InfoField label={t("fields.facebook")} value={toDisplayValue(props.parentData.facebook, tc("notSet"))} />
-        <InfoField label={t("fields.whatsapp")} value={toDisplayValue(props.parentData.whatsapp, tc("notSet"))} />
-        <InfoField label={t("fields.twitter")} value={toDisplayValue(props.parentData.twitter, tc("notSet"))} />
-        <InfoField label={t("fields.skype")} value={toDisplayValue(props.parentData.skype, tc("notSet"))} />
-        <InfoField
-          label={t("fields.defaultZoomLink")}
-          value={toDisplayValue(props.parentData.defaultZoomLink, tc("notSet"))}
-        />
+      <Stack spacing={2.5}>
+        {SOCIAL_FIELDS.map(({ key, platform, icon: Icon }) => {
+          const value = props.parentData[key];
+          const link = buildSocialLink(platform, value);
+          return (
+            <ProfileFieldRow
+              key={key}
+              icon={Icon}
+              label={t(`fields.${key}`)}
+              value={link?.displayText ?? toDisplayValue(value, tc("notSet"))}
+              href={link?.href}
+              fallback={tc("notSet")}
+              hover
+            />
+          );
+        })}
       </Stack>
     </SectionPanel>
   );

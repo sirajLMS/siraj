@@ -107,9 +107,6 @@ function ParentProfileDetails({ parent }: ParentProfileDetailsProps) {
             <DetailItem label={t("fields.whatsapp")} value={parent.whatsapp || "-"} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <DetailItem label={t("fields.skype")} value={parent.skype || "-"} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DetailItem label={t("fields.zoomLink")} value={parent.zoomLink || "-"} isLink={!!parent.zoomLink} />
           </Grid>
         </Grid>

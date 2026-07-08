@@ -20,14 +20,12 @@ export interface ManagersDirectoryLabels {
     readonly hash: string;
     readonly manager: string;
     readonly contactDetails: string;
-    readonly skypeId: string;
     readonly phone: string;
     readonly roleType: string;
     readonly options: string;
   };
   readonly fields: {
     readonly phone: string;
-    readonly skypeId: string;
   };
   readonly actions: {
     readonly addManager: string;

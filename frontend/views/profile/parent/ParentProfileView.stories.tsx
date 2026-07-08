@@ -18,7 +18,6 @@ const parentOwnProfile: ParentOwnData = {
   facebook: "facebook.com/noor.abdullah",
   whatsapp: "+966501234567",
   twitter: "@noor_abdullah",
-  skype: "noor.abdullah",
   defaultZoomLink: "https://zoom.us/j/parent123",
 };
 
@@ -35,7 +34,6 @@ const parentAdminProfile: ParentAdminData = {
   facebook: "facebook.com/noor.abdullah",
   whatsapp: "+966501234567",
   twitter: "@noor_abdullah",
-  skype: "noor.abdullah",
   defaultZoomLink: "https://zoom.us/j/parent123",
   invoiceType: "Monthly",
   feeAmount: "500",
@@ -99,6 +97,7 @@ export const Default: Story = {
   args: {
     parentData: parentOwnProfile,
     associatedStudents,
+    avatarUrl: "/demo/avatars/02.png",
     isAdminScope: false,
   },
 };
@@ -107,7 +106,23 @@ export const AdminView: Story = {
   args: {
     parentData: parentAdminProfile,
     associatedStudents,
+    avatarUrl: "/demo/avatars/02.png",
     isAdminScope: true,
+  },
+};
+
+export const SocialLinks: Story = {
+  args: {
+    parentData: {
+      ...parentOwnProfile,
+      facebook: "https://facebook.com/noor.abdullah",
+      whatsapp: "+966501234567",
+      twitter: "@noor_abdullah",
+      defaultZoomLink: "https://zoom.us/j/parent123",
+    },
+    associatedStudents: { id: "associated-students-empty", totalCount: 0, rows: [] },
+    avatarUrl: "/demo/avatars/02.png",
+    isAdminScope: false,
   },
 };
 

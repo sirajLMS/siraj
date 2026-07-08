@@ -1355,7 +1355,6 @@ export type ManagerDirectoryRow = {
   phone: Maybe<Scalars['String']['output']>;
   roleName: Maybe<Scalars['String']['output']>;
   roleSlug: Maybe<Scalars['String']['output']>;
-  skypeId: Maybe<Scalars['String']['output']>;
   staffProfileId: Maybe<Scalars['String']['output']>;
   status: Maybe<AccountStatus>;
 };
@@ -1379,7 +1378,6 @@ export type ManagerOnboardingInput = {
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
   phone: InputMaybe<Scalars['String']['input']>;
-  skypeId: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Result of manager onboarding operation */
@@ -2107,7 +2105,6 @@ export type ParentAdminProfileUpdateInput = {
   nationality: InputMaybe<Scalars['String']['input']>;
   paymentMethod: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
-  skype: InputMaybe<Scalars['String']['input']>;
   timezone: InputMaybe<Scalars['String']['input']>;
   twitter: InputMaybe<Scalars['String']['input']>;
   whatsapp: InputMaybe<Scalars['String']['input']>;
@@ -2286,7 +2283,6 @@ export type ParentOnboardingInput = {
   password: Scalars['String']['input'];
   paymentMethod: InputMaybe<PaymentMethod>;
   phone: InputMaybe<Scalars['String']['input']>;
-  skype: InputMaybe<Scalars['String']['input']>;
   timezone: InputMaybe<Scalars['String']['input']>;
   twitter: InputMaybe<Scalars['String']['input']>;
   whatsapp: InputMaybe<Scalars['String']['input']>;
@@ -2312,7 +2308,6 @@ export type ParentOwnProfile = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
-  skype: Maybe<Scalars['String']['output']>;
   twitter: Maybe<Scalars['String']['output']>;
   whatsapp: Maybe<Scalars['String']['output']>;
 };
@@ -2321,7 +2316,6 @@ export type ParentOwnProfileUpdateInput = {
   defaultZoomLink: InputMaybe<Scalars['String']['input']>;
   facebook: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
-  skype: InputMaybe<Scalars['String']['input']>;
   twitter: InputMaybe<Scalars['String']['input']>;
   whatsapp: InputMaybe<Scalars['String']['input']>;
 };
@@ -2342,7 +2336,6 @@ export type ParentProfile = {
   nationality: Maybe<Scalars['String']['output']>;
   paymentMethod: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
-  skype: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
   timezone: Maybe<Scalars['String']['output']>;
   twitter: Maybe<Scalars['String']['output']>;
@@ -2972,13 +2965,11 @@ export type SimulatablePermissionGroup = {
 
 export type StaffAdminProfileUpdateInput = {
   phone: InputMaybe<Scalars['String']['input']>;
-  skypeId: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StaffOwnProfileUpdateInput = {
   phone: InputMaybe<Scalars['String']['input']>;
-  skypeId: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StaffPermissionGroup = {
@@ -3382,7 +3373,6 @@ export type SupportContact = {
   name: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
   role: Maybe<Scalars['String']['output']>;
-  skypeId: Maybe<Scalars['String']['output']>;
 };
 
 export type SupportRequestResult = {
@@ -3621,8 +3611,6 @@ export type TeacherOnboardingInput = {
   rateCurrency: InputMaybe<Scalars['String']['input']>;
   /** Bank routing number */
   routingNumber: InputMaybe<Scalars['String']['input']>;
-  /** Teacher Skype ID */
-  skypeId: InputMaybe<Scalars['String']['input']>;
   /** SWIFT/BIC code */
   swiftBic: InputMaybe<Scalars['String']['input']>;
   /** IANA timezone identifier */
@@ -3670,7 +3658,6 @@ export type TeacherProfileResult = {
   phone: Maybe<Scalars['String']['output']>;
   qualifications: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<Scalars['String']['output']>;
-  skypeId: Maybe<Scalars['String']['output']>;
   status: Maybe<AccountStatus>;
   timezone: Maybe<Scalars['String']['output']>;
   totalClasses: Maybe<Scalars['Int']['output']>;
@@ -3690,7 +3677,7 @@ export type TeacherProfileUpdateInput = {
   phone: InputMaybe<Scalars['String']['input']>;
   qualifications: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<Scalars['String']['input']>;
-  skypeId: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<AccountStatus>;
   timezone: InputMaybe<Scalars['String']['input']>;
   zoomLink: InputMaybe<Scalars['String']['input']>;
   zoomPassword: InputMaybe<Scalars['String']['input']>;
@@ -3797,7 +3784,6 @@ export type UnpaidInvoicesSummary = {
 
 export type UpdateManagerProfileInput = {
   phone: InputMaybe<Scalars['String']['input']>;
-  skypeId: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<AccountStatus>;
 };
 

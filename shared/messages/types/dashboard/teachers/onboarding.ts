@@ -20,7 +20,6 @@ export interface TeacherOnboardingLabels {
     readonly female: string;
     readonly address: string;
     readonly qualifications: string;
-    readonly skypeId: string;
     readonly zoomLink: string;
     readonly country: string;
     readonly zoomUsername: string;
@@ -44,7 +43,6 @@ export interface TeacherOnboardingLabels {
     readonly age: string;
     readonly address: string;
     readonly qualifications: string;
-    readonly skypeId: string;
     readonly zoomLink: string;
     readonly zoomUsername: string;
     readonly zoomPassword: string;

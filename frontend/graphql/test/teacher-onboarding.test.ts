@@ -36,7 +36,6 @@ const createMinimalTeacherInput = (
   nationalId: "ID123456",
   qualifications: "PhD",
   routingNumber: "123456789",
-  skypeId: "johndoe",
   swiftBic: "BOFAUS3N",
   zoomLink: "https://zoom.us/j/1234567890",
   zoomPassword: "password123",

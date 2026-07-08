@@ -13,7 +13,6 @@ const defaultValues: ParentOnboardingFormData = {
   whatsapp: "",
   facebook: "",
   twitter: "",
-  skype: "",
   defaultZoomLink: "",
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",

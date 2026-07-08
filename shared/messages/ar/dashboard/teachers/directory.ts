@@ -26,7 +26,6 @@ export const directory: TeachersDirectoryLabels = {
   },
   fields: {
     phone: "الهاتف",
-    skypeId: "معرف سكايب",
   },
   status: {
     active: "نشط",

@@ -93,7 +93,6 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
         role: schedule.supportContact.role,
         avatarUrl: schedule.supportContact.avatarUrl,
         phone: schedule.supportContact.phone,
-        skypeId: schedule.supportContact.skypeId,
       }
     : null;
 

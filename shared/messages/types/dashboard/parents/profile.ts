@@ -40,7 +40,6 @@ export interface ParentProfileLabels {
     readonly address: string;
     readonly facebook: string;
     readonly whatsapp: string;
-    readonly skype: string;
     readonly zoomLink: string;
     readonly invoiceType: string;
     readonly feeAmount: string;

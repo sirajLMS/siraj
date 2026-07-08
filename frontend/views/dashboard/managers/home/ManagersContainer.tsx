@@ -54,7 +54,6 @@ export function ManagersContainer() {
     role: mapManagerRole(row.roleSlug),
     status: mapManagerStatus(row.status),
     email: row.email ?? "",
-    skypeId: row.skypeId ?? "",
     phone: row.phone ?? "",
     avatarUrl: row.avatarUrl ?? "",
     targetIsSuperAdmin: row.roleSlug === "super_admin",

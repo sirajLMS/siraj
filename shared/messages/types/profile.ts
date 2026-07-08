@@ -62,7 +62,6 @@ export interface ProfileLabels {
       readonly whatsapp: string;
       readonly facebook: string;
       readonly twitter: string;
-      readonly skype: string;
       readonly defaultZoomLink: string;
       readonly nationality: string;
       readonly address: string;
@@ -104,7 +103,6 @@ export interface ProfileLabels {
       readonly fullName: string;
       readonly primaryEmail: string;
       readonly phone: string;
-      readonly skypeId: string;
       readonly roleName: string;
       readonly roleSlug: string;
       readonly department: string;

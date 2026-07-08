@@ -17,7 +17,6 @@ export interface ParentOnboardingLabels {
     readonly whatsapp: string;
     readonly facebook: string;
     readonly twitter: string;
-    readonly skype: string;
     readonly zoomId: string;
     readonly invoiceType: string;
     readonly feeAmount: string;
@@ -33,7 +32,6 @@ export interface ParentOnboardingLabels {
     readonly whatsapp: string;
     readonly facebook: string;
     readonly twitter: string;
-    readonly skype: string;
     readonly zoomId: string;
     readonly invoiceType: string;
     readonly feeAmount: string;

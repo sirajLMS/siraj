@@ -33,7 +33,6 @@ function buildCoreInput(formData: StaffOwnEditFormData | StaffAdminEditFormData)
 function buildOwnStaffInput(formData: StaffOwnEditFormData | StaffAdminEditFormData) {
   return {
     phone: formData.phone || null,
-    skypeId: formData.skypeId || null,
   };
 }
 

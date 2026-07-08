@@ -17,7 +17,6 @@ export interface Manager {
   readonly role: ManagerRole;
   readonly status: ManagerStatus;
   readonly email: string;
-  readonly skypeId: string;
   readonly phone: string;
   readonly avatarUrl: string;
   readonly targetIsSuperAdmin: boolean;

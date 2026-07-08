@@ -32,7 +32,6 @@ export const teacherOnboardingSchema = (validationLabels: {
     }),
     address: z.string().optional(),
     qualifications: z.string().optional(),
-    skypeId: z.string().optional(),
     zoomLink: z.url({ message: validationLabels.urlInvalid }).or(z.literal("")).optional(),
     countryCode: z.custom<CountryCode>(
       val => typeof val === "string" && Object.values(CountryCode).includes(val as CountryCode),

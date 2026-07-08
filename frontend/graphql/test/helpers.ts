@@ -327,7 +327,6 @@ export async function provisionTestManager(
         password: TEST_USER_PASSWORD,
         accountType,
         phone: null,
-        skypeId: null,
       },
     },
     context: { headers: { Authorization: `Bearer ${superAdminToken}` } },

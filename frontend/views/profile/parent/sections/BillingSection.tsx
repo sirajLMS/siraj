@@ -25,7 +25,7 @@ export function BillingSection(props: BillingSectionProps) {
   if (props.mode === "edit") {
     return (
       <SectionPanel title={t("sections.billing")}>
-        <Stack spacing={2}>
+        <Stack spacing={2.5}>
           <TextField label={t("fields.invoiceType")} fullWidth size="small" {...props.register("invoiceType")} />
           <TextField label={t("fields.feeAmount")} fullWidth size="small" {...props.register("feeAmount")} />
           <TextField label={t("fields.paymentMethod")} fullWidth size="small" {...props.register("paymentMethod")} />
@@ -47,14 +47,14 @@ export function BillingSection(props: BillingSectionProps) {
         />
         <InfoField label={t("fields.currency")} value={toDisplayValue(props.adminData.currency, tc("notSet"))} />
         <InfoField label={t("fields.timezone")} value={toDisplayValue(props.adminData.timezone, tc("notSet"))} />
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+        <Stack spacing={0.5}>
           <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
             {t("fields.status")}
           </Typography>
           <StatusBadge
             category="studentAccount"
-            status={props.adminData.status ?? "REGULAR"}
-            label={props.adminData.status ?? tc("notSet")}
+            status={(props.adminData.status ?? "REGULAR").toLowerCase()}
+            label={t(`status.${(props.adminData.status ?? "REGULAR").toLowerCase()}`)}
           />
         </Stack>
       </Stack>

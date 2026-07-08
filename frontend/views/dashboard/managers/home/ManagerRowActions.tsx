@@ -63,9 +63,7 @@ interface EditProfileDialogProps {
   readonly onSubmit: () => void;
   readonly manager: Manager;
   readonly editPhone: string;
-  readonly editSkypeId: string | null;
   readonly onPhoneChange: (value: string) => void;
-  readonly onSkypeIdChange: (value: string) => void;
   readonly updateLoading: boolean;
 }
 
@@ -75,9 +73,7 @@ function EditProfileDialog({
   onSubmit,
   manager,
   editPhone,
-  editSkypeId,
   onPhoneChange,
-  onSkypeIdChange,
   updateLoading,
 }: Readonly<EditProfileDialogProps>) {
   const t = useTranslations("dashboard.managersDirectory");
@@ -94,12 +90,6 @@ function EditProfileDialog({
             value={editPhone}
             onChange={e => onPhoneChange(e.target.value)}
             placeholder={t("fields.phone")}
-            fullWidth
-          />
-          <Input
-            value={editSkypeId ?? ""}
-            onChange={e => onSkypeIdChange(e.target.value)}
-            placeholder={t("fields.skypeId")}
             fullWidth
           />
         </StyledEditField>
@@ -217,7 +207,6 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [editPhone, setEditPhone] = useState(manager.phone);
-  const [editSkypeId, setEditSkypeId] = useState(manager.skypeId);
 
   const [updateProfile, { loading: updateLoading }] = useMutation(updateManagerProfileMutationDocument);
 
@@ -232,7 +221,6 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
   const handleEditClick = () => {
     handleMenuClose();
     setEditPhone(manager.phone);
-    setEditSkypeId(manager.skypeId);
     setEditDialogOpen(true);
   };
 
@@ -245,7 +233,7 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
     executeManagerUpdate(
       updateProfile,
       manager.staffProfileId,
-      { phone: editPhone || null, skypeId: editSkypeId || null } as UpdateManagerProfileInput,
+      { phone: editPhone || null, status: null },
       () => setEditDialogOpen(false),
       "Manager profile updated",
       { staffProfileId: manager.staffProfileId }
@@ -287,9 +275,7 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
         onSubmit={handleEditSubmit}
         manager={manager}
         editPhone={editPhone}
-        editSkypeId={editSkypeId}
         onPhoneChange={setEditPhone}
-        onSkypeIdChange={setEditSkypeId}
         updateLoading={updateLoading}
       />
 
