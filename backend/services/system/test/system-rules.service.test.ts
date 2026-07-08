@@ -33,7 +33,13 @@ describe("SystemRulesService.assertLeaveQuotaAvailable", () => {
     testLogger.info("Testing assertLeaveQuotaAvailable with no usage...");
     await runInRollback(async tx => {
       const { teacher } = await setupTeacher(tx);
-      await SystemRulesService.assertLeaveQuotaAvailable(teacher.id, "en", tx);
+      let errorThrown: unknown = null;
+      try {
+        await SystemRulesService.assertLeaveQuotaAvailable(teacher.id, "en", tx);
+      } catch (error) {
+        errorThrown = error;
+      }
+      expect(errorThrown).toBeNull();
     });
     testLogger.info("assertLeaveQuotaAvailable passes with no usage.");
   });
@@ -48,7 +54,13 @@ describe("SystemRulesService.assertLeaveQuotaAvailable", () => {
         periodMonth: currentMonth,
         usedCount: 1,
       });
-      await SystemRulesService.assertLeaveQuotaAvailable(teacher.id, "en", tx);
+      let errorThrown: unknown = null;
+      try {
+        await SystemRulesService.assertLeaveQuotaAvailable(teacher.id, "en", tx);
+      } catch (error) {
+        errorThrown = error;
+      }
+      expect(errorThrown).toBeNull();
     });
     testLogger.info("assertLeaveQuotaAvailable passes with usage below max.");
   });
@@ -128,7 +140,13 @@ describe("SystemRulesService.assertLeaveQuotaAvailable", () => {
         usedCount: 2,
       });
 
-      await SystemRulesService.assertLeaveQuotaAvailable(teacher.id, "en", tx);
+      let errorThrown: unknown = null;
+      try {
+        await SystemRulesService.assertLeaveQuotaAvailable(teacher.id, "en", tx);
+      } catch (error) {
+        errorThrown = error;
+      }
+      expect(errorThrown).toBeNull();
     });
     testLogger.info("assertLeaveQuotaAvailable passes with different period.");
   });

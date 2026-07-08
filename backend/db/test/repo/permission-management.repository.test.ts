@@ -9,7 +9,10 @@ import { createTestPermission } from "../entity-setup";
 import { createTestUser, runInRollback } from "../test-utils";
 
 function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
-  test(name, () => runInRollback(fn));
+  test(name, async () => {
+    expect(typeof fn).toBe("function");
+    await runInRollback(fn);
+  });
 }
 
 function testRepoError(name: string, operation: () => Promise<unknown>) {
@@ -295,25 +298,25 @@ describe("PermissionManagementRepository", () => {
 
       // Initial list should be empty
       const listEmpty = await PermissionManagementRepository.listUsersInGroup(group.id, tx);
-      expect(listEmpty.length).toBe(0);
+      expect(listEmpty).toHaveLength(0);
 
       // Bulk assign
       await PermissionManagementRepository.bulkAssignUsersToGroup([user1.id, user2.id], group.id, undefined, tx);
 
       const listAssigned = await PermissionManagementRepository.listUsersInGroup(group.id, tx);
-      expect(listAssigned.length).toBe(2);
+      expect(listAssigned).toHaveLength(2);
       expect(listAssigned.map(u => u.id)).toContain(user1.id);
       expect(listAssigned.map(u => u.id)).toContain(user2.id);
 
       // Bulk assign again (onConflictDoNothing testing)
       await PermissionManagementRepository.bulkAssignUsersToGroup([user1.id], group.id, undefined, tx);
       const listAssignedAgain = await PermissionManagementRepository.listUsersInGroup(group.id, tx);
-      expect(listAssignedAgain.length).toBe(2);
+      expect(listAssignedAgain).toHaveLength(2);
 
       // Bulk revoke
       await PermissionManagementRepository.bulkRevokeUsersFromGroup([user1.id], group.id, tx);
       const listRevoked = await PermissionManagementRepository.listUsersInGroup(group.id, tx);
-      expect(listRevoked.length).toBe(1);
+      expect(listRevoked).toHaveLength(1);
       expect(listRevoked[0].id).toBe(user2.id);
     });
 
@@ -331,7 +334,7 @@ describe("PermissionManagementRepository", () => {
       await PermissionManagementRepository.bulkAssignUsersToGroup([], group.id, undefined, tx);
       await PermissionManagementRepository.bulkRevokeUsersFromGroup([], group.id, tx);
       const list = await PermissionManagementRepository.listUsersInGroup(group.id, tx);
-      expect(list.length).toBe(0);
+      expect(list).toHaveLength(0);
     });
 
     testRepoError("listUsersInGroup should throw on database error", () =>
@@ -364,7 +367,7 @@ describe("PermissionManagementRepository", () => {
 
       // Initial overrides should be empty
       const initial = await PermissionManagementRepository.getUserOverrides(user.id, tx);
-      expect(initial.length).toBe(0);
+      expect(initial).toHaveLength(0);
 
       // Set overrides
       await PermissionManagementRepository.setUserOverrides(
@@ -378,7 +381,7 @@ describe("PermissionManagementRepository", () => {
       );
 
       const overrides = await PermissionManagementRepository.getUserOverrides(user.id, tx);
-      expect(overrides.length).toBe(2);
+      expect(overrides).toHaveLength(2);
 
       const o1 = overrides.find(o => o.permissionId === perm1.id);
       expect(o1).toBeDefined();
@@ -397,7 +400,7 @@ describe("PermissionManagementRepository", () => {
       );
 
       const finalOverrides = await PermissionManagementRepository.getUserOverrides(user.id, tx);
-      expect(finalOverrides.length).toBe(1);
+      expect(finalOverrides).toHaveLength(1);
       expect(finalOverrides[0].permissionId).toBe(perm1.id);
       expect(finalOverrides[0].state).toBe(OverrideState.DENIED);
     });
@@ -449,7 +452,7 @@ describe("PermissionManagementRepository", () => {
       const tempUser = await createTestUser(tx);
       await PermissionManagementRepository.setUserOverrides(tempUser.id, [], undefined, tx);
       const overrides = await PermissionManagementRepository.getUserOverrides(tempUser.id, tx);
-      expect(overrides.length).toBe(0);
+      expect(overrides).toHaveLength(0);
 
       // Bulk assign
       await PermissionManagementRepository.bulkAssignUsersToGroup([tempUser.id], group.id, undefined, tx);

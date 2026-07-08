@@ -23,7 +23,12 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
 
 function complaintTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    const didRun = { value: false };
+    await runInRollback(async tx => {
+      await fn(tx);
+      didRun.value = true;
+    });
+    expect(didRun.value).toBeTrue();
   });
 }
 
@@ -418,7 +423,7 @@ describe("ComplaintRepository — getUnansweredComplaints", () => {
     await insertTimedComplaintPair(tx, parent.id, "Earlier unanswered", "Later unanswered", 120000);
     const result = await ComplaintRepository.getUnansweredComplaints(100, tx);
     const filtered = result.filter(r => r.body === "Earlier unanswered" || r.body === "Later unanswered");
-    expect(filtered.length).toBe(2);
+    expect(filtered).toHaveLength(2);
     expect(filtered[0].body).toBe("Later unanswered");
     expect(filtered[1].body).toBe("Earlier unanswered");
   });
@@ -447,7 +452,7 @@ describe("ComplaintRepository — getComplaintFiles", () => {
 
     const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);
 
-    expect(result.length).toBe(2);
+    expect(result).toHaveLength(2);
     expect(result.some(f => f.publicUrl === file1.path)).toBeTrue();
     expect(result.some(f => f.publicUrl === file2.path)).toBeTrue();
     expect(result.every(f => f.usageType === "attachment")).toBeTrue();
@@ -483,7 +488,7 @@ describe("ComplaintRepository — getComplaintFiles", () => {
 
     const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);
 
-    expect(result.length).toBe(1);
+    expect(result).toHaveLength(1);
     expect(result[0].fileId).toBe(file.id);
     expect(result[0].publicUrl).toBe(file.path);
     expect(result[0].usageType).toBe("evidence");

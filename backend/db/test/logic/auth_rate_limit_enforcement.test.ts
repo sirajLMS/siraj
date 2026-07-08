@@ -78,14 +78,14 @@ describe("Authentication Rate Limiting Enforcement", () => {
 
     // Record should still exist in DB
     const records = await db.select().from(authRateLimits).where(eq(authRateLimits.email, email));
-    expect(records.length).toBe(1);
+    expect(records).toHaveLength(1);
 
     // Run cleanup
     await RateLimitRepository.cleanupExpired();
 
     // Records should be gone
     const recordsAfter = await db.select().from(authRateLimits).where(eq(authRateLimits.email, email));
-    expect(recordsAfter.length).toBe(0);
+    expect(recordsAfter).toHaveLength(0);
 
     // Verify password reset token cleanup
     const tokenEmail = `${CLEANUP_PREFIX}token-${randomUUID()}@example.com`;
@@ -98,7 +98,7 @@ describe("Authentication Rate Limiting Enforcement", () => {
 
     await RateLimitRepository.cleanupExpired();
     const tokens = await db.select().from(passwordResetTokens).where(eq(passwordResetTokens.email, tokenEmail));
-    expect(tokens.length).toBe(0);
+    expect(tokens).toHaveLength(0);
 
     testLogger.info("Security data cleanup test passed.");
   });

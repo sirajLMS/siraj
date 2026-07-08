@@ -93,6 +93,15 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
     teacherUserId = r.teacherUserId;
     parentUserId = r.parentUserId;
     parentId = r.parentId;
+
+    expect(superAdminToken).toBeTruthy();
+    expect(teacherToken).toBeTruthy();
+    expect(studentId).toBeTruthy();
+    expect(teacherId).toBeTruthy();
+    expect(studentUserId).toBeTruthy();
+    expect(teacherUserId).toBeTruthy();
+    expect(parentUserId).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("teacherDashboard query returns rows scoped to teacher", async () => {

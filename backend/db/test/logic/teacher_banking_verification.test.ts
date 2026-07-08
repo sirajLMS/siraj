@@ -20,7 +20,7 @@ async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
     .values({
       name: "Banking Teacher",
       email: `teacher-banking-${randomUUID()}@example.com`,
-      password: "password",
+      password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })
@@ -34,7 +34,7 @@ async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
     .values({
       name: "Banking Admin",
       email: `admin-banking-${randomUUID()}@example.com`,
-      password: "password",
+      password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })
@@ -88,7 +88,7 @@ describe("Teacher Banking Verification & Payments", () => {
           },
           tx
         );
-        expect(true).toBe(false);
+        throw new Error("Expected createTeacherPayment to throw for unverified banking details");
       } catch (error) {
         const err = error as Error;
         expect(err.message).toContain("No verified active banking details");

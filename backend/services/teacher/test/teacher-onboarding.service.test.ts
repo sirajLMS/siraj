@@ -1,4 +1,5 @@
 import { describe, expect, spyOn, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, TeacherBankingRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -13,7 +14,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
       await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
         name: "Test",
         email: "test@test.com",
-        password: "password123",
+        password: randomUUID(),
         timezone: "UTC",
       });
     } catch (e) {
@@ -37,7 +38,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
         {
           name: "New Teacher",
           email: "newteacher@test.com",
-          password: "password123",
+          password: randomUUID(),
           timezone: "America/New_York",
           nationality: "US",
           phone: "+1234567890",
@@ -73,7 +74,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
       await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
         name: "Dup Teacher",
         email: "existing@test.com",
-        password: "password123",
+        password: randomUUID(),
         timezone: "UTC",
       });
     } catch (e) {
@@ -101,7 +102,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
       await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
         name: "Rollback Teacher",
         email: createdEmail,
-        password: "password123",
+        password: randomUUID(),
         timezone: "UTC",
       });
     } catch (e) {
@@ -137,7 +138,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
           {
             name: "Rollback Teacher",
             email: "rollback@test.com",
-            password: "password123",
+            password: randomUUID(),
             timezone: "UTC",
             beneficiaryName: "John Doe",
             bankName: "Test Bank",

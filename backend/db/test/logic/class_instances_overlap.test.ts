@@ -94,6 +94,17 @@ async function setupTestContext(tx: DBTransaction) {
   return { student1, student2, teacher1, teacher2 };
 }
 
+async function expectOverlapError(fn: () => Promise<unknown>): Promise<Error> {
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  expect(errorCaught).not.toBeNull();
+  return errorCaught as Error;
+}
+
 async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, student2Id: string, teacher1Id: string) {
   // 1. Two non-overlapping classes for the same teacher
   await SchedulingRepository.createClassInstance(
@@ -123,8 +134,8 @@ async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, studen
   );
 
   // 2. Attempt Overlapping Teacher
-  try {
-    await SchedulingRepository.createClassInstance(
+  const teacherError = await expectOverlapError(() =>
+    SchedulingRepository.createClassInstance(
       {
         studentId: student2Id,
         teacherId: teacher1Id,
@@ -135,17 +146,16 @@ async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, studen
         idempotencyKey: randomUUID(),
       },
       tx
-    );
-    expect(true).toBe(false);
-  } catch (error) {
-    expect((error as Error).message).toContain("Teacher is already booked for this time period");
-  }
+    )
+  );
+  expect(teacherError).toBeTruthy();
+  expect(teacherError.message).toContain("Teacher is already booked for this time period");
 }
 
 async function testStudentOverlap(tx: DBTransaction, student1Id: string, teacher2Id: string) {
   // 3. Attempt Overlapping Student
-  try {
-    await SchedulingRepository.createClassInstance(
+  const studentError = await expectOverlapError(() =>
+    SchedulingRepository.createClassInstance(
       {
         studentId: student1Id,
         teacherId: teacher2Id,
@@ -156,11 +166,10 @@ async function testStudentOverlap(tx: DBTransaction, student1Id: string, teacher
         idempotencyKey: randomUUID(),
       },
       tx
-    );
-    expect(true).toBe(false);
-  } catch (error) {
-    expect((error as Error).message).toContain("Student is already booked for this time period");
-  }
+    )
+  );
+  expect(studentError).toBeTruthy();
+  expect(studentError.message).toContain("Student is already booked for this time period");
 }
 
 async function testZoomUrlOverlap(args: {
@@ -187,8 +196,8 @@ async function testZoomUrlOverlap(args: {
     tx
   );
 
-  try {
-    await SchedulingRepository.createClassInstance(
+  const zoomError = await expectOverlapError(() =>
+    SchedulingRepository.createClassInstance(
       {
         studentId: student2Id,
         teacherId: teacher2Id,
@@ -200,11 +209,10 @@ async function testZoomUrlOverlap(args: {
         idempotencyKey: randomUUID(),
       },
       tx
-    );
-    expect(true).toBe(false);
-  } catch (error) {
-    expect((error as Error).message).toContain("Zoom meeting URL is already in use for this time period");
-  }
+    )
+  );
+  expect(zoomError).toBeTruthy();
+  expect(zoomError.message).toContain("Zoom meeting URL is already in use for this time period");
 }
 
 describe("Class Instances Overlap Prevention", () => {

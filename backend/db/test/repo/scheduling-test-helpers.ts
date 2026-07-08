@@ -7,7 +7,7 @@ import { runInRollback } from "../test-utils";
  * Extracted to reduce file size and improve CodeScene scores.
  */
 
-export async function expectRepositoryError(fn: () => Promise<unknown>) {
+export async function expectRepositoryError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
   try {
     await fn();
@@ -15,6 +15,7 @@ export async function expectRepositoryError(fn: () => Promise<unknown>) {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
+  return errorCaught as Error;
 }
 
 /**

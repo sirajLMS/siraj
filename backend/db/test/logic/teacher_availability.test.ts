@@ -14,7 +14,7 @@ async function createTestUser(tx: DBTransaction, name: string, emailPrefix: stri
     .values({
       name,
       email: `${emailPrefix}-${randomUUID()}@example.com`,
-      password: "password",
+      password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })
@@ -122,12 +122,16 @@ async function expectBookingToFail(args: {
   expectedError: string;
 }) {
   const { tx, studentId, teacherId, start, end, expectedError } = args;
+  let bookingError: Error | null = null;
   try {
     await createTestClassInstance({ tx, studentId, teacherId, start, end });
-    expect(true).toBe(false);
   } catch (error) {
-    const err = error as Error;
-    expect(err.message).toContain(expectedError);
+    bookingError = error as Error;
+  }
+  if (bookingError) {
+    expect(bookingError.message).toContain(expectedError);
+  } else {
+    throw new Error(`Expected booking to fail with error containing "${expectedError}", but it succeeded`);
   }
 }
 

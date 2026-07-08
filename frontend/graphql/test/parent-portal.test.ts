@@ -4,7 +4,7 @@ import {
   parentHandbookUrlQueryDocument,
   parentOwnProfileQueryDocument,
 } from "../sharedDocuments/parent-portal.documents";
-import { assertOperationDenied, loginDemoUser } from "./helpers";
+import { loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -47,14 +47,35 @@ describe("GraphQL Parent Portal Integration Tests", () => {
   });
 
   test("parentAssignedStudents — denied for teacher_default", async () => {
-    await assertOperationDenied("teacher_default", "query", parentAssignedStudentsQueryDocument, {});
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.query({
+      query: parentAssignedStudentsQueryDocument,
+      context: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.parentAssignedStudents).toBeNull();
   });
 
   test("parentOwnProfile — denied for teacher_default", async () => {
-    await assertOperationDenied("teacher_default", "query", parentOwnProfileQueryDocument, {});
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.query({
+      query: parentOwnProfileQueryDocument,
+      context: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.parentOwnProfile).toBeNull();
   });
 
   test("parentHandbookUrl — denied for teacher_default", async () => {
-    await assertOperationDenied("teacher_default", "query", parentHandbookUrlQueryDocument, {});
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.query({
+      query: parentHandbookUrlQueryDocument,
+      context: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.parentHandbookUrl).toBeNull();
   });
 });

@@ -58,7 +58,7 @@ describe("BillingRepository.getUnpaidInvoicesSummary", () => {
 
       expect(result.id).toBe("unpaid-invoices-summary");
       expect(result.totalOverdueInvoices).toBe(beforeResult.totalOverdueInvoices);
-      expect(result.items.length).toBe(beforeResult.items.length);
+      expect(result.items).toHaveLength(beforeResult.items.length);
     });
   });
 
@@ -124,7 +124,7 @@ describe("BillingRepository.getUnpaidInvoicesSummary", () => {
       const result = await BillingRepository.getUnpaidInvoicesSummary(tx);
 
       expect(result.totalOverdueInvoices).toBe(beforeResult.totalOverdueInvoices + 2);
-      expect(result.items.length).toBe(beforeResult.items.length + 2);
+      expect(result.items).toHaveLength(beforeResult.items.length + 2);
 
       const parent1Item = result.items.find(i => i.id === parent1.id);
       const parent2Item = result.items.find(i => i.id === parent2.id);
@@ -149,7 +149,7 @@ describe("BillingRepository — getInvoicesForParent", () => {
 
       const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
 
-      expect(result.rows.length).toBe(2);
+      expect(result.rows).toHaveLength(2);
       expect(result.totalCount).toBe(2);
       expect(result.pageInfo).toBeNull();
 

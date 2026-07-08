@@ -70,6 +70,7 @@ describe("GraphQL Schedule Integration Tests", () => {
 
   test("provision test entities and super admin", async () => {
     const r = await loginAndProvision("SchedTest");
+    expect(r.adminToken).not.toBe("");
     adminToken = r.adminToken;
     teacherToken = r.teacherToken;
     teacherId = r.teacherId;
@@ -80,11 +81,13 @@ describe("GraphQL Schedule Integration Tests", () => {
     parentId = r.parentId;
 
     const sa = await provisionTestSuperAdmin(adminToken, "SchedTestSA");
+    expect(sa.token).not.toBe("");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 
     // Provision a second teacher for cross-access tests
     const secondEntities = await provisionTestEntities(adminToken, "SchedTest2");
+    expect(secondEntities.teacherId).not.toBe("");
     secondTeacherId = secondEntities.teacherId;
     secondStudentId = secondEntities.studentId;
     secondStudentUserId = secondEntities.studentUserId;
@@ -219,6 +222,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       weekDate: testDate,
     });
     verifyWeeklyScheduleGrid(data.teacherWeeklyScheduleGrid, teacherId);
+    expect(data.teacherWeeklyScheduleGrid).toBeDefined();
   });
 
   test("teacherWeeklyScheduleGrid returns own schedule for teacher", async () => {
@@ -227,6 +231,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       weekDate: testDate,
     });
     verifyWeeklyScheduleGrid(data.teacherWeeklyScheduleGrid);
+    expect(data.teacherWeeklyScheduleGrid).toBeDefined();
   });
 
   test("teacherWeeklyScheduleGrid denies cross-teacher access", async () => {
@@ -263,14 +268,17 @@ describe("GraphQL Schedule Integration Tests", () => {
       weekDate: testDate,
     });
     verifyWorkloadMetrics(data.teacherWorkloadMetrics);
+    expect(data.teacherWorkloadMetrics).toBeDefined();
   });
 
   test("createRecurringClass denied for teacher role", async () => {
     await assertRecurringClassDenied(teacherToken, [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }]);
+    expect(teacherToken).not.toBe("");
   });
 
   test("createRecurringClass denied for invalid input (no days)", async () => {
     await assertRecurringClassDenied(superAdminToken, []);
+    expect(superAdminToken).not.toBe("");
   });
 
   // DST Migration tests
@@ -369,5 +377,6 @@ describe("GraphQL Schedule Integration Tests", () => {
       parentId: secondParentId,
     });
     await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    expect(superAdminToken).not.toBe("");
   });
 });

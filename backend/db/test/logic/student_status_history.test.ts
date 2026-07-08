@@ -8,6 +8,22 @@ import { studentStatusHistory, students } from "../../schema";
 import { createTestUser, setupStudent } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
+async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  expect(errorCaught).not.toBeNull();
+  return errorCaught as Error;
+}
+
+function getFullErrorMessage(error: Error): string {
+  const cause = error.cause as { message?: string } | undefined;
+  return `${error.message} ${cause?.message ?? ""}`;
+}
+
 describe("Student Status Transitions & History", () => {
   test("Initial student creation logs status history with null old status", async () => {
     testLogger.info("Testing initial status history log...");
@@ -24,7 +40,7 @@ describe("Student Status Transitions & History", () => {
         .from(studentStatusHistory)
         .where(eq(studentStatusHistory.studentId, student.id))) as StudentStatusHistorySelectType[];
 
-      expect(history.length).toBe(1);
+      expect(history).toHaveLength(1);
       expect(history[0].oldStatus).toBeNull();
       expect(history[0].newStatus).toBe(StudentStatus.ON_TRIAL);
     });
@@ -52,7 +68,7 @@ describe("Student Status Transitions & History", () => {
         .where(eq(studentStatusHistory.studentId, student.id))
         .orderBy(studentStatusHistory.createdAt)) as StudentStatusHistorySelectType[];
 
-      expect(history.length).toBe(2);
+      expect(history).toHaveLength(2);
       expect(history[1].oldStatus).toBe(StudentStatus.ON_TRIAL);
       expect(history[1].newStatus).toBe(StudentStatus.REGULAR);
     });
@@ -69,14 +85,10 @@ describe("Student Status Transitions & History", () => {
         { name: "Student", status: StudentStatus.REGULAR }
       );
 
-      try {
-        await tx.update(students).set({ status: StudentStatus.ON_TRIAL }).where(eq(students.id, student.id));
-        expect(true).toBe(false); // Should not reach here
-      } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("Invalid status transition: REGULAR to ON_TRIAL");
-      }
+      const error = await expectRepoError(() =>
+        tx.update(students).set({ status: StudentStatus.ON_TRIAL }).where(eq(students.id, student.id))
+      );
+      expect(getFullErrorMessage(error)).toContain("Invalid status transition: REGULAR to ON_TRIAL");
     });
     testLogger.info("Invalid status transition enforcement test passed.");
   });
@@ -104,7 +116,7 @@ describe("Student Status Transitions & History", () => {
         .from(studentStatusHistory)
         .where(eq(studentStatusHistory.studentId, student.id))) as StudentStatusHistorySelectType[];
 
-      expect(history.length).toBe(1);
+      expect(history).toHaveLength(1);
       expect(history[0].changedByUserId).toBe(userA.id);
     });
     testLogger.info("Actor capture in status history test passed.");

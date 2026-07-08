@@ -72,6 +72,10 @@ describe("GraphQL Class Session Integration Tests", () => {
 
   test("login as academy_admin and teacher", async () => {
     const r = await loginAndProvision("SessionIntTest");
+    expect(r.adminToken).toBeTruthy();
+    expect(r.teacherToken).toBeTruthy();
+    expect(r.studentId).toBeTruthy();
+    expect(r.teacherId).toBeTruthy();
     adminToken = r.adminToken;
     teacherToken = r.teacherToken;
     studentId = r.studentId;

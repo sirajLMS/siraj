@@ -1,5 +1,5 @@
-import { readMigrationFiles } from "drizzle-orm/migrator";
 import { sql } from "drizzle-orm";
+import { readMigrationFiles } from "drizzle-orm/migrator";
 import { db } from "@/backend/db/drizzleDb";
 import logger from "@/backend/lib/logger";
 
@@ -24,7 +24,7 @@ async function isMigrationApplied(migrationName: string): Promise<boolean> {
       return queryHasRows(sql`SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm' LIMIT 1`);
     case "20260707021730_easy_komodo":
       return queryHasRows(
-        sql`SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users' LIMIT 1`,
+        sql`SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users' LIMIT 1`
       );
     case "20260707021731_combined_custom_logic":
       return queryHasRows(sql`SELECT 1 FROM pg_proc WHERE proname = 'current_user_id' LIMIT 1`);
@@ -66,7 +66,7 @@ async function ensureMigrationsTable(): Promise<void> {
 
 async function getRecordedNames(): Promise<Set<string>> {
   const result = await db.execute(
-    sql`SELECT name FROM ${sql.identifier(MIGRATIONS_SCHEMA)}.${sql.identifier(MIGRATIONS_TABLE)} WHERE name IS NOT NULL`,
+    sql`SELECT name FROM ${sql.identifier(MIGRATIONS_SCHEMA)}.${sql.identifier(MIGRATIONS_TABLE)} WHERE name IS NOT NULL`
   );
   return new Set(result.rows.map(row => String(row.name)));
 }

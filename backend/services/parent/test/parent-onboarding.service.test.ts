@@ -1,4 +1,5 @@
 import { describe, expect, spyOn, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -13,7 +14,7 @@ describe("ParentOnboardingService.createParent", () => {
       await ParentOnboardingService.createParent("00000000-0000-0000-0000-000000000000", {
         name: "Test",
         email: "test@test.com",
-        password: "password123",
+        password: randomUUID(),
       });
     } catch (e) {
       error = e;
@@ -35,7 +36,7 @@ describe("ParentOnboardingService.createParent", () => {
         {
           name: "New Parent",
           email: "newparent@test.com",
-          password: "password123",
+          password: randomUUID(),
           phone: "+1234567890",
           invoiceType: "MONTHLY",
           feeAmount: "500.00",
@@ -66,7 +67,7 @@ describe("ParentOnboardingService.createParent", () => {
       await ParentOnboardingService.createParent("00000000-0000-0000-0000-000000000000", {
         name: "Dup Parent",
         email: "existing@test.com",
-        password: "password123",
+        password: randomUUID(),
       });
     } catch (e) {
       error = e;
@@ -93,7 +94,7 @@ describe("ParentOnboardingService.createParent", () => {
       await ParentOnboardingService.createParent("00000000-0000-0000-0000-000000000000", {
         name: "Rollback Parent",
         email: createdEmail,
-        password: "password123",
+        password: randomUUID(),
       });
     } catch (e) {
       error = e;

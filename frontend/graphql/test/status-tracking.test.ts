@@ -3,7 +3,6 @@ import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "../sharedDocuments/schedule.documents";
 import { changeStudentStatusMutationDocument } from "../sharedDocuments/student-lifecycle.documents";
 import {
-  assertOperationDenied,
   authenticatedRequest,
   cleanupTestSuperAdmin,
   loginDemoUser,
@@ -74,19 +73,27 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   });
 
   test("teacher role is denied (no SCHEDULE_VIEW_ALL or DASHBOARD_VIEW_METRICS)", async () => {
-    await assertOperationDenied("teacher_default", "query", statusTrackingScheduleQueryDocument, {
-      date: testDate,
-      search: null,
-      viewerTimezone: null,
+    const teacherToken = await loginDemoUser("teacher_default");
+    const result = await testClient.query({
+      query: statusTrackingScheduleQueryDocument,
+      variables: { date: testDate, search: null, viewerTimezone: null },
+      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
     });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.statusTrackingSchedule).toBeFalsy();
   });
 
   test("parent role is denied", async () => {
-    await assertOperationDenied("parent_default", "query", statusTrackingScheduleQueryDocument, {
-      date: testDate,
-      search: null,
-      viewerTimezone: null,
+    const parentToken = await loginDemoUser("parent_default");
+    const result = await testClient.query({
+      query: statusTrackingScheduleQueryDocument,
+      variables: { date: testDate, search: null, viewerTimezone: null },
+      context: { headers: { Authorization: `Bearer ${parentToken}` } },
     });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.statusTrackingSchedule).toBeFalsy();
   });
 
   test("super_admin can also access statusTrackingSchedule", async () => {

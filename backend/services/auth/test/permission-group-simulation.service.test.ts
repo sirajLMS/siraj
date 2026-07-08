@@ -62,10 +62,12 @@ describe("PermissionGroupSimulationService.assertCanSimulateGroup", () => {
 
   test("allows super admin for valid group slug", async () => {
     const actorSpy = mockSuperAdminActor();
-    const groupSpy = mockGroupContext();
+    const groupContextSpy = mockGroupContext();
     await PermissionGroupSimulationService.assertCanSimulateGroup(ACTOR_ID, "teacher_default", locale);
+    expect(actorSpy).toHaveBeenCalledWith(ACTOR_ID);
+    expect(groupContextSpy).toHaveBeenCalledWith("teacher_default", locale);
     actorSpy.mockRestore();
-    groupSpy.mockRestore();
+    groupContextSpy.mockRestore();
   });
 
   test("rejects simulating a group the actor already has", async () => {

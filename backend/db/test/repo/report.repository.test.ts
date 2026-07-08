@@ -7,7 +7,7 @@ import { runInRollback } from "../test-utils";
 
 function reportRepoTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    await expect(runInRollback(fn)).resolves.toBeUndefined();
   });
 }
 
@@ -47,8 +47,7 @@ async function expectSingleRowAggregatedReport(
 
   const results = await ReportRepository.generateAttendanceReport(filters, tx);
 
-  expect(results).toBeArray();
-  expect(results.length).toBe(1);
+  expect(results).toHaveLength(1);
 
   const row = results[0];
   expect(row.groupKey).toBe(expectedGroupKey);
@@ -129,8 +128,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
 
     // Assert
-    expect(results).toBeArray();
-    expect(results.length).toBe(4);
+    expect(results).toHaveLength(4);
 
     // Sort results by groupKey to make tests deterministic
     const sorted = [...results].sort((a, b) => a.groupKey.localeCompare(b.groupKey));
@@ -203,7 +201,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
 
     // Assert
-    expect(results.length).toBe(1);
+    expect(results).toHaveLength(1);
     expect(results[0].groupKey).toBe(teacher.id);
     expect(results[0].paidEGP).toBe(250); // only aggregates filtered teacher's records
   });
@@ -223,8 +221,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
 
     // Assert
-    expect(results).toBeArray();
-    expect(results.length).toBe(0);
+    expect(results).toHaveLength(0);
   });
 
   reportRepoTest("aggregates and groups correctly by STUDENT", async tx => {
@@ -234,8 +231,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
 
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
 
-    expect(results).toBeArray();
-    expect(results.length).toBe(1);
+    expect(results).toHaveLength(1);
 
     const row = results[0];
     expect(row.groupKey).toBe(student.id);

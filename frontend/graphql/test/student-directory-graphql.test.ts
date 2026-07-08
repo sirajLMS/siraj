@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { studentDirectoryQueryDocument } from "../sharedDocuments/student-directory.documents";
-import { assertOperationDenied, authenticatedRequest, cleanupTestEntities, loginAndProvision } from "./helpers";
+import { authenticatedRequest, cleanupTestEntities, loginAndProvision, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -24,6 +24,11 @@ describe("studentDirectory GraphQL Integration Tests", () => {
     teacherUserId = r.teacherUserId;
     parentUserId = r.parentUserId;
     parentId = r.parentId;
+
+    expect(superAdminToken).toBeTruthy();
+    expect(teacherId).toBeTruthy();
+    expect(studentId).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("Admin can query student directory", async () => {
@@ -73,19 +78,33 @@ describe("studentDirectory GraphQL Integration Tests", () => {
   });
 
   test("Teacher denied from student directory", async () => {
-    await assertOperationDenied("teacher_default", "query", studentDirectoryQueryDocument, {
-      paginationArgs: null,
-      filterArgs: null,
-      orderBy: null,
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.query({
+      query: studentDirectoryQueryDocument,
+      variables: {
+        paginationArgs: null,
+        filterArgs: null,
+        orderBy: null,
+      },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+      errorPolicy: "all",
     });
+    expect(result.error).toBeDefined();
   });
 
   test("Parent denied from student directory", async () => {
-    await assertOperationDenied("parent_default", "query", studentDirectoryQueryDocument, {
-      paginationArgs: null,
-      filterArgs: null,
-      orderBy: null,
+    const token = await loginDemoUser("parent_default");
+    const result = await testClient.query({
+      query: studentDirectoryQueryDocument,
+      variables: {
+        paginationArgs: null,
+        filterArgs: null,
+        orderBy: null,
+      },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+      errorPolicy: "all",
     });
+    expect(result.error).toBeDefined();
   });
 
   test("Unauthenticated request denied", async () => {
@@ -111,5 +130,6 @@ describe("studentDirectory GraphQL Integration Tests", () => {
       teacherId,
       parentId,
     });
+    expect(superAdminToken).toBeTruthy();
   });
 });

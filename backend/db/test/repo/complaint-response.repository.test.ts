@@ -22,7 +22,8 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
 
 function responseTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    const ran = await runInRollback(fn);
+    expect(ran).not.toBeNull();
   });
 }
 
@@ -166,7 +167,7 @@ describe("ComplaintResponseRepository — getResponsesByComplaint", () => {
 
     const result = await ComplaintResponseRepository.getResponsesByComplaint(complaint.id, tx);
 
-    expect(result.length).toBe(2);
+    expect(result).toHaveLength(2);
     expect(result[0].body).toBe("Later response");
     expect(result[1].body).toBe("Earlier response");
     expect(result[0].responderName).toBe("GetResp Parent");
@@ -202,7 +203,7 @@ describe("ComplaintResponseRepository — getResponsesByComplaint", () => {
 
     const result = await ComplaintResponseRepository.getResponsesByComplaint(complaint.id, tx);
 
-    expect(result.length).toBe(1);
+    expect(result).toHaveLength(1);
     expect(result[0].responderName).toBeNull();
     expect(result[0].body).toBe("Anonymous response");
   });

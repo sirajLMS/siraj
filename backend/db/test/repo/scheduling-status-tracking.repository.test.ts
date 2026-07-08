@@ -470,7 +470,7 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         });
 
         const result = await SchedulingRepository.getStudentFutureClasses(student.id, FROM_DATE, tx);
-        expect(result.length).toBe(1);
+        expect(result).toHaveLength(1);
         expect(typeof result[0].id).toBe("string");
         expect(typeof result[0].executionState).toBe("string");
         expect(result[0].scheduledStartAt).toBeInstanceOf(Date);

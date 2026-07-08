@@ -10,7 +10,7 @@ import { runInRollback } from "../test-utils";
 
 function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    await expect(runInRollback(fn)).resolves.toBeUndefined();
   });
 }
 
@@ -162,7 +162,7 @@ describe("StudentRepository.getDirectoryRows", () => {
       };
 
       const result = await StudentRepository.getDirectoryRows(null, filters as StudentFilterArgs, null, tx);
-      expect(result.rows.length).toBe(0);
+      expect(result.rows).toHaveLength(0);
       expect(result.totalCount).toBe(0);
     });
   });

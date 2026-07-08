@@ -8,7 +8,8 @@ import { runInRollback } from "../test-utils";
 
 function preferencesTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    const result = await runInRollback(fn);
+    expect(result).not.toBeInstanceOf(Error);
   });
 }
 

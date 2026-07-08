@@ -377,7 +377,7 @@ describe("ParentRepository — non-transactional coverage fallback", () => {
     expect(student).toBeNull();
 
     const studentsList = await ParentRepository.getAssociatedStudents(fakeId);
-    expect(studentsList.length).toBe(0);
+    expect(studentsList).toHaveLength(0);
 
     const directory = await ParentRepository.getParentDirectory({});
     expect(directory.rows.length).toBeGreaterThanOrEqual(0);

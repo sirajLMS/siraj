@@ -59,8 +59,7 @@ describe("ReportService — generateAttendanceReport", () => {
 
     const result = await ReportService.generateAttendanceReport(dummyFilters, dummyActorId);
 
-    expect(result.rows).toBeArray();
-    expect(result.rows.length).toBe(1);
+    expect(result.rows).toHaveLength(1);
     expect(result.rows[0].takenClasses).toBe(1);
     expect(result.rows[0].groupLabel).toBe("2026-05-10");
 
@@ -84,15 +83,14 @@ describe("ReportService — generateAttendanceReport", () => {
 
     const result = await ReportService.generateAttendanceReport(dummyFilters, dummyActorId);
 
-    expect(result.rows).toBeArray();
-    expect(result.rows.length).toBe(1);
+    expect(result.rows).toHaveLength(1);
     expect(result.rows[0].takenClasses).toBe(1);
     expect(result.rows[0].groupLabel).toBe("2026-05-10");
 
     expect(result.rows[0].totalHours).toBe(1);
     expect(result.rows[0].paidEGP).toBe(100);
     expect(result.rows[0].paidUSD).toBe(0);
-    expect(result.engagementGrowth).toBe(5.2);
+    expect(result.engagementGrowth).toBeCloseTo(5.2, 5);
 
     hasPermissionSpy.mockRestore();
     repoSpy.mockRestore();

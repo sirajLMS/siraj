@@ -1,13 +1,8 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/graphql/sharedDocuments/manager-onboarding.documents";
-import {
-  assertOperationDenied,
-  authenticatedRequest,
-  cleanupTestSuperAdmin,
-  loginDemoUser,
-  provisionTestSuperAdmin,
-} from "./helpers";
+import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const createMinimalManagerInput = (
@@ -19,7 +14,7 @@ const createMinimalManagerInput = (
 ) => ({
   name: overrides?.name ?? "Test Manager",
   email: overrides?.email ?? `test_manager_${Date.now()}@test.com`,
-  password: "TestPassword123!",
+  password: randomUUID(),
   accountType: overrides?.accountType ?? ManagerAccountType.Manager,
   phone: null,
 });
@@ -36,6 +31,9 @@ describe("Manager Onboarding GraphQL API", () => {
     const sa = await provisionTestSuperAdmin(existingSaToken, "mgrOnboard");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
+
+    expect(superAdminToken).toBeTruthy();
+    expect(superAdminUserId).toBeTruthy();
   });
 
   test("Super Admin can create manager with admin type", async () => {
@@ -66,15 +64,27 @@ describe("Manager Onboarding GraphQL API", () => {
   });
 
   test("Admin denied creating manager", async () => {
-    await assertOperationDenied("academy_admin", "mutate", createManagerMutationDocument, {
-      input: createMinimalManagerInput(),
+    const token = await loginDemoUser("academy_admin");
+    const { testClient } = await import("./testClient");
+    const result = await testClient.mutate({
+      mutation: createManagerMutationDocument,
+      variables: { input: createMinimalManagerInput() },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+      errorPolicy: "all",
     });
+    expect(result.error).toBeDefined();
   });
 
   test("Teacher denied creating manager", async () => {
-    await assertOperationDenied("teacher_default", "mutate", createManagerMutationDocument, {
-      input: createMinimalManagerInput(),
+    const token = await loginDemoUser("teacher_default");
+    const { testClient } = await import("./testClient");
+    const result = await testClient.mutate({
+      mutation: createManagerMutationDocument,
+      variables: { input: createMinimalManagerInput() },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+      errorPolicy: "all",
     });
+    expect(result.error).toBeDefined();
   });
 
   test("Unauthenticated denied creating manager", async () => {

@@ -209,7 +209,7 @@ describe("ComplaintService", () => {
       const files = await ComplaintService.getComplaintFiles(MOCK_ACTOR_ID, MOCK_COMPLAINT_ID);
 
       expect(files).toBeArray();
-      expect(files.length).toBe(1);
+      expect(files).toHaveLength(1);
     });
 
     test("admin can access any complaint files", async () => {

@@ -1,13 +1,8 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { CountryCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-onboarding.documents";
-import {
-  assertOperationDenied,
-  authenticatedRequest,
-  cleanupTestSuperAdmin,
-  loginDemoUser,
-  provisionTestSuperAdmin,
-} from "./helpers";
+import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const createMinimalTeacherInput = (
@@ -18,7 +13,7 @@ const createMinimalTeacherInput = (
 ) => ({
   name: overrides?.name ?? "Test Teacher",
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
-  password: "TestPassword123!",
+  password: `Pwd_${randomUUID()}`,
   timezone: "UTC",
   timezoneId: null,
   nationality: CountryCode.Us,
@@ -38,7 +33,7 @@ const createMinimalTeacherInput = (
   routingNumber: "123456789",
   swiftBic: "BOFAUS3N",
   zoomLink: "https://zoom.us/j/1234567890",
-  zoomPassword: "password123",
+  zoomPassword: `Zoom_${randomUUID()}`,
   zoomUsername: "johndoe",
 });
 
@@ -54,6 +49,8 @@ describe("Teacher Onboarding GraphQL API", () => {
     const sa = await provisionTestSuperAdmin(existingSaToken, "tchrOnboard");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
+    expect(superAdminToken.length).toBeGreaterThan(0);
+    expect(superAdminUserId.length).toBeGreaterThan(0);
   });
 
   test("Admin can create teacher", async () => {
@@ -86,15 +83,33 @@ describe("Teacher Onboarding GraphQL API", () => {
   });
 
   test("Teacher denied creating teacher", async () => {
-    await assertOperationDenied("teacher_default", "mutate", createTeacherMutationDocument, {
-      input: createMinimalTeacherInput(),
+    const { testClient } = await import("./testClient");
+    const token = await loginDemoUser("teacher_default");
+
+    const result = await testClient.mutate({
+      mutation: createTeacherMutationDocument,
+      variables: { input: createMinimalTeacherInput() },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+      errorPolicy: "all",
     });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.createTeacher).toBeUndefined();
   });
 
   test("Parent denied creating teacher", async () => {
-    await assertOperationDenied("parent_default", "mutate", createTeacherMutationDocument, {
-      input: createMinimalTeacherInput(),
+    const { testClient } = await import("./testClient");
+    const token = await loginDemoUser("parent_default");
+
+    const result = await testClient.mutate({
+      mutation: createTeacherMutationDocument,
+      variables: { input: createMinimalTeacherInput() },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+      errorPolicy: "all",
     });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.createTeacher).toBeUndefined();
   });
 
   test("Unauthenticated denied creating teacher", async () => {

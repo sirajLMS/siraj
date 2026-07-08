@@ -297,7 +297,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         expect(newMetrics.trial).toBe(initialMetrics.trial + 1);
         expect(newMetrics.taken).toBe(initialMetrics.taken + 1);
         expect(newMetrics.pending).toBe(initialMetrics.pending + 1);
-        expect(newSchedule.length).toBe(initialSchedule.length + 2);
+        expect(newSchedule).toHaveLength(initialSchedule.length + 2);
 
         const scheduledClass = newSchedule.find(s => s.classType === "REGULAR");
         expect(scheduledClass?.student).toBeDefined();
@@ -610,7 +610,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           },
           tx
         );
-        expect(schedule.length).toBe(1);
+        expect(schedule).toHaveLength(1);
         expect(schedule[0].yourTimeFormatted).toBe("12:00 PM");
 
         schedule = await SchedulingRepository.getDailySchedule(
@@ -618,11 +618,11 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           { search: "Unrelated", viewerTimezone: "Africa/Cairo" },
           tx
         );
-        expect(schedule.length).toBe(1);
+        expect(schedule).toHaveLength(1);
         expect(schedule[0].yourTimeFormatted).toBe("03:00 PM");
 
         schedule = await SchedulingRepository.getDailySchedule(date, { search: "NoMatchHere" }, tx);
-        expect(schedule.length).toBe(0);
+        expect(schedule).toHaveLength(0);
       });
     });
   });

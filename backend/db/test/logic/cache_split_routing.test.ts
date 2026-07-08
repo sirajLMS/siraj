@@ -51,11 +51,11 @@ describe("Cache Split Routing & Functionality", () => {
 
     await runInRollback(async tx => {
       const sessionResult = await tx.select().from(sessionCache).where(eq(sessionCache.key, SESSION_KEY)).limit(1);
-      expect(sessionResult.length).toBe(1);
+      expect(sessionResult).toHaveLength(1);
       expect(sessionResult[0].value).toBe(TEST_VALUE);
 
       const rlResult = await tx.select().from(rateLimitCache).where(eq(rateLimitCache.key, SESSION_KEY)).limit(1);
-      expect(rlResult.length).toBe(0);
+      expect(rlResult).toHaveLength(0);
     });
 
     const retrieved = await CacheDbRepository.get(SESSION_KEY);
@@ -74,7 +74,7 @@ describe("Cache Split Routing & Functionality", () => {
     // Verify it's in the correct table via runInRollback
     await runInRollback(async tx => {
       const result = await tx.select().from(rateLimitCache).where(eq(rateLimitCache.key, INCR_KEY)).limit(1);
-      expect(result.length).toBe(1);
+      expect(result).toHaveLength(1);
       expect(result[0].value).toBe("2");
     });
   });
@@ -108,14 +108,14 @@ describe("Cache Split Routing & Functionality", () => {
     // Verify our specific test entries are gone via runInRollback
     await runInRollback(async tx => {
       const rlResult = await tx.select().from(rateLimitCache).where(eq(rateLimitCache.key, EXPIRED_RL_KEY)).limit(1);
-      expect(rlResult.length).toBe(0);
+      expect(rlResult).toHaveLength(0);
 
       const sessionResult = await tx
         .select()
         .from(sessionCache)
         .where(eq(sessionCache.key, EXPIRED_SESSION_KEY))
         .limit(1);
-      expect(sessionResult.length).toBe(0);
+      expect(sessionResult).toHaveLength(0);
     });
   });
 });

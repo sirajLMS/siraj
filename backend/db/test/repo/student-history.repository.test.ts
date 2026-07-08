@@ -50,7 +50,7 @@ describe("StudentHistoryRepository", () => {
       });
 
       const calendar = await StudentHistoryRepository.getMonthlyCalendar(student.id, 2026, 6, undefined, tx);
-      expect(calendar.length).toBe(1);
+      expect(calendar).toHaveLength(1);
 
       const entry = calendar[0];
       expect(entry.id).toBe(juneClass.id);
@@ -90,7 +90,7 @@ describe("StudentHistoryRepository", () => {
         .then(r => r[0]);
 
       const calendar = await StudentHistoryRepository.getMonthlyCalendar(student.id, 2026, 6, undefined, tx);
-      expect(calendar.length).toBe(1);
+      expect(calendar).toHaveLength(1);
 
       const entryNoZoom = calendar[0];
       expect(entryNoZoom.id).toBe(juneClassNoZoom.id);

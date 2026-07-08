@@ -27,6 +27,7 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
 
 function gcTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
+    expect(typeof fn).toBe("function");
     await runInRollback(fn);
   });
 }
@@ -220,7 +221,7 @@ describe("GroupClassRepository — createEnrollments", () => {
       tx
     );
 
-    expect(results.length).toBe(2);
+    expect(results).toHaveLength(2);
     expect(results.every(r => r.groupClassId === groupClass.id)).toBeTrue();
   });
 
@@ -269,7 +270,7 @@ describe("GroupClassRepository — getCommunications", () => {
     const result = await GroupClassRepository.getCommunications(groupClass.id, tx);
     expect(result.length).toBeGreaterThanOrEqual(2);
     const filtered = result.filter(c => c.title === "Earlier comm" || c.title === "Later comm");
-    expect(filtered.length).toBe(2);
+    expect(filtered).toHaveLength(2);
     expect(filtered[0].title).toBe("Later comm");
     expect(filtered[1].title).toBe("Earlier comm");
   });

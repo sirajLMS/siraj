@@ -74,7 +74,7 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
     expect(isInUse).toBe(true);
 
     const usages = await StorageDbRepository.getFileUsages(testPath);
-    expect(usages.length).toBe(1);
+    expect(usages).toHaveLength(1);
     expect(usages[0].referenceTable).toBe("users");
     if (testUser) {
       expect(usages[0].referenceId).toBe(testUser.id);

@@ -104,6 +104,8 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   test("provision super admin for resource operations", async () => {
     const adminToken = await loginDemoUser("academy_admin");
     const sa = await provisionTestSuperAdmin(adminToken, "LRTest");
+    expect(sa.token.length).toBeGreaterThan(0);
+    expect(sa.userId.length).toBeGreaterThan(0);
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
   });
@@ -145,20 +147,37 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
     if (!superAdminToken) throw new Error("Missing super admin token");
 
     const file = await uploadDummyFile(superAdminToken);
+    const teacherToken = await loginDemoUser("teacher_default");
 
-    await assertOperationDenied("teacher_default", "mutate", uploadLearningResourceMutationDocument, {
-      input: {
-        displayName: "Teacher Attempt Upload",
-        filePath: file.path,
-        fileId: file.id,
+    const result = await testClient.mutate({
+      mutation: uploadLearningResourceMutationDocument,
+      variables: {
+        input: {
+          displayName: "Teacher Attempt Upload",
+          filePath: file.path,
+          fileId: file.id,
+        },
+      },
+      context: {
+        headers: { Authorization: `Bearer ${teacherToken}` },
       },
     });
+
+    expect(result.error).toBeDefined();
   });
 
   test("Parent denied from resource directory", async () => {
-    await assertOperationDenied("parent_default", "query", learningResourcesQueryDocument, {
-      searchQuery: null,
+    const parentToken = await loginDemoUser("parent_default");
+
+    const result = await testClient.query({
+      query: learningResourcesQueryDocument,
+      variables: { searchQuery: null },
+      context: {
+        headers: { Authorization: `Bearer ${parentToken}` },
+      },
     });
+
+    expect(result.error).toBeDefined();
   });
 
   test("Upload with missing displayName returns validation error", async () => {
@@ -225,8 +244,8 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   });
 
   test("cleanup super admin", async () => {
-    if (superAdminToken && superAdminUserId) {
-      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
-    }
+    expect(superAdminToken.length).toBeGreaterThan(0);
+    expect(superAdminUserId.length).toBeGreaterThan(0);
+    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
   });
 });

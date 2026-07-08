@@ -213,6 +213,20 @@ describe("Class Instances Security Logic", () => {
           .update(classInstances)
           .set({ executionState: "NOT_ACTIVATED", outcome: "PENDING", actualStartAt: null, actualEndAt: null })
           .where(eq(classInstances.id, instance.id));
+
+        const [resetInstance] = await tx
+          .select({
+            executionState: classInstances.executionState,
+            outcome: classInstances.outcome,
+            actualStartAt: classInstances.actualStartAt,
+            actualEndAt: classInstances.actualEndAt,
+          })
+          .from(classInstances)
+          .where(eq(classInstances.id, instance.id));
+        expect(resetInstance.executionState).toBe("NOT_ACTIVATED");
+        expect(resetInstance.outcome).toBe("PENDING");
+        expect(resetInstance.actualStartAt).toBeNull();
+        expect(resetInstance.actualEndAt).toBeNull();
       }));
 
     it("allows ACTIVATED → NOT_ACTIVATED (reset)", () =>
@@ -224,6 +238,16 @@ describe("Class Instances Security Logic", () => {
           .update(classInstances)
           .set({ executionState: "NOT_ACTIVATED", outcome: "PENDING", actualStartAt: null, actualEndAt: null })
           .where(eq(classInstances.id, instance.id));
+
+        const [resetInstance] = await tx
+          .select({
+            executionState: classInstances.executionState,
+            outcome: classInstances.outcome,
+          })
+          .from(classInstances)
+          .where(eq(classInstances.id, instance.id));
+        expect(resetInstance.executionState).toBe("NOT_ACTIVATED");
+        expect(resetInstance.outcome).toBe("PENDING");
       }));
   });
 });

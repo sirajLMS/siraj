@@ -160,8 +160,9 @@ describe("Permissions and Permission Groups Database Constraints", () => {
     expect(slugUpdatedGroup.slug).toBe("custom_group_updated");
 
     // Delete non-system group
-    const deletedGroup = await tx.delete(permissionGroups).where(eq(permissionGroups.id, newGroup.id)).returning();
+    const [deletedGroup] = await tx.delete(permissionGroups).where(eq(permissionGroups.id, newGroup.id)).returning();
 
-    expect(deletedGroup.length).toBe(1);
+    expect(deletedGroup).toBeDefined();
+    expect(deletedGroup.id).toBe(newGroup.id);
   });
 });

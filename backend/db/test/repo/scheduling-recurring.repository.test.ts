@@ -59,7 +59,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           "@/backend/db/repo/scheduling/scheduling-queries.repository"
         );
         const grid = await getWeeklyScheduleGrid(teacher.id, weekStart, weekEnd, tx);
-        expect(grid.length).toBe(2);
+        expect(grid).toHaveLength(2);
 
         const monClass = grid.find(c => c.id === c1.id);
         expect(monClass?.dayOfWeek).toBe("monday");
@@ -78,7 +78,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
       await runInRollback(async tx => {
         const { teacher, weekStart, weekEnd, queries } = await setupEmptyTeacherWeeklyContext(tx, "WeeklyEmpty");
         const grid = await queries.getWeeklyScheduleGrid(teacher.id, weekStart, weekEnd, tx);
-        expect(grid.length).toBe(0);
+        expect(grid).toHaveLength(0);
       });
     });
 
@@ -102,7 +102,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           new Date("2026-06-29T00:00:00Z"),
           tx
         );
-        expect(grid.length).toBe(0);
+        expect(grid).toHaveLength(0);
       });
     });
 
@@ -167,7 +167,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         );
 
         expect(result.recurringScheduleId).toBeDefined();
-        expect(result.classInstanceIds.length).toBe(4);
+        expect(result.classInstanceIds).toHaveLength(4);
 
         const [studentAfter] = await tx
           .select({ classesRemaining: students.classesRemaining })
@@ -258,7 +258,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           tx
         );
 
-        expect(result.classInstanceIds.length).toBe(2);
+        expect(result.classInstanceIds).toHaveLength(2);
       });
     });
 
@@ -282,7 +282,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           .from(recurringScheduleDays)
           .where(eq(recurringScheduleDays.recurringScheduleId, result.recurringScheduleId));
 
-        expect(days.length).toBe(3);
+        expect(days).toHaveLength(3);
         expect(days.some(d => d.dayOfWeek === "MONDAY")).toBe(true);
         expect(days.some(d => d.dayOfWeek === "WEDNESDAY")).toBe(true);
         expect(days.some(d => d.dayOfWeek === "FRIDAY")).toBe(true);
@@ -307,7 +307,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           .from(classInstances)
           .where(eq(classInstances.recurringScheduleId, result.recurringScheduleId));
 
-        expect(instances.length).toBe(2);
+        expect(instances).toHaveLength(2);
 
         const monInstance = instances.find(i => i.scheduledStartAt.getUTCDay() === 1);
         const wedInstance = instances.find(i => i.scheduledStartAt.getUTCDay() === 3);
@@ -426,7 +426,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           .select()
           .from(recurringSchedules)
           .where(and(eq(recurringSchedules.teacherId, teacher.id), isNull(recurringSchedules.deletedAt)));
-        expect(remaining.length).toBe(0);
+        expect(remaining).toHaveLength(0);
       });
     });
 

@@ -47,7 +47,7 @@ export async function assertOperationDenied<TData = unknown, TVars extends Opera
   type: "query" | "mutate",
   document: TypedDocumentNode<TData, TVars>,
   variables: TVars
-): Promise<void> {
+): Promise<boolean> {
   const token = await loginDemoUser(roleGroupSlug);
   const context = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -65,6 +65,7 @@ export async function assertOperationDenied<TData = unknown, TVars extends Opera
         } as Parameters<typeof testClient.mutate>[0]);
 
   expect(result.error).toBeDefined();
+  return true;
 }
 
 /**

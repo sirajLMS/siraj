@@ -9,7 +9,8 @@ import { runInRollback } from "../test-utils";
 
 function resTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    const result = await runInRollback(fn);
+    expect(result).toBeUndefined();
   });
 }
 

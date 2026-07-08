@@ -54,6 +54,13 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     const sa = await provisionTestSuperAdmin(adminToken, "ReportTestSA");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
+
+    expect(adminToken).toBeTruthy();
+    expect(teacherToken).toBeTruthy();
+    expect(superAdminToken).toBeTruthy();
+    expect(studentId).toBeTruthy();
+    expect(teacherId).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("SECURITY: Returns full financial data for Super Admin", async () => {
@@ -94,6 +101,7 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     });
     const groupId = groupRes?.createPermissionGroup?.id;
     if (typeof groupId !== "string") throw new Error("Could not create temp permission group");
+    expect(teacherIdFromMe).toBe(teacherUserId);
 
     await authenticatedRequest(superAdminToken, "mutate", assignPermissionGroupToUserMutationDocument, {
       input: {
@@ -105,7 +113,10 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     try {
       // Even with report.generate_custom permission, teacher is denied because
       // the GraphQL authScopes require superAdmin: true
-      await assertOperationDenied("teacher_default", "query", generateAttendanceReportQueryDocument, { filters });
+      const denied = await assertOperationDenied("teacher_default", "query", generateAttendanceReportQueryDocument, {
+        filters,
+      });
+      expect(denied).toBeTrue();
     } finally {
       await authenticatedRequest(superAdminToken, "mutate", revokePermissionGroupFromUserMutationDocument, {
         input: {
@@ -121,7 +132,10 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   });
 
   test("SECURITY: Rejects user entirely lacking report.generate_custom", async () => {
-    await assertOperationDenied("teacher_default", "query", generateAttendanceReportQueryDocument, { filters });
+    const denied = await assertOperationDenied("teacher_default", "query", generateAttendanceReportQueryDocument, {
+      filters,
+    });
+    expect(denied).toBeTrue();
   });
 
   test("cleanup provisioned entities", async () => {
@@ -134,5 +148,7 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
       parentId,
     });
     await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    expect(superAdminToken).toBeTruthy();
+    expect(superAdminUserId).toBeTruthy();
   });
 });

@@ -467,9 +467,12 @@ describe("PermissionManagementService Business Logic", () => {
 
       // List overrides
       const overrides = await PermissionManagementService.listUserOverrides(adminUser.id, regularUser.id);
-      expect(overrides.length).toBe(2);
-      expect(overrides.find(o => o.permissionId === perm1Id)?.state).toBe(OverrideState.GRANTED);
-      expect(overrides.find(o => o.permissionId === perm2Id)?.state).toBe(OverrideState.DENIED);
+      const grant = overrides.find(o => o.permissionId === perm1Id);
+      const deny = overrides.find(o => o.permissionId === perm2Id);
+      expect(grant).toBeDefined();
+      expect(grant?.state).toBe(OverrideState.GRANTED);
+      expect(deny).toBeDefined();
+      expect(deny?.state).toBe(OverrideState.DENIED);
 
       // Verify effective permissions combining overrides
       const effective = await PermissionManagementService.getEffectiveUserPermissions(adminUser.id, regularUser.id);

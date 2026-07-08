@@ -101,7 +101,7 @@ describe("CommunicationService", () => {
       const results = await CommunicationService.dispatchMulti(payloads);
 
       expect(results).toBeArray();
-      expect(results.length).toBe(2);
+      expect(results).toHaveLength(2);
       expect(results[0].success).toBe(true);
       expect(results[1].success).toBe(true);
     });
@@ -118,7 +118,7 @@ describe("CommunicationService", () => {
 
       const results = await CommunicationService.dispatchMulti(payloads);
 
-      expect(results.length).toBe(2);
+      expect(results).toHaveLength(2);
       expect(results[0].success).toBe(true);
       expectDispatchFailure(results[1], "provider down");
     });
@@ -136,7 +136,7 @@ describe("CommunicationService", () => {
 
       const results = await CommunicationService.dispatchMulti(payloads);
 
-      expect(results.length).toBe(2);
+      expect(results).toHaveLength(2);
       expectDispatchFailure(results[0]);
       expectDispatchFailure(results[1]);
     });
@@ -147,7 +147,7 @@ describe("CommunicationService", () => {
       const results = await CommunicationService.dispatchMulti([]);
 
       expect(results).toBeArray();
-      expect(results.length).toBe(0);
+      expect(results).toHaveLength(0);
     });
   });
 

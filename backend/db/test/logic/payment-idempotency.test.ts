@@ -16,7 +16,7 @@ async function createTestParent(args: { tx: DBTransaction; suffix: string; now: 
     .values({
       name: "Idempotency Test Parent",
       email: parentEmail,
-      password: "securePassword",
+      password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })

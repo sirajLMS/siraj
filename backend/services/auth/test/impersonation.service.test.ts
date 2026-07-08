@@ -1,4 +1,5 @@
 import { describe, expect, spyOn, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { UserRepository } from "@/backend/db/repo";
 import { UserRole } from "@/backend/enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
@@ -31,7 +32,7 @@ function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; isActive: bo
     id: TARGET_ID,
     name: "Target User",
     email: "target@example.com",
-    password: "hash",
+    password: randomUUID(),
     isActive: overrides.isActive ?? true,
     isSuperAdmin: overrides.isSuperAdmin ?? false,
     deletedAt: overrides.deletedAt ?? null,
@@ -108,6 +109,8 @@ describe("ImpersonationService.assertCanImpersonate", () => {
     const actorSpy = mockSuperAdminActor();
     const targetSpy = mockTargetUser();
     await ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, locale);
+    expect(actorSpy).toHaveBeenCalled();
+    expect(targetSpy).toHaveBeenCalled();
     actorSpy.mockRestore();
     targetSpy.mockRestore();
   });

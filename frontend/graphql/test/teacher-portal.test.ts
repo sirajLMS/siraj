@@ -48,14 +48,17 @@ describe("GraphQL Teacher Portal Integration Tests", () => {
   });
 
   test("teacherAssignedStudents — denied for parent_default", async () => {
-    await assertOperationDenied("parent_default", "query", teacherAssignedStudentsQueryDocument, {});
+    const denied = await assertOperationDenied("parent_default", "query", teacherAssignedStudentsQueryDocument, {});
+    expect(denied).toBe(true);
   });
 
   test("teacherOwnProfile — denied for parent_default", async () => {
-    await assertOperationDenied("parent_default", "query", teacherOwnProfileQueryDocument, {});
+    const denied = await assertOperationDenied("parent_default", "query", teacherOwnProfileQueryDocument, {});
+    expect(denied).toBe(true);
   });
 
   test("teacherAssignedClasses — denied for parent_default", async () => {
-    await assertOperationDenied("parent_default", "query", teacherAssignedClassesQueryDocument, {});
+    const denied = await assertOperationDenied("parent_default", "query", teacherAssignedClassesQueryDocument, {});
+    expect(denied).toBe(true);
   });
 });

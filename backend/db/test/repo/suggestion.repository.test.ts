@@ -24,7 +24,7 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
 
 function suggestionTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    await expect(runInRollback(fn)).resolves.toBeUndefined();
   });
 }
 
@@ -246,7 +246,7 @@ describe("SuggestionRepository — getSuggestionsByParent", () => {
     const result = await SuggestionRepository.getSuggestionsByParent(parent.id, { limit: 50, offset: 0 }, tx);
     const filtered = result.filter(s => s.body === "Earlier suggestion" || s.body === "Later suggestion");
 
-    expect(filtered.length).toBe(2);
+    expect(filtered).toHaveLength(2);
     expect(filtered[0].body).toBe("Later suggestion");
     expect(filtered[1].body).toBe("Earlier suggestion");
   });

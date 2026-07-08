@@ -28,7 +28,7 @@ describe("Row Level Security and Soft Delete", () => {
       `INSERT INTO "users" (name, email, password, created_at, updated_at) VALUES ('RLS Test User', $1, $3, $2, $2) RETURNING id`,
       [emailValid, now.toISOString(), passwordHash]
     );
-    expect(validRows.length).toBe(1);
+    expect(validRows).toHaveLength(1);
 
     let insertError: unknown = null;
     try {
@@ -56,7 +56,7 @@ describe("Row Level Security and Soft Delete", () => {
       .values({
         name: "RLS Update User",
         email,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })
@@ -88,7 +88,7 @@ describe("Row Level Security and Soft Delete", () => {
       .values({
         name: "RLS Delete User",
         email,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })
@@ -102,7 +102,7 @@ describe("Row Level Security and Soft Delete", () => {
       `SELECT id FROM "users" WHERE id = $1`,
       [user.id]
     );
-    expect(selectedUsers.length).toBe(0);
+    expect(selectedUsers).toHaveLength(0);
 
     const [superuserSelect] = await db.select().from(users).where(sql`id = ${user.id}`);
     expect(superuserSelect).toBeDefined();
@@ -114,12 +114,12 @@ describe("Row Level Security and Soft Delete", () => {
       `DELETE FROM "users" WHERE id = $1 RETURNING id`,
       [user.id]
     );
-    expect(deleteResult.length).toBe(0);
+    expect(deleteResult).toHaveLength(0);
 
     const deleteRes = await SoftDeleteRepository.hardDelete("users", user.id);
     expect(deleteRes.id).toBe(user.id);
 
     const superuserSelectAfter = await db.select().from(users).where(sql`id = ${user.id}`);
-    expect(superuserSelectAfter.length).toBe(0);
+    expect(superuserSelectAfter).toHaveLength(0);
   });
 });

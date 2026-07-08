@@ -179,8 +179,7 @@ describe("SuggestionService", () => {
 
       const result = await SuggestionService.getParentSuggestions(MOCK_ACTOR_ID, { limit: 10, offset: 0 });
 
-      expect(result).toBeArray();
-      expect(result.length).toBe(1);
+      expect(result).toHaveLength(1);
       expect(hasPermissionSpy).toHaveBeenCalledWith(MOCK_ACTOR_ID, AppPermission.SUPPORT_VIEW_HISTORY);
       expect(getSuggestionsByParentSpy).toHaveBeenCalledWith(MOCK_PARENT_ID, { limit: 10, offset: 0 });
     });
@@ -219,8 +218,7 @@ describe("SuggestionService", () => {
       expect(result.status).toBe(SuggestionStatus.REVIEWED);
       expect(dispatchMultiSpy).toHaveBeenCalledTimes(1);
       const dispatchedPayloads = dispatchMultiSpy.mock.calls[0][0];
-      expect(dispatchedPayloads).toBeArray();
-      expect(dispatchedPayloads.length).toBe(2);
+      expect(dispatchedPayloads).toHaveLength(2);
       expect(dispatchedPayloads[0].channel).toBe("on_app");
       expect(dispatchedPayloads[1].channel).toBe("email");
     });

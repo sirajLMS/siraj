@@ -7,7 +7,7 @@ import {
   updateTeacherProfileMutationDocument,
 } from "../sharedDocuments/staff-profile.documents";
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import { assertOperationDenied, authenticatedRequest, cleanupTestEntities, loginAndProvision } from "./helpers";
+import { authenticatedRequest, cleanupTestEntities, loginAndProvision, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -80,6 +80,13 @@ describe("GraphQL Teacher Integration Tests", () => {
     teacherUserId = r.teacherUserId;
     parentUserId = r.parentUserId;
     parentId = r.parentId;
+
+    expect(superAdminToken).not.toBe("");
+    expect(teacherId).not.toBe("");
+    expect(studentId).not.toBe("");
+    expect(teacherUserId).not.toBe("");
+    expect(parentUserId).not.toBe("");
+    expect(parentId).not.toBe("");
   });
 
   test("returns error on teachers query when unauthenticated", async () => {
@@ -126,10 +133,13 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherDirectory returns error for unauthorized teacher", async () => {
-    await assertOperationDenied("teacher_default", "query", teacherDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.query({
+      query: teacherDirectoryQueryDocument,
+      variables: { search: null, paginationArgs: null },
+      context: { headers: { Authorization: `Bearer ${token}` } },
     });
+    expect(result.error).toBeDefined();
   });
 
   test("teacherDirectory returns directory data for authorized admin", async () => {
@@ -163,14 +173,26 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherProfileForEdit — teacher role is denied access", async () => {
-    await assertOperationDenied("teacher_default", "query", teacherProfileForEditQueryDocument, { teacherId });
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.query({
+      query: teacherProfileForEditQueryDocument,
+      variables: { teacherId },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    expect(result.error).toBeDefined();
   });
 
   test("updateTeacherProfile — teacher role is denied to update profile", async () => {
-    await assertOperationDenied("teacher_default", "mutate", updateTeacherProfileMutationDocument, {
-      teacherId,
-      input: makeUpdateInput({ phone: "+9999999999" }),
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.mutate({
+      mutation: updateTeacherProfileMutationDocument,
+      variables: {
+        teacherId,
+        input: makeUpdateInput({ phone: "+9999999999" }),
+      },
+      context: { headers: { Authorization: `Bearer ${token}` } },
     });
+    expect(result.error).toBeDefined();
   });
 
   test("updateTeacherProfile — returns error for non-existent teacher", async () => {
@@ -268,6 +290,10 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("cleanup provisioned entities", async () => {
+    expect(teacherId).not.toBe("");
+    expect(studentId).not.toBe("");
+    expect(parentId).not.toBe("");
+
     await cleanupTestEntities(superAdminToken, {
       studentUserId,
       teacherUserId,

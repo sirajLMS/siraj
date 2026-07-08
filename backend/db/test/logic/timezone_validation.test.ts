@@ -5,6 +5,23 @@ import { recurringSchedules, teachers } from "../../schema";
 import { setupStudent, setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
+/**
+ * Runs an operation expected to violate a database constraint and asserts an error is thrown.
+ * Returns the caught error so the caller can assert on its message.
+ */
+async function expectConstraintError(
+  insertFn: () => Promise<unknown>
+): Promise<Error & { cause?: { message?: string } }> {
+  let errorCaught: unknown = null;
+  try {
+    await insertFn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  expect(errorCaught).not.toBeNull();
+  return errorCaught as Error & { cause?: { message?: string } };
+}
+
 describe("Timezone Validation Constraints", () => {
   test("Allows valid timezones for teachers", async () => {
     testLogger.info("Testing valid timezones for teachers...");
@@ -22,8 +39,8 @@ describe("Timezone Validation Constraints", () => {
     await runInRollback(async tx => {
       const { user } = await setupTeacher(tx, { name: "Invalid Teacher User" });
 
-      try {
-        await tx
+      const error = await expectConstraintError(() =>
+        tx
           .insert(teachers)
           .values({
             userId: user.id,
@@ -32,13 +49,10 @@ describe("Timezone Validation Constraints", () => {
             createdAt: new Date(),
             updatedAt: new Date(),
           })
-          .execute();
-        expect(true).toBe(false); // Should not be reached
-      } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toMatch(/teachers_timezone_chk|time zone .* not recognized/);
-      }
+          .execute()
+      );
+      const message = error.cause?.message || error.message || "";
+      expect(message).toMatch(/teachers_timezone_chk|time zone .* not recognized/);
     });
     testLogger.info("Invalid teacher timezone test passed.");
   });
@@ -74,8 +88,8 @@ describe("Timezone Validation Constraints", () => {
       const { student } = await setupStudent(tx, { name: "Schedule Parent User" }, {}, { name: "Schedule Student" });
       const { teacher } = await setupTeacher(tx, { name: "Schedule Teacher User" });
 
-      try {
-        await tx
+      const error = await expectConstraintError(() =>
+        tx
           .insert(recurringSchedules)
           .values({
             studentId: student.id,
@@ -86,13 +100,10 @@ describe("Timezone Validation Constraints", () => {
             createdAt: new Date(),
             updatedAt: new Date(),
           })
-          .execute();
-        expect(true).toBe(false); // Should not be reached
-      } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toMatch(/recurring_schedules_timezone_chk|time zone .* not recognized/);
-      }
+          .execute()
+      );
+      const message = error.cause?.message || error.message || "";
+      expect(message).toMatch(/recurring_schedules_timezone_chk|time zone .* not recognized/);
     });
     testLogger.info("Invalid recurring schedule timezone test passed.");
   });

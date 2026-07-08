@@ -1,13 +1,8 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parent-onboarding.documents";
-import {
-  assertOperationDenied,
-  authenticatedRequest,
-  cleanupTestSuperAdmin,
-  loginDemoUser,
-  provisionTestSuperAdmin,
-} from "./helpers";
+import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const createMinimalParentInput = (
@@ -18,7 +13,7 @@ const createMinimalParentInput = (
 ) => ({
   name: overrides?.name ?? "Test Parent",
   email: overrides?.email ?? `test_parent_${Date.now()}@test.com`,
-  password: "TestPassword123!",
+  password: randomUUID(),
   phone: null,
   invoiceType: null,
   feeAmount: null,
@@ -54,7 +49,7 @@ const createFullParentInput = (
 ) => ({
   name: overrides?.name ?? "Test Parent",
   email: overrides?.email ?? `test_parent_${Date.now()}@test.com`,
-  password: "TestPassword123!",
+  password: randomUUID(),
   phone: overrides?.phone ?? "+1234567890",
   invoiceType: overrides?.invoiceType ?? InvoiceType.Monthly,
   feeAmount: overrides?.feeAmount ?? "500.00",
@@ -81,6 +76,8 @@ describe("Parent Onboarding GraphQL API", () => {
     const sa = await provisionTestSuperAdmin(existingSaToken, "parOnboard");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
+    expect(superAdminToken).toBeTruthy();
+    expect(superAdminUserId).toBeTruthy();
   });
 
   test("Admin can create parent with billing", async () => {
@@ -113,9 +110,19 @@ describe("Parent Onboarding GraphQL API", () => {
   });
 
   test("Teacher denied creating parent", async () => {
-    await assertOperationDenied("teacher_default", "mutate", createParentMutationDocument, {
-      input: createMinimalParentInput(),
+    const token = await loginDemoUser("teacher_default");
+    const { testClient } = await import("./testClient");
+
+    const result = await testClient.mutate({
+      mutation: createParentMutationDocument,
+      variables: {
+        input: createMinimalParentInput(),
+      },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+      errorPolicy: "all",
     });
+
+    expect(result.error).toBeDefined();
   });
 
   test("Unauthenticated denied creating parent", async () => {

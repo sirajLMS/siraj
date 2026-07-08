@@ -57,7 +57,7 @@ describe("Soft Delete Security (Issue #2)", () => {
     `);
 
     const rows = "rows" in result ? result.rows : (result as unknown as Record<string, unknown>[]);
-    expect(rows.length).toBe(0);
+    expect(rows).toHaveLength(0);
     testLogger.info("soft_delete_row_trigger_fn no longer exists.");
   });
 
@@ -71,7 +71,7 @@ describe("Soft Delete Security (Issue #2)", () => {
     `);
 
     const rows = "rows" in result ? result.rows : (result as unknown as Record<string, unknown>[]);
-    expect(rows.length).toBe(0);
+    expect(rows).toHaveLength(0);
     testLogger.info("No soft-delete SECURITY DEFINER functions found.");
   });
 
@@ -85,7 +85,7 @@ describe("Soft Delete Security (Issue #2)", () => {
       .values({
         name: "Soft Delete Audit User",
         email,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })
@@ -118,7 +118,7 @@ describe("Soft Delete Security (Issue #2)", () => {
       .values({
         name: "RLS Soft Delete User",
         email,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })
@@ -129,7 +129,7 @@ describe("Soft Delete Security (Issue #2)", () => {
         await tx.execute(sql`SET LOCAL ROLE test_rls_user_soft_delete`);
 
         const hardDeleteResult = await tx.delete(users).where(eq(users.id, user.id)).returning();
-        expect(hardDeleteResult.length).toBe(0);
+        expect(hardDeleteResult).toHaveLength(0);
 
         let directUpdateError: unknown = null;
         try {
@@ -171,7 +171,7 @@ describe("Soft Delete Security (Issue #2)", () => {
       .values({
         name: "Hard Delete User",
         email,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })
@@ -183,7 +183,7 @@ describe("Soft Delete Security (Issue #2)", () => {
     expect(hardDeleted.id).toBe(user.id);
 
     const remaining = await db.select().from(users).where(eq(users.id, user.id));
-    expect(remaining.length).toBe(0);
+    expect(remaining).toHaveLength(0);
     testLogger.info("Superuser hard delete test passed.");
   });
 });

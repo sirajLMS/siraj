@@ -24,7 +24,7 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
 
 function staffTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    await expect(runInRollback(fn)).resolves.toBeUndefined();
   });
 }
 
@@ -342,7 +342,7 @@ describe("StaffProfileRepository — getUserPermissionGroupSlugs", () => {
     const slugs = await StaffProfileRepository.getUserPermissionGroupSlugs(user.id, tx);
     expect(slugs).toContain(group1.slug);
     expect(slugs).toContain(group2.slug);
-    expect(slugs.length).toBe(2);
+    expect(slugs).toHaveLength(2);
   });
 
   staffTest("returns empty array for user with no groups", async tx => {

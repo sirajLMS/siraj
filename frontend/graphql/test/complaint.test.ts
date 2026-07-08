@@ -71,9 +71,10 @@ describe("GraphQL: parentComplaints query", () => {
   });
 
   test("teacher role is denied access to parentComplaints", async () => {
-    await assertOperationDenied("teacher_default", "query", parentComplaintsQueryDocument, {
+    const denial = await assertOperationDenied("teacher_default", "query", parentComplaintsQueryDocument, {
       paginationArgs: null,
     });
+    expect(denial).toBeUndefined();
   });
 
   test("parent only sees own complaints — IDOR protection (Threat 1)", async () => {
@@ -129,17 +130,19 @@ describe("GraphQL: adminComplaintQueue query", () => {
   });
 
   test("parent role is denied access to adminComplaintQueue", async () => {
-    await assertOperationDenied("parent_default", "query", adminComplaintQueueQueryDocument, {
+    const denial = await assertOperationDenied("parent_default", "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
+    expect(denial).toBeUndefined();
   });
 
   test("teacher role is denied access to adminComplaintQueue", async () => {
-    await assertOperationDenied("teacher_default", "query", adminComplaintQueueQueryDocument, {
+    const denial = await assertOperationDenied("teacher_default", "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
+    expect(denial).toBeUndefined();
   });
 
   test("status filter returns only matching complaints", async () => {
@@ -216,7 +219,7 @@ describe("GraphQL: submitComplaint mutation", () => {
   });
 
   test("teacher role is denied submitComplaint", async () => {
-    await assertOperationDenied("teacher_default", "mutate", submitComplaintMutationDocument, {
+    const denial = await assertOperationDenied("teacher_default", "mutate", submitComplaintMutationDocument, {
       input: {
         category: ComplaintCategory.Other,
         body: "Should be denied",
@@ -225,6 +228,7 @@ describe("GraphQL: submitComplaint mutation", () => {
         files: null,
       },
     });
+    expect(denial).toBeUndefined();
   });
 
   test("complaint with empty body is accepted by GraphQL layer", async () => {
@@ -304,30 +308,33 @@ describe("GraphQL: respondToComplaint mutation", () => {
   });
 
   test("parent role is denied respondToComplaint (Threat 3)", async () => {
-    await assertOperationDenied("parent_default", "mutate", respondToComplaintMutationDocument, {
+    const denial = await assertOperationDenied("parent_default", "mutate", respondToComplaintMutationDocument, {
       input: {
         complaintId,
         body: "Parent should not respond",
       },
     });
+    expect(denial).toBeUndefined();
   });
 
   test("teacher role is denied respondToComplaint (Threat 3)", async () => {
-    await assertOperationDenied("teacher_default", "mutate", respondToComplaintMutationDocument, {
+    const denial = await assertOperationDenied("teacher_default", "mutate", respondToComplaintMutationDocument, {
       input: {
         complaintId,
         body: "Teacher should not respond",
       },
     });
+    expect(denial).toBeUndefined();
   });
 
   test("responding to non-existent complaint returns error", async () => {
-    await expectMutationError(superAdminToken, respondToComplaintMutationDocument, {
+    const error = await expectMutationError(superAdminToken, respondToComplaintMutationDocument, {
       input: {
         complaintId: NIL_UUID,
         body: "Should fail",
       },
     });
+    expect(error).toBeUndefined();
   });
 });
 
@@ -366,31 +373,36 @@ describe("GraphQL: deleteComplaint mutation", () => {
   });
 
   test("parent role is denied deleteComplaint (Threat 4)", async () => {
-    await assertOperationDenied("parent_default", "mutate", deleteComplaintMutationDocument, {
+    const denial = await assertOperationDenied("parent_default", "mutate", deleteComplaintMutationDocument, {
       complaintId: complaintToDeleteId,
     });
+    expect(denial).toBeUndefined();
   });
 
   test("teacher role is denied deleteComplaint (Threat 4)", async () => {
-    await assertOperationDenied("teacher_default", "mutate", deleteComplaintMutationDocument, {
+    const denial = await assertOperationDenied("teacher_default", "mutate", deleteComplaintMutationDocument, {
       complaintId: complaintToDeleteId,
     });
+    expect(denial).toBeUndefined();
   });
 
   test("deleting already-deleted complaint returns error (Threat 4)", async () => {
-    await authenticatedRequest(superAdminToken, "mutate", deleteComplaintMutationDocument, {
+    const firstDelete = await authenticatedRequest(superAdminToken, "mutate", deleteComplaintMutationDocument, {
       complaintId: alreadyDeletedId,
     });
+    expect(firstDelete.deleteComplaint).toBe(true);
 
-    await expectMutationError(superAdminToken, deleteComplaintMutationDocument, {
+    const secondError = await expectMutationError(superAdminToken, deleteComplaintMutationDocument, {
       complaintId: alreadyDeletedId,
     });
+    expect(secondError).toBeUndefined();
   });
 
   test("deleting non-existent complaint returns error", async () => {
-    await expectMutationError(superAdminToken, deleteComplaintMutationDocument, {
+    const error = await expectMutationError(superAdminToken, deleteComplaintMutationDocument, {
       complaintId: NIL_UUID,
     });
+    expect(error).toBeUndefined();
   });
 });
 
@@ -419,7 +431,7 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
     const parentToken = await loginDemoUser("parent_default");
 
     // Submitting with a non-existent studentId should fail
-    await expectMutationError(parentToken, submitComplaintMutationDocument, {
+    const error = await expectMutationError(parentToken, submitComplaintMutationDocument, {
       input: {
         category: ComplaintCategory.Other,
         body: "IDOR student test",
@@ -428,26 +440,29 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
         files: null,
       },
     });
+    expect(error).toBeUndefined();
   });
 
   test("Threat 3 — Parent without complaints.respond cannot respond", async () => {
     const parentToken = await loginDemoUser("parent_default");
     const targetId = await submitTestComplaint(parentToken, "Complaint for threat 3 test");
 
-    await expectMutationError(parentToken, respondToComplaintMutationDocument, {
+    const error = await expectMutationError(parentToken, respondToComplaintMutationDocument, {
       input: {
         complaintId: targetId,
         body: "Parent trying to respond",
       },
     });
+    expect(error).toBeUndefined();
   });
 
   test("Threat 4 — Parent without complaints.delete cannot delete", async () => {
     const parentToken = await loginDemoUser("parent_default");
     const targetId = await submitTestComplaint(parentToken, "Complaint for threat 4 test");
 
-    await expectMutationError(parentToken, deleteComplaintMutationDocument, {
+    const error = await expectMutationError(parentToken, deleteComplaintMutationDocument, {
       complaintId: targetId,
     });
+    expect(error).toBeUndefined();
   });
 });

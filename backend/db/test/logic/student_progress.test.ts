@@ -15,7 +15,7 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
     .values({
       name: "Parent",
       email: `p-${randomUUID()}@x.com`,
-      password: "p",
+      password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })
@@ -29,7 +29,7 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
     .values({
       name: "Teacher",
       email: `t-${randomUUID()}@x.com`,
-      password: "t",
+      password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })
@@ -106,7 +106,7 @@ describe("Student Progress Tracking", () => {
         .select()
         .from(studentProgress)
         .where(eq(studentProgress.classInstanceId, classInst.id))) as StudentProgressSelectType[];
-      expect(progressResults.length).toBe(1);
+      expect(progressResults).toHaveLength(1);
       const progress = progressResults[0];
       expect(progress.topicsCovered).toBe("Intro to SQL");
     });
@@ -133,7 +133,7 @@ describe("Student Progress Tracking", () => {
           teacherId: teacher.id,
           topicsCovered: "B",
         });
-        expect(true).toBe(false);
+        throw new Error("Expected duplicate progress insert to violate unique constraint");
       } catch (error) {
         const err = error as Error & { cause?: { code?: string } };
         const code = err.cause?.code || "";
@@ -165,7 +165,7 @@ describe("Student Progress Tracking", () => {
         .select({ id: studentProgress.id, topicsCovered: studentProgress.topicsCovered })
         .from(studentProgress)
         .where(eq(studentProgress.studentId, student.id));
-      expect(visibleResults.length).toBe(1);
+      expect(visibleResults).toHaveLength(1);
       expect(visibleResults[0].topicsCovered).toBe("Visible Part");
     });
     testLogger.info("Parent visibility RLS test passed.");

@@ -82,9 +82,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const otherUserId = otherTeacher.userId;
         if (!otherUserId) throw new Error("setup error");
 
-        await expectRepositoryError(() =>
+        const teacherError = await expectRepositoryError(() =>
           SchedulingRepository.activateClassInstance(id, otherUserId, { force: false }, tx)
         );
+        expect(teacherError.message).toContain("Unauthorized action");
 
         const { parent: otherParent } = await setupStudent(tx, {
           name: "Other Parent",
@@ -93,9 +94,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const otherParentUserId = otherParent.userId;
         if (!otherParentUserId) throw new Error("setup error");
 
-        await expectRepositoryError(() =>
+        const parentError = await expectRepositoryError(() =>
           SchedulingRepository.activateClassInstance(id, otherParentUserId, { force: false }, tx)
         );
+        expect(parentError.message).toContain("Unauthorized action");
       });
     });
 
@@ -135,19 +137,24 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         if (!id || !u) throw new Error("setup error");
 
         await tx.update(classInstances).set({ executionState: "ACTIVATED" }).where(eq(classInstances.id, id));
-        await expectRepositoryError(() => SchedulingRepository.activateClassInstance(id, u, { force: false }, tx));
+        const activatedError = await expectRepositoryError(() =>
+          SchedulingRepository.activateClassInstance(id, u, { force: false }, tx)
+        );
+        expect(activatedError.message).toContain("Invalid status transition");
 
         const { instance: instance2, teacher: teacher2 } = await setupTestEntities(tx, "Trans2");
         const id2 = instance2?.id;
         const u2 = teacher2.userId;
         if (!id2 || !u2) throw new Error("setup error");
-        await expectRepositoryError(() => SchedulingRepository.startClassInstance(id2, u2, tx));
+        const startError = await expectRepositoryError(() => SchedulingRepository.startClassInstance(id2, u2, tx));
+        expect(startError.message).toContain("Invalid status transition");
 
         const { instance: instance3, teacher: teacher3 } = await setupTestEntities(tx, "Trans3");
         const id3 = instance3?.id;
         const u3 = teacher3.userId;
         if (!id3 || !u3) throw new Error("setup error");
-        await expectRepositoryError(() => SchedulingRepository.markClassAbsent(id3, u3, tx));
+        const absentError = await expectRepositoryError(() => SchedulingRepository.markClassAbsent(id3, u3, tx));
+        expect(absentError.message).toContain("Invalid status transition");
       });
     });
 
@@ -158,7 +165,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           classesRemaining: 0,
         });
 
-        await expectRepositoryError(() =>
+        const createError = await expectRepositoryError(() =>
           SchedulingRepository.createClassInstance(
             {
               studentId: student.id,
@@ -173,6 +180,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
             tx
           )
         );
+        expect(createError.message).toContain("quota has been exhausted");
 
         const { student: s2, instance: i2 } = await setupTestEntities(tx, "QuotaUp1", {
           skipInstance: false,
@@ -184,7 +192,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         await tx.update(classInstances).set({ quotaDeducted: false }).where(eq(classInstances.id, id2));
         await tx.update(students).set({ classesRemaining: 0 }).where(eq(students.id, s2.id));
 
-        await expectRepositoryError(() => SchedulingRepository.updateClassInstance(id2, { quotaDeducted: true }, tx));
+        const updateError = await expectRepositoryError(() =>
+          SchedulingRepository.updateClassInstance(id2, { quotaDeducted: true }, tx)
+        );
+        expect(updateError.message).toContain("quota has been exhausted");
 
         const { instance: i3 } = await setupTestEntities(tx, "QuotaUp2", { classesRemaining: 5 });
         const id3 = i3?.id;
@@ -209,7 +220,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
 
         await tx.update(classInstances).set({ quotaDeducted: true }).where(eq(classInstances.id, id3));
 
-        await expectRepositoryError(() => SchedulingRepository.updateClassInstance(id3, { studentId: s4.id }, tx));
+        const swapError = await expectRepositoryError(() =>
+          SchedulingRepository.updateClassInstance(id3, { studentId: s4.id }, tx)
+        );
+        expect(swapError.message).toContain("quota has been exhausted");
       });
     });
 
@@ -291,7 +305,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
     test("processClassLeave throws error when instance doesn't exist", async () => {
       await runInRollback(async tx => {
         const fakeId = randomUUID();
-        await expectRepositoryError(() => SchedulingRepository.processClassLeave(fakeId, "Sick", "some-actor-id", tx));
+        const notFoundError = await expectRepositoryError(() =>
+          SchedulingRepository.processClassLeave(fakeId, "Sick", "some-actor-id", tx)
+        );
+        expect(notFoundError.message).toContain("not found");
       });
     });
   });
@@ -345,7 +362,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           usedCount: 2,
         });
 
-        await expectRepositoryError(() => SchedulingRepository.processClassLeave(id, "Third leave", u, tx, "en"));
+        const quotaError = await expectRepositoryError(() =>
+          SchedulingRepository.processClassLeave(id, "Third leave", u, tx, "en")
+        );
+        expect(quotaError.message).toContain("quota has been exhausted");
       });
     });
 

@@ -584,7 +584,7 @@ describe("Session Scalability and Redis Integration", () => {
 
         const metadata = await SessionRepository.getUserSessionMetadata(user.id, tx);
 
-        expect(metadata.length).toBe(2);
+        expect(metadata).toHaveLength(2);
         // Most recent should be first
         expect(metadata[0].sessionId).toBe(secondHashedId);
         expect(metadata[1].sessionId).toBe(firstHashedId);
@@ -602,7 +602,7 @@ describe("Session Scalability and Redis Integration", () => {
 
         // Verify metadata exists
         const metadata = await SessionRepository.getUserSessionMetadata(user.id, tx);
-        expect(metadata.length).toBe(1);
+        expect(metadata).toHaveLength(1);
 
         // Delete session (simulating expiration)
         await SessionRepository.deleteSessionById(sessionId, tx);

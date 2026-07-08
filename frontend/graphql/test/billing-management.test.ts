@@ -107,6 +107,8 @@ describe("GraphQL: createManualInvoice mutation", () => {
 
   test("provision test entities and login", async () => {
     await provisionAndLogin(state, "BillTest");
+    expect(state.superAdminToken).not.toBe("");
+    expect(state.parentId).not.toBe("");
   });
 
   test("admin creates a manual invoice with UNPAID status", async () => {
@@ -124,33 +126,39 @@ describe("GraphQL: createManualInvoice mutation", () => {
   });
 
   test("teacher role is denied", async () => {
-    await assertOperationDenied(
-      "teacher_default",
-      "mutate",
-      createManualInvoiceMutationDocument,
-      invoiceVars(NIL_UUID, "100.00")
-    );
+    await expect(
+      assertOperationDenied(
+        "teacher_default",
+        "mutate",
+        createManualInvoiceMutationDocument,
+        invoiceVars(NIL_UUID, "100.00")
+      )
+    ).resolves.toBeUndefined();
   });
 
   test("parent role is denied", async () => {
-    await assertOperationDenied(
-      "parent_default",
-      "mutate",
-      createManualInvoiceMutationDocument,
-      invoiceVars(NIL_UUID, "100.00")
-    );
+    await expect(
+      assertOperationDenied(
+        "parent_default",
+        "mutate",
+        createManualInvoiceMutationDocument,
+        invoiceVars(NIL_UUID, "100.00")
+      )
+    ).resolves.toBeUndefined();
   });
 
   test("invalid negative amount returns validation error", async () => {
-    await expectMutationError(
-      state.superAdminToken,
-      createManualInvoiceMutationDocument,
-      invoiceVars(state.parentId, "-50.00")
-    );
+    await expect(
+      expectMutationError(
+        state.superAdminToken,
+        createManualInvoiceMutationDocument,
+        invoiceVars(state.parentId, "-50.00")
+      )
+    ).resolves.toBeUndefined();
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupAll(state);
+    await expect(cleanupAll(state)).resolves.toBeUndefined();
   });
 });
 
@@ -173,6 +181,8 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
 
   test("provision test entities and login", async () => {
     await provisionAndLogin(state, "BillPaidTest");
+    expect(state.superAdminToken).not.toBe("");
+    expect(state.parentId).not.toBe("");
   });
 
   test("create an UNPAID invoice for mark-paid tests", async () => {
@@ -191,24 +201,30 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("Threat 1 — double settlement: second markInvoicePaid returns error", async () => {
-    await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
-      invoiceId: unpaidInvoiceId,
-      expectedVersion: null,
-    });
+    await expect(
+      expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
+        invoiceId: unpaidInvoiceId,
+        expectedVersion: null,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("teacher role is denied markInvoicePaid", async () => {
-    await assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
-      invoiceId: NIL_UUID,
-      expectedVersion: null,
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
+        invoiceId: NIL_UUID,
+        expectedVersion: null,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("Threat 2 — non-existent invoice ID returns error", async () => {
-    await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
-      invoiceId: NIL_UUID,
-      expectedVersion: null,
-    });
+    await expect(
+      expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
+        invoiceId: NIL_UUID,
+        expectedVersion: null,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("create a second UNPAID invoice for delete tests", async () => {
@@ -225,14 +241,18 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("Threat 2 — double deletion: second deleteInvoice returns error", async () => {
-    await expectMutationError(state.superAdminToken, deleteInvoiceMutationDocument, { invoiceId: deleteInvoiceId });
+    await expect(
+      expectMutationError(state.superAdminToken, deleteInvoiceMutationDocument, { invoiceId: deleteInvoiceId })
+    ).resolves.toBeUndefined();
   });
 
   test("teacher role is denied deleteInvoice", async () => {
-    await assertOperationDenied("teacher_default", "mutate", deleteInvoiceMutationDocument, { invoiceId: NIL_UUID });
+    await expect(
+      assertOperationDenied("teacher_default", "mutate", deleteInvoiceMutationDocument, { invoiceId: NIL_UUID })
+    ).resolves.toBeUndefined();
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupAll(state);
+    await expect(cleanupAll(state)).resolves.toBeUndefined();
   });
 });

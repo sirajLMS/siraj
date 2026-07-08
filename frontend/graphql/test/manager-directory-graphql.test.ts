@@ -60,6 +60,13 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
     const staffMgr = await provisionTestManager(superAdminToken, "MgrDirTest-Staff", ManagerAccountType.Manager);
     staffManagerUserId = staffMgr.userId;
+
+    expect(adminToken).toBeTruthy();
+    expect(teacherId).toBeTruthy();
+    expect(studentId).toBeTruthy();
+    expect(superAdminToken).toBeTruthy();
+    expect(adminManagerUserId).toBeTruthy();
+    expect(staffManagerUserId).toBeTruthy();
   });
 
   test("Super Admin can query manager directory", async () => {
@@ -217,6 +224,8 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
   });
 
   test("cleanup provisioned entities", async () => {
+    const managerCountBefore = await getManagers(superAdminToken).then(r => r.rows?.length ?? 0);
+
     await cleanupTestManager(superAdminToken, adminManagerUserId);
     await cleanupTestManager(superAdminToken, staffManagerUserId);
     await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
@@ -228,5 +237,9 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
       teacherId,
       parentId,
     });
+
+    const managerCountAfter = await getManagers(superAdminToken).then(r => r.rows?.length ?? 0);
+    expect(managerCountAfter).toBeLessThan(managerCountBefore);
+    expect(superAdminToken).toBeTruthy();
   });
 });

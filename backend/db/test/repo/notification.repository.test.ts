@@ -12,7 +12,7 @@ import { runInRollback } from "../test-utils";
 
 function notificationTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await runInRollback(fn);
+    await expect(runInRollback(fn)).resolves.toBeUndefined();
   });
 }
 
@@ -170,7 +170,7 @@ describe("NotificationRepository — createDeliveriesBatch", () => {
       tx
     );
 
-    expect(deliveries.length).toBe(3);
+    expect(deliveries).toHaveLength(3);
     expect(deliveries.every(d => d.userId === user.id)).toBeTrue();
     expect(deliveries.every(d => d.status === NotificationDeliveryStatus.PENDING)).toBeTrue();
     expect(deliveries[0].channel).toBe(NotificationChannel.EMAIL);
@@ -198,7 +198,7 @@ describe("NotificationRepository — createDeliveriesBatch", () => {
       tx
     );
 
-    expect(deliveries.length).toBe(1);
+    expect(deliveries).toHaveLength(1);
     expect(deliveries[0].status).toBe(NotificationDeliveryStatus.PENDING);
     expect(deliveries[0].title).toBe("SMS pending");
   });

@@ -48,11 +48,11 @@ describe("TeacherRepository", () => {
       );
 
       const nameSearchResult = await TeacherRepository.getTeacherDirectory(null, "SearchName", tx);
-      expect(nameSearchResult.rows.length).toBe(1);
+      expect(nameSearchResult.rows).toHaveLength(1);
       expect(nameSearchResult.rows[0].id).toBe(t1.teacher.id);
 
       const emailSearchResult = await TeacherRepository.getTeacherDirectory(null, "searchemail@example.com", tx);
-      expect(emailSearchResult.rows.length).toBe(1);
+      expect(emailSearchResult.rows).toHaveLength(1);
       expect(emailSearchResult.rows[0].id).toBe(t2.teacher.id);
     });
   });
@@ -65,11 +65,11 @@ describe("TeacherRepository", () => {
 
       const firstPageArgs = new PaginationArgs({ first: 1, page: 1 });
       const limited = await TeacherRepository.getTeacherDirectory(firstPageArgs, undefined, tx);
-      expect(limited.rows.length).toBe(1);
+      expect(limited.rows).toHaveLength(1);
 
       const secondPageArgs = new PaginationArgs({ first: 1, page: 2 });
       const offsetResult = await TeacherRepository.getTeacherDirectory(secondPageArgs, undefined, tx);
-      expect(offsetResult.rows.length).toBe(1);
+      expect(offsetResult.rows).toHaveLength(1);
       expect(offsetResult.rows[0].id).not.toBe(limited.rows[0].id);
     });
   });
@@ -93,13 +93,13 @@ describe("TeacherRepository", () => {
       const t1 = await setupTeacher(tx, { name: "SoftDeleted Teacher" }, { status: "ACTIVATED" });
 
       const beforeDelete = await TeacherRepository.getTeacherDirectory(null, "SoftDeleted", tx);
-      expect(beforeDelete.rows.length).toBe(1);
+      expect(beforeDelete.rows).toHaveLength(1);
 
       // Soft delete user
       await tx.update(users).set({ deletedAt: new Date() }).where(eq(users.id, t1.user.id));
 
       const afterDelete = await TeacherRepository.getTeacherDirectory(null, "SoftDeleted", tx);
-      expect(afterDelete.rows.length).toBe(0);
+      expect(afterDelete.rows).toHaveLength(0);
     });
   });
 
@@ -285,7 +285,7 @@ describe("TeacherRepository", () => {
         await setupTeacher(tx, { name: "Other Teacher" });
 
         const results = await TeacherRepository.searchTeachers("SearchMe", 10, tx);
-        expect(results.length).toBe(1);
+        expect(results).toHaveLength(1);
         expect(results[0].id).toBe(teacher.id);
 
         const allResults = await TeacherRepository.searchTeachers("", 10, tx);
@@ -359,7 +359,7 @@ describe("TeacherRepository", () => {
       expect(profile).toBeNull();
 
       const search = await TeacherRepository.searchTeachers("NonExistentName", 10);
-      expect(search.length).toBe(0);
+      expect(search).toHaveLength(0);
 
       const directory = await TeacherRepository.getTeacherDirectory(new PaginationArgs({ first: 1, page: 1 }));
       expect(directory.rows.length).toBeGreaterThanOrEqual(0);

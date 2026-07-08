@@ -35,16 +35,16 @@ describe("Teacher Banking Details Versioning & History", () => {
   const expectBankingUpdateToFail = async (
     tx: DBTransaction,
     bankingId: string,
-    update: Partial<import("../../../types").TeacherBankingDetailsHistoryInsertInput>,
-    expectedError: string
-  ) => {
+    update: Partial<import("../../../types").TeacherBankingDetailsHistoryInsertInput>
+  ): Promise<Error> => {
+    let errorCaught: unknown = null;
     try {
       await TeacherBankingRepository.updateBankingDetails(bankingId, update, tx);
-      expect(true).toBe(false);
     } catch (error) {
-      const err = error as Error;
-      expect(err.message).toContain(expectedError);
+      errorCaught = error;
     }
+    expect(errorCaught).not.toBeNull();
+    return errorCaught as Error;
   };
 
   test("Allows historical record updates by closing old and inserting new", async () => {
@@ -82,7 +82,7 @@ describe("Teacher Banking Details Versioning & History", () => {
         .from(teacherBankingDetailsHistory)
         .where(eq(teacherBankingDetailsHistory.teacherId, teacher.id))) as TeacherBankingDetailsHistorySelectType[];
 
-      expect(dbRows.length).toBe(2);
+      expect(dbRows).toHaveLength(2);
 
       const oldRecord = dbRows.find(r => r.id === banking1.id);
       const newRecord = dbRows.find(r => r.id === banking2.id);
@@ -123,12 +123,8 @@ describe("Teacher Banking Details Versioning & History", () => {
         })
         .returning()) as [TeacherBankingDetailsHistorySelectType];
 
-      await expectBankingUpdateToFail(
-        tx,
-        banking.id,
-        { beneficiaryName: "Cheater Name" },
-        "Cannot modify historical banking records"
-      );
+      const error = await expectBankingUpdateToFail(tx, banking.id, { beneficiaryName: "Cheater Name" });
+      expect(error.message).toContain("Cannot modify historical banking records");
     });
     testLogger.info("Historical closed record immutability test passed.");
   });
@@ -138,12 +134,8 @@ describe("Teacher Banking Details Versioning & History", () => {
     await runInRollback(async tx => {
       const { banking } = await setupBankingTest(tx, "Active Bank", "Original Name");
 
-      await expectBankingUpdateToFail(
-        tx,
-        banking.id,
-        { beneficiaryName: "Cheater Name" },
-        "Cannot modify banking fields directly"
-      );
+      const error = await expectBankingUpdateToFail(tx, banking.id, { beneficiaryName: "Cheater Name" });
+      expect(error.message).toContain("Cannot modify banking fields directly");
     });
     testLogger.info("Active record banking fields immutability test passed.");
   });
@@ -160,7 +152,7 @@ describe("Teacher Banking Details Versioning & History", () => {
         .from(teacherBankingDetailsHistory)
         .where(eq(teacherBankingDetailsHistory.teacherId, teacher.id))) as TeacherBankingDetailsHistorySelectType[];
 
-      expect(dbRows.length).toBe(1);
+      expect(dbRows).toHaveLength(1);
     });
     testLogger.info("Non-banking fields updates test passed.");
   });
@@ -195,15 +187,12 @@ describe("Teacher Banking Details Versioning & History", () => {
       );
 
       // Attempt to modify a banking field
-      await expectBankingUpdateToFail(
-        tx,
-        banking.id,
-        { bankName: "Hack Bank" },
-        "Cannot modify verified banking records"
-      );
+      const modifyError = await expectBankingUpdateToFail(tx, banking.id, { bankName: "Hack Bank" });
+      expect(modifyError.message).toContain("Cannot modify verified banking records");
 
       // Attempt to un-verify
-      await expectBankingUpdateToFail(tx, banking.id, { verifiedAt: null }, "Cannot modify verified banking records");
+      const unverifyError = await expectBankingUpdateToFail(tx, banking.id, { verifiedAt: null });
+      expect(unverifyError.message).toContain("Cannot modify verified banking records");
     });
     testLogger.info("Verified record immutability test passed.");
   });

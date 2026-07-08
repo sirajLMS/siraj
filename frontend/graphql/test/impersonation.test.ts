@@ -10,11 +10,11 @@ import {
   startImpersonationMutationDocument,
 } from "../sharedDocuments/auth.documents";
 import {
-  assertOperationDenied,
   authenticatedRequest,
   cleanupTestEntities,
   cleanupTestSuperAdmin,
   loginAndProvision,
+  loginDemoUser,
   provisionTestSuperAdmin,
 } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
@@ -89,6 +89,13 @@ describe("GraphQL Impersonation Integration Tests", () => {
     const sa = await provisionTestSuperAdmin(seedSuperAdminToken, "ImpersonationTestSA");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
+
+    expect(seedSuperAdminToken).toBeTruthy();
+    expect(superAdminToken).toBeTruthy();
+    expect(superAdminUserId).toBeTruthy();
+    expect(teacherUserId).toBeTruthy();
+    expect(parentId).toBeTruthy();
+    expect(studentId).toBeTruthy();
   });
 
   test("impersonation status is inactive before starting a session", async () => {
@@ -193,10 +200,14 @@ describe("GraphQL Impersonation Integration Tests", () => {
   test("non-super-admin cannot start impersonation", async () => {
     if (!teacherUserId || !parentUserId) throw new Error("Missing setup data");
 
-    await assertOperationDenied("teacher_default", "mutate", startImpersonationMutationDocument, {
-      targetUserId: parentUserId,
-      reason: null,
-    });
+    const token = await loginDemoUser("teacher_default");
+    const result = await testClient.mutate({
+      mutation: startImpersonationMutationDocument,
+      variables: { targetUserId: parentUserId, reason: null },
+      context: { headers: { Authorization: `Bearer ${token}` } },
+    } as Parameters<typeof testClient.mutate>[0]);
+
+    expect(result.error).toBeDefined();
   });
 
   afterAll(async () => {

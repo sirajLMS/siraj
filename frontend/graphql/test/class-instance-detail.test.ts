@@ -84,8 +84,9 @@ describe("GraphQL Class Instance Detail Query", () => {
   test("unrelated teacher_default user is denied", async () => {
     if (!classInstanceId) throw new Error("Missing class instance");
 
-    await assertOperationDenied("teacher_default", "query", classInstanceQueryDocument, {
+    const denied = await assertOperationDenied("teacher_default", "query", classInstanceQueryDocument, {
       id: classInstanceId,
     });
+    expect(denied).toBeUndefined();
   });
 });

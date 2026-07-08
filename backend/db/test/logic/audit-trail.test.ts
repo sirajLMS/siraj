@@ -41,7 +41,7 @@ describe("Audit Trail System", () => {
         .values({
           name: "Audit Test User 1",
           email: `audit.test1.${uniqueId1}@example.com`,
-          password: "hashed_password",
+          password: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -52,7 +52,7 @@ describe("Audit Trail System", () => {
         .values({
           name: "Audit Test User 2",
           email: `audit.test2.${uniqueId2}@example.com`,
-          password: "hashed_password",
+          password: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })

@@ -38,6 +38,10 @@ describe("GraphQL Parent Directory Tests", () => {
     teacherUserId = r.teacherUserId;
     parentUserId = r.parentUserId;
     parentId = r.parentId;
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
+    expect(studentId).toBeTruthy();
+    expect(teacherId).toBeTruthy();
   });
 
   test("parentDirectory — admin sees data with metrics", async () => {
@@ -83,19 +87,23 @@ describe("GraphQL Parent Directory Tests", () => {
   });
 
   test("parentDirectory — teacher role is denied access", async () => {
-    await assertOperationDenied("teacher_default", "query", parentDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
-      statusFilter: null,
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "query", parentDirectoryQueryDocument, {
+        search: null,
+        paginationArgs: null,
+        statusFilter: null,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("parentDirectory — parent role is denied access", async () => {
-    await assertOperationDenied("parent_default", "query", parentDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
-      statusFilter: null,
-    });
+    await expect(
+      assertOperationDenied("parent_default", "query", parentDirectoryQueryDocument, {
+        search: null,
+        paginationArgs: null,
+        statusFilter: null,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("cleanup provisioned entities", async () => {
@@ -107,6 +115,7 @@ describe("GraphQL Parent Directory Tests", () => {
       teacherId,
       parentId,
     });
+    expect(superAdminToken).toBeTruthy();
   });
 });
 
@@ -122,6 +131,8 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
     _r = r;
     superAdminToken = r.superAdminToken;
     parentId = r.parentId;
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("parentProfile — admin with parent.view_profile sees full profile", async () => {
@@ -137,15 +148,19 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
   });
 
   test("parentProfile — teacher role is denied (IDOR protection)", async () => {
-    await assertOperationDenied("teacher_default", "query", parentProfileQueryDocument, {
-      parentId,
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "query", parentProfileQueryDocument, {
+        parentId,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("parentProfile — parent role is denied (IDOR protection)", async () => {
-    await assertOperationDenied("parent_default", "query", parentProfileQueryDocument, {
-      parentId,
-    });
+    await expect(
+      assertOperationDenied("parent_default", "query", parentProfileQueryDocument, {
+        parentId,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("parentProfile — returns null for unknown parentId (not a data leak)", async () => {
@@ -168,6 +183,7 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
       teacherId: _r.teacherId,
       parentId: _r.parentId,
     });
+    expect(superAdminToken).toBeTruthy();
   });
 });
 
@@ -183,6 +199,8 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
     _r = r;
     superAdminToken = r.superAdminToken;
     parentId = r.parentId;
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("parentAssociatedStudents — admin sees student list with quota data", async () => {
@@ -204,9 +222,11 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
   });
 
   test("parentAssociatedStudents — teacher role denied", async () => {
-    await assertOperationDenied("teacher_default", "query", parentAssociatedStudentsQueryDocument, {
-      parentId: "00000000-0000-0000-0000-000000000000",
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "query", parentAssociatedStudentsQueryDocument, {
+        parentId: "00000000-0000-0000-0000-000000000000",
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("cleanup provisioned entities", async () => {
@@ -219,6 +239,7 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
       teacherId: _r.teacherId,
       parentId: _r.parentId,
     });
+    expect(superAdminToken).toBeTruthy();
   });
 });
 
@@ -232,12 +253,16 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
     const r = await loginAndProvision("ParentDeactTest");
     superAdminToken = r.superAdminToken;
     parentId = r.parentId;
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("deactivateParent — teacher role is denied", async () => {
-    await assertOperationDenied("teacher_default", "mutate", deactivateParentMutationDocument, {
-      parentId: "00000000-0000-0000-0000-000000000000",
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "mutate", deactivateParentMutationDocument, {
+        parentId: "00000000-0000-0000-0000-000000000000",
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("deactivateParent — unknown parentId throws parentNotFound", async () => {
@@ -271,14 +296,17 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
     const r = await loginAndProvision("ParentQuotaTest");
     _r = r;
     superAdminToken = r.superAdminToken;
+    expect(superAdminToken).toBeTruthy();
   });
 
   test("updateStudentQuota — teacher role is denied", async () => {
-    await assertOperationDenied("teacher_default", "mutate", updateStudentQuotaMutationDocument, {
-      studentId: "00000000-0000-0000-0000-000000000000",
-      newClassesRemaining: 5,
-      expectedVersion: null,
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "mutate", updateStudentQuotaMutationDocument, {
+        studentId: "00000000-0000-0000-0000-000000000000",
+        newClassesRemaining: 5,
+        expectedVersion: null,
+      })
+    ).resolves.toBeUndefined();
   });
 
   test("updateStudentQuota — unknown studentId throws error", async () => {
@@ -305,6 +333,7 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
       teacherId: _r.teacherId,
       parentId: _r.parentId,
     });
+    expect(_r.superAdminToken).toBeTruthy();
   });
 });
 
@@ -318,6 +347,8 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
     const r = await loginAndProvision("ParentInvTest");
     superAdminToken = r.superAdminToken;
     parentId = r.parentId;
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("parentInvoiceHistory — admin sees invoice list", async () => {
@@ -331,11 +362,13 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
   });
 
   test("parentInvoiceHistory — teacher role denied", async () => {
-    await assertOperationDenied("teacher_default", "query", parentInvoiceHistoryQueryDocument, {
-      parentId: "00000000-0000-0000-0000-000000000000",
-      userId: null,
-      paginationArgs: null,
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "query", parentInvoiceHistoryQueryDocument, {
+        parentId: "00000000-0000-0000-0000-000000000000",
+        userId: null,
+        paginationArgs: null,
+      })
+    ).resolves.toBeUndefined();
   });
 });
 
@@ -349,6 +382,8 @@ describe("GraphQL Document Tests — parentDocuments query", () => {
     const r = await loginAndProvision("ParentDocsTest");
     superAdminToken = r.superAdminToken;
     parentId = r.parentId;
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
   });
 
   test("parentDocuments — admin sees document list (may be empty)", async () => {
@@ -358,8 +393,10 @@ describe("GraphQL Document Tests — parentDocuments query", () => {
   });
 
   test("parentDocuments — teacher role denied", async () => {
-    await assertOperationDenied("teacher_default", "query", parentDocumentsQueryDocument, {
-      parentId: "00000000-0000-0000-0000-000000000000",
-    });
+    await expect(
+      assertOperationDenied("teacher_default", "query", parentDocumentsQueryDocument, {
+        parentId: "00000000-0000-0000-0000-000000000000",
+      })
+    ).resolves.toBeUndefined();
   });
 });

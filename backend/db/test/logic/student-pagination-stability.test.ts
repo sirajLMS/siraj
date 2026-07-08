@@ -21,7 +21,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       .values({
         name: "Pagination Test User",
         email: `pagination-test-${randomUUID()}@example.com`,
-        password: "test-password-hash",
+        password: randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -187,7 +187,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtAsc
     );
-    expect(page1.data.length).toBe(2);
+    expect(page1.data).toHaveLength(2);
     const page1Ids = page1.data.map(s => s.id);
 
     // Update a student from page 1 — cursor should still point past it
@@ -203,10 +203,10 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtAsc
     );
-    expect(page2.data.length).toBe(2);
+    expect(page2.data).toHaveLength(2);
 
     const overlap = page1Ids.filter(id => page2.data.map(s => s.id).includes(id));
-    expect(overlap.length).toBe(0);
+    expect(overlap).toHaveLength(0);
     testLogger.info("✓ No overlap between pages after student update");
   });
 
@@ -235,14 +235,14 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtDesc
     );
-    expect(page1.data.length).toBe(2);
+    expect(page1.data).toHaveLength(2);
 
     const page2 = await StudentRepository.fetchWithFilters(
       new PaginationArgs({ first: 2, after: page1.pageInfo.endCursor }),
       { parentId: testParent.id } as StudentFilterArgs,
       orderByCreatedAtDesc
     );
-    expect(page2.data.length).toBe(2);
+    expect(page2.data).toHaveLength(2);
 
     const allIds = [...page1.data, ...page2.data].map(s => s.id);
     expect(new Set(allIds).size).toBe(4);
