@@ -3,7 +3,7 @@ import { AccountStatus, Gender, PaymentMethod } from "@/frontend/graphql/generat
 
 const coreSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
 });
 
 const ownTeacherSchema = z.object({
@@ -14,7 +14,7 @@ const ownTeacherSchema = z.object({
 const adminTeacherSchema = ownTeacherSchema.extend({
   nationalId: z.string().optional(),
   dateOfBirth: z.string().optional(),
-  gender: z.nativeEnum(Gender).optional().nullable(),
+  gender: z.enum(Gender).optional().nullable(),
   address: z.string().optional(),
   qualifications: z.string().optional(),
   zoomUsername: z.string().optional(),
@@ -22,12 +22,12 @@ const adminTeacherSchema = ownTeacherSchema.extend({
   timezone: z.string().optional(),
   hourlyRate: z.string().optional(),
   rateCurrency: z.string().optional(),
-  paymentMethod: z.nativeEnum(PaymentMethod).optional().nullable(),
-  status: z.nativeEnum(AccountStatus).optional().nullable(),
+  paymentMethod: z.enum(PaymentMethod).optional().nullable(),
+  status: z.enum(AccountStatus).optional().nullable(),
 });
 
-export const teacherOwnEditSchema = coreSchema.merge(ownTeacherSchema);
-export const teacherAdminEditSchema = coreSchema.merge(adminTeacherSchema);
+export const teacherOwnEditSchema = z.object({ ...coreSchema.shape, ...ownTeacherSchema.shape });
+export const teacherAdminEditSchema = z.object({ ...coreSchema.shape, ...adminTeacherSchema.shape });
 
 export type TeacherOwnEditFormData = z.infer<typeof teacherOwnEditSchema>;
 export type TeacherAdminEditFormData = z.infer<typeof teacherAdminEditSchema>;

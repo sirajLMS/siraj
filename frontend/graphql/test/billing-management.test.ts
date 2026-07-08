@@ -126,39 +126,33 @@ describe("GraphQL: createManualInvoice mutation", () => {
   });
 
   test("teacher role is denied", async () => {
-    await expect(
-      assertOperationDenied(
-        "teacher_default",
-        "mutate",
-        createManualInvoiceMutationDocument,
-        invoiceVars(NIL_UUID, "100.00")
-      )
-    ).resolves.toBeUndefined();
+    await assertOperationDenied(
+      "teacher_default",
+      "mutate",
+      createManualInvoiceMutationDocument,
+      invoiceVars(NIL_UUID, "100.00")
+    );
   });
 
   test("parent role is denied", async () => {
-    await expect(
-      assertOperationDenied(
-        "parent_default",
-        "mutate",
-        createManualInvoiceMutationDocument,
-        invoiceVars(NIL_UUID, "100.00")
-      )
-    ).resolves.toBeUndefined();
+    await assertOperationDenied(
+      "parent_default",
+      "mutate",
+      createManualInvoiceMutationDocument,
+      invoiceVars(NIL_UUID, "100.00")
+    );
   });
 
   test("invalid negative amount returns validation error", async () => {
-    await expect(
-      expectMutationError(
-        state.superAdminToken,
-        createManualInvoiceMutationDocument,
-        invoiceVars(state.parentId, "-50.00")
-      )
-    ).resolves.toBeUndefined();
+    await expectMutationError(
+      state.superAdminToken,
+      createManualInvoiceMutationDocument,
+      invoiceVars(state.parentId, "-50.00")
+    );
   });
 
   test("cleanup provisioned entities", async () => {
-    await expect(cleanupAll(state)).resolves.toBeUndefined();
+    await cleanupAll(state);
   });
 });
 
@@ -201,30 +195,24 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("Threat 1 — double settlement: second markInvoicePaid returns error", async () => {
-    await expect(
-      expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
-        invoiceId: unpaidInvoiceId,
-        expectedVersion: null,
-      })
-    ).resolves.toBeUndefined();
+    await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
+      invoiceId: unpaidInvoiceId,
+      expectedVersion: null,
+    });
   });
 
   test("teacher role is denied markInvoicePaid", async () => {
-    await expect(
-      assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
-        invoiceId: NIL_UUID,
-        expectedVersion: null,
-      })
-    ).resolves.toBeUndefined();
+    await assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
+      invoiceId: NIL_UUID,
+      expectedVersion: null,
+    });
   });
 
   test("Threat 2 — non-existent invoice ID returns error", async () => {
-    await expect(
-      expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
-        invoiceId: NIL_UUID,
-        expectedVersion: null,
-      })
-    ).resolves.toBeUndefined();
+    await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
+      invoiceId: NIL_UUID,
+      expectedVersion: null,
+    });
   });
 
   test("create a second UNPAID invoice for delete tests", async () => {
@@ -241,18 +229,14 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("Threat 2 — double deletion: second deleteInvoice returns error", async () => {
-    await expect(
-      expectMutationError(state.superAdminToken, deleteInvoiceMutationDocument, { invoiceId: deleteInvoiceId })
-    ).resolves.toBeUndefined();
+    await expectMutationError(state.superAdminToken, deleteInvoiceMutationDocument, { invoiceId: deleteInvoiceId });
   });
 
   test("teacher role is denied deleteInvoice", async () => {
-    await expect(
-      assertOperationDenied("teacher_default", "mutate", deleteInvoiceMutationDocument, { invoiceId: NIL_UUID })
-    ).resolves.toBeUndefined();
+    await assertOperationDenied("teacher_default", "mutate", deleteInvoiceMutationDocument, { invoiceId: NIL_UUID });
   });
 
   test("cleanup provisioned entities", async () => {
-    await expect(cleanupAll(state)).resolves.toBeUndefined();
+    await cleanupAll(state);
   });
 });

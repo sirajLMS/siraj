@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const coreSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
 });
 
 const ownParentSchema = z.object({
@@ -23,8 +23,8 @@ const adminParentSchema = ownParentSchema.extend({
   timezone: z.string().optional(),
 });
 
-export const parentOwnEditSchema = coreSchema.merge(ownParentSchema);
-export const parentAdminEditSchema = coreSchema.merge(adminParentSchema);
+export const parentOwnEditSchema = z.object({ ...coreSchema.shape, ...ownParentSchema.shape });
+export const parentAdminEditSchema = z.object({ ...coreSchema.shape, ...adminParentSchema.shape });
 
 export type ParentOwnEditFormData = z.infer<typeof parentOwnEditSchema>;
 export type ParentAdminEditFormData = z.infer<typeof parentAdminEditSchema>;

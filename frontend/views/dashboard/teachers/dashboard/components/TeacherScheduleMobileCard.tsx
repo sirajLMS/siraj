@@ -4,7 +4,6 @@ import { AccessTimeOutlined, VideocamOffOutlined, VideocamOutlined, VisibilityOu
 import { alpha, Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/ui";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -70,8 +69,8 @@ function renderFooterAction(
   onRequestLeave?: (id: string) => void
 ) {
   const actions = resolveTeacherScheduleSessionActions({
-    executionState: row.executionState as ClassExecutionState | undefined,
-    outcome: row.outcome as ClassOutcome | undefined,
+    executionState: row.executionState,
+    outcome: row.outcome,
     activateEnabled: row.activateEnabled,
     canActivate,
     videoEnabled: row.videoEnabled,
@@ -381,8 +380,8 @@ export function TeacherScheduleMobileCard({
   const isLive = row.isLive === true;
   const studentHrefValue = row.studentId ? studentHref(row.studentId) : undefined;
   const sessionActions = resolveTeacherScheduleSessionActions({
-    executionState: row.executionState as ClassExecutionState | undefined,
-    outcome: row.outcome as ClassOutcome | undefined,
+    executionState: row.executionState,
+    outcome: row.outcome,
     activateEnabled: row.activateEnabled,
     canActivate,
     videoEnabled: row.videoEnabled,

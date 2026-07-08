@@ -213,7 +213,7 @@ function MockStudentHistoryContainer() {
   };
 
   const handlePrint = () => {
-    window.print();
+    globalThis.print();
   };
 
   return (

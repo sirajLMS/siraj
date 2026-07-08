@@ -55,7 +55,7 @@ export function RescheduleTrackingView({
 
   const handleStatusFilterChange = (e: SelectChangeEvent<LeaveRequestStatus | "">) => {
     const value = e.target.value;
-    onFilterChange(value === "" ? null : (value as LeaveRequestStatus));
+    onFilterChange(value === "" ? null : value);
   };
 
   const filterSelect = (

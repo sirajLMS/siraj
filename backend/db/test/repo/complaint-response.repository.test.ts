@@ -65,7 +65,7 @@ async function setupAndCreateResponse(
       body: overrides.body,
       emailSent: overrides.emailSent,
       responderUserId: overrides.responderUserId ?? user.id,
-    } as CreateResponseInput,
+    },
     tx
   );
   return { complaint, user, result };

@@ -85,7 +85,7 @@ export function StudentHistoryContainer() {
   }, [currentMonth, setCurrentMonth]);
 
   const handlePrint = useCallback(() => {
-    window.print();
+    globalThis.print();
   }, []);
 
   const handleSelectDay = useCallback(

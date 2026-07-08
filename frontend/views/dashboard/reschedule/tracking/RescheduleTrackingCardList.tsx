@@ -148,12 +148,12 @@ const CardFooter = ({
         category="trackingStatus"
         status={row.status ?? LeaveRequestStatus.Pending}
         label={
-          row.status != null
-            ? getTrackingStatusLabel(row.status ?? LeaveRequestStatus.Pending, { ...labels, filterAll: "" })
-            : ""
+          row.status === null
+            ? ""
+            : getTrackingStatusLabel(row.status ?? LeaveRequestStatus.Pending, { ...labels, filterAll: "" })
         }
         icon={
-          row.status != null ? getTrackingStatusIcon(row.status ?? LeaveRequestStatus.Pending, { fontSize: 14 }) : null
+          row.status === null ? null : getTrackingStatusIcon(row.status ?? LeaveRequestStatus.Pending, { fontSize: 14 })
         }
       />
     </Box>

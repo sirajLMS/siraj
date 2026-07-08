@@ -9,8 +9,7 @@ import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AccountSection } from "./sections/AccountSection";
 import { ContactSection } from "./sections/ContactSection";
 import { ZoomSection } from "./sections/ZoomSection";
-import type { TeacherEditData } from "./teacherProfileFormTypes";
-import { type TeacherOwnEditFormData, teacherOwnEditSchema } from "./teacherProfileFormTypes";
+import { type TeacherEditData, type TeacherOwnEditFormData, teacherOwnEditSchema } from "./teacherProfileFormTypes";
 
 export type { TeacherOwnEditFormData } from "./teacherProfileFormTypes";
 

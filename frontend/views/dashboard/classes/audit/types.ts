@@ -1,18 +1,10 @@
-import type {
-  AdminNoteInfo,
-  CommunicationLogEntry,
-  GroupClassAudit,
-  GroupClassStudent,
-  OnlineMeetingInfo,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-
 export type {
   AdminNoteInfo as AdminNoteData,
   CommunicationLogEntry as CommunicationLogEntryData,
   GroupClassAudit as ClassAuditData,
   GroupClassStudent as RegisteredStudent,
   OnlineMeetingInfo as MeetingInfo,
-};
+} from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type AttendanceStatus = "pending" | "present" | "absent";
 

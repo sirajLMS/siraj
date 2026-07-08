@@ -138,8 +138,8 @@ export function RescheduleTrackingDataGrid({
             <StatusBadge
               category="trackingStatus"
               status={status}
-              label={row.status != null ? getTrackingStatusLabel(status, { ...labels, filterAll: "" }) : ""}
-              icon={row.status != null ? getTrackingStatusIcon(status, { fontSize: 14, color: "inherit" }) : null}
+              label={row.status === null ? "" : getTrackingStatusLabel(status, { ...labels, filterAll: "" })}
+              icon={row.status === null ? null : getTrackingStatusIcon(status, { fontSize: 14, color: "inherit" })}
             />
           );
         },

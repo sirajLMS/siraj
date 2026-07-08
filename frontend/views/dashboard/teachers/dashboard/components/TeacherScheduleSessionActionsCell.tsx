@@ -3,7 +3,6 @@
 import { VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
@@ -34,8 +33,8 @@ export function TeacherScheduleSessionActionsCell({
   onRequestLeave,
 }: Readonly<TeacherScheduleSessionActionsCellProps>) {
   const actions = resolveTeacherScheduleSessionActions({
-    executionState: row.executionState as ClassExecutionState | undefined,
-    outcome: row.outcome as ClassOutcome | undefined,
+    executionState: row.executionState,
+    outcome: row.outcome,
     activateEnabled: row.activateEnabled,
     canActivate,
     videoEnabled: row.videoEnabled,

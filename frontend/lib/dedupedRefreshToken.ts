@@ -19,10 +19,8 @@ let inFlightRefresh: Promise<RefreshTokenMutationResult> | null = null;
 export function dedupedRefreshToken(
   refresh: () => Promise<RefreshTokenMutationResult>
 ): Promise<RefreshTokenMutationResult> {
-  if (!inFlightRefresh) {
-    inFlightRefresh = refresh().finally(() => {
-      inFlightRefresh = null;
-    });
-  }
+  inFlightRefresh ??= refresh().finally(() => {
+    inFlightRefresh = null;
+  });
   return inFlightRefresh;
 }

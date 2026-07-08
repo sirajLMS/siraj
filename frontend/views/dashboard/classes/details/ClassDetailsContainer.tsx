@@ -20,7 +20,7 @@ import { useClassMutations } from "./hooks/useClassMutations";
 import { useEventLogDownload } from "./hooks/useEventLogDownload";
 import { formatClassDetailDate } from "./types";
 
-function InvalidIdState({ t }: { t: ReturnType<typeof useTranslations> }) {
+function InvalidIdState({ t }: { readonly t: ReturnType<typeof useTranslations> }) {
   return (
     <Box sx={theme => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>
       {t("invalidClassId")}

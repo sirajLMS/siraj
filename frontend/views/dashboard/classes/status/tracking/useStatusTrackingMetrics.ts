@@ -29,7 +29,7 @@ const METRIC_DEFINITIONS: readonly Omit<RawMetric, "count">[] = [
 ];
 
 function computeMetricCounts(rows: readonly StatusTrackingRow[]): MetricCounts {
-  const counts: Record<keyof MetricCounts, number> = { regular: 0, pending: 0, suspended: 0, on_leave: 0 };
+  const counts = { regular: 0, pending: 0, suspended: 0, on_leave: 0 };
   for (const row of rows) {
     const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
     if (status === SessionStatus.REGULAR) counts.regular += 1;
@@ -37,7 +37,7 @@ function computeMetricCounts(rows: readonly StatusTrackingRow[]): MetricCounts {
     else if (status === SessionStatus.SUSPENDED_PENDING) counts.suspended += 1;
     else if (status === SessionStatus.ON_LEAVE) counts.on_leave += 1;
   }
-  return counts as MetricCounts;
+  return counts;
 }
 
 function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>): readonly RawMetric[] {

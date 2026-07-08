@@ -68,7 +68,7 @@ export function StudentHistoryMobile({
     return session ? [session] : [];
   }, [selectedDay, classes]);
 
-  const dateStr = selectedDay !== null ? `Day ${selectedDay} of ${monthStr}` : `${monthStr}`;
+  const dateStr = selectedDay === null ? `${monthStr}` : `Day ${selectedDay} of ${monthStr}`;
 
   const streakDays = useMemo(
     () => deriveStreakDays(classes, currentMonth, selectedWeek),

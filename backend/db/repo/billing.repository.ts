@@ -15,7 +15,6 @@ import {
 import type { InvoiceStatus, InvoiceType, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
-import type { PaginationArgs } from "@/backend/types";
 import type { DBTransaction } from "../db.types";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;
@@ -331,7 +330,7 @@ export namespace BillingRepository {
       .leftJoin(users, eq(parents.userId, users.id))
       .where(inArray(parents.id, parentIds));
 
-    return new Map(parentUsers.map(p => [p.parentId as string, p as ParentUserRow]));
+    return new Map(parentUsers.map(p => [p.parentId, p]));
   }
 
   function groupInvoicesByParent(overdueInvoices: OverdueInvoiceRow[]): Map<string, OverdueInvoiceRow[]> {
@@ -440,7 +439,7 @@ export namespace BillingRepository {
 
   export const getInvoicesForParent = async (
     parentId: string,
-    pagination: PaginationArgs | null = null,
+    pagination: Types.PaginationArgs | null = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
     const queryDb = tx ?? db;
@@ -470,7 +469,7 @@ export namespace BillingRepository {
     queryDb: DBTransaction | typeof db,
     parentId: string,
     whereCondition: SQL | undefined,
-    pagination: PaginationArgs
+    pagination: Types.PaginationArgs
   ): Promise<Types.InvoiceHistoryPaginatedResult> {
     const perPage = pagination.perPage;
     const currentPage = pagination.currentPage;
@@ -510,7 +509,7 @@ export namespace BillingRepository {
   }
 
   export const getAllInvoices = async (
-    pagination: PaginationArgs | null = null,
+    pagination: Types.PaginationArgs | null = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
     const queryDb = tx ?? db;

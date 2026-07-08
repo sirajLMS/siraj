@@ -105,7 +105,7 @@ export function StudentStatusContainer() {
       await changeStatus({
         variables: {
           studentId,
-          newStatus: status as unknown as StudentStatus,
+          newStatus: status,
           expectedVersion: versionRef.current,
         },
       });

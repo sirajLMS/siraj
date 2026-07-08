@@ -8,7 +8,7 @@ import { authRateLimits, passwordResetTokens } from "../../schema";
 
 /** Generate a unique IP address to avoid collision across parallel test runs. */
 function uniqueTestIp(): string {
-  const hex = randomUUID().replace(/-/g, "");
+  const hex = randomUUID().replaceAll("-", "");
   // Build a valid IPv4 in 10.x.y.z range (3 octets from UUID hex)
   const x = Number.parseInt(hex.slice(0, 2), 16); // 0-255
   const y = Number.parseInt(hex.slice(2, 4), 16); // 0-255

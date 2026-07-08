@@ -37,7 +37,7 @@ function TrackingLoadingState() {
   );
 }
 
-function TrackingErrorState({ message }: { message: string }) {
+function TrackingErrorState({ message }: Readonly<{ message: string }>) {
   return <Box sx={errorSx}>{message}</Box>;
 }
 
