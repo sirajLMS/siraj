@@ -1,0 +1,116 @@
+import { readMigrationFiles } from "drizzle-orm/migrator";
+import { sql } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import logger from "@/backend/lib/logger";
+
+const MIGRATIONS_FOLDER = "./backend/drizzle";
+const MIGRATIONS_SCHEMA = "drizzle";
+const MIGRATIONS_TABLE = "__drizzle_migrations";
+
+type MigrationRow = {
+  hash: string;
+  folderMillis: number;
+  name: string;
+};
+
+async function queryHasRows(query: ReturnType<typeof sql>): Promise<boolean> {
+  const result = await db.execute(query);
+  return result.rows.length > 0;
+}
+
+async function isMigrationApplied(migrationName: string): Promise<boolean> {
+  switch (migrationName) {
+    case "20260707021729_extensions":
+      return queryHasRows(sql`SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm' LIMIT 1`);
+    case "20260707021730_easy_komodo":
+      return queryHasRows(
+        sql`SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users' LIMIT 1`,
+      );
+    case "20260707021731_combined_custom_logic":
+      return queryHasRows(sql`SELECT 1 FROM pg_proc WHERE proname = 'current_user_id' LIMIT 1`);
+    case "20260708133349_ancient_microchip":
+      return queryHasRows(sql`
+        SELECT 1
+        FROM pg_enum e
+        JOIN pg_type t ON e.enumtypid = t.oid
+        WHERE t.typname = 'app_permission'
+          AND e.enumlabel = 'auth.edit_own_profile'
+        LIMIT 1
+      `);
+    case "20260708191500_class_avatar_urls":
+      return queryHasRows(sql`
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'class_subjects'
+          AND column_name = 'avatar_url'
+        LIMIT 1
+      `);
+    default:
+      return false;
+  }
+}
+
+async function ensureMigrationsTable(): Promise<void> {
+  await db.execute(sql`CREATE SCHEMA IF NOT EXISTS ${sql.identifier(MIGRATIONS_SCHEMA)}`);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS ${sql.identifier(MIGRATIONS_SCHEMA)}.${sql.identifier(MIGRATIONS_TABLE)} (
+      id SERIAL PRIMARY KEY,
+      hash text NOT NULL,
+      created_at bigint,
+      name text,
+      applied_at timestamp with time zone DEFAULT now()
+    )
+  `);
+}
+
+async function getRecordedNames(): Promise<Set<string>> {
+  const result = await db.execute(
+    sql`SELECT name FROM ${sql.identifier(MIGRATIONS_SCHEMA)}.${sql.identifier(MIGRATIONS_TABLE)} WHERE name IS NOT NULL`,
+  );
+  return new Set(result.rows.map(row => String(row.name)));
+}
+
+async function recordMigration(migration: MigrationRow): Promise<void> {
+  await db.execute(sql`
+    INSERT INTO ${sql.identifier(MIGRATIONS_SCHEMA)}.${sql.identifier(MIGRATIONS_TABLE)} (hash, created_at, name)
+    VALUES (${migration.hash}, ${migration.folderMillis}, ${migration.name})
+  `);
+}
+
+export async function baselineDrizzleMigrations(): Promise<void> {
+  const migrations = readMigrationFiles({ migrationsFolder: MIGRATIONS_FOLDER }) as MigrationRow[];
+  await ensureMigrationsTable();
+  const recordedNames = await getRecordedNames();
+
+  let baselined = 0;
+  for (const migration of migrations) {
+    if (recordedNames.has(migration.name)) {
+      continue;
+    }
+
+    const applied = await isMigrationApplied(migration.name);
+    if (!applied) {
+      logger.log(`Baseline stop: ${migration.name} is not applied in the database yet`);
+      break;
+    }
+
+    await recordMigration(migration);
+    recordedNames.add(migration.name);
+    baselined += 1;
+    logger.log(`Baselined migration journal entry: ${migration.name}`);
+  }
+
+  if (baselined === 0) {
+    logger.log("No drizzle migration journal baselining was needed");
+  } else {
+    logger.log(`Baselined ${baselined} migration journal entr${baselined === 1 ? "y" : "ies"}`);
+  }
+}
+
+if (require.main === module) {
+  baselineDrizzleMigrations().catch((error: unknown) => {
+    logger.error("Baseline failed:", error);
+    process.exit(1);
+  });
+}

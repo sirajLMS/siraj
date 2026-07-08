@@ -26,11 +26,18 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Baseline drizzle migration journal
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY }}
+          DB_PROVIDER: neon
+          NODE_ENV: development
+        run: bun run scripts/baseline-drizzle-migrations.ts
+
       - name: Run database migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY }}
           DB_PROVIDER: neon
-          # Migration only needs DB access; skip full production env validation.
           NODE_ENV: development
         run: bun run backend/db/scripts/migrate.ts
