@@ -8,12 +8,12 @@ import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import {
   formatDurationMinutes,
   formatScheduleTimeOnly,
   formatScheduleYourTime,
-} from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
+} from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 import { StyledActionsCellBox, StyledGridDetailsLink, StyledMonospaceLabel } from "./ScheduleOverviewDataGrid.styles";
 

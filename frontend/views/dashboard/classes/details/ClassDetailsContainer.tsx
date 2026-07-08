@@ -9,7 +9,7 @@ import { LoadingState } from "@/frontend/components/ui/state/LoadingState";
 import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
+import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { useRouter } from "@/shared/i18n/routing";
 import { ClassDetailsContent } from "./components/ClassDetailsContent";
 import { useClassActionHandlers } from "./hooks/useClassActionHandlers";

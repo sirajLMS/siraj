@@ -8,5 +8,6 @@
   "codescene.enableAutoRefactor": false,
   "codescene.enableTelemetry": false,
   "chat.utilityModel": "customoai/nvidia-reasoning",
-  "chat.utilitySmallModel": "customoai/nvidia-reasoning"
+  "chat.utilitySmallModel": "customoai/nvidia-reasoning",
+  "js/ts.tsdk.path": "node_modules/@typescript/native-preview"
 }

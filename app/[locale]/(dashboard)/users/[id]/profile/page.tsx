@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext, resolveProfilePageContext } from "@/backend/lib";
-import { ProfilePageClient } from "@/frontend/views/profile/core/ProfilePageClient";
+import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n";
 
 export const metadata: Metadata = {

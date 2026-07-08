@@ -3,15 +3,15 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
 import { DashboardView } from "../../dashboard/DashboardView";
-import { buildAdminDashboardMetrics } from "../dashboard/utils/adminDashboardMetrics";
+import { buildAdminDashboardMetrics } from "../home/utils/adminDashboardMetrics";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
-} from "../dashboard/utils/dailyScheduleMetricFilter";
+} from "../home/utils/dailyScheduleMetricFilter";
 import { useAdminDashboardLabels } from "./utils";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [

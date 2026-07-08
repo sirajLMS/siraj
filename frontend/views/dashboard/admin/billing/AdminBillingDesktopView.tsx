@@ -4,13 +4,13 @@ import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { BillingMetricsRow } from "../../billing/components/BillingMetricsRow";
+import { BillingSearchBar } from "../../billing/components/BillingSearchBar";
+import { StudentCreditDataGrid } from "../../billing/components/StudentCreditDataGrid";
+import type { AdminBillingViewProps } from "../../billing/types/billingViewTypes";
+import { buildAdminMetrics } from "../../billing/utils/billingMetrics";
+import { getAdminInvoiceGridLabels, getStudentCreditGridLabels } from "../../billing/utils/label-mappers";
 import { AdminInvoicesDataGrid } from "./components/AdminInvoicesDataGrid";
-import { BillingMetricsRow } from "./components/BillingMetricsRow";
-import { BillingSearchBar } from "./components/BillingSearchBar";
-import { StudentCreditDataGrid } from "./components/StudentCreditDataGrid";
-import type { AdminBillingViewProps } from "./types/billingViewTypes";
-import { buildAdminMetrics } from "./utils/billingMetrics";
-import { getAdminInvoiceGridLabels, getStudentCreditGridLabels } from "./utils/label-mappers";
 
 // Chip indicating items requiring attention, styled with error colors
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({

@@ -4,7 +4,7 @@ import { Avatar, Box, Button, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
+import type { AdminInvoiceRow, AdminInvoiceStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;

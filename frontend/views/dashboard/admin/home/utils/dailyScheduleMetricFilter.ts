@@ -1,4 +1,4 @@
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import {
   type DailyScheduleMetricFilterKey,
   matchesDashboardMetricFilter,

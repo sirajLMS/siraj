@@ -23,14 +23,14 @@ import {
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
-import { useRouter } from "@/shared/i18n/routing";
-import { AdminBillingView } from "./AdminBillingView";
 import type {
   AdminBillingSummary,
   AdminInvoiceRow,
   AdminInvoiceStatus,
   StudentCreditRow,
-} from "./types/billingViewTypes";
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { useRouter } from "@/shared/i18n/routing";
+import { AdminBillingView } from "./AdminBillingView";
 import { filterAdminInvoices } from "./utils/billingFilters";
 import { buildBillingLabels } from "./utils/buildBillingLabels";
 

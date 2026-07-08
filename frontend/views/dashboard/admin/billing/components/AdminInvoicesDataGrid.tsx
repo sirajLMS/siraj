@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/utils/profileHref";
-import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
+import type { AdminInvoiceRow, AdminInvoiceStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;

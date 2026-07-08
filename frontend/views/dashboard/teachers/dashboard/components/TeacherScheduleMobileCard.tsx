@@ -7,7 +7,7 @@ import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/u
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/utils/profileHref";
-import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
+import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
