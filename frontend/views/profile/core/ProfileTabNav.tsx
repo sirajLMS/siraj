@@ -60,7 +60,8 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
       sx={theme => ({
         width: "100%",
         borderBottom: `1px solid ${theme.palette.divider}`,
-        mb: 3,
+        mx: { xs: -2, md: 0 },
+        px: { xs: 2, md: 0 },
       })}
     >
       <Box sx={{ display: { xs: "flex", md: "none" }, overflowX: "auto", pb: 1 }}>

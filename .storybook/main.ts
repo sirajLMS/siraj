@@ -11,6 +11,6 @@ const config: StorybookConfig = {
     "@storybook/addon-themes",
   ],
   framework: "@storybook/nextjs-vite",
-  staticDirs: ["..\\public"], //NoSonar
+  staticDirs: ["../public"],
 };
 export default config;

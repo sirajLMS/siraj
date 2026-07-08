@@ -11,7 +11,6 @@ export function ProfileSkeleton() {
         spacing={2}
         sx={_theme => ({
           alignItems: { xs: "flex-start", md: "center" },
-          mb: 4,
           width: "100%",
         })}
       >

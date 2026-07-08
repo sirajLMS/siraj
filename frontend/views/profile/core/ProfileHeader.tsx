@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Badge, Box, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 
 export type ProfileHeaderProps = {
@@ -13,58 +13,56 @@ export type ProfileHeaderProps = {
 export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderProps) {
   const t = useTranslations("profile");
 
-  const getRoleBadge = () => {
-    if (role === "teacher") {
-      return (
-        <Box
-          sx={theme => ({
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            px: 1,
-            py: 0.5,
-            borderRadius: 1,
-            fontSize: theme.typography.body2.fontSize,
-            fontWeight: 500,
-          })}
-        >
-          {t("role.teacher")}
-        </Box>
-      );
-    } else if (role === "parent") {
-      return (
-        <Box
-          sx={theme => ({
-            bgcolor: theme.palette.secondary.main,
-            color: theme.palette.onSecondary,
-            px: 1,
-            py: 0.5,
-            borderRadius: 1,
-            fontSize: theme.typography.body2.fontSize,
-            fontWeight: 500,
-          })}
-        >
-          {t("role.parent")}
-        </Box>
-      );
-    } else if (role === "staff") {
-      return (
-        <Box
-          sx={theme => ({
-            bgcolor: theme.palette.info.main,
-            color: theme.palette.onInfo,
-            px: 1,
-            py: 0.5,
-            borderRadius: 1,
-            fontSize: theme.typography.body2.fontSize,
-            fontWeight: 500,
-          })}
-        >
-          {t("role.staff")}
-        </Box>
-      );
-    }
-    return null;
-  };
+  const roleBadge =
+    role === "teacher" ? (
+      <Box
+        sx={theme => ({
+          bgcolor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
+          px: 1.25,
+          py: 0.5,
+          borderRadius: 999,
+          fontSize: theme.typography.labelSm.fontSize,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+        })}
+      >
+        {t("role.teacher")}
+      </Box>
+    ) : role === "parent" ? (
+      <Box
+        sx={theme => ({
+          bgcolor: theme.palette.secondary.main,
+          color: theme.palette.onSecondary,
+          px: 1.25,
+          py: 0.5,
+          borderRadius: 999,
+          fontSize: theme.typography.labelSm.fontSize,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+        })}
+      >
+        {t("role.parent")}
+      </Box>
+    ) : role === "staff" ? (
+      <Box
+        sx={theme => ({
+          bgcolor: theme.palette.info.main,
+          color: theme.palette.onInfo,
+          px: 1.25,
+          py: 0.5,
+          borderRadius: 999,
+          fontSize: theme.typography.labelSm.fontSize,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+        })}
+      >
+        {t("role.staff")}
+      </Box>
+    ) : null;
 
   return (
     <Stack
@@ -72,43 +70,44 @@ export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderPro
       spacing={2}
       sx={_theme => ({
         alignItems: { xs: "flex-start", md: "center" },
-        mb: 3,
         width: "100%",
+        pt: { xs: 0.5, md: 0 },
       })}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Badge
-          overlap="circular"
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          badgeContent={getRoleBadge()}
+      <Avatar
+        src={avatarUrl ?? undefined}
+        sx={theme => ({
+          width: 64,
+          height: 64,
+          flexShrink: 0,
+          bgcolor: avatarUrl ? undefined : theme.palette.primary.main,
+        })}
+      >
+        {name.charAt(0).toUpperCase()}
+      </Avatar>
+
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{ alignItems: { xs: "flex-start", sm: "center" }, mb: 0.5 }}
         >
-          <Avatar
-            src={avatarUrl ?? undefined}
+          <Typography
             sx={theme => ({
-              width: 64,
-              height: 64,
-              bgcolor: avatarUrl ? undefined : theme.palette.primary.main,
+              color: theme.palette.text.primary,
+              fontWeight: 600,
+              fontSize: theme.typography.h5.fontSize,
             })}
           >
-            {name.charAt(0).toUpperCase()}
-          </Avatar>
-        </Badge>
-      </Box>
-
-      <Box sx={{ flex: 1 }}>
-        <Typography
-          sx={theme => ({
-            color: theme.palette.text.primary,
-            fontWeight: 600,
-            fontSize: theme.typography.h5.fontSize,
-          })}
-        >
-          {name}
-        </Typography>
+            {name}
+          </Typography>
+          {roleBadge}
+        </Stack>
         <Typography
           sx={theme => ({
             color: theme.palette.text.secondary,
             fontSize: theme.typography.body1.fontSize,
+            wordBreak: "break-word",
           })}
         >
           {email}

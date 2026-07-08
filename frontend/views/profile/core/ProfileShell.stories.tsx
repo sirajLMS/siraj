@@ -2,10 +2,25 @@
 
 import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { useState } from "react";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ProfileShell } from "./ProfileShell";
+
+function StorybookPageFrame({ children }: { readonly children: ReactNode }) {
+  return (
+    <Box
+      sx={theme => ({
+        minHeight: "100vh",
+        bgcolor: theme.palette.background.default,
+        px: { xs: 0, md: theme.layout.pageMargin },
+        py: { xs: theme.spacing(2), md: theme.layout.pageMargin },
+      })}
+    >
+      {children}
+    </Box>
+  );
+}
 
 const meta: Meta<typeof ProfileShell> = {
   title: "Views/profile/core/ProfileShell",
@@ -25,7 +40,11 @@ const meta: Meta<typeof ProfileShell> = {
         notificationCount: 0,
         actorIsSuperAdmin: false,
       });
-      return <Story />;
+      return (
+        <StorybookPageFrame>
+          <Story />
+        </StorybookPageFrame>
+      );
     },
   ],
 };
