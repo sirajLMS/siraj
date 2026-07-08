@@ -20,7 +20,7 @@ describe("Invoice Referential Integrity", () => {
         .values({
           name: "Invoice Test Parent",
           email: parentEmail,
-          password: "securePassword",
+          password: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })

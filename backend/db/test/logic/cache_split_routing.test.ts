@@ -34,11 +34,11 @@ describe("Cache Split Routing & Functionality", () => {
     // Verify via runInRollback so these SELECTs don't pollute
     await runInRollback(async tx => {
       const rlResult = await tx.select().from(rateLimitCache).where(eq(rateLimitCache.key, RATE_LIMIT_KEY)).limit(1);
-      expect(rlResult.length).toBe(1);
+      expect(rlResult).toHaveLength(1);
       expect(rlResult[0].value).toBe(TEST_VALUE);
 
       const sessionResult = await tx.select().from(sessionCache).where(eq(sessionCache.key, RATE_LIMIT_KEY)).limit(1);
-      expect(sessionResult.length).toBe(0);
+      expect(sessionResult).toHaveLength(0);
     });
 
     const retrieved = await CacheDbRepository.get(RATE_LIMIT_KEY);

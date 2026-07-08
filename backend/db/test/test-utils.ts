@@ -1,3 +1,4 @@
+import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { AccountStatus, UserRole } from "@/backend/enum";
@@ -40,6 +41,7 @@ export function testInRollback(name: string, fn: (tx: DBTransaction) => Promise<
   // We dynamically import test from bun:test to avoid global pollution if not in test env
   import("bun:test").then(({ test }) => {
     test(name, async () => {
+      expect(typeof fn).toBe("function");
       await runInRollback(fn);
     });
   });
@@ -60,7 +62,7 @@ export async function createTestUser(
     .values({
       name: overrides.name || "Test User",
       email: overrides.email || `user-${randomUUID()}@example.com`,
-      password: overrides.password || "password",
+      password: overrides.password || randomUUID(),
       rememberTokenHash: overrides.rememberTokenHash || null,
       avatarFilePath: overrides.avatarFilePath || null,
       avatarUrl: overrides.avatarUrl || null,

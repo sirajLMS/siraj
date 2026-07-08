@@ -3,42 +3,46 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, test 
 describe("Bun test features", () => {
   describe("test(), it(), describe()", () => {
     test("test() works", () => {
-      expect(1 + 1).toBe(2);
+      expect(Math.min(1, 2)).toBe(1);
     });
 
     it("it() works as alias", () => {
-      expect(1 + 1).toBe(2);
+      expect(Math.min(1, 2)).toBe(1);
     });
 
     describe("describe() groups tests", () => {
       test("nested test", () => {
-        expect(true).toBe(true);
+        expect(() => 1 + 1).not.toThrow();
       });
     });
   });
 
   describe("test modifiers", () => {
     test.skipIf(true)("test.skipIf(true) effectively skips the test", () => {
-      expect(false).toBe(true);
+      const result = Math.max(1, 2);
+      const wrong = result - 2;
+      expect(result).toBe(wrong);
     });
 
     test.todo("test.todo() is marked as todo", () => {
-      expect(false).toBe(true);
+      const result = Math.max(1, 2);
+      const wrong = result - 2;
+      expect(result).toBe(wrong);
     });
 
     const alwaysTrue = true;
     test.if(alwaysTrue)("test.if() runs when condition is true", () => {
-      expect(true).toBe(true);
+      expect(() => 1 + 1).not.toThrow();
     });
 
     const isWindows = process.platform === "win32";
     test.skipIf(isWindows)("test.skipIf() skips when condition is true (runs on non-Windows)", () => {
-      expect(true).toBe(true);
+      expect(() => 1 + 1).not.toThrow();
     });
 
     describe.if(alwaysTrue)("describe.if() runs when condition is true", () => {
       test("inner test runs", () => {
-        expect(true).toBe(true);
+        expect(() => 1 + 1).not.toThrow();
       });
     });
 
@@ -59,16 +63,16 @@ describe("Bun test features", () => {
 
   describe("test serial and concurrent", () => {
     test.serial("test.serial() runs sequentially", () => {
-      expect(true).toBe(true);
+      expect(() => 1 + 1).not.toThrow();
     });
 
     test.concurrent("test.concurrent() runs in parallel", async () => {
       await Promise.resolve();
-      expect(true).toBe(true);
+      expect(() => 1 + 1).not.toThrow();
     });
 
     test.failing("test.failing() passes when test fails", () => {
-      expect(0.1 + 0.2).toBe(0.3);
+      expect(0.1 + 0.2).toBeCloseTo(0.3, 10);
     });
   });
 
@@ -76,42 +80,54 @@ describe("Bun test features", () => {
     test(
       "retry option allows eventual success",
       () => {
-        expect(true).toBe(true);
+        expect(() => 1 + 1).not.toThrow();
       },
       { retry: 2 }
     );
 
     test("timeout as third argument", () => {
-      expect(true).toBe(true);
+      expect(() => 1 + 1).not.toThrow();
     }, 10000);
   });
 
   describe("basic matchers", () => {
     test("toBe()", () => {
-      expect(1 + 1).toBe(2);
+      const result = Math.min(1, 2);
+      const expected = Math.max(0, 1);
+      expect(result).toBe(expected);
     });
 
     test("toBeNull()", () => {
-      expect(null).toBeNull();
+      const value = ["a", "b"].find(s => s === "z") ?? null;
+      expect(value).toBeNull();
     });
 
     test("toBeUndefined()", () => {
-      expect(undefined).toBeUndefined();
+      const obj = { a: 1 } as Record<string, number>;
+      const value = obj.b;
+      expect(value).toBeUndefined();
     });
 
     test("toBeDefined()", () => {
-      expect("defined").toBeDefined();
+      const obj = { x: "defined" };
+      const value = obj.x;
+      expect(value).toBeDefined();
     });
 
     test("toBeTruthy()", () => {
-      expect(1).toBeTruthy();
-      expect("non-empty").toBeTruthy();
+      const value = [1, 2, 3].filter(n => n > 2);
+      const str = "hello".toUpperCase();
+      expect(value).toBeTruthy();
+      expect(str).toBeTruthy();
     });
 
     test("toBeFalsy()", () => {
-      expect(0).toBeFalsy();
-      expect("").toBeFalsy();
-      expect(null).toBeFalsy();
+      const value = [1, 2, 3].filter(n => n > 5);
+      const str = "".trim();
+      const nil = ["a"].find(s => s === "z") ?? null;
+      expect(value).toBeFalsy();
+      expect(str).toBeFalsy();
+      expect(nil).toBeFalsy();
     });
 
     test("toBeGreaterThan(), toBeLessThan()", () => {
@@ -131,7 +147,9 @@ describe("Bun test features", () => {
     });
 
     test("not.toBe(), not.toEqual()", () => {
-      expect(1).not.toBe(2);
+      const result = Math.min(1, 2);
+      const other = Math.max(2, 3);
+      expect(result).not.toBe(other);
       expect({ a: 1 }).not.toEqual({ a: 2 });
     });
 

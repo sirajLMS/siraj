@@ -119,7 +119,7 @@ describe("Row Level Security for Students", () => {
 
         const parentAView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
-        expect(parentAView.length).toBe(1);
+        expect(parentAView).toHaveLength(1);
         expect(parentAView[0].id).toBe(studentA.id);
 
         // 6. Query as Parent B
@@ -127,7 +127,7 @@ describe("Row Level Security for Students", () => {
 
         const parentBView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
-        expect(parentBView.length).toBe(1);
+        expect(parentBView).toHaveLength(1);
         expect(parentBView[0].id).toBe(studentB.id);
 
         tx.rollback();
@@ -153,7 +153,7 @@ describe("Row Level Security for Students", () => {
           .set({ name: "Updated Student A" })
           .where(eq(students.id, studentA.id))
           .returning();
-        expect(updateResult.length).toBe(1);
+        expect(updateResult).toHaveLength(1);
 
         // 6. Parent A tries to update Student B (should fail/return 0 rows)
         const updateBResult = await tx
@@ -161,15 +161,15 @@ describe("Row Level Security for Students", () => {
           .set({ name: "Malicious Update" })
           .where(eq(students.id, studentB.id))
           .returning();
-        expect(updateBResult.length).toBe(0);
+        expect(updateBResult).toHaveLength(0);
 
         // 7. Parent A tries to delete Student B (should fail/return 0 rows)
         const deleteBResult = await tx.delete(students).where(eq(students.id, studentB.id)).returning();
-        expect(deleteBResult.length).toBe(0);
+        expect(deleteBResult).toHaveLength(0);
 
         // 8. Parent A tries to delete Student A (should succeed)
         const deleteResult = await tx.delete(students).where(eq(students.id, studentA.id)).returning();
-        expect(deleteResult.length).toBe(1);
+        expect(deleteResult).toHaveLength(1);
 
         tx.rollback();
       })
@@ -194,7 +194,7 @@ describe("Row Level Security for Students", () => {
         const adminView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
         // Admin should see both students since they are not a parent
-        expect(adminView.length).toBe(2);
+        expect(adminView).toHaveLength(2);
 
         tx.rollback();
       })

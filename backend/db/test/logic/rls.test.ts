@@ -21,11 +21,12 @@ describe("Row Level Security and Soft Delete", () => {
     const emailInvalid = `rls-test-${randomUUID()}@example.com`;
     const now = new Date();
 
+    const passwordHash = randomUUID();
     const validRows = await queryAsRlsRole<{ id: string }>(
       "test_rls_user",
       "00000000-0000-0000-0000-000000000000",
-      `INSERT INTO "users" (name, email, password, created_at, updated_at) VALUES ('RLS Test User', $1, 'securePassword', $2, $2) RETURNING id`,
-      [emailValid, now.toISOString()]
+      `INSERT INTO "users" (name, email, password, created_at, updated_at) VALUES ('RLS Test User', $1, $3, $2, $2) RETURNING id`,
+      [emailValid, now.toISOString(), passwordHash]
     );
     expect(validRows.length).toBe(1);
 
@@ -34,8 +35,8 @@ describe("Row Level Security and Soft Delete", () => {
       await queryAsRlsRole(
         "test_rls_user",
         "00000000-0000-0000-0000-000000000000",
-        `INSERT INTO "users" (name, email, password, created_at, updated_at, deleted_at) VALUES ('RLS Deleted User', $1, 'securePassword', $2, $2, $2)`,
-        [emailInvalid, now.toISOString()]
+        `INSERT INTO "users" (name, email, password, created_at, updated_at, deleted_at) VALUES ('RLS Deleted User', $1, $3, $2, $2, $2)`,
+        [emailInvalid, now.toISOString(), passwordHash]
       );
     } catch (e) {
       insertError = e;

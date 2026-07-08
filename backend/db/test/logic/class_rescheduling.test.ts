@@ -139,7 +139,7 @@ async function insertRescheduledInstance(
 async function expectConstraintViolation(fn: () => Promise<unknown>, constraintName: string) {
   try {
     await fn();
-    expect(true).toBe(false);
+    throw new Error(`Expected constraint violation "${constraintName}" but none was thrown`);
   } catch (error) {
     let causeStr = "";
     if (error instanceof Error && error.cause) {

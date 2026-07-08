@@ -36,7 +36,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .values({
         name: "Recalculation Parent",
         email: parentEmail,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })
@@ -59,7 +59,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .values({
         name: "Recalculation Teacher",
         email: teacherEmail,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })

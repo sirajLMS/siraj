@@ -76,12 +76,14 @@ function getClassParams(studentId: string, teacherId: string) {
 }
 
 async function expectClassCreationToFail(tx: DBTransaction, studentId: string, teacherId: string) {
+  let errorCaught: unknown = null;
   try {
     await SchedulingRepository.createClassInstance(getClassParams(studentId, teacherId), tx);
-    expect(true).toBe(false); // Should fail
   } catch (error) {
-    expect((error as Error).message).toContain("is not assigned to student");
+    errorCaught = error;
   }
+  expect(errorCaught).not.toBeNull();
+  expect((errorCaught as Error).message).toContain("is not assigned to student");
 }
 
 describe("Class Teacher Assignment Integrity", () => {
@@ -141,12 +143,14 @@ describe("Class Teacher Assignment Integrity", () => {
 
       const classInst = await SchedulingRepository.createClassInstance(getClassParams(student.id, teacher1.id), tx);
 
+      let errorCaught: unknown = null;
       try {
         await SchedulingRepository.updateClassInstance(classInst.id, { teacherId: teacher2.id }, tx);
-        expect(true).toBe(false); // Should fail
       } catch (error) {
-        expect((error as Error).message).toContain("is not assigned to student");
+        errorCaught = error;
       }
+      expect(errorCaught).not.toBeNull();
+      expect((errorCaught as Error).message).toContain("is not assigned to student");
     });
     testLogger.info("Class update to non-assigned teacher failed as expected.");
   });

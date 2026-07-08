@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -45,6 +46,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             </AppApolloProvider>
           </MuiProvider>
         </NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

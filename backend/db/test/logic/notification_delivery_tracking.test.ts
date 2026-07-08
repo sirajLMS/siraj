@@ -233,8 +233,8 @@ describe("Notification Delivery Tracking", () => {
       const visibleTokens = await tx.select({ userId: userDeviceTokens.userId }).from(userDeviceTokens);
       const visibleDeliveries = await tx.select({ userId: notificationDeliveries.userId }).from(notificationDeliveries);
 
-      expect(visibleTokens.length).toBe(0);
-      expect(visibleDeliveries.length).toBe(0);
+      expect(visibleTokens).toHaveLength(0);
+      expect(visibleDeliveries).toHaveLength(0);
 
       await tx.execute(sql`RESET ROLE`);
       await tx.execute(sql`SET LOCAL ROLE "test_rls_user"`);
@@ -243,8 +243,8 @@ describe("Notification Delivery Tracking", () => {
       const userBTokens = await tx.select({ userId: userDeviceTokens.userId }).from(userDeviceTokens);
       const userBDeliveries = await tx.select({ userId: notificationDeliveries.userId }).from(notificationDeliveries);
 
-      expect(userBTokens.length).toBe(1);
-      expect(userBDeliveries.length).toBe(1);
+      expect(userBTokens).toHaveLength(1);
+      expect(userBDeliveries).toHaveLength(1);
     });
     testLogger.info("RLS test passed.");
   });

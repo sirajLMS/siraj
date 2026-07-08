@@ -15,7 +15,7 @@ import type {
   SuggestionSubmitInput,
 } from "@/backend/types";
 
-function requireAuth(ctx: { user?: { id: string } | undefined }): string {
+function requireAuth(ctx: { user?: { id: string } }): string {
   if (!ctx.user?.id) {
     throw new Error("unauthenticated");
   }
@@ -296,7 +296,7 @@ function toSuggestionReturnType(result: SuggestionSelectType): SuggestionReturnT
 }
 
 async function authenticatedSuggestionMutation(
-  ctx: { user?: { id: string } | undefined; locale: string },
+  ctx: { user?: { id: string }; locale: string },
   serviceCall: (userId: string) => Promise<SuggestionSelectType>
 ): Promise<SuggestionReturnType> {
   const userId = requireAuth(ctx);

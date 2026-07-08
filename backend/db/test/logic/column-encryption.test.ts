@@ -14,7 +14,7 @@ async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date
     .values({
       name: "Crypto Teacher",
       email,
-      password: "securePassword",
+      password: randomUUID(),
       createdAt: now,
       updatedAt: now,
     })
@@ -128,7 +128,7 @@ describe("Column-Level Encryption", () => {
       const uniqueSuffix = randomUUID();
 
       const plainValues = {
-        zoomPassword: "SecretZoomPassword123!",
+        zoomPassword: randomUUID(),
         nationalId: "NID-999-888-777",
         beneficiaryName: "Teacher Beneficiary Name",
         iban: "US12345678901234567890",

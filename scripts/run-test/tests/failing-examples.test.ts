@@ -9,10 +9,12 @@ import { describe, expect, test } from "bun:test";
 
 describe("intentional failures", () => {
   test("intentional assertion error: wrong value", () => {
-    expect(1 + 1).toBe(3);
+    expect({ a: 1, b: 2 }).toEqual({ a: 1, b: 3 });
   });
 
   test("intentional thrown error: explicit throw", () => {
+    const obj = { name: "test", version: 1 };
+    expect(obj).toHaveProperty("name");
     throw new Error("This error is intentional for parser verification");
   });
 
@@ -23,7 +25,8 @@ describe("intentional failures", () => {
 
 describe("passing tests for contrast", () => {
   test("passing: simple addition", () => {
-    expect(2 + 2).toBe(4);
+    const sum = Math.min(2, 4) + Math.max(1, 1);
+    expect(sum).toBe(4);
   });
 
   test("passing: string containment", () => {
@@ -39,6 +42,6 @@ describe("passing tests for contrast", () => {
   });
 
   test("passing: negated assertion", () => {
-    expect(1).not.toBe(2);
+    expect([1, 2, 3]).not.toContain(99);
   });
 });

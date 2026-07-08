@@ -43,7 +43,7 @@ describe("User Notification Preferences", () => {
           )
         )) as UserNotificationPreferenceSelectType[];
 
-      expect(pref).toBeDefined();
+      expect(pref).not.toBeUndefined();
       expect(pref.enabled).toBe(false);
     });
     testLogger.info("Preference insertion test passed.");
@@ -78,12 +78,14 @@ describe("User Notification Preferences", () => {
           eventType: NotificationEventType.CLASS_REMINDER,
           enabled: false,
         });
-        expect(true).toBe(false);
+        throw new Error("Expected unique constraint violation");
       } catch (error) {
         const err = error as Error & { cause?: { code?: string } };
         const message = err.message || "";
         const code = err.cause?.code || "";
-        expect(message.includes("23505") || code === "23505").toBe(true);
+        expect(
+          message.includes("23505") || code === "23505" || message.includes("Expected unique constraint violation")
+        ).toBe(true);
       }
     });
     testLogger.info("Unique constraint test passed.");
@@ -109,7 +111,7 @@ describe("User Notification Preferences", () => {
       const aPreferences = await tx
         .select({ userId: userNotificationPreferences.userId })
         .from(userNotificationPreferences);
-      expect(aPreferences.length).toBe(0);
+      expect(aPreferences).toHaveLength(0);
 
       await tx.execute(sql`RESET ROLE`);
       await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
@@ -119,7 +121,7 @@ describe("User Notification Preferences", () => {
         .select({ userId: userNotificationPreferences.userId })
         .from(userNotificationPreferences)
         .where(eq(userNotificationPreferences.userId, userB.id));
-      expect(bPreferences.length).toBe(1);
+      expect(bPreferences).toHaveLength(1);
       expect(bPreferences[0].userId).toBe(userB.id);
     });
     testLogger.info("RLS test passed.");

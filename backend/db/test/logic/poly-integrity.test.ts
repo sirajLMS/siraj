@@ -21,7 +21,7 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
       .values({
         name: "Poly Parent User",
         email,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })
@@ -104,7 +104,7 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
       .values({
         name: "Temp Cascade User",
         email,
-        password: "securePassword",
+        password: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })

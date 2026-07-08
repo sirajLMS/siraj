@@ -153,12 +153,32 @@ describe("Class Instances Security Logic", () => {
 
     it("allows ACTIVATED → COMPLETED with outcome=ABSENT", () =>
       runInRollback(async tx => {
+        const { teacher, student } = await setupTestEntities(tx, "S2-1", { skipInstance: true });
+        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
+
         await testOutcome(tx, "S2-1", "ABSENT");
+
+        const [updated] = await tx
+          .select({ executionState: classInstances.executionState, outcome: classInstances.outcome })
+          .from(classInstances)
+          .where(eq(classInstances.id, instance.id));
+        expect(updated.executionState).toBe("COMPLETED");
+        expect(updated.outcome).toBe("ABSENT");
       }));
 
     it("allows ACTIVATED → COMPLETED with outcome=LEAVE", () =>
       runInRollback(async tx => {
+        const { teacher, student } = await setupTestEntities(tx, "S2-2", { skipInstance: true });
+        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
+
         await testOutcome(tx, "S2-2", "LEAVE");
+
+        const [updated] = await tx
+          .select({ executionState: classInstances.executionState, outcome: classInstances.outcome })
+          .from(classInstances)
+          .where(eq(classInstances.id, instance.id));
+        expect(updated.executionState).toBe("COMPLETED");
+        expect(updated.outcome).toBe("LEAVE");
       }));
 
     it("blocks ACTIVATED → COMPLETED with outcome=TAKEN", () =>

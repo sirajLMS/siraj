@@ -13,8 +13,8 @@ const ClassExecutionStateValues = {
 } as const;
 
 export interface TeacherScheduleSessionActionInput {
-  readonly executionState?: string | null | undefined;
-  readonly outcome?: string | null | undefined;
+  readonly executionState?: string | null;
+  readonly outcome?: string | null;
   readonly activateEnabled: boolean;
   readonly canActivate: boolean;
   readonly videoEnabled: boolean;

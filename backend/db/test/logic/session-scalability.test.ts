@@ -34,7 +34,7 @@ async function createTestUser(tx: DBTransaction, email: string) {
     .values({
       name: "Session Test User",
       email,
-      password: "hashed_password",
+      password: randomUUID(),
       createdAt: new Date(),
       updatedAt: new Date(),
     })
@@ -156,7 +156,7 @@ describe("Session Scalability and Redis Integration", () => {
 
         // Verify metadata exists in PostgreSQL
         const metadata = await SessionRepository.getUserSessionMetadata(user.id, tx);
-        expect(metadata.length).toBe(1);
+        expect(metadata).toHaveLength(1);
         expect(metadata[0].deviceType).toBe("desktop");
 
         testLogger.info(`Session ${sessionId} created in Redis and metadata in PostgreSQL`);
@@ -496,14 +496,14 @@ describe("Session Scalability and Redis Integration", () => {
 
         // Verify metadata exists
         let metadata = await SessionRepository.getUserSessionMetadata(user.id, tx);
-        expect(metadata.length).toBe(2);
+        expect(metadata).toHaveLength(2);
 
         // Logout everywhere
         await SessionRepository.deleteByUserId(user.id, tx);
 
         // Verify metadata removed
         metadata = await SessionRepository.getUserSessionMetadata(user.id, tx);
-        expect(metadata.length).toBe(0);
+        expect(metadata).toHaveLength(0);
 
         testLogger.info("Metadata removed from PostgreSQL on logout everywhere");
       });

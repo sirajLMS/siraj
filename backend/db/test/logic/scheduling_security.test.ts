@@ -157,7 +157,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .select()
         .from(recurringSchedules)
         .where(and(eq(recurringSchedules.teacherId, teacher.id), isNull(recurringSchedules.deletedAt)));
-      expect(activeSchedules.length).toBe(0);
+      expect(activeSchedules).toHaveLength(0);
 
       const activeDays = await tx
         .select()
@@ -168,7 +168,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
             sql`${recurringScheduleDays.recurringScheduleId} IN (${schedule1.id}, ${schedule2.id})`
           )
         );
-      expect(activeDays.length).toBe(0);
+      expect(activeDays).toHaveLength(0);
     }));
 });
 

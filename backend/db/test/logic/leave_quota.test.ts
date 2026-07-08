@@ -11,11 +11,15 @@ import { setupStudent, setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
+  let errorCaught: Error | null = null;
   try {
     await fn();
-    expect(true).toBe(false);
   } catch (error) {
-    const err = error as Error & { cause?: { message?: string } };
+    errorCaught = error as Error;
+  }
+  expect(errorCaught).not.toBeNull();
+  if (errorCaught) {
+    const err = errorCaught as Error & { cause?: { message?: string } };
     const message = err.cause?.message || err.message || "";
     expect(message).toContain("Leave quota exceeded");
   }

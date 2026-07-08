@@ -104,7 +104,7 @@ describe("ProfileTabNav", () => {
       permissions: [AppPermission.AuthViewOwnProfile],
     });
 
-    expect(screen.getAllByText("Notifications").length).toBe(2);
+    expect(screen.getAllByText("Notifications")).toHaveLength(2);
   });
 
   test("renders tablist for desktop layout", () => {

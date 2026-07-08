@@ -207,7 +207,7 @@ describe("Class Quota System Constraints & Triggers", () => {
           },
           tx
         );
-        expect(true).toBe(false); // Should not reach here
+        expect.unreachable("Should have thrown an error for zero quota");
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
@@ -263,8 +263,8 @@ describe("Class Quota System Constraints & Triggers", () => {
       const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
 
       // Exactly one insertion should succeed, and one should fail
-      expect(successes.length).toBe(1);
-      expect(failures.length).toBe(1);
+      expect(successes).toHaveLength(1);
+      expect(failures).toHaveLength(1);
 
       const failReason: unknown = failures[0].reason;
       const message = failReason instanceof Error ? failReason.message : String(failReason);
