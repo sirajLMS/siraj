@@ -1,10 +1,11 @@
 "use client";
 
-import { HistoryOutlined, PersonOutlined, VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
-import { Avatar, alpha, Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { HistoryOutlined, VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
+import { alpha, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { SchedulePagination } from "../ParentDashboardView";
 import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
 import type { ParentBookingStatus, ParentScheduleRow } from "../types/parentDashboardTypes";
@@ -74,23 +75,16 @@ export function ParentScheduleDataGrid({
         flex: 1.2,
         minWidth: 180,
         renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-            <Avatar
-              sx={theme => ({
-                width: 32,
-                height: 32,
-                fontSize: 12,
-                fontWeight: 700,
-                backgroundColor: theme.palette.secondaryContainer,
-                color: theme.palette.onSecondaryContainer,
-              })}
-            >
-              {row.studentInitials}
-            </Avatar>
-            <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-              {row.studentName}
-            </Typography>
-          </Box>
+          <PersonProfileLinkCell
+            href={row.studentId ? studentHref(row.studentId) : undefined}
+            name={row.studentName}
+            avatarUrl={row.studentAvatarUrl}
+            showAvatar
+            avatarSize={32}
+            fallbackInitial={row.studentInitials?.[0] ?? "?"}
+            typographyVariant="bodyMd"
+            fontWeight={600}
+          />
         ),
       },
       {
@@ -99,10 +93,14 @@ export function ParentScheduleDataGrid({
         flex: 1.2,
         minWidth: 180,
         renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, height: "100%" }}>
-            <PersonOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
-            <Typography variant="bodyMd">{row.teacherName}</Typography>
-          </Box>
+          <PersonProfileLinkCell
+            href={row.teacherId ? profileHrefForTeacher({ teacherId: row.teacherId }) : undefined}
+            name={row.teacherName}
+            showAvatar={false}
+            typographyVariant="bodyMd"
+            fontWeight={400}
+            emphasizeLink={Boolean(row.teacherId)}
+          />
         ),
       },
       {

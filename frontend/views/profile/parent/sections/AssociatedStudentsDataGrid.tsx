@@ -1,11 +1,11 @@
 "use client";
 
-import { Avatar, Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import { Link } from "@/shared/i18n/routing";
+import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { profileHrefForUser, studentHref } from "@/frontend/utils/profileHref";
 import type { AssociatedStudentRow } from "./parentProfileTypes";
 
 type AssociatedStudentsDataGridProps = {
@@ -17,35 +17,6 @@ type AssociatedStudentsDataGridProps = {
 function formatStatusLabel(status: string): string {
   const normalized = status.replaceAll("_", " ").toLowerCase();
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
-
-function getInitial(name: string | null | undefined, fallback: string): string {
-  return (name?.trim()?.[0] ?? fallback).toUpperCase();
-}
-
-function ProfileLinkCell({
-  href,
-  avatarUrl,
-  name,
-  fallbackInitial,
-}: {
-  readonly href: string;
-  readonly avatarUrl?: string | null;
-  readonly name: string;
-  readonly fallbackInitial: string;
-}) {
-  return (
-    <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "flex", height: "100%" }}>
-      <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
-        <Avatar src={avatarUrl ?? undefined} sx={{ width: 28, height: 28 }}>
-          {getInitial(name, fallbackInitial)}
-        </Avatar>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.primary.main, fontWeight: 600 }}>
-          {name}
-        </Typography>
-      </Stack>
-    </Link>
-  );
 }
 
 export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage }: AssociatedStudentsDataGridProps) {
@@ -60,8 +31,8 @@ export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage
         flex: 1.5,
         minWidth: 220,
         renderCell: params => (
-          <ProfileLinkCell
-            href={`/students/${params.row.id}`}
+          <PersonProfileLinkCell
+            href={params.row.id ? studentHref(params.row.id) : undefined}
             avatarUrl={params.row.studentAvatarUrl}
             name={params.row.name ?? tc("notSet")}
             fallbackInitial="S"
@@ -88,20 +59,15 @@ export function AssociatedStudentsDataGrid({ rows, loading = false, emptyMessage
         minWidth: 220,
         renderCell: params => {
           const teacherName = params.row.teacherName?.trim() || tc("notSet");
-          if (!params.row.teacherUserId) {
-            return (
-              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                {teacherName}
-              </Typography>
-            );
-          }
+          const href = params.row.teacherUserId ? profileHrefForUser(params.row.teacherUserId) : undefined;
 
           return (
-            <ProfileLinkCell
-              href={`/users/${params.row.teacherUserId}/profile`}
+            <PersonProfileLinkCell
+              href={href}
               avatarUrl={params.row.teacherAvatarUrl}
               name={teacherName}
               fallbackInitial="T"
+              emphasizeLink={Boolean(href)}
             />
           );
         },

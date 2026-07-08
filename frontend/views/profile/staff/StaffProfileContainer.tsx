@@ -9,6 +9,7 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
+import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
 import { StaffProfileEditForm } from "./StaffProfileEditForm";
@@ -78,14 +79,14 @@ export function StaffProfileContainer({
 
     if (scope === "own") {
       await updateOwnProfile({ variables: { input: { core: coreInput, staff: staffInput } } });
-      router.push("/profile");
+      router.push(ownProfileHref());
       return;
     }
 
     await updateUserProfile({
       variables: { userId: targetUserId, input: { core: coreInput, staff: staffInput } },
     });
-    router.push(`/users/${targetUserId}/profile`);
+    router.push(profileHrefForUser(targetUserId));
   };
 
   if (loading && !profile) {

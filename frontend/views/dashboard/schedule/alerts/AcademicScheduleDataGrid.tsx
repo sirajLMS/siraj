@@ -3,8 +3,9 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "./types";
 
@@ -87,6 +88,15 @@ export function AcademicScheduleDataGrid({
         headerName: labels.instructor,
         flex: 1,
         minWidth: 140,
+        renderCell: ({ row }) => (
+          <PersonProfileLinkCell
+            href={profileHrefForTeacher({ teacherId: row.instructorId })}
+            name={row.instructor}
+            showAvatar={false}
+            typographyVariant="bodyMd"
+            fontWeight={400}
+          />
+        ),
       },
       {
         field: "time",

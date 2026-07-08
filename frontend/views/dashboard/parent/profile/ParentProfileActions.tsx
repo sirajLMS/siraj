@@ -24,6 +24,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { deactivateParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { profileHrefForParent, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { Link, useRouter } from "@/shared/i18n/routing";
 
 interface DeactivateParentDialogProps {
@@ -74,10 +75,19 @@ function DeactivateParentDialog({ open, onClose, onConfirm, deactivating, error 
 
 interface ParentProfileActionsProps {
   readonly parentId: string;
+  readonly userId?: string | null;
   readonly onEditAvatar: () => void;
 }
 
-function ParentProfileActions({ parentId, onEditAvatar }: ParentProfileActionsProps) {
+function parentProfileEditHref(userId?: string | null, parentId?: string): string | undefined {
+  if (userId) {
+    return `${profileHrefForUser(userId)}/edit`;
+  }
+  const profileHref = profileHrefForParent({ parentId });
+  return profileHref ? `${profileHref}/edit` : undefined;
+}
+
+function ParentProfileActions({ parentId, userId, onEditAvatar }: ParentProfileActionsProps) {
   const t = useTranslations("dashboard.parentProfile.actions");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -112,6 +122,8 @@ function ParentProfileActions({ parentId, onEditAvatar }: ParentProfileActionsPr
     fontWeight: 700,
   } as const;
 
+  const editProfileHref = parentProfileEditHref(userId, parentId);
+
   return (
     <>
       <Stack
@@ -132,14 +144,24 @@ function ParentProfileActions({ parentId, onEditAvatar }: ParentProfileActionsPr
           {t("editPicture")}
         </Button>
 
-        <Link href={`/parents/${parentId}/profile/edit`} style={{ textDecoration: "none" }}>
+        {editProfileHref ? (
+          <Link href={editProfileHref} style={{ textDecoration: "none" }}>
+            <Button
+              startIcon={<EditNoteOutlined sx={{ fontSize: 18 }} />}
+              sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
+            >
+              {t("editProfile")}
+            </Button>
+          </Link>
+        ) : (
           <Button
             startIcon={<EditNoteOutlined sx={{ fontSize: 18 }} />}
             sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
+            disabled
           >
             {t("editProfile")}
           </Button>
-        </Link>
+        )}
 
         <Link href={`/students/onboarding?parentId=${parentId}`} style={{ textDecoration: "none" }}>
           <Button

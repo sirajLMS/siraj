@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { studentHref } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "../types";
@@ -33,7 +34,7 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
   const router = useRouter();
 
   const handleViewAll = useCallback(() => {
-    router.push(`/students/${studentId}/history`);
+    router.push(`${studentHref(studentId)}/history`);
   }, [router, studentId]);
 
   return (

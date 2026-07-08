@@ -11,6 +11,7 @@ import {
 import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ProfileByUserIdQuery } from "@/frontend/graphql/generated/gql/operations";
+import { profileHrefForUser } from "@/frontend/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 
 type BankingSummary = NonNullable<NonNullable<ProfileByUserIdQuery["profileByUserId"]>["bankingSummary"]>;
@@ -260,7 +261,7 @@ function VerificationFooter({ banking, mode, targetUserId }: VerificationFooterP
   const t = useTranslations("profile.banking");
   const verifiedDate = formatVerifiedDate(banking.verifiedAt);
   const isVerified = Boolean(banking.verifiedAt);
-  const editHref = `/users/${targetUserId}/profile/edit?tab=banking`;
+  const editHref = `${profileHrefForUser(targetUserId)}/edit?tab=banking`;
 
   return (
     <Box

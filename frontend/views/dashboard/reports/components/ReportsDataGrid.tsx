@@ -3,10 +3,11 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import type { ReportLedgerRow, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 export interface ReportsDataGridLabels {
   readonly name: string;
@@ -23,7 +24,21 @@ export interface ReportsDataGridLabels {
 interface ReportsDataGridProps {
   readonly rows: readonly ReportLedgerRow[];
   readonly labels: ReportsDataGridLabels;
+  readonly reportType: ReportType;
   readonly onRowClick?: (row: ReportLedgerRow) => void;
+}
+
+function nameHrefForRow(row: ReportLedgerRow, reportType: ReportType): string | undefined {
+  if (!row.entityId) {
+    return undefined;
+  }
+  if (reportType === "by_teacher") {
+    return profileHrefForTeacher({ teacherId: row.entityId });
+  }
+  if (reportType === "by_student") {
+    return studentHref(row.entityId);
+  }
+  return undefined;
 }
 
 function formatCurrency(value: number): string {
@@ -49,7 +64,7 @@ function renderCountCell(value: number, tone: "default" | "error" | "primary" = 
   );
 }
 
-export function ReportsDataGrid({ rows, labels, onRowClick }: Readonly<ReportsDataGridProps>) {
+export function ReportsDataGrid({ rows, labels, reportType, onRowClick }: Readonly<ReportsDataGridProps>) {
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
@@ -61,9 +76,12 @@ export function ReportsDataGrid({ rows, labels, onRowClick }: Readonly<ReportsDa
         flex: 1.4,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-            {row.name}
-          </Typography>
+          <PersonProfileLinkCell
+            name={row.name}
+            href={nameHrefForRow(row, reportType)}
+            showAvatar={false}
+            fontWeight={600}
+          />
         ),
       },
       {
@@ -142,7 +160,7 @@ export function ReportsDataGrid({ rows, labels, onRowClick }: Readonly<ReportsDa
     }
 
     return cols;
-  }, [labels, showFinancials]);
+  }, [labels, reportType, showFinancials]);
 
   return (
     <Box sx={{ px: { xs: 0, md: 1 }, pb: 1 }}>

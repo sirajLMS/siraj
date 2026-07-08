@@ -9,7 +9,8 @@ import {
 } from "@mui/icons-material";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
+import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "./types";
 
@@ -98,9 +99,13 @@ const AcademicClassCard = ({
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
               <PersonOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                {row.instructor}
-              </Typography>
+              <PersonProfileLink
+                href={profileHrefForTeacher({ teacherId: row.instructorId })}
+                name={row.instructor}
+                showAvatar={false}
+                typographyVariant="bodyMd"
+                fontWeight={400}
+              />
             </Box>
           </Box>
           <StatusBadge category="classSession" status={row.sessionStatus} label={statusLabels[row.sessionStatus]} />

@@ -1,12 +1,13 @@
 "use client";
 
 import { HistoryOutlined, InfoOutlined } from "@mui/icons-material";
-import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { studentHref } from "@/frontend/utils/profileHref";
 import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
 
@@ -54,12 +55,14 @@ export function StudentDirectoryDataGrid({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-            <Avatar src={row.avatarUrl || undefined} alt={row.name ?? ""} sx={{ width: 40, height: 40 }} />
-            <Typography variant="bodyLg" sx={theme => ({ fontWeight: 600, color: theme.palette.primary.main })}>
-              {row.name}
-            </Typography>
-          </Box>
+          <PersonProfileLinkCell
+            href={row.id ? studentHref(row.id) : undefined}
+            name={row.name ?? ""}
+            avatarUrl={row.avatarUrl}
+            avatarSize={40}
+            typographyVariant="bodyLg"
+            fontWeight={600}
+          />
         ),
       },
       {

@@ -13,6 +13,7 @@ import { useAuth } from "@/frontend/hooks/useAuth";
 import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { ownProfileHref } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 
 export interface UserInfoSlotProps {
@@ -369,7 +370,7 @@ export function UserMenuButton({
 
   const handleProfileClick = () => {
     handleClose();
-    router.push("/profile");
+    router.push(ownProfileHref());
   };
 
   const handleLogoutClick = () => {

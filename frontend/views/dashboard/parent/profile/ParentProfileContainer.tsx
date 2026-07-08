@@ -23,6 +23,7 @@ function isNonEmpty(value: string | null | undefined): value is string {
 function mapStudent(raw: {
   readonly id: string | null | undefined;
   readonly name: string | null | undefined;
+  readonly primaryTeacherId: string | null | undefined;
   readonly teacherName: string | null | undefined;
   readonly hoursPerWeek: string | null | undefined;
   readonly classesRemaining: number | null | undefined;
@@ -36,6 +37,7 @@ function mapStudent(raw: {
     id: raw.id,
     name: raw.name,
     teacher: raw.teacherName ?? "",
+    teacherId: raw.primaryTeacherId ?? null,
     hoursPerWeek: Number(raw.hoursPerWeek ?? 0),
     classesLeft: raw.classesRemaining ?? 0,
     totalClasses: raw.classesTotal ?? 0,
@@ -67,6 +69,7 @@ function mapProfileData(
   associatedStudents: ReadonlyArray<{
     readonly id: string | null;
     readonly name: string | null;
+    readonly primaryTeacherId: string | null;
     readonly teacherName: string | null;
     readonly hoursPerWeek: string | null;
     readonly classesRemaining: number | null;

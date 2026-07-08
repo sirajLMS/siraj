@@ -1,9 +1,10 @@
 "use client";
 
-import { Avatar, Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
-import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { studentHref } from "@/frontend/utils/profileHref";
 
 export type AssignedStudentsRow = {
   readonly id: string;
@@ -47,12 +48,12 @@ export function AssignedStudentsDataGrid({
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
-        <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
-          <Avatar src={params.row.studentAvatarUrl ?? undefined} sx={{ width: 28, height: 28 }}>
-            {(params.row.studentName[0] ?? "S").toUpperCase()}
-          </Avatar>
-          <Typography sx={{ typography: "bodyMd" }}>{params.row.studentName}</Typography>
-        </Stack>
+        <PersonProfileLinkCell
+          href={params.row.id ? studentHref(params.row.id) : undefined}
+          avatarUrl={params.row.studentAvatarUrl}
+          name={params.row.studentName}
+          fallbackInitial="S"
+        />
       ),
     },
     {
@@ -61,12 +62,12 @@ export function AssignedStudentsDataGrid({
       flex: 1.5,
       minWidth: 260,
       renderCell: params => (
-        <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
-          <Avatar src={params.row.parentAvatarUrl ?? undefined} sx={{ width: 28, height: 28 }}>
-            {(params.row.parentName[0] ?? "P").toUpperCase()}
-          </Avatar>
-          <Typography sx={{ typography: "bodyMd" }}>{params.row.parentName}</Typography>
-        </Stack>
+        <PersonProfileLinkCell
+          avatarUrl={params.row.parentAvatarUrl}
+          name={params.row.parentName}
+          fallbackInitial="P"
+          emphasizeLink={false}
+        />
       ),
     },
     {
@@ -105,11 +106,9 @@ export function AssignedStudentsDataGrid({
       flex: 1,
       minWidth: 140,
       renderCell: params => (
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", height: "100%" }}>
-          <Typography sx={{ typography: "labelSm", color: theme => theme.palette.text.secondary }}>
-            {params.row.classesRemaining} / {params.row.classesTotal}
-          </Typography>
-        </Stack>
+        <Typography sx={{ typography: "labelSm", color: theme => theme.palette.text.secondary }}>
+          {params.row.classesRemaining} / {params.row.classesTotal}
+        </Typography>
       ),
     },
   ];

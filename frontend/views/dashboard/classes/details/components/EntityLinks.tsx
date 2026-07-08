@@ -3,6 +3,7 @@
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { avatarInitials } from "@/frontend/utils/avatar";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 
 const StyledEntityLink = styled(Link)(({ theme }) => ({
@@ -35,7 +36,7 @@ export function StudentEntityLink({
   showAvatar = false,
   variant = "titleLg",
 }: StudentEntityLinkProps) {
-  const href = `/students/${studentId}`;
+  const href = studentHref(studentId);
 
   if (showAvatar) {
     return (
@@ -72,7 +73,8 @@ export function StudentEntityLink({
 }
 
 interface TeacherEntityLinkProps {
-  readonly teacherId: string;
+  readonly teacherId?: string | null;
+  readonly userId?: string | null;
   readonly name: string;
   readonly avatarUrl?: string | null;
   readonly avatarSize?: number;
@@ -82,13 +84,26 @@ interface TeacherEntityLinkProps {
 
 export function TeacherEntityLink({
   teacherId,
+  userId,
   name,
   avatarUrl,
   avatarSize = 64,
   showAvatar = false,
   variant = "titleLg",
 }: TeacherEntityLinkProps) {
-  const href = `/teachers/${teacherId}/profile`;
+  const href = profileHrefForTeacher({ userId, teacherId });
+
+  if (!href) {
+    return (
+      <Typography
+        variant={variant}
+        component="span"
+        sx={{ fontWeight: 600, color: theme => theme.palette.text.secondary }}
+      >
+        {name}
+      </Typography>
+    );
+  }
 
   if (showAvatar) {
     return (

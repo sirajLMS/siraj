@@ -5,7 +5,8 @@ import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { studentHref } from "@/frontend/utils/profileHref";
 import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
 
 export interface StudentCreditDataGridLabels {
@@ -33,12 +34,6 @@ function formatClassesLeft(row: StudentCreditRow): string {
   return `${row.classesLeft} / ${row.classesTotal}`;
 }
 
-// Student name styled with primary color and bold weight for grid emphasis
-const StyledStudentNameTypography = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
-
 // Small warning icon for negative balance indicators, styled with error color
 const StyledWarningIcon = styled(WarningAmberOutlined)(({ theme }) => ({
   fontSize: 16,
@@ -59,7 +54,7 @@ export function StudentCreditDataGrid({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <StyledStudentNameTypography variant="bodyMd">{row.studentName}</StyledStudentNameTypography>
+          <PersonProfileLinkCell name={row.studentName} href={studentHref(row.id)} showAvatar={false} fontWeight={700} />
         ),
       },
       {

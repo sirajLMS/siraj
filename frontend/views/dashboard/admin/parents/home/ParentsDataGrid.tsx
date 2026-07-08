@@ -10,9 +10,10 @@ import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
-import { GridPagination } from "@/frontend/components/ui";
+import { GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 
@@ -84,9 +85,13 @@ export function ParentsDataGrid({
         minWidth: 200,
         renderCell: ({ row }) => (
           <Stack sx={{ justifyContent: "center", height: "100%" }}>
-            <Typography variant="bodyLg" sx={theme => ({ fontWeight: 600, color: theme.palette.primary.main })}>
-              {row.name}
-            </Typography>
+            <PersonProfileLinkCell
+              href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
+              name={row.name}
+              showAvatar={false}
+              typographyVariant="bodyLg"
+              fontWeight={600}
+            />
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {labels.guardianOf(row.guardianOf)}
             </Typography>

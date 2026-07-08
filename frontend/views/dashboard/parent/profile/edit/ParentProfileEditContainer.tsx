@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 import ParentProfileEditView from "./ParentProfileEditView";
 import type { ParentProfileEditFormData } from "./parentProfileEditSchema";
@@ -79,7 +80,10 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
 
   const onSubmit = (formData: ParentProfileEditFormData) => {
     logger.info("Profile edit submitted", { parentId, formData });
-    router.push(`/parents/${parentId}/profile`);
+    const profileHref = profileHrefForParent({ userId: profile?.userId, parentId });
+    if (profileHref) {
+      router.push(profileHref);
+    }
   };
 
   if (!parentId) {

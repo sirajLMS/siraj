@@ -1,11 +1,12 @@
 "use client";
 
 import { CheckCircleOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { studentHref } from "@/frontend/utils/profileHref";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
 
@@ -37,14 +38,6 @@ interface AdminInvoicesDataGridProps {
 const StyledInvoiceIdTypography = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   color: theme.palette.primary.main,
-}));
-
-// Small avatar for student initials in the data grid rows
-const StyledStudentAvatarSmall = styled(Avatar)(({ theme }) => ({
-  width: 32,
-  height: 32,
-  backgroundColor: theme.palette.secondaryContainer,
-  fontSize: 12,
 }));
 
 // Date text styled with secondary color for subdued appearance in grid cells
@@ -126,10 +119,12 @@ export function AdminInvoicesDataGrid({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-            <StyledStudentAvatarSmall>{row.studentInitials}</StyledStudentAvatarSmall>
-            <Typography variant="bodyMd">{row.studentName}</Typography>
-          </Box>
+          <PersonProfileLinkCell
+            name={row.studentName}
+            href={row.studentId ? studentHref(row.studentId) : undefined}
+            fallbackInitial={row.studentInitials}
+            avatarSize={32}
+          />
         ),
       },
       {

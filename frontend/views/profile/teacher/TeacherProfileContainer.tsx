@@ -10,6 +10,7 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
+import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
 import { TeacherBankingTab } from "./banking/TeacherBankingTab";
@@ -189,7 +190,7 @@ export function TeacherProfileContainer({
     await updateOwnProfile({
       variables: { input: { core: buildCoreInput(formData), teacher: buildOwnTeacherInput(formData) } },
     });
-    router.push("/profile");
+    router.push(ownProfileHref());
   };
 
   const onSubmitAdmin = async (formData: TeacherAdminEditFormData) => {
@@ -199,7 +200,7 @@ export function TeacherProfileContainer({
         input: { core: buildCoreInput(formData), teacher: buildAdminTeacherInput(formData) },
       },
     });
-    router.push(`/users/${targetUserId}/profile`);
+    router.push(profileHrefForUser(targetUserId));
   };
 
   if (loading && !profile) {

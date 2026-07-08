@@ -5,9 +5,10 @@ import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { getTrackingStatusIcon, getTrackingStatusLabel } from "./tracking.helpers";
 import type { RescheduleTrackingDataGridProps, TrackingRow } from "./tracking.types";
 
@@ -54,9 +55,13 @@ export function RescheduleTrackingDataGrid({
                 gap: 0.5,
               }}
             >
-              <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-                {row.teacherName ?? ""}
-              </Typography>
+              <PersonProfileLinkCell
+                href={profileHrefForTeacher({ teacherId: row.teacherId })}
+                name={row.teacherName ?? ""}
+                showAvatar={false}
+                typographyVariant="bodyMd"
+                fontWeight={700}
+              />
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                 ID: {row.teacherId ?? ""}
               </Typography>
@@ -70,9 +75,14 @@ export function RescheduleTrackingDataGrid({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.studentName ?? ""}
-          </Typography>
+          <PersonProfileLinkCell
+            href={row.studentId ? studentHref(row.studentId) : undefined}
+            name={row.studentName ?? ""}
+            showAvatar={false}
+            typographyVariant="bodyMd"
+            fontWeight={400}
+            emphasizeLink={Boolean(row.studentId)}
+          />
         ),
       },
       {

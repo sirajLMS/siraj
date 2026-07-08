@@ -2,10 +2,11 @@ import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutli
 import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
-import { PaginationControls } from "@/frontend/components/ui";
+import { PaginationControls, PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherCardListProps {
@@ -87,9 +88,13 @@ function TeacherCard({
           })}
         />
         <Box sx={{ flex: 1 }}>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-            {row.name}
-          </Typography>
+          <PersonProfileLink
+            href={profileHrefForTeacher({ userId: row.userId, teacherId: row.id })}
+            name={row.name ?? ""}
+            showAvatar={false}
+            typographyVariant="titleLg"
+            fontWeight={600}
+          />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {row.email}
           </Typography>
@@ -154,8 +159,9 @@ function TeacherCardActions({
       <IconButton
         sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
         onClick={() => {
-          if (row.id) {
-            router.push(`/teachers/${row.id}/profile`);
+          const href = profileHrefForTeacher({ userId: row.userId, teacherId: row.id });
+          if (href) {
+            router.push(href);
           }
         }}
       >

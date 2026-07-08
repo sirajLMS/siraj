@@ -1,7 +1,9 @@
 "use client";
 
-import { Avatar, Chip, Paper, Stack, Typography } from "@mui/material";
+import { Chip, Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { PersonProfileLink } from "@/frontend/components/ui";
+import { studentHref } from "@/frontend/utils/profileHref";
 import type { AssignedStudentsRow } from "./AssignedStudentsDataGrid";
 
 type AssignedStudentsCardListProps = {
@@ -22,22 +24,24 @@ export function AssignedStudentsCardList({ rows }: AssignedStudentsCardListProps
         <Paper key={row.id} variant="outlined" sx={{ p: 2 }}>
           <Stack spacing={1}>
             <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", gap: 1 }}>
-              <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
-                <Avatar src={row.studentAvatarUrl ?? undefined} sx={{ width: 28, height: 28 }}>
-                  {(row.studentName[0] ?? "S").toUpperCase()}
-                </Avatar>
-                <Typography sx={{ typography: "titleMd" }}>{row.studentName}</Typography>
-              </Stack>
+              <PersonProfileLink
+                href={row.id ? studentHref(row.id) : undefined}
+                avatarUrl={row.studentAvatarUrl}
+                name={row.studentName}
+                fallbackInitial="S"
+              />
               <Chip size="small" variant="outlined" label={formatStatusLabel(row.status)} />
             </Stack>
-            <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
-              <Avatar src={row.parentAvatarUrl ?? undefined} sx={{ width: 24, height: 24 }}>
-                {(row.parentName[0] ?? "P").toUpperCase()}
-              </Avatar>
-              <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-                {t("columns.parent")}: {row.parentName}
-              </Typography>
-            </Stack>
+            <PersonProfileLink
+              avatarUrl={row.parentAvatarUrl}
+              name={row.parentName}
+              fallbackInitial="P"
+              label={t("columns.parent")}
+              showAvatar
+              avatarSize={24}
+              fontWeight={400}
+              emphasizeLink={false}
+            />
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
               {t("columns.class")}: {row.className}
             </Typography>

@@ -7,6 +7,7 @@ import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { ActionIconLink as StyledHistoryIconLink } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import {
   formatDurationMinutes,
@@ -97,7 +98,7 @@ function renderStudentCell(row: DailyScheduleRow) {
     return <StyledStudentNameText variant="bodyMd">{studentName}</StyledStudentNameText>;
   }
 
-  return <StyledScheduleNameLink href={`/students/${studentId}`}>{studentName}</StyledScheduleNameLink>;
+  return <StyledScheduleNameLink href={studentHref(studentId)}>{studentName}</StyledScheduleNameLink>;
 }
 
 function renderTeacherCell(row: DailyScheduleRow) {
@@ -108,7 +109,12 @@ function renderTeacherCell(row: DailyScheduleRow) {
     return <StyledTeacherNameText variant="bodyMd">{teacherName}</StyledTeacherNameText>;
   }
 
-  return <StyledScheduleTeacherLink href={`/teachers/${teacherId}/profile`}>{teacherName}</StyledScheduleTeacherLink>;
+  const href = profileHrefForTeacher({ teacherId });
+  if (!href) {
+    return <StyledTeacherNameText variant="bodyMd">{teacherName}</StyledTeacherNameText>;
+  }
+
+  return <StyledScheduleTeacherLink href={href}>{teacherName}</StyledScheduleTeacherLink>;
 }
 
 function buildActionsColumn(
@@ -133,7 +139,7 @@ function buildActionsColumn(
         <StyledActionsCellBox>
           {studentId ? (
             <Tooltip title={historyLabel}>
-              <StyledHistoryIconLink href={`/students/${studentId}/history`} aria-label={historyLabel}>
+              <StyledHistoryIconLink href={`${studentHref(studentId)}/history`} aria-label={historyLabel}>
                 <HistoryOutlined fontSize="small" />
               </StyledHistoryIconLink>
             </Tooltip>

@@ -10,6 +10,8 @@ import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
+import { profileHrefForUser } from "@/frontend/utils/profileHref";
+import { Link } from "@/shared/i18n/routing";
 
 export interface UserOverridesDataGridProps {
   readonly users: readonly User[];
@@ -247,6 +249,22 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         minWidth: 220,
         renderCell: params => {
           const user = params.row;
+          const profileHref = user.id ? profileHrefForUser(user.id) : undefined;
+          const nameTypography = (
+            <Typography
+              variant="bodyMd"
+              sx={{
+                fontWeight: 600,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                color: theme => (profileHref ? theme.palette.primary.main : theme.palette.text.primary),
+              }}
+            >
+              {user.name}
+            </Typography>
+          );
+
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
               <Avatar
@@ -269,17 +287,13 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
                   .toUpperCase()}
               </Avatar>
               <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                <Typography
-                  variant="bodyMd"
-                  sx={{
-                    fontWeight: 600,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {user.name}
-                </Typography>
+                {profileHref ? (
+                  <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
+                    {nameTypography}
+                  </Link>
+                ) : (
+                  nameTypography
+                )}
                 <Typography
                   variant="labelMd"
                   sx={theme => ({

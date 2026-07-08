@@ -7,9 +7,11 @@ export interface ParentScheduleRow {
   readonly rowNumber: number;
   readonly classTime: string;
   readonly durationMinutes: number;
+  readonly studentId?: string;
   readonly studentName: string;
   readonly studentInitials: string;
   readonly studentAvatarUrl?: string;
+  readonly teacherId?: string;
   readonly teacherName: string;
   readonly bookingStatus: ParentBookingStatus;
   readonly liveClassStatus: ParentLiveClassStatus;

@@ -4,7 +4,6 @@ import { useMutation } from "@apollo/client/react";
 import { PersonOutlined, SettingsOutlined } from "@mui/icons-material";
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -20,13 +19,13 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppDataGrid, LanguageDisplay, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, LanguageDisplay, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { AppPermission, type StudentStatus as GqlStudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   changeStudentStatusMutationDocument,
@@ -226,6 +225,7 @@ interface ParentStudentsDataGridProps {
 function ParentStudentsDataGrid({ rows, loading, onRefetch }: ParentStudentsDataGridProps) {
   const t = useTranslations("dashboard.parentProfile.table");
   const tStudents = useTranslations("dashboard.parentProfile.students");
+  const tc = useTranslations("profile");
   const router = useRouter();
   const notifications = useNotifications();
 
@@ -248,28 +248,14 @@ function ParentStudentsDataGrid({ rows, loading, onRefetch }: ParentStudentsData
       flex: 1.5,
       minWidth: 200,
       renderCell: params => (
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center", height: "100%" }}>
-          <Avatar
-            src={params.row.avatarUrl}
-            sx={theme => ({
-              width: 32,
-              height: 32,
-              fontSize: 12,
-              backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              color: theme.palette.primary.main,
-              fontWeight: 700,
-            })}
-          >
-            {params.row.name
-              .split(" ")
-              .map(n => n[0])
-              .join("")
-              .toUpperCase()}
-          </Avatar>
-          <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-            {params.row.name}
-          </Typography>
-        </Stack>
+        <PersonProfileLinkCell
+          href={studentHref(params.row.id)}
+          avatarUrl={params.row.avatarUrl}
+          name={params.row.name}
+          avatarSize={32}
+          fallbackInitial="S"
+          fontWeight={700}
+        />
       ),
     },
     {
@@ -277,6 +263,15 @@ function ParentStudentsDataGrid({ rows, loading, onRefetch }: ParentStudentsData
       headerName: t("teacher"),
       flex: 1.2,
       minWidth: 150,
+      renderCell: params => (
+        <PersonProfileLinkCell
+          href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
+          name={params.row.teacher.trim() || tc("notSet")}
+          showAvatar={false}
+          fontWeight={400}
+          emphasizeLink={Boolean(params.row.teacherId)}
+        />
+      ),
     },
     {
       field: "hoursPerWeek",

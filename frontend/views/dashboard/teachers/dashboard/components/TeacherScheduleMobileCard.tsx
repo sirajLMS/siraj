@@ -6,6 +6,7 @@ import { styled } from "@mui/material/styles";
 import { ActionIconLink, StatusBadge } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import { studentHref } from "@/frontend/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
@@ -253,6 +254,8 @@ function TimeHighlight({ row, labels }: { readonly row: TeacherScheduleRow; read
 }
 
 function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
+  const href = row.studentId ? studentHref(row.studentId) : undefined;
+
   return (
     <Box
       sx={theme => ({
@@ -265,9 +268,27 @@ function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
       })}
     >
       <Avatar sx={{ width: 32, height: 32, typography: "labelMd" }}>{row.studentInitials}</Avatar>
-      <Typography sx={{ typography: "bodyMd", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-        {row.studentName}
-      </Typography>
+      {href ? (
+        <Typography
+          component={Link}
+          href={href}
+          sx={{
+            typography: "bodyMd",
+            color: theme => theme.palette.primary.main,
+            textDecoration: "none",
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            "&:hover": { textDecoration: "underline" },
+          }}
+        >
+          {row.studentName}
+        </Typography>
+      ) : (
+        <Typography sx={{ typography: "bodyMd", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+          {row.studentName}
+        </Typography>
+      )}
     </Box>
   );
 }
@@ -356,7 +377,7 @@ export function TeacherScheduleMobileCard({
 }: Readonly<TeacherScheduleMobileCardProps>) {
   const isCompleted = row.status === "completed";
   const isLive = row.isLive === true;
-  const studentHref = row.studentId ? `/students/${row.studentId}` : undefined;
+  const studentHrefValue = row.studentId ? studentHref(row.studentId) : undefined;
   const sessionActions = resolveTeacherScheduleSessionActions({
     executionState: row.executionState as ClassExecutionState | undefined,
     outcome: row.outcome as ClassOutcome | undefined,
@@ -369,7 +390,7 @@ export function TeacherScheduleMobileCard({
 
   return (
     <StyledScheduleCard elevation={0} isLive={isLive} sx={{ opacity: isCompleted ? 0.7 : 1 }}>
-      <CardHeader row={row} labels={labels} canActivate={canActivate} isLive={isLive} studentHref={studentHref} />
+      <CardHeader row={row} labels={labels} canActivate={canActivate} isLive={isLive} studentHref={studentHrefValue} />
       <TimeHighlight row={row} labels={labels} />
       <StudentInfoRow row={row} />
       <CardFooter

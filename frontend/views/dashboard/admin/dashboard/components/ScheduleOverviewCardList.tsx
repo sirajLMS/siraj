@@ -7,6 +7,7 @@ import { useLocale } from "next-intl";
 import { ActionIconLink } from "@/frontend/components/ui";
 import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import {
   formatDurationMinutes,
@@ -362,7 +363,7 @@ function ScheduleOverviewMobileCard({
         <StyledCardHeaderMain>
           {studentId ? (
             <StyledScheduleNameLink
-              href={`/students/${studentId}`}
+              href={studentHref(studentId)}
               title={studentName}
               sx={{ minWidth: 0, maxWidth: "100%", display: "block", overflow: "hidden", alignSelf: "stretch" }}
             >
@@ -388,7 +389,7 @@ function ScheduleOverviewMobileCard({
         <StyledCardActions>
           {studentId ? (
             <Tooltip title={headers.history}>
-              <ActionIconLink href={`/students/${studentId}/history`} aria-label={headers.history}>
+              <ActionIconLink href={`${studentHref(studentId)}/history`} aria-label={headers.history}>
                 <HistoryOutlined fontSize="small" />
               </ActionIconLink>
             </Tooltip>
@@ -426,13 +427,13 @@ function ScheduleOverviewMobileCard({
           label={headers.teacher}
           name={teacherName}
           tone="teacher"
-          href={teacherId ? `/teachers/${teacherId}/profile` : undefined}
+          href={teacherId ? profileHrefForTeacher({ teacherId }) : undefined}
         />
         <PersonCell
           label={headers.student}
           name={studentName}
           tone="student"
-          href={studentId ? `/students/${studentId}` : undefined}
+          href={studentId ? studentHref(studentId) : undefined}
         />
       </StyledPeopleRow>
     </StyledScheduleCard>

@@ -152,6 +152,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     () =>
       (invoicesData?.adminInvoices?.rows ?? []).map(inv => ({
         id: inv.id ?? "",
+        studentId: inv.studentId ?? null,
         studentName: inv.studentName ?? inv.studentId ?? "Student",
         studentInitials: deriveInitials(inv.studentName),
         dateIssued: formatDate(inv.issueDate),

@@ -1,13 +1,19 @@
 "use client";
 
-import { Avatar, Box, Typography } from "@mui/material";
+import { PersonProfileLinkCell } from "@/frontend/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import { studentHref } from "@/frontend/utils/profileHref";
 
 export function TeacherScheduleStudentCell({ row }: Readonly<{ row: TeacherScheduleRow }>) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, alignSelf: "center", height: "100%" }}>
-      <Avatar sx={{ width: 32, height: 32, typography: "labelMd" }}>{row.studentInitials}</Avatar>
-      <Typography sx={{ typography: "bodyMd" }}>{row.studentName}</Typography>
-    </Box>
+    <PersonProfileLinkCell
+      href={row.studentId ? studentHref(row.studentId) : undefined}
+      name={row.studentName}
+      showAvatar
+      avatarSize={32}
+      fallbackInitial={row.studentInitials?.[0] ?? "?"}
+      typographyVariant="bodyMd"
+      fontWeight={400}
+    />
   );
 }

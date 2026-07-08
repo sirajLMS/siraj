@@ -17,6 +17,7 @@ export interface AcademicClassRow {
   readonly className: string;
   readonly classId: string;
   readonly instructor: string;
+  readonly instructorId?: string;
   readonly time: string;
   readonly room: string;
   readonly action: ClassSessionAction;

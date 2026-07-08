@@ -15,6 +15,7 @@ export interface AdminBillingSummary {
 
 export interface AdminInvoiceRow {
   readonly id: string;
+  readonly studentId: string | null;
   readonly studentName: string;
   readonly studentInitials: string;
   readonly dateIssued: string;

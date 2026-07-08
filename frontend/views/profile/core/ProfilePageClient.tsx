@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile.types";
 import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments/profile.documents";
+import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { ParentProfileContainer } from "../parent/ParentProfileContainer";
 import { StaffProfileContainer } from "../staff/StaffProfileContainer";
 import { TeacherProfileContainer } from "../teacher/TeacherProfileContainer";
@@ -33,8 +34,8 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   const title = mode === "edit" ? t("editTitle") : t("pageTitle");
   const subtitle = tAudience("subtitle");
 
-  const editHref = scope === "own" ? "/profile/edit" : `/users/${targetUserId}/profile/edit`;
-  const cancelHref = scope === "own" ? "/profile" : `/users/${targetUserId}/profile`;
+  const editHref = scope === "own" ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
+  const cancelHref = scope === "own" ? ownProfileHref() : profileHrefForUser(targetUserId);
 
   const handleRetry = useCallback(() => {
     void refetch();

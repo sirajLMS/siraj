@@ -3,8 +3,9 @@
 import { Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { AdminSuggestionRow } from "../types/suggestions.types";
 import type { SuggestionsDataGridProps } from "../types/suggestionsView.types";
 import { mapStatusForBadge, statusLabelKey } from "../utils/suggestionStatusMap";
@@ -98,9 +99,12 @@ export function SuggestionsDataGrid({
         flex: 0.9,
         minWidth: 140,
         renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-            {row.parentName}
-          </Typography>
+          <PersonProfileLinkCell
+            name={row.parentName}
+            href={profileHrefForParent({ parentId: row.parentId })}
+            showAvatar={false}
+            fontWeight={700}
+          />
         ),
       },
       {

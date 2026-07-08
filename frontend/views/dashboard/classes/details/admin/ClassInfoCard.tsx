@@ -10,6 +10,7 @@ import type {
   ClassInstanceTeacherInfo,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { avatarInitials } from "@/frontend/utils/avatar";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 import { StudentEntityLink, TeacherEntityLink } from "../components/EntityLinks";
 
@@ -132,8 +133,8 @@ function LinkedAvatar({
 }
 
 export function ClassInfoCard({ courseName, instanceId, student, teacher, isActive, labels }: ClassInfoCardProps) {
-  const studentHref = student.id ?? undefined;
-  const teacherHref = teacher.id ? `/teachers/${teacher.id}/profile` : undefined;
+  const studentProfileHref = student.id ? studentHref(student.id) : undefined;
+  const teacherProfileHref = profileHrefForTeacher({ teacherId: teacher.id });
 
   return (
     <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
@@ -187,7 +188,7 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
       <Stack direction="row" sx={theme => ({ gap: theme.spacing(4), mt: theme.spacing(2), alignItems: "center" })}>
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
           <LinkedAvatar
-            href={studentHref}
+            href={studentProfileHref}
             name={student.name ?? ""}
             avatarUrl={student.avatarUrl ?? undefined}
             variant="student"
@@ -215,7 +216,7 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
 
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
           <LinkedAvatar
-            href={teacherHref}
+            href={teacherProfileHref}
             name={teacher.name ?? ""}
             avatarUrl={teacher.avatarUrl ?? undefined}
             variant="teacher"

@@ -9,6 +9,8 @@ import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import type { GroupUser, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import { profileHrefForUser } from "@/frontend/utils/profileHref";
+import { Link } from "@/shared/i18n/routing";
 
 const StyledTabContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -143,6 +145,9 @@ export function AssignedUsersTab({
         minWidth: 200,
         renderCell: (params: { row: GroupUser }) => {
           const user = params.row;
+          const profileHref = user.id ? profileHrefForUser(user.id) : undefined;
+          const nameText = <StyledUserNameText variant="bodyMd">{user.name}</StyledUserNameText>;
+
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
               <StyledUserAvatar>
@@ -154,7 +159,13 @@ export function AssignedUsersTab({
                   .toUpperCase()}
               </StyledUserAvatar>
               <StyledUserInfoContainer>
-                <StyledUserNameText variant="bodyMd">{user.name}</StyledUserNameText>
+                {profileHref ? (
+                  <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
+                    {nameText}
+                  </Link>
+                ) : (
+                  nameText
+                )}
                 <StyledUserEmailText variant="bodyMd">{user.email}</StyledUserEmailText>
               </StyledUserInfoContainer>
             </Box>

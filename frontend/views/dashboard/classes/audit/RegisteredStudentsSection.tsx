@@ -1,14 +1,15 @@
 "use client";
 
 import { FileDownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, Box, IconButton, Typography } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { ExportButton, SectionPanel, StatusBadge } from "@/frontend/components/ui";
+import { ExportButton, PersonProfileLinkCell, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import type { GroupClassStudent } from "@/frontend/graphql/generated/gql/graphql-types";
 import { GroupClassAttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { studentHref } from "@/frontend/utils/profileHref";
 
 interface RegisteredStudentsSectionProps {
   readonly students: readonly (GroupClassStudent | null)[] | null | undefined;
@@ -77,29 +78,18 @@ export function RegisteredStudentsSection({
         headerName: labels.studentName,
         flex: 1.2,
         minWidth: 200,
-        renderCell: ({ row, api }) => {
-          const rowIndex = api.getAllRowIds().indexOf(row.id ?? "");
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-              <Avatar
-                sx={theme => ({
-                  width: 32,
-                  height: 32,
-                  typography: "labelMd",
-                  backgroundColor:
-                    rowIndex % 2 === 0 ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
-                  color: rowIndex % 2 === 0 ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,
-                })}
-                src={row.avatarUrl ?? undefined}
-              >
-                {row.initials ?? ""}
-              </Avatar>
-              <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-                {row.name ?? ""}
-              </Typography>
-            </Box>
-          );
-        },
+        renderCell: ({ row }) => (
+          <PersonProfileLinkCell
+            href={row.id ? studentHref(row.id) : undefined}
+            name={row.name ?? ""}
+            avatarUrl={row.avatarUrl}
+            showAvatar
+            avatarSize={32}
+            fallbackInitial={row.initials?.[0] ?? "?"}
+            typographyVariant="bodyMd"
+            fontWeight={500}
+          />
+        ),
       },
       {
         field: "studentId",

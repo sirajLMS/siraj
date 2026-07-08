@@ -36,9 +36,11 @@ function useScheduleRows(
                 readonly id?: string | null;
                 readonly classTimeFormatted?: string | null;
                 readonly durationMinutes?: number | null;
+                readonly studentId?: string | null;
                 readonly studentName?: string | null;
                 readonly studentInitials?: string | null;
                 readonly studentAvatarUrl?: string | null;
+                readonly teacherId?: string | null;
                 readonly teacherName?: string | null;
                 readonly bookingStatus?: string | null;
                 readonly executionState?: string | null;
@@ -59,9 +61,11 @@ function useScheduleRows(
       rowNumber: 0,
       classTime: r.classTimeFormatted ?? "",
       durationMinutes: r.durationMinutes ?? 0,
+      studentId: r.studentId ?? undefined,
       studentName: r.studentName ?? "",
       studentInitials: r.studentInitials ?? "",
       studentAvatarUrl: r.studentAvatarUrl ?? undefined,
+      teacherId: r.teacherId ?? undefined,
       teacherName: r.teacherName ?? "",
       bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
       liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),

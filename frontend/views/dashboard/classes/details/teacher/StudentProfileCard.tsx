@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import type { ClassInstanceStudentInfo } from "@/frontend/graphql/generated/gql/graphql-types";
+import { studentHref } from "@/frontend/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 import { StudentEntityLink } from "../components/EntityLinks";
 
@@ -45,7 +46,7 @@ export function StudentProfileCard({ student, labels }: StudentProfileCardProps)
     );
   }
 
-  const profileHref = `/students/${student.id}`;
+  const profileHref = studentHref(student.id);
 
   return (
     <BaseCard edgeToEdge sx={{ position: "relative", overflow: "hidden", pt: 4 }}>

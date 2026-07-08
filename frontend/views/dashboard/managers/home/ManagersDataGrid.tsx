@@ -6,8 +6,9 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { profileHrefForStaff } from "@/frontend/utils/profileHref";
 import { ManagerRowActions } from "./ManagerRowActions";
 import type { Manager } from "./types";
 
@@ -15,11 +16,6 @@ const StyledManagerAvatar = styled(Avatar)({
   width: 40,
   height: 40,
 });
-
-const StyledManagerNameTypography = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
 
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "isStaff",
@@ -78,7 +74,13 @@ export function ManagersDataGrid({
                 gap: 0.5,
               }}
             >
-              <StyledManagerNameTypography variant="bodyMd">{params.row.name}</StyledManagerNameTypography>
+              <PersonProfileLinkCell
+                href={profileHrefForStaff({ userId: params.row.userId })}
+                name={params.row.name}
+                showAvatar={false}
+                typographyVariant="bodyMd"
+                fontWeight={700}
+              />
               <StatusBadge
                 category="session"
                 status={params.row.status === "active" ? "active" : "blocked"}

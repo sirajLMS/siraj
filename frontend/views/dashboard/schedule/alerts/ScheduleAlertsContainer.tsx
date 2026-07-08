@@ -79,6 +79,7 @@ export function ScheduleAlertsContainer() {
       className: row?.student?.name ?? "",
       classId: row?.id ?? "",
       instructor: row?.teacher?.name ?? "",
+      instructorId: row?.teacher?.id ?? undefined,
       time: row?.yourTime ?? "",
       room: "",
       action: mapOutcomeToAction(row?.outcome, status),

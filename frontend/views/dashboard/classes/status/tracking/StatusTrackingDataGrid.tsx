@@ -8,6 +8,8 @@ import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { Link } from "@/shared/i18n/routing";
 import { StatusAction } from "./StatusBadgeAction";
 import {
   computeSessionStatus,
@@ -102,6 +104,8 @@ export function StatusTrackingDataGrid({
         renderCell: ({ row }) => {
           const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
           const styles = sessionLabelStyles(theme, status);
+          const studentProfileHref = row.studentId ? studentHref(row.studentId) : undefined;
+          const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
               <Avatar
@@ -119,10 +123,39 @@ export function StatusTrackingDataGrid({
                 {row.studentInitials ?? ""}
               </Avatar>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-                  {row.studentName ?? ""}
-                </Typography>
-                <StyledClassNameText variant="labelMd">{row.teacherName ?? ""}</StyledClassNameText>
+                {studentProfileHref ? (
+                  <Link href={studentProfileHref} style={{ textDecoration: "none" }}>
+                    <Typography
+                      variant="bodyMd"
+                      sx={{
+                        fontWeight: 700,
+                        color: theme.palette.primary.main,
+                        "&:hover": { textDecoration: "underline" },
+                      }}
+                    >
+                      {row.studentName ?? ""}
+                    </Typography>
+                  </Link>
+                ) : (
+                  <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
+                    {row.studentName ?? ""}
+                  </Typography>
+                )}
+                {teacherProfileHref ? (
+                  <Link href={teacherProfileHref} style={{ textDecoration: "none" }}>
+                    <StyledClassNameText
+                      variant="labelMd"
+                      sx={{
+                        color: theme.palette.primary.main,
+                        "&:hover": { textDecoration: "underline" },
+                      }}
+                    >
+                      {row.teacherName ?? ""}
+                    </StyledClassNameText>
+                  </Link>
+                ) : (
+                  <StyledClassNameText variant="labelMd">{row.teacherName ?? ""}</StyledClassNameText>
+                )}
               </Box>
             </Box>
           );
@@ -133,7 +166,25 @@ export function StatusTrackingDataGrid({
         headerName: labels.teacher,
         flex: 1,
         minWidth: 140,
-        valueGetter: (_value, row) => row.teacherName ?? "",
+        renderCell: ({ row }) => {
+          const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
+          if (!teacherProfileHref) {
+            return <Typography variant="bodyMd">{row.teacherName ?? ""}</Typography>;
+          }
+          return (
+            <Link href={teacherProfileHref} style={{ textDecoration: "none", alignSelf: "center" }}>
+              <Typography
+                variant="bodyMd"
+                sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": { textDecoration: "underline" },
+                }}
+              >
+                {row.teacherName ?? ""}
+              </Typography>
+            </Link>
+          );
+        },
       },
       {
         field: "schedule",

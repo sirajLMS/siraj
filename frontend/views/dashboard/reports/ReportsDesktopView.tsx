@@ -83,7 +83,7 @@ export function ReportsDesktopView({
       </BaseCard>
 
       <SectionPanel>
-        <ReportsDataGrid rows={rows} labels={tableLabels} onRowClick={onRowClick} />
+        <ReportsDataGrid rows={rows} labels={tableLabels} reportType={reportType} onRowClick={onRowClick} />
         <ReportsTotalsRow
           summary={summary}
           totalsLabel={totalsLabel}

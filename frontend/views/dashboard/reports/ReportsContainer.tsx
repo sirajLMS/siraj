@@ -11,6 +11,7 @@ import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teache
 import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 import { ReportsView } from "./ReportsView";
 import type { ReportLedgerRow, ReportsSummary, ReportType } from "./types/reportsTypes";
@@ -369,9 +370,12 @@ function useReportHandlers({
     (row: ReportLedgerRow) => {
       if (!row.entityId) return;
       if (reportType === "by_teacher") {
-        router.push(`/teachers/${row.entityId}/profile`);
+        const href = profileHrefForTeacher({ teacherId: row.entityId });
+        if (href) {
+          router.push(href);
+        }
       } else if (reportType === "by_student") {
-        router.push(`/students/${row.entityId}/status`);
+        router.push(`${studentHref(row.entityId)}/status`);
       }
     },
     [reportType, router]

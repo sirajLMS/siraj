@@ -28,6 +28,7 @@ import {
 } from "@mui/icons-material";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/types/page-permissions.types";
+import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 
 /**
@@ -273,7 +274,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     key: "parent-profile",
     labelKey: "dashboard.nav.parents",
     icon: PersonOutlineOutlined,
-    href: "/parents/par-001/profile",
+    href: profileHrefForParent({ parentId: "par-001" }) ?? "/parents",
     section: "main",
     permission: AppPermission.ParentsEdit,
   },

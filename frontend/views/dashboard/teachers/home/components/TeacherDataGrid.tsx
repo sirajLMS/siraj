@@ -3,9 +3,10 @@ import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
-import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
+import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherDataGridProps {
@@ -106,9 +107,13 @@ export function TeacherDataGrid({
       headerName: t("table.name"),
       flex: 1.5,
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-          {params.value as string}
-        </Typography>
+        <PersonProfileLinkCell
+          href={profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id })}
+          name={(params.value as string) ?? ""}
+          showAvatar={false}
+          typographyVariant="bodyLg"
+          fontWeight={700}
+        />
       ),
     },
     {
@@ -188,8 +193,9 @@ export function TeacherDataGrid({
             icon={<SettingsOutlined />}
             variant="primary"
             onClick={() => {
-              if (params.row.id) {
-                router.push(`/teachers/${params.row.id}/profile`);
+              const href = profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id });
+              if (href) {
+                router.push(href);
               }
             }}
           />

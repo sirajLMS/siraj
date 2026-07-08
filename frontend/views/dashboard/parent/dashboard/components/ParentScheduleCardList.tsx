@@ -1,8 +1,9 @@
 "use client";
 
 import { ScheduleOutlined, VideocamOutlined } from "@mui/icons-material";
-import { Avatar, Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
-import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import { Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
+import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { SchedulePagination } from "../ParentDashboardView";
 import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
 import type { ParentScheduleRow } from "../types/parentDashboardTypes";
@@ -31,6 +32,10 @@ function ScheduleCard({
   readonly labels: ParentDashboardLabels;
   readonly onJoinVideo: (id: string) => void;
 }) {
+  const studentProfileHref = row.studentId ? studentHref(row.studentId) : undefined;
+  const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
+  const teacherLabel = formatTeacherLabel(labels.schedule.teacherLabel, row.teacherName);
+
   return (
     <Card
       elevation={0}
@@ -79,18 +84,24 @@ function ScheduleCard({
             borderTop: `1px dashed ${theme.palette.outlineVariant}`,
           })}
         >
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-            <Avatar src={row.studentAvatarUrl} alt={row.studentName} sx={{ width: 40, height: 40 }}>
-              {row.studentInitials}
-            </Avatar>
-            <Box>
-              <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-                {row.studentName}
-              </Typography>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {formatTeacherLabel(labels.schedule.teacherLabel, row.teacherName)}
-              </Typography>
-            </Box>
+          <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+            <PersonProfileLink
+              href={studentProfileHref}
+              name={row.studentName}
+              avatarUrl={row.studentAvatarUrl}
+              fallbackInitial={row.studentInitials || "S"}
+              avatarSize={40}
+              typographyVariant="bodyMd"
+              fontWeight={700}
+            />
+            <PersonProfileLink
+              href={teacherProfileHref}
+              name={teacherLabel}
+              showAvatar={false}
+              typographyVariant="labelMd"
+              fontWeight={400}
+              emphasizeLink={Boolean(teacherProfileHref)}
+            />
           </Stack>
           <IconButton
             onClick={() => {

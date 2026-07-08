@@ -16,6 +16,7 @@ import { AppPermission, type ParentStatus } from "@/frontend/graphql/generated/g
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
 import { useParentsStore } from "@/frontend/stores/parentsStore";
 import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
+import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 import { useRouter } from "@/shared/i18n/routing";
 import { toParentAccountStatus } from "./directory";
@@ -191,7 +192,11 @@ export function ParentsContainer() {
   };
 
   const handleOpenSettings = (id: string) => {
-    router.push(`/parents/${id}/profile`);
+    const row = rows.find(r => r.id === id);
+    const href = profileHrefForParent({ userId: row?.userId, parentId: id });
+    if (href) {
+      router.push(href);
+    }
   };
 
   const handleSearch = (query: string) => {
