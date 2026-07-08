@@ -119,6 +119,7 @@ export type TeacherProfileReturnType = Omit<
   updatedAt: string;
   totalClasses: number;
   avgEngagementScore: number;
+  hasZoomPassword: boolean;
 };
 
 export type TeacherProfileUpdateInputType = Partial<
@@ -195,6 +196,7 @@ export type TeacherOwnProfileReturnType = {
   rateCurrency: string | null;
   paymentMethod: PaymentMethod | null;
   zoomLink: string | null;
+  totalClasses: number;
 };
 
 export type TeacherOwnProfileUpdateInput = {

@@ -30,6 +30,7 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     }),
     totalClasses: t.exposeInt("totalClasses"),
     avgEngagementScore: t.exposeFloat("avgEngagementScore"),
+    hasZoomPassword: t.exposeBoolean("hasZoomPassword", { authScopes: { superAdmin: true } }),
   }),
 });
 

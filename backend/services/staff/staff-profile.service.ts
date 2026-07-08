@@ -4,6 +4,25 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teacher.types";
 
+function maskNationalId(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (trimmed.length <= 4) {
+    return "****";
+  }
+  const maskedPrefix = "*".repeat(Math.min(trimmed.length - 4, 8));
+  return `${maskedPrefix}${trimmed.slice(-4)}`;
+}
+
+function toMaskedTeacherProfile(profile: TeacherProfileReturnType): TeacherProfileReturnType {
+  return {
+    ...profile,
+    nationalId: maskNationalId(profile.nationalId),
+  };
+}
+
 export namespace StaffProfileService {
   export async function updateTeacherProfile(
     actorUserId: string,
@@ -44,7 +63,7 @@ export namespace StaffProfileService {
       throw new Error(tFunc("teacherNotFound", { id: teacherId }));
     }
 
-    return profile;
+    return toMaskedTeacherProfile(profile);
   }
 
   export async function getTeacherProfileForEdit(
@@ -64,6 +83,6 @@ export namespace StaffProfileService {
       throw new Error(tFunc("teacherNotFound", { id: teacherId }));
     }
 
-    return profile;
+    return toMaskedTeacherProfile(profile);
   }
 }

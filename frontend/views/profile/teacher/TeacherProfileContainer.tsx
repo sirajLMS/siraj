@@ -1,13 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import type { ProfileMode, ProfileScope } from "@/backend/types/profile.types";
+import { ErrorState } from "@/frontend/components/ui";
+import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
@@ -16,14 +13,17 @@ import {
 import { useRouter } from "@/shared/i18n/routing";
 import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
 import { TeacherBankingTab } from "./banking/TeacherBankingTab";
+import { TeacherProfileLoadingSkeleton } from "./sections/TeacherProfileLoadingSkeleton";
+import { isTeacherAdminData } from "./sections/teacherProfileTypes";
 import { AssignedStudentsTab } from "./students/AssignedStudentsTab";
-import { type TeacherOwnEditFormData, TeacherProfileEditForm } from "./TeacherProfileEditForm";
+import { TeacherAdminEditForm } from "./TeacherAdminEditForm";
+import { TeacherProfileEditForm } from "./TeacherProfileEditForm";
 import { TeacherProfileView } from "./TeacherProfileView";
+import type { TeacherAdminEditFormData, TeacherOwnEditFormData } from "./teacherProfileFormTypes";
 
-const teacherOwnEditSchema = z.object({
-  phone: z.string().optional(),
-  zoomLink: z.string().optional(),
-});
+type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type TeacherOwnData = NonNullable<ProfileData["teacherOwnProfile"]>;
+type TeacherAdminData = NonNullable<ProfileData["teacherAdminProfile"]>;
 
 type TeacherProfileContainerProps = {
   readonly scope: ProfileScope;
@@ -32,57 +32,96 @@ type TeacherProfileContainerProps = {
   readonly activeTab?: string;
 };
 
-export function TeacherProfileContainer({
+function buildCoreInput(formData: TeacherOwnEditFormData | TeacherAdminEditFormData) {
+  return {
+    name: formData.name.trim(),
+    email: formData.email.trim(),
+  };
+}
+
+function buildOwnTeacherInput(formData: TeacherOwnEditFormData | TeacherAdminEditFormData) {
+  return {
+    phone: formData.phone || null,
+    zoomLink: formData.zoomLink || null,
+  };
+}
+
+function buildAdminTeacherInput(formData: TeacherAdminEditFormData) {
+  const input = {
+    ...buildOwnTeacherInput(formData),
+    nationalId: formData.nationalId || null,
+    dateOfBirth: formData.dateOfBirth || null,
+    gender: formData.gender ?? null,
+    address: formData.address || null,
+    qualifications: formData.qualifications || null,
+    zoomUsername: formData.zoomUsername || null,
+    timezone: formData.timezone || null,
+    hourlyRate: formData.hourlyRate || null,
+    rateCurrency: formData.rateCurrency || null,
+    paymentMethod: formData.paymentMethod ?? null,
+    status: formData.status ?? null,
+  };
+
+  if (formData.zoomPassword?.trim()) {
+    return { ...input, zoomPassword: formData.zoomPassword.trim() };
+  }
+
+  return input;
+}
+
+function buildEditSource(scope: ProfileScope, profile: ProfileData): TeacherOwnData | TeacherAdminData | null {
+  return scope === "own" ? profile.teacherOwnProfile : profile.teacherAdminProfile;
+}
+
+function buildEditData(teacherData: TeacherOwnData | TeacherAdminData) {
+  const base = {
+    name: teacherData.name,
+    email: teacherData.email,
+    phone: teacherData.phone,
+    zoomLink: teacherData.zoomLink,
+    timezone: teacherData.timezone,
+  };
+
+  if (!isTeacherAdminData(teacherData)) {
+    return base;
+  }
+
+  return {
+    ...base,
+    nationalId: teacherData.nationalId,
+    dateOfBirth: teacherData.dateOfBirth,
+    gender: teacherData.gender,
+    address: teacherData.address,
+    qualifications: teacherData.qualifications,
+    zoomUsername: teacherData.zoomUsername,
+    hourlyRate: teacherData.hourlyRate,
+    rateCurrency: teacherData.rateCurrency,
+    paymentMethod: teacherData.paymentMethod,
+    status: teacherData.status,
+  };
+}
+
+type TabContentProps = {
+  readonly activeTab: string;
+  readonly scope: ProfileScope;
+  readonly mode: ProfileMode;
+  readonly targetUserId: string;
+  readonly profile: ProfileData | null | undefined;
+  readonly loading: boolean;
+  readonly error: Error | undefined;
+  readonly refetch: () => void;
+};
+
+function renderActiveTabContent({
+  activeTab,
   scope,
   mode,
   targetUserId,
-  activeTab: _activeTab = "profile",
-}: TeacherProfileContainerProps) {
-  const activeTab = _activeTab;
-  const tc = useTranslations("profile");
-  const router = useRouter();
-
-  const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
-    variables: { userId: targetUserId },
-  });
-
-  const [updateOwnProfile, { loading: savingOwn }] = useMutation(updateOwnProfileMutationDocument);
-  const [updateUserProfile, { loading: savingOther }] = useMutation(updateUserProfileMutationDocument);
-
-  const profile = data?.profileByUserId;
-  const teacherData = scope === "own" ? profile?.teacherOwnProfile : profile?.teacherAdminProfile;
-  const isSaving = savingOwn || savingOther;
-
-  const form = useForm<TeacherOwnEditFormData>({
-    resolver: zodResolver(teacherOwnEditSchema),
-    defaultValues: { phone: "", zoomLink: "" },
-  });
-
-  useEffect(() => {
-    if (teacherData && scope === "own") {
-      form.reset({
-        phone: teacherData.phone ?? "",
-        zoomLink: "zoomLink" in teacherData ? (teacherData.zoomLink ?? "") : "",
-      });
-    }
-  }, [teacherData, form, scope]);
-
-  const onSubmit = async (formData: TeacherOwnEditFormData) => {
-    const teacherInput = {
-      phone: formData.phone || null,
-      zoomLink: formData.zoomLink || null,
-    };
-
-    if (scope === "own") {
-      await updateOwnProfile({ variables: { input: { teacher: teacherInput } } });
-      router.push("/profile");
-      return;
-    }
-
-    await updateUserProfile({ variables: { userId: targetUserId, input: { teacher: teacherInput } } });
-    router.push(`/users/${targetUserId}/profile`);
-  };
-
+  profile,
+  loading,
+  error,
+  refetch,
+}: TabContentProps) {
   if (activeTab === "notifications" && scope === "own") {
     return <NotificationPreferencesTab isActive />;
   }
@@ -104,41 +143,107 @@ export function TeacherProfileContainer({
     );
   }
 
-  if (loading) {
+  if (activeTab !== "profile") {
     return null;
   }
 
-  if (error) {
+  return undefined;
+}
+
+export function TeacherProfileContainer({
+  scope,
+  mode,
+  targetUserId,
+  activeTab: _activeTab = "profile",
+}: TeacherProfileContainerProps) {
+  const tc = useTranslations("profile");
+  const isAdminScope = scope === "other";
+  const activeTab = _activeTab;
+  const router = useRouter();
+
+  const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
+    variables: { userId: targetUserId },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const [updateOwnProfile, { loading: savingOwn }] = useMutation(updateOwnProfileMutationDocument);
+  const [updateUserProfile, { loading: savingOther }] = useMutation(updateUserProfileMutationDocument);
+  const isSaving = savingOwn || savingOther;
+  const profile = data?.profileByUserId;
+
+  const tabContent = renderActiveTabContent({
+    activeTab,
+    scope,
+    mode,
+    targetUserId,
+    profile,
+    loading,
+    error,
+    refetch,
+  });
+  if (tabContent !== undefined) {
+    return tabContent;
+  }
+
+  const onSubmitOwn = async (formData: TeacherOwnEditFormData) => {
+    await updateOwnProfile({
+      variables: { input: { core: buildCoreInput(formData), teacher: buildOwnTeacherInput(formData) } },
+    });
+    router.push("/profile");
+  };
+
+  const onSubmitAdmin = async (formData: TeacherAdminEditFormData) => {
+    await updateUserProfile({
+      variables: {
+        userId: targetUserId,
+        input: { core: buildCoreInput(formData), teacher: buildAdminTeacherInput(formData) },
+      },
+    });
+    router.push(`/users/${targetUserId}/profile`);
+  };
+
+  if (loading && !profile) {
+    return <TeacherProfileLoadingSkeleton />;
+  }
+
+  if (error && !profile) {
     return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
-        {tc("errors.failedToLoad")}
-      </Typography>
-    );
-  }
-
-  if (!teacherData) {
-    return <Typography sx={{ color: theme => theme.palette.text.secondary }}>{tc("errors.notFound")}</Typography>;
-  }
-
-  if (mode === "view") {
-    return <TeacherProfileView teacherData={teacherData} />;
-  }
-
-  if (scope === "own") {
-    return (
-      <TeacherProfileEditForm
-        register={form.register}
-        errors={form.formState.errors}
-        handleSubmit={form.handleSubmit}
-        onSubmit={onSubmit}
-        isSaving={isSaving}
+      <ErrorState
+        embedded
+        message={tc("errors.failedToLoad")}
+        retryLabel={tc("actions.retry")}
+        onRetry={() => {
+          void refetch();
+        }}
       />
     );
   }
 
+  const teacherData = buildEditSource(scope, profile ?? ({} as ProfileData));
+  if (!teacherData) {
+    return <ErrorState embedded message={tc("errors.notFound")} />;
+  }
+
+  const avatarUrl = profile?.avatarUrl;
+  const editData = buildEditData(teacherData);
+
+  if (mode === "view") {
+    return <TeacherProfileView teacherData={teacherData} avatarUrl={avatarUrl} isAdminScope={isAdminScope} />;
+  }
+
+  if (scope === "own") {
+    return (
+      <TeacherProfileEditForm teacherData={editData} avatarUrl={avatarUrl} isSaving={isSaving} onSubmit={onSubmitOwn} />
+    );
+  }
+
   return (
-    <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-      {tc("adminEditHint")}
-    </Typography>
+    <TeacherAdminEditForm
+      teacherData={editData}
+      avatarUrl={avatarUrl}
+      hasZoomPassword={isTeacherAdminData(teacherData) ? Boolean(teacherData.hasZoomPassword) : false}
+      isSaving={isSaving}
+      onSubmit={onSubmitAdmin}
+    />
   );
 }

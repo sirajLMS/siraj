@@ -33,15 +33,50 @@ export interface ProfileLabels {
   };
   readonly teacher: {
     readonly subtitle: string;
+    readonly adminBanner: string;
     readonly sections: {
+      readonly account: string;
       readonly contact: string;
-      readonly salary: string;
+      readonly zoom: string;
+      readonly compensation: string;
+      readonly identity: string;
+      readonly professional: string;
+      readonly stats: string;
+      readonly adminOnly: string;
     };
     readonly baseSalary: string;
     readonly paymentMethod: string;
+    readonly stats: {
+      readonly totalClasses: string;
+      readonly avgEngagement: string;
+    };
     readonly fields: {
+      readonly fullName: string;
+      readonly primaryEmail: string;
       readonly phone: string;
+      readonly address: string;
+      readonly timezone: string;
       readonly zoomLink: string;
+      readonly zoomUsername: string;
+      readonly zoomPassword: string;
+      readonly zoomPasswordSet: string;
+      readonly zoomPasswordPlaceholder: string;
+      readonly nationalId: string;
+      readonly dateOfBirth: string;
+      readonly gender: string;
+      readonly qualifications: string;
+      readonly hourlyRate: string;
+      readonly currency: string;
+      readonly paymentMethod: string;
+      readonly status: string;
+    };
+    readonly gender: {
+      readonly male: string;
+      readonly female: string;
+    };
+    readonly status: {
+      readonly activated: string;
+      readonly deactivated: string;
     };
   };
   readonly parent: {

@@ -67,17 +67,17 @@ Admin-only identity/zoom sections hidden from own profile per product decision.
 
 ## Acceptance criteria
 
-- [ ] Own view shows contact + compensation (read-only) + zoom link
-- [ ] Own edit saves phone + zoomLink + core fields via `updateOwnProfile`
-- [ ] Admin view shows all sections including Identity (admin-only)
-- [ ] Admin edit saves full teacher input via `updateUserProfile.teacher`
-- [ ] Sensitive fields (nationalId, zoomPassword) in admin-only section
-- [ ] Stats section shows totalClasses (and avgEngagement for admin)
-- [ ] Matches Stitch layout structure with Siraj theme colors
-- [ ] Mobile animated reference layout on small screens
+- [x] Own view shows contact + compensation (read-only) + zoom link
+- [x] Own edit saves phone + zoomLink + core fields via `updateOwnProfile`
+- [x] Admin view shows all sections including Identity (admin-only)
+- [x] Admin edit saves full teacher input via `updateUserProfile.teacher`
+- [x] Sensitive fields (nationalId, zoomPassword) in admin-only section
+- [x] Stats section shows totalClasses (and avgEngagement for admin)
+- [x] Matches Stitch layout structure with Siraj theme colors
+- [x] Mobile animated reference layout on small screens
 
 
-- [ ] All display/edit data via GraphQL only ([DATA_POLICY.md](../DATA_POLICY.md))
+- [x] All display/edit data via GraphQL only ([DATA_POLICY.md](../DATA_POLICY.md))
 ## Gaps
 
 - Stitch Navy/Warm variants are color-only — use Siraj theme

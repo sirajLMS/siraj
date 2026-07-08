@@ -28,4 +28,18 @@ describe("profileByUserIdQueryDocument", () => {
     expect(querySource).toContain("teacherAvatarUrl");
     expect(querySource).toContain("totalCount");
   });
+
+  test("includes teacher own profile stats fields", () => {
+    const querySource = profileByUserIdQueryDocument.loc?.source.body ?? "";
+    expect(querySource).toContain("totalClasses");
+    expect(querySource).toContain("teacherOwnProfile");
+  });
+
+  test("includes teacher admin profile sensitive metadata fields", () => {
+    const querySource = profileByUserIdQueryDocument.loc?.source.body ?? "";
+    expect(querySource).toContain("hasZoomPassword");
+    expect(querySource).toContain("avgEngagementScore");
+    expect(querySource).toContain("nationalId");
+    expect(querySource).toContain("qualifications");
+  });
 });

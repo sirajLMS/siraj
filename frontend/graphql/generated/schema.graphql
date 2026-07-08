@@ -2813,6 +2813,7 @@ type TeacherOwnProfile {
   phone: String
   rateCurrency: String
   timezone: String
+  totalClasses: Int
   zoomLink: String
 }
 
@@ -2827,6 +2828,7 @@ type TeacherProfileResult {
   dateOfBirth: String
   email: String
   gender: Gender
+  hasZoomPassword: Boolean
   hourlyRate: String
   id: String
   name: String

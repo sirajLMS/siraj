@@ -24,6 +24,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         rateCurrency
         paymentMethod
         zoomLink
+        totalClasses
       }
       teacherAdminProfile {
         id
@@ -37,6 +38,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         qualifications
         zoomLink
         zoomUsername
+        hasZoomPassword
         timezone
         hourlyRate
         rateCurrency
@@ -175,6 +177,7 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         rateCurrency
         paymentMethod
         zoomLink
+        totalClasses
       }
       parentOwnProfile {
         id
@@ -216,11 +219,22 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         name
         email
         phone
+        nationalId
+        dateOfBirth
+        gender
+        address
+        qualifications
+        zoomLink
+        zoomUsername
+        hasZoomPassword
         timezone
         hourlyRate
         rateCurrency
         paymentMethod
-        zoomLink
+        status
+        updatedAt
+        totalClasses
+        avgEngagementScore
       }
       parentAdminProfile {
         id

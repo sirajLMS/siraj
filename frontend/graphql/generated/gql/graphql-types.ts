@@ -3635,6 +3635,7 @@ export type TeacherOwnProfile = {
   phone: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<Scalars['String']['output']>;
   timezone: Maybe<Scalars['String']['output']>;
+  totalClasses: Maybe<Scalars['Int']['output']>;
   zoomLink: Maybe<Scalars['String']['output']>;
 };
 
@@ -3650,6 +3651,7 @@ export type TeacherProfileResult = {
   dateOfBirth: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
   gender: Maybe<Gender>;
+  hasZoomPassword: Maybe<Scalars['Boolean']['output']>;
   hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;

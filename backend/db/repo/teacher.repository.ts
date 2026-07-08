@@ -194,6 +194,7 @@ export namespace TeacherRepository {
     qualifications: teachers.qualifications,
     zoomLink: teachers.zoomLink,
     zoomUsername: teachers.zoomUsername,
+    hasZoomPassword: sql<boolean>`(${teachers.zoomPassword} IS NOT NULL)`.mapWith(Boolean),
     timezone: teachers.timezone,
     hourlyRate: teachers.hourlyRate,
     rateCurrency: teachers.rateCurrency,
@@ -230,6 +231,7 @@ export namespace TeacherRepository {
     qualifications: string | null;
     zoomLink: string | null;
     zoomUsername: string | null;
+    hasZoomPassword: boolean;
     timezone: string;
     hourlyRate: string | null;
     rateCurrency: string | null;
@@ -250,6 +252,7 @@ export namespace TeacherRepository {
     qualifications: teacher.qualifications,
     zoomLink: teacher.zoomLink,
     zoomUsername: teacher.zoomUsername,
+    hasZoomPassword: teacher.hasZoomPassword,
     timezone: teacher.timezone,
     hourlyRate: teacher.hourlyRate,
     rateCurrency: teacher.rateCurrency,

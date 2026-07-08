@@ -1,62 +1,53 @@
 "use client";
 
-import { Grid, Paper, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ProfileByUserIdQuery } from "@/frontend/graphql/generated/gql/operations";
+import { AccountSection } from "./sections/AccountSection";
+import { AdminOnlySection } from "./sections/AdminOnlySection";
+import { CompensationSection } from "./sections/CompensationSection";
+import { ContactSection } from "./sections/ContactSection";
+import { StatsSection } from "./sections/StatsSection";
+import { isTeacherAdminData, type TeacherViewData } from "./sections/teacherProfileTypes";
+import { ZoomSection } from "./sections/ZoomSection";
 
-type TeacherProfileData =
-  | NonNullable<ProfileByUserIdQuery["profileByUserId"]>["teacherOwnProfile"]
-  | NonNullable<ProfileByUserIdQuery["profileByUserId"]>["teacherAdminProfile"];
-
-type TeacherProfileViewProps = {
-  readonly teacherData: TeacherProfileData;
-};
-
-export function TeacherProfileView({ teacherData }: TeacherProfileViewProps) {
+export function TeacherProfileView({
+  teacherData,
+  avatarUrl,
+  isAdminScope,
+}: {
+  readonly teacherData: TeacherViewData;
+  readonly avatarUrl?: string | null;
+  readonly isAdminScope: boolean;
+}) {
   const t = useTranslations("profile.teacher");
-  const tc = useTranslations("profile");
+  const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
 
   return (
-    <Grid container spacing={3}>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
-          <Stack spacing={1}>
-            <Typography sx={{ typography: "bodyMd" }}>{teacherData?.name}</Typography>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {teacherData?.email}
-            </Typography>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {teacherData?.phone ?? tc("notSet")}
-            </Typography>
-            {teacherData && "timezone" in teacherData ? (
-              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                {teacherData.timezone}
-              </Typography>
-            ) : null}
-          </Stack>
-        </Paper>
-      </Grid>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.salary")}</Typography>
-          <Stack spacing={1}>
-            {teacherData && "hourlyRate" in teacherData ? (
-              <Typography sx={{ typography: "bodyMd" }}>
-                {t("baseSalary", {
-                  amount: teacherData.hourlyRate ?? "0",
-                  currency: teacherData.rateCurrency ?? "USD",
-                })}
-              </Typography>
-            ) : null}
-            {teacherData && "paymentMethod" in teacherData ? (
-              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                {t("paymentMethod", { method: teacherData.paymentMethod ?? tc("notSet") })}
-              </Typography>
-            ) : null}
-          </Stack>
-        </Paper>
-      </Grid>
-    </Grid>
+    <Stack spacing={3}>
+      {isAdminScope ? (
+        <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
+          {t("adminBanner")}
+        </Typography>
+      ) : null}
+
+      <Box
+        sx={{
+          display: "grid",
+          gap: 3,
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            md: "repeat(2, minmax(0, 1fr))",
+          },
+        }}
+      >
+        <AccountSection mode="view" teacherData={teacherData} avatarUrl={avatarUrl} />
+        <ContactSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
+        <ZoomSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
+        <CompensationSection mode="view" teacherData={teacherData} />
+        {isAdminScope && adminData ? <AdminOnlySection mode="view" adminData={adminData} /> : null}
+      </Box>
+
+      <StatsSection teacherData={teacherData} isAdminScope={isAdminScope} />
+    </Stack>
   );
 }

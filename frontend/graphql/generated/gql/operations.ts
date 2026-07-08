@@ -2195,9 +2195,9 @@ export type UpdateUserOverridesMutationVariables = Exact<{
 
 export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null, totalClasses: number | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null };
 
@@ -2231,7 +2231,7 @@ export type ProfileByUserIdQueryVariables = Exact<{
 
 export type ProfileByUserIdQuery = ProfileByUserIdQuery_Query;
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null, totalClasses: number | null };
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null };
 
@@ -2249,7 +2249,7 @@ export type UpdateOwnProfileMutationVariables = Exact<{
 
 export type UpdateOwnProfileMutation = UpdateOwnProfileMutation_Mutation;
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null };
 

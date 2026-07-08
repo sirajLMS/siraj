@@ -1,70 +1,78 @@
 "use client";
 
-import { Box, Stack, Typography } from "@mui/material";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
+import { AccountSection } from "./sections/AccountSection";
+import { ContactSection } from "./sections/ContactSection";
+import { ZoomSection } from "./sections/ZoomSection";
+import type { TeacherEditData } from "./teacherProfileFormTypes";
+import { type TeacherOwnEditFormData, teacherOwnEditSchema } from "./teacherProfileFormTypes";
 
-export type TeacherOwnEditFormData = {
-  phone?: string;
-  zoomLink?: string;
-};
-
-type TeacherProfileEditFormProps = {
-  readonly register: UseFormRegister<TeacherOwnEditFormData>;
-  readonly errors: FieldErrors<TeacherOwnEditFormData>;
-  readonly handleSubmit: UseFormHandleSubmit<TeacherOwnEditFormData>;
-  readonly onSubmit: (formData: TeacherOwnEditFormData) => Promise<void>;
-  readonly isSaving: boolean;
-};
+export type { TeacherOwnEditFormData } from "./teacherProfileFormTypes";
 
 export function TeacherProfileEditForm({
-  register,
-  errors,
-  handleSubmit,
-  onSubmit,
+  teacherData,
+  avatarUrl,
   isSaving,
-}: TeacherProfileEditFormProps) {
-  const t = useTranslations("profile.teacher");
+  onSubmit,
+}: {
+  readonly teacherData: TeacherEditData;
+  readonly avatarUrl?: string | null;
+  readonly isSaving: boolean;
+  readonly onSubmit: (values: TeacherOwnEditFormData) => Promise<void>;
+}) {
   const tc = useTranslations("profile");
+  const form = useForm<TeacherOwnEditFormData>({
+    resolver: zodResolver(teacherOwnEditSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      zoomLink: "",
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      name: teacherData.name ?? "",
+      email: teacherData.email ?? "",
+      phone: teacherData.phone ?? "",
+      zoomLink: teacherData.zoomLink ?? "",
+    });
+  }, [form, teacherData]);
+
+  const onValidSubmit = async (values: TeacherOwnEditFormData) => {
+    await onSubmit(values);
+  };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={2} sx={{ maxWidth: 480 }}>
-        <Typography sx={{ typography: "titleMd" }}>{t("sections.contact")}</Typography>
-        <Box>
-          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.phone")}</Typography>
-          <Box
-            component="input"
-            {...register("phone")}
-            sx={theme => ({
-              width: "100%",
-              p: 1.5,
-              borderRadius: 1,
-              border: `1px solid ${theme.palette.divider}`,
-            })}
+    <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
+      <Stack spacing={3}>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "repeat(2, minmax(0, 1fr))",
+            },
+          }}
+        >
+          <AccountSection
+            mode="edit"
+            teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
+            avatarUrl={avatarUrl}
+            register={form.register}
           />
-          {errors.phone ? (
-            <Typography sx={{ color: theme => theme.palette.error.main, typography: "bodySm" }}>
-              {errors.phone.message}
-            </Typography>
-          ) : null}
-        </Box>
-        <Box>
-          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.zoomLink")}</Typography>
-          <Box
-            component="input"
-            {...register("zoomLink")}
-            sx={theme => ({
-              width: "100%",
-              p: 1.5,
-              borderRadius: 1,
-              border: `1px solid ${theme.palette.divider}`,
-            })}
-          />
+          <ContactSection mode="edit" isAdminScope={false} register={form.register} />
+          <ZoomSection mode="edit" isAdminScope={false} register={form.register} />
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
-          {tc("actions.save")}
+          {isSaving ? tc("shell.loading") : tc("actions.save")}
         </PrimaryPageAction>
       </Stack>
     </Box>

@@ -52,6 +52,7 @@ export namespace TeacherPortalService {
       rateCurrency: profile.rateCurrency,
       paymentMethod: profile.paymentMethod,
       zoomLink: profile.zoomLink,
+      totalClasses: profile.totalClasses,
     };
   }
 
