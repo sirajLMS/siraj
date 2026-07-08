@@ -1,3 +1,5 @@
+import { getStringEnv } from "@/backend/lib/env";
+
 function trimTrailingSlashes(str: string): string {
   let end = str.length;
   while (end > 0 && str[end - 1] === "/") {
@@ -33,7 +35,7 @@ function validateBaseUrl(url: string): URL {
 }
 
 function getNextDevServerUrl(): string {
-  const envUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const envUrl = getStringEnv("NEXT_PUBLIC_BASE_URL");
   if (process.env.NODE_ENV === "production" && !envUrl) {
     throw new Error("NEXT_PUBLIC_BASE_URL must be set in production mode");
   }

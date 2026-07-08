@@ -1,4 +1,4 @@
-import { ensureEnvironmentValidated } from "@/backend/lib/env";
+import { ensureEnvironmentValidated, getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import { resolveConnectionStrategy } from "./connection-strategy";
@@ -17,21 +17,22 @@ export function clearDrizzleLogs() {
 function initDatabase() {
   ensureEnvironmentValidated();
 
-  if (!process.env.DATABASE_URL) {
+  const { databaseUrl } = getEnvironmentConfig();
+  if (!databaseUrl) {
     logger.error("backend/db/drizzleDb.ts:❌ Error: DATABASE_URL is not set in environment variables");
     logger.error("   Please check your .env file");
     process.exit(1);
   }
 
   const strategy = resolveConnectionStrategy();
-  const mode = process.env.DB_CONNECTION_MODE || "auto";
-  const provider = process.env.DB_PROVIDER || "postgres";
+  const mode = getStringEnv("DB_CONNECTION_MODE", "auto");
+  const provider = getStringEnv("DB_PROVIDER", "postgres");
 
-  logger.log("backend/db/drizzleDb.ts Environment variables loaded successfully");
-  logger.log(`   DATABASE_URL=${process.env.DATABASE_URL.substring(0, 20)}...`);
-  logger.log(`   DB_CONNECTION_MODE=${mode}`);
-  logger.log(`   DB_PROVIDER=${provider}`);
-  logger.log(`   DB_STRATEGY=${strategy}`);
+  logger.debug("backend/db/drizzleDb.ts Environment variables loaded successfully");
+  logger.debug(`   DATABASE_URL=${databaseUrl ? "[SET]" : "[NOT SET]"}`);
+  logger.debug(`   DB_CONNECTION_MODE=${mode}`);
+  logger.debug(`   DB_PROVIDER=${provider}`);
+  logger.debug(`   DB_STRATEGY=${strategy}`);
 
   return createDatabase();
 }

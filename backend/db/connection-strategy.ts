@@ -1,3 +1,4 @@
+import { getStringEnv } from "@/backend/lib/env";
 import { isServerlessRuntime, isTestEnv, isVercelRuntime } from "@/backend/lib/runtime";
 
 export type DbConnectionStrategy = "pg-pooled" | "neon-serverless";
@@ -10,7 +11,7 @@ export type PoolMaxContext = {
 };
 
 function getConnectionMode(): DbConnectionMode {
-  const mode = process.env.DB_CONNECTION_MODE?.toLowerCase();
+  const mode = getStringEnv("DB_CONNECTION_MODE")?.toLowerCase();
   if (mode === "pg" || mode === "neon") return mode;
   return "auto";
 }
@@ -25,7 +26,7 @@ export function resolveConnectionStrategy(): DbConnectionStrategy {
     return "pg-pooled";
   }
 
-  const provider = process.env.DB_PROVIDER || "postgres";
+  const provider = getStringEnv("DB_PROVIDER", "postgres");
   return provider === "neon" ? "neon-serverless" : "pg-pooled";
 }
 

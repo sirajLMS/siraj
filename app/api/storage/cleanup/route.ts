@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { SessionService, StorageService } from "@/backend/services";
 
 /**
@@ -21,7 +22,7 @@ async function authenticateAdmin(request: NextRequest): Promise<{ userId: string
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminEmail = getEnvironmentConfig().adminEmail;
   if (!adminEmail || user.email !== adminEmail) {
     logger.warn("Unauthorized cleanup attempt - non-admin user", { userId: user.id, email: user.email });
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

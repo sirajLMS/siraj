@@ -1,4 +1,5 @@
 import { SignedUrlRepository, StorageDbRepository } from "@/backend/db/repo";
+import { getStringEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
@@ -24,7 +25,7 @@ export async function prepareUploadHelper(
       throw new StorageValidationError(validationError);
     }
 
-    const cleanupStrategy = process.env.SIGNED_URL_CLEANUP_STRATEGY || "lazy";
+    const cleanupStrategy = getStringEnv("SIGNED_URL_CLEANUP_STRATEGY", "lazy");
     if (cleanupStrategy === "lazy" || cleanupStrategy === "both") {
       try {
         await SignedUrlRepository.deleteExpired();

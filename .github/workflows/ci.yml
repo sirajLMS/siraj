@@ -1,0 +1,101 @@
+# CI workflow for build, type-check, format/lint (via Biome), and tests.
+# NOTE: ESLint (`bun run lint`) is intentionally NOT run in CI. Per AGENTS.md,
+# `bun run lint` is heavyweight and must go through the lint queue server
+# (a local-only dev process). Lint runs in pre-commit hooks and the local
+# `bun quality-gate` orchestration. Biome (which is concurrency-safe) IS
+# run here as the CI-safe format/lint gate.
+# TODO(team): pin Bun version for reproducibility (currently unpinned).
+
+name: CI
+
+on: [push, pull_request]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: siraj_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.20"
+
+      - name: Cache Bun & Next.js
+        uses: actions/cache@v4
+        with:
+          path:
+            - ~/.bun/install/cache
+            - .next/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type check (tsgo)
+        run: bun run tsgo
+
+      - name: Biome lint + format
+        run: bun run biome:check
+
+      # NEXT_PUBLIC_BASE_URL is safe to hardcode for the build step.
+      # DATABASE_URL/JWT_SECRET come from repo secrets; if absent they resolve
+      # empty and the build still passes under NODE_ENV=test (non-strict env
+      # validation). TODO(team): add DATABASE_URL and JWT_SECRET repo secrets.
+      - name: Next.js build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NEXT_PUBLIC_BASE_URL: http://localhost:3000
+          NODE_ENV: test
+        run: bun run build
+
+      - name: UI component tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test
+          JWT_SECRET: test-jwt-secret-not-used-in-ci-but-must-be-non-empty
+          NODE_ENV: test
+        run: bun run test:ui:components
+
+      - name: GraphQL integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test
+          JWT_SECRET: test-jwt-secret-not-used-in-ci-but-must-be-non-empty
+          NODE_ENV: test
+        run: bun run test:graphql
+
+      # TODO(team): enable once a Postgres service container and DB setup is
+      # wired here. The Postgres service above is provisioned, but the DB tests
+      # need migrations/schema pushed first — add a migration step before
+      # running them.
+      #- name: Database tests
+      #  env:
+      #    DATABASE_URL: postgresql://postgres:postgres@localhost:5432/siraj_test
+      #    JWT_SECRET: test-jwt-secret-not-used-in-ci-but-must-be-non-empty
+      #    NODE_ENV: test
+      #  run: bun run test:db

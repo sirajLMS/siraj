@@ -1,6 +1,7 @@
 import twilio from "twilio";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { deliveryFailedMessage } from "../../../utils";
 import type { ISmsChannel, SmsPayload, SmsSendResult } from "../ISmsChannel";
@@ -13,9 +14,11 @@ export class TwilioSmsAdapter implements ISmsChannel {
   private readonly rateLimitConfig: TwilioRateLimitConfig;
 
   constructor() {
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
-    const fromNumber = process.env.TWILIO_FROM_NUMBER;
+    const {
+      twilioAccountSid: accountSid,
+      twilioAuthToken: authToken,
+      twilioFromNumber: fromNumber,
+    } = getEnvironmentConfig();
 
     if (!accountSid) {
       throw new Error("TWILIO_ACCOUNT_SID environment variable is required for TwilioSmsAdapter");
@@ -148,9 +151,11 @@ export class TwilioSmsAdapter implements ISmsChannel {
 
   async validateConfig(): Promise<boolean> {
     try {
-      const accountSid = process.env.TWILIO_ACCOUNT_SID;
-      const authToken = process.env.TWILIO_AUTH_TOKEN;
-      const fromNumber = process.env.TWILIO_FROM_NUMBER;
+      const {
+        twilioAccountSid: accountSid,
+        twilioAuthToken: authToken,
+        twilioFromNumber: fromNumber,
+      } = getEnvironmentConfig();
 
       return !!accountSid && !!authToken && !!fromNumber;
     } catch (error) {

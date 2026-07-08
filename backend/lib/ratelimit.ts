@@ -1,3 +1,4 @@
+import { getBooleanEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { cacheService } from "@/backend/services/cache";
 
@@ -203,7 +204,7 @@ export async function checkRateLimit(
   // environments. In production, rate limits are always enforced even if the flag is set,
   // because disabling rate limiting in production would expose the system to abuse.
   // This fail-closed design ensures security is never accidentally relaxed in production.
-  const disableRateLimiting = process.env.DISABLE_RATE_LIMITING === "true";
+  const disableRateLimiting = getBooleanEnv("DISABLE_RATE_LIMITING");
   try {
     const { success, limit, remaining, reset } = await limiter.limitSimple(identifier);
 

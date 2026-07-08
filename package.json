@@ -6,17 +6,13 @@
     "dev": "next dev --turbopack -p 3000 -H 0.0.0.0",
     "debug": "next dev --turbopack -p 3000 -H 0.0.0.0",
     "dev:safe": "bun scripts/safe-dev.ts",
-    "dev:full": "bash ../scripts/dev.sh",
     "dev:inspect": "NODE_OPTIONS='--inspect' next dev --turbopack -p 3000 -H 0.0.0.0",
     "build": "next build",
     "start": "next start -p 3000 -H 0.0.0.0",
-    "lint": "eslint --fix --cache --cache-location .eslintcache --concurrency=auto",
-    "lint:perf": "TIMING=1 eslint app/ frontend/ backend/ scripts/ --cache --cache-location .eslintcache --concurrency=auto",
     "format": "bunx @biomejs/biome format --write .",
     "biome:check": "bunx @biomejs/biome check --write --unsafe .",
     "biome:lint": "bunx @biomejs/biome lint --write .",
     "biome:imports": "bunx @biomejs/biome check --write --formatter-enabled=false --linter-enabled=false .",
-    "typecheck": "tsgo -b --noEmit",
     "tsgo": "tsgo -b --noEmit",
     "generate:gqlSchema": "bun run backend/graphql/generateGqlSchema.ts",
     "codegen": "graphql-codegen",
@@ -41,7 +37,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepare": "husky",
-    "postinstall": "rm -rf node_modules/*/node_modules/typescript && node -e \"const fs = require('fs'); const file = 'node_modules/typescript/lib/version.cjs'; if (fs.existsSync(file)) fs.writeFileSync(file, 'module.exports = { ...require(\\\"@typescript/typescript6\\\"), version: \\\"7.0.2\\\", versionMajorMinor: \\\"7.0\\\" };');\"",
+    "postinstall": "rm -rf node_modules/*/node_modules/typescript && bun -e \"const fs = require('fs'); const file = 'node_modules/typescript/lib/version.cjs'; if (fs.existsSync(file)) fs.writeFileSync(file, 'module.exports = { ...require(\\\"@typescript/typescript6\\\"), version: \\\"7.0.2\\\", versionMajorMinor: \\\"7.0\\\" };');\"",
     "db": "bun run scripts/dbActions.ts"
   },
   "dependencies": {
@@ -243,8 +239,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
+      "prettier --write"
     ],
     "*.{json,css,scss,md}": [
       "prettier --write"

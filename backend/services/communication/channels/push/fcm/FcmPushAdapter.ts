@@ -3,6 +3,7 @@ import type { BatchResponse, Message, SendResponse } from "firebase-admin/messag
 import { getMessaging } from "firebase-admin/messaging";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import type { NotificationDeliverySelectType } from "@/backend/types/notificationDeliveries.types";
 import type { UserDeviceTokenSelectType } from "@/backend/types/userDeviceTokens.types";
@@ -15,9 +16,11 @@ export class FcmPushAdapter implements IPushChannel {
   private readonly context: FcmPushContext;
 
   constructor() {
-    const projectId = process.env.FIREBASE_PROJECT_ID;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const {
+      firebaseProjectId: projectId,
+      firebasePrivateKey: privateKey,
+      firebaseClientEmail: clientEmail,
+    } = getEnvironmentConfig();
 
     if (!projectId) {
       throw new Error("FIREBASE_PROJECT_ID environment variable is required for FcmPushAdapter");
@@ -96,9 +99,11 @@ export class FcmPushAdapter implements IPushChannel {
 
   async validateConfig(): Promise<boolean> {
     try {
-      const projectId = process.env.FIREBASE_PROJECT_ID;
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      const {
+        firebaseProjectId: projectId,
+        firebasePrivateKey: privateKey,
+        firebaseClientEmail: clientEmail,
+      } = getEnvironmentConfig();
 
       return !!projectId && !!privateKey && !!clientEmail;
     } catch (error) {

@@ -1,3 +1,4 @@
+import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import type { IPushChannel, PushProvider } from "./IPushChannel";
 
@@ -5,7 +6,7 @@ let instance: IPushChannel | null = null;
 let initializationPromise: Promise<IPushChannel> | null = null;
 
 function getPushProvider(): PushProvider {
-  const rawProvider = process.env.PUSH_PROVIDER as string | undefined;
+  const rawProvider = getStringEnv("PUSH_PROVIDER");
   const provider = (rawProvider || "fcm").toLowerCase();
 
   if (provider !== "fcm") {

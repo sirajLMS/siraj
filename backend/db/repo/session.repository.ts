@@ -1,8 +1,9 @@
-import { and, eq, lte, sql } from "drizzle-orm";
+import { and, desc, eq, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { getRedisService, SessionRedisService } from "@/backend/services";
 import type {
   RedisGroupSimulationSessionData,
@@ -25,7 +26,7 @@ let sessionRedisService: SessionRedisService | null = null;
  * Whether sessions should use Redis.
  */
 function redisSessionsEnabled(): boolean {
-  return process.env.CACHE_PROVIDER !== "postgres";
+  return getEnvironmentConfig().cacheProvider !== "postgres";
 }
 
 function getSessionRedisService(): SessionRedisService {
@@ -152,6 +153,17 @@ export namespace SessionRepository {
   };
 
   export const findByUserId = async (userId: string): Promise<SessionSelectType | null> => {
+    // When Redis is not enabled, sessions live in Postgres — query directly
+    if (!redisSessionsEnabled()) {
+      const pgSessions = await db
+        .select()
+        .from(sessions)
+        .where(eq(sessions.userId, userId))
+        .orderBy(desc(sessions.lastActivity))
+        .limit(1);
+      return pgSessions[0] ?? null;
+    }
+
     const sessionsList = await findSessionsByUserId(userId);
     if (sessionsList.length === 0) return null;
 

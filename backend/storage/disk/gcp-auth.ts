@@ -1,11 +1,12 @@
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { Storage } from "@google-cloud/storage";
 import { GoogleAuth } from "google-auth-library";
+import { getStringEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 
-const projectId = process.env.GCP_PROJECT_ID;
-const secretId = process.env.GCP_SECRET_ID;
-const secretVersion = process.env.GCP_SECRET_VERSION || "latest";
+const projectId = getStringEnv("GCP_PROJECT_ID");
+const secretId = getStringEnv("GCP_SECRET_ID");
+const secretVersion = getStringEnv("GCP_SECRET_VERSION", "latest");
 
 interface GcpCredentials {
   client_email: string;
@@ -65,7 +66,7 @@ const getStorageFromSecretManager = async (): Promise<Storage> => {
 };
 
 const getStorageFromEnv = (): Storage | null => {
-  const credentialsJson = process.env.GCP_CREDENTIALS_JSON;
+  const credentialsJson = getStringEnv("GCP_CREDENTIALS_JSON");
 
   if (!credentialsJson) {
     return null;

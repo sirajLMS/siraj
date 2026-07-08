@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
       "next-intl/config": "./shared/i18n/request.ts",
     },
   },
-  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.100.30"], // NoSonar
+  allowedDevOrigins: ["127.0.0.1", "localhost", getEnv("DEV_ORIGIN", "")].filter(Boolean), // NoSonar
   async headers() {
     return [
       {

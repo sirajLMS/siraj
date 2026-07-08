@@ -5,6 +5,7 @@ import { UserRepository } from "@/backend/db/repo/user.repository";
 import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { setAuthCookies as applyAuthCookies } from "@/backend/lib/auth/cookies";
 import { comparePassword } from "@/backend/lib/auth/password";
+import { getBooleanEnv } from "@/backend/lib/env";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
@@ -233,7 +234,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-      const isDemo = process.env.IS_DEMO === "true";
+      const isDemo = getBooleanEnv("IS_DEMO");
       if (!isDemo) {
         throw new GraphQLError(t("auth.demoLoginNotEnabled"), {
           extensions: { code: "UNAUTHENTICATED" },

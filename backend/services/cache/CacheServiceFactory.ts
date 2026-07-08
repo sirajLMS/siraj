@@ -1,6 +1,7 @@
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
-import type { CacheProvider, ICacheService } from "./ICacheService";
+import type { ICacheService } from "./ICacheService";
 import { PostgresCacheAdapter } from "./PostgresCacheAdapter";
 
 const CACHE_STATE_KEY = Symbol.for("siraj.cacheState");
@@ -18,18 +19,10 @@ function getCacheState(): CacheState {
 }
 
 /**
- * Get cache provider from environment variable
+ * Get cache provider from the centralized env validator
  */
-function getCacheProvider(): CacheProvider {
-  const rawProvider = process.env.CACHE_PROVIDER as string | undefined;
-  const provider = (rawProvider || "redis").toLowerCase();
-
-  if (provider !== "redis" && provider !== "postgres") {
-    logger.warn(`⚠️  Invalid CACHE_PROVIDER: ${provider}. Must be 'redis' or 'postgres'. Using 'redis'.`);
-    return "redis";
-  }
-
-  return provider;
+function getCacheProvider(): "redis" | "postgres" {
+  return getEnvironmentConfig().cacheProvider;
 }
 
 /**

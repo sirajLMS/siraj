@@ -8,7 +8,7 @@ import {
 import { hashPassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
 import type { PermissionGroupEntity } from "@/backend/types";
-import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
+import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import {
   buildExtraParentUserSpecs,
   buildExtraTeacherUserSpecs,
@@ -22,8 +22,8 @@ async function seedUserFromSpec(
   groupMap: Map<string, string>,
   now: Date
 ) {
-  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
-  const plainPassword = "plainPassword" in spec ? (spec.plainPassword ?? "Seed_Pass1!") : "Seed_Pass1!";
+  const plainPassword =
+    "plainPassword" in spec ? (spec.plainPassword ?? DEFAULT_SEED_ADMIN_PASSWORD) : DEFAULT_SEED_ADMIN_PASSWORD;
   const hashedPassword = await hashPassword(plainPassword);
 
   const [insertedUser] = await db

@@ -42,7 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 .eslintcache
-
 .scannerwork/
 
 logs/
@@ -61,18 +60,10 @@ build/
 dist/
 coverage/
 .DS_Store
-*.log
-.env*
-!.env.example
 
 .next
 tsconfig.tsbuildinfo
-.eslintcache
 .quality-gate-state.json
-
-.scannerwork
-
-next-env.d.ts
 
 eslint-results.json
 *storybook.log

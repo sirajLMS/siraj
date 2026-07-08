@@ -1,7 +1,8 @@
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import type { UserSelectType } from "@/backend/types";
 
 /** Email used to identify the system super admin (from ADMIN_EMAIL env var, fallback admin@siraj.local) */
-export const ADMIN_USER_EMAIL = process.env.ADMIN_EMAIL || "admin@siraj.local";
+export const ADMIN_USER_EMAIL = getEnvironmentConfig().adminEmail || "admin@siraj.local";
 
 /**
  * Find the admin user from the seeded users list.

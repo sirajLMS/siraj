@@ -1,3 +1,4 @@
+import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import type { ISmsChannel, SmsProvider } from "./ISmsChannel";
 
@@ -5,7 +6,7 @@ let instance: ISmsChannel | null = null;
 let initializationPromise: Promise<ISmsChannel> | null = null;
 
 function getSmsProvider(): SmsProvider {
-  const rawProvider = process.env.SMS_PROVIDER as string | undefined;
+  const rawProvider = getStringEnv("SMS_PROVIDER");
   const provider = (rawProvider || "twilio").toLowerCase();
 
   if (provider !== "twilio") {

@@ -1,14 +1,16 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/shared/i18n/routing";
 
 interface NewStudentPageProps {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+  readonly params: Promise<{ locale: string }>;
 }
 
-export default async function NewStudentPage({ searchParams }: NewStudentPageProps) {
-  const params = await searchParams;
+export default async function NewStudentPage({ searchParams, params }: NewStudentPageProps) {
+  const [{ locale }] = await Promise.all([params]);
+  const search = await searchParams;
   const query = new URLSearchParams();
 
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries(search)) {
     if (typeof value === "string") {
       query.set(key, value);
     } else if (Array.isArray(value)) {
@@ -19,5 +21,5 @@ export default async function NewStudentPage({ searchParams }: NewStudentPagePro
   }
 
   const suffix = query.toString();
-  redirect(suffix ? `/students/onboarding?${suffix}` : "/students/onboarding");
+  redirect({ href: suffix ? `/students/onboarding?${suffix}` : "/students/onboarding", locale });
 }

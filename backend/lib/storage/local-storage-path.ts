@@ -1,9 +1,10 @@
 import path from "node:path";
+import { getStringEnv } from "@/backend/lib/env";
 
 const DEFAULT_STORAGE_DIR = "storage";
 
 function getConfiguredStoragePath(): string {
-  return process.env.LOCAL_STORAGE_PATH ?? `./${DEFAULT_STORAGE_DIR}/`;
+  return getStringEnv("LOCAL_STORAGE_PATH") ?? `./${DEFAULT_STORAGE_DIR}/`;
 }
 
 export function getLocalStorageBasePath(): string {

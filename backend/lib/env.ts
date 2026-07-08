@@ -18,6 +18,53 @@ export interface EnvironmentConfig {
   upstashRedisUrl?: string;
   upstashRedisToken?: string;
   allowedOrigin: string | undefined;
+  // App-wide secrets (validated server-side only)
+  databaseEncryptionKey: string;
+  adminEmail: string;
+  adminPassword: string;
+  storageProvider: string;
+  // Optional feature-gated config (surfaced verbatim from process.env)
+  gcpProjectId?: string;
+  gcpSecretId?: string;
+  gcpSecretVersion?: string;
+  gcpCredentialsJson?: string;
+  twilioAccountSid?: string;
+  twilioAuthToken?: string;
+  twilioFromNumber?: string;
+  resendApiKey?: string;
+  resendFromEmail?: string;
+  firebaseProjectId?: string;
+  firebasePrivateKey?: string;
+  firebaseClientEmail?: string;
+  blobReadWriteToken?: string;
+  smsProvider?: string;
+  emailProvider?: string;
+  pushProvider?: string;
+  signedUrlCleanupStrategy?: string;
+  localStoragePath?: string;
+  nextPublicBaseUrl?: string;
+  disableRateLimiting?: boolean;
+  isDemo?: boolean;
+  nextPublicIsDemo?: boolean;
+  dbConnectionMode?: string;
+  dbProvider?: string;
+  cleanupEnabled?: boolean;
+  devOrigin?: string;
+}
+
+/**
+ * Read an env var as a string, returning the fallback if unset.
+ */
+export function getStringEnv(name: string, fallback?: string): string | undefined {
+  return process.env[name] ?? fallback;
+}
+
+/**
+ * Read an env var as a boolean — true only when value (case-insensitive) === "true".
+ * Suitable for DISABLE_RATE_LIMITING, IS_DEMO, CLEANUP_ENABLED, etc.
+ */
+export function getBooleanEnv(name: string): boolean {
+  return process.env[name]?.toLowerCase() === "true";
 }
 
 /**
@@ -92,7 +139,7 @@ function validateRedisConfig(): {
   if (provider === "local") {
     const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
     const sanitizedUrl = sanitizeUrlCredentials(redisUrl);
-    logger.log(`Redis provider: local (${sanitizedUrl})`);
+    logger.debug(`Redis provider: local (${sanitizedUrl})`);
     return { redisProvider: provider, redisUrl };
   }
 
@@ -110,7 +157,7 @@ function validateRedisConfig(): {
     };
   }
 
-  logger.log("Redis provider: upstash (serverless)");
+  logger.debug("Redis provider: upstash (serverless)");
   return {
     redisProvider: "upstash",
     redisUrl: "",
@@ -122,20 +169,20 @@ function validateRedisConfig(): {
 function logEnvironmentConfig(config: EnvironmentConfig): void {
   if (config.nodeEnv !== "development") return;
 
-  logger.log("Configuration:");
-  logger.log(`  NODE_ENV: ${config.nodeEnv}`);
-  logger.log(`  JWT_SECRET: ${config.jwtSecret ? "[SET]" : "[NOT SET]"}`);
-  logger.log(`  DATABASE_URL: ${config.databaseUrl ? "[SET]" : "[NOT SET]"}`);
-  logger.log(`  CACHE_PROVIDER: ${config.cacheProvider}`);
-  logger.log(`  REDIS_PROVIDER: ${config.redisProvider}`);
+  logger.debug("Configuration:");
+  logger.debug(`  NODE_ENV: ${config.nodeEnv}`);
+  logger.debug(`  JWT_SECRET: ${config.jwtSecret ? "[SET]" : "[NOT SET]"}`);
+  logger.debug(`  DATABASE_URL: ${config.databaseUrl ? "[SET]" : "[NOT SET]"}`);
+  logger.debug(`  CACHE_PROVIDER: ${config.cacheProvider}`);
+  logger.debug(`  REDIS_PROVIDER: ${config.redisProvider}`);
 
   if (config.redisProvider === "local") {
-    logger.log(`  REDIS_URL: ${sanitizeUrlCredentials(config.redisUrl)}`);
+    logger.debug(`  REDIS_URL: ${sanitizeUrlCredentials(config.redisUrl)}`);
   } else {
-    logger.log(`  UPSTASH_REDIS_REST_URL: ${config.upstashRedisUrl ? "[SET]" : "[NOT SET]"}`);
-    logger.log(`  UPSTASH_REDIS_REST_TOKEN: ${config.upstashRedisToken ? "[SET]" : "[NOT SET]"}`);
+    logger.debug(`  UPSTASH_REDIS_REST_URL: ${config.upstashRedisUrl ? "[SET]" : "[NOT SET]"}`);
+    logger.debug(`  UPSTASH_REDIS_REST_TOKEN: ${config.upstashRedisToken ? "[SET]" : "[NOT SET]"}`);
   }
-  logger.log(`  ALLOWED_ORIGIN: ${config.allowedOrigin || "[DEFAULT]"}`);
+  logger.debug(`  ALLOWED_ORIGIN: ${config.allowedOrigin || "[DEFAULT]"}`);
 }
 
 /**
@@ -166,6 +213,11 @@ function validateNoPlaceholderSecrets(): void {
     "CRON_SECRET",
     "GRAPHQL_ENCRYPTION_KEY",
     "ADMIN_PASSWORD",
+    "RESEND_API_KEY",
+    "FIREBASE_PRIVATE_KEY",
+    "TWILIO_AUTH_TOKEN",
+    "GCP_CREDENTIALS_JSON",
+    "BLOB_READ_WRITE_TOKEN",
   ] as const;
 
   for (const name of secretEnvVars) {
@@ -183,13 +235,26 @@ function validateNoPlaceholderSecrets(): void {
 }
 
 /**
+ * Validate a required app secret: throws in production, warns + returns "" in non-prod when unset.
+ */
+function validateRequiredAppSecret(name: string): string {
+  const value = process.env[name];
+  if (value) return value;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(`CRITICAL: ${name} is not set in production environment.`);
+  }
+  logger.warn(`⚠️  ${name} not set. App may not function correctly.`);
+  return "";
+}
+
+/**
  * Main validation function
  */
 export function validateEnvironment(): EnvironmentConfig {
   const nodeEnv = validateNodeEnv();
 
-  logger.log("🔍 Validating environment variables...");
-  logger.log(`Environment: ${nodeEnv}`);
+  logger.debug("🔍 Validating environment variables...");
+  logger.debug(`Environment: ${nodeEnv}`);
 
   try {
     const cacheProvider = getEnumEnv("CACHE_PROVIDER", ["redis", "postgres"], "redis");
@@ -210,13 +275,43 @@ export function validateEnvironment(): EnvironmentConfig {
       cacheProvider,
       ...redisConfig,
       allowedOrigin: process.env.ALLOWED_ORIGIN,
+      databaseEncryptionKey: validateRequiredAppSecret("DATABASE_ENCRYPTION_KEY"),
+      adminEmail: validateRequiredAppSecret("ADMIN_EMAIL"),
+      adminPassword: validateRequiredAppSecret("ADMIN_PASSWORD"),
+      storageProvider: validateRequiredAppSecret("STORAGE_PROVIDER"),
+      gcpProjectId: process.env.GCP_PROJECT_ID,
+      gcpSecretId: process.env.GCP_SECRET_ID,
+      gcpSecretVersion: process.env.GCP_SECRET_VERSION,
+      gcpCredentialsJson: process.env.GCP_CREDENTIALS_JSON,
+      twilioAccountSid: process.env.TWILIO_ACCOUNT_SID,
+      twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
+      twilioFromNumber: process.env.TWILIO_FROM_NUMBER,
+      resendApiKey: process.env.RESEND_API_KEY,
+      resendFromEmail: process.env.RESEND_FROM_EMAIL,
+      firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
+      firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY,
+      firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN,
+      smsProvider: process.env.SMS_PROVIDER,
+      emailProvider: process.env.EMAIL_PROVIDER,
+      pushProvider: process.env.PUSH_PROVIDER,
+      signedUrlCleanupStrategy: process.env.SIGNED_URL_CLEANUP_STRATEGY,
+      localStoragePath: process.env.LOCAL_STORAGE_PATH,
+      nextPublicBaseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+      disableRateLimiting: getBooleanEnv("DISABLE_RATE_LIMITING"),
+      isDemo: getBooleanEnv("IS_DEMO"),
+      nextPublicIsDemo: getBooleanEnv("NEXT_PUBLIC_IS_DEMO"),
+      dbConnectionMode: process.env.DB_CONNECTION_MODE,
+      dbProvider: process.env.DB_PROVIDER,
+      cleanupEnabled: getBooleanEnv("CLEANUP_ENABLED"),
+      devOrigin: process.env.DEV_ORIGIN,
     };
 
     if (process.env.NODE_ENV === "production" && !config.allowedOrigin) {
       logger.warn("⚠️  ALLOWED_ORIGIN not set in production.");
     }
 
-    logger.log("✅ Environment validation successful!");
+    logger.debug("✅ Environment validation successful!");
     logEnvironmentConfig(config);
 
     return config;

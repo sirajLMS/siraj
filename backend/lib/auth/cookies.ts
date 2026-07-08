@@ -1,4 +1,5 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
+import { getStringEnv } from "@/backend/lib/env";
 
 export function setAuthCookies(
   cookies: ResponseCookies | undefined,
@@ -9,7 +10,7 @@ export function setAuthCookies(
   if (!cookies) return;
 
   const isSecure =
-    process.env.NODE_ENV === "production" && (process.env.ALLOWED_ORIGIN?.startsWith("https://") ?? false);
+    process.env.NODE_ENV === "production" && (getStringEnv("ALLOWED_ORIGIN")?.startsWith("https://") ?? false);
 
   const options = {
     httpOnly: true,

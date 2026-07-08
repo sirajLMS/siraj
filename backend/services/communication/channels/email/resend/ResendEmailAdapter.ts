@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { deliveryFailedMessage } from "../../../utils";
 import type { EmailPayload, EmailSendResult, IEmailChannel } from "../IEmailChannel";
@@ -10,8 +11,7 @@ export class ResendEmailAdapter implements IEmailChannel {
   private readonly context: ResendEmailContext;
 
   constructor() {
-    const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL;
+    const { resendApiKey: apiKey, resendFromEmail: fromEmail } = getEnvironmentConfig();
 
     if (!apiKey) {
       throw new Error("RESEND_API_KEY environment variable is required for ResendEmailAdapter");
@@ -100,8 +100,7 @@ export class ResendEmailAdapter implements IEmailChannel {
 
   async validateConfig(): Promise<boolean> {
     try {
-      const apiKey = process.env.RESEND_API_KEY;
-      const fromEmail = process.env.RESEND_FROM_EMAIL;
+      const { resendApiKey: apiKey, resendFromEmail: fromEmail } = getEnvironmentConfig();
 
       return !!apiKey && !!fromEmail;
     } catch (error) {

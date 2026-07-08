@@ -10,6 +10,7 @@ import {
   poolMax,
   resolveConnectionStrategy,
 } from "@/backend/db/connection-strategy";
+import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { isVercelRuntime } from "@/backend/lib/runtime";
 import { relations } from "./drizzleRelations";
@@ -27,7 +28,7 @@ function configureNeonWebSocket(): void {
 
 function createPgPool(): PgPool {
   const pool = new PgPool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: getEnvironmentConfig().databaseUrl,
     max: poolMax(),
     idleTimeoutMillis: poolIdleTimeoutMillis(),
   });
@@ -41,7 +42,7 @@ const createNeonDb = () => {
   logger.log("Initializing Neon serverless Pool connection");
   configureNeonWebSocket();
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: getEnvironmentConfig().databaseUrl,
     max: poolMax(),
   });
   const db = drizzleNeon({ client: pool, relations });
@@ -64,13 +65,14 @@ const createPostgresDb = () => {
 export type PostgresDbType = ReturnType<typeof createPostgresDb>;
 
 function logConnectionStrategy(strategy: DbConnectionStrategy): void {
-  const mode = process.env.DB_CONNECTION_MODE || "auto";
-  const provider = process.env.DB_PROVIDER || "postgres";
+  const mode = getStringEnv("DB_CONNECTION_MODE", "auto");
+  const provider = getStringEnv("DB_PROVIDER", "postgres");
   logger.log(`Creating database connection (strategy: ${strategy}, mode: ${mode}, provider: ${provider})`);
 }
 
 export function createDatabase(): NeonDbType | PostgresDbType {
-  if (!process.env.DATABASE_URL) {
+  const databaseUrl = getEnvironmentConfig().databaseUrl;
+  if (!databaseUrl) {
     logger.error("DATABASE_URL is not set in environment variables");
     process.exit(1);
   }
@@ -93,7 +95,7 @@ export function createPool(): PgPool | Pool {
 
   configureNeonWebSocket();
   return new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: getEnvironmentConfig().databaseUrl,
     max: poolMax(),
   });
 }

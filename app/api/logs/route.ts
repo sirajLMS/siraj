@@ -2,6 +2,7 @@ import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getBooleanEnv } from "@/backend/lib/env";
 
 interface LogEntry {
   sessionId: string;
@@ -29,7 +30,7 @@ interface BatchLogRequest {
   logs: LogEntry[];
 }
 
-const CLEANUP_ENABLED = process.env.CLEANUP_ENABLED === "true";
+const CLEANUP_ENABLED = getBooleanEnv("CLEANUP_ENABLED");
 
 // Track if we've already cleaned up old logs for this session
 const cleanedSessions = new Set<string>();

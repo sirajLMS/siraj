@@ -1,3 +1,4 @@
+import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import type { EmailProvider, IEmailChannel } from "./IEmailChannel";
 
@@ -5,7 +6,7 @@ let instance: IEmailChannel | null = null;
 let initializationPromise: Promise<IEmailChannel> | null = null;
 
 function getEmailProvider(): EmailProvider {
-  const rawProvider = process.env.EMAIL_PROVIDER as string | undefined;
+  const rawProvider = getStringEnv("EMAIL_PROVIDER");
   const provider = (rawProvider || "resend").toLowerCase();
 
   if (provider !== "resend") {

@@ -1,3 +1,4 @@
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
@@ -11,7 +12,7 @@ const REDIS_KEY = Symbol.for("siraj.redis");
  * Create local Redis adapter
  */
 function createLocalRedis(): IRedisService {
-  const url = process.env.REDIS_URL || "redis://localhost:6379";
+  const url = getEnvironmentConfig().redisUrl || "redis://localhost:6379";
 
   const sanitizedUrl = sanitizeUrlCredentials(url);
   logger.log(`Connecting to local Redis: ${sanitizedUrl}`);
@@ -23,8 +24,7 @@ function createLocalRedis(): IRedisService {
  * Create Upstash Redis adapter
  */
 function createUpstashRedis(): IRedisService {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const { upstashRedisUrl: url, upstashRedisToken: token } = getEnvironmentConfig();
 
   if (!url || !token) {
     throw new Error(
@@ -42,7 +42,7 @@ function createUpstashRedis(): IRedisService {
  * Create Redis service based on provider type
  */
 function createRedisService(): IRedisService {
-  const provider = process.env.REDIS_PROVIDER;
+  const provider = getEnvironmentConfig().redisProvider;
 
   logger.log(`🔧 Initializing Redis with provider: ${provider}`);
 

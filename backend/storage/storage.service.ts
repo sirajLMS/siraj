@@ -1,3 +1,4 @@
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { createGcpAdapter } from "./disk/gcp";
 import { createLocalAdapter } from "./disk/local";
@@ -17,7 +18,7 @@ let initializationPromise: Promise<StorageService> | null = null;
  * Get the storage provider from environment variable
  */
 function getStorageProvider(): StorageProvider {
-  const provider = process.env.STORAGE_PROVIDER;
+  const provider = getEnvironmentConfig().storageProvider as StorageProvider;
 
   const validProviders: StorageProvider[] = ["gcp", "local", "vercel", "s3", "r2"];
   if (!validProviders.includes(provider)) {
