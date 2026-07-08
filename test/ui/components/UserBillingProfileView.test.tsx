@@ -4,11 +4,10 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { UserBillingProfileViewProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/UserBillingProfileView";
-import { InvoiceStatus } from "@/shared/lib/enum";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import { renderWithWrapper } from "./TestWrapper";
 
@@ -282,7 +281,7 @@ describe("UserBillingProfileView", () => {
           dueDate: "2026-06-30",
           paidDate: "—",
           fee: "USD 500.00",
-          status: InvoiceStatus.UNPAID,
+          status: InvoiceStatus.Unpaid,
         },
         {
           id: "inv-2",
@@ -292,7 +291,7 @@ describe("UserBillingProfileView", () => {
           dueDate: "2026-05-31",
           paidDate: "2026-05-28",
           fee: "USD 450.00",
-          status: InvoiceStatus.PAID,
+          status: InvoiceStatus.Paid,
         },
       ],
       totalCount: 2,
@@ -337,7 +336,7 @@ describe("UserBillingProfileView", () => {
           dueDate: "2026-06-30",
           paidDate: "—",
           fee: "USD 300.00",
-          status: InvoiceStatus.UNPAID,
+          status: InvoiceStatus.Unpaid,
         },
       ],
       totalCount: 1,

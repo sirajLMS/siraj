@@ -10,8 +10,8 @@ import type {
   sessions,
   userPermissionGroups,
 } from "@/backend/db/schema";
+import type { AccountStatus, AppPermission, UserRole } from "@/backend/enum";
 import type { Email } from "@/backend/lib/email";
-import type { AccountStatus, AppPermission, UserRole } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 import type { SafeUser, UserReturnType } from "./user.types";
 

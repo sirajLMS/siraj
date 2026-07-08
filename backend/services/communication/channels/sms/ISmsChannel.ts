@@ -1,4 +1,4 @@
-import type { NotificationEventType } from "@/shared/lib/enum";
+import type { NotificationEventType } from "@/backend/enum";
 
 export interface SmsPayload {
   readonly to: string;

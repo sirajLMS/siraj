@@ -13,6 +13,7 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
+import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import type {
@@ -21,7 +22,6 @@ import type {
   DailyScheduleResult,
 } from "@/backend/types/scheduling.types";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib";
-import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/shared/lib/enum";
 import {
   computeDailyScheduleMetricsFromRows,
   matchesDashboardMetricFilter,

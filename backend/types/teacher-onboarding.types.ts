@@ -1,8 +1,7 @@
 // Canonical type definitions for Teacher Onboarding.
 // Aligned with TeacherOnboardingInput (service) and TeacherOnboardingResult (service/graphql).
-
+import type { Gender } from "@/backend/enum";
 import type { TeacherOnboardingResult } from "@/backend/services/teacher/teacher-onboarding.service";
-import type { Gender } from "@/shared/lib/enum";
 
 /**
  * TeacherOnboardingReturnType:

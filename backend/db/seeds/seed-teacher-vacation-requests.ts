@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherVacationRequests } from "@/backend/db/schema/teacher-availability";
+import { VacationRequestStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
-import { VacationRequestStatus } from "@/shared/lib/enum";
 import { addMonths, findAdminUser, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
 
 async function upsertVacationRequest(

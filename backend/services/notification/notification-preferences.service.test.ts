@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
+import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 
 describe("NotificationPreferencesService", () => {
   test("channel and event enums produce the expected preference matrix size", () => {

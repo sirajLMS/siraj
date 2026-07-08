@@ -1,10 +1,10 @@
 import { BookRepository } from "@/backend/db/repo/book.repository";
+import { AppPermission } from "@/backend/enum";
 import { DomainError, UnauthorizedError } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { BookReturnType } from "@/backend/types/book.types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace BookService {
   export async function listBooks(actorUserId: string, locale?: string): Promise<BookReturnType[]> {

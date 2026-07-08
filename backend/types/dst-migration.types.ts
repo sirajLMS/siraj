@@ -1,6 +1,5 @@
 import type { dstMigrationEntries, dstMigrationRuns } from "@/backend/db/schema";
-import type { DstMigrationResult, MigrationStatus } from "@/shared/lib/enum";
-
+import type { DstMigrationResult, MigrationStatus } from "@/backend/enum";
 export type DstMigrationRunSelectType = typeof dstMigrationRuns.$inferSelect;
 export type DstMigrationRunInsertType = typeof dstMigrationRuns.$inferInsert;
 

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { permissionGroups, permissions } from "@/backend/db/schema";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission } from "@/backend/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 import { runInRollback } from "../test-utils";
 

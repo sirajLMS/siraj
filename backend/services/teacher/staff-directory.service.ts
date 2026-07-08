@@ -1,10 +1,10 @@
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { type AccountStatus, AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PageInfo, PaginationArgs, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import { type AccountStatus, AppPermission } from "@/shared/lib/enum";
 
 export namespace StaffDirectoryService {
   async function assertDirectoryAccess(userId: string, locale?: string): Promise<void> {

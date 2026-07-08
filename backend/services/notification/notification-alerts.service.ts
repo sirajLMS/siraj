@@ -1,11 +1,11 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
+import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { NotificationAlertReturnType, NotificationAlertsPaginatedReturnType } from "@/backend/types";
-import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/shared/lib/enum";
 
 export namespace NotificationAlertsService {
   export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsPaginatedReturnType> {

@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@/shared/lib/enum";
+import type { AppLanguage } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface LanguageType {
   code: AppLanguage;

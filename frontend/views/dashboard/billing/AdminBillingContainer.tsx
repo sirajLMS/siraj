@@ -9,6 +9,7 @@ import {
   AppPermission,
   type InvoiceType as GqlInvoiceType,
   type StudentStatus as GqlStudentStatus,
+  InvoiceStatus,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   deleteInvoiceMutationDocument,
@@ -23,7 +24,6 @@ import {
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
-import { InvoiceStatus } from "@/shared/lib/enum";
 import { AdminBillingView } from "./AdminBillingView";
 import type {
   AdminBillingSummary,
@@ -39,7 +39,7 @@ interface AdminBillingContainerProps {
 }
 
 function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): AdminInvoiceStatus {
-  if (gqlStatus === InvoiceStatus.PAID) return InvoiceStatus.PAID;
+  if (gqlStatus === InvoiceStatus.Paid) return InvoiceStatus.Paid;
   if (dueDate && new Date(dueDate) < new Date()) return "OVERDUE";
   return "PENDING";
 }

@@ -1,9 +1,9 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { groupPermissions, permissionGroups, permissions, userPermissionGroups, users } from "@/backend/db/schema";
+import { type AppPermission, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-import { type AppPermission, SystemPermissionGroupSlug, UserRole } from "@/shared/lib/enum";
 
 export type UserPermissionContext = {
   permissions: AppPermission[];

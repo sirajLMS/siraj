@@ -26,7 +26,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, LanguageDisplay, StatusBadge } from "@/frontend/components/ui";
 import { AppPermission, type StudentStatus as GqlStudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   changeStudentStatusMutationDocument,
@@ -318,6 +318,11 @@ function ParentStudentsDataGrid({ rows, loading, onRefetch }: ParentStudentsData
       headerName: t("language"),
       flex: 1,
       minWidth: 100,
+      renderCell: params => (
+        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <LanguageDisplay code={params.value} />
+        </Box>
+      ),
     },
     {
       field: "gender",

@@ -1,10 +1,12 @@
 "use client";
 
 import { TranslateOutlined } from "@mui/icons-material";
-import { Paper, type PaperProps, Popover, Stack, styled, Typography } from "@mui/material";
+import { Paper, type PaperProps, Popover, Stack, styled } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { LanguageDisplay } from "@/frontend/components/ui/display";
 import { useLanguageSwitch } from "@/frontend/hooks/useLanguageSwitch";
+import { languages } from "@/frontend/lib/locale";
 import type { Locale } from "@/shared/i18n/routing";
 import { NavbarIcon } from "./NavbarIcon";
 
@@ -40,15 +42,7 @@ const LanguageOption = styled(Paper, {
 const LanguageOptionLayout = styled(Stack)(({ theme }) => ({
   flexDirection: "row",
   alignItems: "center",
-  gap: theme.spacing(1.5), // replaces spacing={1.5} on the old Stack
-}));
-
-/**
- * Standardizes the minimum width and size of the short code (e.g., "EN", "AR").
- */
-const ShortLabel = styled(Typography)(({ theme }) => ({
-  minWidth: "32px",
-  fontSize: theme.typography.bodyMd.fontSize,
+  gap: theme.spacing(1.5),
 }));
 
 // --- Main Component ---
@@ -58,11 +52,6 @@ export function LanguageSwitcher() {
   const { currentLocale, switchLanguage, isPending } = useLanguageSwitch();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
-  const languages: Array<{ code: Locale; label: string; shortLabel: string }> = [
-    { code: "ar", label: t("langAr"), shortLabel: t("langArShort") },
-    { code: "en", label: t("langEn"), shortLabel: t("langEnShort") },
-  ];
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -71,8 +60,8 @@ export function LanguageSwitcher() {
     setAnchorEl(null);
   };
 
-  const handleLanguageChange = (locale: Locale) => {
-    switchLanguage(locale);
+  const handleLanguageChange = (nextLocale: Locale) => {
+    switchLanguage(nextLocale);
     handleClose();
   };
 
@@ -95,15 +84,15 @@ export function LanguageSwitcher() {
         disableAutoFocus
       >
         <Stack>
-          {languages.map((option, index, array) => {
-            const isSelected = currentLocale === option.code;
+          {languages.map((language, index, array) => {
+            const isSelected = currentLocale === language.code;
             const isLastItem = index === array.length - 1;
 
             return (
               <LanguageOption
-                key={option.code}
+                key={language.code}
                 onClick={() => {
-                  handleLanguageChange(option.code);
+                  handleLanguageChange(language.code as Locale);
                 }}
                 elevation={0}
                 square
@@ -111,8 +100,11 @@ export function LanguageSwitcher() {
                 isLastItem={isLastItem}
               >
                 <LanguageOptionLayout>
-                  <ShortLabel>{option.shortLabel}</ShortLabel>
-                  <Typography>{option.label}</Typography>
+                  <LanguageDisplay
+                    language={language}
+                    typographyVariant="bodyMd"
+                    sx={{ "& > span": { fontSize: "1.25rem" } }}
+                  />
                 </LanguageOptionLayout>
               </LanguageOption>
             );

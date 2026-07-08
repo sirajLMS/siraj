@@ -1,8 +1,8 @@
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries } from "@/backend/db/schema/communications";
+import { NotificationDeliveryStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
-import { NotificationDeliveryStatus } from "@/shared/lib/enum";
 import {
   ALL_NOTIFICATION_CHANNELS,
   ALL_NOTIFICATION_DELIVERY_STATUSES,

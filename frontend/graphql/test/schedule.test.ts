@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ClassOutcome } from "@/shared/lib/enum";
+import { ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
 import { executeDstBulkUpdateMutationDocument } from "../sharedDocuments/dst-migration.documents";
 import {
@@ -166,7 +166,7 @@ describe("GraphQL Schedule Integration Tests", () => {
     expect(pendingList.length).toBeLessThanOrEqual(allList.length);
     for (const item of pendingList) {
       if (!item) continue;
-      expect(resolveClassInstanceDashboardStatus(item.outcome, item.executionState)).toBe(ClassOutcome.PENDING);
+      expect(resolveClassInstanceDashboardStatus(item.outcome, item.executionState)).toBe(ClassOutcome.Pending);
     }
   });
 
@@ -190,7 +190,7 @@ describe("GraphQL Schedule Integration Tests", () => {
 
     for (const item of result.rows ?? []) {
       if (!item) continue;
-      expect(resolveClassInstanceDashboardStatus(item.outcome, item.executionState)).toBe(ClassOutcome.PENDING);
+      expect(resolveClassInstanceDashboardStatus(item.outcome, item.executionState)).toBe(ClassOutcome.Pending);
     }
   });
 

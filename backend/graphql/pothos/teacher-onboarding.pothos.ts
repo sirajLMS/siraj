@@ -1,8 +1,8 @@
+import type { CountryCode, Gender } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { Email } from "@/backend/lib/email";
 import type { TeacherOnboardingInput } from "@/backend/services/teacher/teacher-onboarding.service";
 import type { TeacherOnboardingReturnType } from "@/backend/types/teacher-onboarding.types";
-import type { CountryCode, Gender } from "@/shared/lib/enum";
 import { CountryCodePothosObject, GenderPothosObject } from "./enum.pothos";
 
 export interface TeacherOnboardingGqlInput extends Omit<TeacherOnboardingInput, "email" | "gender" | "countryCode"> {

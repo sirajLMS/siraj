@@ -5,9 +5,9 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
-import { AppPermission } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("Scheduling Security & Trigger Compatibility", () => {

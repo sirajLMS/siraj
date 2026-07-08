@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { AppLanguage } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type LanguageType, languages } from "@/frontend/lib/locale";
-import { AppLanguage } from "@/shared/lib/enum";
 import { LanguageSelector, type LanguageSelectorProps } from "./LanguageSelector";
 
 function LanguageSelectorStory({
@@ -31,7 +31,7 @@ type Story = StoryObj<typeof LanguageSelectorStory>;
 
 export const Default: Story = {
   args: {
-    initialLanguageCode: AppLanguage.ar,
+    initialLanguageCode: AppLanguage.Ar,
   },
 };
 
@@ -39,7 +39,7 @@ export const Empty: Story = {};
 
 export const Required: Story = {
   args: {
-    initialLanguageCode: AppLanguage.en,
+    initialLanguageCode: AppLanguage.En,
     required: true,
   },
 };
@@ -49,6 +49,6 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    initialLanguageCode: AppLanguage.ar,
+    initialLanguageCode: AppLanguage.Ar,
   },
 };

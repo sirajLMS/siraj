@@ -4,19 +4,18 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
-  MenuItem,
   Radio,
   RadioGroup,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
+import { LanguageDisplay } from "@/frontend/components/ui/display";
 import { AppDatePicker } from "@/frontend/components/ui/form";
 import type { StudentQuotaFormData } from "../schemas/studentQuotaSchema";
-import { GENDER_OPTIONS, LANGUAGE_OPTIONS } from "../types";
+import { GENDER_OPTIONS } from "../types";
 import { QuotaFormField } from "./QuotaFormField";
 import { quotaInputSx } from "./quotaFieldStyles";
 import { SectionHeader } from "./SectionHeader";
@@ -99,21 +98,14 @@ function LanguageField() {
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormField label={t("fields.language")}>
+    <QuotaFormField label={t("fields.language")} helperText={errors.language?.message}>
       <Controller
         name="language"
         control={control}
         render={({ field }) => (
-          <FormControl fullWidth error={!!errors.language}>
-            <Select {...field} displayEmpty disabled sx={quotaInputSx}>
-              {LANGUAGE_OPTIONS.map(option => (
-                <MenuItem key={option.value} value={option.value}>
-                  {t(`fields.${option.labelKey}`)}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.language && <FormHelperText>{errors.language.message}</FormHelperText>}
-          </FormControl>
+          <Box sx={quotaInputSx}>
+            <LanguageDisplay code={field.value} />
+          </Box>
         )}
       />
     </QuotaFormField>

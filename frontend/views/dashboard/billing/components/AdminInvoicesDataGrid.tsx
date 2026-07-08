@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
-import { InvoiceStatus } from "@/shared/lib/enum";
+import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
 
 export interface AdminInvoicesDataGridLabels {
@@ -63,8 +63,8 @@ function renderInvoiceAction(
   canManage: boolean,
   onMarkAsPaid: (id: string) => void
 ) {
-  if (!canManage || row.status === InvoiceStatus.PAID) {
-    if (row.status === InvoiceStatus.PAID) {
+  if (!canManage || row.status === InvoiceStatus.Paid) {
+    if (row.status === InvoiceStatus.Paid) {
       return <StyledPaidCheckIcon />;
     }
     return null;

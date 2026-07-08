@@ -2,6 +2,7 @@ import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm"
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
+import { type ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   ComplaintFileReturnType,
@@ -16,7 +17,6 @@ import type {
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
 import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
-import { type ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 function formatDuration(hours: number): string {

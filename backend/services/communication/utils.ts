@@ -1,4 +1,4 @@
-import type { NotificationChannel } from "@/shared/lib/enum";
+import type { NotificationChannel } from "@/backend/enum";
 
 type LowercaseEnumValue<T extends string, ExcludeVal extends string> = Lowercase<Exclude<`${T}`, ExcludeVal>>;
 

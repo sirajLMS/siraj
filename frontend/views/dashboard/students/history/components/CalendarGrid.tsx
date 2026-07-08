@@ -2,8 +2,8 @@ import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui";
+import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { Link } from "@/shared/i18n/routing";
-import { AttendanceStatus } from "@/shared/lib/enum";
 import type { CalendarGridProps, ClassSession } from "../types";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
@@ -41,11 +41,11 @@ const EmptyCell = styled(Box)(({ theme }) => ({
 
 function CalendarStatusBadge({ status, label }: Readonly<{ status: AttendanceStatus; label: string }>) {
   let badgeStatus: string;
-  if (status === AttendanceStatus.PRESENT) {
+  if (status === AttendanceStatus.Present) {
     badgeStatus = "active";
-  } else if (status === AttendanceStatus.LATE) {
+  } else if (status === AttendanceStatus.Late) {
     badgeStatus = "late";
-  } else if (status === AttendanceStatus.ABSENT) {
+  } else if (status === AttendanceStatus.Absent) {
     badgeStatus = "blocked";
   } else {
     badgeStatus = "pending";

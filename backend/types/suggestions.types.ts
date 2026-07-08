@@ -1,6 +1,5 @@
 import type { suggestions } from "@/backend/db/schema";
-import type { SuggestionStatus } from "@/shared/lib/enum";
-
+import type { SuggestionStatus } from "@/backend/enum";
 export type SuggestionSelectType = typeof suggestions.$inferSelect;
 export type SuggestionInsertType = typeof suggestions.$inferInsert;
 

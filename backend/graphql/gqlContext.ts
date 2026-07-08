@@ -1,7 +1,6 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
+import { type AppPermission, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { AppPermission } from "@/shared/lib/enum";
-import { UserRole } from "@/shared/lib/enum";
 
 export type BaseContext = {
   user:

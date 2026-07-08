@@ -1,4 +1,4 @@
-import type { InvoiceStatus } from "@/shared/lib/enum";
+import type { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type ParentInvoiceStatus = `${InvoiceStatus}`;
 

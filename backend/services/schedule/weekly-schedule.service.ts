@@ -3,10 +3,10 @@ import {
   getWeeklyWorkloadMetrics,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace WeeklyScheduleService {

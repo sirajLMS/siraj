@@ -1,6 +1,5 @@
 import type { classInstances } from "@/backend/db/schema/scheduling";
-import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
-
+import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 // Foundation types from schema
 export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertType = typeof classInstances.$inferInsert;

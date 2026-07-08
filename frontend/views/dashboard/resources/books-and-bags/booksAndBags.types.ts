@@ -1,4 +1,4 @@
-import type { AvailabilityStatus } from "@/shared/lib/enum";
+import type { AvailabilityStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface BookItem {
   readonly id: string;

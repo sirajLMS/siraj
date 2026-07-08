@@ -7,8 +7,7 @@ import { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import type { StudentStatus } from "@/shared/lib/enum";
-import { StudentStatus as StudentStatusEnum } from "@/shared/lib/enum";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AdminHoldControls } from "./components/AdminHoldControls";
 import { PolicyOverviewCard, SuspensionWarningBanner } from "./components/PolicyOverviewCard";
 import { StudentStatusHeader } from "./components/StudentStatusHeader";
@@ -22,7 +21,7 @@ export function StudentStatusView({ student, isUpdating, onUpdateStatus }: Reado
   const methods = useForm<StatusUpdateFormData>({
     resolver: zodResolver(statusUpdateSchema),
     defaultValues: {
-      status: StudentStatusEnum.REGULAR,
+      status: StudentStatus.Regular,
       reason: "",
     },
   });
@@ -30,7 +29,7 @@ export function StudentStatusView({ student, isUpdating, onUpdateStatus }: Reado
   const selectedStatus = useWatch({
     control: methods.control,
     name: "status",
-    defaultValue: StudentStatusEnum.REGULAR,
+    defaultValue: StudentStatus.Regular,
   });
 
   useEffect(() => {
@@ -76,7 +75,7 @@ export function StudentStatusView({ student, isUpdating, onUpdateStatus }: Reado
 
         <Grid size={{ xs: 12, lg: 8 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}>
-            {selectedStatus === StudentStatusEnum.SUSPENDED && <SuspensionWarningBanner />}
+            {selectedStatus === StudentStatus.Suspended && <SuspensionWarningBanner />}
             <UpcomingClassesTable classes={student.upcomingClasses} studentId={student.id} />
           </Box>
         </Grid>

@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses } from "@/backend/db/schema/communications";
+import { ComplaintStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
-import { ComplaintStatus } from "@/shared/lib/enum";
 import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
 type ComplaintRow = {

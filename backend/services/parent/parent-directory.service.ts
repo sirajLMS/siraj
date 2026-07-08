@@ -1,8 +1,8 @@
 import { ParentRepository } from "@/backend/db/repo";
+import { AppPermission, type ParentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PaginationArgs, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
-import { AppPermission, type ParentStatus } from "@/shared/lib/enum";
 
 export type {
   ParentDirectoryMetrics,

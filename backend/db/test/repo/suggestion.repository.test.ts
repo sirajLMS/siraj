@@ -5,7 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SuggestionRepository } from "@/backend/db/repo";
 import { suggestions } from "@/backend/db/schema";
-import { SuggestionStatus } from "@/shared/lib/enum";
+import { SuggestionStatus } from "@/backend/enum";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

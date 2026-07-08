@@ -5,19 +5,18 @@ import { DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, AvailabilityStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { deleteBookMutationDocument } from "@/frontend/graphql/sharedDocuments/books-and-bags.documents";
-import { AvailabilityStatus } from "@/shared/lib/enum";
 import type { BookItemCardProps, BooksAndBagsLabels } from "./booksAndBags.types";
 
 const statusLabelMap: Record<AvailabilityStatus, keyof BooksAndBagsLabels> = {
-  [AvailabilityStatus.AVAILABLE]: "statusAvailable",
-  [AvailabilityStatus.OUT_OF_STOCK]: "statusOutOfStock",
+  [AvailabilityStatus.Available]: "statusAvailable",
+  [AvailabilityStatus.OutOfStock]: "statusOutOfStock",
 };
 
 const statusPaletteKey: Record<AvailabilityStatus, "active" | "blocked"> = {
-  [AvailabilityStatus.AVAILABLE]: "active",
-  [AvailabilityStatus.OUT_OF_STOCK]: "blocked",
+  [AvailabilityStatus.Available]: "active",
+  [AvailabilityStatus.OutOfStock]: "blocked",
 };
 
 export function BookItemCard({ book, labels, onDelete }: Readonly<BookItemCardProps>) {

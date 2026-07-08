@@ -1,4 +1,5 @@
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -7,7 +8,6 @@ import type {
   OnboardingMetricsResult,
   PaginationArgs,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ManagerDirectoryService {
   export async function getManagerDirectory(

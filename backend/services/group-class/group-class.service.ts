@@ -1,6 +1,13 @@
 import { GroupClassRepository } from "@/backend/db/repo/group-class.repository";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import {
+  AppPermission,
+  ClassExecutionState,
+  type GroupClassAttendanceStatus,
+  NotificationChannel,
+  NotificationEventType,
+} from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -11,13 +18,6 @@ import type {
   GroupClassOnlineMeetingInfoReturnType,
   GroupClassStudentReturnType,
 } from "@/backend/types";
-import {
-  AppPermission,
-  ClassExecutionState,
-  type GroupClassAttendanceStatus,
-  NotificationChannel,
-  NotificationEventType,
-} from "@/shared/lib/enum";
 
 export namespace GroupClassService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {

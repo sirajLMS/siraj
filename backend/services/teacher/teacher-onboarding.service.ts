@@ -6,12 +6,12 @@ import {
   TeacherRepository,
   UserRepository,
 } from "@/backend/db/repo";
+import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { TeacherCreateResult } from "@/backend/types/teacher.types";
 import type { UserReturnType } from "@/backend/types/user.types";
-import { AppPermission, SystemPermissionGroupSlug } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
 
 export interface TeacherOnboardingInput {

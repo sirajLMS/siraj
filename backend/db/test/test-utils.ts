@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import { AccountStatus, UserRole } from "@/backend/enum";
 import type { UserReturnType } from "@/backend/types/user.types";
-import { AccountStatus, UserRole } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 import { db } from "../drizzleDb";
 import { users } from "../schema";

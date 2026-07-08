@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import { getEnv } from "@/backend/lib/env";
+
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
-  distDir: process.env.NEXT_DIST_DIR || ".next",
+  distDir: getEnv("NEXT_DIST_DIR", ".next"),
   reactStrictMode: true,
   serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
   turbopack: {
@@ -36,7 +38,7 @@ const nextConfig: NextConfig = {
   images: {
     // Disable image optimization for localhost URLs to avoid 400 errors
     // The Next.js Image Optimization API can't reach localhost:5000 from the server side
-    unoptimized: process.env.NODE_ENV === "development",
+    unoptimized: getEnv("NODE_ENV", "development") === "development",
     // NOTE: localhost/127.0.0.1 patterns should ONLY be used in development environments.
     // Remove or restrict these in production to prevent unauthorized image source origins.
     remotePatterns: [

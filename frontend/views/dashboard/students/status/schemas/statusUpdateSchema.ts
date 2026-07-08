@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { StudentStatus } from "@/shared/lib/enum";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const statusTransitionTargets: [string, ...string[]] = [
-  StudentStatus.REGULAR,
-  StudentStatus.SUSPENDED,
-  StudentStatus.ON_LEAVE,
-  StudentStatus.DEACTIVATED,
+  StudentStatus.Regular,
+  StudentStatus.Suspended,
+  StudentStatus.OnLeave,
+  StudentStatus.Deactivated,
 ];
 
 export const statusUpdateSchema = z.object({

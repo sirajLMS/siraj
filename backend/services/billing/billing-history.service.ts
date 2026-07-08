@@ -1,4 +1,5 @@
 import { BillingRepository, ParentRepository } from "@/backend/db/repo";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -8,7 +9,6 @@ import type {
   ParentBillingSummaryResult,
   StudentCreditRow,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace BillingHistoryService {
   async function assertBillingViewPermission(actorUserId: string, locale?: string): Promise<void> {

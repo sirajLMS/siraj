@@ -1,4 +1,5 @@
 import { TeacherNotesRepository } from "@/backend/db/repo/teacher-notes.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -6,7 +7,6 @@ import type {
   TeacherImportantNoteSubmitInput,
   TeacherImportantNoteUpdateInput,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace TeacherNotesService {
   export async function getActiveNotes(

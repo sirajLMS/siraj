@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classStatusEvents } from "@/backend/db/schema/scheduling";
+import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { ClassInstanceEntity, TeacherEntity } from "@/backend/types";
-import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import type { SeedConfig } from "./lib";
 
 export async function seedOrGet(

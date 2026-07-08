@@ -1,6 +1,6 @@
+import type { ParentStatus } from "@/backend/enum";
 import { ParentDirectoryService } from "@/backend/services/parent/parent-directory.service";
 import { PaginationArgs } from "@/backend/types";
-import type { ParentStatus } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { ParentStatusPothosEnum } from "../pothos/enum.pothos";
 import { PaginationArgsObject } from "../pothos/pagination.objects";

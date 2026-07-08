@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AttendanceStatus } from "@/shared/lib/enum";
+import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ClassSession, MobileWeeklyScrollerProps } from "../types";
 
 interface WeekDayData {
@@ -114,9 +114,9 @@ export function MobileWeeklyScroller({
             theme.palette.primary.main;
           if (isSelected) {
             dotColor = theme => theme.palette.onPrimaryContainer;
-          } else if (d.status === AttendanceStatus.ABSENT) {
+          } else if (d.status === AttendanceStatus.Absent) {
             dotColor = theme => theme.palette.error.main;
-          } else if (d.status === AttendanceStatus.LATE) {
+          } else if (d.status === AttendanceStatus.Late) {
             dotColor = theme => theme.palette.warning.main;
           }
 

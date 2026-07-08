@@ -1,4 +1,4 @@
-import { InvoiceStatus, InvoiceType, PaymentMethod } from "@/shared/lib/enum";
+import { InvoiceStatus, InvoiceType, PaymentMethod } from "@/backend/enum";
 import { addMonths, formatDateKey, getDateWindow, startOfDay } from "./date-window";
 import { getFakerForIndex } from "./faker-client";
 import type { SeedConfig } from "./seed-config";

@@ -1,5 +1,4 @@
-import type { StudentDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { StudentStatus } from "@/shared/lib/enum";
+import { type StudentDirectoryRow, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export enum StudentEnrollmentStatus {
   REGULAR = "regular",
@@ -8,11 +7,11 @@ export enum StudentEnrollmentStatus {
 }
 
 export const STUDENT_STATUS_TO_ACCOUNT_STATUS: Record<StudentStatus, StudentAccountStatus> = {
-  [StudentStatus.REGULAR]: "regular",
-  [StudentStatus.DEACTIVATED]: "deactivated",
-  [StudentStatus.ON_LEAVE]: "on_leave",
-  [StudentStatus.SUSPENDED]: "suspended",
-  [StudentStatus.ON_TRIAL]: "on_trial",
+  [StudentStatus.Regular]: "regular",
+  [StudentStatus.Deactivated]: "deactivated",
+  [StudentStatus.OnLeave]: "on_leave",
+  [StudentStatus.Suspended]: "suspended",
+  [StudentStatus.OnTrial]: "on_trial",
 };
 
 export type StudentAccountStatus = "deactivated" | "regular" | "on_leave" | "suspended" | "on_trial";

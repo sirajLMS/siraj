@@ -1,9 +1,9 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import type { StatusTrackingRow } from "@/backend/db/repo/scheduling/queries";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission } from "@/shared/lib/enum";
 
 /**
  * ScheduleQueryService — thin service layer for schedule-related read queries.

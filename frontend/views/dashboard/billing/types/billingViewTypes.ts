@@ -1,5 +1,4 @@
-import type { InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { InvoiceStatus } from "@/shared/lib/enum";
+import type { InvoiceStatus, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type { ParentBillingSummary, ParentInvoiceRow } from "./parentBillingTypes";
 

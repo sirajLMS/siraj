@@ -1,8 +1,8 @@
 import { ComplaintRepository, ComplaintResponseRepository, ParentRepository } from "@/backend/db/repo";
+import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
-import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
 
 type ComplaintById = NonNullable<Awaited<ReturnType<typeof ComplaintRepository.getComplaintById>>>;
 

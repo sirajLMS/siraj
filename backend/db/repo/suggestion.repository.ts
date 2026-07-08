@@ -1,10 +1,10 @@
 import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
+import { SuggestionStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-import { SuggestionStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace SuggestionRepository {

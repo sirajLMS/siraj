@@ -1,9 +1,9 @@
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
-import { AppPermission } from "@/shared/lib/enum";
 
 const HANDBOOK_SETTING_KEY = "teacher_handbook_url";
 const PARENT_HANDBOOK_SETTING_KEY = "parent_handbook_url";

@@ -2,11 +2,11 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { StorageDbRepository } from "@/backend/db/repo";
 import { students, teacherAssignments } from "@/backend/db/schema/students";
+import { StudentStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
-import { StudentStatus } from "@/shared/lib/enum";
 import {
   ALL_STUDENT_STATUSES,
   buildStudentName,

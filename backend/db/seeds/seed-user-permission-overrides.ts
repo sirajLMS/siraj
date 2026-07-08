@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { permissions, userPermissionOverrides } from "@/backend/db/schema/permissions";
+import { AppPermission } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {

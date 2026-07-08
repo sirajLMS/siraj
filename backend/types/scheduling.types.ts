@@ -5,7 +5,7 @@ import type {
   recurringSchedules,
   timezones,
 } from "@/backend/db/schema";
-import type { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
+import type { LeaveRequestStatus, RescheduleDateLabel } from "@/backend/enum";
 import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule-instance-dashboard-status";
 import type { ClassInstancePerformanceReturnType } from "./class-instance-detail.types";
 import type { PageInfo, PaginationArgs } from "./pagination.types";

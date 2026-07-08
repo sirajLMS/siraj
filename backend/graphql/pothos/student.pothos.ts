@@ -1,4 +1,5 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
+import { OrderSortDirection } from "@/backend/enum";
 import type {
   PartialStudentUpdateInput,
   Student,
@@ -8,7 +9,6 @@ import type {
   StudentsWithFiltersResponse,
 } from "@/backend/types";
 import { StudentsOrderByColumn } from "@/backend/types";
-import { OrderSortDirection } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   AppLanguagePothosObject,

@@ -3,7 +3,7 @@ import type {
   teacherRecurringUnavailability,
   teacherVacationRequests,
 } from "@/backend/db/schema";
-import type { AvailabilitySearchSortBy, DayOfWeek, Gender } from "@/shared/lib/enum";
+import type { AvailabilitySearchSortBy, DayOfWeek, Gender } from "@/backend/enum";
 import type { PageInfo, PaginationInput } from "./pagination.types";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;

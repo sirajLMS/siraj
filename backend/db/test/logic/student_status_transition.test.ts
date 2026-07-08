@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { StudentRepository } from "@/backend/db/repo";
-import { StudentStatus } from "@/shared/lib/enum";
+import { StudentStatus } from "@/backend/enum";
 import { setupStudent } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

@@ -1,3 +1,4 @@
+import { SuggestionStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
 import type {
@@ -13,7 +14,6 @@ import type {
   SuggestionSelectType,
   SuggestionSubmitInput,
 } from "@/backend/types";
-import { SuggestionStatus } from "@/shared/lib/enum";
 
 function requireAuth(ctx: { user?: { id: string } | undefined }): string {
   if (!ctx.user?.id) {

@@ -3,10 +3,9 @@
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { useScheduleAlertsStore } from "@/frontend/stores/scheduleAlertsStore";
-import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
 import { ScheduleAlertsView } from "./ScheduleAlertsView";
 import type { AcademicClassRow, AlertsMetric, ClassSessionAction, ClassSessionStatus, ScheduleAlert } from "./types";
@@ -28,10 +27,10 @@ function mapRowToSessionStatus(
     scheduledEndAt: scheduledEndAt ?? undefined,
   });
 
-  if (displayStatus === ClassExecutionState.RUNNING || displayStatus === ClassExecutionState.ACTIVATED) {
+  if (displayStatus === ClassExecutionState.Running || displayStatus === ClassExecutionState.Activated) {
     return "active";
   }
-  if (displayStatus === ClassOutcome.ABSENT || displayStatus === ClassOutcome.LEAVE) {
+  if (displayStatus === ClassOutcome.Absent || displayStatus === ClassOutcome.Leave) {
     return "missed";
   }
   return "upcoming";

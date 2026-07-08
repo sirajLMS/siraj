@@ -1,4 +1,4 @@
-import { ComplaintCategory, ComplaintStatus, SuggestionStatus } from "@/shared/lib/enum";
+import { ComplaintCategory, ComplaintStatus, SuggestionStatus } from "@/backend/enum";
 import { getFakerForIndex } from "./faker-client";
 import type { SeedConfig } from "./seed-config";
 

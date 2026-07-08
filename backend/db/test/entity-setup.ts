@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { AppPermission } from "@/shared/lib/enum";
+import type { AppPermission } from "@/backend/enum";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "../../types";
 import type { DBTransaction } from "../db.types";
 import { classInstances, parents, permissions, students, teacherAssignments, teachers, users } from "../schema";

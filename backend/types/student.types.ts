@@ -1,5 +1,5 @@
 import type { students } from "@/backend/db/schema";
-import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/shared/lib/enum";
+import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/backend/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type StudentEntity = typeof students.$inferSelect;

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
+import { AccountStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AccountStatus } from "@/shared/lib/enum";
 import { ManagerProfileService } from "./manager-profile.service";
 
 const targetRow = {

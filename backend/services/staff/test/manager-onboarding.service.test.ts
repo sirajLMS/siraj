@@ -1,13 +1,13 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { AppPermission, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   type ManagerOnboardingInput,
   type ManagerOnboardingResult,
   ManagerOnboardingService,
 } from "@/backend/services/staff/manager-onboarding.service";
-import { AppPermission, SystemPermissionGroupSlug, UserRole } from "@/shared/lib/enum";
 
 const DEFAULT_ACTOR_ID = "00000000-0000-0000-0000-000000000000";
 

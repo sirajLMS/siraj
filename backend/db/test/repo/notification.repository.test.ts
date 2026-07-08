@@ -5,8 +5,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo";
 import { notificationDeliveries, userNotificationPreferences } from "@/backend/db/schema";
+import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import type { CreateNotificationDeliveryInput } from "@/backend/types";
-import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/shared/lib/enum";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

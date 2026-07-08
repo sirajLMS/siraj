@@ -5,7 +5,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, InvoiceStatus as GqlInvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   userBillingProfileInvoiceHistoryQueryDocument,
@@ -17,7 +17,6 @@ import { logger } from "@/frontend/utils/logger";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
-import { InvoiceStatus } from "@/shared/lib/enum";
 import type { UserBillingProfileContainerProps } from "./types/userBillingProfile.types";
 import { UserBillingProfileView } from "./UserBillingProfileView";
 
@@ -120,9 +119,9 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         dueDate: inv.dueDate ?? "",
         paidDate: inv.paidDate ?? "—",
         fee: `${inv.currency} ${inv.amount}`,
-        status: (inv.status === GqlInvoiceStatus.Paid
-          ? GqlInvoiceStatus.Paid
-          : GqlInvoiceStatus.Unpaid) as unknown as InvoiceStatus,
+        status: (inv.status === InvoiceStatus.Paid
+          ? InvoiceStatus.Paid
+          : InvoiceStatus.Unpaid) as unknown as InvoiceStatus,
       })),
     [data?.parentInvoiceHistory]
   );
@@ -154,7 +153,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   };
 
   const handleQuickPay = () => {
-    const firstUnpaid = invoices.find(inv => inv.status === InvoiceStatus.UNPAID);
+    const firstUnpaid = invoices.find(inv => inv.status === InvoiceStatus.Unpaid);
     if (firstUnpaid) {
       handlePayNow(firstUnpaid.id);
     } else {

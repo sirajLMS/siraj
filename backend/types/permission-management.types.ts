@@ -1,5 +1,5 @@
 import type { userPermissionOverrides } from "@/backend/db/schema";
-import type { OverrideState } from "@/shared/lib/enum";
+import type { OverrideState } from "@/backend/enum";
 import type { PermissionGroupReturnType } from "./permission-group.types";
 import type { UserReturnType } from "./user.types";
 

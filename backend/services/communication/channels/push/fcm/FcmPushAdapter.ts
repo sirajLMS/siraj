@@ -2,10 +2,10 @@ import { cert, deleteApp, getApp, getApps, initializeApp } from "firebase-admin/
 import type { BatchResponse, SendResponse } from "firebase-admin/messaging";
 import { getMessaging } from "firebase-admin/messaging";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
+import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type { NotificationDeliverySelectType } from "@/backend/types/notificationDeliveries.types";
 import type { UserDeviceTokenSelectType } from "@/backend/types/userDeviceTokens.types";
-import { NotificationChannel, NotificationDeliveryStatus } from "@/shared/lib/enum";
 import { deliveryFailedMessage } from "../../../utils";
 import type { IPushChannel, PushPayload, PushSendResult } from "../IPushChannel";
 import type { FcmPushContext } from "./fcm.types";

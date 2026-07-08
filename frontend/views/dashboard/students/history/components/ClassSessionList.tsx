@@ -2,8 +2,8 @@ import type { Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { Link } from "@/shared/i18n/routing";
-import { AttendanceStatus } from "@/shared/lib/enum";
 import type { ClassSession, ClassSessionListProps } from "../types";
 
 function formatDuration(mins: number): string {
@@ -33,19 +33,19 @@ function SessionListHeader({ title, dateStr }: Readonly<{ title: string; dateStr
 }
 
 function getStatusColors(status: AttendanceStatus, theme: Theme): { backgroundColor: string; color: string } {
-  if (status === AttendanceStatus.PRESENT) {
+  if (status === AttendanceStatus.Present) {
     return {
       backgroundColor: theme.palette.status.activeContainer,
       color: theme.palette.status.onActiveContainer,
     };
   }
-  if (status === AttendanceStatus.ABSENT) {
+  if (status === AttendanceStatus.Absent) {
     return {
       backgroundColor: theme.palette.errorContainer,
       color: theme.palette.onErrorContainer,
     };
   }
-  if (status === AttendanceStatus.LATE) {
+  if (status === AttendanceStatus.Late) {
     return {
       backgroundColor: theme.palette.warningContainer ?? theme.palette.tertiaryContainer,
       color: theme.palette.onWarningContainer ?? theme.palette.onTertiaryContainer,

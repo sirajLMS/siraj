@@ -1,4 +1,5 @@
 import { DstMigrationRepository } from "@/backend/db/repo";
+import { AppPermission, DstMigrationResult, type MigrationStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -8,7 +9,6 @@ import type {
   DstMigrationReportReturnType,
   DstUpdatedSessionReturnType,
 } from "@/backend/types";
-import { AppPermission, DstMigrationResult, type MigrationStatus } from "@/shared/lib/enum";
 
 export namespace DstMigrationService {
   async function ensurePermission(actorUserId: string, locale?: string): Promise<void> {

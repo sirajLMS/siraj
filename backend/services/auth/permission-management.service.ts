@@ -2,9 +2,9 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import type { GroupWithPermissionIds, PermissionEntity, UserOverrideEntity, UserOverrideInput } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
 import { PermissionsService } from "./permissions.service";
 

@@ -1,5 +1,6 @@
 import { ClassSubjectRepository } from "@/backend/db/repo/class-subject.repository";
 import { SubjectResourceRepository } from "@/backend/db/repo/subject-resource.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -9,7 +10,6 @@ import type {
   SubjectResourceAttachInput,
   SubjectResourceReturnType,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ClassSubjectService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string): Promise<void> {

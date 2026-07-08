@@ -1,10 +1,10 @@
+import type { InvoiceType, PaymentMethod } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { Email } from "@/backend/lib/email";
 import type {
   ParentOnboardingInput,
   ParentOnboardingResult,
 } from "@/backend/services/parent/parent-onboarding.service";
-import type { InvoiceType, PaymentMethod } from "@/shared/lib/enum";
 import { InvoiceTypePothosObject, PaymentMethodPothosObject } from "./enum.pothos";
 
 export interface ParentOnboardingGqlInput

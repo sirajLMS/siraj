@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { Gender } from "@/shared/lib/enum";
+import { Gender } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { StudentEntity, TeacherEntity } from "../../../types";
 import { SchedulingRepository } from "../../repo";

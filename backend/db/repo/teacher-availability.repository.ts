@@ -8,12 +8,12 @@ import {
   teacherVacationRequests,
   users,
 } from "@/backend/db/schema";
+import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 type TeacherGender = string | null;

@@ -4,16 +4,16 @@ import type { Theme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
-import { StudentStatus } from "@/shared/lib/enum";
 import type { StudentStatusHeaderProps } from "../types";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {
-  [StudentStatus.REGULAR]: "success",
-  [StudentStatus.SUSPENDED]: "error",
-  [StudentStatus.ON_LEAVE]: "warning",
-  [StudentStatus.ON_TRIAL]: "info",
-  [StudentStatus.DEACTIVATED]: "grey",
+  [StudentStatus.Regular]: "success",
+  [StudentStatus.Suspended]: "error",
+  [StudentStatus.OnLeave]: "warning",
+  [StudentStatus.OnTrial]: "info",
+  [StudentStatus.Deactivated]: "grey",
 };
 
 function getStatusDotColor(student: StudentStatusHeaderProps["student"], theme: Theme) {
@@ -27,11 +27,11 @@ function getStatusDotColor(student: StudentStatusHeaderProps["student"], theme: 
 }
 
 const STATUS_BADGE_MAP: Record<string, string> = {
-  [StudentStatus.REGULAR]: "regular",
-  [StudentStatus.SUSPENDED]: "suspended",
-  [StudentStatus.ON_LEAVE]: "on_leave",
-  [StudentStatus.ON_TRIAL]: "on_trial",
-  [StudentStatus.DEACTIVATED]: "deactivated",
+  [StudentStatus.Regular]: "regular",
+  [StudentStatus.Suspended]: "suspended",
+  [StudentStatus.OnLeave]: "on_leave",
+  [StudentStatus.OnTrial]: "on_trial",
+  [StudentStatus.Deactivated]: "deactivated",
 };
 
 function getBadgeStatusKey(status: StudentStatus): string {

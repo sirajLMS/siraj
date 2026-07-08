@@ -1,8 +1,8 @@
+import type { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   AdminInvoiceStatus,
   StudentCreditStatus,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
-import type { InvoiceStatus } from "@/shared/lib/enum";
 import type { BillingManualLabels } from "./manual";
 
 export interface BillingLabels {

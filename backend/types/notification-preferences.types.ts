@@ -1,5 +1,4 @@
-import type { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
-
+import type { NotificationChannel, NotificationEventType } from "@/backend/enum";
 export type NotificationPreferenceReturnType = {
   readonly id: string;
   readonly channel: NotificationChannel;

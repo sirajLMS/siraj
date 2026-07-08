@@ -1,9 +1,9 @@
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { CrossStaffSearchInput } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 function getUtcDateString(date: Date): string {
   return date.toISOString().split("T")[0];

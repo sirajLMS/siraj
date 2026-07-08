@@ -1,5 +1,5 @@
 // DEV ONLY: Never use these credentials in production
-import { SystemPermissionGroupSlug } from "@/shared/lib/enum";
+import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { getFakerForIndex } from "./faker-client";
 import type { SeedConfig } from "./seed-config";
 

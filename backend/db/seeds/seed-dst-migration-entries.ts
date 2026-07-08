@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { dstMigrationEntries } from "@/backend/db/schema/scheduling";
+import { DstMigrationResult } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { RecurringScheduleEntity } from "@/backend/types";
-import { DstMigrationResult } from "@/shared/lib/enum";
 
 type DstMigrationRunRow = { id: string };
 

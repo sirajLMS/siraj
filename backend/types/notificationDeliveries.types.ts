@@ -1,6 +1,5 @@
 import type { notificationDeliveries } from "@/backend/db/schema";
-import type { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/shared/lib/enum";
-
+import type { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 export type NotificationDeliverySelectType = typeof notificationDeliveries.$inferSelect;
 export type NotificationDeliveryInsertType = typeof notificationDeliveries.$inferInsert;
 

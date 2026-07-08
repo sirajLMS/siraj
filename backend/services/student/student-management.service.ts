@@ -1,7 +1,7 @@
 import { StudentRepository } from "@/backend/db/repo";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission } from "@/shared/lib/enum";
 
 export interface EditQuotaResult {
   readonly id: string;

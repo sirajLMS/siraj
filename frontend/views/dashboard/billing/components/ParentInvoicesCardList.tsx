@@ -4,7 +4,7 @@ import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import { InvoiceStatus } from "@/shared/lib/enum";
+import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ParentInvoiceRow } from "../types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
@@ -83,7 +83,7 @@ export function ParentInvoicesCardList({
               {row.fee}
             </Typography>
           </Box>
-          {canView && row.status === InvoiceStatus.UNPAID && (
+          {canView && row.status === InvoiceStatus.Unpaid && (
             <PrimaryPageAction
               fullWidth
               onClick={() => {
@@ -93,7 +93,7 @@ export function ParentInvoicesCardList({
               {labels.payNow}
             </PrimaryPageAction>
           )}
-          {canView && row.status === InvoiceStatus.PAID && (
+          {canView && row.status === InvoiceStatus.Paid && (
             <StyledActionsContainer sx={{ gap: 0.5 }}>
               <IconButton size="small" aria-label={labels.viewDetails}>
                 <VisibilityOutlined fontSize="small" />

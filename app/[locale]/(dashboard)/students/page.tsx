@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { cache } from "react";
+import { AppPermission } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
@@ -8,7 +9,6 @@ import { StudentsContainer } from "@/frontend/views/dashboard/admin/parents/stud
 import { ParentStudentsContainer } from "@/frontend/views/dashboard/parent/students/ParentStudentsContainer";
 import { TeacherStudentsContainer } from "@/frontend/views/dashboard/teachers/students/TeacherStudentsContainer";
 import { redirect } from "@/shared/i18n/routing";
-import { AppPermission } from "@/shared/lib/enum";
 
 export const metadata: Metadata = {
   title: "Your Students - Siraj LMS",

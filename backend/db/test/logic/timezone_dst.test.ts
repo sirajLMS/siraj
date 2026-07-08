@@ -2,11 +2,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
+import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import type { UserSelectType } from "@/backend/types/user.types";
-import { AppPermission } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import { getErrorMessage } from "@/shared/utils/error";
 import { db } from "../../drizzleDb";

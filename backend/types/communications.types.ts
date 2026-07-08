@@ -1,5 +1,4 @@
-import type { NotificationEventType } from "@/shared/lib/enum";
-
+import type { NotificationEventType } from "@/backend/enum";
 export type CommunicationChannelType = "on_app" | "email" | "sms" | "push";
 
 export type CommunicationPayload = {

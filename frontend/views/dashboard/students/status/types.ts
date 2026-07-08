@@ -1,4 +1,4 @@
-import type { StudentStatus } from "@/shared/lib/enum";
+import type { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface UpcomingClassDisplay {
   readonly id: string;

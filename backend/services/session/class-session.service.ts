@@ -1,13 +1,13 @@
 import { ParentRepository } from "@/backend/db/repo/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
+import { AppPermission } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
 import type { ClassInstanceDetailReturnType, ClassInstanceEntity, ClassStatusEventReturnType } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 /**
  * ClassSessionService

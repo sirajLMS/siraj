@@ -6,6 +6,7 @@ import {
   StorageDbRepository,
   SystemSettingsRepository,
 } from "@/backend/db/repo";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
@@ -19,7 +20,6 @@ import type {
   PaginationArgs,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ComplaintService {
   export async function getParentIdForComplaints(actorUserId: string, locale?: string): Promise<string> {

@@ -2,8 +2,8 @@ import { asc, desc, eq, gt, gte, isNull, like, lt, lte, not, notLike } from "dri
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { fullTextSearch } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
+import { OrderSortDirection } from "@/backend/enum";
 import * as Types from "@/backend/types";
-import { OrderSortDirection } from "@/shared/lib/enum";
 
 export namespace StudentFilterUtils {
   export function applyFilters<T extends PgSelect>(qb: T, args?: Types.StudentFilterArgs | null): T {

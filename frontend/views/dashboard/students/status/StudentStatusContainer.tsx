@@ -7,16 +7,15 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   AppPermission,
   ClassExecutionState as GqlClassExecutionState,
+  StudentStatus,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
 import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/student-status.documents";
 import { logger } from "@/frontend/utils/logger";
-import { StudentStatus } from "@/shared/lib/enum";
 import { StudentStatusView } from "./StudentStatusView";
 import type { StudentStatusPageData, UpcomingClassDisplay } from "./types";
 
@@ -82,7 +81,7 @@ export function StudentStatusContainer() {
     return {
       id: s.id,
       name: s.name,
-      status: (uc?.status ?? s.status ?? StudentStatus.REGULAR) as StudentStatus,
+      status: (uc?.status ?? s.status ?? StudentStatus.Regular) as StudentStatus,
       avatarUrl: null,
       primaryTeacherId: s.primaryTeacherId ?? null,
       teacherName: s.teacherName ?? null,
@@ -105,7 +104,7 @@ export function StudentStatusContainer() {
       await changeStatus({
         variables: {
           studentId,
-          newStatus: status as unknown as Types.StudentStatus,
+          newStatus: status as unknown as StudentStatus,
           expectedVersion: versionRef.current,
         },
       });

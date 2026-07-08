@@ -1,9 +1,9 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { SessionRepository } from "@/backend/db/repo";
+import { UserRole } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { UserRole } from "@/shared/lib/enum";
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
 const SESSION_ID = "session-raw-id";

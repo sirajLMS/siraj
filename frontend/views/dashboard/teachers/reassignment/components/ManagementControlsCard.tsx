@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
+import type { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/utils/student-status-transitions";
-import type { StudentStatus } from "@/shared/lib/enum";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "../../../admin/parents/students/types";
 import type { ManagementControlsCardProps, ReassignmentSubmitInput, StatusChangeInput } from "../types";
 

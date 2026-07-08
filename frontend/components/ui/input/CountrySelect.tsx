@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback } from "react";
+import { LocaleEmoji } from "@/frontend/components/ui/display";
 import { type CountryType, countries, getCountryDisplayName } from "@/frontend/lib/locale";
 
 export type CountrySelectProps = {
@@ -19,14 +20,6 @@ export type CountrySelectProps = {
   onBlurAction?: () => void;
   style?: React.CSSProperties;
 };
-
-function CountryEmoji({ emoji }: Readonly<{ emoji: string }>) {
-  return (
-    <Box component="span" aria-hidden sx={{ flexShrink: 0, lineHeight: 1 }}>
-      {emoji}
-    </Box>
-  );
-}
 
 /**
  * CountrySelect component allows users to select a country from a dropdown list.
@@ -65,7 +58,7 @@ export const CountrySelect: React.FC<CountrySelectProps> = ({
         const { key, ...optionProps } = props;
         return (
           <Box key={key} component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }} {...optionProps}>
-            <CountryEmoji emoji={option.emoji} />
+            <LocaleEmoji emoji={option.emoji} />
             {getCountryName(option.code)}
           </Box>
         );
@@ -83,7 +76,7 @@ export const CountrySelect: React.FC<CountrySelectProps> = ({
               startAdornment: country ? (
                 <>
                   <InputAdornment position="start">
-                    <CountryEmoji emoji={country.emoji} />
+                    <LocaleEmoji emoji={country.emoji} />
                   </InputAdornment>
                   {params.slotProps.input?.startAdornment}
                 </>

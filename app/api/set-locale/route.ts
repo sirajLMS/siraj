@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getEnvironmentConfig } from "@/backend/lib/env";
+import { getEnv, getEnvironmentConfig } from "@/backend/lib/env";
 
 const envConfig = getEnvironmentConfig();
-const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_BASE_URL, envConfig.allowedOrigin, "http://localhost:3000"].filter(
+const ALLOWED_ORIGINS = [getEnv("NEXT_PUBLIC_BASE_URL", ""), envConfig.allowedOrigin, "http://localhost:3000"].filter(
   Boolean
 ) as string[];
 

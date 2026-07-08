@@ -1,4 +1,4 @@
-import type { StudentStatus } from "@/shared/lib/enum";
+import type { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { StudentAccountStatus } from "../../admin/parents/students/types";
 
 export interface TeacherReassignmentViewProps {

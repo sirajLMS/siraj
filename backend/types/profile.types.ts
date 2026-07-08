@@ -1,4 +1,4 @@
-import type { AppPermission } from "@/shared/lib/enum";
+import type { AppPermission } from "@/backend/enum";
 import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType, ParentProfileResult } from "./parent.types";
 import type {
   ManagerDirectoryRow,

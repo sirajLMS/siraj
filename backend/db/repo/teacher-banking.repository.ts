@@ -2,10 +2,9 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { notificationDeliveries, teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
+import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
-
-import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 const BANKING_DETAIL_FIELDS = [

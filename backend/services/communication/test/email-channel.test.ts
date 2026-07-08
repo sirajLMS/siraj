@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { emailChannel, resetEmailChannel } from "@/backend/services/communication/channels/email";
 import type { NotificationDeliverySelectType } from "@/backend/types";
-import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/shared/lib/enum";
 
 const MOCK_USER_ID = "user-uuid-0001";
 const MOCK_DELIVERY_ID = "delivery-uuid-0001";

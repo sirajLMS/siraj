@@ -1,8 +1,8 @@
 import { db } from "@/backend/db/drizzleDb";
 import { classInstancePerformance } from "@/backend/db/schema/scheduling";
+import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { ClassInstanceEntity } from "@/backend/types";
-import { ClassOutcome } from "@/shared/lib/enum";
 import {
   ALL_FOCUS_LEVELS,
   ALL_GRADES,

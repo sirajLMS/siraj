@@ -1,9 +1,9 @@
 import { ClassCategoryRepository } from "@/backend/db/repo/class-category.repository";
 import { ClassSubjectRepository } from "@/backend/db/repo/class-subject.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ClassCategoryReturnType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ClassCategoryService {
   export async function listCategories(userId: string, locale?: string): Promise<ClassCategoryReturnType[]> {

@@ -1,9 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
+import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import { AppPermission, OverrideState, UserRole } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 import { db } from "../../drizzleDb";
 import { permissionGroups, permissions, users } from "../../schema";

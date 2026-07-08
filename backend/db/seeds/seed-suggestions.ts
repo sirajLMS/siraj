@@ -1,8 +1,8 @@
 import { db } from "@/backend/db/drizzleDb";
 import { suggestions } from "@/backend/db/schema/communications";
+import { SuggestionStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { ParentEntity, UserSelectType } from "@/backend/types";
-import { SuggestionStatus } from "@/shared/lib/enum";
 import { buildSuggestionBody, findAdminUser, loadSeedConfig, pickSuggestionStatus, type SeedConfig } from "./lib";
 
 function resolveAdminResponse(status: SuggestionStatus): string | null {

@@ -5,10 +5,10 @@ import {
   StorageDbRepository,
   SystemSettingsRepository,
 } from "@/backend/db/repo";
+import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import type { ComplaintSelectType } from "@/backend/types";
-import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 
 const MOCK_ACTOR_ID = "actor-uuid-0001";
 const MOCK_PARENT_ID = "parent-uuid-0001";

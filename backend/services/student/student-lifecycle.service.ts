@@ -1,9 +1,9 @@
 import { StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import { AppPermission, type StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
-import { AppPermission, type StudentStatus } from "@/shared/lib/enum";
 
 export namespace StudentLifecycleService {
   export async function reassignTeacher(

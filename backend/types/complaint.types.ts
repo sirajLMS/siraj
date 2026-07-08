@@ -1,5 +1,5 @@
 import type { complaints } from "@/backend/db/schema";
-import type { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
+import type { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import type { ComplaintResponseReturnType } from "./complaintResponses.types";
 import type { PageInfo } from "./pagination.types";
 

@@ -11,7 +11,7 @@ import {
 import { Box, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AttendanceStatus } from "@/shared/lib/enum";
+import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ClassSession, MobileMetricProps, StudentHistoryMobileProps } from "../types";
 import { ClassSessionList } from "./ClassSessionList";
 import { MobileWeeklyScroller } from "./MobileWeeklyScroller";
@@ -36,9 +36,9 @@ function deriveStreakDays(
     const session = classes[day];
     if (!session) {
       result.push(0);
-    } else if (session.status === AttendanceStatus.ABSENT) {
+    } else if (session.status === AttendanceStatus.Absent) {
       result.push(0);
-    } else if (session.status === AttendanceStatus.LATE) {
+    } else if (session.status === AttendanceStatus.Late) {
       result.push(24);
     } else {
       result.push(48);

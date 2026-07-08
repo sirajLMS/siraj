@@ -3,6 +3,7 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -15,7 +16,6 @@ import type {
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
 import type { DailyScheduleResult } from "@/backend/types/scheduling.types";
-import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace ScheduleService {

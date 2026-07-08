@@ -6,8 +6,8 @@ import { db } from "@/backend/db/drizzleDb";
 import { StaffProfileRepository } from "@/backend/db/repo";
 import type { ManagerProfileUpdateInput } from "@/backend/db/repo/staff-profile.repository";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
+import { AccountStatus } from "@/backend/enum";
 import { PaginationArgs } from "@/backend/types";
-import { AccountStatus } from "@/shared/lib/enum";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

@@ -9,9 +9,9 @@ import {
   WarningAmberOutlined,
 } from "@mui/icons-material";
 import type { useTranslations } from "next-intl";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { StudentDirectoryQuery } from "@/frontend/graphql/generated/gql/operations";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { StudentStatus } from "@/shared/lib/enum";
 import type {
   StudentAccountStatus,
   StudentDirectoryRowExtended,
@@ -50,8 +50,8 @@ function mapStatus(status: string | null | undefined): StudentAccountStatus {
 function getEnrollmentStatus(status: string | null | undefined): StudentEnrollmentStatus {
   if (!status) return EnrollmentEnum.REGULAR;
   const s = status.toUpperCase();
-  if (s === StudentStatus.DEACTIVATED) return EnrollmentEnum.WITHDRAWN;
-  if (s === StudentStatus.ON_TRIAL) return EnrollmentEnum.PROSPECT;
+  if (s === StudentStatus.Deactivated) return EnrollmentEnum.WITHDRAWN;
+  if (s === StudentStatus.OnTrial) return EnrollmentEnum.PROSPECT;
   return EnrollmentEnum.REGULAR;
 }
 

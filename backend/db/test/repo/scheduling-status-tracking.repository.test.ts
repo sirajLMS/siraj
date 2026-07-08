@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, students, teacherAssignments, users } from "@/backend/db/schema";
-import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/shared/lib/enum";
+import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

@@ -1,5 +1,5 @@
 import type { classInstances } from "@/backend/db/schema/scheduling";
-import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import {
   createTimestampOnDate,
   daysBetween,

@@ -1,8 +1,8 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { UserRepository } from "@/backend/db/repo";
+import { UserRole } from "@/backend/enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { UserRole } from "@/shared/lib/enum";
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
 const TARGET_ID = "22222222-2222-2222-2222-222222222222";

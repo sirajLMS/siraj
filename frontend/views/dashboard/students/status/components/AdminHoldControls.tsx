@@ -3,7 +3,7 @@ import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
-import { StudentStatus } from "@/shared/lib/enum";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "../schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "../types";
 
@@ -40,11 +40,11 @@ function StatusSelectionField() {
               },
             })}
           >
-            <MenuItem value={StudentStatus.REGULAR}>{t("statusOptions.REGULAR")}</MenuItem>
-            <MenuItem value={StudentStatus.SUSPENDED}>{t("statusOptions.SUSPENDED")}</MenuItem>
-            <MenuItem value={StudentStatus.ON_LEAVE}>{t("statusOptions.ON_LEAVE")}</MenuItem>
-            <MenuItem value={StudentStatus.ON_TRIAL}>{t("statusOptions.ON_TRIAL")}</MenuItem>
-            <MenuItem value={StudentStatus.DEACTIVATED}>{t("statusOptions.DEACTIVATED")}</MenuItem>
+            <MenuItem value={StudentStatus.Regular}>{t("statusOptions.REGULAR")}</MenuItem>
+            <MenuItem value={StudentStatus.Suspended}>{t("statusOptions.SUSPENDED")}</MenuItem>
+            <MenuItem value={StudentStatus.OnLeave}>{t("statusOptions.ON_LEAVE")}</MenuItem>
+            <MenuItem value={StudentStatus.OnTrial}>{t("statusOptions.ON_TRIAL")}</MenuItem>
+            <MenuItem value={StudentStatus.Deactivated}>{t("statusOptions.DEACTIVATED")}</MenuItem>
           </Select>
         )}
       />
@@ -133,7 +133,7 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
   const { watch } = useFormContext<StatusUpdateFormData>();
   const currentStatus = watch("status");
 
-  const isSuspended = currentStatus === StudentStatus.SUSPENDED;
+  const isSuspended = currentStatus === StudentStatus.Suspended;
 
   return (
     <PrimaryPageAction

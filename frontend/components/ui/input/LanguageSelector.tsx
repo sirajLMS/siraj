@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback } from "react";
+import { LocaleEmoji } from "@/frontend/components/ui/display";
 import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/lib/locale";
 
 export type LanguageSelectorProps = {
@@ -17,14 +18,6 @@ export type LanguageSelectorProps = {
   label?: string;
   style?: React.CSSProperties;
 };
-
-function LanguageEmoji({ emoji }: Readonly<{ emoji: string }>) {
-  return (
-    <Box component="span" aria-hidden sx={{ flexShrink: 0, lineHeight: 1 }}>
-      {emoji}
-    </Box>
-  );
-}
 
 /**
  * LanguageSelector component allows users to select a language from a dropdown list.
@@ -60,7 +53,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         const { key, ...optionProps } = props;
         return (
           <Box key={key} component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }} {...optionProps}>
-            <LanguageEmoji emoji={option.emoji} />
+            <LocaleEmoji emoji={option.emoji} />
             {getLanguageName(option.code)}
           </Box>
         );
@@ -77,7 +70,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               startAdornment: language ? (
                 <>
                   <InputAdornment position="start">
-                    <LanguageEmoji emoji={language.emoji} />
+                    <LocaleEmoji emoji={language.emoji} />
                   </InputAdornment>
                   {params.slotProps.input?.startAdornment}
                 </>

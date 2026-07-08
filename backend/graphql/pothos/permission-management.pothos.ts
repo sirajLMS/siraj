@@ -1,4 +1,5 @@
 import { PermissionManagementRepository } from "@/backend/db/repo";
+import { AppPermission, type OverrideState } from "@/backend/enum";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import type {
   GroupUserEntity,
@@ -6,7 +7,6 @@ import type {
   PermissionEntity,
   UserOverrideReturnType,
 } from "@/backend/types";
-import { AppPermission, type OverrideState } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { OverrideStatePothosObject } from "./enum.pothos";
 

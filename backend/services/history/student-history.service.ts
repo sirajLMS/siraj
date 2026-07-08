@@ -1,8 +1,8 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
 import { StudentHistoryRepository } from "@/backend/db/repo/student-history.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace StudentHistoryService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {

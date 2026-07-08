@@ -24,7 +24,7 @@ import {
   PaymentMethod,
   RescheduleDateLabel,
   StudentStatus,
-} from "@/shared/lib/enum";
+} from "@/backend/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {

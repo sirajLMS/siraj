@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
+import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { NotificationChannel, NotificationDeliveryStatus } from "@/shared/lib/enum";
 import { deliveryFailedMessage } from "../../../utils";
 import type { EmailPayload, EmailSendResult, IEmailChannel } from "../IEmailChannel";
 import type { ResendEmailContext } from "./resend.types";

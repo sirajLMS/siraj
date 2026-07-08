@@ -2,9 +2,9 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { books } from "@/backend/db/schema";
+import type { AvailabilityStatus } from "@/backend/enum";
 import type { PaginationArgs } from "@/backend/types";
 import type { BookReturnType } from "@/backend/types/book.types";
-import type { AvailabilityStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 function mapRow(row: { id: string; name: string; availabilityStatus: string; createdAt: Date }): BookReturnType {

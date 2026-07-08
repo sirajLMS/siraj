@@ -1,6 +1,6 @@
 import { UserRepository } from "@/backend/db/repo";
+import { AppPermission } from "@/backend/enum";
 import { AuthUtils } from "@/backend/utils";
-import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { UserPothosObject } from "../pothos";
 

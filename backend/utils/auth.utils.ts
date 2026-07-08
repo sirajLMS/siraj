@@ -1,5 +1,5 @@
+import { AccountStatus, UserRole } from "@/backend/enum";
 import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
-import { AccountStatus, UserRole } from "@/shared/lib/enum";
 
 type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId">;
 

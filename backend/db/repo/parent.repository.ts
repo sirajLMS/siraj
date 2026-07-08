@@ -12,6 +12,7 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
+import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
@@ -26,7 +27,6 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
-import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace ParentRepository {

@@ -2,6 +2,7 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
 import { adminAuditLogs, permissionGroups } from "@/backend/db/schema";
+import { SystemPermissionGroupSlug } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { generateAccessToken, generateGroupSimulationAccessToken } from "@/backend/lib/auth/jwt";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -9,7 +10,6 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import type { RedisGroupSimulationSessionData } from "@/backend/types/auth.types";
-import { SystemPermissionGroupSlug } from "@/shared/lib/enum";
 
 export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
 

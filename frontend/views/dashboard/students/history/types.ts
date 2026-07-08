@@ -1,5 +1,5 @@
 import type { Theme } from "@mui/material";
-import { AttendanceStatus } from "@/shared/lib/enum";
+import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface ClassSession {
   readonly id: string;
@@ -91,8 +91,8 @@ export interface MobileMetricProps {
 
 export function mapStatusToAttendance(rawStatus: string): AttendanceStatus {
   const lower = rawStatus.toLowerCase();
-  if (lower === "absent") return AttendanceStatus.ABSENT;
-  if (lower === "late") return AttendanceStatus.LATE;
-  if (lower === "taken" || lower === "completed" || lower === "present") return AttendanceStatus.PRESENT;
-  return AttendanceStatus.PRESENT;
+  if (lower === "absent") return AttendanceStatus.Absent;
+  if (lower === "late") return AttendanceStatus.Late;
+  if (lower === "taken" || lower === "completed" || lower === "present") return AttendanceStatus.Present;
+  return AttendanceStatus.Present;
 }

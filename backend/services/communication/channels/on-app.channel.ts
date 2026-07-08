@@ -1,7 +1,7 @@
 import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationChannel } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import type { CommunicationPayload } from "@/backend/types";
-import { NotificationChannel } from "@/shared/lib/enum";
 
 export namespace OnAppChannel {
   export async function send(payload: CommunicationPayload, _locale?: string): Promise<void> {

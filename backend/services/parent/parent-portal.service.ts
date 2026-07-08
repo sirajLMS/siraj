@@ -1,8 +1,8 @@
 import { ParentRepository } from "@/backend/db/repo";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType } from "@/backend/types/parent.types";
-import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ParentPortalService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {

@@ -11,9 +11,9 @@ import WithInputPlugin from "@pothos/plugin-with-input";
 import { getTableConfig } from "drizzle-orm/pg-core";
 import { GraphQLError } from "graphql";
 import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
+import type { AppPermission } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { AppPermission } from "@/shared/lib/enum";
 import type { Email, PhoneNumber } from "../lib";
 import type { AuthContexts, BaseContext } from "./gqlContext";
 

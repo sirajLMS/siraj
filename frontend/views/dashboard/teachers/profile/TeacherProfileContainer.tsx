@@ -9,15 +9,14 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import {
   AppPermission,
   AccountStatus as GqlAccountStatus,
-  type Gender as GqlGender,
-  type PaymentMethod as GqlPaymentMethod,
+  type Gender,
+  type PaymentMethod,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/staff-profile.documents";
 import { logger } from "@/frontend/utils/logger";
-import type { Gender, PaymentMethod } from "@/shared/lib/enum";
 import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
 import { TeacherProfileView } from "./TeacherProfileView";
 import type { TeacherProfileData } from "./types";
@@ -43,12 +42,12 @@ export function TeacherProfileContainer() {
           teacherId: id,
           input: {
             phone: formData.phone || null,
-            gender: formData.gender as GqlGender,
+            gender: formData.gender as Gender,
             timezone: formData.timezone,
             address: formData.address || null,
             hourlyRate: String(formData.baseSalary),
             rateCurrency: formData.currency,
-            paymentMethod: formData.paymentMethod as GqlPaymentMethod,
+            paymentMethod: formData.paymentMethod as PaymentMethod,
             zoomLink: formData.zoomLink || null,
             dateOfBirth: null,
             nationalId: null,

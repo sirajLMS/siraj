@@ -1,9 +1,9 @@
-import { AppLanguage } from "@/shared/lib/enum";
+import { AppLanguage } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { LanguageType } from "./types";
 
 export const languages: readonly LanguageType[] = [
-  { code: AppLanguage.ar, emoji: "🇸🇦" },
-  { code: AppLanguage.en, emoji: "🇬🇧" },
+  { code: AppLanguage.Ar, emoji: "🇸🇦" },
+  { code: AppLanguage.En, emoji: "🇬🇧" },
 ];
 
 export default languages;

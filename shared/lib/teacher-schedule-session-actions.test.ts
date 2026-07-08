@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
+import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import type {
   TeacherScheduleSessionActionInput,
   TeacherScheduleSessionActions,

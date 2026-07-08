@@ -5,11 +5,11 @@ import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { OrderSortDirection, type StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
-import { OrderSortDirection, type StudentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 const _processStudentQuery = async (

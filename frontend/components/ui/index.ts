@@ -5,6 +5,7 @@ export * from "./container";
 export * from "./container/page";
 export * from "./dataGrid";
 export * from "./dialog";
+export * from "./display";
 export * from "./filter";
 export * from "./form";
 export * from "./state";

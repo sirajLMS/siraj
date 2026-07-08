@@ -1,7 +1,7 @@
 import { StudentRepository } from "@/backend/db/repo";
+import { AppPermission } from "@/backend/enum";
 import * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
-import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import * as Pothos from "../pothos";
 

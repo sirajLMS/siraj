@@ -1,4 +1,4 @@
-import type { Gender, PaymentMethod } from "@/shared/lib/enum";
+import type { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
 
 export interface TeacherProfileData {

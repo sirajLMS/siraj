@@ -7,7 +7,7 @@ import type {
   Gender,
   PaymentMethod,
   StudentStatus,
-} from "@/shared/lib/enum";
+} from "@/backend/enum";
 import type { PageInfo } from "./pagination.types";
 import type { ClassSessionMetrics } from "./schedule.types";
 

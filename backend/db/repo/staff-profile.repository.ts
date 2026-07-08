@@ -8,6 +8,7 @@ import {
   userPermissionOverrides,
   users,
 } from "@/backend/db/schema";
+import type { AccountStatus, OverrideState } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
@@ -22,7 +23,6 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
-import type { AccountStatus, OverrideState } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export interface ManagerProfileUpdateInput {

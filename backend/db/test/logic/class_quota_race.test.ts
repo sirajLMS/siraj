@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { Gender } from "@/shared/lib/enum";
+import { Gender } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../../drizzleDb";
 import { SchedulingRepository } from "../../repo";

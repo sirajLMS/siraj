@@ -1,8 +1,20 @@
-import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
+const ClassOutcomeValues = {
+  PENDING: "PENDING",
+  TAKEN: "TAKEN",
+  ABSENT: "ABSENT",
+  LEAVE: "LEAVE",
+} as const;
+
+const ClassExecutionStateValues = {
+  NOT_ACTIVATED: "NOT_ACTIVATED",
+  ACTIVATED: "ACTIVATED",
+  RUNNING: "RUNNING",
+  COMPLETED: "COMPLETED",
+} as const;
 
 export interface TeacherScheduleSessionActionInput {
-  readonly executionState?: ClassExecutionState | string | null | undefined;
-  readonly outcome?: ClassOutcome | string | null | undefined;
+  readonly executionState?: string | null | undefined;
+  readonly outcome?: string | null | undefined;
   readonly activateEnabled: boolean;
   readonly canActivate: boolean;
   readonly videoEnabled: boolean;
@@ -29,19 +41,19 @@ export interface TeacherScheduleSessionActions {
 export function resolveTeacherScheduleSessionActions(
   input: TeacherScheduleSessionActionInput
 ): TeacherScheduleSessionActions {
-  const executionState = (input.executionState ?? ClassExecutionState.NOT_ACTIVATED) as ClassExecutionState;
-  const outcome = (input.outcome ?? ClassOutcome.PENDING) as ClassOutcome;
+  const executionState = (input.executionState ?? ClassExecutionStateValues.NOT_ACTIVATED) as string;
+  const outcome = (input.outcome ?? ClassOutcomeValues.PENDING) as string;
   const none = { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: false };
 
-  if (executionState === ClassExecutionState.COMPLETED) {
+  if (executionState === ClassExecutionStateValues.COMPLETED) {
     return { ...none, joinVideo: input.videoEnabled };
   }
 
-  if (executionState === ClassExecutionState.NOT_ACTIVATED && outcome !== ClassOutcome.PENDING) {
+  if (executionState === ClassExecutionStateValues.NOT_ACTIVATED && outcome !== ClassOutcomeValues.PENDING) {
     return none;
   }
 
-  if (executionState === ClassExecutionState.NOT_ACTIVATED) {
+  if (executionState === ClassExecutionStateValues.NOT_ACTIVATED) {
     return {
       ...none,
       activate: input.canActivate && !input.isConnecting,
@@ -49,7 +61,7 @@ export function resolveTeacherScheduleSessionActions(
     };
   }
 
-  if (executionState === ClassExecutionState.ACTIVATED) {
+  if (executionState === ClassExecutionStateValues.ACTIVATED) {
     return {
       activate: false,
       start: true,
@@ -59,7 +71,7 @@ export function resolveTeacherScheduleSessionActions(
     };
   }
 
-  if (executionState === ClassExecutionState.RUNNING) {
+  if (executionState === ClassExecutionStateValues.RUNNING) {
     return {
       activate: false,
       start: false,

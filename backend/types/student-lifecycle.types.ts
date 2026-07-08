@@ -1,7 +1,6 @@
-import type { StudentStatus } from "@/shared/lib/enum";
+import type { StudentStatus } from "@/backend/enum";
 
-export { ALLOWED_STATUS_TRANSITIONS } from "@/shared/lib/enum";
-
+export { ALLOWED_STATUS_TRANSITIONS } from "@/backend/enum";
 export interface LeaveProcessingResult {
   readonly processedCount: number;
   readonly successorIds: string[];

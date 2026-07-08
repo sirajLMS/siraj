@@ -1,11 +1,11 @@
 import { AuditRepository } from "@/backend/db/repo/audit.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
-import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/shared/lib/enum";
 
 export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {

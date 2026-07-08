@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { NotificationEventType } from "@/backend/enum";
 import { OnAppChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
-import { NotificationEventType } from "@/shared/lib/enum";
 
 const MOCK_USER_ID = "user-uuid-0001";
 

@@ -1,4 +1,5 @@
 import { ParentRepository, SignedUrlRepository, StorageDbRepository, TeacherRepository } from "@/backend/db/repo";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
@@ -8,7 +9,6 @@ import type {
   StorageItemProtectionUpdateInput,
   StorageUploadValidationParams,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 
 // --- Extended StorageService ---
 export namespace StorageService {

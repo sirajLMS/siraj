@@ -11,8 +11,7 @@ import {
   ParentStatus,
   PaymentMethod,
   StudentStatus,
-} from "@/shared/lib/enum";
-
+} from "@/backend/enum";
 /**
  * Deterministic enum cycling for dev seeds — each index maps to the next enum variant
  * so a small entity count still exercises almost every UI filter/badge state.

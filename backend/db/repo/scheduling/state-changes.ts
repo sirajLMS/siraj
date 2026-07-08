@@ -3,10 +3,10 @@ import { db } from "@/backend/db/drizzleDb";
 import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { classInstances, classStatusEvents, leaveRequests, parents, students, teachers } from "@/backend/db/schema";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 import { createRescheduledSuccessor, type DBTransaction, performRescheduleValidations } from "./shared";
 
 export async function updateInstanceState(

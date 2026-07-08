@@ -2,6 +2,7 @@ import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
+import type { AccountStatus, Gender, PaymentMethod } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
@@ -13,7 +14,6 @@ import type {
   TeacherProfileUpdateInputType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-import type { AccountStatus, Gender, PaymentMethod } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace TeacherRepository {

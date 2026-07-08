@@ -12,10 +12,10 @@ import {
   systemSettings,
   users,
 } from "@/backend/db/schema";
+import type { InvoiceStatus, InvoiceType, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import type { PaginationArgs } from "@/backend/types";
-import type { InvoiceStatus, InvoiceType, StudentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;

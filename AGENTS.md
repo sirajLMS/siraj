@@ -19,6 +19,8 @@ All commands use Bun. The specific binary path `~/.bun/bin/bun` is required in s
 # Development
 bun run dev                    # Start dev server with Turbopack on port 3000
 bun run dev:safe               # Safe dev mode via scripts/safe-dev.ts
+bun run debug                  # Same as dev (alias for debugging workflows)
+bun run dev:inspect            # Start dev server with Node inspector enabled (--inspect)
 
 # Build & Type Check
 bun run build                  # Next.js production build
@@ -100,6 +102,11 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 ### React 19 Changes
 - `FormEvent` is deprecated/removed. Use `React.SubmitEvent` or `React.SyntheticEvent<HTMLFormElement>`
 - Cast FormData results: `(formData.get("name") as string | null) ?? ""`
+
+### Path Aliases
+- The `@/*` path alias maps to the project root (`./`), configured in `tsconfig.json` under `compilerOptions.paths`
+- All imports use this pattern: `import { logger } from "@/backend/lib"` (never relative paths)
+- Examples: `@/backend/services/` → `./backend/services/`, `@/frontend/views/` → `./frontend/views/`
 
 ### Database Testing Critical Rules
 - **ALWAYS use `runInRollback` wrapper** for database tests

@@ -1,6 +1,6 @@
 import type { ElementType, ReactNode } from "react";
+import { AppLanguage, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/quota/schemas/studentQuotaSchema";
-import { AppLanguage, Gender } from "@/shared/lib/enum";
 
 export interface StudentProfileData extends StudentQuotaFormData {
   readonly id: string;
@@ -51,11 +51,11 @@ export interface LanguageOption {
 }
 
 export const LANGUAGE_OPTIONS: readonly LanguageOption[] = [
-  { value: AppLanguage.ar, labelKey: "arabic" },
-  { value: AppLanguage.en, labelKey: "english" },
+  { value: AppLanguage.Ar, labelKey: "arabic" },
+  { value: AppLanguage.En, labelKey: "english" },
 ] as const;
 
 export const GENDER_OPTIONS: readonly { readonly value: Gender; readonly labelKey: string }[] = [
-  { value: Gender.MALE, labelKey: "male" },
-  { value: Gender.FEMALE, labelKey: "female" },
+  { value: Gender.Male, labelKey: "male" },
+  { value: Gender.Female, labelKey: "female" },
 ] as const;

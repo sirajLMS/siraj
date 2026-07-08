@@ -1,7 +1,7 @@
 import twilio from "twilio";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
+import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { NotificationChannel, NotificationDeliveryStatus } from "@/shared/lib/enum";
 import { deliveryFailedMessage } from "../../../utils";
 import type { ISmsChannel, SmsPayload, SmsSendResult } from "../ISmsChannel";
 import type { TwilioRateLimitConfig, TwilioSmsContext } from "./twilio.types";

@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo";
 import { teacherAvailabilityWindows, teacherRecurringUnavailability } from "@/backend/db/schema";
+import { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import type { CrossStaffSearchInput } from "@/backend/types";
-import { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/shared/lib/enum";
 import { createMockClassInstance, createTestTeacher, createTestUser, setupStudent } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

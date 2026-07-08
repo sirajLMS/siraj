@@ -1,5 +1,5 @@
 import type { currencyExchangeRates, invoices, payments } from "@/backend/db/schema";
-import type { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
+import type { InvoiceStatus, InvoiceType } from "@/backend/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -94,7 +94,7 @@ export type StudentCreditRow = {
   readonly planType: InvoiceType;
   readonly classesRemaining: number;
   readonly classesTotal: number;
-  readonly status: import("@/shared/lib/enum").StudentStatus;
+  readonly status: import("@/backend/enum").StudentStatus;
 };
 
 export type ParentBillingSummaryResult = {

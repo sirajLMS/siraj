@@ -1,4 +1,5 @@
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository } from "@/backend/db/repo";
+import { AppPermission, NotificationEventType, SuggestionStatus } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
@@ -11,7 +12,6 @@ import type {
   SuggestionSelectType,
   SuggestionSubmitInput,
 } from "@/backend/types";
-import { AppPermission, NotificationEventType, SuggestionStatus } from "@/shared/lib/enum";
 
 export namespace SuggestionService {
   export async function submitSuggestion(

@@ -1,9 +1,8 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/class-instance-performance.types";
-import type { ClassOutcome, ClassType } from "@/shared/lib/enum";
-import { ClassExecutionState } from "@/shared/lib/enum";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
 

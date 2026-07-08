@@ -5,8 +5,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ComplaintRepository } from "@/backend/db/repo";
 import { complaintFiles, complaints, storageFiles } from "@/backend/db/schema";
+import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import type { ComplaintSubmitInput } from "@/backend/types";
-import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

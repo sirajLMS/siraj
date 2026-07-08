@@ -1,9 +1,9 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
-import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   PartialStudentUpdateInputPothosObject,

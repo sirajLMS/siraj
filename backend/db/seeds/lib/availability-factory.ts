@@ -1,4 +1,4 @@
-import { DayOfWeek } from "@/shared/lib/enum";
+import { DayOfWeek } from "@/backend/enum";
 import { formatDateKey, getDateWindow } from "./date-window";
 import type { SeedConfig } from "./seed-config";
 

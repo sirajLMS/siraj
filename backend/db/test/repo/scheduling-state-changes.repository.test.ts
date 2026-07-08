@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, leaveQuotaUsage, students, teacherAssignments } from "@/backend/db/schema";
+import type { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
-import type { AppPermission } from "@/shared/lib/enum";
 import {
   createMockClassInstance,
   createTestUser,

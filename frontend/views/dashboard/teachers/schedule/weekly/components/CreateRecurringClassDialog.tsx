@@ -22,13 +22,12 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, type CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ClassType as ClassTypeEnum, type CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/recurring-class.documents";
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { logger } from "@/frontend/utils/logger";
 import { CLASS_TYPE_OPTIONS, TIMEZONE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
-import { ClassType as ClassTypeEnum } from "@/shared/lib/enum";
 import type { CreateRecurringClassDialogProps } from "../types";
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
@@ -41,7 +40,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
   const [duration, setDuration] = useState(60);
   const [defaultStartTime, setDefaultStartTime] = useState("09:00");
   const [timezone, setTimezone] = useState("Africa/Cairo");
-  const [classType, setClassType] = useState<ClassTypeEnum>(ClassTypeEnum.REGULAR);
+  const [classType, setClassType] = useState<ClassTypeEnum>(ClassTypeEnum.Regular);
 
   const { data: studentsData, loading: loadingStudents } = useQuery(studentsQueryDocument, {
     variables: {
@@ -68,7 +67,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
       setDuration(60);
       setDefaultStartTime("09:00");
       setTimezone("Africa/Cairo");
-      setClassType(ClassTypeEnum.REGULAR);
+      setClassType(ClassTypeEnum.Regular);
       resetDays();
     }
   }, [isDialogOpen, resetDays]);

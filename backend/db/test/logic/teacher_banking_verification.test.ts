@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { NotificationEventType } from "@/shared/lib/enum";
+import { NotificationEventType } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { TeacherEntity, UserSelectType } from "../../../types";
 import { TeacherBankingRepository } from "../../repo/teacher-banking.repository";

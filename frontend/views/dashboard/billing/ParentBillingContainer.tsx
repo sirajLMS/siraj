@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, InvoiceStatus as GqlInvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   parentBillingSummaryQueryDocument,
@@ -14,7 +14,6 @@ import {
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { logger } from "@/frontend/utils/logger";
-import { InvoiceStatus } from "@/shared/lib/enum";
 import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { filterParentInvoices } from "./utils/billingFilters";
@@ -105,7 +104,7 @@ export function ParentBillingContainer() {
           dueDate: inv.dueDate ?? "",
           paidDate: inv.paidDate ?? "—",
           fee: `${inv.currency} ${inv.amount}`,
-          status: inv.status === GqlInvoiceStatus.Paid ? InvoiceStatus.PAID : InvoiceStatus.UNPAID,
+          status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
         })),
         searchQuery
       ),

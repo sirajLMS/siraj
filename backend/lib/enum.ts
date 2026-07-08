@@ -1,5 +1,4 @@
-import { CountryCode, Gender } from "@/shared/lib/enum";
-
+import { CountryCode, Gender } from "@/backend/enum";
 export const parseCountryCode = (value: string | null | undefined): CountryCode | null => {
   if (!value) return null;
 

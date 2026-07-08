@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { StudentRepository } from "@/backend/db/repo";
 import { students } from "@/backend/db/schema";
-import { StudentStatus } from "@/shared/lib/enum";
+import { StudentStatus } from "@/backend/enum";
 import { setupStudent, setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

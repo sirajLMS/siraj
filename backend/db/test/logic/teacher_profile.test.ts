@@ -3,9 +3,9 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teachers, users } from "@/backend/db/schema";
+import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
-import { AppPermission } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("StaffProfileService Permission Gating", () => {

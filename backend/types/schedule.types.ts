@@ -1,4 +1,4 @@
-import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
+import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import type { SupportContactReturnType, TeacherImportantNoteReturnType } from "./teacher-notes.types";
 
 export type ClassSessionMetrics = {
@@ -133,7 +133,7 @@ export type StatusTrackingScheduleRow = {
   studentId: string;
   studentName: string;
   studentInitials: string;
-  studentStatus: import("@/shared/lib/enum").StudentStatus;
+  studentStatus: import("@/backend/enum").StudentStatus;
   teacherId: string;
   teacherName: string;
   scheduledStartAt: Date;

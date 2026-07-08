@@ -1,5 +1,5 @@
+import type { AppLanguage, Gender, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { AppLanguage, Gender, StudentStatus } from "@/shared/lib/enum";
 import type { Student, StudentEntity } from "../types";
 
 export namespace StudentUtils {

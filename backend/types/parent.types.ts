@@ -1,4 +1,4 @@
-import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/shared/lib/enum";
+import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type ParentEntity = typeof import("@/backend/db/schema").parents.$inferSelect;

@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, type StudentStatus as GqlStudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import {
@@ -17,7 +17,6 @@ import {
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
-import type { StudentStatus } from "@/shared/lib/enum";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "../../admin/parents/students/types";
 import { TeacherReassignmentView } from "./TeacherReassignmentView";
 import type {
@@ -146,7 +145,7 @@ export function TeacherReassignmentContainer() {
       await changeStatus({
         variables: {
           studentId: input.studentId,
-          newStatus: input.newStatus as unknown as GqlStudentStatus,
+          newStatus: input.newStatus as unknown as StudentStatus,
           expectedVersion: input.expectedVersion ?? versionRef.current,
         },
       });

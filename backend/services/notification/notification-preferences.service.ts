@@ -1,11 +1,11 @@
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notification-preferences.repository";
+import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   NotificationPreferenceReturnType,
   NotificationPreferenceUpdateInput,
 } from "@/backend/types/notification-preferences.types";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types/userNotificationPreferences.types";
-import { AppPermission, NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { PermissionsService } from "../auth/permissions.service";
 
 const ALL_CHANNELS = Object.values(NotificationChannel);

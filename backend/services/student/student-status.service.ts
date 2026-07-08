@@ -1,9 +1,9 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
+import { AppPermission, type ClassExecutionState, type StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
-import { AppPermission, type ClassExecutionState, type StudentStatus } from "@/shared/lib/enum";
 
 export namespace StudentStatusService {
   export async function getUpcomingClasses(

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository } from "@/backend/db/repo";
 import { invoices } from "@/backend/db/schema";
-import { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
+import { InvoiceStatus, InvoiceType } from "@/backend/enum";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

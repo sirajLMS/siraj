@@ -1,4 +1,4 @@
-import { DayOfWeek } from "@/shared/lib/enum";
+import { DayOfWeek } from "@/backend/enum";
 
 const JS_DAY_TO_ENUM: Record<number, DayOfWeek> = {
   0: DayOfWeek.SUNDAY,

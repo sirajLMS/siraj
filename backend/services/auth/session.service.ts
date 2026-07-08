@@ -1,5 +1,6 @@
 import { SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/user.repository";
+import { AccountStatus } from "@/backend/enum";
 import { computeSessionHashes, verifyAndMigrateSessionHash } from "@/backend/lib/auth/session-hash";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -7,7 +8,6 @@ import { ParentPortalService } from "@/backend/services/parent/parent-portal.ser
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { CurrentUserProfile, SessionEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
-import { AccountStatus } from "@/shared/lib/enum";
 
 export namespace SessionService {
   /**

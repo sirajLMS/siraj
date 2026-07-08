@@ -1,5 +1,4 @@
-import type { ClassExecutionState, StudentStatus } from "@/shared/lib/enum";
-
+import type { ClassExecutionState, StudentStatus } from "@/backend/enum";
 export interface StudentUpcomingClass {
   readonly id: string;
   readonly instructor: string;

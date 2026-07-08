@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository } from "@/backend/db/repo";
+import { AppPermission, SuggestionStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
 import type { SuggestionSelectType } from "@/backend/types";
-import { AppPermission, SuggestionStatus } from "@/shared/lib/enum";
 
 const MOCK_ACTOR_ID = "actor-uuid-0001";
 const MOCK_PARENT_ID = "parent-uuid-0001";
