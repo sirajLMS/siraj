@@ -14,9 +14,9 @@ import type { Email } from "@/backend/lib/email";
 import type { AccountStatus, AppPermission, UserRole } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
-import type { UserReturnType } from "./user.types";
+import type { SafeUser, UserReturnType } from "./user.types";
 
-export type { SafeUser, UserEntity, UserReturnType } from "./user.types";
+export type { SafeUser, UserReturnType, UserSelectType } from "./user.types";
 
 export type UserCreateInput = {
   name: string;
@@ -171,13 +171,13 @@ export type DemoLoginInput = {
 };
 
 export type LoginResponse = {
-  user: UserReturnType;
+  user: SafeUser;
   token: string;
 };
 
 export type RefreshTokenResponse = {
   token: string;
-  user: UserReturnType;
+  user: SafeUser;
 };
 
 export type AuthRateLimitSelectType = typeof authRateLimits.$inferSelect;

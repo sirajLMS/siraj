@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { UserRepository } from "@/backend/db";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
-import { StorageService } from "@/backend/services";
+import { SessionService, StorageService } from "@/backend/services";
 
 /**
  * Validates that the request is from an admin user
@@ -16,7 +15,7 @@ async function authenticateAdmin(request: NextRequest): Promise<{ userId: string
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await UserRepository.findById(payload.userId);
+  const user = await SessionService.getCurrentUserProfile(payload.userId);
   if (!user) {
     logger.warn("Unauthorized cleanup attempt - user not found", { userId: payload.userId });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

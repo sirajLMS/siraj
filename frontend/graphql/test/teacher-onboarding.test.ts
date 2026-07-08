@@ -69,7 +69,7 @@ describe("Teacher Onboarding GraphQL API", () => {
 
     if (!result.createTeacher) throw new Error("createTeacher is null");
     expect(result.createTeacher.userId).toBeDefined();
-    expect(result.createTeacher.teacherId).toBeDefined();
+    expect(result.createTeacher.id).toBeDefined();
     expect(result.createTeacher.name).toBe("GraphQL Test Teacher");
     expect(result.createTeacher.status).toBe("ACTIVATED");
   });

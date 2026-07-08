@@ -1142,7 +1142,7 @@ export type FileTypeBreakdown = {
   __typename?: 'FileTypeBreakdown';
   count: Maybe<Scalars['Int']['output']>;
   size: Maybe<Scalars['String']['output']>;
-  type: Maybe<FileType>;
+  type: Maybe<Scalars['String']['output']>;
 };
 
 export type FileUsageCheckInput = {
@@ -1284,6 +1284,7 @@ export type LearningResourceRow = {
   contentType: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   displayName: Maybe<Scalars['String']['output']>;
+  filePath: Maybe<Scalars['String']['output']>;
   fileSize: Maybe<Scalars['Float']['output']>;
   id: Maybe<Scalars['String']['output']>;
   uploadedByUserId: Maybe<Scalars['String']['output']>;
@@ -1359,10 +1360,22 @@ export type ManagerDirectoryRow = {
   status: Maybe<AccountStatus>;
 };
 
+/** Manager/Staff account details */
+export type ManagerOnboarding = {
+  __typename?: 'ManagerOnboarding';
+  assignedGroupSlug: Maybe<Scalars['String']['output']>;
+  email: Scalars['String']['output'];
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  staffProfileId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
 /** Input for creating a new manager/staff account with RBAC assignment */
 export type ManagerOnboardingInput = {
   accountType: ManagerAccountType;
-  email: Scalars['Email']['input'];
+  email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
   phone: InputMaybe<Scalars['String']['input']>;
@@ -1439,7 +1452,7 @@ export type Mutation = {
   createPermissionGroup: Maybe<PermissionGroup>;
   createRecurringClass: Maybe<CreateRecurringClassResult>;
   /** Create a new teacher account with comprehensive profile */
-  createTeacher: Maybe<TeacherOnboardingResult>;
+  createTeacher: Maybe<TeacherOnboarding>;
   createTeacherImportantNote: Maybe<TeacherImportantNote>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
   createTestEntities: Maybe<TestEntities>;
@@ -3466,6 +3479,25 @@ export type TeacherImportantNote = {
   title: Maybe<Scalars['String']['output']>;
 };
 
+/** Teacher onboarding profile with resolved metadata */
+export type TeacherOnboarding = {
+  __typename?: 'TeacherOnboarding';
+  /** Teacher email address */
+  email: Maybe<Scalars['String']['output']>;
+  /** Teacher gender */
+  gender: Maybe<Gender>;
+  /** Unique identifier for the teacher profile */
+  id: Maybe<Scalars['String']['output']>;
+  /** Resolved teacher display name */
+  name: Maybe<Scalars['String']['output']>;
+  /** Current teacher account status */
+  status: Maybe<Scalars['String']['output']>;
+  /** Formatted timezone display string */
+  timezoneDisplay: Maybe<Scalars['String']['output']>;
+  /** Created user ID for the onboarded teacher */
+  userId: Maybe<Scalars['String']['output']>;
+};
+
 /** Input for creating a new teacher account with comprehensive profile */
 export type TeacherOnboardingInput = {
   /** Bank account number */
@@ -3518,21 +3550,6 @@ export type TeacherOnboardingInput = {
   zoomPassword: InputMaybe<Scalars['String']['input']>;
   /** Teacher Zoom username */
   zoomUsername: InputMaybe<Scalars['String']['input']>;
-};
-
-/** Result of teacher onboarding operation */
-export type TeacherOnboardingResult = {
-  __typename?: 'TeacherOnboardingResult';
-  /** Teacher email */
-  email: Maybe<Scalars['String']['output']>;
-  /** Teacher name */
-  name: Maybe<Scalars['String']['output']>;
-  /** Teacher account status */
-  status: Maybe<Scalars['String']['output']>;
-  /** Created teacher profile ID */
-  teacherId: Maybe<Scalars['String']['output']>;
-  /** Created user ID */
-  userId: Maybe<Scalars['String']['output']>;
 };
 
 export type TeacherOwnProfile = {

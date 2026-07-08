@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { AppPermission } from "@/shared/lib/enum";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserReturnType } from "../../types";
+import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "../../types";
 import type { DBTransaction } from "../db.types";
 import { classInstances, parents, permissions, students, teacherAssignments, teachers, users } from "../schema";
 
 export async function createTestUser(
   tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
-): Promise<UserReturnType> {
+): Promise<UserSelectType> {
   const now = new Date();
   const [user] = await tx
     .insert(users)
@@ -107,7 +107,7 @@ export async function setupTeacher(
   tx: DBTransaction,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   teacherOverrides: Partial<typeof teachers.$inferInsert> = {}
-): Promise<{ user: UserReturnType; teacher: TeacherEntity }> {
+): Promise<{ user: UserSelectType; teacher: TeacherEntity }> {
   const user = await createTestUser(tx, userOverrides);
   const teacher = await createTestTeacher(tx, user.id, teacherOverrides);
   return { user, teacher };
@@ -118,7 +118,7 @@ export async function setupStudent(
   userOverrides: Partial<typeof users.$inferInsert> = {},
   parentOverrides: Partial<typeof parents.$inferInsert> = {},
   studentOverrides: Partial<typeof students.$inferInsert> = {}
-): Promise<{ user: UserReturnType; parent: ParentEntity; student: StudentEntity }> {
+): Promise<{ user: UserSelectType; parent: ParentEntity; student: StudentEntity }> {
   const user = await createTestUser(tx, userOverrides);
   const parent = await createTestParent(tx, user.id, parentOverrides);
   const student = await createTestStudent(tx, parent.id, studentOverrides);
@@ -160,10 +160,10 @@ export async function setupTestEntities(
   prefix: string,
   options: { skipInstance?: boolean; classesRemaining?: number } = {}
 ): Promise<{
-  parentUser: UserReturnType;
+  parentUser: UserSelectType;
   parent: ParentEntity;
   student: StudentEntity;
-  teacherUser: UserReturnType;
+  teacherUser: UserSelectType;
   teacher: TeacherEntity;
   assignment: typeof teacherAssignments.$inferSelect;
   instance: ClassInstanceEntity | null;

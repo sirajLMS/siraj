@@ -8,13 +8,13 @@ import {
   ParentOnboardingInputPothosObject,
   ParentOnboardingResultPothosObject,
   TeacherOnboardingInputPothosObject,
-  TeacherOnboardingResultPothosObject,
+  TeacherOnboardingPothosObject,
 } from "../pothos";
 import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.mutationFields(t => ({
   createTeacher: t.field({
-    type: TeacherOnboardingResultPothosObject,
+    type: TeacherOnboardingPothosObject,
     description: "Create a new teacher account with comprehensive profile",
     authScopes: { loggedIn: true },
     args: {
@@ -70,7 +70,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         userId,
         {
           ...args.input,
-          email: args.input.email.value,
+          email: args.input.email,
         },
         ctx.locale
       );

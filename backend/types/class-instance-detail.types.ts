@@ -35,7 +35,10 @@ export type ClassInstanceTeacherReturnType = {
   avatarUrl: string | null;
 };
 
-export type ClassInstanceDetailReturnType = Omit<ClassInstanceSelectType, "deletedAt" | "createdAt" | "updatedAt"> & {
+export type ClassInstanceDetailReturnType = Omit<
+  ClassInstanceSelectType,
+  "deletedAt" | "createdAt" | "updatedAt" | "classType" | "executionState" | "outcome"
+> & {
   courseName?: string | null;
   classType: ClassType | null;
   instanceId: string;

@@ -2,10 +2,10 @@ import { count } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs } from "@/backend/db/schema/audit";
 import logger from "@/backend/lib/logger";
-import type { InvoiceSelectType, UserEntity } from "@/backend/types";
+import type { InvoiceSelectType, UserSelectType } from "@/backend/types";
 import { AUDIT_ENTITY_TYPES, buildAdminAuditDescription, findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
-export async function seedOrGet(usersList: UserEntity[], invoicesList: InvoiceSelectType[], config?: SeedConfig) {
+export async function seedOrGet(usersList: UserSelectType[], invoicesList: InvoiceSelectType[], config?: SeedConfig) {
   logger.info("Seeding audit logs...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

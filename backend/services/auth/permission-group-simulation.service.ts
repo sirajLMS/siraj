@@ -370,7 +370,7 @@ export namespace PermissionGroupSimulationService {
 
 async function clearOptionalRedisImpersonation(rawSessionId: string): Promise<void> {
   await SessionRepository.updateRedisSessionData(rawSessionId, data => {
-    const { impersonation: _removed, ...rest } = data;
+    const { impersonation: _removed, ...rest } = data; //NoSonar
     return rest;
   });
 }

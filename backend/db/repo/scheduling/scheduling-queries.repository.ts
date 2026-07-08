@@ -15,10 +15,15 @@ import {
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
-import { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
+import type {
+  AdminDashboardScheduleInput,
+  AdminDashboardScheduleResult,
+  DailyScheduleResult,
+} from "@/backend/types/scheduling.types";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib";
+import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/shared/lib/enum";
 import {
   computeDailyScheduleMetricsFromRows,
-  type DailyScheduleMetricsCounts,
   matchesDashboardMetricFilter,
 } from "@/shared/lib/schedule-instance-dashboard-status";
 
@@ -35,29 +40,6 @@ export type DailyScheduleMetricFilter =
   | "running"
   | "absent"
   | "leave";
-
-export type DailyScheduleResult = Types.ClassInstanceDetailReturnType & {
-  student?: Types.StudentEntity;
-  teacher?: Types.TeacherEntity & { user: Types.UserReturnType };
-  yourTimeFormatted?: string;
-};
-
-export type AdminDashboardScheduleInput = {
-  date: Date;
-  teacherId?: string;
-  search?: string;
-  viewerTimezone: string;
-  metricFilter?: string;
-  pagination?: Types.PaginationArgs | null;
-  locale?: string;
-};
-
-export type AdminDashboardScheduleResult = {
-  metrics: DailyScheduleMetricsCounts;
-  rows: DailyScheduleResult[];
-  totalCount: number;
-  pageInfo: Types.PageInfo | null;
-};
 
 function buildDailyScheduleDayConditions(
   date: Date,
@@ -98,13 +80,13 @@ async function hydrateDailyScheduleRows(
     teachersData.map(teacherRow => [teacherRow.teacher.id, { ...teacherRow.teacher, user: teacherRow.user }])
   );
 
-  return instances.map(instance => {
+  return instances.map((instance): DailyScheduleResult => {
     const student = studentMap.get(instance.studentId);
     const teacher = teacherMap.get(instance.teacherId);
 
     return {
       ...instance,
-      courseName: null, // No direct mapping from DB
+      courseName: null,
       instanceId: instance.id,
       scheduledDate: instance.scheduledStartAt.toISOString().split("T")[0],
       startTime: instance.scheduledStartAt.toISOString(),
@@ -112,27 +94,14 @@ async function hydrateDailyScheduleRows(
       durationMinutes: Math.round(
         (instance.scheduledEndAt.getTime() - instance.scheduledStartAt.getTime()) / (1000 * 60)
       ),
-      classType: instance.classType as Types.ClassType | null,
-      status: instance.executionState as Types.ClassExecutionState | null,
-      outcome: instance.outcome as Types.ClassOutcome | null,
-      executionState: instance.executionState as Types.ClassExecutionState | null,
-      rescheduleDateLabel: instance.rescheduleDateLabel as Types.RescheduleDateLabel | null,
-      student: student
-        ? {
-            id: student.id,
-            name: student.name,
-            grade: null, // No direct mapping
-            level: null, // No direct mapping
-            avatarUrl: student.avatarUrl,
-          }
-        : undefined,
-      teacher: teacher
-        ? {
-            ...teacher,
-            user: teacher.user,
-          }
-        : undefined,
-      yourTimeFormatted: instance.yourTimeFormatted,
+      status: instance.executionState,
+      remarks: instance.remarks ?? null,
+      hasTimezoneMismatch: false,
+      studentTimezone: null,
+      teacherTimezone: teacher?.timezone ?? null,
+      performance: null,
+      ...(student ? { student } : {}),
+      ...(teacher ? { teacher } : {}),
     };
   });
 }
@@ -181,7 +150,7 @@ async function fetchDailyScheduleBaseRows(
   return hydrateDailyScheduleRows(
     t,
     rows.map(row => row.classInstance)
-  ) as unknown as DailyScheduleResult[];
+  );
 }
 
 async function applyViewerTimezoneFormatting(
@@ -784,8 +753,6 @@ export const getWeeklyWorkloadMetrics = async (
     classCount: metrics?.classCount ?? 0,
   };
 };
-
-import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/shared/lib/enum";
 
 export type StatusTrackingRow = {
   id: string;

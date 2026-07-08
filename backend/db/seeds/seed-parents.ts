@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { parents } from "@/backend/db/schema/parents";
 import logger from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import {
   ALL_PARENT_STATUSES,
   cycleAtIndex,
@@ -36,7 +36,7 @@ async function upsertParent(userId: string, timezone: string, status: string, no
   return insertedParent;
 }
 
-export async function seedOrGet(users: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(users: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding system parents...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

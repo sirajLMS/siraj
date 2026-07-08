@@ -6,7 +6,12 @@ import type {
   timezones,
 } from "@/backend/db/schema";
 import type { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
-import type { PageInfo } from "./pagination.types";
+import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule-instance-dashboard-status";
+import type { ClassInstancePerformanceReturnType } from "./class-instance-detail.types";
+import type { PageInfo, PaginationArgs } from "./pagination.types";
+import type { StudentEntity } from "./student.types";
+import type { TeacherEntity } from "./teacher.types";
+import type { UserSelectType } from "./user.types";
 
 export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
 export type RecurringScheduleInsertInput = typeof recurringSchedules.$inferInsert;
@@ -16,6 +21,43 @@ export type RecurringScheduleDayInsertInput = typeof recurringScheduleDays.$infe
 
 export type ClassInstanceEntity = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertInput = typeof classInstances.$inferInsert;
+
+export type DailyScheduleTeacher = TeacherEntity & { user: UserSelectType };
+
+export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "createdAt" | "updatedAt"> & {
+  courseName: string | null;
+  instanceId: string;
+  scheduledDate: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  status: ClassInstanceEntity["executionState"];
+  remarks: string | null;
+  hasTimezoneMismatch: boolean;
+  studentTimezone: string | null;
+  teacherTimezone: string | null;
+  performance: ClassInstancePerformanceReturnType | null;
+  student?: StudentEntity;
+  teacher?: DailyScheduleTeacher;
+  yourTimeFormatted?: string;
+};
+
+export type AdminDashboardScheduleInput = {
+  date: Date;
+  teacherId?: string;
+  search?: string;
+  viewerTimezone: string;
+  metricFilter?: string;
+  pagination?: PaginationArgs | null;
+  locale?: string;
+};
+
+export type AdminDashboardScheduleResult = {
+  metrics: DailyScheduleMetricsCounts;
+  rows: DailyScheduleResult[];
+  totalCount: number;
+  pageInfo: PageInfo | null;
+};
 
 export type LeaveQuotaUsageEntity = typeof leaveQuotaUsage.$inferSelect;
 export type LeaveQuotaUsageInsertInput = typeof leaveQuotaUsage.$inferInsert;

@@ -5,7 +5,6 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 import { ProfileTabNav } from "./ProfileTabNav";
 
-// Mock next/navigation hooks
 const mockRouterPush = mock(() => {});
 const mockRouterReplace = mock(() => {});
 const mockRouterBack = mock(() => {});
@@ -23,71 +22,78 @@ function mockNavigation(moduleOverrides = {}) {
   }));
 }
 
+const enLocale = { locale: "en" as const };
+
 afterEach(() => {
   cleanup();
   useUserStore.setState({ permissions: [] }, false);
   mockNavigation();
+  mockRouterReplace.mockClear();
 });
 
 describe("ProfileTabNav", () => {
   test("hides Banking tab for teacher in own scope", () => {
     mockNavigation();
-    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" />, {
+    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" currentTab="profile" onTabChange={() => {}} />, {
+      ...enLocale,
       permissions: [AppPermission.AuthViewOwnProfile],
     });
 
-    expect(screen.queryByText("profile.shell.tabs.banking")).not.toBeInTheDocument();
-    expect(screen.getByText("profile.shell.tabs.notifications")).toBeInTheDocument();
+    expect(screen.queryByText("Banking")).toBeNull();
+    expect(screen.getAllByText("Notifications").length).toBeGreaterThan(0);
   });
 
   test("shows Permissions tab for staff admin in other scope", () => {
     mockNavigation();
-    renderWithWrapper(<ProfileTabNav audience="staff" scope="other" />, {
+    renderWithWrapper(<ProfileTabNav audience="staff" scope="other" currentTab="profile" onTabChange={() => {}} />, {
+      ...enLocale,
       permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
     });
 
-    expect(screen.getByText("profile.shell.tabs.permissions")).toBeInTheDocument();
+    expect(screen.getAllByText("Permissions").length).toBeGreaterThan(0);
   });
 
   test("hides Permissions tab for non-admin staff in other scope", () => {
     mockNavigation();
-    renderWithWrapper(<ProfileTabNav audience="staff" scope="other" />, {
+    renderWithWrapper(<ProfileTabNav audience="staff" scope="other" currentTab="profile" onTabChange={() => {}} />, {
+      ...enLocale,
       permissions: [AppPermission.AuthViewOwnProfile],
     });
 
-    expect(screen.queryByText("profile.shell.tabs.permissions")).not.toBeInTheDocument();
+    expect(screen.queryByText("Permissions")).toBeNull();
   });
 
-  test("syncs query param with tab selection", () => {
+  test("reads tab from query param on mount", () => {
     const testParams = new URLSearchParams("tab=notifications");
+    const onTabChange = mock(() => {});
     mockNavigation({ useSearchParams: () => testParams });
 
-    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" />, {
+    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" currentTab="profile" onTabChange={onTabChange} />, {
+      ...enLocale,
       permissions: [AppPermission.AuthViewOwnProfile],
     });
 
-    expect(mockRouterReplace).toHaveBeenCalledWith("/profile?tab=notifications", { scroll: false });
+    expect(onTabChange).toHaveBeenCalledWith("notifications");
   });
 
-  test("shows mobile chips and hides desktop tabs on small screens", () => {
+  test("renders chip labels alongside desktop tabs", () => {
     mockNavigation();
-    window.innerWidth = 400; // Simulate mobile
-    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" />, {
+    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" currentTab="profile" onTabChange={() => {}} />, {
+      ...enLocale,
       permissions: [AppPermission.AuthViewOwnProfile],
     });
 
-    expect(screen.getByText("profile.shell.tabs.notifications")).toBeVisible();
-    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Notifications").length).toBe(2);
   });
 
-  test("shows desktop tabs and hides mobile chips on large screens", () => {
+  test("renders tablist for desktop layout", () => {
     mockNavigation();
-    window.innerWidth = 1200; // Simulate desktop
-    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" />, {
+    renderWithWrapper(<ProfileTabNav audience="teacher" scope="own" currentTab="profile" onTabChange={() => {}} />, {
+      ...enLocale,
       permissions: [AppPermission.AuthViewOwnProfile],
     });
 
-    expect(screen.getByRole("tablist")).toBeVisible();
-    expect(screen.queryByText("profile.shell.tabs.notifications")).toBeInTheDocument();
+    expect(screen.getByRole("tablist")).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Notifications" })).toBeTruthy();
   });
 });

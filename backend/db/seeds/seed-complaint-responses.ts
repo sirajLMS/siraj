@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { ComplaintStatus } from "@/shared/lib/enum";
 import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
@@ -11,7 +11,7 @@ type ComplaintRow = {
   status: string;
 };
 
-export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding complaint responses...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

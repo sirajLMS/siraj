@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { teachers } from "@/backend/db/schema/teachers";
 import logger from "@/backend/lib/logger";
-import type { TimezoneEntity, UserEntity } from "@/backend/types";
+import type { TimezoneEntity, UserSelectType } from "@/backend/types";
 import {
   ALL_ACCOUNT_STATUSES,
   cycleAtIndex,
@@ -46,7 +46,7 @@ function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneE
   return match;
 }
 
-export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[], config?: SeedConfig) {
+export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEntity[], config?: SeedConfig) {
   logger.info("Seeding system teachers...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

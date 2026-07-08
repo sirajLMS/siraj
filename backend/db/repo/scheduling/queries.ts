@@ -2,6 +2,8 @@ export type {
   AdminDashboardScheduleInput,
   AdminDashboardScheduleResult,
   DailyScheduleResult,
+} from "@/backend/types/scheduling.types";
+export type {
   FutureClassRow,
   StatusTrackingRow,
   TeacherAssignedClassRow,

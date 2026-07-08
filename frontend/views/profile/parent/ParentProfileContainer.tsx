@@ -15,8 +15,6 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
-import { ProfileActionBar } from "../core/components/ProfileActionBar";
-import { ProfileShell } from "../core/ProfileShell";
 
 const parentOwnEditSchema = z.object({
   phone: z.string().optional(),
@@ -33,9 +31,15 @@ type ParentProfileContainerProps = {
   readonly scope: ProfileScope;
   readonly mode: ProfileMode;
   readonly targetUserId: string;
+  readonly activeTab?: string;
 };
 
-export function ParentProfileContainer({ scope, mode, targetUserId }: ParentProfileContainerProps) {
+export function ParentProfileContainer({
+  scope,
+  mode,
+  targetUserId,
+  activeTab: _activeTab = "profile",
+}: ParentProfileContainerProps) {
   const t = useTranslations("profile.parent");
   const tc = useTranslations("profile");
   const router = useRouter();
@@ -96,73 +100,78 @@ export function ParentProfileContainer({ scope, mode, targetUserId }: ParentProf
     router.push(`/users/${targetUserId}/profile`);
   };
 
-  const editHref = scope === "own" ? "/profile/edit" : `/users/${targetUserId}/profile/edit`;
-  const title = mode === "edit" ? tc("editTitle") : tc("pageTitle");
+  if (loading) {
+    return null;
+  }
+
+  if (error) {
+    return (
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
+        {tc("errors.failedToLoad")}
+      </Typography>
+    );
+  }
+
+  if (!parentData) {
+    return null;
+  }
+
+  if (mode === "view") {
+    return (
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
+            <Stack spacing={1}>
+              <Typography sx={{ typography: "bodyMd" }}>{parentData.name}</Typography>
+              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+                {parentData.email}
+              </Typography>
+              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+                {parentData.phone ?? tc("notSet")}
+              </Typography>
+            </Stack>
+          </Paper>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.social")}</Typography>
+            <Stack spacing={1}>
+              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+                {t("fields.whatsapp")}: {parentData.whatsapp ?? tc("notSet")}
+              </Typography>
+              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+                {t("fields.facebook")}: {parentData.facebook ?? tc("notSet")}
+              </Typography>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
+    );
+  }
 
   return (
-    <ProfileShell
-      title={title}
-      subtitle={t("subtitle")}
-      loading={loading}
-      error={error ? tc("errors.failedToLoad") : null}
-      actions={mode === "view" ? <ProfileActionBar editHref={editHref} editLabel={tc("actions.edit")} /> : null}
-    >
-      {parentData && mode === "view" ? (
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Paper variant="outlined" sx={{ p: 3 }}>
-              <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
-              <Stack spacing={1}>
-                <Typography sx={{ typography: "bodyMd" }}>{parentData.name}</Typography>
-                <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                  {parentData.email}
-                </Typography>
-                <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                  {parentData.phone ?? tc("notSet")}
-                </Typography>
-              </Stack>
-            </Paper>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Paper variant="outlined" sx={{ p: 3 }}>
-              <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.social")}</Typography>
-              <Stack spacing={1}>
-                <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                  {t("fields.whatsapp")}: {parentData.whatsapp ?? tc("notSet")}
-                </Typography>
-                <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                  {t("fields.facebook")}: {parentData.facebook ?? tc("notSet")}
-                </Typography>
-              </Stack>
-            </Paper>
-          </Grid>
-        </Grid>
-      ) : null}
-
-      {parentData && mode === "edit" ? (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={2} sx={{ maxWidth: 480 }}>
-            {(["phone", "whatsapp", "facebook", "twitter", "skype", "defaultZoomLink"] as const).map(field => (
-              <Box key={field}>
-                <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t(`fields.${field}`)}</Typography>
-                <Box
-                  component="input"
-                  {...register(field)}
-                  sx={theme => ({
-                    width: "100%",
-                    p: 1.5,
-                    borderRadius: 1,
-                    border: `1px solid ${theme.palette.divider}`,
-                  })}
-                />
-              </Box>
-            ))}
-            <PrimaryPageAction type="submit" disabled={isSaving}>
-              {tc("actions.save")}
-            </PrimaryPageAction>
-          </Stack>
-        </Box>
-      ) : null}
-    </ProfileShell>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+      <Stack spacing={2} sx={{ maxWidth: 480 }}>
+        {(["phone", "whatsapp", "facebook", "twitter", "skype", "defaultZoomLink"] as const).map(field => (
+          <Box key={field}>
+            <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t(`fields.${field}`)}</Typography>
+            <Box
+              component="input"
+              {...register(field)}
+              sx={theme => ({
+                width: "100%",
+                p: 1.5,
+                borderRadius: 1,
+                border: `1px solid ${theme.palette.divider}`,
+              })}
+            />
+          </Box>
+        ))}
+        <PrimaryPageAction type="submit" disabled={isSaving}>
+          {tc("actions.save")}
+        </PrimaryPageAction>
+      </Stack>
+    </Box>
   );
 }

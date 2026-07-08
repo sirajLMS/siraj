@@ -16,9 +16,16 @@ export interface ProfileLabels {
       readonly retry: string;
     };
   };
+  readonly role: {
+    readonly teacher: string;
+    readonly parent: string;
+    readonly staff: string;
+  };
   readonly actions: {
     readonly edit: string;
     readonly save: string;
+    readonly cancel: string;
+    readonly retry: string;
   };
   readonly errors: {
     readonly failedToLoad: string;

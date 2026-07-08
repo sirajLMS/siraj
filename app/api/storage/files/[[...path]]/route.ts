@@ -2,7 +2,6 @@ import { createReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
-import { UserRepository } from "@/backend/db";
 import {
   extractTokenFromHeader,
   logger,
@@ -10,7 +9,7 @@ import {
   resolvePublicStoragePath,
   verifyToken,
 } from "@/backend/lib";
-import { StorageService } from "@/backend/services";
+import { SessionService, StorageService } from "@/backend/services";
 import { extToMime } from "@/shared/utils";
 
 /**
@@ -97,7 +96,7 @@ async function authenticateRequest(request: NextRequest): Promise<{ userId: stri
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await UserRepository.findById(payload.userId);
+  const user = await SessionService.getCurrentUserProfile(payload.userId);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

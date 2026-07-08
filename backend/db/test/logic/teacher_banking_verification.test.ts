@@ -3,19 +3,19 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { TeacherEntity, UserReturnType } from "../../../types";
+import type { TeacherEntity, UserSelectType } from "../../../types";
 import { TeacherBankingRepository } from "../../repo/teacher-banking.repository";
 import { teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
   teacher: TeacherEntity;
-  teacherUser: UserReturnType;
-  adminUser: UserReturnType;
+  teacherUser: UserSelectType;
+  adminUser: UserSelectType;
 }> {
   const now = new Date();
 
-  const teacherUsers = (await tx
+  const [teacherUser] = await tx
     .insert(users)
     .values({
       name: "Banking Teacher",
@@ -24,10 +24,12 @@ async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as UserReturnType[];
-  const teacherUser = teacherUsers[0];
+    .returning();
+  if (!teacherUser) {
+    throw new Error("Failed to create teacher user");
+  }
 
-  const adminUsers = (await tx
+  const [adminUser] = await tx
     .insert(users)
     .values({
       name: "Banking Admin",
@@ -36,10 +38,12 @@ async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as UserReturnType[];
-  const adminUser = adminUsers[0];
+    .returning();
+  if (!adminUser) {
+    throw new Error("Failed to create admin user");
+  }
 
-  const [teacher] = (await tx
+  const [teacher] = await tx
     .insert(teachers)
     .values({
       userId: teacherUser.id,
@@ -48,7 +52,10 @@ async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [TeacherEntity];
+    .returning();
+  if (!teacher) {
+    throw new Error("Failed to create test teacher");
+  }
 
   return { teacher, teacherUser, adminUser };
 }

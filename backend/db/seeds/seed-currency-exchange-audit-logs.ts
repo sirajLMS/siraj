@@ -1,12 +1,12 @@
 import { db } from "@/backend/db/drizzleDb";
 import { currencyExchangeAuditLogs } from "@/backend/db/schema/billing";
 import logger from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 type ExchangeRateRow = { fromCurrency: string; toCurrency: string; rate: string; createdAt: Date };
 
-export async function seedOrGet(ratesList: ExchangeRateRow[], usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(ratesList: ExchangeRateRow[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding currency exchange audit logs...");
   const seedConfig = config ?? loadSeedConfig();
 

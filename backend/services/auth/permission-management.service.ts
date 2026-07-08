@@ -180,7 +180,7 @@ export namespace PermissionManagementService {
     return PermissionManagementRepository.createGroup({
       name: trimmedName,
       slug,
-      description: input.description?.trim(),
+      description: input.description?.trim() ?? null,
       permissionIds: input.permissionIds,
       createdByUserId: actorUserId,
     });

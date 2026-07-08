@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { NotificationDeliveryStatus } from "@/shared/lib/enum";
 import {
   ALL_NOTIFICATION_CHANNELS,
@@ -25,7 +25,7 @@ function deliveryTimestamps(status: NotificationDeliveryStatus, now: Date) {
   };
 }
 
-export async function seedOrGet(usersList: UserEntity[], deviceTokensList: DeviceTokenRow[], config?: SeedConfig) {
+export async function seedOrGet(usersList: UserSelectType[], deviceTokensList: DeviceTokenRow[], config?: SeedConfig) {
   logger.info("Seeding notification deliveries...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

@@ -1,4 +1,7 @@
-import type { UserReturnType } from "@/backend/types";
+import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
+import { AccountStatus, UserRole } from "@/shared/lib/enum";
+
+type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId">;
 
 export namespace AuthUtils {
   export const validateUserName = (name: string) => {
@@ -7,19 +10,23 @@ export namespace AuthUtils {
     }
   };
 
-  export const toSafeUser = (user: UserReturnType): UserReturnType => {
+  export const toUserReturnType = (
+    user: UserSelectType,
+    resolved: Partial<UserResolvedFields> = {}
+  ): UserReturnType => {
+    const { deletedAt: _deletedAt, ...rest } = user;
     return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      emailVerifiedAt: user.emailVerifiedAt,
-      avatarFilePath: user.avatarFilePath,
-      avatarUrl: user.avatarUrl,
-      isActive: user.isActive,
-      isSuperAdmin: user.isSuperAdmin,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      ...rest,
+      role: resolved.role ?? UserRole.USER,
+      status: resolved.status ?? AccountStatus.ACTIVATED,
+      teacherId: resolved.teacherId ?? null,
+      parentId: resolved.parentId ?? null,
     };
+  };
+
+  export const toSafeUser = (user: UserReturnType | UserSelectType): SafeUser => {
+    const resolved = "role" in user && "status" in user ? user : toUserReturnType(user);
+    const { password: _password, rememberTokenHash: _rememberTokenHash, ...safeUser } = resolved;
+    return safeUser;
   };
 }

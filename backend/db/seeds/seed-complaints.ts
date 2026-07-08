@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { complaints } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
-import type { ParentEntity, StudentEntity, UserEntity } from "@/backend/types";
+import type { ParentEntity, StudentEntity, UserSelectType } from "@/backend/types";
 import {
   buildComplaintBody,
   loadSeedConfig,
@@ -15,7 +15,7 @@ import {
 export async function seedOrGet(
   parentsList: ParentEntity[],
   studentsList: StudentEntity[],
-  usersList: UserEntity[],
+  usersList: UserSelectType[],
   config?: SeedConfig
 ) {
   logger.info("Seeding complaints...");

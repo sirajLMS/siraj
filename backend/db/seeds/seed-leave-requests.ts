@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveRequests } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "@/backend/types";
+import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/shared/lib/enum";
 import {
   ALL_LEAVE_REQUESTER_TYPES,
@@ -143,7 +143,7 @@ async function seedSupplementalLeaves(
 export async function seedOrGet(
   classInstancesList: ClassInstanceEntity[],
   teachersList: TeacherEntity[],
-  usersList: UserEntity[],
+  usersList: UserSelectType[],
   studentsList: StudentEntity[],
   parentsList: ParentEntity[],
   config?: SeedConfig

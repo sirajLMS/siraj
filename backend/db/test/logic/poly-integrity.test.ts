@@ -1,14 +1,14 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { UserReturnType } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../../drizzleDb";
 import { SoftDeleteRepository, StorageDbRepository } from "../../repo";
 import { storageFiles, userFiles, users } from "../../schema";
 
 describe("Consolidated File Usage Integrity (Junction Tables)", () => {
-  let testUser: UserReturnType | null = null;
+  let testUser: UserSelectType | null = null;
   const testPath = `/uploads/test-file-${randomUUID()}.png`;
 
   beforeAll(async () => {
@@ -26,8 +26,11 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
         updatedAt: now,
       })
       .returning();
+    if (!inserted) {
+      throw new Error("Failed to create test user");
+    }
     testUser = inserted;
-    testLogger.info(`Created test user: ${testUser.id}`);
+    testLogger.info(`Created test user: ${inserted.id}`);
   });
 
   afterAll(async () => {

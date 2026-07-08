@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import type { UserReturnType } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity } from "../../../types";
 import { leaveQuotaUsage, systemSettings } from "../../schema";
@@ -280,7 +280,7 @@ describe("Leave Quota Repository Methods", () => {
 
 async function setupTeacherAndStudent(
   tx: DBTransaction
-): Promise<{ user: UserReturnType; teacher: TeacherEntity; student: StudentEntity }> {
+): Promise<{ user: UserSelectType; teacher: TeacherEntity; student: StudentEntity }> {
   const { user, teacher } = await setupTeacher(tx, {
     name: "Quota Teacher User",
     email: `quota-teacher-${randomUUID()}@example.com`,
@@ -293,5 +293,5 @@ async function setupTeacherAndStudent(
     { name: "Quota Student", classesTotal: 10, classesRemaining: 10 }
   );
 
-  return { user: user as UserReturnType, teacher, student };
+  return { user: user, teacher, student };
 }

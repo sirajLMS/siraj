@@ -1,4 +1,5 @@
 import { UserRepository } from "@/backend/db/repo";
+import { AuthUtils } from "@/backend/utils";
 import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { UserPothosObject } from "../pothos";
@@ -13,7 +14,8 @@ gqlSchemaBuilder.queryFields(t => ({
     resolve: async (_parent, _args, ctx) => {
       if (!ctx.user) return null;
 
-      return await UserRepository.findById(ctx.user.id);
+      const user = await UserRepository.findById(ctx.user.id);
+      return user ? AuthUtils.toUserReturnType(user) : null;
     },
   }),
 
@@ -26,7 +28,10 @@ gqlSchemaBuilder.queryFields(t => ({
     args: {
       id: t.arg.string({ required: true }),
     },
-    resolve: async (_parent, args) => await UserRepository.findById(args.id),
+    resolve: async (_parent, args) => {
+      const user = await UserRepository.findById(args.id);
+      return user ? AuthUtils.toUserReturnType(user) : null;
+    },
   }),
 
   users: t.field({

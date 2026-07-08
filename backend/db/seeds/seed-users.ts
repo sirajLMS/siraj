@@ -7,7 +7,7 @@ import {
 } from "@/backend/db/schema";
 import { hashPassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
-import type { PermissionGroupEntity } from "@/backend/types/auth.types";
+import type { PermissionGroupEntity } from "@/backend/types";
 import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import {
   buildExtraParentUserSpecs,

@@ -1,15 +1,18 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import type { TeacherOnboardingInput, TeacherOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { TeacherOnboardingInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { useTeacherOnboardingStore } from "@/frontend/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
-import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/types";
+import type {
+  TeacherOnboardingCreateResult,
+  TeacherOnboardingFormData,
+} from "@/frontend/views/dashboard/teachers/onboarding/types";
 
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);
   const { cache } = useApolloClient();
 
-  const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboardingResult> => {
+  const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboardingCreateResult> => {
     useTeacherOnboardingStore.getState().reset();
     useTeacherOnboardingStore.setState({ isSubmitting: true });
 

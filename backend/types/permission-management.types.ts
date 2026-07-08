@@ -14,7 +14,12 @@ export type GroupWithPermissionIds = PermissionGroupReturnType & {
   permissionIds: string[];
 };
 
-export type CreateGroupInput = Omit<PermissionGroupReturnType, "id" | "createdAt" | "updatedAt"> & {
+export type CreateGroupInput = {
+  name: string;
+  slug: string;
+  description?: string | null;
+  isSystem?: boolean;
+  createdByUserId?: string | null;
   permissionIds: string[];
 };
 

@@ -1,6 +1,5 @@
 import { ParentRepository } from "@/backend/db/repo/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import type { DailyScheduleResult } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
@@ -15,6 +14,7 @@ import type {
   TeacherFutureScheduleReturnType,
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
+import type { DailyScheduleResult } from "@/backend/types/scheduling.types";
 import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 

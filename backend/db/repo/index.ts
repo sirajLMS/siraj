@@ -1,3 +1,4 @@
+export type { UserReturnType, UserSelectType } from "@/backend/types";
 export { AuditRepository } from "./audit.repository";
 export { BillingRepository } from "./billing.repository";
 export { CacheDbRepository } from "./cache.repository";

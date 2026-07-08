@@ -1,10 +1,10 @@
 import { db } from "@/backend/db/drizzleDb";
 import { userDeviceTokens } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { ALL_DEVICE_PLATFORMS, cycleAtIndex, getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
-export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding user device tokens...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

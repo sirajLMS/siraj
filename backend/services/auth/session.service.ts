@@ -6,6 +6,8 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { CurrentUserProfile, SessionEntity } from "@/backend/types";
+import { AuthUtils } from "@/backend/utils";
+import { AccountStatus } from "@/shared/lib/enum";
 
 export namespace SessionService {
   /**
@@ -62,12 +64,15 @@ export namespace SessionService {
     }
 
     return {
-      ...safeUser,
+      ...AuthUtils.toUserReturnType(safeUser, {
+        role: permContext.role,
+        status: safeUser.isActive ? AccountStatus.ACTIVATED : AccountStatus.DEACTIVATED,
+      }),
       permissions: permContext.permissions,
       notificationCount: 0,
       role: permContext.role,
-      teacherId,
-      parentId,
+      teacherId: teacherId ?? null,
+      parentId: parentId ?? null,
     };
   }
 }

@@ -2,11 +2,11 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { permissions, userPermissionOverrides } from "@/backend/db/schema/permissions";
 import logger from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
-export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding user permission overrides...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

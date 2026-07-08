@@ -3,14 +3,14 @@ import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity, UserEntity } from "../../../types";
+import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity } from "../../../types";
 import type { ClassInstanceEntity } from "../../../types/scheduling.types";
 import type { DBTransaction } from "../../db.types";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function setupTestEnvironment(tx: DBTransaction, now: Date) {
-  const [userP] = (await tx
+  const [userP] = await tx
     .insert(users)
     .values({
       name: "Parent",
@@ -19,12 +19,12 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [UserEntity];
+    .returning();
   const [parent] = (await tx
     .insert(parents)
     .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
     .returning()) as [ParentEntity];
-  const [userT] = (await tx
+  const [userT] = await tx
     .insert(users)
     .values({
       name: "Teacher",
@@ -33,7 +33,7 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [UserEntity];
+    .returning();
   const [teacher] = (await tx
     .insert(teachers)
     .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })

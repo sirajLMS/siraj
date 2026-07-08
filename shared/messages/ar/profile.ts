@@ -18,9 +18,16 @@ export const profile: ProfileLabels = {
   editTitle: "Edit Profile",
   notSet: "Not set",
   adminEditHint: "Use the staff profile tools for full administrative editing.",
+  role: {
+    teacher: "معلم",
+    parent: "ولي أمر",
+    staff: "موظف",
+  },
   actions: {
-    edit: "Edit Profile",
-    save: "Save Changes",
+    edit: "تعديل الملف الشخصي",
+    save: "حفظ التغييرات",
+    cancel: "إلغاء",
+    retry: "إعادة المحاولة",
   },
   errors: {
     failedToLoad: "Failed to load profile.",

@@ -2,33 +2,34 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/shared/lib/enum";
-import type { ParentEntity, StudentEntity, TeacherEntity, UserReturnType } from "../../../types";
+import type { StudentEntity, TeacherEntity, UserSelectType } from "../../../types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "../../repo";
 import { parents, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
-async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserReturnType> {
+async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserSelectType> {
   const now = new Date();
-  const user = (
-    await tx
-      .insert(users)
-      .values({
-        name,
-        email: `${emailPrefix}-${randomUUID()}@example.com`,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning()
-  )[0] as UserReturnType;
+  const [user] = await tx
+    .insert(users)
+    .values({
+      name,
+      email: `${emailPrefix}-${randomUUID()}@example.com`,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  if (!user) {
+    throw new Error("Failed to create test user");
+  }
   return user;
 }
 
 async function createBookingFixture(tx: DBTransaction): Promise<{
   teacher: TeacherEntity;
   student: StudentEntity;
-  teacherUser: UserReturnType;
-  adminUser: UserReturnType;
+  teacherUser: UserSelectType;
+  adminUser: UserSelectType;
 }> {
   const now = new Date();
 
@@ -36,7 +37,7 @@ async function createBookingFixture(tx: DBTransaction): Promise<{
   const adminUser = await createTestUser(tx, "Availability Admin", "admin-avail");
   const parentUser = await createTestUser(tx, "Availability Parent", "parent-avail");
 
-  const [parent] = (await tx
+  const [parent] = await tx
     .insert(parents)
     .values({
       userId: parentUser.id,
@@ -44,9 +45,12 @@ async function createBookingFixture(tx: DBTransaction): Promise<{
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [ParentEntity];
+    .returning();
+  if (!parent) {
+    throw new Error("Failed to create test parent");
+  }
 
-  const [teacher] = (await tx
+  const [teacher] = await tx
     .insert(teachers)
     .values({
       userId: teacherUser.id,
@@ -55,9 +59,12 @@ async function createBookingFixture(tx: DBTransaction): Promise<{
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [TeacherEntity];
+    .returning();
+  if (!teacher) {
+    throw new Error("Failed to create test teacher");
+  }
 
-  const [student] = (await tx
+  const [student] = await tx
     .insert(students)
     .values({
       parentId: parent.id,
@@ -69,7 +76,10 @@ async function createBookingFixture(tx: DBTransaction): Promise<{
       updatedAt: now,
       idempotencyKey: randomUUID(),
     })
-    .returning()) as [StudentEntity];
+    .returning();
+  if (!student) {
+    throw new Error("Failed to create test student");
+  }
 
   await tx.insert(teacherAssignments).values({
     studentId: student.id,

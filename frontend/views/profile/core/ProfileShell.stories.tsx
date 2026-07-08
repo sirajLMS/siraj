@@ -2,6 +2,8 @@
 
 import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import type { ComponentProps } from "react";
+import { useState } from "react";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ProfileShell } from "./ProfileShell";
 
@@ -14,7 +16,6 @@ const meta: Meta<typeof ProfileShell> = {
   },
   decorators: [
     Story => {
-      // Reset userStore state for each story
       useUserStore.setState({
         user: null,
         name: "",
@@ -37,9 +38,6 @@ const mockActions = (
     <Button variant="contained" size="small">
       Edit
     </Button>
-    <Button variant="outlined" size="small">
-      Settings
-    </Button>
   </Box>
 );
 
@@ -59,7 +57,13 @@ const mockChildren = (
   </Box>
 );
 
+function TabbedShellStory(args: ComponentProps<typeof ProfileShell>) {
+  const [currentTab, setCurrentTab] = useState(args.currentTab ?? "profile");
+  return <ProfileShell {...args} currentTab={currentTab} onTabChange={setCurrentTab} />;
+}
+
 export const Default: Story = {
+  render: args => <TabbedShellStory {...args} />,
   args: {
     title: "User Profile",
     subtitle: "Manage your account details",
@@ -68,12 +72,15 @@ export const Default: Story = {
     role: "teacher",
     audience: "teacher",
     scope: "own",
+    mode: "view",
+    currentTab: "profile",
     actions: mockActions,
     children: mockChildren,
   },
 };
 
 export const ParentProfile: Story = {
+  render: args => <TabbedShellStory {...args} />,
   args: {
     title: "Parent Profile",
     subtitle: "View and manage child accounts",
@@ -82,6 +89,8 @@ export const ParentProfile: Story = {
     role: "parent",
     audience: "parent",
     scope: "own",
+    mode: "view",
+    currentTab: "profile",
     actions: mockActions,
     children: mockChildren,
   },
@@ -94,6 +103,7 @@ export const ParentProfile: Story = {
 };
 
 export const StaffProfile: Story = {
+  render: args => <TabbedShellStory {...args} />,
   args: {
     title: "Staff Profile",
     subtitle: "Administrative view",
@@ -102,6 +112,8 @@ export const StaffProfile: Story = {
     role: "staff",
     audience: "staff",
     scope: "own",
+    mode: "view",
+    currentTab: "profile",
     actions: mockActions,
     children: mockChildren,
   },
@@ -129,25 +141,23 @@ export const ErrorState: Story = {
     error: "Failed to load profile. Please try again later.",
     audience: "teacher",
     scope: "own",
+    onRetry: () => {},
   },
 };
 
 export const OtherUserProfile: Story = {
+  render: args => <TabbedShellStory {...args} />,
   args: {
     title: "Viewing User",
     subtitle: "Profile of another user",
     name: "Alice Johnson",
     email: "alice.johnson@example.com",
     role: "teacher",
-    audience: "staff",
+    audience: "teacher",
     scope: "other",
+    mode: "view",
+    currentTab: "profile",
     actions: mockActions,
     children: mockChildren,
   },
-  decorators: [
-    Story => {
-      useUserStore.setState({ role: "staff" });
-      return <Story />;
-    },
-  ],
 };

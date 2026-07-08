@@ -13,7 +13,7 @@ import type {
   TeacherBankingDetailsHistorySelectType,
   TeacherEntity,
   TimezoneEntity,
-  UserEntity,
+  UserSelectType,
 } from "@/backend/types";
 import { loadSeedConfig, type SeedConfig } from "./lib";
 import { seedOrGet as seedOrGetAdminAuditLogs } from "./seed-admin-audit-logs";
@@ -65,7 +65,7 @@ export type SeedContext = {
   systemSettings?: SystemSettingSelectType[];
   timezones?: TimezoneEntity[];
   permissionGroups?: PermissionGroupEntity[];
-  users?: UserEntity[];
+  users?: UserSelectType[];
   teachers?: TeacherEntity[];
   parents?: ParentEntity[];
   students?: StudentEntity[];

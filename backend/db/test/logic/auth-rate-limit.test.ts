@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import type { AuthRateLimitInsertType } from "@/backend/types/auth.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { AuthRateLimitEntityInput } from "../../../types";
 import { authRateLimits } from "../../schema";
 import { IP_ADDRESS_1 } from "../const";
 import { runInRollback } from "../test-utils";
@@ -14,7 +14,7 @@ describe("Authentication Rate Limiting", () => {
       const ipAddress = IP_ADDRESS_1;
       const now = new Date();
 
-      const rateLimitInput1: AuthRateLimitEntityInput = {
+      const rateLimitInput1: AuthRateLimitInsertType = {
         email,
         ipAddress,
         attempts: 1,
@@ -22,7 +22,7 @@ describe("Authentication Rate Limiting", () => {
         updatedAt: now,
       };
 
-      const rateLimitInput2: AuthRateLimitEntityInput = {
+      const rateLimitInput2: AuthRateLimitInsertType = {
         email,
         ipAddress,
         attempts: 2,

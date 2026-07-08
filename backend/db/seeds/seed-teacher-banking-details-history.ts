@@ -1,9 +1,9 @@
 import { TeacherBankingRepository } from "@/backend/db/repo/teacher-banking.repository";
 import logger from "@/backend/lib/logger";
-import type { TeacherEntity, UserEntity } from "@/backend/types";
+import type { TeacherEntity, UserSelectType } from "@/backend/types";
 import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
-export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding teacher banking details...");
   const seedConfig = config ?? loadSeedConfig();
 

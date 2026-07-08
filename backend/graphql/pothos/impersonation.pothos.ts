@@ -8,6 +8,7 @@ import type {
   ImpersonationStatusReturnType,
   StartImpersonationReturnType,
 } from "@/backend/types";
+import { AuthUtils } from "@/backend/utils";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { UserPothosObject } from "./user.pothos";
 
@@ -24,12 +25,20 @@ export const ImpersonationStatusPothosObject = ImpersonationStatusPothosObjectRe
     targetUser: t.field({
       type: UserPothosObject,
       nullable: true,
-      resolve: parent => (parent.targetUserId ? UserRepository.findById(parent.targetUserId) : null),
+      resolve: async parent => {
+        if (!parent.targetUserId) return null;
+        const user = await UserRepository.findById(parent.targetUserId);
+        return user ? AuthUtils.toUserReturnType(user) : null;
+      },
     }),
     actorUser: t.field({
       type: UserPothosObject,
       nullable: true,
-      resolve: parent => (parent.actorUserId ? UserRepository.findById(parent.actorUserId) : null),
+      resolve: async parent => {
+        if (!parent.actorUserId) return null;
+        const user = await UserRepository.findById(parent.actorUserId);
+        return user ? AuthUtils.toUserReturnType(user) : null;
+      },
     }),
   }),
 });

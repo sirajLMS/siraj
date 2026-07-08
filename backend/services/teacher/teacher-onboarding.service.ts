@@ -1,7 +1,11 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { PermissionManagementRepository, TeacherBankingRepository, TeacherRepository } from "@/backend/db/repo";
-import * as UserRepository from "@/backend/db/repo/user.repository";
+import {
+  PermissionManagementRepository,
+  TeacherBankingRepository,
+  TeacherRepository,
+  UserRepository,
+} from "@/backend/db/repo";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

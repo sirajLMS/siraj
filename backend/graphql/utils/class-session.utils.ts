@@ -69,6 +69,8 @@ export async function buildClassInstanceDetail(
       instance.executionState as ClassExecutionState,
       instance.outcome as ClassOutcome
     ),
+    executionState: instance.executionState as ClassExecutionState,
+    outcome: instance.outcome as ClassOutcome,
     hasTimezoneMismatch,
     studentTimezone,
     teacherTimezone,

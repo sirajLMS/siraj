@@ -12,7 +12,7 @@ import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { SessionService } from "@/backend/services/auth/session.service";
-import type { SafeUser, SessionEntity, UserEntity } from "@/backend/types";
+import type { SafeUser, SessionEntity, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
@@ -29,7 +29,7 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 
 async function resolveUserFromSession(
   sessionId: string
-): Promise<{ session: SessionEntity | null; user: UserEntity | null }> {
+): Promise<{ session: SessionEntity | null; user: UserSelectType | null }> {
   const session = await SessionService.validateSession(sessionId);
   if (!session?.userId) return { session: session ?? null, user: null };
 
@@ -44,7 +44,7 @@ async function resolveUserFromSession(
 
 async function resolveUserFromRefreshToken(
   refreshToken: string
-): Promise<{ session: SessionEntity | null; user: UserEntity | null }> {
+): Promise<{ session: SessionEntity | null; user: UserSelectType | null }> {
   const payload = await verifyToken(refreshToken);
   if (payload?.type !== "refresh") return { session: null, user: null };
 
@@ -88,7 +88,7 @@ async function validateRefreshTokenJti(
 }
 
 async function rotateTokensAndSession(
-  user: UserEntity,
+  user: UserSelectType,
   session: SessionEntity,
   ctx: BaseContext,
   rawSessionId?: string
@@ -124,7 +124,7 @@ async function rotateTokensAndSession(
   const effectiveUserId = ctx.isImpersonating && ctx.user ? ctx.user.id : user.id;
   const effectiveUser = (await UserRepository.findById(effectiveUserId)) ?? user;
 
-  return { token: newAccessToken, user: AuthUtils.toSafeUser(effectiveUser) };
+  return { token: newAccessToken, user: AuthUtils.toSafeUser(AuthUtils.toUserReturnType(effectiveUser)) };
 }
 
 gqlSchemaBuilder.mutationFields(t => ({
@@ -154,7 +154,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         });
       }
 
-      let user: UserEntity | null;
+      let user: UserSelectType | null;
       try {
         user = (await UserRepository.findByEmail(email.value)) ?? null;
       } catch (err) {
@@ -271,7 +271,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       let session: SessionEntity | null = null;
-      let user: UserEntity | null = null;
+      let user: UserSelectType | null = null;
       let resolvedViaSessionId = false;
 
       if (sessionId) {

@@ -275,9 +275,16 @@ const en: MessageSchema = {
         skypeId: "Skype ID",
       },
     },
+    role: {
+      teacher: "Teacher",
+      parent: "Parent",
+      staff: "Staff",
+    },
     actions: {
       edit: "Edit Profile",
       save: "Save Profile",
+      cancel: "Cancel",
+      retry: "Retry",
     },
     errors: {
       failedToLoad: "Failed to load profile",

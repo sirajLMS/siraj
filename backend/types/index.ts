@@ -23,7 +23,12 @@ export * from "./audit.types";
 // Auth types (includes session, permission, and user-related types)
 export type {
   AuthRateLimitSelectType as AuthRateLimitEntityInput,
+  CurrentUserProfile,
+  DemoLoginInput,
+  LoginInput,
+  LoginResponse,
   PermissionGroupSelectType as PermissionGroupEntity,
+  RefreshTokenResponse,
   SessionConfigSelectType as SessionConfigEntity,
   SessionMetadataSelectType as SessionMetadataEntity,
   SessionSelectType as SessionEntity,
@@ -79,6 +84,7 @@ export * from "./dst-migration.types";
 export type {
   ClassCommunicationInsertType,
   ClassCommunicationSelectType,
+  GroupClassAdminNoteReturnType as AdminNoteReturnType,
   GroupClassAuditReturnType,
   GroupClassCommunicationLogEntryReturnType as CommunicationLogEntryReturnType,
   GroupClassEnrollmentInsertType,
@@ -113,6 +119,7 @@ export * from "./notificationDeliveries.types";
 export * from "./pagination.types";
 export * from "./parent.types";
 export * from "./parentHandbook.types";
+export type { PermissionReturnType as PermissionEntity } from "./permission.types";
 export * from "./permission.types";
 export * from "./permission-group-simulation.types";
 // Permission management types
@@ -142,7 +149,8 @@ export * from "./teacher.types";
 export * from "./teacher-availability.types";
 export * from "./teacher-notes.types";
 export * from "./teacher-onboarding.types";
-// User types (export UserEntity and SafeUser from user.types.ts)
 // User types
+// Re-export UserSelectType and UserReturnType
+export type { SafeUser, UserReturnType, UserSelectType } from "./user.types";
 export * from "./userDeviceTokens.types";
 export * from "./userNotificationPreferences.types";

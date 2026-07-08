@@ -9,7 +9,7 @@ export const createTeacherMutationDocument: TypedDocumentNode<
   mutation createTeacher($input: TeacherOnboardingInput!) {
     createTeacher(input: $input) {
       userId
-      teacherId
+      id
       name
       email
       status

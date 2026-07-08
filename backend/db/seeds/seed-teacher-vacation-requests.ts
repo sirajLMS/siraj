@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherVacationRequests } from "@/backend/db/schema/teacher-availability";
 import logger from "@/backend/lib/logger";
-import type { TeacherEntity, TimezoneEntity, UserEntity } from "@/backend/types";
+import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
 import { VacationRequestStatus } from "@/shared/lib/enum";
 import { addMonths, findAdminUser, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
 
@@ -82,7 +82,7 @@ function buildVacationSpecs(teachersList: TeacherEntity[], profile: string) {
 
 export async function seedOrGet(
   teachersList: TeacherEntity[],
-  usersList: UserEntity[],
+  usersList: UserSelectType[],
   timezones: TimezoneEntity[],
   config?: SeedConfig
 ) {

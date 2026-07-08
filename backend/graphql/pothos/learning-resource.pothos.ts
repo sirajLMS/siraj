@@ -20,6 +20,7 @@ export const LearningResourceRowPothosObject = LearningResourceRowRef.implement(
   fields: t => ({
     id: t.exposeString("id"),
     displayName: t.exposeString("displayName"),
+    filePath: t.exposeString("filePath"),
     uploadedByUserId: t.exposeString("uploadedByUserId"),
     uploadedByUserName: t.exposeString("uploadedByUserName", { nullable: true }),
     fileSize: t.exposeFloat("fileSize", { nullable: true }),

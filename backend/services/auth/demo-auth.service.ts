@@ -6,7 +6,7 @@ import { permissionGroups, userPermissionGroups, users } from "@/backend/db/sche
 import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-import type { SafeUser, UserEntity } from "@/backend/types";
+import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 
 export namespace DemoAuthService {
@@ -84,7 +84,7 @@ export namespace DemoAuthService {
     return proceedWithUser(assignment.user);
   }
 
-  async function proceedWithUser(user: UserEntity) {
+  async function proceedWithUser(user: UserSelectType) {
     const accessToken = await generateAccessToken(user.id, user.email);
     const refreshToken = await generateRefreshToken(user.id, user.email);
 

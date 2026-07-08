@@ -2,10 +2,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { dstMigrationRuns } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
-export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding DST migration runs...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

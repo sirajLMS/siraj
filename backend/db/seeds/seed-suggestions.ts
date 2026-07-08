@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { suggestions } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
-import type { ParentEntity, UserEntity } from "@/backend/types";
+import type { ParentEntity, UserSelectType } from "@/backend/types";
 import { SuggestionStatus } from "@/shared/lib/enum";
 import { buildSuggestionBody, findAdminUser, loadSeedConfig, pickSuggestionStatus, type SeedConfig } from "./lib";
 
@@ -15,7 +15,7 @@ function resolveAdminResponse(status: SuggestionStatus): string | null {
   return null;
 }
 
-export async function seedOrGet(parentsList: ParentEntity[], usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(parentsList: ParentEntity[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding suggestions...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

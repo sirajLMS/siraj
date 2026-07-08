@@ -6,6 +6,7 @@ export const learningResourceRowFragment = gql`
 fragment LearningResourceRowFragment on LearningResourceRow {
   id
   displayName
+  filePath
   uploadedByUserId
   uploadedByUserName
   fileSize

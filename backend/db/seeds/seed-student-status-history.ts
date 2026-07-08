@@ -2,10 +2,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { studentStatusHistory } from "@/backend/db/schema/students";
 import logger from "@/backend/lib/logger";
-import type { StudentEntity, UserEntity } from "@/backend/types";
+import type { StudentEntity, UserSelectType } from "@/backend/types";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
-export async function seedOrGet(studentsList: StudentEntity[], usersList: UserEntity[], config?: SeedConfig) {
+export async function seedOrGet(studentsList: StudentEntity[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding student status history...");
   const seedConfig = config ?? loadSeedConfig();
 

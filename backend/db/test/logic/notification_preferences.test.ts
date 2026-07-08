@@ -2,7 +2,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
-import type { UserNotificationPreferenceSelectType, UserReturnType } from "@/backend/types";
+import type { UserNotificationPreferenceSelectType } from "@/backend/types";
 import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import { userNotificationPreferences, users } from "../../schema";
@@ -53,7 +53,7 @@ describe("User Notification Preferences", () => {
     testLogger.info("Testing unique constraint on preferences...");
     await runInRollback(async tx => {
       const now = new Date();
-      const [user] = (await tx
+      const [user] = await tx
         .insert(users)
         .values({
           name: "Test User",
@@ -62,7 +62,7 @@ describe("User Notification Preferences", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as UserReturnType[];
+        .returning();
 
       await tx.insert(userNotificationPreferences).values({
         userId: user.id,

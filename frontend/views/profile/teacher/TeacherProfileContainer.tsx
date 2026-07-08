@@ -14,8 +14,6 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
-import { ProfileActionBar } from "../core/components/ProfileActionBar";
-import { ProfileShell } from "../core/ProfileShell";
 import { type TeacherOwnEditFormData, TeacherProfileEditForm } from "./TeacherProfileEditForm";
 import { TeacherProfileView } from "./TeacherProfileView";
 
@@ -28,10 +26,15 @@ type TeacherProfileContainerProps = {
   readonly scope: ProfileScope;
   readonly mode: ProfileMode;
   readonly targetUserId: string;
+  readonly activeTab?: string;
 };
 
-export function TeacherProfileContainer({ scope, mode, targetUserId }: TeacherProfileContainerProps) {
-  const t = useTranslations("profile.teacher");
+export function TeacherProfileContainer({
+  scope,
+  mode,
+  targetUserId,
+  activeTab: _activeTab = "profile",
+}: TeacherProfileContainerProps) {
   const tc = useTranslations("profile");
   const router = useRouter();
 
@@ -76,38 +79,41 @@ export function TeacherProfileContainer({ scope, mode, targetUserId }: TeacherPr
     router.push(`/users/${targetUserId}/profile`);
   };
 
-  const title = mode === "edit" ? tc("editTitle") : tc("pageTitle");
+  if (loading) {
+    return null;
+  }
+
+  if (error) {
+    return (
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
+        {tc("errors.failedToLoad")}
+      </Typography>
+    );
+  }
+
+  if (!teacherData) {
+    return <Typography sx={{ color: theme => theme.palette.text.secondary }}>{tc("errors.notFound")}</Typography>;
+  }
+
+  if (mode === "view") {
+    return <TeacherProfileView teacherData={teacherData} />;
+  }
+
+  if (scope === "own") {
+    return (
+      <TeacherProfileEditForm
+        register={form.register}
+        errors={form.formState.errors}
+        handleSubmit={form.handleSubmit}
+        onSubmit={onSubmit}
+        isSaving={isSaving}
+      />
+    );
+  }
 
   return (
-    <ProfileShell
-      title={title}
-      subtitle={t("subtitle")}
-      loading={loading}
-      error={error ? tc("errors.failedToLoad") : null}
-      actions={
-        mode === "view" && scope === "own" ? (
-          <ProfileActionBar editHref="/profile/edit" editLabel={tc("actions.edit")} />
-        ) : null
-      }
-    >
-      {teacherData && mode === "view" ? <TeacherProfileView teacherData={teacherData} /> : null}
-      {teacherData && mode === "edit" && scope === "own" ? (
-        <TeacherProfileEditForm
-          register={form.register}
-          errors={form.formState.errors}
-          handleSubmit={form.handleSubmit}
-          onSubmit={onSubmit}
-          isSaving={isSaving}
-        />
-      ) : null}
-      {teacherData && mode === "edit" && scope === "other" ? (
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {tc("adminEditHint")}
-        </Typography>
-      ) : null}
-      {!teacherData && !loading && !error ? (
-        <Typography sx={{ color: theme => theme.palette.text.secondary }}>{tc("errors.notFound")}</Typography>
-      ) : null}
-    </ProfileShell>
+    <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+      {tc("adminEditHint")}
+    </Typography>
   );
 }

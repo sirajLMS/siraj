@@ -1,51 +1,51 @@
-"use client";
+import type { ProfileAudience, ProfileScope } from "@/backend/types/profile.types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 
-// ProfileAudience enum is used in the audiences array below
+export type ProfileTabId = "profile" | "banking" | "students" | "notifications" | "permissions";
 
-// Tab visibility matrix:
-// - "own" scope: tabs visible to the user viewing their own profile
-// - "other" scope: tabs visible when viewing another user's profile
-// - Audiences: teacher, parent, staff
+export type ProfileTabDefinition = {
+  readonly id: ProfileTabId;
+  readonly i18nKey: `shell.tabs.${string}`;
+};
 
-export const profileTabs = [
-  {
-    id: "profile",
-    i18nKey: "profile.shell.tabs.profile",
-    scope: "own", // Visible only to the user viewing their own profile
-    audiences: ["teacher", "parent", "staff"], // Visible to all audiences
-    view: "ProfileTab", // React component for the tab
-    forbiddenPermissions: [], // No restrictions
-  },
-  {
-    id: "banking",
-    i18nKey: "profile.shell.tabs.banking",
-    scope: "other", // Visible only when viewing another user's profile
-    audiences: ["teacher"], // Visible only to staff viewing teacher profiles
-    view: "BankingTab",
-    forbiddenPermissions: [],
-  },
-  {
-    id: "students",
-    i18nKey: "profile.shell.tabs.students",
-    scope: "other", // Visible only when viewing another user's profile
-    audiences: ["teacher"], // Visible only to staff viewing teacher profiles
-    view: "StudentsTab",
-    forbiddenPermissions: [],
-  },
-  {
-    id: "notifications",
-    i18nKey: "profile.shell.tabs.notifications",
-    scope: "own", // Visible to the user viewing their own profile
-    audiences: ["teacher", "parent"], // Visible to teachers and parents
-    view: "NotificationsTab",
-    forbiddenPermissions: [],
-  },
-  {
-    id: "permissions",
-    i18nKey: "profile.shell.tabs.permissions",
-    scope: "other", // Visible only when viewing another user's profile
-    audiences: ["staff"], // Visible only to staff with admin permissions
-    view: "PermissionsTab",
-    forbiddenPermissions: ["auth.view_own_profile"], // Requires elevated permissions
-  },
-];
+type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
+
+const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
+  profile: ["teacher-own", "teacher-other", "parent-own", "parent-other", "staff-own", "staff-other"],
+  banking: ["teacher-other"],
+  students: ["teacher-other"],
+  notifications: ["teacher-own", "parent-own", "staff-own"],
+  permissions: ["teacher-other", "parent-other", "staff-other"],
+};
+
+export const profileTabs: readonly ProfileTabDefinition[] = [
+  { id: "profile", i18nKey: "shell.tabs.profile" },
+  { id: "banking", i18nKey: "shell.tabs.banking" },
+  { id: "students", i18nKey: "shell.tabs.students" },
+  { id: "notifications", i18nKey: "shell.tabs.notifications" },
+  { id: "permissions", i18nKey: "shell.tabs.permissions" },
+] as const;
+
+export function getVisibleProfileTabs({
+  audience,
+  scope,
+  hasPermission,
+}: {
+  readonly audience: ProfileAudience;
+  readonly scope: ProfileScope;
+  readonly hasPermission: (permission: AppPermission) => boolean;
+}): ProfileTabDefinition[] {
+  const visibilityKey: TabVisibilityKey = `${audience}-${scope}`;
+
+  return profileTabs.filter(tab => {
+    if (!TAB_VISIBILITY[tab.id].includes(visibilityKey)) {
+      return false;
+    }
+
+    if (tab.id === "permissions" && !hasPermission(AppPermission.UserEditProfile)) {
+      return false;
+    }
+
+    return true;
+  });
+}

@@ -14,8 +14,6 @@ import {
   updateOwnProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
-import { ProfileActionBar } from "../core/components/ProfileActionBar";
-import { ProfileShell } from "../core/ProfileShell";
 
 const staffEditSchema = z.object({
   phone: z.string().optional(),
@@ -28,9 +26,15 @@ type StaffProfileContainerProps = {
   readonly scope: ProfileScope;
   readonly mode: ProfileMode;
   readonly targetUserId: string;
+  readonly activeTab?: string;
 };
 
-export function StaffProfileContainer({ scope, mode, targetUserId }: StaffProfileContainerProps) {
+export function StaffProfileContainer({
+  scope,
+  mode,
+  targetUserId,
+  activeTab: _activeTab = "profile",
+}: StaffProfileContainerProps) {
   const t = useTranslations("profile.staff");
   const tc = useTranslations("profile");
   const router = useRouter();
@@ -71,77 +75,87 @@ export function StaffProfileContainer({ scope, mode, targetUserId }: StaffProfil
     router.push("/profile");
   };
 
-  const title = mode === "edit" ? tc("editTitle") : tc("pageTitle");
+  if (loading) {
+    return null;
+  }
+
+  if (error) {
+    return (
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
+        {tc("errors.failedToLoad")}
+      </Typography>
+    );
+  }
+
+  if (!staffData) {
+    return null;
+  }
+
+  if (mode === "view") {
+    return (
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
+            <Stack spacing={1}>
+              <Typography sx={{ typography: "bodyMd" }}>{staffData.name}</Typography>
+              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+                {staffData.email}
+              </Typography>
+              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+                {staffData.phone ?? tc("notSet")}
+              </Typography>
+              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+                {staffData.roleName ?? staffData.roleSlug ?? tc("notSet")}
+              </Typography>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
+    );
+  }
+
+  if (scope !== "own") {
+    return (
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+        {tc("adminEditHint")}
+      </Typography>
+    );
+  }
 
   return (
-    <ProfileShell
-      title={title}
-      subtitle={t("subtitle")}
-      loading={loading}
-      error={error ? tc("errors.failedToLoad") : null}
-      actions={
-        mode === "view" && scope === "own" ? (
-          <ProfileActionBar editHref="/profile/edit" editLabel={tc("actions.edit")} />
-        ) : null
-      }
-    >
-      {staffData && mode === "view" ? (
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Paper variant="outlined" sx={{ p: 3 }}>
-              <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
-              <Stack spacing={1}>
-                <Typography sx={{ typography: "bodyMd" }}>{staffData.name}</Typography>
-                <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                  {staffData.email}
-                </Typography>
-                <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                  {staffData.phone ?? tc("notSet")}
-                </Typography>
-                <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                  {staffData.roleName ?? staffData.roleSlug ?? tc("notSet")}
-                </Typography>
-              </Stack>
-            </Paper>
-          </Grid>
-        </Grid>
-      ) : null}
-
-      {staffData && mode === "edit" && scope === "own" ? (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={2} sx={{ maxWidth: 480 }}>
-            <Box>
-              <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.phone")}</Typography>
-              <Box
-                component="input"
-                {...register("phone")}
-                sx={theme => ({
-                  width: "100%",
-                  p: 1.5,
-                  borderRadius: 1,
-                  border: `1px solid ${theme.palette.divider}`,
-                })}
-              />
-            </Box>
-            <Box>
-              <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.skypeId")}</Typography>
-              <Box
-                component="input"
-                {...register("skypeId")}
-                sx={theme => ({
-                  width: "100%",
-                  p: 1.5,
-                  borderRadius: 1,
-                  border: `1px solid ${theme.palette.divider}`,
-                })}
-              />
-            </Box>
-            <PrimaryPageAction type="submit" disabled={saving}>
-              {tc("actions.save")}
-            </PrimaryPageAction>
-          </Stack>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+      <Stack spacing={2} sx={{ maxWidth: 480 }}>
+        <Box>
+          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.phone")}</Typography>
+          <Box
+            component="input"
+            {...register("phone")}
+            sx={theme => ({
+              width: "100%",
+              p: 1.5,
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.divider}`,
+            })}
+          />
         </Box>
-      ) : null}
-    </ProfileShell>
+        <Box>
+          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.skypeId")}</Typography>
+          <Box
+            component="input"
+            {...register("skypeId")}
+            sx={theme => ({
+              width: "100%",
+              p: 1.5,
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.divider}`,
+            })}
+          />
+        </Box>
+        <PrimaryPageAction type="submit" disabled={saving}>
+          {tc("actions.save")}
+        </PrimaryPageAction>
+      </Stack>
+    </Box>
   );
 }

@@ -3,61 +3,66 @@
 import { Box, Chip, Stack, Tab, Tabs } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import type { ProfileAudience } from "@/backend/types/profile.types";
-import { profileTabs } from "./profileTabs";
+import { useEffect } from "react";
+import type { ProfileAudience, ProfileScope } from "@/backend/types/profile.types";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { getVisibleProfileTabs } from "./profileTabs";
 
 export type ProfileTabNavProps = {
-  audience: ProfileAudience;
-  scope: "own" | "other";
-  currentTab?: string;
-  onTabChange?: (tab: string) => void;
+  readonly audience: ProfileAudience;
+  readonly scope: ProfileScope;
+  readonly currentTab: string;
+  readonly onTabChange: (tab: string) => void;
 };
 
-export function ProfileTabNav({
-  audience,
-  scope,
-  currentTab: controlledTab,
-  onTabChange: onControlledTabChange,
-}: ProfileTabNavProps) {
+export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: ProfileTabNavProps) {
   const t = useTranslations("profile");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [internalTab, setInternalTab] = useState(controlledTab ?? profileTabs[0]?.id ?? "");
+  const hasPermission = useUserStore(state => state.hasPermission);
 
-  const currentTab = controlledTab ?? internalTab;
-  const onTabChange = onControlledTabChange ?? setInternalTab;
+  const availableTabs = getVisibleProfileTabs({ audience, scope, hasPermission });
 
-  // Filter tabs based on audience and scope
-  const availableTabs = profileTabs.filter(tab => tab.audiences.includes(audience) && tab.scope === scope);
-
-  // Sync query param with tab selection
   useEffect(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam && availableTabs.some(tab => tab.id === tabParam)) {
       onTabChange(tabParam);
-    } else if (availableTabs.length > 0 && !currentTab) {
-      onTabChange(availableTabs[0].id);
+      return;
+    }
+
+    const fallbackTab = availableTabs[0]?.id;
+    if (fallbackTab && fallbackTab !== currentTab) {
+      onTabChange(fallbackTab);
     }
   }, [searchParams, availableTabs, currentTab, onTabChange]);
 
-  // Update query param when tab changes
   useEffect(() => {
-    if (!currentTab) return;
+    if (!currentTab) {
+      return;
+    }
+
     const params = new URLSearchParams(searchParams.toString());
+    if (params.get("tab") === currentTab) {
+      return;
+    }
+
     params.set("tab", currentTab);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [currentTab, pathname, router, searchParams]);
+
+  if (availableTabs.length === 0) {
+    return null;
+  }
 
   return (
     <Box
       sx={theme => ({
         width: "100%",
         borderBottom: `1px solid ${theme.palette.divider}`,
+        mb: 3,
       })}
     >
-      {/* Mobile: Chips */}
       <Box sx={{ display: { xs: "flex", md: "none" }, overflowX: "auto", pb: 1 }}>
         <Stack direction="row" spacing={1} sx={{ minWidth: "fit-content", px: 1 }}>
           {availableTabs.map(tab => (
@@ -85,7 +90,6 @@ export function ProfileTabNav({
         </Stack>
       </Box>
 
-      {/* Desktop: Tabs */}
       <Tabs
         value={currentTab}
         onChange={(_, newValue) => onTabChange(newValue)}
@@ -99,12 +103,8 @@ export function ProfileTabNav({
             sx={theme => ({
               fontSize: theme.typography.bodyMd.fontSize,
               ...(currentTab === tab.id
-                ? {
-                    color: theme.palette.primary.main,
-                  }
-                : {
-                    color: theme.palette.text.secondary,
-                  }),
+                ? { color: theme.palette.primary.main }
+                : { color: theme.palette.text.secondary }),
             })}
           />
         ))}

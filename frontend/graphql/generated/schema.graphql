@@ -1092,7 +1092,7 @@ enum FileType {
 type FileTypeBreakdown {
   count: Int
   size: String
-  type: FileType
+  type: String
 }
 
 input FileUsageCheckInput {
@@ -1229,6 +1229,7 @@ type LearningResourceRow {
   contentType: String
   createdAt: DateTime
   displayName: String
+  filePath: String
   fileSize: Float
   id: String
   uploadedByUserId: String
@@ -1299,10 +1300,21 @@ type ManagerDirectoryRow {
   status: AccountStatus
 }
 
+"""Manager/Staff account details"""
+type ManagerOnboarding {
+  assignedGroupSlug: String
+  email: String!
+  id: String
+  name: String
+  staffProfileId: String
+  status: String
+  userId: String
+}
+
 """Input for creating a new manager/staff account with RBAC assignment"""
 input ManagerOnboardingInput {
   accountType: ManagerAccountType!
-  email: Email!
+  email: String!
   name: String!
   password: String!
   phone: String
@@ -1378,7 +1390,7 @@ type Mutation {
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
 
   """Create a new teacher account with comprehensive profile"""
-  createTeacher(input: TeacherOnboardingInput!): TeacherOnboardingResult
+  createTeacher(input: TeacherOnboardingInput!): TeacherOnboarding
   createTeacherImportantNote(input: CreateTeacherNoteInput!): TeacherImportantNote
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
@@ -2627,6 +2639,30 @@ type TeacherImportantNote {
   title: String
 }
 
+"""Teacher onboarding profile with resolved metadata"""
+type TeacherOnboarding {
+  """Teacher email address"""
+  email: String
+
+  """Teacher gender"""
+  gender: Gender
+
+  """Unique identifier for the teacher profile"""
+  id: String
+
+  """Resolved teacher display name"""
+  name: String
+
+  """Current teacher account status"""
+  status: String
+
+  """Formatted timezone display string"""
+  timezoneDisplay: String
+
+  """Created user ID for the onboarded teacher"""
+  userId: String
+}
+
 """Input for creating a new teacher account with comprehensive profile"""
 input TeacherOnboardingInput {
   """Bank account number"""
@@ -2703,24 +2739,6 @@ input TeacherOnboardingInput {
 
   """Teacher Zoom username"""
   zoomUsername: String
-}
-
-"""Result of teacher onboarding operation"""
-type TeacherOnboardingResult {
-  """Teacher email"""
-  email: String
-
-  """Teacher name"""
-  name: String
-
-  """Teacher account status"""
-  status: String
-
-  """Created teacher profile ID"""
-  teacherId: String
-
-  """Created user ID"""
-  userId: String
 }
 
 type TeacherOwnProfile {
