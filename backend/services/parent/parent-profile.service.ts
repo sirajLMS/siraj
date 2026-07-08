@@ -8,7 +8,7 @@ import type {
   ParentProfileResult,
   ParentProfileUpdateInput,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib";
+import { AppPermission } from "@/backend/enum";
 
 export type {
   AssociatedStudentResult,
@@ -51,7 +51,6 @@ export namespace ParentProfileService {
       facebook: profile.facebook,
       whatsapp: profile.whatsapp,
       twitter: profile.twitter,
-      skype: profile.skype,
       defaultZoomLink: profile.defaultZoomLink,
       invoiceType: profile.invoiceType,
       feeAmount: profile.feeAmount,

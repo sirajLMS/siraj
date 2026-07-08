@@ -5,6 +5,7 @@ import {
   TeacherRepository,
   UserRepository,
 } from "@/backend/db";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib";
 import {
   ManagerProfileService,
@@ -28,7 +29,6 @@ import type {
   UpdateUserProfileInput,
 } from "@/backend/types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parent.types";
-import { AppPermission } from "@/shared/lib";
 
 type ResolvedRoleIds = {
   readonly audience: ProfileAudience;
@@ -70,7 +70,6 @@ export function toParentRepoInput(
     facebook: input.facebook,
     whatsapp: input.whatsapp,
     twitter: input.twitter,
-    skype: input.skype,
     defaultZoomLink: input.defaultZoomLink,
     invoiceType: "invoiceType" in input ? input.invoiceType : undefined,
     feeAmount: "feeAmount" in input ? input.feeAmount : undefined,

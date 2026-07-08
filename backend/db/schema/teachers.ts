@@ -28,7 +28,6 @@ export const teachers = pgTable(
     gender: genderEnum("gender"),
     address: text("address"),
     qualifications: text("qualifications"),
-    skypeId: varchar("skype_id", { length: 255 }),
     zoomLink: varchar("zoom_link", { length: 1024 }),
     zoomUsername: varchar("zoom_username", { length: 255 }),
     // NOTE: zoomPassword must be encrypted at the application level before saving

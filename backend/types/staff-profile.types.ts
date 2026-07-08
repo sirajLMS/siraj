@@ -5,10 +5,7 @@ import type { PageInfo } from "./pagination.types";
 export type StaffProfileEntity = typeof staffProfiles.$inferSelect;
 export type StaffProfileEntityInput = typeof staffProfiles.$inferInsert;
 
-export type StaffProfileCreateResult = Pick<
-  StaffProfileEntity,
-  "id" | "userId" | "status" | "phone" | "skypeId" | "createdAt"
->;
+export type StaffProfileCreateResult = Pick<StaffProfileEntity, "id" | "userId" | "status" | "phone" | "createdAt">;
 
 export interface ManagerDirectoryResult {
   readonly id?: string;
@@ -33,7 +30,6 @@ export interface ManagerDirectoryRow {
   readonly email: string;
   readonly avatarUrl: string | null;
   readonly phone: string | null;
-  readonly skypeId: string | null;
   readonly status: AccountStatus;
   readonly roleSlug: string | null;
   readonly roleName: string | null;
@@ -53,7 +49,6 @@ export interface OnboardingMetricsResult {
 
 export interface UpdateManagerProfileInput {
   phone?: string | null;
-  skypeId?: string | null;
   status?: AccountStatus | null;
 }
 

@@ -18,7 +18,6 @@ import { useState } from "react";
 import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { UserRole } from "@/shared/lib/enum";
 
 type ViewAsUserVariant = "icon" | "link" | "menuItem" | "button";
 
@@ -46,7 +45,7 @@ export function ViewAsUserButton({
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
 
-  const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
+  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
   const isSelf = currentUser?.id === targetUserId;
 
   if (!isSuperAdmin || isSelf || targetIsSuperAdmin || isImpersonating || isSimulatingGroup) {

@@ -279,6 +279,13 @@ const en: MessageSchema = {
         timezone: "Timezone",
         status: "Status",
       },
+      status: {
+        regular: "Regular",
+        on_trial: "On Trial",
+        on_leave: "On Leave",
+        suspended: "Suspended",
+        deactivated: "Deactivated",
+      },
       students: {
         empty: "No associated students found.",
         mobileListLabel: "Associated students list",

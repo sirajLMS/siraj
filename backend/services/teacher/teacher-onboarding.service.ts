@@ -25,7 +25,6 @@ export interface TeacherOnboardingInput {
   readonly gender?: "MALE" | "FEMALE" | null;
   readonly address?: string | null;
   readonly qualifications?: string | null;
-  readonly skypeId?: string | null;
   readonly zoomLink?: string | null;
   readonly zoomUsername?: string | null;
   readonly zoomPassword?: string | null;
@@ -74,7 +73,6 @@ export namespace TeacherOnboardingService {
         gender: input.gender ?? null,
         address: input.address ?? null,
         qualifications: input.qualifications ?? null,
-        skypeId: input.skypeId ?? null,
         zoomLink: input.zoomLink ?? null,
         zoomUsername: input.zoomUsername ?? null,
         zoomPassword: input.zoomPassword ?? null,

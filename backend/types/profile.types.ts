@@ -49,7 +49,6 @@ export type ParentOwnProfileUpdateInput = {
   readonly facebook?: string | null;
   readonly whatsapp?: string | null;
   readonly twitter?: string | null;
-  readonly skype?: string | null;
   readonly defaultZoomLink?: string | null;
 };
 
@@ -65,7 +64,6 @@ export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {
 
 export type StaffOwnProfileUpdateInput = {
   readonly phone?: string | null;
-  readonly skypeId?: string | null;
 };
 
 export type StaffAdminProfileUpdateInput = StaffOwnProfileUpdateInput & {

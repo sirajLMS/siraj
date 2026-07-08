@@ -32,5 +32,4 @@ export type SupportContactReturnType = {
   role: string | null;
   avatarUrl: string | null;
   phone: string | null;
-  skypeId: string | null;
 };

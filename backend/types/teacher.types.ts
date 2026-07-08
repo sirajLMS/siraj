@@ -126,7 +126,6 @@ export type TeacherProfileUpdateInputType = Partial<
     TeacherEntityInput,
     | "id"
     | "userId"
-    | "status"
     | "createdAt"
     | "updatedAt"
     | "nationality"
@@ -135,8 +134,10 @@ export type TeacherProfileUpdateInputType = Partial<
     | "gender"
     | "paymentMethod"
     | "timezone"
+    | "status"
   >
 > & {
+  readonly status?: AccountStatus | null;
   readonly gender?: Gender | null;
   readonly paymentMethod?: PaymentMethod | null;
   readonly timezone?: string | null;

@@ -71,7 +71,6 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     email: t.exposeString("email"),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     phone: t.exposeString("phone", { nullable: true }),
-    skypeId: t.exposeString("skypeId", { nullable: true }),
     status: t.expose("status", { type: AccountStatusPothosObject }),
     roleSlug: t.exposeString("roleSlug", { nullable: true }),
     roleName: t.exposeString("roleName", { nullable: true }),
@@ -184,7 +183,6 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       phone: t.string({ required: false }),
-      skypeId: t.string({ required: false }),
       status: t.field({ type: AccountStatusPothosObject, required: false }),
     }),
   });

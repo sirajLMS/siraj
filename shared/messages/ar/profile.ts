@@ -75,6 +75,13 @@ export const profile: ProfileLabels = {
       timezone: "المنطقة الزمنية",
       status: "الحالة",
     },
+    status: {
+      regular: "عادي",
+      on_trial: "فترة تجريبية",
+      on_leave: "في إجازة",
+      suspended: "موقوف",
+      deactivated: "مُلغى التفعيل",
+    },
     students: {
       empty: "لا يوجد طلاب مرتبطون حالياً.",
       mobileListLabel: "قائمة الطلاب المرتبطين",

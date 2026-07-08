@@ -326,7 +326,6 @@ export namespace ScheduleService {
           role: staffRow.roleName,
           avatarUrl: staffRow.avatarUrl,
           phone: staffRow.phone,
-          skypeId: staffRow.skypeId,
         };
       })(),
     ]);

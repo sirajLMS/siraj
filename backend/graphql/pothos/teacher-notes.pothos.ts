@@ -25,7 +25,6 @@ export const SupportContactPothosObject = SupportContactRef.implement({
     role: t.exposeString("role", { nullable: true }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     phone: t.exposeString("phone", { nullable: true }),
-    skypeId: t.exposeString("skypeId", { nullable: true }),
   }),
 });
 

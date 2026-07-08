@@ -42,7 +42,6 @@ export const ManagerOnboardingInputPothosObject = gqlSchemaBuilder
       email: t.string({ required: true }),
       password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
       phone: t.string({ directives: { constraint: { maxLength: 512 } } }),
-      skypeId: t.string({ directives: { constraint: { maxLength: 512 } } }),
       accountType: t.field({ type: ManagerAccountTypePothosEnum, required: true }),
     }),
   });

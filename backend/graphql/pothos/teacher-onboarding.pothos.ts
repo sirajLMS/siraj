@@ -49,7 +49,6 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         description: "Teacher qualifications",
         directives: { constraint: { maxLength: 2000 } },
       }),
-      skypeId: t.string({ description: "Teacher Skype ID", directives: { constraint: { maxLength: 512 } } }),
       zoomLink: t.string({ description: "Teacher Zoom meeting link", directives: { constraint: { maxLength: 2000 } } }),
       zoomUsername: t.string({ description: "Teacher Zoom username", directives: { constraint: { maxLength: 512 } } }),
       zoomPassword: t.string({

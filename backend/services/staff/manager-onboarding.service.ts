@@ -11,7 +11,6 @@ export interface ManagerOnboardingInput {
   readonly email: string;
   readonly password: string;
   readonly phone?: string | null;
-  readonly skypeId?: string | null;
   readonly accountType: "admin" | "manager";
 }
 
@@ -69,7 +68,6 @@ export namespace ManagerOnboardingService {
         {
           userId: user.id,
           phone: input.phone ?? null,
-          skypeId: input.skypeId ?? null,
           status: "ACTIVATED",
           createdAt: new Date(),
           updatedAt: new Date(),

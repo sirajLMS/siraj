@@ -28,8 +28,6 @@ import type { DBTransaction } from "../db.types";
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;
   readonly phoneIsSet?: boolean;
-  readonly skypeId?: string | null;
-  readonly skypeIdIsSet?: boolean;
   readonly status?: string | null;
   readonly statusIsSet?: boolean;
 }
@@ -58,7 +56,6 @@ export namespace StaffProfileRepository {
       .values({
         userId: input.userId,
         phone: input.phone ?? null,
-        skypeId: input.skypeId ?? null,
         status: input.status,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -75,7 +72,6 @@ export namespace StaffProfileRepository {
       userId: created.userId,
       status: created.status,
       phone: created.phone,
-      skypeId: created.skypeId,
       createdAt: created.createdAt,
     };
   }
@@ -87,7 +83,6 @@ export namespace StaffProfileRepository {
     email: users.email,
     avatarUrl: users.avatarUrl,
     phone: staffProfiles.phone,
-    skypeId: staffProfiles.skypeId,
     status: staffProfiles.status,
     roleSlug: permissionGroups.slug,
     roleName: permissionGroups.name,
@@ -291,9 +286,6 @@ export namespace StaffProfileRepository {
 
       if (input.phoneIsSet) {
         updateSet.phone = input.phone ?? null;
-      }
-      if (input.skypeIdIsSet) {
-        updateSet.skypeId = input.skypeId ?? null;
       }
       if (input.statusIsSet) {
         updateSet.status = input.status ?? "ACTIVATED";

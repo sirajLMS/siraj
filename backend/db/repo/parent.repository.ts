@@ -69,7 +69,6 @@ export namespace ParentRepository {
         facebook: input.facebook ?? null,
         whatsapp: input.whatsapp ?? null,
         twitter: input.twitter ?? null,
-        skype: input.skype ?? null,
         defaultZoomLink: input.defaultZoomLink ?? null,
         invoiceType: input.invoiceType ?? null,
         feeAmount: input.feeAmount ?? null,
@@ -267,7 +266,6 @@ export namespace ParentRepository {
     facebook: string | null;
     whatsapp: string | null;
     twitter: string | null;
-    skype: string | null;
     defaultZoomLink: string | null;
     invoiceType: string | null;
     feeAmount: string | null;
@@ -295,7 +293,6 @@ export namespace ParentRepository {
         facebook: parents.facebook,
         whatsapp: parents.whatsapp,
         twitter: parents.twitter,
-        skype: parents.skype,
         defaultZoomLink: parents.defaultZoomLink,
         invoiceType: parents.invoiceType,
         feeAmount: parents.feeAmount,
@@ -336,7 +333,6 @@ export namespace ParentRepository {
     if (input.facebook !== undefined) parentUpdate.facebook = input.facebook;
     if (input.whatsapp !== undefined) parentUpdate.whatsapp = input.whatsapp;
     if (input.twitter !== undefined) parentUpdate.twitter = input.twitter;
-    if (input.skype !== undefined) parentUpdate.skype = input.skype;
     if (input.defaultZoomLink !== undefined) parentUpdate.defaultZoomLink = input.defaultZoomLink;
     if (input.invoiceType !== undefined) parentUpdate.invoiceType = input.invoiceType;
     if (input.feeAmount !== undefined) parentUpdate.feeAmount = input.feeAmount;

@@ -1,13 +1,12 @@
 import { StaffProfileRepository } from "@/backend/db";
 import type { ManagerProfileUpdateInput } from "@/backend/db/repo/staff-profile.repository";
+import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type { ManagerDirectoryRow } from "@/backend/types";
-import { AppPermission, SystemPermissionGroupSlug } from "@/shared/lib";
 
 export interface UpdateManagerProfileInput {
   readonly phone?: string | null;
-  readonly skypeId?: string | null;
   readonly status?: string | null;
 }
 
@@ -15,7 +14,7 @@ export namespace ManagerProfileService {
   export async function updateOwnStaffProfile(
     actorUserId: string,
     targetStaffProfileId: string,
-    input: Pick<UpdateManagerProfileInput, "phone" | "skypeId">,
+    input: Pick<UpdateManagerProfileInput, "phone">,
     locale?: string
   ): Promise<ManagerDirectoryRow> {
     const t = await getBackendTranslations({ locale, namespace: "errors" });
@@ -28,8 +27,6 @@ export namespace ManagerProfileService {
     const repoInput: ManagerProfileUpdateInput = {
       phone: input.phone,
       phoneIsSet: input.phone !== undefined,
-      skypeId: input.skypeId,
-      skypeIdIsSet: input.skypeId !== undefined,
     };
 
     const updatedProfile = await StaffProfileRepository.updateManagerProfile(targetStaffProfileId, repoInput, locale);
@@ -81,8 +78,6 @@ export namespace ManagerProfileService {
     const repoInput: ManagerProfileUpdateInput = {
       phone: input.phone,
       phoneIsSet: input.phone !== undefined,
-      skypeId: input.skypeId,
-      skypeIdIsSet: input.skypeId !== undefined,
       status: input.status,
       statusIsSet: input.status !== undefined,
     };

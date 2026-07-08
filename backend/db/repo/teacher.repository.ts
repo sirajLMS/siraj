@@ -47,7 +47,6 @@ export namespace TeacherRepository {
         gender: input.gender ?? null,
         address: input.address ?? null,
         qualifications: input.qualifications ?? null,
-        skypeId: input.skypeId ?? null,
         zoomLink: input.zoomLink ?? null,
         zoomUsername: input.zoomUsername ?? null,
         zoomPassword: input.zoomPassword ?? null,
@@ -193,7 +192,6 @@ export namespace TeacherRepository {
     gender: teachers.gender,
     address: teachers.address,
     qualifications: teachers.qualifications,
-    skypeId: teachers.skypeId,
     zoomLink: teachers.zoomLink,
     zoomUsername: teachers.zoomUsername,
     timezone: teachers.timezone,
@@ -230,7 +228,6 @@ export namespace TeacherRepository {
     gender: Gender | null;
     address: string | null;
     qualifications: string | null;
-    skypeId: string | null;
     zoomLink: string | null;
     zoomUsername: string | null;
     timezone: string;
@@ -251,7 +248,6 @@ export namespace TeacherRepository {
     gender: teacher.gender,
     address: teacher.address,
     qualifications: teacher.qualifications,
-    skypeId: teacher.skypeId,
     zoomLink: teacher.zoomLink,
     zoomUsername: teacher.zoomUsername,
     timezone: teacher.timezone,

@@ -1,7 +1,7 @@
 import { expect } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
+import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { academyAdmins, parents, teachers } from "@/shared/demo-users";
-import { SystemPermissionGroupSlug } from "@/shared/lib/enum";
 
 const PWD = "12345678";
 

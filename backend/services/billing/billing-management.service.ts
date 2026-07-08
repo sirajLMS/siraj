@@ -10,7 +10,7 @@ import type {
   MarkInvoicePaidResult,
   SendPaymentReminderResult,
 } from "@/backend/types";
-import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/shared/lib";
+import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/backend/enum";
 
 function deriveIdempotencyKey(input: {
   parentId: string;

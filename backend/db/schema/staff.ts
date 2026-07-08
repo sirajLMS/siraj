@@ -11,7 +11,6 @@ export const staffProfiles = pgTable(
       .unique()
       .references(() => users.id, { onDelete: "restrict" }),
     phone: varchar("phone", { length: 50 }),
-    skypeId: varchar("skype_id", { length: 255 }),
     status: accountStatusEnum("status").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),

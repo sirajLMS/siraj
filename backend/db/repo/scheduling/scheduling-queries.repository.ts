@@ -14,6 +14,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import type {
@@ -21,7 +22,6 @@ import type {
   AdminDashboardScheduleResult,
   DailyScheduleResult,
 } from "@/backend/types/scheduling.types";
-import { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib";
 import {
   computeDailyScheduleMetricsFromRows,
   matchesDashboardMetricFilter,

@@ -18,7 +18,6 @@ export const parents = pgTable(
     facebook: varchar("facebook", { length: 512 }),
     whatsapp: varchar("whatsapp", { length: 50 }),
     twitter: varchar("twitter", { length: 255 }),
-    skype: varchar("skype", { length: 255 }),
     defaultZoomLink: varchar("default_zoom_link", { length: 1024 }),
     invoiceType: invoiceTypeEnum("invoice_type"),
     feeAmount: numeric("fee_amount", { precision: 12, scale: 2 }),

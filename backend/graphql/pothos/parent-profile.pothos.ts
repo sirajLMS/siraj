@@ -22,7 +22,6 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     facebook: t.exposeString("facebook", { nullable: true }),
     whatsapp: t.exposeString("whatsapp", { nullable: true }),
     twitter: t.exposeString("twitter", { nullable: true }),
-    skype: t.exposeString("skype", { nullable: true }),
     defaultZoomLink: t.exposeString("defaultZoomLink", { nullable: true }),
     invoiceType: t.exposeString("invoiceType", { nullable: true }),
     feeAmount: t.exposeString("feeAmount", { nullable: true }),

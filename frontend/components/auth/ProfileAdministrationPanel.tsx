@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { SectionPanel } from "@/frontend/components/ui";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { UserRole } from "@/shared/lib/enum";
 
 interface ProfileAdministrationPanelProps {
   readonly profileUserId: string;
@@ -21,7 +20,7 @@ export function ProfileAdministrationPanel({
 }: Readonly<ProfileAdministrationPanelProps>) {
   const t = useTranslations("auth.impersonation");
   const currentUser = useUserStore(state => state.user);
-  const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
+  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
   const isSelf = currentUser?.id === profileUserId;
 
   if (!isSuperAdmin || isSelf || profileIsSuperAdmin) {

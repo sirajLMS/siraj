@@ -1,4 +1,5 @@
 import { SchedulingRepository, StudentRepository, TeacherRepository } from "@/backend/db";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
@@ -7,7 +8,6 @@ import type {
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib";
 
 export namespace TeacherPortalService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {

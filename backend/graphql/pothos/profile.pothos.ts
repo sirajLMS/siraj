@@ -132,7 +132,6 @@ export const ParentOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
       facebook: t.string({ required: false }),
       whatsapp: t.string({ required: false }),
       twitter: t.string({ required: false }),
-      skype: t.string({ required: false }),
       defaultZoomLink: t.string({ required: false }),
     }),
   });
@@ -147,7 +146,6 @@ export const ParentAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
       facebook: t.string({ required: false }),
       whatsapp: t.string({ required: false }),
       twitter: t.string({ required: false }),
-      skype: t.string({ required: false }),
       defaultZoomLink: t.string({ required: false }),
       invoiceType: t.string({ required: false }),
       feeAmount: t.string({ required: false }),
@@ -162,7 +160,6 @@ export const StaffOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       phone: t.string({ required: false }),
-      skypeId: t.string({ required: false }),
     }),
   });
 
@@ -171,7 +168,6 @@ export const StaffAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       phone: t.string({ required: false }),
-      skypeId: t.string({ required: false }),
       status: t.string({ required: false }),
     }),
   });

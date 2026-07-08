@@ -4,9 +4,9 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { CalendarGrid } from "@/frontend/views/dashboard/students/history/components/CalendarGrid";
 import type { ClassSession } from "@/frontend/views/dashboard/students/history/types";
-import { AttendanceStatus } from "@/shared/lib/enum";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {
@@ -36,7 +36,7 @@ describe("CalendarGrid", () => {
       title: "Math Class",
       time: "10:00",
       duration: 60,
-      status: AttendanceStatus.PRESENT,
+      status: AttendanceStatus.Present,
       instructor: "Teacher John",
       timeSlot: "morning",
       room: "Room A",
@@ -61,7 +61,7 @@ describe("CalendarGrid", () => {
       title: "Math Class",
       time: "10:00",
       duration: 60,
-      status: AttendanceStatus.PRESENT,
+      status: AttendanceStatus.Present,
       instructor: "Teacher John",
       timeSlot: "morning",
       room: "Room A",

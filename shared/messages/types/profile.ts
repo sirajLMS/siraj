@@ -73,6 +73,13 @@ export interface ProfileLabels {
       readonly timezone: string;
       readonly status: string;
     };
+    readonly status: {
+      readonly regular: string;
+      readonly on_trial: string;
+      readonly on_leave: string;
+      readonly suspended: string;
+      readonly deactivated: string;
+    };
     readonly students: {
       readonly empty: string;
       readonly mobileListLabel: string;
