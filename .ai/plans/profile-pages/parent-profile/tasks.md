@@ -8,165 +8,164 @@
 Follow [LAYER_PIPELINE.md](../LAYER_PIPELINE.md). Complete each layer before the next.
 
 ## Layer 1 — Types
-- [ ] Read `backend/types/AGENTS.md`
-- [ ] Add `AssociatedStudentReturnType` (or extend parent types) for students grid
-- [ ] Extend `UnifiedProfileReturnType` with `associatedStudents` array
-- [ ] Verify `ParentAdminProfileUpdateInput` covers all billing fields in spec.md
-- [ ] `bun tsgo` on type files
+- [x] Read `backend/types/AGENTS.md`
+- [x] Add `AssociatedStudentReturnType` (or extend parent types) for students grid
+- [x] Extend `UnifiedProfileReturnType` with `associatedStudents` array
+- [x] Verify `ParentAdminProfileUpdateInput` covers all billing fields in spec.md
+- [x] `bun tsgo` on type files
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 2 — Schema / Migration / Seed
-- [ ] N/A — students relation exists
+- [x] N/A — students relation exists
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 3 — Repository
-- [ ] Read `backend/db/repo/AGENTS.md`
-- [ ] Add or extend parent repo method for associated students by parentId
-- [ ] Data access only — no permission checks in repo
+- [x] Read `backend/db/repo/AGENTS.md`
+- [x] Add or extend parent repo method for associated students by parentId
+- [x] Data access only — no permission checks in repo
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 4 — Services
-- [ ] Read `backend/services/AGENTS.md`
-- [ ] Load associated students in `ProfileService.getProfileByUserId`
-- [ ] Verify `updateOwnProfile.parent` and `updateUserProfile.parent` (full admin input)
-- [ ] Localized errors via `getBackendTranslations`
+- [x] Read `backend/services/AGENTS.md`
+- [x] Load associated students in `ProfileService.getProfileByUserId`
+- [x] Verify `updateOwnProfile.parent` and `updateUserProfile.parent` (full admin input)
+- [x] Localized errors via `getBackendTranslations`
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 5 — Pothos
-- [ ] Read `backend/graphql/AGENTS.md`
-- [ ] Add `associatedStudents` nested type using types from `@/backend/types`
-- [ ] No local type definitions in pothos files
-- [ ] Expose all parent admin fields; every object has `id`
+- [x] Read `backend/graphql/AGENTS.md`
+- [x] Add `associatedStudents` nested type using types from `@/backend/types`
+- [x] No local type definitions in pothos files
+- [x] Expose all parent admin fields; every object has `id`
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 6 — GraphQL ops
-- [ ] Resolvers delegate to ProfileService only
+- [x] Resolvers delegate to ProfileService only
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 7 — Codegen (schema)
-- [ ] `bun run generate:gqlSchema` → `bun codegen`
+- [x] `bun run generate:gqlSchema` → `bun codegen`
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 8 — Documents
-- [ ] Read `frontend/graphql/sharedDocuments/AGENTS.md`
-- [ ] Add `associatedStudents { id ... }` to `profileByUserId` document
-- [ ] Add admin billing fields to mutation selection sets
+- [x] Read `frontend/graphql/sharedDocuments/AGENTS.md`
+- [x] Add `associatedStudents { id ... }` to `profileByUserId` document
+- [x] Add admin billing fields to mutation selection sets
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 9 — Codegen (operations)
-- [ ] `bun codegen`
+- [x] `bun codegen`
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 10 — Frontend types
-- [ ] `type ParentProfileData = NonNullable<Operations.ProfileByUserIdQuery['profileByUserId']>` if needed
+- [x] `type ParentProfileData = NonNullable<Operations.ProfileByUserIdQuery['profileByUserId']>` if needed
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 11 — i18n
-- [ ] `profile.parent.sections.*` (types, en, ar)
+- [x] `profile.parent.sections.*` (types, en, ar)
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 12 — UI
-- [ ] Read `frontend/views/AGENTS.md`
-- [ ] Depends on [shared-shell](../shared-shell/)
-- [ ] Create `ParentProfileView.tsx`, `ParentProfileEditForm.tsx`, sections
-- [ ] Integrate AssociatedStudentsGrid layout — pass `associatedStudents` from `profileByUserId`
-- [ ] Admin billing edit for scope=other — submit `ParentAdminProfileUpdateInput`
-- [ ] Wire core fields in edit form
-- [ ] Stitch loading/empty/error states
-- [ ] Pass `associatedStudents` from `profileByUserId` into grid — grid must not fetch its own data
+- [x] Read `frontend/views/AGENTS.md`
+- [x] Depends on [shared-shell](../shared-shell/)
+- [x] Create `ParentProfileView.tsx`, `ParentProfileEditForm.tsx`, sections
+- [x] Integrate AssociatedStudentsGrid layout — pass `associatedStudents` from `profileByUserId`
+- [x] Admin billing edit for scope=other — submit `ParentAdminProfileUpdateInput`
+- [x] Wire core fields in edit form
+- [x] Stitch loading/empty/error states
+- [x] Pass `associatedStudents` from `profileByUserId` into grid — grid must not fetch its own data
 
 ### VERIFY — this layer
-- [ ] DATA_POLICY: GraphQL endpoints only — no backend service/repo imports in UI
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] DATA_POLICY: GraphQL endpoints only — no backend service/repo imports in UI
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 13 — Tests
-- [ ] Service test: parent admin update with billing fields
-- [ ] GraphQL test: associated students on profile query
+- [x] Service test: parent admin update with billing fields
+- [x] GraphQL test: associated students on profile query
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan
 
 ## Layer 14 — Verification
-- [ ] tsgo, biome, lint per file; Storybook ParentProfileView
+- [x] tsgo, biome, lint per file; Storybook ParentProfileView
 
 ### VERIFY — this layer
-- [ ] `sub-loop.ts --lifecycle lint` on every file changed this layer
-- [ ] `bun tsgo` passes
-- [ ] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
-- [ ] Auto-fix violations; re-run until clean — do not proceed to next layer
-- [ ] Do NOT run codescene or sonar-scan
-
+- [x] `sub-loop.ts --lifecycle lint` on every file changed this layer
+- [x] `bun tsgo` passes
+- [x] Layer instruction file rules satisfied (see LAYER_PIPELINE.md)
+- [x] Auto-fix violations; re-run until clean — do not proceed to next layer
+- [x] Do NOT run codescene or sonar-scan

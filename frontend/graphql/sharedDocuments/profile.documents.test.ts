@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { profileByUserIdQueryDocument } from "./profile.documents";
+import { profileByUserIdQueryDocument, updateUserProfileMutationDocument } from "./profile.documents";
 
 describe("profileByUserIdQueryDocument", () => {
   test("requests assignedStudents fields for teacher admin tab", () => {
@@ -41,5 +41,17 @@ describe("profileByUserIdQueryDocument", () => {
     expect(querySource).toContain("avgEngagementScore");
     expect(querySource).toContain("nationalId");
     expect(querySource).toContain("qualifications");
+  });
+
+  test("updateUserProfile mutation returns full parent admin billing fields", () => {
+    const mutationSource = updateUserProfileMutationDocument.loc?.source.body ?? "";
+    expect(mutationSource).toContain("parentAdminProfile");
+    expect(mutationSource).toContain("invoiceType");
+    expect(mutationSource).toContain("feeAmount");
+    expect(mutationSource).toContain("paymentMethod");
+    expect(mutationSource).toContain("currency");
+    expect(mutationSource).toContain("timezone");
+    expect(mutationSource).toContain("status");
+    expect(mutationSource).toContain("avatarUrl");
   });
 });

@@ -81,21 +81,32 @@ export function ParentProfileEditForm({
   return (
     <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
       <Stack spacing={3}>
-        <AccountSection
-          mode="edit"
-          parentData={{ name: parentData.name ?? null, email: parentData.email ?? null }}
-          avatarUrl={avatarUrl}
-          register={form.register}
-        />
-        <ContactSection mode="edit" register={form.register} />
-        <SocialSection mode="edit" register={form.register} />
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "repeat(2, minmax(0, 1fr))",
+            },
+          }}
+        >
+          <AccountSection
+            mode="edit"
+            parentData={{ name: parentData.name ?? null, email: parentData.email ?? null }}
+            avatarUrl={avatarUrl}
+            register={form.register}
+          />
+          <ContactSection mode="edit" register={form.register} />
+          <SocialSection mode="edit" register={form.register} />
 
-        {isAdminScope ? (
-          <>
-            <IdentitySection mode="edit" register={form.register} />
-            <BillingSection mode="edit" register={form.register} />
-          </>
-        ) : null}
+          {isAdminScope ? (
+            <>
+              <IdentitySection mode="edit" register={form.register} />
+              <BillingSection mode="edit" register={form.register} />
+            </>
+          ) : null}
+        </Box>
 
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {isSaving ? tc("shell.loading") : tc("actions.save")}

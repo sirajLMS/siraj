@@ -1,10 +1,9 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Alert } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ProfileMode, ProfileScope } from "@/backend/types/profile.types";
-import { ErrorState, LoadingState } from "@/frontend/components/ui";
+import { ErrorState } from "@/frontend/components/ui";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   profileByUserIdQueryDocument,
@@ -15,6 +14,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
 import { type ParentAdminEditFormData, ParentProfileEditForm } from "./ParentProfileEditForm";
 import { ParentProfileView } from "./ParentProfileView";
+import { ParentProfileLoadingSkeleton } from "./sections/ParentProfileLoadingSkeleton";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;
@@ -106,7 +106,7 @@ export function ParentProfileContainer({
   };
 
   if (loading && !profile) {
-    return <LoadingState />;
+    return <ParentProfileLoadingSkeleton />;
   }
 
   if (error && !profile) {
@@ -123,12 +123,12 @@ export function ParentProfileContainer({
   }
 
   if (!profile) {
-    return <Alert severity="warning">{tc("errors.notFound")}</Alert>;
+    return <ErrorState embedded message={tc("errors.notFound")} />;
   }
 
   const parentData = buildEditSource(scope, profile);
   if (!parentData) {
-    return <Alert severity="warning">{tc("errors.notFound")}</Alert>;
+    return <ErrorState embedded message={tc("errors.notFound")} />;
   }
 
   const avatarUrl = profile.avatarUrl ?? ("avatarUrl" in parentData ? parentData.avatarUrl : null);

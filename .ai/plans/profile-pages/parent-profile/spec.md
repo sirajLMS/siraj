@@ -62,15 +62,15 @@ Full parent profile page for own view and admin view: account, identity, billing
 
 ## Acceptance criteria
 
-- [ ] Own view/edit covers contact + social + zoom fields
-- [ ] Admin view shows billing + identity sections
-- [ ] Admin edit submits `ParentAdminProfileUpdateInput` (not own-only fields)
-- [ ] Associated students grid matches Stitch (name, grade, status)
-- [ ] Admin-only banner visible on admin scope
-- [ ] Mobile layout matches animated Stitch reference
+- [x] Own view/edit covers contact + social + zoom fields
+- [x] Admin view shows billing + identity sections
+- [x] Admin edit submits `ParentAdminProfileUpdateInput` (not own-only fields)
+- [x] Associated students grid matches Stitch (name, grade, status)
+- [x] Admin-only banner visible on admin scope
+- [x] Mobile layout matches animated Stitch reference
 
 
-- [ ] All display/edit data via GraphQL only ([DATA_POLICY.md](../DATA_POLICY.md))
+- [x] All display/edit data via GraphQL only ([DATA_POLICY.md](../DATA_POLICY.md))
 ## Gaps
 
 - Parent status edit uses separate deactivate flow — view only on profile

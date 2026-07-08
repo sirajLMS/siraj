@@ -241,6 +241,8 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         userId
         name
         email
+        avatarUrl
+        status
         phone
         nationality
         address
@@ -253,6 +255,8 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         paymentMethod
         currency
         timezone
+        createdAt
+        updatedAt
       }
       staffProfile {
         id
