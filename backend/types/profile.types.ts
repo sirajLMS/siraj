@@ -1,6 +1,10 @@
 import type { AppPermission } from "@/shared/lib/enum";
-import type { ParentOwnProfileReturnType, ParentProfileResult } from "./parent.types";
-import type { ManagerDirectoryRow } from "./staff-profile.types";
+import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType, ParentProfileResult } from "./parent.types";
+import type {
+  ManagerDirectoryRow,
+  StaffPermissionGroupReturnType,
+  StaffPermissionOverrideReturnType,
+} from "./staff-profile.types";
 import type {
   TeacherAssignedStudentsResult,
   TeacherBankingSummaryReturnType,
@@ -64,6 +68,10 @@ export type StaffOwnProfileUpdateInput = {
   readonly skypeId?: string | null;
 };
 
+export type StaffAdminProfileUpdateInput = StaffOwnProfileUpdateInput & {
+  readonly status?: string | null;
+};
+
 export type UpdateOwnProfileInput = {
   readonly core?: CoreUserProfileFields;
   readonly teacher?: TeacherOwnProfileUpdateInput;
@@ -75,9 +83,7 @@ export type UpdateUserProfileInput = {
   readonly core?: CoreUserProfileFields;
   readonly teacher?: TeacherProfileUpdateInputType;
   readonly parent?: ParentAdminProfileUpdateInput;
-  readonly staff?: StaffOwnProfileUpdateInput & {
-    readonly status?: string | null;
-  };
+  readonly staff?: StaffAdminProfileUpdateInput;
 };
 
 export type UnifiedProfileReturnType = {
@@ -95,7 +101,10 @@ export type UnifiedProfileReturnType = {
   readonly teacherAdminProfile: TeacherProfileReturnType | null;
   readonly parentOwnProfile: ParentOwnProfileReturnType | null;
   readonly parentAdminProfile: ParentProfileResult | null;
+  readonly associatedStudents: ParentAssignedStudentsResult | null;
   readonly staffProfile: ManagerDirectoryRow | null;
+  readonly staffPermissionGroups: StaffPermissionGroupReturnType[] | null;
+  readonly staffPermissionOverrides: StaffPermissionOverrideReturnType[] | null;
   readonly bankingSummary: TeacherBankingSummaryReturnType | null;
   readonly assignedStudents: TeacherAssignedStudentsResult | null;
 };

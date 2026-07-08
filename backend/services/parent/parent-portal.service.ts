@@ -31,8 +31,12 @@ export namespace ParentPortalService {
       rows: rows.map(row => ({
         id: row.id,
         name: row.name,
+        studentAvatarUrl: row.studentAvatarUrl,
         status: row.status,
+        primaryTeacherId: row.primaryTeacherId,
+        teacherUserId: row.teacherUserId,
         teacherName: row.teacherName,
+        teacherAvatarUrl: row.teacherAvatarUrl,
         hoursPerWeek: row.hoursPerWeek,
         classesRemaining: row.classesRemaining,
         classesTotal: row.classesTotal,

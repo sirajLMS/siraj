@@ -12,6 +12,7 @@ export * from "./group-class.documents";
 export * from "./learning-resource.documents";
 export { createManagerMutationDocument } from "./manager-onboarding.documents";
 export * from "./notification-alerts.documents";
+export * from "./notification-preferences.documents";
 export * from "./parent-billing-history.documents";
 export * from "./parent-dashboard.documents";
 export * from "./parent-directory.documents";

@@ -1,26 +1,20 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import type { ProfileMode, ProfileScope } from "@/backend/types/profile.types";
-import { PrimaryPageAction } from "@/frontend/components/ui";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
+  updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
-
-const staffEditSchema = z.object({
-  phone: z.string().optional(),
-  skypeId: z.string().optional(),
-});
-
-type StaffEditFormData = z.infer<typeof staffEditSchema>;
+import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
+import { StaffProfileEditForm } from "./StaffProfileEditForm";
+import { StaffProfileView } from "./StaffProfileView";
+import { StaffProfileLoadingSkeleton } from "./sections/StaffProfileLoadingSkeleton";
+import type { StaffAdminEditFormData, StaffOwnEditFormData } from "./staffProfileFormTypes";
 
 type StaffProfileContainerProps = {
   readonly scope: ProfileScope;
@@ -29,133 +23,123 @@ type StaffProfileContainerProps = {
   readonly activeTab?: string;
 };
 
+function buildCoreInput(formData: StaffOwnEditFormData | StaffAdminEditFormData) {
+  return {
+    name: formData.name.trim(),
+    email: formData.email.trim(),
+  };
+}
+
+function buildOwnStaffInput(formData: StaffOwnEditFormData | StaffAdminEditFormData) {
+  return {
+    phone: formData.phone || null,
+    skypeId: formData.skypeId || null,
+  };
+}
+
+function buildAdminStaffInput(formData: StaffAdminEditFormData) {
+  return {
+    ...buildOwnStaffInput(formData),
+    status: formData.status ?? null,
+  };
+}
+
 export function StaffProfileContainer({
   scope,
   mode,
   targetUserId,
   activeTab: _activeTab = "profile",
 }: StaffProfileContainerProps) {
-  const t = useTranslations("profile.staff");
   const tc = useTranslations("profile");
+  const isAdminScope = scope === "other";
+  const activeTab = _activeTab;
   const router = useRouter();
 
-  const { data, loading, error } = useQuery(profileByUserIdQueryDocument, {
+  const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
+    fetchPolicy: "cache-and-network",
   });
 
-  const [updateOwnProfile, { loading: saving }] = useMutation(updateOwnProfileMutationDocument);
+  const [updateOwnProfile, { loading: savingOwn }] = useMutation(updateOwnProfileMutationDocument);
+  const [updateUserProfile, { loading: savingOther }] = useMutation(updateUserProfileMutationDocument);
+  const isSaving = savingOwn || savingOther;
+  const profile = data?.profileByUserId;
 
-  const staffData = data?.profileByUserId?.staffProfile;
+  if (activeTab === "notifications" && scope === "own") {
+    return <NotificationPreferencesTab isActive />;
+  }
 
-  const { register, handleSubmit, reset } = useForm<StaffEditFormData>({
-    resolver: zodResolver(staffEditSchema),
-    defaultValues: { phone: "", skypeId: "" },
-  });
-
-  useEffect(() => {
-    if (staffData) {
-      reset({
-        phone: staffData.phone ?? "",
-        skypeId: staffData.skypeId ?? "",
-      });
-    }
-  }, [staffData, reset]);
-
-  const onSubmit = async (formData: StaffEditFormData) => {
-    await updateOwnProfile({
-      variables: {
-        input: {
-          staff: {
-            phone: formData.phone || null,
-            skypeId: formData.skypeId || null,
-          },
-        },
-      },
-    });
-    router.push("/profile");
-  };
-
-  if (loading) {
+  if (activeTab !== "profile") {
     return null;
   }
 
-  if (error) {
+  const onSubmit = async (formData: StaffAdminEditFormData) => {
+    const coreInput = buildCoreInput(formData);
+    const staffInput = isAdminScope ? buildAdminStaffInput(formData) : buildOwnStaffInput(formData);
+
+    if (scope === "own") {
+      await updateOwnProfile({ variables: { input: { core: coreInput, staff: staffInput } } });
+      router.push("/profile");
+      return;
+    }
+
+    await updateUserProfile({
+      variables: { userId: targetUserId, input: { core: coreInput, staff: staffInput } },
+    });
+    router.push(`/users/${targetUserId}/profile`);
+  };
+
+  if (loading && !profile) {
+    return <StaffProfileLoadingSkeleton />;
+  }
+
+  if (error && !profile) {
     return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
+      <Alert
+        severity="error"
+        action={
+          <Button
+            color="inherit"
+            size="small"
+            onClick={() => {
+              void refetch();
+            }}
+          >
+            {tc("actions.retry")}
+          </Button>
+        }
+      >
         {tc("errors.failedToLoad")}
-      </Typography>
+      </Alert>
     );
   }
 
-  if (!staffData) {
-    return null;
+  if (!profile?.staffProfile) {
+    return <Alert severity="warning">{tc("errors.notFound")}</Alert>;
   }
+
+  const staffData = profile.staffProfile;
+  const avatarUrl = profile.avatarUrl ?? staffData.avatarUrl;
 
   if (mode === "view") {
     return (
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
-            <Stack spacing={1}>
-              <Typography sx={{ typography: "bodyMd" }}>{staffData.name}</Typography>
-              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                {staffData.email}
-              </Typography>
-              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                {staffData.phone ?? tc("notSet")}
-              </Typography>
-              <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                {staffData.roleName ?? staffData.roleSlug ?? tc("notSet")}
-              </Typography>
-            </Stack>
-          </Paper>
-        </Grid>
-      </Grid>
-    );
-  }
-
-  if (scope !== "own") {
-    return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-        {tc("adminEditHint")}
-      </Typography>
+      <StaffProfileView
+        staffData={staffData}
+        avatarUrl={avatarUrl}
+        isAdminScope={isAdminScope}
+        permissionGroups={profile.staffPermissionGroups}
+        permissionOverrides={profile.staffPermissionOverrides}
+      />
     );
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={2} sx={{ maxWidth: 480 }}>
-        <Box>
-          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.phone")}</Typography>
-          <Box
-            component="input"
-            {...register("phone")}
-            sx={theme => ({
-              width: "100%",
-              p: 1.5,
-              borderRadius: 1,
-              border: `1px solid ${theme.palette.divider}`,
-            })}
-          />
-        </Box>
-        <Box>
-          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t("fields.skypeId")}</Typography>
-          <Box
-            component="input"
-            {...register("skypeId")}
-            sx={theme => ({
-              width: "100%",
-              p: 1.5,
-              borderRadius: 1,
-              border: `1px solid ${theme.palette.divider}`,
-            })}
-          />
-        </Box>
-        <PrimaryPageAction type="submit" disabled={saving}>
-          {tc("actions.save")}
-        </PrimaryPageAction>
-      </Stack>
-    </Box>
+    <StaffProfileEditForm
+      staffData={staffData}
+      avatarUrl={avatarUrl}
+      isAdminScope={isAdminScope}
+      isSaving={isSaving}
+      onSubmit={onSubmit}
+    />
   );
 }

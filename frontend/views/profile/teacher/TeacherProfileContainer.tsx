@@ -14,6 +14,7 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
+import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
 import { TeacherBankingTab } from "./banking/TeacherBankingTab";
 import { AssignedStudentsTab } from "./students/AssignedStudentsTab";
 import { type TeacherOwnEditFormData, TeacherProfileEditForm } from "./TeacherProfileEditForm";
@@ -81,6 +82,10 @@ export function TeacherProfileContainer({
     await updateUserProfile({ variables: { userId: targetUserId, input: { teacher: teacherInput } } });
     router.push(`/users/${targetUserId}/profile`);
   };
+
+  if (activeTab === "notifications" && scope === "own") {
+    return <NotificationPreferencesTab isActive />;
+  }
 
   if (activeTab === "banking" && scope === "other") {
     return <TeacherBankingTab targetUserId={targetUserId} mode={mode} />;

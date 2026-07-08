@@ -11,8 +11,12 @@ export const ParentAssignedStudentPothosObject = ParentAssignedStudentRef.implem
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
+    studentAvatarUrl: t.exposeString("studentAvatarUrl", { nullable: true }),
     status: t.exposeString("status"),
+    primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
+    teacherUserId: t.exposeString("teacherUserId", { nullable: true }),
     teacherName: t.exposeString("teacherName", { nullable: true }),
+    teacherAvatarUrl: t.exposeString("teacherAvatarUrl", { nullable: true }),
     hoursPerWeek: t.exposeString("hoursPerWeek"),
     classesRemaining: t.exposeInt("classesRemaining"),
     classesTotal: t.exposeInt("classesTotal"),

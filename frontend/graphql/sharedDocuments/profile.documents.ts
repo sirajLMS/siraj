@@ -81,6 +81,23 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         createdAt
         updatedAt
       }
+      associatedStudents {
+        id
+        totalCount
+        rows {
+          id
+          name
+          studentAvatarUrl
+          status
+          primaryTeacherId
+          teacherUserId
+          teacherName
+          teacherAvatarUrl
+          hoursPerWeek
+          classesRemaining
+          classesTotal
+        }
+      }
       staffProfile {
         id
         staffProfileId
@@ -92,6 +109,20 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         status
         roleSlug
         roleName
+      }
+      staffPermissionGroups {
+        id
+        name
+        slug
+        description
+      }
+      staffPermissionOverrides {
+        id
+        permissionId
+        permissionKey
+        resource
+        action
+        state
       }
       bankingSummary {
         id

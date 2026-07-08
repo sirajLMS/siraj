@@ -409,9 +409,12 @@ export namespace ParentRepository {
   export type AssociatedStudentRow = {
     id: string;
     name: string;
+    studentAvatarUrl: string | null;
     status: string;
     primaryTeacherId: string | null;
+    teacherUserId: string | null;
     teacherName: string | null;
+    teacherAvatarUrl: string | null;
     hoursPerWeek: string;
     classesRemaining: number;
     classesTotal: number;
@@ -426,9 +429,12 @@ export namespace ParentRepository {
       .select({
         id: students.id,
         name: students.name,
+        studentAvatarUrl: students.avatarUrl,
         status: students.status,
         primaryTeacherId: students.primaryTeacherId,
+        teacherUserId: teachers.userId,
         teacherName: users.name,
+        teacherAvatarUrl: users.avatarUrl,
         hoursPerWeek: students.hoursPerWeek,
         classesRemaining: students.classesRemaining,
         classesTotal: students.classesTotal,
@@ -445,9 +451,12 @@ export namespace ParentRepository {
   const mapAssociatedStudentRow = (r: {
     id: string;
     name: string;
+    studentAvatarUrl: string | null;
     status: string;
     primaryTeacherId: string | null;
+    teacherUserId: string | null;
     teacherName: string | null;
+    teacherAvatarUrl: string | null;
     hoursPerWeek: string;
     classesRemaining: number;
     classesTotal: number;
@@ -458,9 +467,12 @@ export namespace ParentRepository {
   }): AssociatedStudentRow => ({
     id: r.id,
     name: r.name,
+    studentAvatarUrl: r.studentAvatarUrl,
     status: r.status,
     primaryTeacherId: r.primaryTeacherId,
+    teacherUserId: r.teacherUserId,
     teacherName: r.teacherName ?? null,
+    teacherAvatarUrl: r.teacherAvatarUrl,
     hoursPerWeek: r.hoursPerWeek,
     classesRemaining: r.classesRemaining,
     classesTotal: r.classesTotal,

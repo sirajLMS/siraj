@@ -1521,6 +1521,7 @@ export type Mutation = {
   updateDirectoryPermissions: Maybe<FileOperationResult>;
   /** Updates a manager's profile fields. */
   updateManagerProfile: Maybe<ManagerDirectoryRow>;
+  updateNotificationPreferences: Maybe<Array<NotificationPreference>>;
   updateOwnProfile: Maybe<UnifiedProfile>;
   updatePermissionGroup: Maybe<PermissionGroup>;
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
@@ -1940,6 +1941,11 @@ export type MutationUpdateManagerProfileArgs = {
 };
 
 
+export type MutationUpdateNotificationPreferencesArgs = {
+  input: Array<NotificationPreferenceInput>;
+};
+
+
 export type MutationUpdateOwnProfileArgs = {
   input: UpdateOwnProfileInput;
 };
@@ -2007,6 +2013,38 @@ export type NotificationAlertsResult = {
   id: Maybe<Scalars['String']['output']>;
   totalCount: Maybe<Scalars['Int']['output']>;
   unreadCount: Maybe<Scalars['Int']['output']>;
+};
+
+export enum NotificationChannel {
+  Email = 'EMAIL',
+  OnApp = 'ON_APP',
+  Push = 'PUSH',
+  Sms = 'SMS'
+}
+
+export enum NotificationEventType {
+  BankingDetailsChanged = 'BANKING_DETAILS_CHANGED',
+  ClassReminder = 'CLASS_REMINDER',
+  ComplaintResponse = 'COMPLAINT_RESPONSE',
+  InvoiceGenerated = 'INVOICE_GENERATED',
+  NewComplaint = 'NEW_COMPLAINT',
+  NewSuggestion = 'NEW_SUGGESTION',
+  SuggestionAcknowledged = 'SUGGESTION_ACKNOWLEDGED',
+  SuggestionDuplicateMarked = 'SUGGESTION_DUPLICATE_MARKED'
+}
+
+export type NotificationPreference = {
+  __typename?: 'NotificationPreference';
+  channel: Maybe<NotificationChannel>;
+  enabled: Maybe<Scalars['Boolean']['output']>;
+  eventType: Maybe<NotificationEventType>;
+  id: Maybe<Scalars['String']['output']>;
+};
+
+export type NotificationPreferenceInput = {
+  channel: NotificationChannel;
+  enabled: Scalars['Boolean']['input'];
+  eventType: NotificationEventType;
 };
 
 /** Summary metrics for the staff onboarding process */
@@ -2082,8 +2120,12 @@ export type ParentAssignedStudent = {
   hoursPerWeek: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  primaryTeacherId: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
+  studentAvatarUrl: Maybe<Scalars['String']['output']>;
+  teacherAvatarUrl: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
+  teacherUserId: Maybe<Scalars['String']['output']>;
 };
 
 export type ParentAssignedStudentsResult = {
@@ -2423,6 +2465,7 @@ export type Query = {
   managerDirectory: Maybe<ManagerDirectoryResult>;
   me: Maybe<User>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
+  notificationPreferences: Maybe<Array<NotificationPreference>>;
   /** Returns onboarding metrics for staff accounts. */
   onboardingMetrics: Maybe<OnboardingMetrics>;
   parentAssignedStudents: Maybe<ParentAssignedStudentsResult>;
@@ -2927,9 +2970,33 @@ export type SimulatablePermissionGroup = {
   slug: Maybe<Scalars['String']['output']>;
 };
 
+export type StaffAdminProfileUpdateInput = {
+  phone: InputMaybe<Scalars['String']['input']>;
+  skypeId: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<Scalars['String']['input']>;
+};
+
 export type StaffOwnProfileUpdateInput = {
   phone: InputMaybe<Scalars['String']['input']>;
   skypeId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type StaffPermissionGroup = {
+  __typename?: 'StaffPermissionGroup';
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+};
+
+export type StaffPermissionOverride = {
+  __typename?: 'StaffPermissionOverride';
+  action: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  permissionId: Maybe<Scalars['String']['output']>;
+  permissionKey: Maybe<Scalars['String']['output']>;
+  resource: Maybe<Scalars['String']['output']>;
+  state: Maybe<OverrideState>;
 };
 
 export type StartImpersonationResponse = {
@@ -3687,6 +3754,7 @@ export type TestSuperAdmin = {
 export type UnifiedProfile = {
   __typename?: 'UnifiedProfile';
   assignedStudents: Maybe<TeacherAssignedStudentsResult>;
+  associatedStudents: Maybe<ParentAssignedStudentsResult>;
   audience: Maybe<ProfileAudience>;
   avatarUrl: Maybe<Scalars['String']['output']>;
   bankingSummary: Maybe<TeacherBankingSummary>;
@@ -3697,6 +3765,8 @@ export type UnifiedProfile = {
   parentId: Maybe<Scalars['String']['output']>;
   parentOwnProfile: Maybe<ParentOwnProfile>;
   scope: Maybe<ProfileScope>;
+  staffPermissionGroups: Maybe<Array<StaffPermissionGroup>>;
+  staffPermissionOverrides: Maybe<Array<StaffPermissionOverride>>;
   staffProfile: Maybe<ManagerDirectoryRow>;
   staffProfileId: Maybe<Scalars['String']['output']>;
   teacherAdminProfile: Maybe<TeacherProfileResult>;
@@ -3757,7 +3827,7 @@ export type UpdateTeacherNoteInput = {
 export type UpdateUserProfileInput = {
   core: InputMaybe<CoreUserProfileFieldsInput>;
   parent: InputMaybe<ParentAdminProfileUpdateInput>;
-  staff: InputMaybe<StaffOwnProfileUpdateInput>;
+  staff: InputMaybe<StaffAdminProfileUpdateInput>;
   teacher: InputMaybe<TeacherProfileUpdateInput>;
 };
 

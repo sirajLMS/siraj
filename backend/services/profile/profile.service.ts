@@ -60,6 +60,26 @@ export function isRedirect(result: ProfilePageResolution): result is { redirect:
   return "redirect" in result;
 }
 
+export function toParentRepoInput(
+  input: ParentOwnProfileUpdateInput | ParentAdminProfileUpdateInput
+): ParentProfileUpdateInput {
+  return {
+    phone: input.phone,
+    nationality: "nationality" in input ? input.nationality : undefined,
+    address: "address" in input ? input.address : undefined,
+    facebook: input.facebook,
+    whatsapp: input.whatsapp,
+    twitter: input.twitter,
+    skype: input.skype,
+    defaultZoomLink: input.defaultZoomLink,
+    invoiceType: "invoiceType" in input ? input.invoiceType : undefined,
+    feeAmount: "feeAmount" in input ? input.feeAmount : undefined,
+    paymentMethod: "paymentMethod" in input ? input.paymentMethod : undefined,
+    currency: "currency" in input ? input.currency : undefined,
+    timezone: "timezone" in input ? input.timezone : undefined,
+  };
+}
+
 type OwnScopePermissionSet = {
   readonly authPermission: AppPermission;
   readonly audiencePermissions: Partial<Record<ProfileAudience, AppPermission>>;
@@ -213,7 +233,10 @@ export namespace ProfileService {
     let teacherAdminProfile = null;
     let parentOwnProfile = null;
     let parentAdminProfile = null;
+    let associatedStudents = null;
     let staffProfile = null;
+    let staffPermissionGroups = null;
+    let staffPermissionOverrides = null;
     let assignedStudents = null;
 
     if (roleIds.audience === "teacher" && roleIds.teacherId) {
@@ -235,10 +258,32 @@ export namespace ProfileService {
       } else {
         parentAdminProfile = await ParentProfileService.getProfile(actorUserId, roleIds.parentId, locale);
       }
+      const parentStudents = await ParentRepository.getAssociatedStudents(roleIds.parentId);
+      associatedStudents = {
+        rows: parentStudents.map(student => ({
+          id: student.id,
+          name: student.name,
+          studentAvatarUrl: student.studentAvatarUrl,
+          status: student.status,
+          primaryTeacherId: student.primaryTeacherId,
+          teacherUserId: student.teacherUserId,
+          teacherName: student.teacherName,
+          teacherAvatarUrl: student.teacherAvatarUrl,
+          hoursPerWeek: student.hoursPerWeek,
+          classesRemaining: student.classesRemaining,
+          classesTotal: student.classesTotal,
+        })),
+        totalCount: parentStudents.length,
+      };
     }
 
     if (roleIds.audience === "staff" && roleIds.staffProfileId) {
       staffProfile = await StaffProfileRepository.findByStaffProfileId(roleIds.staffProfileId);
+
+      if (scope === "other") {
+        staffPermissionGroups = await StaffProfileRepository.getUserPermissionGroups(targetUserId);
+        staffPermissionOverrides = await StaffProfileRepository.getUserPermissionOverrides(targetUserId);
+      }
     }
 
     return {
@@ -246,7 +291,10 @@ export namespace ProfileService {
       teacherAdminProfile,
       parentOwnProfile,
       parentAdminProfile,
+      associatedStudents,
       staffProfile,
+      staffPermissionGroups,
+      staffPermissionOverrides,
       assignedStudents,
     };
   }
@@ -320,7 +368,10 @@ export namespace ProfileService {
       teacherAdminProfile,
       parentOwnProfile,
       parentAdminProfile,
+      associatedStudents,
       staffProfile,
+      staffPermissionGroups,
+      staffPermissionOverrides,
       assignedStudents,
     } = await loadRoleProfiles(actorUserId, targetUserId, scope, roleIds, locale);
 
@@ -346,7 +397,10 @@ export namespace ProfileService {
       teacherAdminProfile,
       parentOwnProfile,
       parentAdminProfile,
+      associatedStudents,
       staffProfile,
+      staffPermissionGroups,
+      staffPermissionOverrides,
       bankingSummary,
       assignedStudents,
     };
@@ -371,26 +425,6 @@ export namespace ProfileService {
     }
 
     await UserRepository.updateProfileFields(targetUserId, core, locale);
-  }
-
-  function toParentRepoInput(
-    input: ParentOwnProfileUpdateInput | ParentAdminProfileUpdateInput
-  ): ParentProfileUpdateInput {
-    return {
-      phone: input.phone,
-      nationality: "nationality" in input ? input.nationality : undefined,
-      address: "address" in input ? input.address : undefined,
-      facebook: input.facebook,
-      whatsapp: input.whatsapp,
-      twitter: input.twitter,
-      skype: input.skype,
-      defaultZoomLink: input.defaultZoomLink,
-      invoiceType: "invoiceType" in input ? input.invoiceType : undefined,
-      feeAmount: "feeAmount" in input ? input.feeAmount : undefined,
-      paymentMethod: "paymentMethod" in input ? input.paymentMethod : undefined,
-      currency: "currency" in input ? input.currency : undefined,
-      timezone: "timezone" in input ? input.timezone : undefined,
-    };
   }
 
   type RoleSpecificUpdateInput = {
@@ -429,7 +463,11 @@ export namespace ProfileService {
     }
 
     if (roleIds.audience === "staff" && input.staff && roleIds.staffProfileId) {
-      await ManagerProfileService.updateManagerProfile(actorUserId, roleIds.staffProfileId, input.staff, locale);
+      if (scope === "own") {
+        await ManagerProfileService.updateOwnStaffProfile(actorUserId, roleIds.staffProfileId, input.staff, locale);
+      } else {
+        await ManagerProfileService.updateManagerProfile(actorUserId, roleIds.staffProfileId, input.staff, locale);
+      }
     }
   }
 

@@ -12,6 +12,7 @@ export { GroupClassRepository } from "./group-class.repository";
 export { ImpersonationRepository } from "./impersonation.repository";
 export { LearningResourceRepository } from "./learning-resource.repository";
 export { NotificationRepository } from "./notification.repository";
+export { NotificationPreferencesRepository } from "./notification-preferences.repository";
 export { ParentRepository } from "./parent.repository";
 export { PermissionManagementRepository } from "./permission-management.repository";
 export { RateLimitRepository } from "./ratelimit.repository";

@@ -13,4 +13,19 @@ describe("profileByUserIdQueryDocument", () => {
     expect(querySource).toContain("parentAvatarUrl");
     expect(querySource).toContain("totalCount");
   });
+
+  test("requests associatedStudents fields for parent profile", () => {
+    const querySource = profileByUserIdQueryDocument.loc?.source.body ?? "";
+
+    expect(querySource).toContain("associatedStudents");
+    expect(querySource).toContain("id");
+    expect(querySource).toContain("rows");
+    expect(querySource).toContain("name");
+    expect(querySource).toContain("status");
+    expect(querySource).toContain("teacherName");
+    expect(querySource).toContain("studentAvatarUrl");
+    expect(querySource).toContain("teacherUserId");
+    expect(querySource).toContain("teacherAvatarUrl");
+    expect(querySource).toContain("totalCount");
+  });
 });

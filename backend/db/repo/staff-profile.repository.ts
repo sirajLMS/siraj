@@ -1,6 +1,13 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
+import {
+  permissionGroups,
+  permissions,
+  staffProfiles,
+  userPermissionGroups,
+  userPermissionOverrides,
+  users,
+} from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
@@ -10,10 +17,12 @@ import type {
   ManagerDirectoryRow,
   OnboardingMetricsResult,
   PaginationArgs,
+  StaffPermissionGroupReturnType,
+  StaffPermissionOverrideReturnType,
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
-import type { AccountStatus } from "@/shared/lib/enum";
+import type { AccountStatus, OverrideState } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export interface ManagerProfileUpdateInput {
@@ -326,5 +335,53 @@ export namespace StaffProfileRepository {
       .where(eq(userPermissionGroups.userId, userId));
 
     return results.map(r => r.slug);
+  }
+
+  export async function getUserPermissionGroups(
+    userId: string,
+    tx?: DBTransaction
+  ): Promise<StaffPermissionGroupReturnType[]> {
+    const queryDb = tx ?? db;
+
+    return queryDb
+      .select({
+        id: permissionGroups.id,
+        name: permissionGroups.name,
+        slug: permissionGroups.slug,
+        description: permissionGroups.description,
+      })
+      .from(userPermissionGroups)
+      .innerJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
+      .where(eq(userPermissionGroups.userId, userId))
+      .orderBy(permissionGroups.name);
+  }
+
+  export async function getUserPermissionOverrides(
+    userId: string,
+    tx?: DBTransaction
+  ): Promise<StaffPermissionOverrideReturnType[]> {
+    const queryDb = tx ?? db;
+
+    const rows = await queryDb
+      .select({
+        permissionId: userPermissionOverrides.permissionId,
+        permissionKey: permissions.key,
+        resource: permissions.resource,
+        action: permissions.action,
+        state: userPermissionOverrides.state,
+      })
+      .from(userPermissionOverrides)
+      .innerJoin(permissions, eq(userPermissionOverrides.permissionId, permissions.id))
+      .where(eq(userPermissionOverrides.userId, userId))
+      .orderBy(permissions.resource, permissions.action);
+
+    return rows.map(row => ({
+      id: row.permissionId,
+      permissionId: row.permissionId,
+      permissionKey: row.permissionKey,
+      resource: row.resource,
+      action: row.action,
+      state: row.state as OverrideState,
+    }));
   }
 }

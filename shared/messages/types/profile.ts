@@ -46,27 +46,81 @@ export interface ProfileLabels {
   };
   readonly parent: {
     readonly subtitle: string;
+    readonly adminBanner: string;
     readonly sections: {
+      readonly account: string;
       readonly contact: string;
       readonly social: string;
+      readonly identity: string;
+      readonly billing: string;
+      readonly students: string;
     };
     readonly fields: {
+      readonly fullName: string;
+      readonly primaryEmail: string;
       readonly phone: string;
       readonly whatsapp: string;
       readonly facebook: string;
       readonly twitter: string;
       readonly skype: string;
       readonly defaultZoomLink: string;
+      readonly nationality: string;
+      readonly address: string;
+      readonly invoiceType: string;
+      readonly feeAmount: string;
+      readonly paymentMethod: string;
+      readonly currency: string;
+      readonly timezone: string;
+      readonly status: string;
+    };
+    readonly students: {
+      readonly empty: string;
+      readonly mobileListLabel: string;
+      readonly columns: {
+        readonly name: string;
+        readonly status: string;
+        readonly teacher: string;
+        readonly hoursPerWeek: string;
+      };
     };
   };
   readonly staff: {
     readonly subtitle: string;
+    readonly adminBanner: string;
     readonly sections: {
+      readonly account: string;
       readonly contact: string;
+      readonly role: string;
+      readonly permissions: string;
     };
     readonly fields: {
+      readonly fullName: string;
+      readonly primaryEmail: string;
       readonly phone: string;
       readonly skypeId: string;
+      readonly roleName: string;
+      readonly roleSlug: string;
+      readonly department: string;
+      readonly status: string;
+      readonly statusActive: string;
+      readonly statusInactive: string;
+    };
+    readonly permissions: {
+      readonly inheritedGroups: string;
+      readonly directOverrides: string;
+      readonly empty: {
+        readonly title: string;
+        readonly description: string;
+      };
+      readonly columns: {
+        readonly resource: string;
+        readonly action: string;
+        readonly state: string;
+      };
+      readonly states: {
+        readonly granted: string;
+        readonly denied: string;
+      };
     };
   };
   readonly banking: {
@@ -123,6 +177,29 @@ export interface ProfileLabels {
     readonly errors: {
       readonly failedToLoad: string;
       readonly retry: string;
+    };
+  };
+  readonly notifications: {
+    readonly title: string;
+    readonly description: string;
+    readonly saved: string;
+    readonly errorLoading: string;
+    readonly errorSaving: string;
+    readonly channels: {
+      readonly EMAIL: string;
+      readonly SMS: string;
+      readonly PUSH: string;
+      readonly ON_APP: string;
+    };
+    readonly events: {
+      readonly CLASS_REMINDER: string;
+      readonly INVOICE_GENERATED: string;
+      readonly COMPLAINT_RESPONSE: string;
+      readonly BANKING_DETAILS_CHANGED: string;
+      readonly NEW_COMPLAINT: string;
+      readonly NEW_SUGGESTION: string;
+      readonly SUGGESTION_ACKNOWLEDGED: string;
+      readonly SUGGESTION_DUPLICATE_MARKED: string;
     };
   };
 }

@@ -14,6 +14,7 @@ export * from "./impersonation.pothos";
 export * from "./learning-resource.pothos";
 export * from "./manager-onboarding.pothos";
 export * from "./notification-alerts.pothos";
+export * from "./notification-preferences.pothos";
 export * from "./pagination.objects";
 export * from "./parent-dashboard.pothos";
 export * from "./parent-directory.pothos";

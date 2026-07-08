@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { SectionPanel } from "./SectionPanel";
 
@@ -10,12 +10,10 @@ const meta: Meta<typeof SectionPanel> = {
     title: "Student Information",
     subTitle: "Personal details and academic records.",
     children: (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="body1">
-          Content of the section panel goes here. It is wrapped in a M3-compliant Paper component with a specific
-          background and border.
-        </Typography>
-      </Box>
+      <Typography variant="body1">
+        Content of the section panel goes here. It is wrapped in a M3-compliant Paper component with a specific
+        background and border.
+      </Typography>
     ),
   },
 };

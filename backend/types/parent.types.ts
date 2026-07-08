@@ -173,8 +173,12 @@ export interface ParentProfileResult {
 export type ParentAssignedStudentReturnType = {
   id: string;
   name: string;
+  studentAvatarUrl: string | null;
   status: string;
+  primaryTeacherId: string | null;
+  teacherUserId: string | null;
   teacherName: string | null;
+  teacherAvatarUrl: string | null;
   hoursPerWeek: string;
   classesRemaining: number;
   classesTotal: number;

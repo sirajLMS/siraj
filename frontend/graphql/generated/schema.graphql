@@ -1481,6 +1481,7 @@ type Mutation {
 
   """Updates a manager's profile fields."""
   updateManagerProfile(input: UpdateManagerProfileInput!, staffProfileId: ID!): ManagerDirectoryRow
+  updateNotificationPreferences(input: [NotificationPreferenceInput!]!): [NotificationPreference!]
   updateOwnProfile(input: UpdateOwnProfileInput!): UnifiedProfile
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
@@ -1501,6 +1502,37 @@ type NotificationAlertsResult {
   id: String
   totalCount: Int
   unreadCount: Int
+}
+
+enum NotificationChannel {
+  EMAIL
+  ON_APP
+  PUSH
+  SMS
+}
+
+enum NotificationEventType {
+  BANKING_DETAILS_CHANGED
+  CLASS_REMINDER
+  COMPLAINT_RESPONSE
+  INVOICE_GENERATED
+  NEW_COMPLAINT
+  NEW_SUGGESTION
+  SUGGESTION_ACKNOWLEDGED
+  SUGGESTION_DUPLICATE_MARKED
+}
+
+type NotificationPreference {
+  channel: NotificationChannel
+  enabled: Boolean
+  eventType: NotificationEventType
+  id: String
+}
+
+input NotificationPreferenceInput {
+  channel: NotificationChannel!
+  enabled: Boolean!
+  eventType: NotificationEventType!
 }
 
 """Summary metrics for the staff onboarding process"""
@@ -1572,8 +1604,12 @@ type ParentAssignedStudent {
   hoursPerWeek: String
   id: String
   name: String
+  primaryTeacherId: String
   status: String
+  studentAvatarUrl: String
+  teacherAvatarUrl: String
   teacherName: String
+  teacherUserId: String
 }
 
 type ParentAssignedStudentsResult {
@@ -1910,6 +1946,7 @@ type Query {
   managerDirectory(paginationArgs: PaginationArgs, roleFilter: String, statusFilter: String): ManagerDirectoryResult
   me: User
   notificationAlerts: NotificationAlertsResult
+  notificationPreferences: [NotificationPreference!]
 
   """Returns onboarding metrics for staff accounts."""
   onboardingMetrics: OnboardingMetrics
@@ -2120,9 +2157,31 @@ type SimulatablePermissionGroup {
   slug: String
 }
 
+input StaffAdminProfileUpdateInput {
+  phone: String
+  skypeId: String
+  status: String
+}
+
 input StaffOwnProfileUpdateInput {
   phone: String
   skypeId: String
+}
+
+type StaffPermissionGroup {
+  description: String
+  id: String
+  name: String
+  slug: String
+}
+
+type StaffPermissionOverride {
+  action: String
+  id: String
+  permissionId: String
+  permissionKey: String
+  resource: String
+  state: OverrideState
 }
 
 type StartImpersonationResponse {
@@ -2867,6 +2926,7 @@ type TestSuperAdmin {
 
 type UnifiedProfile {
   assignedStudents: TeacherAssignedStudentsResult
+  associatedStudents: ParentAssignedStudentsResult
   audience: ProfileAudience
   avatarUrl: String
   bankingSummary: TeacherBankingSummary
@@ -2877,6 +2937,8 @@ type UnifiedProfile {
   parentId: String
   parentOwnProfile: ParentOwnProfile
   scope: ProfileScope
+  staffPermissionGroups: [StaffPermissionGroup!]
+  staffPermissionOverrides: [StaffPermissionOverride!]
   staffProfile: ManagerDirectoryRow
   staffProfileId: String
   teacherAdminProfile: TeacherProfileResult
@@ -2935,7 +2997,7 @@ input UpdateTeacherNoteInput {
 input UpdateUserProfileInput {
   core: CoreUserProfileFieldsInput
   parent: ParentAdminProfileUpdateInput
-  staff: StaffOwnProfileUpdateInput
+  staff: StaffAdminProfileUpdateInput
   teacher: TeacherProfileUpdateInput
 }
 

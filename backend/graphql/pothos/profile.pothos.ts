@@ -2,7 +2,10 @@ import type {
   CoreUserProfileFields,
   ParentAdminProfileUpdateInput,
   ParentOwnProfileUpdateInput,
+  StaffAdminProfileUpdateInput,
   StaffOwnProfileUpdateInput,
+  StaffPermissionGroupReturnType,
+  StaffPermissionOverrideReturnType,
   TeacherOwnProfileUpdateInput,
   UnifiedProfileReturnType,
   UpdateOwnProfileInput,
@@ -10,11 +13,37 @@ import type {
 } from "@/backend/types";
 import type { TeacherBankingSummaryReturnType } from "@/backend/types/teacher.types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ParentOwnProfilePothosObject } from "./parent-portal.pothos";
+import { OverrideStatePothosObject } from "./enum.pothos";
+import { ParentAssignedStudentsResultPothosObject, ParentOwnProfilePothosObject } from "./parent-portal.pothos";
 import { ParentProfilePothosObject } from "./parent-profile.pothos";
 import { ManagerDirectoryRowPothosObject } from "./staff-directory.pothos";
 import { TeacherProfileResultPothosObject, TeacherProfileUpdateInputPothosObject } from "./staff-profile.pothos";
 import { TeacherAssignedStudentsResultPothosObject, TeacherOwnProfilePothosObject } from "./teacher-portal.pothos";
+
+const StaffPermissionGroupRef = gqlSchemaBuilder.objectRef<StaffPermissionGroupReturnType>("StaffPermissionGroup");
+
+export const StaffPermissionGroupPothosObject = StaffPermissionGroupRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    slug: t.exposeString("slug"),
+    description: t.exposeString("description", { nullable: true }),
+  }),
+});
+
+const StaffPermissionOverrideRef =
+  gqlSchemaBuilder.objectRef<StaffPermissionOverrideReturnType>("StaffPermissionOverride");
+
+export const StaffPermissionOverridePothosObject = StaffPermissionOverrideRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    permissionId: t.exposeString("permissionId"),
+    permissionKey: t.exposeString("permissionKey"),
+    resource: t.exposeString("resource"),
+    action: t.exposeString("action"),
+    state: t.expose("state", { type: OverrideStatePothosObject }),
+  }),
+});
 
 export const ProfileAudiencePothosEnum = gqlSchemaBuilder.enumType("ProfileAudience", {
   values: ["teacher", "parent", "staff"] as const,
@@ -58,7 +87,19 @@ export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
     teacherAdminProfile: t.expose("teacherAdminProfile", { type: TeacherProfileResultPothosObject, nullable: true }),
     parentOwnProfile: t.expose("parentOwnProfile", { type: ParentOwnProfilePothosObject, nullable: true }),
     parentAdminProfile: t.expose("parentAdminProfile", { type: ParentProfilePothosObject, nullable: true }),
+    associatedStudents: t.expose("associatedStudents", {
+      type: ParentAssignedStudentsResultPothosObject,
+      nullable: true,
+    }),
     staffProfile: t.expose("staffProfile", { type: ManagerDirectoryRowPothosObject, nullable: true }),
+    staffPermissionGroups: t.expose("staffPermissionGroups", {
+      type: [StaffPermissionGroupPothosObject],
+      nullable: true,
+    }),
+    staffPermissionOverrides: t.expose("staffPermissionOverrides", {
+      type: [StaffPermissionOverridePothosObject],
+      nullable: true,
+    }),
     bankingSummary: t.expose("bankingSummary", { type: TeacherBankingSummaryPothosObject, nullable: true }),
     assignedStudents: t.expose("assignedStudents", { type: TeacherAssignedStudentsResultPothosObject, nullable: true }),
   }),
@@ -125,6 +166,16 @@ export const StaffOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
     }),
   });
 
+export const StaffAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
+  .inputRef<StaffAdminProfileUpdateInput>("StaffAdminProfileUpdateInput")
+  .implement({
+    fields: t => ({
+      phone: t.string({ required: false }),
+      skypeId: t.string({ required: false }),
+      status: t.string({ required: false }),
+    }),
+  });
+
 export const UpdateOwnProfileInputPothosObject = gqlSchemaBuilder
   .inputRef<UpdateOwnProfileInput>("UpdateOwnProfileInput")
   .implement({
@@ -143,6 +194,6 @@ export const UpdateUserProfileInputPothosObject = gqlSchemaBuilder
       core: t.field({ type: CoreUserProfileFieldsInputPothosObject, required: false }),
       teacher: t.field({ type: TeacherProfileUpdateInputPothosObject, required: false }),
       parent: t.field({ type: ParentAdminProfileUpdateInputPothosObject, required: false }),
-      staff: t.field({ type: StaffOwnProfileUpdateInputPothosObject, required: false }),
+      staff: t.field({ type: StaffAdminProfileUpdateInputPothosObject, required: false }),
     }),
   });

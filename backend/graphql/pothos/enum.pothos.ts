@@ -16,6 +16,8 @@ import {
   InvoiceStatus,
   InvoiceType,
   LeaveRequestStatus,
+  NotificationChannel,
+  NotificationEventType,
   OrderSortDirection,
   OverrideState,
   ParentStatus,
@@ -115,4 +117,12 @@ export const ClassTypePothosObject = gqlSchemaBuilder.enumType(ClassType, {
 
 export const AvailabilitySearchSortByPothosObject = gqlSchemaBuilder.enumType(AvailabilitySearchSortBy, {
   name: "AvailabilitySearchSortBy",
+});
+
+export const NotificationChannelPothosObject = gqlSchemaBuilder.enumType(NotificationChannel, {
+  name: "NotificationChannel",
+});
+
+export const NotificationEventTypePothosObject = gqlSchemaBuilder.enumType(NotificationEventType, {
+  name: "NotificationEventType",
 });

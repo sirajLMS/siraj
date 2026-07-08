@@ -1,31 +1,24 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Alert } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import type { ProfileMode, ProfileScope } from "@/backend/types/profile.types";
-import { PrimaryPageAction } from "@/frontend/components/ui";
+import { ErrorState, LoadingState } from "@/frontend/components/ui";
+import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
+import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
+import { type ParentAdminEditFormData, ParentProfileEditForm } from "./ParentProfileEditForm";
+import { ParentProfileView } from "./ParentProfileView";
 
-const parentOwnEditSchema = z.object({
-  phone: z.string().optional(),
-  facebook: z.string().optional(),
-  whatsapp: z.string().optional(),
-  twitter: z.string().optional(),
-  skype: z.string().optional(),
-  defaultZoomLink: z.string().optional(),
-});
-
-type ParentOwnEditFormData = z.infer<typeof parentOwnEditSchema>;
+type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;
+type ParentAdminData = NonNullable<ProfileData["parentAdminProfile"]>;
 
 type ParentProfileContainerProps = {
   readonly scope: ProfileScope;
@@ -34,7 +27,14 @@ type ParentProfileContainerProps = {
   readonly activeTab?: string;
 };
 
-function buildParentInput(formData: ParentOwnEditFormData) {
+function buildCoreInput(formData: ParentAdminEditFormData) {
+  return {
+    name: formData.name.trim(),
+    email: formData.email.trim(),
+  };
+}
+
+function buildOwnParentInput(formData: ParentAdminEditFormData) {
   return {
     phone: formData.phone || null,
     facebook: formData.facebook || null,
@@ -45,190 +45,21 @@ function buildParentInput(formData: ParentOwnEditFormData) {
   };
 }
 
-function ParentContactSection({
-  parentData,
-  t,
-  tc,
-}: {
-  readonly parentData: {
-    readonly name?: string | null;
-    readonly email?: string | null;
-    readonly phone?: string | null;
+function buildAdminParentInput(formData: ParentAdminEditFormData) {
+  return {
+    ...buildOwnParentInput(formData),
+    nationality: formData.nationality || null,
+    address: formData.address || null,
+    invoiceType: formData.invoiceType || null,
+    feeAmount: formData.feeAmount || null,
+    paymentMethod: formData.paymentMethod || null,
+    currency: formData.currency || null,
+    timezone: formData.timezone || null,
   };
-  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
-  readonly tc: ReturnType<typeof useTranslations<"profile">>;
-}) {
-  return (
-    <Grid size={{ xs: 12, md: 6 }}>
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
-        <Stack spacing={1}>
-          <Typography sx={{ typography: "bodyMd" }}>{parentData.name}</Typography>
-          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-            {parentData.email}
-          </Typography>
-          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-            {parentData.phone ?? tc("notSet")}
-          </Typography>
-        </Stack>
-      </Paper>
-    </Grid>
-  );
 }
 
-function ParentSocialSection({
-  parentData,
-  t,
-  tc,
-}: {
-  readonly parentData: {
-    readonly whatsapp?: string | null;
-    readonly facebook?: string | null;
-  };
-  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
-  readonly tc: ReturnType<typeof useTranslations<"profile">>;
-}) {
-  return (
-    <Grid size={{ xs: 12, md: 6 }}>
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.social")}</Typography>
-        <Stack spacing={1}>
-          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-            {t("fields.whatsapp")}: {parentData.whatsapp ?? tc("notSet")}
-          </Typography>
-          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-            {t("fields.facebook")}: {parentData.facebook ?? tc("notSet")}
-          </Typography>
-        </Stack>
-      </Paper>
-    </Grid>
-  );
-}
-
-function ParentViewMode({
-  parentData,
-  t,
-  tc,
-}: {
-  readonly parentData: {
-    readonly name?: string | null;
-    readonly email?: string | null;
-    readonly phone?: string | null;
-    readonly whatsapp?: string | null;
-    readonly facebook?: string | null;
-  };
-  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
-  readonly tc: ReturnType<typeof useTranslations<"profile">>;
-}) {
-  return (
-    <Grid container spacing={3}>
-      <ParentContactSection parentData={parentData} t={t} tc={tc} />
-      <ParentSocialSection parentData={parentData} t={t} tc={tc} />
-    </Grid>
-  );
-}
-
-function ParentEditFormFields({
-  register,
-  t,
-}: {
-  readonly register: ReturnType<typeof useForm<ParentOwnEditFormData>>["register"];
-  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
-}) {
-  return (
-    <>
-      {(["phone", "whatsapp", "facebook", "twitter", "skype", "defaultZoomLink"] as const).map(field => (
-        <Box key={field}>
-          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t(`fields.${field}`)}</Typography>
-          <Box
-            component="input"
-            {...register(field)}
-            sx={theme => ({
-              width: "100%",
-              p: 1.5,
-              borderRadius: 1,
-              border: `1px solid ${theme.palette.divider}`,
-            })}
-          />
-        </Box>
-      ))}
-    </>
-  );
-}
-
-function ParentEditForm({
-  parentData,
-  scope,
-  targetUserId,
-  t,
-  tc,
-}: {
-  readonly parentData: {
-    readonly phone?: string | null;
-    readonly facebook?: string | null;
-    readonly whatsapp?: string | null;
-    readonly twitter?: string | null;
-    readonly skype?: string | null;
-    readonly defaultZoomLink?: string | null;
-  };
-  readonly scope: ProfileScope;
-  readonly targetUserId: string;
-  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
-  readonly tc: ReturnType<typeof useTranslations<"profile">>;
-}) {
-  const router = useRouter();
-  const [updateOwnProfile, { loading: savingOwn }] = useMutation(updateOwnProfileMutationDocument);
-  const [updateUserProfile, { loading: savingOther }] = useMutation(updateUserProfileMutationDocument);
-  const isSaving = savingOwn || savingOther;
-
-  const { register, handleSubmit, reset } = useForm<ParentOwnEditFormData>({
-    resolver: zodResolver(parentOwnEditSchema),
-    defaultValues: {
-      phone: "",
-      facebook: "",
-      whatsapp: "",
-      twitter: "",
-      skype: "",
-      defaultZoomLink: "",
-    },
-  });
-
-  useEffect(() => {
-    if (parentData) {
-      reset({
-        phone: parentData.phone ?? "",
-        facebook: parentData.facebook ?? "",
-        whatsapp: parentData.whatsapp ?? "",
-        twitter: parentData.twitter ?? "",
-        skype: parentData.skype ?? "",
-        defaultZoomLink: parentData.defaultZoomLink ?? "",
-      });
-    }
-  }, [parentData, reset]);
-
-  const onSubmit = async (formData: ParentOwnEditFormData) => {
-    const parentInput = buildParentInput(formData);
-
-    if (scope === "own") {
-      await updateOwnProfile({ variables: { input: { parent: parentInput } } });
-      router.push("/profile");
-      return;
-    }
-
-    await updateUserProfile({ variables: { userId: targetUserId, input: { parent: parentInput } } });
-    router.push(`/users/${targetUserId}/profile`);
-  };
-
-  return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={2} sx={{ maxWidth: 480 }}>
-        <ParentEditFormFields register={register} t={t} />
-        <PrimaryPageAction type="submit" disabled={isSaving}>
-          {tc("actions.save")}
-        </PrimaryPageAction>
-      </Stack>
-    </Box>
-  );
+function buildEditSource(scope: ProfileScope, profile: ProfileData): ParentOwnData | ParentAdminData | null {
+  return scope === "own" ? profile.parentOwnProfile : profile.parentAdminProfile;
 }
 
 export function ParentProfileContainer({
@@ -237,35 +68,91 @@ export function ParentProfileContainer({
   targetUserId,
   activeTab: _activeTab = "profile",
 }: ParentProfileContainerProps) {
-  const t = useTranslations("profile.parent");
   const tc = useTranslations("profile");
-
-  const { data, loading, error } = useQuery(profileByUserIdQueryDocument, {
+  const isAdminScope = scope === "other";
+  const activeTab = _activeTab;
+  const router = useRouter();
+  const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
+    fetchPolicy: "cache-and-network",
   });
 
+  const [updateOwnProfile, { loading: savingOwn }] = useMutation(updateOwnProfileMutationDocument);
+  const [updateUserProfile, { loading: savingOther }] = useMutation(updateUserProfileMutationDocument);
+  const isSaving = savingOwn || savingOther;
   const profile = data?.profileByUserId;
-  const parentData = scope === "own" ? profile?.parentOwnProfile : profile?.parentAdminProfile;
 
-  if (loading) {
+  if (activeTab === "notifications" && scope === "own") {
+    return <NotificationPreferencesTab isActive />;
+  }
+
+  if (activeTab !== "profile") {
     return null;
   }
 
-  if (error) {
+  const onSubmit = async (formData: ParentAdminEditFormData) => {
+    const coreInput = buildCoreInput(formData);
+    const parentInput = isAdminScope ? buildAdminParentInput(formData) : buildOwnParentInput(formData);
+
+    if (scope === "own") {
+      await updateOwnProfile({ variables: { input: { core: coreInput, parent: parentInput } } });
+      router.push("/profile");
+      return;
+    }
+
+    await updateUserProfile({
+      variables: { userId: targetUserId, input: { core: coreInput, parent: parentInput } },
+    });
+    router.push(`/users/${targetUserId}/profile`);
+  };
+
+  if (loading && !profile) {
+    return <LoadingState />;
+  }
+
+  if (error && !profile) {
     return (
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main }}>
-        {tc("errors.failedToLoad")}
-      </Typography>
+      <ErrorState
+        embedded
+        message={tc("errors.failedToLoad")}
+        retryLabel={tc("actions.retry")}
+        onRetry={() => {
+          void refetch();
+        }}
+      />
     );
   }
 
-  if (!parentData) {
-    return null;
+  if (!profile) {
+    return <Alert severity="warning">{tc("errors.notFound")}</Alert>;
   }
+
+  const parentData = buildEditSource(scope, profile);
+  if (!parentData) {
+    return <Alert severity="warning">{tc("errors.notFound")}</Alert>;
+  }
+
+  const avatarUrl = profile.avatarUrl ?? ("avatarUrl" in parentData ? parentData.avatarUrl : null);
 
   if (mode === "view") {
-    return <ParentViewMode parentData={parentData} t={t} tc={tc} />;
+    return (
+      <ParentProfileView
+        parentData={parentData}
+        associatedStudents={profile.associatedStudents}
+        avatarUrl={avatarUrl}
+        isAdminScope={isAdminScope}
+        studentsLoading={loading}
+      />
+    );
   }
 
-  return <ParentEditForm parentData={parentData} scope={scope} targetUserId={targetUserId} t={t} tc={tc} />;
+  return (
+    <ParentProfileEditForm
+      parentData={parentData}
+      avatarUrl={avatarUrl}
+      isAdminScope={isAdminScope}
+      isSaving={isSaving}
+      onSubmit={onSubmit}
+    />
+  );
 }

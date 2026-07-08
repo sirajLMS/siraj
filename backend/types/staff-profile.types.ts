@@ -1,5 +1,5 @@
 import type { staffProfiles } from "@/backend/db/schema";
-import type { AccountStatus } from "@/shared/lib/enum";
+import type { AccountStatus, OverrideState } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type StaffProfileEntity = typeof staffProfiles.$inferSelect;
@@ -55,4 +55,20 @@ export interface UpdateManagerProfileInput {
   phone?: string | null;
   skypeId?: string | null;
   status?: AccountStatus | null;
+}
+
+export interface StaffPermissionGroupReturnType {
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly description: string | null;
+}
+
+export interface StaffPermissionOverrideReturnType {
+  readonly id: string;
+  readonly permissionId: string;
+  readonly permissionKey: string;
+  readonly resource: string;
+  readonly action: string;
+  readonly state: OverrideState;
 }

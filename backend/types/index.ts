@@ -115,6 +115,7 @@ export type {
 } from "./notification-alerts.types";
 // Notification Alerts types
 export * from "./notification-alerts.types";
+export * from "./notification-preferences.types";
 export * from "./notificationDeliveries.types";
 export * from "./pagination.types";
 export * from "./parent.types";

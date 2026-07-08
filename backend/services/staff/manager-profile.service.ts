@@ -12,6 +12,36 @@ export interface UpdateManagerProfileInput {
 }
 
 export namespace ManagerProfileService {
+  export async function updateOwnStaffProfile(
+    actorUserId: string,
+    targetStaffProfileId: string,
+    input: Pick<UpdateManagerProfileInput, "phone" | "skypeId">,
+    locale?: string
+  ): Promise<ManagerDirectoryRow> {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+    const targetRow = await StaffProfileRepository.findByStaffProfileId(targetStaffProfileId);
+    if (!targetRow || targetRow.id !== actorUserId) {
+      throw new Error(t("insufficientPermissions"));
+    }
+
+    const repoInput: ManagerProfileUpdateInput = {
+      phone: input.phone,
+      phoneIsSet: input.phone !== undefined,
+      skypeId: input.skypeId,
+      skypeIdIsSet: input.skypeId !== undefined,
+    };
+
+    const updatedProfile = await StaffProfileRepository.updateManagerProfile(targetStaffProfileId, repoInput, locale);
+
+    logger.info("Own staff profile updated", {
+      staffProfileId: targetStaffProfileId,
+      actorUserId,
+    });
+
+    return updatedProfile;
+  }
+
   export async function updateManagerProfile(
     actorUserId: string,
     targetStaffProfileId: string,

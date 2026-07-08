@@ -643,6 +643,28 @@ export type MarkSuggestionDuplicateInput = {
   suggestionId: string;
 };
 
+export type NotificationChannel =
+  | 'EMAIL'
+  | 'ON_APP'
+  | 'PUSH'
+  | 'SMS';
+
+export type NotificationEventType =
+  | 'BANKING_DETAILS_CHANGED'
+  | 'CLASS_REMINDER'
+  | 'COMPLAINT_RESPONSE'
+  | 'INVOICE_GENERATED'
+  | 'NEW_COMPLAINT'
+  | 'NEW_SUGGESTION'
+  | 'SUGGESTION_ACKNOWLEDGED'
+  | 'SUGGESTION_DUPLICATE_MARKED';
+
+export type NotificationPreferenceInput = {
+  channel: NotificationChannel;
+  enabled: boolean;
+  eventType: NotificationEventType;
+};
+
 export type OrderSortDirection =
   | 'ASC'
   | 'DESC';
@@ -770,6 +792,12 @@ export type RespondToSuggestionInput = {
 export type RevokePermissionGroupFromUserInput = {
   groupId: string;
   userId: string;
+};
+
+export type StaffAdminProfileUpdateInput = {
+  phone: string | null | undefined;
+  skypeId: string | null | undefined;
+  status: string | null | undefined;
 };
 
 export type StaffOwnProfileUpdateInput = {
@@ -974,7 +1002,7 @@ export type UpdateTeacherNoteInput = {
 export type UpdateUserProfileInput = {
   core: CoreUserProfileFieldsInput | null | undefined;
   parent: ParentAdminProfileUpdateInput | null | undefined;
-  staff: StaffOwnProfileUpdateInput | null | undefined;
+  staff: StaffAdminProfileUpdateInput | null | undefined;
   teacher: TeacherProfileUpdateInput | null | undefined;
 };
 
@@ -1752,6 +1780,28 @@ export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type NotificationAlertsQuery = NotificationAlertsQuery_Query;
 
+export type NotificationPreferencesQuery_notificationPreferences_NotificationPreference = { id: string | null, channel: Types.NotificationChannel | null, eventType: Types.NotificationEventType | null, enabled: boolean | null };
+
+export type NotificationPreferencesQuery_Query = { notificationPreferences: Array<NotificationPreferencesQuery_notificationPreferences_NotificationPreference> | null };
+
+
+export type NotificationPreferencesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NotificationPreferencesQuery = NotificationPreferencesQuery_Query;
+
+export type UpdateNotificationPreferencesMutation_updateNotificationPreferences_NotificationPreference = { id: string | null, channel: Types.NotificationChannel | null, eventType: Types.NotificationEventType | null, enabled: boolean | null };
+
+export type UpdateNotificationPreferencesMutation_Mutation = { updateNotificationPreferences: Array<UpdateNotificationPreferencesMutation_updateNotificationPreferences_NotificationPreference> | null };
+
+
+export type UpdateNotificationPreferencesMutationVariables = Exact<{
+  input: Array<Types.NotificationPreferenceInput> | Types.NotificationPreferenceInput;
+}>;
+
+
+export type UpdateNotificationPreferencesMutation = UpdateNotificationPreferencesMutation_Mutation;
+
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null };
 
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
@@ -2162,7 +2212,15 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, skype: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
 
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent = { id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent> | null };
+
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, skypeId: string | null, status: Types.AccountStatus | null, roleSlug: string | null, roleName: string | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride = { id: string | null, permissionId: string | null, permissionKey: string | null, resource: string | null, action: string | null, state: Types.OverrideState | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_bankingSummary_TeacherBankingSummary = { id: string | null, beneficiaryName: string | null, bankName: string | null, accountNumber: string | null, routingNumber: string | null, swiftBic: string | null, iban: string | null, verifiedAt: string | null, verifiedByUserId: string | null, verifiedByName: string | null };
 
@@ -2170,7 +2228,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent> | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, bankingSummary: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_bankingSummary_TeacherBankingSummary | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride> | null, bankingSummary: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_bankingSummary_TeacherBankingSummary | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
 
 export type ProfileByUserIdQuery_Query = { profileByUserId: ProfileByUserIdQuery_profileByUserId_UnifiedProfile | null };
 

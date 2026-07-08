@@ -79,7 +79,20 @@ export function SectionPanel({ title, subTitle, actions, children, edgeToEdge = 
           {actions && <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>{actions}</Box>}
         </Box>
       )}
-      {children}
+      {children ? (
+        edgeToEdge ? (
+          children
+        ) : (
+          <Box
+            sx={{
+              px: { xs: 2, md: 3 },
+              py: 2.5,
+            }}
+          >
+            {children}
+          </Box>
+        )
+      ) : null}
     </Paper>
   );
 }
