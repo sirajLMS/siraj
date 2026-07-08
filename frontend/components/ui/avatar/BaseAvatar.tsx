@@ -19,14 +19,7 @@ export type BaseAvatarProps = {
 
 const ROUNDED_BORDER_RADIUS = 1.5;
 
-export function BaseAvatar({
-  src,
-  label = "",
-  size = 40,
-  variant = "circular",
-  sx,
-  children,
-}: BaseAvatarProps) {
+export function BaseAvatar({ src, label = "", size = 40, variant = "circular", sx, children }: BaseAvatarProps) {
   const hasImage = Boolean(src);
   const initials = children ?? (label ? avatarInitials(label) : "");
 

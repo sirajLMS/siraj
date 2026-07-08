@@ -47,11 +47,7 @@ function ParentProfileView({ parent, parentId, onRefetchStudents }: ParentProfil
         onEditAvatar={() => setAvatarDialogOpen(true)}
       />
 
-      <ParentProfileActions
-        parentId={parentId}
-        userId={parent.userId}
-        onEditAvatar={() => setAvatarDialogOpen(true)}
-      />
+      <ParentProfileActions parentId={parentId} userId={parent.userId} onEditAvatar={() => setAvatarDialogOpen(true)} />
 
       <ParentProfileDetails parent={parent} />
 

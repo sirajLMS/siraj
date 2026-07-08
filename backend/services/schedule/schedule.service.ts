@@ -44,7 +44,11 @@ export namespace ScheduleService {
       status: (item.outcome || item.executionState) as ClassExecutionState,
       outcome: item.outcome as ClassOutcome,
       executionState: item.executionState as ClassExecutionState,
-      student: { id: item.studentId, name: item.student?.name || unknownName, avatarUrl: item.student?.avatarUrl ?? null },
+      student: {
+        id: item.studentId,
+        name: item.student?.name || unknownName,
+        avatarUrl: item.student?.avatarUrl ?? null,
+      },
       teacher: {
         id: item.teacherId,
         name: item.teacher?.user?.name || unknownName,

@@ -149,7 +149,7 @@ export function StatusTrackingDataGrid({
         ),
       },
     ];
-  }, [isDesktop, labels, locale, onActivate, onReschedule, onVerify, onJoin, theme]);
+  }, [isDesktop, labels, locale, onActivate, onReschedule, onVerify, onJoin]);
 
   return (
     <AppDataGrid<StatusTrackingRow>

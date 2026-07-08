@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import { Stack } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react";
 import { BaseAvatar } from "./BaseAvatar";
 
 const meta: Meta<typeof BaseAvatar> = {

@@ -45,13 +45,7 @@ function getRoomIcon(room: string) {
 
 type AcademicCardLabels = AcademicScheduleCardListProps["labels"];
 
-function ClassCardHeader({
-  row,
-  labels,
-}: {
-  row: AcademicClassRow;
-  labels: AcademicCardLabels;
-}) {
+function ClassCardHeader({ row, labels }: { row: AcademicClassRow; labels: AcademicCardLabels }) {
   const statusLabels: Record<ClassSessionStatus, string> = {
     active: labels.active,
     upcoming: labels.upcoming,

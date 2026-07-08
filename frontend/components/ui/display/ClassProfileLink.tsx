@@ -53,12 +53,9 @@ export function ClassProfileLink({
   const content = (
     <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
       {showAvatar ? (
-        <ClassAvatar
-          src={avatarUrl}
-          label={name || fallbackInitial}
-          size={avatarSize}
-          children={name ? undefined : fallbackInitial}
-        />
+        <ClassAvatar src={avatarUrl} label={name || fallbackInitial} size={avatarSize}>
+          {name ? null : fallbackInitial}
+        </ClassAvatar>
       ) : null}
       <Stack spacing={0.25} sx={{ minWidth: 0 }}>
         {label ? (

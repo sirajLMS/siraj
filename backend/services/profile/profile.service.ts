@@ -271,8 +271,7 @@ export namespace ProfileService {
       return { parentOwnProfile: null, parentAdminProfile: null, associatedStudents: null };
     }
 
-    const parentOwnProfile =
-      scope === "own" ? await ParentPortalService.getOwnProfile(targetUserId, locale) : null;
+    const parentOwnProfile = scope === "own" ? await ParentPortalService.getOwnProfile(targetUserId, locale) : null;
     const parentAdminProfile =
       scope === "other" ? await ParentProfileService.getProfile(actorUserId, roleIds.parentId, locale) : null;
     const parentStudents = await ParentRepository.getAssociatedStudents(roleIds.parentId);

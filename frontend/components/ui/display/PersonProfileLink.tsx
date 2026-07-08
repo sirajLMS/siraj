@@ -53,12 +53,9 @@ export function PersonProfileLink({
   const content = (
     <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
       {showAvatar ? (
-        <UserAvatar
-          src={avatarUrl}
-          label={name || fallbackInitial}
-          size={avatarSize}
-          children={name ? undefined : fallbackInitial}
-        />
+        <UserAvatar src={avatarUrl} label={name || fallbackInitial} size={avatarSize}>
+          {name ? null : fallbackInitial}
+        </UserAvatar>
       ) : null}
       <Stack spacing={0.25} sx={{ minWidth: 0 }}>
         {label ? (

@@ -5,7 +5,13 @@ import type {
   recurringSchedules,
   timezones,
 } from "@/backend/db/schema";
-import type { LeaveRequestStatus, RescheduleDateLabel } from "@/backend/enum";
+import type {
+  ClassExecutionState,
+  ClassOutcome,
+  LeaveRequestStatus,
+  RescheduleDateLabel,
+  StudentStatus,
+} from "@/backend/enum";
 import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule-instance-dashboard-status";
 import type { ClassInstancePerformanceReturnType } from "./class-instance-detail.types";
 import type { PageInfo, PaginationArgs } from "./pagination.types";
@@ -127,4 +133,97 @@ export type CreateRecurringClassReturnType = {
   recurringScheduleId: string;
   classInstanceIds: string[];
   classInstanceCount: number;
+};
+
+export type DailyScheduleMetricFilter =
+  | "total"
+  | "regular"
+  | "trial"
+  | "advance"
+  | "rescheduled"
+  | "suspended"
+  | "taken"
+  | "pending"
+  | "activated"
+  | "running"
+  | "absent"
+  | "leave";
+
+export type FutureClassRow = {
+  id: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  isRescheduled: boolean;
+  studentName: string;
+  studentId: string;
+  classType?: string | null;
+  subjectId?: string | null;
+  subjectName?: string | null;
+  subjectAvatarUrl?: string | null;
+  recurringAvatarUrl?: string | null;
+  zoomMeetingUrl?: string | null;
+};
+
+export type WeeklyScheduleGridRow = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  teacherId: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  dayOfWeek: string;
+  executionState: string;
+  outcome: string;
+  subjectId?: string | null;
+  subjectName?: string | null;
+  classType?: string | null;
+};
+
+export type WeeklyWorkloadMetrics = {
+  totalMinutes: number;
+  totalHoursFormatted: string;
+  classCount: number;
+};
+
+export type StatusTrackingRow = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentInitials: string;
+  studentAvatarUrl: string | null;
+  studentStatus: StudentStatus;
+  teacherId: string;
+  teacherName: string;
+  teacherAvatarUrl: string | null;
+  courseName: string | null;
+  avatarUrl: string | null;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome;
+  isFrozen: boolean;
+};
+
+export type UpcomingClassRow = {
+  id: string;
+  instructor: string;
+  teacherId: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: string;
+  isFrozen: boolean;
+};
+
+export type TeacherAssignedClassRow = {
+  id: string;
+  studentName: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: string;
+  outcome: string | null;
 };
