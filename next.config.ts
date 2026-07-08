@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
-import { getEnv } from "@/backend/lib/env";
+function getEnv(name: string, defaultValue: string): string {
+  return process.env[name] || defaultValue;
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
