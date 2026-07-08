@@ -1,9 +1,10 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import type { CreateRecurringClassInput, ManagerAccountType } from "../generated/gql/graphql-types";
+import { ClassType, type CreateRecurringClassInput, type ManagerAccountType } from "../generated/gql/graphql-types";
 import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
 import { createManagerMutationDocument } from "../sharedDocuments/manager-onboarding.documents";
 import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
+import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teacher-dashboard.documents";
 import {
   cleanupTestEntitiesMutationDocument,
   cleanupTestManagerMutationDocument,
@@ -288,6 +289,44 @@ export async function mutateCreateRecurringClass(token: string, input: CreateRec
     mutation: createRecurringClassMutationDocument,
     variables: {
       input,
+    },
+    errorPolicy: "all",
+    context: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  });
+}
+
+/**
+ * Creates a teacher manual class entry via the GraphQL API with `errorPolicy: "all"`.
+ * Returns the raw Apollo mutation result so callers can assert on `.data` / `.error`.
+ *
+ * @param token - The Bearer token to include in the Authorization header.
+ * @param studentId - The student ID for the manual class entry.
+ * @param teacherId - The teacher ID for the manual class entry.
+ * @param startAt - The scheduled start time as an ISO string.
+ * @param endAt - The scheduled end time as an ISO string.
+ */
+export async function createManualClassEntry(
+  token: string,
+  studentId: string,
+  teacherId: string,
+  startAt: string,
+  endAt: string
+) {
+  return testClient.mutate({
+    mutation: createTeacherManualClassEntryMutationDocument,
+    variables: {
+      input: {
+        studentId,
+        teacherId,
+        scheduledStartAt: startAt,
+        scheduledEndAt: endAt,
+        durationMinutes: 60,
+        classType: ClassType.Regular,
+      },
     },
     errorPolicy: "all",
     context: {

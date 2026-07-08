@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
+import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
 import { DashboardView } from "../../dashboard/DashboardView";
@@ -20,7 +21,7 @@ const MOCK_TEACHERS: TeacherFilterItem[] = [
 ];
 
 const MOCK_SCHEDULE: DailyScheduleRow[] = [
-  {
+  createDailyScheduleRow({
     id: "9082",
     yourTime: "10:00 AM - 11:00 AM",
     teacherTime: "11:00 AM - 12:00 PM",
@@ -28,15 +29,12 @@ const MOCK_SCHEDULE: DailyScheduleRow[] = [
     duration: 60,
     scheduledStartAt: "2028-01-01T10:00:00.000Z",
     scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    status: null,
     outcome: ClassOutcome.Pending,
     executionState: ClassExecutionState.NotActivated,
-    avatarUrl: null,
-    courseName: null,
     student: { id: "student-1", name: "Omar Khalid", avatarUrl: null },
     teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed", avatarUrl: null },
-  },
-  {
+  }),
+  createDailyScheduleRow({
     id: "9083",
     yourTime: "11:30 AM - 12:30 PM",
     teacherTime: "12:30 PM - 01:30 PM",
@@ -44,15 +42,12 @@ const MOCK_SCHEDULE: DailyScheduleRow[] = [
     duration: 60,
     scheduledStartAt: "2028-01-01T10:00:00.000Z",
     scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    status: null,
     outcome: ClassOutcome.Pending,
     executionState: ClassExecutionState.Running,
-    avatarUrl: null,
-    courseName: null,
     student: { id: "student-2", name: "Layla Ismail", avatarUrl: null },
     teacher: { id: "teacher-sarah", name: "Sarah Johnson", avatarUrl: null },
-  },
-  {
+  }),
+  createDailyScheduleRow({
     id: "9084",
     yourTime: "02:00 PM - 03:00 PM",
     teacherTime: "03:00 PM - 04:00 PM",
@@ -60,14 +55,11 @@ const MOCK_SCHEDULE: DailyScheduleRow[] = [
     duration: 60,
     scheduledStartAt: "2028-01-01T10:00:00.000Z",
     scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    status: null,
     outcome: ClassOutcome.Taken,
     executionState: ClassExecutionState.Completed,
-    avatarUrl: null,
-    courseName: null,
     student: { id: "student-3", name: "Omar Ahmed", avatarUrl: null },
     teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed", avatarUrl: null },
-  },
+  }),
 ];
 
 export function MockAdminDashboardContainer() {

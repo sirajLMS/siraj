@@ -15,7 +15,7 @@ import {
   teacherDashboardQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
 import { cleanupTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
-import { authenticatedRequest, loginAndProvision } from "./helpers";
+import { authenticatedRequest, createManualClassEntry, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -104,25 +104,13 @@ describe("GraphQL Class Session Integration Tests", () => {
     const now = new Date();
     const end = new Date(now.getTime() + 60 * 60 * 1000);
 
-    const createRes = await testClient.mutate({
-      mutation: createTeacherManualClassEntryMutationDocument,
-      variables: {
-        input: {
-          studentId,
-          teacherId,
-          scheduledStartAt: now.toISOString(),
-          scheduledEndAt: end.toISOString(),
-          durationMinutes: 60,
-          classType: ClassType.Regular,
-        },
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-    });
+    const createRes = await createManualClassEntry(
+      teacherToken,
+      studentId,
+      teacherId,
+      now.toISOString(),
+      end.toISOString()
+    );
 
     expect(createRes.data).toBeDefined();
     expect(createRes.error).toBeUndefined();
@@ -178,25 +166,13 @@ describe("GraphQL Class Session Integration Tests", () => {
     const endOutside = new Date(now.getTime() + 3 * 60 * 60 * 1000);
     outsideDate = startOutside.toISOString().split("T")[0];
 
-    const createRes = await testClient.mutate({
-      mutation: createTeacherManualClassEntryMutationDocument,
-      variables: {
-        input: {
-          studentId,
-          teacherId,
-          scheduledStartAt: startOutside.toISOString(),
-          scheduledEndAt: endOutside.toISOString(),
-          durationMinutes: 60,
-          classType: ClassType.Regular,
-        },
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-    });
+    const createRes = await createManualClassEntry(
+      teacherToken,
+      studentId,
+      teacherId,
+      startOutside.toISOString(),
+      endOutside.toISOString()
+    );
 
     expect(createRes.data).toBeDefined();
     expect(createRes.error).toBeUndefined();

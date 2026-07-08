@@ -1,19 +1,16 @@
 "use client";
 
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
-import { Link } from "@/shared/i18n/routing";
-
-const BOTTOM_NAV_SCROLL_THRESHOLD = 5;
-const BOTTOM_NAV_ITEM_MIN_WIDTH = 72;
+import { BOTTOM_NAV_SCROLL_THRESHOLD, BottomNavItemView } from "./BottomNavItemView";
 
 interface BottomNavbarProps {
   readonly items: readonly NavItem[];
   readonly activeKey: string;
 }
 
-export function BottomNavbar({ items, activeKey }: BottomNavbarProps) {
+export function BottomNavbar({ items, activeKey }: Readonly<BottomNavbarProps>) {
   const t = useTranslations();
   const isScrollable = items.length > BOTTOM_NAV_SCROLL_THRESHOLD;
 
@@ -44,53 +41,17 @@ export function BottomNavbar({ items, activeKey }: BottomNavbarProps) {
           },
         })}
       >
-        {items.map(item => {
-          const IconComponent = item.icon;
-          const isActive = item.key === activeKey;
-          const label = t(item.labelKey);
-
-          return (
-            <Box
-              key={item.key}
-              component={Link}
-              href={item.href}
-              aria-label={label}
-              aria-current={isActive ? "page" : undefined}
-              sx={theme => ({
-                flex: isScrollable ? `0 0 ${BOTTOM_NAV_ITEM_MIN_WIDTH}px` : 1,
-                minWidth: isScrollable ? BOTTOM_NAV_ITEM_MIN_WIDTH : 0,
-                maxWidth: isScrollable ? 80 : "none",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 0.25,
-                px: 0.5,
-                py: 0.75,
-                textDecoration: "none",
-                color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
-                overflow: "hidden",
-              })}
-            >
-              <IconComponent sx={{ fontSize: 20, flexShrink: 0 }} />
-              <Typography
-                variant="labelSm"
-                sx={{
-                  fontWeight: isActive ? 600 : 400,
-                  width: "100%",
-                  textAlign: "center",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  letterSpacing: 0,
-                  lineHeight: 1.2,
-                }}
-              >
-                {label}
-              </Typography>
-            </Box>
-          );
-        })}
+        {items.map(item => (
+          <BottomNavItemView
+            key={item.key}
+            itemKey={item.key}
+            href={item.href}
+            label={t(item.labelKey)}
+            icon={item.icon}
+            isActive={item.key === activeKey}
+            isScrollable={isScrollable}
+          />
+        ))}
       </Box>
     </Paper>
   );

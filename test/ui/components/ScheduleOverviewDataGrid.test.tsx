@@ -31,6 +31,7 @@ import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/gra
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ScheduleOverviewDataGrid } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
+import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {
@@ -63,7 +64,7 @@ const headers = {
 };
 
 const mockRows: readonly DailyScheduleRow[] = [
-  {
+  createDailyScheduleRow({
     id: "row-1",
     yourTime: "10:00 AM",
     teacherTime: "11:00 AM",
@@ -71,15 +72,12 @@ const mockRows: readonly DailyScheduleRow[] = [
     duration: 60,
     scheduledStartAt: "2028-01-01T10:00:00.000Z",
     scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    status: null,
     outcome: ClassOutcome.Pending,
     executionState: ClassExecutionState.NotActivated,
-    avatarUrl: null,
-    courseName: null,
     student: { id: "student-1", name: "Ahmed Hassan", avatarUrl: null },
     teacher: { id: "teacher-1", name: "Dr. Sarah", avatarUrl: null },
-  },
-  {
+  }),
+  createDailyScheduleRow({
     id: "row-2",
     yourTime: "2:00 PM",
     teacherTime: "3:00 PM",
@@ -87,14 +85,11 @@ const mockRows: readonly DailyScheduleRow[] = [
     duration: 60,
     scheduledStartAt: "2028-01-01T10:00:00.000Z",
     scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    status: null,
     outcome: ClassOutcome.Taken,
     executionState: ClassExecutionState.Completed,
-    avatarUrl: null,
-    courseName: null,
     student: { id: "student-2", name: "Fatima Ali", avatarUrl: null },
     teacher: { id: "teacher-2", name: "Mr. Omar", avatarUrl: null },
-  },
+  }),
 ];
 
 const defaultPaginationProps = {

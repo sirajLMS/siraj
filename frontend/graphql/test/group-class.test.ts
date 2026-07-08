@@ -1,18 +1,22 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
 } from "../sharedDocuments";
 import { deleteClassInstanceMutationDocument } from "../sharedDocuments/class-session.documents";
-import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teacher-dashboard.documents";
 import {
   cleanupTestEntitiesMutationDocument,
   cleanupTestGroupClassMutationDocument,
   createTestGroupClassMutationDocument,
 } from "../sharedDocuments/test-helper.documents";
-import { authenticatedRequest, cleanupTestSuperAdmin, loginAndProvision, provisionTestSuperAdmin } from "./helpers";
+import {
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  createManualClassEntry,
+  loginAndProvision,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -53,21 +57,13 @@ describe("GraphQL: Group Class integration tests", () => {
 
     const now = new Date();
     const end = new Date(now.getTime() + 60 * 60 * 1000);
-    const createRes = await testClient.mutate({
-      mutation: createTeacherManualClassEntryMutationDocument,
-      variables: {
-        input: {
-          studentId,
-          teacherId,
-          scheduledStartAt: now.toISOString(),
-          scheduledEndAt: end.toISOString(),
-          durationMinutes: 60,
-          classType: ClassType.Regular,
-        },
-      },
-      errorPolicy: "all",
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
-    });
+    const createRes = await createManualClassEntry(
+      teacherToken,
+      studentId,
+      teacherId,
+      now.toISOString(),
+      end.toISOString()
+    );
     expect(createRes.error).toBeUndefined();
     classInstanceId = createRes.data?.createTeacherManualClassEntry?.id ?? null;
     expect(classInstanceId).toBeTruthy();

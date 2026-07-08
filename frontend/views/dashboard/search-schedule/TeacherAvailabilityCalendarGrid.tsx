@@ -1,8 +1,13 @@
 "use client";
 
 import { ScheduleOutlined } from "@mui/icons-material";
-import { Box, Chip, Paper, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import {
+  CalendarGridContainer,
+  CalendarWeekdayHeader,
+  computeCalendarGridLayout,
+} from "@/frontend/views/dashboard/shared/CalendarGridShared";
 import type { TeacherAvailabilityGapItem } from "./TeacherAvailabilityDayPill";
 
 export interface TeacherAvailabilityCalendarDay {
@@ -74,47 +79,11 @@ export function TeacherAvailabilityCalendarGrid({
   daysByDate,
 }: Readonly<TeacherAvailabilityCalendarGridProps>) {
   const t = useTranslations("dashboard.searchSchedule.calendar.days");
-
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
-  const daysOfWeek = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
-
-  const emptyStartDays = Array.from({ length: firstDayOfMonth }, (_, index) => {
-    const prevMonthDays = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate();
-    return prevMonthDays - firstDayOfMonth + index + 1;
-  });
-
-  const remainingCells = 35 - (emptyStartDays.length + daysInMonth);
-  const emptyEndDays = Array.from(
-    { length: remainingCells > 0 ? remainingCells : remainingCells + 7 },
-    (_, index) => index + 1
-  );
+  const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        borderRadius: theme => theme.layout.radius.card,
-        border: theme => `1px solid ${theme.palette.border.light}`,
-        overflow: "hidden",
-      }}
-    >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(7, 1fr)",
-          borderBottom: theme => `1px solid ${theme.palette.border.light}`,
-          backgroundColor: theme => theme.palette.surfaceContainerLow,
-        }}
-      >
-        {daysOfWeek.map(day => (
-          <Box key={day} sx={{ py: 2, textAlign: "center" }}>
-            <Typography variant="buttonText" sx={theme => ({ color: theme.palette.onSecondaryContainer })}>
-              {t(day)}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+    <CalendarGridContainer>
+      <CalendarWeekdayHeader translateDay={day => t(day)} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {emptyStartDays.map(day => (
@@ -129,6 +98,6 @@ export function TeacherAvailabilityCalendarGrid({
           <EmptyCell key={`end-${day}`} day={day} />
         ))}
       </Box>
-    </Paper>
+    </CalendarGridContainer>
   );
 }

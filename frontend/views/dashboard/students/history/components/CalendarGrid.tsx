@@ -1,8 +1,13 @@
 import { ScheduleOutlined } from "@mui/icons-material";
-import { Box, Paper, styled, Typography } from "@mui/material";
+import { Box, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui";
 import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  CalendarGridContainer,
+  CalendarWeekdayHeader,
+  computeCalendarGridLayout,
+} from "@/frontend/views/dashboard/shared/CalendarGridShared";
 import { Link } from "@/shared/i18n/routing";
 import type { CalendarGridProps, ClassSession } from "../types";
 
@@ -95,47 +100,11 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
 
 export function CalendarGrid({ currentMonth, classes }: Readonly<CalendarGridProps>) {
   const t = useTranslations("dashboard.studentHistory.calendar.days");
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
-
-  const daysOfWeek = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
-
-  const emptyStartDays = Array.from({ length: firstDayOfMonth }, (_, i) => {
-    const prevMonthDays = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate();
-    return prevMonthDays - firstDayOfMonth + i + 1;
-  });
-
-  const remainingCells = 35 - (emptyStartDays.length + daysInMonth);
-  const emptyEndDays = Array.from(
-    { length: remainingCells > 0 ? remainingCells : remainingCells + 7 },
-    (_, i) => i + 1
-  );
+  const { daysInMonth, emptyStartDays, emptyEndDays } = computeCalendarGridLayout(currentMonth);
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        borderRadius: theme => theme.layout.radius.card,
-        border: theme => `1px solid ${theme.palette.border.light}`,
-        overflow: "hidden",
-      }}
-    >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(7, 1fr)",
-          borderBottom: theme => `1px solid ${theme.palette.border.light}`,
-          backgroundColor: theme => theme.palette.surfaceContainerLow,
-        }}
-      >
-        {daysOfWeek.map(day => (
-          <Box key={day} sx={{ py: 2, textAlign: "center" }}>
-            <Typography variant="buttonText" sx={{ color: theme => theme.palette.onSecondaryContainer }}>
-              {t(day)}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+    <CalendarGridContainer>
+      <CalendarWeekdayHeader translateDay={day => t(day)} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", minHeight: 800 }}>
         {emptyStartDays.map(day => (
@@ -154,6 +123,6 @@ export function CalendarGrid({ currentMonth, classes }: Readonly<CalendarGridPro
           </EmptyCell>
         ))}
       </Box>
-    </Paper>
+    </CalendarGridContainer>
   );
 }
