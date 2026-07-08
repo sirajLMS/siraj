@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
+import { mapBackendPermissionsToGraphql } from "@/backend/lib/auth/map-graphql-permissions";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
 import type { AppPermission, User } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -39,7 +40,7 @@ export default async function DashboardLayout({
     name: userProfile.name,
     email: userProfile.email,
     avatarUrl: userProfile.avatarUrl,
-    permissions: userProfile.permissions as unknown as AppPermission[],
+    permissions: mapBackendPermissionsToGraphql(userProfile.permissions) as AppPermission[],
     role: userProfile.role,
     notificationCount: userProfile.notificationCount,
     teacherId: userProfile.teacherId,
