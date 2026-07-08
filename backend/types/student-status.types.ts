@@ -2,6 +2,7 @@ import type { ClassExecutionState, StudentStatus } from "@/backend/enum";
 export interface StudentUpcomingClass {
   readonly id: string;
   readonly instructor: string;
+  readonly teacherId: string;
   readonly scheduledStartAt: Date;
   readonly scheduledEndAt: Date;
   readonly durationMinutes: number;

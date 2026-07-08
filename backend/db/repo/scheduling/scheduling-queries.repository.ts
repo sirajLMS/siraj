@@ -939,6 +939,7 @@ export const getStudentFutureClasses = async (
 export type UpcomingClassRow = {
   id: string;
   instructor: string;
+  teacherId: string;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
@@ -961,6 +962,7 @@ export const getUpcomingClassesForStudent = async (
       executionState: classInstances.executionState,
       isFrozen: classInstances.isFrozen,
       instructor: users.name,
+      teacherId: classInstances.teacherId,
     })
     .from(classInstances)
     .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))

@@ -1625,7 +1625,7 @@ export type DeleteComplaintMutationVariables = Exact<{
 
 export type DeleteComplaintMutation = DeleteComplaintMutation_Mutation;
 
-export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_updatedSessions_DstUpdatedSession = { id: string | null, studentName: string | null, teacherName: string | null, fromTime: string | null, toTime: string | null };
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_updatedSessions_DstUpdatedSession = { id: string | null, studentId: string | null, teacherId: string | null, studentName: string | null, teacherName: string | null, fromTime: string | null, toTime: string | null };
 
 export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_conflictGroups_DstConflictGroup_conflicts_DstConflictItem = { id: string | null, studentName: string | null, message: string | null };
 
@@ -1996,7 +1996,7 @@ export type ParentProfileQueryVariables = Exact<{
 
 export type ParentProfileQuery = ParentProfileQuery_Query;
 
-export type ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
+export type ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
 
 export type ParentAssociatedStudentsQuery_Query = { parentAssociatedStudents: Array<ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent> | null };
 
@@ -2215,7 +2215,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionO
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_bankingSummary_TeacherBankingSummary = { id: string | null, beneficiaryName: string | null, bankName: string | null, accountNumber: string | null, routingNumber: string | null, swiftBic: string | null, iban: string | null, verifiedAt: string | null, verifiedByUserId: string | null, verifiedByName: string | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent = { id: string | null, name: string | null, studentAvatarUrl: string | null, parentName: string | null, parentAvatarUrl: string | null, className: string | null, status: Types.StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent = { id: string | null, name: string | null, studentAvatarUrl: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentAvatarUrl: string | null, className: string | null, status: Types.StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent> | null };
 
@@ -2577,7 +2577,7 @@ export type ChangeStudentStatusMutationVariables = Exact<{
 
 export type ChangeStudentStatusMutation = ChangeStudentStatusMutation_Mutation;
 
-export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass = { id: string | null, instructor: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, isFrozen: boolean | null };
+export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass = { id: string | null, instructor: string | null, teacherId: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, isFrozen: boolean | null };
 
 export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult = { id: string | null, studentId: string | null, studentName: string | null, status: Types.StudentStatus | null, classes: Array<StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass> | null };
 
@@ -2621,7 +2621,7 @@ export type StudentByIdQueryVariables = Exact<{
 
 export type StudentByIdQuery = StudentByIdQuery_Query;
 
-export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, submitterName: string | null, body: string | null, status: Types.SuggestionStatus | null, adminResponse: string | null, duplicateOfId: string | null, duplicateOfBody: string | null, duplicateOfSubmitterName: string | null, responseCount: number | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, parentUserId: string | null, submitterName: string | null, body: string | null, status: Types.SuggestionStatus | null, adminResponse: string | null, duplicateOfId: string | null, duplicateOfBody: string | null, duplicateOfSubmitterName: string | null, responseCount: number | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
 
 export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics = { id: string | null, pending: number | null, reviewed: number | null, duplicate: number | null, avgResponseTime: string | null, totalCount: number | null };
 

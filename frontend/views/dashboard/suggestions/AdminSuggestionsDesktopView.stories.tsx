@@ -11,6 +11,7 @@ const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
   {
     id: "sug-1001",
     parentId: "par-1001",
+    parentUserId: "usr-par-1001",
     parentName: "Sarah Jenkins",
     suggestionPreview: "It would be great to have a weekend coding club for Grade 5-8 students...",
     status: SuggestionStatus.Pending,
@@ -23,6 +24,7 @@ const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
   {
     id: "sug-1002",
     parentId: "par-1002",
+    parentUserId: "usr-par-1002",
     parentName: "David Miller",
     suggestionPreview: "Consider adding organic options to the cafeteria lunch menu.",
     status: SuggestionStatus.Reviewed,
@@ -35,6 +37,7 @@ const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
   {
     id: "sug-1003",
     parentId: "par-1003",
+    parentUserId: "usr-par-1003",
     parentName: "Fatima Ali",
     suggestionPreview: "Weekend coding club would be wonderful for the students.",
     status: SuggestionStatus.Duplicate,

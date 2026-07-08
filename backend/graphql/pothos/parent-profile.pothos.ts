@@ -43,6 +43,7 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
     name: t.exposeString("name"),
     status: t.exposeString("status"),
     primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
+    teacherUserId: t.exposeString("teacherUserId", { nullable: true }),
     teacherName: t.exposeString("teacherName", { nullable: true }),
     hoursPerWeek: t.exposeString("hoursPerWeek"),
     classesRemaining: t.exposeInt("classesRemaining"),

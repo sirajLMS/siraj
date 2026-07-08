@@ -1,11 +1,12 @@
 "use client";
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
@@ -24,12 +25,20 @@ export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
         minWidth: 220,
         renderCell: params => (
           <Box sx={{ py: 1 }}>
-            <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-              {params.row.studentName}
-            </Typography>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {params.row.teacherName}
-            </Typography>
+            <PersonProfileLinkCell
+              href={params.row.studentId ? studentHref(params.row.studentId) : undefined}
+              name={params.row.studentName}
+              showAvatar={false}
+              typographyVariant="bodyMd"
+              fontWeight={700}
+            />
+            <PersonProfileLinkCell
+              href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
+              name={params.row.teacherName}
+              showAvatar={false}
+              typographyVariant="labelMd"
+              fontWeight={400}
+            />
           </Box>
         ),
       },

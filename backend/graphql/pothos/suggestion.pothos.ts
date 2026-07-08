@@ -44,6 +44,7 @@ export const SuggestionPothosObject = SuggestionRef.implement({
     emailSentAt: t.expose("emailSentAt", { type: "DateTime", nullable: true }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     parentName: t.exposeString("parentName", { nullable: true }),
+    parentUserId: t.exposeString("parentUserId", { nullable: true }),
     reviewedByName: t.field({
       type: "String",
       nullable: true,

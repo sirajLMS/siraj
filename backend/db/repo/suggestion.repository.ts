@@ -70,6 +70,7 @@ export namespace SuggestionRepository {
   export type AdminSuggestionQueueRow = {
     id: string;
     parentId: string;
+    parentUserId: string | null;
     parentName: string;
     submitterName: string;
     body: string;
@@ -113,6 +114,7 @@ export namespace SuggestionRepository {
       .select({
         id: suggestions.id,
         parentId: suggestions.parentId,
+        parentUserId: parents.userId,
         parentName: users.name,
         submitterName: suggestions.submitterName,
         body: suggestions.body,

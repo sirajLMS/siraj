@@ -3,9 +3,10 @@ import { Box, Button, Paper, Typography, useMediaQuery, useTheme } from "@mui/ma
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
+import { PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "../types";
@@ -91,7 +92,13 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
                   })}
                 >
                   <PersonOutlined sx={{ fontSize: 18 }} />
-                  <Typography variant="bodyMd">{cls.instructor}</Typography>
+                  <PersonProfileLink
+                    href={profileHrefForTeacher({ teacherId: cls.teacherId })}
+                    name={cls.instructor}
+                    showAvatar={false}
+                    typographyVariant="bodyMd"
+                    fontWeight={400}
+                  />
                 </Box>
                 <Box
                   sx={theme => ({
@@ -195,6 +202,31 @@ function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
   );
 }
 
+function InstructorCell({ row, minutesLabel }: Readonly<{ row: UpcomingClassDisplay; minutesLabel: string }>) {
+  const instructorHref = profileHrefForTeacher({ teacherId: row.teacherId });
+
+  return (
+    <Box sx={{ py: 1.5 }}>
+      {instructorHref ? (
+        <PersonProfileLink
+          href={instructorHref}
+          name={row.instructor}
+          showAvatar={false}
+          typographyVariant="bodyMd"
+          fontWeight={700}
+        />
+      ) : (
+        <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
+          {row.instructor}
+        </Typography>
+      )}
+      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+        {minutesLabel}
+      </Typography>
+    </Box>
+  );
+}
+
 function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
   const t = useTranslations("dashboard.studentStatus");
   const locale = useLocale();
@@ -205,10 +237,9 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
       headerName: t("table.subjectInstructor"),
       flex: 1.5,
       renderCell: params => (
-        <RenderCellWrapper
-          primary={params.row.instructor}
-          secondary={t("table.minutesShort", { minutes: params.row.durationMinutes })}
-          primaryBold
+        <InstructorCell
+          row={params.row}
+          minutesLabel={t("table.minutesShort", { minutes: params.row.durationMinutes })}
         />
       ),
     },

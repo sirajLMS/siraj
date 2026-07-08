@@ -21,6 +21,8 @@ export const TeacherAssignedStudentPothosObject = TeacherAssignedStudentRef.impl
     id: t.exposeString("id"),
     name: t.exposeString("name"),
     studentAvatarUrl: t.exposeString("studentAvatarUrl", { nullable: true }),
+    parentId: t.exposeString("parentId", { nullable: true }),
+    parentUserId: t.exposeString("parentUserId", { nullable: true }),
     parentName: t.exposeString("parentName", { nullable: true }),
     parentAvatarUrl: t.exposeString("parentAvatarUrl", { nullable: true }),
     className: t.exposeString("className", { nullable: true }),

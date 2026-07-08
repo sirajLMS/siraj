@@ -4,7 +4,7 @@ import { Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForParent, studentHref } from "@/frontend/utils/profileHref";
 
 export type AssignedStudentsRow = {
   readonly id: string;
@@ -12,6 +12,8 @@ export type AssignedStudentsRow = {
   readonly studentAvatarUrl: string | null;
   readonly parentName: string;
   readonly parentAvatarUrl: string | null;
+  readonly parentId: string | null;
+  readonly parentUserId: string | null;
   readonly className: string;
   readonly status: string;
   readonly hoursPerWeek: number;
@@ -63,10 +65,13 @@ export function AssignedStudentsDataGrid({
       minWidth: 260,
       renderCell: params => (
         <PersonProfileLinkCell
+          href={profileHrefForParent({
+            userId: params.row.parentUserId,
+            parentId: params.row.parentId,
+          })}
           avatarUrl={params.row.parentAvatarUrl}
           name={params.row.parentName}
           fallbackInitial="P"
-          emphasizeLink={false}
         />
       ),
     },

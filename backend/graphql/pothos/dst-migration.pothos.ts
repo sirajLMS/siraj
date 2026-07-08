@@ -12,6 +12,8 @@ const DstUpdatedSessionRef = gqlSchemaBuilder.objectRef<DstUpdatedSessionReturnT
 export const DstUpdatedSessionPothosObject = DstUpdatedSessionRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
+    studentId: t.exposeString("studentId"),
+    teacherId: t.exposeString("teacherId"),
     studentName: t.exposeString("studentName"),
     teacherName: t.exposeString("teacherName"),
     fromTime: t.exposeString("fromTime"),

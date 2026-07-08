@@ -25,12 +25,12 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, LanguageDisplay, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { AppPermission, type StudentStatus as GqlStudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/utils/student-status-transitions";
 import { useRouter } from "@/shared/i18n/routing";
 import type { ParentStudent } from "../types/profile";
@@ -265,11 +265,14 @@ function ParentStudentsDataGrid({ rows, loading, onRefetch }: ParentStudentsData
       minWidth: 150,
       renderCell: params => (
         <PersonProfileLinkCell
-          href={profileHrefForTeacher({ teacherId: params.row.teacherId })}
+          href={profileHrefForTeacher({
+            userId: params.row.teacherUserId,
+            teacherId: params.row.teacherId,
+          })}
           name={params.row.teacher.trim() || tc("notSet")}
           showAvatar={false}
           fontWeight={400}
-          emphasizeLink={Boolean(params.row.teacherId)}
+          emphasizeLink={Boolean(params.row.teacherUserId || params.row.teacherId)}
         />
       ),
     },

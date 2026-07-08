@@ -55,6 +55,8 @@ export function DstMigrationContainer() {
     () =>
       report?.updatedSessions?.map(s => ({
         id: s.id ?? "",
+        studentId: s.studentId ?? "",
+        teacherId: s.teacherId ?? "",
         studentName: s.studentName ?? "",
         teacherName: s.teacherName ?? "",
         fromTime: s.fromTime ?? "",

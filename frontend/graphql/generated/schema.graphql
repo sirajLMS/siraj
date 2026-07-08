@@ -194,6 +194,7 @@ type AssociatedStudent {
   primaryTeacherId: String
   status: String
   teacherName: String
+  teacherUserId: String
   updatedAt: DateTime
   version: Int
 }
@@ -1018,7 +1019,9 @@ type DstMigrationReport {
 type DstUpdatedSession {
   fromTime: String
   id: String
+  studentId: String
   studentName: String
+  teacherId: String
   teacherName: String
   toTime: String
 }
@@ -2414,6 +2417,7 @@ type StudentUpcomingClass {
   isFrozen: Boolean
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
+  teacherId: String
 }
 
 type StudentUpcomingClassesResult {
@@ -2477,6 +2481,7 @@ type Suggestion {
   id: String
   parentId: String
   parentName: String
+  parentUserId: String
   responseCount: Int
   reviewedAt: DateTime
   reviewedByName: String
@@ -2581,7 +2586,9 @@ type TeacherAssignedStudent {
   id: String
   name: String
   parentAvatarUrl: String
+  parentId: String
   parentName: String
+  parentUserId: String
   status: StudentStatus
   studentAvatarUrl: String
 }

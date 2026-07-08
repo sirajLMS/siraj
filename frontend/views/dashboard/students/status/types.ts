@@ -3,6 +3,7 @@ import type { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-typ
 export interface UpcomingClassDisplay {
   readonly id: string;
   readonly instructor: string;
+  readonly teacherId: string | null;
   readonly scheduledStartAt: string;
   readonly scheduledEndAt: string;
   readonly durationMinutes: number;

@@ -71,6 +71,7 @@ export function StudentStatusContainer() {
     const upcomingClasses: UpcomingClassDisplay[] = (uc?.classes ?? []).map(cls => ({
       id: cls?.id ?? "",
       instructor: cls?.instructor ?? "",
+      teacherId: cls?.teacherId ?? null,
       scheduledStartAt: cls?.scheduledStartAt ?? "",
       scheduledEndAt: cls?.scheduledEndAt ?? "",
       durationMinutes: cls?.durationMinutes ?? 0,

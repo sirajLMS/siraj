@@ -141,6 +141,8 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
           id
           name
           studentAvatarUrl
+          parentId
+          parentUserId
           parentName
           parentAvatarUrl
           className

@@ -101,7 +101,7 @@ export function SuggestionsDataGrid({
         renderCell: ({ row }) => (
           <PersonProfileLinkCell
             name={row.parentName}
-            href={profileHrefForParent({ parentId: row.parentId })}
+            href={profileHrefForParent({ userId: row.parentUserId, parentId: row.parentId })}
             showAvatar={false}
             fontWeight={700}
           />

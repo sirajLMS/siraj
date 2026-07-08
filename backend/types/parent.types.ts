@@ -136,6 +136,7 @@ export interface AssociatedStudentResult {
   readonly name: string;
   readonly status: string;
   readonly primaryTeacherId: string | null;
+  readonly teacherUserId: string | null;
   readonly teacherName: string | null;
   readonly hoursPerWeek: string;
   readonly classesRemaining: number;

@@ -47,6 +47,7 @@ export const parentAssociatedStudentsQueryDocument: TypedDocumentNode<
       name
       status
       primaryTeacherId
+      teacherUserId
       teacherName
       hoursPerWeek
       classesRemaining

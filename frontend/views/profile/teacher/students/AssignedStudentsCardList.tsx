@@ -3,7 +3,7 @@
 import { Chip, Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PersonProfileLink } from "@/frontend/components/ui";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForParent, studentHref } from "@/frontend/utils/profileHref";
 import type { AssignedStudentsRow } from "./AssignedStudentsDataGrid";
 
 type AssignedStudentsCardListProps = {
@@ -33,6 +33,10 @@ export function AssignedStudentsCardList({ rows }: AssignedStudentsCardListProps
               <Chip size="small" variant="outlined" label={formatStatusLabel(row.status)} />
             </Stack>
             <PersonProfileLink
+              href={profileHrefForParent({
+                userId: row.parentUserId,
+                parentId: row.parentId,
+              })}
               avatarUrl={row.parentAvatarUrl}
               name={row.parentName}
               fallbackInitial="P"
@@ -40,7 +44,6 @@ export function AssignedStudentsCardList({ rows }: AssignedStudentsCardListProps
               showAvatar
               avatarSize={24}
               fontWeight={400}
-              emphasizeLink={false}
             />
             <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
               {t("columns.class")}: {row.className}

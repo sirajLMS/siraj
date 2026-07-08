@@ -33,6 +33,8 @@ function toViewRow(
     studentAvatarUrl: student.studentAvatarUrl ?? null,
     parentName: student.parentName?.trim() || t("parentUnknown"),
     parentAvatarUrl: student.parentAvatarUrl ?? null,
+    parentId: student.parentId ?? null,
+    parentUserId: student.parentUserId ?? null,
     className: student.className?.trim() || t("classUnknown"),
     status: student.status ?? "UNKNOWN",
     hoursPerWeek,

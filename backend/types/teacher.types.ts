@@ -172,6 +172,8 @@ export type TeacherAssignedStudentReturnType = {
   id: string;
   name: string;
   studentAvatarUrl: string | null;
+  parentId: string | null;
+  parentUserId: string | null;
   parentName: string | null;
   parentAvatarUrl: string | null;
   className: string | null;

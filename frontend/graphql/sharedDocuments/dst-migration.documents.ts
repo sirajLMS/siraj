@@ -17,6 +17,8 @@ export const executeDstBulkUpdateMutationDocument: TypedDocumentNode<
       status
       updatedSessions {
         id
+        studentId
+        teacherId
         studentName
         teacherName
         fromTime

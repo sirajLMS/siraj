@@ -9,6 +9,7 @@ export interface ParentStudent {
   readonly avatarUrl?: string;
   readonly teacher: string;
   readonly teacherId?: string | null;
+  readonly teacherUserId?: string | null;
   readonly hoursPerWeek: number;
   readonly classesLeft: number;
   readonly totalClasses: number;

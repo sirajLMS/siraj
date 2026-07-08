@@ -95,6 +95,7 @@ export namespace SuggestionService {
         suggestions: result.rows.map(row => ({
           id: row.id,
           parentId: row.parentId,
+          parentUserId: row.parentUserId,
           submitterName: row.submitterName,
           body: row.body,
           status: row.status as SuggestionStatus,

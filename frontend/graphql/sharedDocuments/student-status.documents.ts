@@ -15,6 +15,7 @@ export const studentUpcomingClassesQueryDocument: TypedDocumentNode<
       classes {
         id
         instructor
+        teacherId
         scheduledStartAt
         scheduledEndAt
         durationMinutes

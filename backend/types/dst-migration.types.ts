@@ -8,6 +8,8 @@ export type DstMigrationEntryInsertType = typeof dstMigrationEntries.$inferInser
 
 export type DstUpdatedSessionReturnType = {
   readonly id: string;
+  readonly studentId: string;
+  readonly teacherId: string;
   readonly studentName: string;
   readonly teacherName: string;
   readonly fromTime: string;

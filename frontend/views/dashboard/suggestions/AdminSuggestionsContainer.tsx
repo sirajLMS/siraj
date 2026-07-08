@@ -155,6 +155,7 @@ export function AdminSuggestionsContainer() {
     return data.adminSuggestions.rows.map(row => ({
       id: row.id ?? "",
       parentId: row.parentId ?? null,
+      parentUserId: row.parentUserId ?? null,
       parentName: row.parentName ?? "",
       suggestionPreview: row.body ?? "",
       status: row.status ?? SuggestionStatus.Pending,

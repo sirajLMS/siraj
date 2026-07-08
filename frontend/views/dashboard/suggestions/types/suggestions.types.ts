@@ -25,6 +25,7 @@ export interface AdminSuggestionsSummary {
 export interface AdminSuggestionRow {
   readonly id: string;
   readonly parentId: string | null;
+  readonly parentUserId: string | null;
   readonly parentName: string;
   readonly suggestionPreview: string;
   readonly status: SuggestionStatus;

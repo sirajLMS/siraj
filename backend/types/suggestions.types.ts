@@ -6,6 +6,7 @@ export type SuggestionInsertType = typeof suggestions.$inferInsert;
 export type SuggestionReturnType = Omit<SuggestionSelectType, "deletedAt"> & {
   status: SuggestionStatus;
   parentName?: string | null;
+  parentUserId?: string | null;
   reviewedByUserName?: string | null;
   duplicateOfBody?: string | null;
   duplicateOfSubmitterName?: string | null;

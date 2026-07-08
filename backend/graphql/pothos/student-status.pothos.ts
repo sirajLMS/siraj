@@ -8,6 +8,7 @@ export const StudentUpcomingClassPothosObject = StudentUpcomingClassRef.implemen
   fields: t => ({
     id: t.exposeString("id"),
     instructor: t.exposeString("instructor"),
+    teacherId: t.exposeString("teacherId"),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),

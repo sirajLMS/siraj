@@ -83,6 +83,8 @@ export namespace DstMigrationService {
       kind: "updated",
       session: {
         id: schedule.id,
+        studentId: schedule.studentId,
+        teacherId: schedule.teacherId,
         studentName: schedule.studentName,
         teacherName: schedule.teacherName,
         fromTime: schedule.defaultStartTime,

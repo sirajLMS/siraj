@@ -221,6 +221,7 @@ export type AssociatedStudent = {
   primaryTeacherId: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
+  teacherUserId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   version: Maybe<Scalars['Int']['output']>;
 };
@@ -1065,7 +1066,9 @@ export type DstUpdatedSession = {
   __typename?: 'DstUpdatedSession';
   fromTime: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
   toTime: Maybe<Scalars['String']['output']>;
 };
@@ -3239,6 +3242,7 @@ export type StudentUpcomingClass = {
   isFrozen: Maybe<Scalars['Boolean']['output']>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
 };
 
 export type StudentUpcomingClassesResult = {
@@ -3304,6 +3308,7 @@ export type Suggestion = {
   id: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
+  parentUserId: Maybe<Scalars['String']['output']>;
   responseCount: Maybe<Scalars['Int']['output']>;
   reviewedAt: Maybe<Scalars['DateTime']['output']>;
   reviewedByName: Maybe<Scalars['String']['output']>;
@@ -3418,7 +3423,9 @@ export type TeacherAssignedStudent = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   parentAvatarUrl: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
+  parentUserId: Maybe<Scalars['String']['output']>;
   status: Maybe<StudentStatus>;
   studentAvatarUrl: Maybe<Scalars['String']['output']>;
 };

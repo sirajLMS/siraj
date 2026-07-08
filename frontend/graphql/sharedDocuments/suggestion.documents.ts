@@ -14,6 +14,7 @@ export const adminSuggestionsQueryDocument: TypedDocumentNode<
       rows {
         id
         parentId
+        parentUserId
         submitterName
         body
         status

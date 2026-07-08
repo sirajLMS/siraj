@@ -1,5 +1,7 @@
 export interface UpdatedSession {
   readonly id: string;
+  readonly studentId: string;
+  readonly teacherId: string;
   readonly studentName: string;
   readonly teacherName: string;
   readonly fromTime: string;

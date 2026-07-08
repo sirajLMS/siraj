@@ -2,6 +2,8 @@
 
 import { ArrowForwardOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
+import { PersonProfileLink } from "@/frontend/components/ui";
+import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
@@ -20,15 +22,23 @@ function UpdatedSessionRow({ session }: Readonly<{ session: UpdatedSession }>) {
         borderBottom: `1px solid ${theme.palette.outlineVariant}`,
       })}
     >
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
         <CheckCircleOutlined sx={theme => ({ color: theme.palette.tertiaryContainer })} />
-        <Box>
-          <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-            {session.studentName}
-          </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {session.teacherName}
-          </Typography>
+        <Box sx={{ minWidth: 0 }}>
+          <PersonProfileLink
+            href={session.studentId ? studentHref(session.studentId) : undefined}
+            name={session.studentName}
+            showAvatar={false}
+            typographyVariant="bodyMd"
+            fontWeight={700}
+          />
+          <PersonProfileLink
+            href={profileHrefForTeacher({ teacherId: session.teacherId })}
+            name={session.teacherName}
+            showAvatar={false}
+            typographyVariant="labelMd"
+            fontWeight={400}
+          />
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {session.fromTime}
