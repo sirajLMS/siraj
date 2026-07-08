@@ -1,8 +1,11 @@
 import { addDays, format } from "date-fns";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AvailabilitySearchInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AvailabilitySearchSortBy, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  type AvailabilitySearchInput,
+  AvailabilitySearchSortBy,
+  type Gender,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";
 const DEFAULT_PAGE_SIZE = 10;

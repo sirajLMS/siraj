@@ -145,7 +145,7 @@ export function TeacherReassignmentContainer() {
       await changeStatus({
         variables: {
           studentId: input.studentId,
-          newStatus: input.newStatus as unknown as StudentStatus,
+          newStatus: input.newStatus,
           expectedVersion: input.expectedVersion ?? versionRef.current,
         },
       });

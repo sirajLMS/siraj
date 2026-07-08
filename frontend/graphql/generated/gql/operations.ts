@@ -103,6 +103,7 @@ export type AppPermission =
   | 'STORAGE_MANAGE'
   | 'STUDENTS_CHANGE_STATUS'
   | 'STUDENTS_CHANGE_TEACHER'
+  | 'STUDENTS_CREATE'
   | 'STUDENTS_EDIT'
   | 'STUDENTS_LIST'
   | 'STUDENTS_OVERRIDE_QUOTA'
@@ -833,6 +834,19 @@ export type StudentFilterArgs = {
   nameNotEquals: string | null | undefined;
   nameStartsWith: string | null | undefined;
   parentId: string | null | undefined;
+  primaryTeacherId: string | null | undefined;
+  status: StudentStatus | null | undefined;
+};
+
+/** Input for creating a new student profile under a parent */
+export type StudentOnboardingInput = {
+  classesRemaining: number | null | undefined;
+  classesTotal: number | null | undefined;
+  dateOfBirth: string | null | undefined;
+  gender: Gender | null | undefined;
+  language: AppLanguage | null | undefined;
+  name: string;
+  parentId: string;
   primaryTeacherId: string | null | undefined;
   status: StudentStatus | null | undefined;
 };
@@ -2578,6 +2592,18 @@ export type ChangeStudentStatusMutationVariables = Exact<{
 
 
 export type ChangeStudentStatusMutation = ChangeStudentStatusMutation_Mutation;
+
+export type CreateStudentMutation_createStudent_StudentOnboardingResult = { studentId: string | null, parentId: string | null, name: string | null, status: Types.StudentStatus | null, primaryTeacherId: string | null };
+
+export type CreateStudentMutation_Mutation = { createStudent: CreateStudentMutation_createStudent_StudentOnboardingResult | null };
+
+
+export type CreateStudentMutationVariables = Exact<{
+  input: Types.StudentOnboardingInput;
+}>;
+
+
+export type CreateStudentMutation = CreateStudentMutation_Mutation;
 
 export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass = { id: string | null, instructor: string | null, teacherId: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, isFrozen: boolean | null };
 

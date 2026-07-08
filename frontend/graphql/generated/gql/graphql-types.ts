@@ -163,6 +163,7 @@ export enum AppPermission {
   StorageManage = 'STORAGE_MANAGE',
   StudentsChangeStatus = 'STUDENTS_CHANGE_STATUS',
   StudentsChangeTeacher = 'STUDENTS_CHANGE_TEACHER',
+  StudentsCreate = 'STUDENTS_CREATE',
   StudentsEdit = 'STUDENTS_EDIT',
   StudentsList = 'STUDENTS_LIST',
   StudentsOverrideQuota = 'STUDENTS_OVERRIDE_QUOTA',
@@ -1460,6 +1461,8 @@ export type Mutation = {
   createParent: Maybe<ParentOnboardingResult>;
   createPermissionGroup: Maybe<PermissionGroup>;
   createRecurringClass: Maybe<CreateRecurringClassResult>;
+  /** Create a new student profile under an existing parent */
+  createStudent: Maybe<StudentOnboardingResult>;
   /** Create a new teacher account with comprehensive profile */
   createTeacher: Maybe<TeacherOnboarding>;
   createTeacherImportantNote: Maybe<TeacherImportantNote>;
@@ -1667,6 +1670,11 @@ export type MutationCreatePermissionGroupArgs = {
 
 export type MutationCreateRecurringClassArgs = {
   input: CreateRecurringClassInput;
+};
+
+
+export type MutationCreateStudentArgs = {
+  input: StudentOnboardingInput;
 };
 
 
@@ -3216,6 +3224,29 @@ export type StudentHistorySession = {
   time: Maybe<Scalars['String']['output']>;
   timeSlot: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
+};
+
+/** Input for creating a new student profile under a parent */
+export type StudentOnboardingInput = {
+  classesRemaining: InputMaybe<Scalars['Int']['input']>;
+  classesTotal: InputMaybe<Scalars['Int']['input']>;
+  dateOfBirth: InputMaybe<Scalars['DateTime']['input']>;
+  gender: InputMaybe<Gender>;
+  language: InputMaybe<AppLanguage>;
+  name: Scalars['String']['input'];
+  parentId: Scalars['String']['input'];
+  primaryTeacherId: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<StudentStatus>;
+};
+
+/** Result of student onboarding operation */
+export type StudentOnboardingResult = {
+  __typename?: 'StudentOnboardingResult';
+  name: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  primaryTeacherId: Maybe<Scalars['String']['output']>;
+  status: Maybe<StudentStatus>;
+  studentId: Maybe<Scalars['String']['output']>;
 };
 
 export type StudentProgress = {

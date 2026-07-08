@@ -148,8 +148,8 @@ export namespace GroupClassService {
 
     const inputs = uniqueUserIds.map(uid => ({
       userId: uid,
-      channel: NotificationChannel.EMAIL as typeof NotificationChannel.EMAIL,
-      eventType: NotificationEventType.CLASS_REMINDER as typeof NotificationEventType.CLASS_REMINDER,
+      channel: NotificationChannel.EMAIL,
+      eventType: NotificationEventType.CLASS_REMINDER,
       title,
       body,
     }));
@@ -188,6 +188,6 @@ function resolveGroupClassStatus(executionState: string | null | undefined): Cla
 }
 
 function extractZoomMeetingId(url: string): string | null {
-  const match = url.match(/\/j\/(\d+)/);
+  const match = /\/j\/(\d+)/.exec(url);
   return match ? match[1] : null;
 }

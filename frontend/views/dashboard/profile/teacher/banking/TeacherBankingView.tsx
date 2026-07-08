@@ -47,7 +47,14 @@ function FieldValueDisplay({
   readonly notProvidedText: string;
   readonly notSetText: string;
 }) {
-  const displayValue = value?.trim() ? value : optional ? notProvidedText : notSetText;
+  function resolveDisplayValue(): string {
+    if (value?.trim()) {
+      return value;
+    }
+    return optional ? notProvidedText : notSetText;
+  }
+
+  const displayValue = resolveDisplayValue();
 
   return (
     <Typography

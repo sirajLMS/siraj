@@ -28,12 +28,17 @@ export function AccountSection(props: AccountSectionProps) {
   const t = useTranslations("profile.staff");
   const tc = useTranslations("profile");
 
-  const statusLabel =
-    props.mode === "view" && props.isAdminScope && props.staffData.status
-      ? props.staffData.status === AccountStatus.Activated
-        ? t("fields.statusActive")
-        : t("fields.statusInactive")
-      : "";
+  function computeStatusLabel(): string {
+    if (props.mode !== "view") {
+      return "";
+    }
+    if (!props.isAdminScope || !props.staffData.status) {
+      return "";
+    }
+    return props.staffData.status === AccountStatus.Activated ? t("fields.statusActive") : t("fields.statusInactive");
+  }
+
+  const statusLabel = computeStatusLabel();
 
   if (props.mode === "edit") {
     return (

@@ -126,7 +126,7 @@ export function StudentsContainer() {
   };
 
   const handleAddStudent = () => {
-    router.push("/students/new");
+    router.push("/students/onboarding");
   };
 
   const handleFilterClick = () => {

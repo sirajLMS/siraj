@@ -6,7 +6,9 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ProfileAdministrationPanel } from "@/frontend/components/auth/ProfileAdministrationPanel";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import type { ParentProfileData } from "../types/profile";
@@ -94,21 +96,23 @@ function ParentProfileView({ parent, parentId, onRefetchStudents }: ParentProfil
             justifyContent: "center",
           }}
         >
-          <Button
-            variant="text"
-            endIcon={<ArrowForwardOutlined />}
-            onClick={() => router.push(`/students/onboarding?parentId=${parentId}`)}
-            sx={{
-              color: theme.palette.primary.main,
-              typography: "labelLarge",
-              fontWeight: 700,
-              gap: 1,
-              "&:hover": { gap: 2 },
-              transition: "gap 0.2s",
-            }}
-          >
-            {t("actions.addNewStudent")}
-          </Button>
+          <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+            <Button
+              variant="text"
+              endIcon={<ArrowForwardOutlined />}
+              onClick={() => router.push(`/students/onboarding?parentId=${parentId}`)}
+              sx={{
+                color: theme.palette.primary.main,
+                typography: "labelLarge",
+                fontWeight: 700,
+                gap: 1,
+                "&:hover": { gap: 2 },
+                transition: "gap 0.2s",
+              }}
+            >
+              {t("actions.addNewStudent")}
+            </Button>
+          </RequirePermission>
         </Box>
       </SectionPanel>
 

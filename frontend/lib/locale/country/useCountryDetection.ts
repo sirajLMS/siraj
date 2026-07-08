@@ -53,7 +53,7 @@ const detectCountry = async (
     setCountryCode(defaultCountryCode);
   } finally {
     const storedRequestCount = getLocalStorageItem(STORAGE_KEYS.requestCount);
-    const requestCount = storedRequestCount ? parseInt(storedRequestCount, 10) : 0;
+    const requestCount = storedRequestCount ? Number.parseInt(storedRequestCount, 10) : 0;
     setLocalStorageItem(STORAGE_KEYS.requestCount, (requestCount + 1).toString());
     setLoading(false);
   }
@@ -75,9 +75,9 @@ const fetchCountryCode = (
   const storedRequestCount = getLocalStorageItem(STORAGE_KEYS.requestCount);
   const fetchDate = storedFetchDate ? new Date(storedFetchDate) : null;
   const now = new Date();
-  const requestCount = storedRequestCount ? parseInt(storedRequestCount, 10) : 0;
+  const requestCount = storedRequestCount ? Number.parseInt(storedRequestCount, 10) : 0;
 
-  if (storedCountryCode && fetchDate && now.getDate() === fetchDate.getDate()) {
+  if (storedCountryCode && now.getDate() === fetchDate?.getDate()) {
     if (requestCount < MAX_REQUESTS_PER_DAY) {
       setLocalStorageItem(STORAGE_KEYS.requestCount, (requestCount + 1).toString());
       setCountryCode(storedCountryCode);
@@ -120,7 +120,7 @@ export function useCountryDetection(timeout: number = 2000, defaultCountryCode: 
       const fetchDate = storedFetchDate ? new Date(storedFetchDate) : null;
       const now = new Date();
 
-      if (storedCountryCode && fetchDate && now.getDate() === fetchDate.getDate()) {
+      if (storedCountryCode && now.getDate() === fetchDate?.getDate()) {
         setCountryCode(storedCountryCode);
         setLoading(false);
       } else {

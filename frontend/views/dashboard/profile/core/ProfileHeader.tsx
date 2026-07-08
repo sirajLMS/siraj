@@ -5,17 +5,15 @@ import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/frontend/components/ui";
 
 export type ProfileHeaderProps = {
-  name: string;
-  email: string;
-  role: string;
-  avatarUrl?: string | null;
+  readonly name: string;
+  readonly email: string;
+  readonly role: string;
+  readonly avatarUrl?: string | null;
 };
 
-export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderProps) {
-  const t = useTranslations("profile");
-
-  const roleBadge =
-    role === "teacher" ? (
+function renderRoleBadge(role: string, t: ReturnType<typeof useTranslations>) {
+  if (role === "teacher") {
+    return (
       <Box
         sx={theme => ({
           bgcolor: theme.palette.primary.main,
@@ -31,7 +29,11 @@ export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderPro
       >
         {t("role.teacher")}
       </Box>
-    ) : role === "parent" ? (
+    );
+  }
+
+  if (role === "parent") {
+    return (
       <Box
         sx={theme => ({
           bgcolor: theme.palette.secondary.main,
@@ -47,7 +49,11 @@ export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderPro
       >
         {t("role.parent")}
       </Box>
-    ) : role === "staff" ? (
+    );
+  }
+
+  if (role === "staff") {
+    return (
       <Box
         sx={theme => ({
           bgcolor: theme.palette.info.main,
@@ -63,7 +69,16 @@ export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderPro
       >
         {t("role.staff")}
       </Box>
-    ) : null;
+    );
+  }
+
+  return null;
+}
+
+export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderProps) {
+  const t = useTranslations("profile");
+
+  const roleBadge = renderRoleBadge(role, t);
 
   return (
     <Stack

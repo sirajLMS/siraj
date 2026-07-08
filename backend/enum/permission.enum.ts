@@ -47,6 +47,7 @@ export enum AppPermission {
   PARENTS_CREATE = "parents.create",
   PARENTS_EDIT = "parents.edit",
   STUDENTS_LIST = "students.list",
+  STUDENTS_CREATE = "students.create",
   STUDENTS_EDIT = "students.edit",
   STUDENTS_CHANGE_TEACHER = "students.change_teacher",
   STUDENTS_CHANGE_STATUS = "students.change_status",

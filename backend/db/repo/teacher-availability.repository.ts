@@ -227,16 +227,19 @@ function getBookingBlockedRangesForDate(
   return blocked;
 }
 
-function findGapsForCalendarDate(
-  teacher: TeacherShortInfo,
-  calendarDate: string,
-  day: DayOfWeek,
-  dayWindows: Types.TeacherAvailabilityWindowSelectType[],
-  dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[],
-  extraBlocked: { start: number; end: number }[],
-  fromMinutes: number,
-  toMinutes: number
-): Types.TeacherAvailabilityGap[] {
+interface FindGapsForCalendarDateOptions {
+  teacher: TeacherShortInfo;
+  calendarDate: string;
+  day: DayOfWeek;
+  dayWindows: Types.TeacherAvailabilityWindowSelectType[];
+  dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[];
+  extraBlocked: { start: number; end: number }[];
+  fromMinutes: number;
+  toMinutes: number;
+}
+
+function findGapsForCalendarDate(options: FindGapsForCalendarDateOptions): Types.TeacherAvailabilityGap[] {
+  const { teacher, calendarDate, day, dayWindows, dayUnavail, extraBlocked, fromMinutes, toMinutes } = options;
   const gaps: Types.TeacherAvailabilityGap[] = [];
   const effectiveWindows = dayWindows.filter(window =>
     isWithinEffectiveRange(calendarDate, window.effectiveFrom, window.effectiveUntil)
@@ -781,19 +784,34 @@ export namespace TeacherAvailabilityRepository {
       );
   }
 
-  function buildTeacherSearchResults(
-    allTeachers: TeacherShortInfo[],
-    windowsByTeacher: Map<string, Types.TeacherAvailabilityWindowSelectType[]>,
-    unavailabilitiesByTeacher: Map<string, Types.TeacherRecurringUnavailabilitySelectType[]>,
-    vacationsByTeacher: Map<string, { startAt: Date; endAt: Date }[]>,
-    bookingsByTeacher: Map<string, { scheduledStartAt: Date; scheduledEndAt: Date }[]>,
-    calendarDates: string[],
-    allowedDays: Set<DayOfWeek> | null,
-    fromMinutes: number,
-    toMinutes: number,
-    minAvailableDays: number | null | undefined,
-    minTotalGaps: number | null | undefined
-  ): Types.AvailabilitySearchTeacher[] {
+  interface BuildTeacherSearchResultsOptions {
+    allTeachers: TeacherShortInfo[];
+    windowsByTeacher: Map<string, Types.TeacherAvailabilityWindowSelectType[]>;
+    unavailabilitiesByTeacher: Map<string, Types.TeacherRecurringUnavailabilitySelectType[]>;
+    vacationsByTeacher: Map<string, { startAt: Date; endAt: Date }[]>;
+    bookingsByTeacher: Map<string, { scheduledStartAt: Date; scheduledEndAt: Date }[]>;
+    calendarDates: string[];
+    allowedDays: Set<DayOfWeek> | null;
+    fromMinutes: number;
+    toMinutes: number;
+    minAvailableDays: number | null | undefined;
+    minTotalGaps: number | null | undefined;
+  }
+
+  function buildTeacherSearchResults(options: BuildTeacherSearchResultsOptions): Types.AvailabilitySearchTeacher[] {
+    const {
+      allTeachers,
+      windowsByTeacher,
+      unavailabilitiesByTeacher,
+      vacationsByTeacher,
+      bookingsByTeacher,
+      calendarDates,
+      allowedDays,
+      fromMinutes,
+      toMinutes,
+      minAvailableDays,
+      minTotalGaps,
+    } = options;
     const result: Types.AvailabilitySearchTeacher[] = [];
 
     for (const teacher of allTeachers) {
@@ -820,7 +838,7 @@ export namespace TeacherAvailabilityRepository {
           ...getBookingBlockedRangesForDate(calendarDate, bookings),
         ];
 
-        const dayGaps = findGapsForCalendarDate(
+        const dayGaps = findGapsForCalendarDate({
           teacher,
           calendarDate,
           day,
@@ -828,8 +846,8 @@ export namespace TeacherAvailabilityRepository {
           dayUnavail,
           extraBlocked,
           fromMinutes,
-          toMinutes
-        );
+          toMinutes,
+        });
         gaps.push(...dayGaps);
       }
 
@@ -903,7 +921,7 @@ export namespace TeacherAvailabilityRepository {
     const vacationsByTeacher = groupByTeacherId(vacations);
     const bookingsByTeacher = groupByTeacherId(bookings);
 
-    const matchedTeachers = buildTeacherSearchResults(
+    const matchedTeachers = buildTeacherSearchResults({
       allTeachers,
       windowsByTeacher,
       unavailabilitiesByTeacher,
@@ -913,9 +931,9 @@ export namespace TeacherAvailabilityRepository {
       allowedDays,
       fromMinutes,
       toMinutes,
-      input.minAvailableDays,
-      input.minTotalGaps
-    );
+      minAvailableDays: input.minAvailableDays,
+      minTotalGaps: input.minTotalGaps,
+    });
 
     const sortedTeachers = sortTeachers(matchedTeachers, input.sortBy);
     const totalGaps = sortedTeachers.reduce((sum, teacher) => sum + teacher.gaps.length, 0);

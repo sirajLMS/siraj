@@ -28,6 +28,7 @@ import { booksAndBags as booksAndBagsLabels, resources as resourcesLabels } from
 import {
   directory as studentDirectory,
   history as studentHistory,
+  onboarding as studentOnboarding,
   quota as studentQuota,
   status as studentStatus,
 } from "./dashboard/students";
@@ -96,6 +97,7 @@ export const arTranslations = {
     studentQuota,
     studentHistory,
     studentDirectory,
+    studentOnboarding,
     rescheduleTracking,
     scheduleAlerts,
     admin,

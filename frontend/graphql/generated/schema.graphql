@@ -137,6 +137,7 @@ enum AppPermission {
   STORAGE_MANAGE
   STUDENTS_CHANGE_STATUS
   STUDENTS_CHANGE_TEACHER
+  STUDENTS_CREATE
   STUDENTS_EDIT
   STUDENTS_LIST
   STUDENTS_OVERRIDE_QUOTA
@@ -1398,6 +1399,9 @@ type Mutation {
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
 
+  """Create a new student profile under an existing parent"""
+  createStudent(input: StudentOnboardingInput!): StudentOnboardingResult
+
   """Create a new teacher account with comprehensive profile"""
   createTeacher(input: TeacherOnboardingInput!): TeacherOnboarding
   createTeacherImportantNote(input: CreateTeacherNoteInput!): TeacherImportantNote
@@ -2394,6 +2398,28 @@ type StudentHistorySession {
   time: String
   timeSlot: String
   title: String
+}
+
+"""Input for creating a new student profile under a parent"""
+input StudentOnboardingInput {
+  classesRemaining: Int
+  classesTotal: Int
+  dateOfBirth: DateTime
+  gender: Gender
+  language: AppLanguage
+  name: String!
+  parentId: String!
+  primaryTeacherId: String
+  status: StudentStatus
+}
+
+"""Result of student onboarding operation"""
+type StudentOnboardingResult {
+  name: String
+  parentId: String
+  primaryTeacherId: String
+  status: StudentStatus
+  studentId: String
 }
 
 type StudentProgress {

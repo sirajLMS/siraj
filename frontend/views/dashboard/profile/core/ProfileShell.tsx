@@ -49,6 +49,59 @@ export function ProfileShell({
   const t = useTranslations("profile");
   const showTabs = mode === "view" && currentTab && onTabChange;
 
+  function renderBody() {
+    if (loading) {
+      return <ProfileSkeleton />;
+    }
+
+    if (error) {
+      return (
+        <Box sx={{ py: 4, textAlign: "center" }}>
+          <Typography sx={theme => ({ color: theme.palette.error.main })}>{error}</Typography>
+          <Typography sx={{ mt: 2, color: theme => theme.palette.text.secondary }}>{t("shell.error.retry")}</Typography>
+          {onRetry ? (
+            <Button variant="outlined" sx={{ mt: 2 }} onClick={onRetry}>
+              {t("actions.retry")}
+            </Button>
+          ) : null}
+        </Box>
+      );
+    }
+
+    return (
+      <Box
+        sx={theme => ({
+          display: "flex",
+          flexDirection: "column",
+          gap: theme.layout.sectionGap,
+          width: "100%",
+          animation: "profileContentEnter 0.3s ease-out",
+          "@keyframes profileContentEnter": {
+            from: { opacity: 0, transform: "translateY(8px)" },
+            to: { opacity: 1, transform: "translateY(0)" },
+          },
+        })}
+      >
+        <ProfileHeader name={name ?? ""} email={email ?? ""} role={role ?? ""} avatarUrl={avatarUrl} />
+        {showTabs ? (
+          <ProfileTabNav audience={audience} scope={scope} currentTab={currentTab} onTabChange={onTabChange} />
+        ) : null}
+        <Box
+          key={currentTab ?? "content"}
+          sx={{
+            animation: showTabs ? "profileTabFade 0.2s ease-out" : undefined,
+            "@keyframes profileTabFade": {
+              from: { opacity: 0 },
+              to: { opacity: 1 },
+            },
+          }}
+        >
+          {children}
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <PageContainer sx={{ px: { xs: 2, md: 0 } }}>
       <Box
@@ -60,52 +113,7 @@ export function ProfileShell({
         })}
       >
         <PageHeader title={title} subtitle={subtitle} actions={actions} />
-        {loading ? (
-          <ProfileSkeleton />
-        ) : error ? (
-          <Box sx={{ py: 4, textAlign: "center" }}>
-            <Typography sx={theme => ({ color: theme.palette.error.main })}>{error}</Typography>
-            <Typography sx={{ mt: 2, color: theme => theme.palette.text.secondary }}>
-              {t("shell.error.retry")}
-            </Typography>
-            {onRetry ? (
-              <Button variant="outlined" sx={{ mt: 2 }} onClick={onRetry}>
-                {t("actions.retry")}
-              </Button>
-            ) : null}
-          </Box>
-        ) : (
-          <Box
-            sx={theme => ({
-              display: "flex",
-              flexDirection: "column",
-              gap: theme.layout.sectionGap,
-              width: "100%",
-              animation: "profileContentEnter 0.3s ease-out",
-              "@keyframes profileContentEnter": {
-                from: { opacity: 0, transform: "translateY(8px)" },
-                to: { opacity: 1, transform: "translateY(0)" },
-              },
-            })}
-          >
-            <ProfileHeader name={name ?? ""} email={email ?? ""} role={role ?? ""} avatarUrl={avatarUrl} />
-            {showTabs ? (
-              <ProfileTabNav audience={audience} scope={scope} currentTab={currentTab} onTabChange={onTabChange} />
-            ) : null}
-            <Box
-              key={currentTab ?? "content"}
-              sx={{
-                animation: showTabs ? "profileTabFade 0.2s ease-out" : undefined,
-                "@keyframes profileTabFade": {
-                  from: { opacity: 0 },
-                  to: { opacity: 1 },
-                },
-              }}
-            >
-              {children}
-            </Box>
-          </Box>
-        )}
+        {renderBody()}
       </Box>
     </PageContainer>
   );

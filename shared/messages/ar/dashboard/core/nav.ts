@@ -30,6 +30,7 @@ export const nav: DashboardNavigationLabels = {
   teacherOnboarding: "انضمام المعلم",
   parentOnboarding: "انضمام ولي الأمر",
   managerOnboarding: "انضمام المدير",
+  studentOnboarding: "انضمام الطالب",
   scheduleReschedule: "إعادة جدولة الحصة",
   dstMigration: "ترحيل التوقيت الصيفي",
   billingAdmin: "إدارة الفواتير",

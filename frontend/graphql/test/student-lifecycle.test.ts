@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import type { StudentStatus as StudentStatusType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { changeStudentStatusMutationDocument, reassignStudentTeacherMutationDocument } from "../sharedDocuments";
 import { assertOperationDenied, authenticatedRequest, loginDemoUser, provisionTestEntities } from "./helpers";
@@ -60,23 +59,21 @@ describe("GraphQL: reassignStudentTeacher mutation", () => {
   });
 
   test("teacher role is denied", async () => {
-    await expect(
-      assertOperationDenied("teacher_default", "mutate", reassignStudentTeacherMutationDocument, {
-        studentId: studentId || NIL_UUID,
-        newTeacherId: newTeacherId || NIL_UUID,
-        expectedVersion: null,
-      })
-    ).resolves.toBeUndefined();
+    const denied = await assertOperationDenied("teacher_default", "mutate", reassignStudentTeacherMutationDocument, {
+      studentId: studentId || NIL_UUID,
+      newTeacherId: newTeacherId || NIL_UUID,
+      expectedVersion: null,
+    });
+    expect(denied).toBe(true);
   });
 
   test("parent role is denied", async () => {
-    await expect(
-      assertOperationDenied("parent_default", "mutate", reassignStudentTeacherMutationDocument, {
-        studentId: studentId || NIL_UUID,
-        newTeacherId: newTeacherId || NIL_UUID,
-        expectedVersion: null,
-      })
-    ).resolves.toBeUndefined();
+    const denied = await assertOperationDenied("parent_default", "mutate", reassignStudentTeacherMutationDocument, {
+      studentId: studentId || NIL_UUID,
+      newTeacherId: newTeacherId || NIL_UUID,
+      expectedVersion: null,
+    });
+    expect(denied).toBe(true);
   });
 
   test("academy admin (non-superAdmin) is denied", async () => {
@@ -120,7 +117,7 @@ describe("GraphQL: changeStudentStatus mutation", () => {
   test("super admin changes status from REGULAR to SUSPENDED", async () => {
     const data = await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId,
-      newStatus: StudentStatus.Suspended as StudentStatusType,
+      newStatus: StudentStatus.Suspended,
       expectedVersion: null,
     });
 
@@ -131,7 +128,7 @@ describe("GraphQL: changeStudentStatus mutation", () => {
   test("super admin changes status from SUSPENDED back to REGULAR", async () => {
     const data = await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId,
-      newStatus: StudentStatus.Regular as StudentStatusType,
+      newStatus: StudentStatus.Regular,
       expectedVersion: null,
     });
 
@@ -141,7 +138,7 @@ describe("GraphQL: changeStudentStatus mutation", () => {
   test("super admin changes status from REGULAR to ON_LEAVE", async () => {
     const data = await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId,
-      newStatus: StudentStatus.OnLeave as StudentStatusType,
+      newStatus: StudentStatus.OnLeave,
       expectedVersion: null,
     });
 
@@ -149,39 +146,39 @@ describe("GraphQL: changeStudentStatus mutation", () => {
   });
 
   test("teacher role is denied", async () => {
-    await expect(
-      assertOperationDenied("teacher_default", "mutate", changeStudentStatusMutationDocument, {
-        studentId: studentId || NIL_UUID,
-        newStatus: StudentStatus.Suspended as StudentStatusType,
-        expectedVersion: null,
-      })
-    ).resolves.toBeUndefined();
+    const denied = await assertOperationDenied("teacher_default", "mutate", changeStudentStatusMutationDocument, {
+      studentId: studentId || NIL_UUID,
+      newStatus: StudentStatus.Suspended,
+      expectedVersion: null,
+    });
+    expect(denied).toBe(true);
   });
 
   test("parent role is denied", async () => {
-    await expect(
-      assertOperationDenied("parent_default", "mutate", changeStudentStatusMutationDocument, {
-        studentId: studentId || NIL_UUID,
-        newStatus: StudentStatus.Suspended as StudentStatusType,
-        expectedVersion: null,
-      })
-    ).resolves.toBeUndefined();
+    const denied = await assertOperationDenied("parent_default", "mutate", changeStudentStatusMutationDocument, {
+      studentId: studentId || NIL_UUID,
+      newStatus: StudentStatus.Suspended,
+      expectedVersion: null,
+    });
+    expect(denied).toBe(true);
   });
 
   test("academy admin (non-superAdmin) is denied", async () => {
     const academyAdminToken = await loginDemoUser("academy_admin");
     await expectMutationError(academyAdminToken, changeStudentStatusMutationDocument, {
       studentId: studentId || NIL_UUID,
-      newStatus: StudentStatus.Suspended as StudentStatusType,
+      newStatus: StudentStatus.Suspended,
       expectedVersion: null,
     });
+    expect(academyAdminToken).toBeTruthy();
   });
 
   test("non-existent student returns studentNotFound", async () => {
     await expectMutationError(superAdminToken, changeStudentStatusMutationDocument, {
       studentId: "00000000-0000-0000-0000-000000000006",
-      newStatus: StudentStatus.Suspended as StudentStatusType,
+      newStatus: StudentStatus.Suspended,
       expectedVersion: null,
     });
+    expect(superAdminToken).toBeTruthy();
   });
 });

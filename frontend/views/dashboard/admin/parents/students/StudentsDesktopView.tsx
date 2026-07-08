@@ -1,8 +1,10 @@
 "use client";
 
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryDataGrid } from "./components/StudentDirectoryDataGrid";
 import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "./types";
@@ -54,9 +56,11 @@ export function StudentsDesktopView({
         title={globalRecord}
         actions={
           <>
-            <PrimaryPageAction id="students-add-btn" startIcon={<AddOutlined />} onClick={onAddStudent}>
-              {addStudentLabel}
-            </PrimaryPageAction>
+            <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+              <PrimaryPageAction id="students-add-btn" startIcon={<AddOutlined />} onClick={onAddStudent}>
+                {addStudentLabel}
+              </PrimaryPageAction>
+            </RequirePermission>
             <FilterButton id="students-filters-btn" startIcon={<FilterListOutlined />} onClick={onFilterClick}>
               {filtersLabel}
             </FilterButton>

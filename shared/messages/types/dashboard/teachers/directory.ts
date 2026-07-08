@@ -7,6 +7,7 @@ export interface TeachersDirectoryLabels {
   };
   readonly actions: {
     readonly updateSchedules: string;
+    readonly addTeacher: string;
     readonly joinRoom: string;
     readonly viewSchedule: string;
     readonly options: string;

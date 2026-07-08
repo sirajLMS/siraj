@@ -4,13 +4,6 @@ import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/backend/e
 import { ForbiddenError, getBackendTranslations, logger, NotFoundError } from "@/backend/lib";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
 import type * as Types from "@/backend/types";
-import type {
-  CreateManualInvoiceInput,
-  DeleteInvoiceResult,
-  ManualInvoiceResult,
-  MarkInvoicePaidResult,
-  SendPaymentReminderResult,
-} from "@/backend/types";
 
 function deriveIdempotencyKey(input: {
   parentId: string;
@@ -31,7 +24,7 @@ async function requirePermission(actorUserId: string, permission: AppPermission,
   }
 }
 
-async function validateManualInvoiceInput(input: CreateManualInvoiceInput, locale?: string): Promise<void> {
+async function validateManualInvoiceInput(input: Types.CreateManualInvoiceInput, locale?: string): Promise<void> {
   if (!input.parentId || input.parentId.trim().length === 0) {
     const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
     throw new Error(tFunc("invalidParentId"));
@@ -44,7 +37,7 @@ async function validateManualInvoiceInput(input: CreateManualInvoiceInput, local
   }
 }
 
-function buildInvoiceInsertPayload(actorUserId: string, input: CreateManualInvoiceInput) {
+function buildInvoiceInsertPayload(actorUserId: string, input: Types.CreateManualInvoiceInput) {
   return {
     parentId: input.parentId,
     studentId: input.studentId ?? null,
@@ -61,7 +54,7 @@ function buildInvoiceInsertPayload(actorUserId: string, input: CreateManualInvoi
   };
 }
 
-function mapToManualInvoiceResult(created: Types.InvoiceSelectType): ManualInvoiceResult {
+function mapToManualInvoiceResult(created: Types.InvoiceSelectType): Types.ManualInvoiceResult {
   return {
     id: created.id,
     parentId: created.parentId,
@@ -94,9 +87,9 @@ async function syncNotificationAfterCreate(
 export namespace BillingManagementService {
   export async function createManualInvoice(
     actorUserId: string,
-    input: CreateManualInvoiceInput,
+    input: Types.CreateManualInvoiceInput,
     locale?: string
-  ): Promise<ManualInvoiceResult> {
+  ): Promise<Types.ManualInvoiceResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_CREATE_INVOICE, locale);
     await validateManualInvoiceInput(input, locale);
 
@@ -127,7 +120,7 @@ export namespace BillingManagementService {
     invoiceId: string,
     expectedVersion?: number,
     locale?: string
-  ): Promise<MarkInvoicePaidResult> {
+  ): Promise<Types.MarkInvoicePaidResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -172,7 +165,7 @@ export namespace BillingManagementService {
     actorUserId: string,
     invoiceId: string,
     locale?: string
-  ): Promise<DeleteInvoiceResult> {
+  ): Promise<Types.DeleteInvoiceResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_DELETE_INVOICE);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -238,7 +231,7 @@ export namespace BillingManagementService {
 
     if (!hasBillingAccess) {
       const parent = await ParentRepository.findByUserId(actorUserId);
-      if (!parent || parent.id !== invoice.parentId) {
+      if (parent?.id !== invoice.parentId) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new ForbiddenError(tFunc("insufficientPermissions"));
       }
@@ -251,7 +244,7 @@ export namespace BillingManagementService {
     actorUserId: string,
     studentId: string,
     locale?: string
-  ): Promise<SendPaymentReminderResult> {
+  ): Promise<Types.SendPaymentReminderResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

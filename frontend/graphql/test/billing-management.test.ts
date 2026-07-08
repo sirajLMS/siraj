@@ -126,21 +126,23 @@ describe("GraphQL: createManualInvoice mutation", () => {
   });
 
   test("teacher role is denied", async () => {
-    await assertOperationDenied(
+    const denied = await assertOperationDenied(
       "teacher_default",
       "mutate",
       createManualInvoiceMutationDocument,
       invoiceVars(NIL_UUID, "100.00")
     );
+    expect(denied).toBe(true);
   });
 
   test("parent role is denied", async () => {
-    await assertOperationDenied(
+    const denied = await assertOperationDenied(
       "parent_default",
       "mutate",
       createManualInvoiceMutationDocument,
       invoiceVars(NIL_UUID, "100.00")
     );
+    expect(denied).toBe(true);
   });
 
   test("invalid negative amount returns validation error", async () => {
@@ -149,10 +151,12 @@ describe("GraphQL: createManualInvoice mutation", () => {
       createManualInvoiceMutationDocument,
       invoiceVars(state.parentId, "-50.00")
     );
+    expect(state.superAdminToken).toBeTruthy();
   });
 
   test("cleanup provisioned entities", async () => {
     await cleanupAll(state);
+    expect(state.superAdminToken).toBeTruthy();
   });
 });
 
@@ -199,13 +203,15 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
     });
+    expect(unpaidInvoiceId).toBeTruthy();
   });
 
   test("teacher role is denied markInvoicePaid", async () => {
-    await assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
+    const denied = await assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
     });
+    expect(denied).toBe(true);
   });
 
   test("Threat 2 — non-existent invoice ID returns error", async () => {
@@ -213,6 +219,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
       invoiceId: NIL_UUID,
       expectedVersion: null,
     });
+    expect(state.superAdminToken).toBeTruthy();
   });
 
   test("create a second UNPAID invoice for delete tests", async () => {
@@ -230,13 +237,18 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
 
   test("Threat 2 — double deletion: second deleteInvoice returns error", async () => {
     await expectMutationError(state.superAdminToken, deleteInvoiceMutationDocument, { invoiceId: deleteInvoiceId });
+    expect(deleteInvoiceId).toBeTruthy();
   });
 
   test("teacher role is denied deleteInvoice", async () => {
-    await assertOperationDenied("teacher_default", "mutate", deleteInvoiceMutationDocument, { invoiceId: NIL_UUID });
+    const denied = await assertOperationDenied("teacher_default", "mutate", deleteInvoiceMutationDocument, {
+      invoiceId: NIL_UUID,
+    });
+    expect(denied).toBe(true);
   });
 
   test("cleanup provisioned entities", async () => {
     await cleanupAll(state);
+    expect(state.superAdminToken).toBeTruthy();
   });
 });

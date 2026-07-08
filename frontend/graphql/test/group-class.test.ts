@@ -156,7 +156,7 @@ describe("GraphQL: Group Class integration tests", () => {
       context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
-    const err = result.error as Error | undefined;
+    const err = result.error;
     if (err) {
       expect(err.message.length).toBeGreaterThan(0);
     } else if (result.data?.resendClassNotifications) {

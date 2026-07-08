@@ -24,7 +24,12 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
 
 function staffTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
-    await expect(runInRollback(fn)).resolves.toBeUndefined();
+    let completed = false;
+    await runInRollback(async tx => {
+      await fn(tx);
+      completed = true;
+    });
+    expect(completed).toBe(true);
   });
 }
 

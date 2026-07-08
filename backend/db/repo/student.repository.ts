@@ -90,7 +90,11 @@ export namespace StudentRepository {
     });
   };
 
-  export const create = async (input: Types.StudentCreateInput, locale?: string): Promise<Types.StudentEntity> => {
+  export const create = async (
+    input: Types.StudentCreateInput,
+    locale?: string,
+    tx?: DBTransaction
+  ): Promise<Types.StudentEntity> => {
     const err = await StudentUtils.validateName(input.name, locale);
     if (err) throw new Error(err);
 
@@ -109,12 +113,30 @@ export namespace StudentRepository {
       updatedAt: new Date(),
     };
     try {
-      const [createdStudent] = await db.insert(students).values(insertInput).returning();
+      const executor = tx ?? db;
+      const [createdStudent] = await executor.insert(students).values(insertInput).returning();
       return createdStudent;
     } catch {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("studentCreateFailed"));
     }
+  };
+
+  export const createTeacherAssignment = async (
+    input: {
+      readonly studentId: string;
+      readonly teacherId: string;
+      readonly assignedByUserId?: string | null;
+    },
+    tx?: DBTransaction
+  ): Promise<void> => {
+    const executor = tx ?? db;
+    await executor.insert(teacherAssignments).values({
+      studentId: input.studentId,
+      teacherId: input.teacherId,
+      assignedAt: new Date(),
+      assignedByUserId: input.assignedByUserId ?? null,
+    });
   };
 
   export const createList = async (

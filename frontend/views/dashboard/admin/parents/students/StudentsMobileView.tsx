@@ -2,7 +2,9 @@
 
 import { AddOutlined, FilterListOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, Fab, IconButton, InputAdornment, TextField } from "@mui/material";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryCardList } from "./components/StudentDirectoryCardList";
 import { StudentMobileMetricsScroll } from "./components/StudentMobileMetricsScroll";
@@ -92,20 +94,22 @@ export function StudentsMobileView({
           >
             <FilterListOutlined />
           </IconButton>
-          <IconButton
-            id="students-add-mobile-btn"
-            aria-label={addStudentLabel}
-            onClick={onAddStudent}
-            sx={theme => ({
-              backgroundColor: theme.palette.header,
-              color: theme.palette.onPrimary,
-              borderRadius: 3,
-              px: 2,
-              "&:hover": { backgroundColor: theme.palette.primary.dark },
-            })}
-          >
-            <PersonAddAltOutlined />
-          </IconButton>
+          <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+            <IconButton
+              id="students-add-mobile-btn"
+              aria-label={addStudentLabel}
+              onClick={onAddStudent}
+              sx={theme => ({
+                backgroundColor: theme.palette.header,
+                color: theme.palette.onPrimary,
+                borderRadius: 3,
+                px: 2,
+                "&:hover": { backgroundColor: theme.palette.primary.dark },
+              })}
+            >
+              <PersonAddAltOutlined />
+            </IconButton>
+          </RequirePermission>
         </Box>
 
         <StudentDirectoryCardList
@@ -118,21 +122,23 @@ export function StudentsMobileView({
           onPageChange={onPageChange}
         />
 
-        <Fab
-          id="students-mobile-fab"
-          aria-label={addStudentLabel}
-          onClick={onAddStudent}
-          sx={theme => ({
-            position: "fixed",
-            bottom: 88,
-            right: 24,
-            backgroundColor: theme.palette.header,
-            color: theme.palette.onPrimary,
-            "&:hover": { backgroundColor: theme.palette.primary.dark },
-          })}
-        >
-          <AddOutlined />
-        </Fab>
+        <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+          <Fab
+            id="students-mobile-fab"
+            aria-label={addStudentLabel}
+            onClick={onAddStudent}
+            sx={theme => ({
+              position: "fixed",
+              bottom: 88,
+              right: 24,
+              backgroundColor: theme.palette.header,
+              color: theme.palette.onPrimary,
+              "&:hover": { backgroundColor: theme.palette.primary.dark },
+            })}
+          >
+            <AddOutlined />
+          </Fab>
+        </RequirePermission>
       </Box>
     </PageContainer>
   );

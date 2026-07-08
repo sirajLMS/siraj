@@ -57,6 +57,26 @@ export type StudentCreateInput = Omit<
   status: StudentStatus;
 };
 
+export interface StudentOnboardingInput {
+  readonly parentId: string;
+  readonly name: string;
+  readonly dateOfBirth?: Date | null;
+  readonly gender?: Gender | null;
+  readonly language?: AppLanguage | null;
+  readonly primaryTeacherId?: string | null;
+  readonly status?: StudentStatus | null;
+  readonly classesTotal?: number | null;
+  readonly classesRemaining?: number | null;
+}
+
+export interface StudentOnboardingResult {
+  readonly studentId: string;
+  readonly parentId: string;
+  readonly name: string;
+  readonly status: StudentStatus;
+  readonly primaryTeacherId: string | null;
+}
+
 export type PartialStudentUpdateInput = Partial<Omit<StudentCreateInput, "idempotencyKey">> & {
   id: string;
 };

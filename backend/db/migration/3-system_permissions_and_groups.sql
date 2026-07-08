@@ -403,6 +403,15 @@ VALUES (
     ),
     (
         gen_random_uuid (),
+        'students.create',
+        'students',
+        'create',
+        'Create student profiles',
+        'Students',
+        true
+    ),
+    (
+        gen_random_uuid (),
         'students.edit',
         'students',
         'edit',
@@ -1075,6 +1084,7 @@ AND permission_id IN (
         'parents.create',
         'parents.edit',
         'students.list',
+        'students.create',
         'students.edit',
         'students.change_teacher',
         'students.change_status',
@@ -1175,6 +1185,7 @@ WHERE
         'parents.create',
         'parents.edit',
         'students.list',
+        'students.create',
         'students.edit',
         'students.change_teacher',
         'students.change_status',

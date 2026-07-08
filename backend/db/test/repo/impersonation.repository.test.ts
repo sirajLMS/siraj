@@ -53,7 +53,7 @@ function buildSessionInput(
     targetUserId,
     sessionId: `sess-${randomUUID()}`,
     reason: "Support investigation",
-    ipAddress: "192.168.1.10",
+    ipAddress: "192.168.1.10", // NOSONAR
     userAgent: "TestAgent/1.0",
     ...overrides,
   };
@@ -75,7 +75,7 @@ describe("ImpersonationRepository", () => {
     expect(created.isActive).toBe(true);
     expect(created.endedAt).toBeNull();
     expect(created.startedAt).toBeInstanceOf(Date);
-    expect(String(created.ipAddress)).toBe("192.168.1.10");
+    expect(String(created.ipAddress)).toBe("192.168.1.10"); // NOSONAR
   });
 
   impersonationTest("createSession sanitizes invalid IP addresses to 127.0.0.1", async tx => {
@@ -93,7 +93,7 @@ describe("ImpersonationRepository", () => {
 
     const created = await ImpersonationRepository.createSession(input, tx);
 
-    expect(String(created.ipAddress)).toBe("10.0.0.5");
+    expect(String(created.ipAddress)).toBe("10.0.0.5"); // NOSONAR
   });
 
   impersonationTest("createSession stores null IP when omitted", async tx => {

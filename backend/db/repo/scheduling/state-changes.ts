@@ -629,7 +629,7 @@ export async function processAutomatedClassLeave(
     const successor = await createRescheduledSuccessor(t, existing, offsetDays, "Automated leave reschedule");
 
     const updated = await runStateChange(id, actorUserId, t, undefined, async () =>
-      buildLeaveStateChangePayload(existing, successor.id, reason, undefined)
+      buildLeaveStateChangePayload(existing, successor.id, reason)
     );
 
     const originalId = updated?.id ?? id;

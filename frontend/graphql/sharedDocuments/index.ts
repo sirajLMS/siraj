@@ -31,6 +31,7 @@ export * from "./student.documents";
 export * from "./student-directory.documents";
 export * from "./student-history.documents";
 export * from "./student-lifecycle.documents";
+export { createStudentMutationDocument } from "./student-onboarding.documents";
 export * from "./student-status.documents";
 export * from "./suggestion.documents";
 export * from "./teacher.documents";

@@ -1,6 +1,8 @@
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { Link } from "@/shared/i18n/routing";
 import { ManagersCardList } from "./ManagersCardList";
 import { ManagersDataGrid } from "./ManagersDataGrid";
@@ -38,9 +40,11 @@ export function ManagersView({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const actions = (
-    <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
-      <PrimaryPageAction>{t("actions.addManager")}</PrimaryPageAction>
-    </Link>
+    <RequirePermission permissions={[AppPermission.StaffCreate]}>
+      <Link href="/managers/onboarding" style={{ textDecoration: "none" }}>
+        <PrimaryPageAction>{t("actions.addManager")}</PrimaryPageAction>
+      </Link>
+    </RequirePermission>
   );
 
   return (

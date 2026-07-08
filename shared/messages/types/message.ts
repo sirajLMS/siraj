@@ -33,6 +33,7 @@ import type { BooksAndBagsLabels, ResourcesLabels } from "./dashboard/resources"
 import type {
   StudentDirectoryLabels,
   StudentHistoryLabels,
+  StudentOnboardingLabels,
   StudentQuotaLabels,
   StudentStatusLabels,
 } from "./dashboard/students";
@@ -137,6 +138,7 @@ export type MessageSchema = {
     readonly managersDirectory: ManagersDirectoryLabels;
     readonly parentOnboarding: ParentOnboardingLabels;
     readonly managerOnboarding: ManagerOnboardingLabels;
+    readonly studentOnboarding: StudentOnboardingLabels;
     readonly rescheduleForm: RescheduleFormLabels;
     readonly dstMigration: DstMigrationLabels;
     readonly parentDashboard: ParentDashboardLabels;

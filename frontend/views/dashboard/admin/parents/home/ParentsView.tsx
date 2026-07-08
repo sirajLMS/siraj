@@ -12,6 +12,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
   ExportButton,
   FilterButton,
@@ -20,7 +21,7 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   type ParentDirectoryRow,
   toParentAccountStatus,
@@ -303,7 +304,9 @@ export function ParentsView({
         actions={
           <>
             {!isMobile && <ParentSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />}
-            <PrimaryPageAction onClick={onAddParent}>{labels.addParent}</PrimaryPageAction>
+            <RequirePermission permissions={[AppPermission.ParentsCreate]}>
+              <PrimaryPageAction onClick={onAddParent}>{labels.addParent}</PrimaryPageAction>
+            </RequirePermission>
           </>
         }
       />

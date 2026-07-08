@@ -28,6 +28,7 @@ export interface DashboardNavigationLabels {
   readonly teacherOnboarding: string;
   readonly parentOnboarding: string;
   readonly managerOnboarding: string;
+  readonly studentOnboarding: string;
   readonly scheduleReschedule: string;
   readonly dstMigration: string;
   readonly billingAdmin: string;

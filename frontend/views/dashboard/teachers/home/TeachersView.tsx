@@ -1,11 +1,14 @@
 "use client";
 
-import { EditCalendarOutlined } from "@mui/icons-material";
+import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
 import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { Link } from "@/shared/i18n/routing";
 import { TeacherCardList } from "./components/TeacherCardList";
 import { TeacherDataGrid } from "./components/TeacherDataGrid";
 import { TeacherMetricsRow } from "./components/TeacherMetricsRow";
@@ -43,7 +46,14 @@ export function TeachersView({
         title={t("pageTitle")}
         subtitle={t("pageSubtitle")}
         actions={
-          <PrimaryPageAction startIcon={<EditCalendarOutlined />}>{t("actions.updateSchedules")}</PrimaryPageAction>
+          <>
+            <RequirePermission permissions={[AppPermission.TeachersCreate]}>
+              <Link href="/teachers/onboarding" style={{ textDecoration: "none" }}>
+                <PrimaryPageAction startIcon={<PersonAddOutlined />}>{t("actions.addTeacher")}</PrimaryPageAction>
+              </Link>
+            </RequirePermission>
+            <PrimaryPageAction startIcon={<EditCalendarOutlined />}>{t("actions.updateSchedules")}</PrimaryPageAction>
+          </>
         }
       />
 

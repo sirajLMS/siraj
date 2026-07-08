@@ -137,8 +137,8 @@ function renderActiveTabContent({
         assignedStudents={profile?.assignedStudents}
         loading={loading}
         hasError={Boolean(error)}
-        onRetry={() => {
-          void refetch();
+        onRetry={async () => {
+          await refetch();
         }}
       />
     );

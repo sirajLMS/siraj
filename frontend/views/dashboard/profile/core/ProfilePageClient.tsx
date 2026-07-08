@@ -88,15 +88,15 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
     );
   }
 
-  return (
-    <ProfileShell {...shellProps}>
-      {audience === "teacher" ? (
-        <TeacherProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />
-      ) : audience === "parent" ? (
-        <ParentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />
-      ) : (
-        <StaffProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />
-      )}
-    </ProfileShell>
-  );
+  function renderProfileContainer() {
+    if (audience === "teacher") {
+      return <TeacherProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
+    }
+    if (audience === "parent") {
+      return <ParentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
+    }
+    return <StaffProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
+  }
+
+  return <ProfileShell {...shellProps}>{renderProfileContainer()}</ProfileShell>;
 }

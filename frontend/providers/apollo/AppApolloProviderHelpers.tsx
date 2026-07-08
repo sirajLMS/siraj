@@ -9,11 +9,11 @@ export function InitializingUI({
   error,
   onRetry,
   t,
-}: {
+}: Readonly<{
   error?: boolean;
   onRetry?: () => void;
   t: ReturnType<typeof useTranslations<"common">>;
-}) {
+}>) {
   return (
     <Box
       sx={{

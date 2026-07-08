@@ -1,5 +1,23 @@
-import { NewStudentContainer } from "@/frontend/views/dashboard/students/new/NewStudentContainer";
+import { redirect } from "next/navigation";
 
-export default function NewStudentPage() {
-  return <NewStudentContainer />;
+interface NewStudentPageProps {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function NewStudentPage({ searchParams }: NewStudentPageProps) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string") {
+      query.set(key, value);
+    } else if (Array.isArray(value)) {
+      for (const item of value) {
+        query.append(key, item);
+      }
+    }
+  }
+
+  const suffix = query.toString();
+  redirect(suffix ? `/students/onboarding?${suffix}` : "/students/onboarding");
 }

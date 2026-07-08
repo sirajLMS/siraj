@@ -1,5 +1,6 @@
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
 import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
+import { StudentOnboardingService } from "@/backend/services/student/student-onboarding.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
@@ -7,6 +8,8 @@ import {
   ManagerOnboardingResultPothosObject,
   ParentOnboardingInputPothosObject,
   ParentOnboardingResultPothosObject,
+  StudentOnboardingInputPothosObject,
+  StudentOnboardingResultPothosObject,
   TeacherOnboardingInputPothosObject,
   TeacherOnboardingPothosObject,
 } from "../pothos";
@@ -54,6 +57,19 @@ gqlSchemaBuilder.mutationFields(t => ({
         },
         ctx.locale
       );
+    },
+  }),
+
+  createStudent: t.field({
+    type: StudentOnboardingResultPothosObject,
+    description: "Create a new student profile under an existing parent",
+    authScopes: { loggedIn: true },
+    args: {
+      input: t.arg({ type: StudentOnboardingInputPothosObject, required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return await StudentOnboardingService.createStudent(userId, args.input, ctx.locale);
     },
   }),
 

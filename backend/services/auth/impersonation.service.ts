@@ -61,7 +61,7 @@ async function assertActorOwnsSession(rawSessionId: string, actorUserId: string,
 async function getActiveDbImpersonation(rawSessionId: string, actorUserId: string) {
   const hashedSessionId = hashSessionId(rawSessionId);
   const row = await ImpersonationRepository.findActiveBySessionId(hashedSessionId);
-  if (!row || row.actorUserId !== actorUserId) {
+  if (row?.actorUserId !== actorUserId) {
     return null;
   }
 
@@ -288,7 +288,7 @@ export namespace ImpersonationService {
     }
 
     const active = await getActiveDbImpersonation(rawSessionId, payload.actorUserId);
-    if (!active || active.row.targetUserId !== payload.userId) {
+    if (active?.row.targetUserId !== payload.userId) {
       return null;
     }
 

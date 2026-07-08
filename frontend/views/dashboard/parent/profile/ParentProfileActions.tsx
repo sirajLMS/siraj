@@ -22,6 +22,8 @@ import {
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { deactivateParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import { profileHrefForParent, profileHrefForUser } from "@/frontend/utils/profileHref";
@@ -163,14 +165,16 @@ function ParentProfileActions({ parentId, userId, onEditAvatar }: ParentProfileA
           </Button>
         )}
 
-        <Link href={`/students/onboarding?parentId=${parentId}`} style={{ textDecoration: "none" }}>
-          <Button
-            startIcon={<PersonAddOutlined sx={{ fontSize: 18 }} />}
-            sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
-          >
-            {t("addNewStudent")}
-          </Button>
-        </Link>
+        <RequirePermission permissions={[AppPermission.StudentsCreate]}>
+          <Link href={`/students/onboarding?parentId=${parentId}`} style={{ textDecoration: "none" }}>
+            <Button
+              startIcon={<PersonAddOutlined sx={{ fontSize: 18 }} />}
+              sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
+            >
+              {t("addNewStudent")}
+            </Button>
+          </Link>
+        </RequirePermission>
 
         <Link href={`/billing/invoices?parentId=${parentId}`} style={{ textDecoration: "none" }}>
           <Button

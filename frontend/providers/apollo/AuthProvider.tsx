@@ -19,11 +19,11 @@ function LoadingUI({
   onRetry,
   error,
   t,
-}: {
+}: Readonly<{
   onRetry: () => void;
   error?: string | null;
   t: ReturnType<typeof useTranslations<"auth.login">>;
-}) {
+}>) {
   return (
     <Box
       sx={{
@@ -62,7 +62,7 @@ function LoadingUI({
   );
 }
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const t = useTranslations("auth.login");
   const { updateAuthToken, clearAuthData } = useAuthToken();
   const client = useApolloClient();

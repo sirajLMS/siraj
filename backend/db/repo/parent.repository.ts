@@ -533,9 +533,11 @@ export namespace ParentRepository {
 
     if (input.date) {
       const { getDayBoundaries } = await import("@/backend/lib/timezone");
-      const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(input.date as Date, timezone);
-      conditions.push(gte(classInstances.scheduledStartAt, startOfDayUtc));
-      conditions.push(lt(classInstances.scheduledStartAt, endOfDayUtc));
+      const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(input.date, timezone);
+      conditions.push(
+        gte(classInstances.scheduledStartAt, startOfDayUtc),
+        lt(classInstances.scheduledStartAt, endOfDayUtc)
+      );
     }
 
     if (input.search) {

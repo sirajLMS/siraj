@@ -327,7 +327,7 @@ export namespace PermissionGroupSimulationService {
     }
 
     const serverActive = await getActiveGroupSimulation(rawSessionId, payload.userId);
-    if (!serverActive || serverActive.data.groupSlug !== payload.groupSimulationSlug) {
+    if (serverActive?.data.groupSlug !== payload.groupSimulationSlug) {
       const fromSession = await resolveActiveSessionSimulation(payload.userId, rawSessionId);
       return fromSession ?? null;
     }

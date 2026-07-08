@@ -9,6 +9,7 @@ export const directory: TeachersDirectoryLabels = {
   },
   actions: {
     updateSchedules: "تحديث الجداول",
+    addTeacher: "إضافة معلم",
     joinRoom: "انضمام للغرفة",
     viewSchedule: "عرض الجدول",
     options: "خيارات",

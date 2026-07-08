@@ -8,6 +8,22 @@ import type { ICacheService } from "./ICacheService";
  * Implements ICacheService using PostgreSQL with UNLOGGED tables
  * Uses Drizzle ORM for database operations
  */
+
+interface CacheSetOptions {
+  ex?: number;
+  px?: number;
+}
+
+function resolveTtlSeconds(options?: CacheSetOptions): number {
+  if (options?.ex) {
+    return options.ex;
+  }
+  if (options?.px) {
+    return options.px / 1000;
+  }
+  return 3600;
+}
+
 export class PostgresCacheAdapter implements ICacheService {
   private cleanupInterval: NodeJS.Timeout | null = null;
 
@@ -35,7 +51,7 @@ export class PostgresCacheAdapter implements ICacheService {
   async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
     try {
       // Default to 1 hour TTL when no TTL is provided — prevents unbounded cache growth
-      const ttlSeconds = options?.ex ? options.ex : options?.px ? options.px / 1000 : 3600;
+      const ttlSeconds = resolveTtlSeconds(options);
       const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
 
       await CacheDbRepository.set(key, value, expiresAt);

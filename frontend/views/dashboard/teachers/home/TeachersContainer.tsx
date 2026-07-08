@@ -49,7 +49,7 @@ export function TeachersContainer() {
     <RequirePermission permissions={[AppPermission.StaffViewDirectory]}>
       <TeachersView
         metrics={directory.metrics}
-        rows={(directory.rows || []) as unknown as readonly TeacherDirectoryRow[]}
+        rows={(directory.rows ?? []) as readonly TeacherDirectoryRow[]}
         totalTeachers={directory.totalTeachers || 0}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

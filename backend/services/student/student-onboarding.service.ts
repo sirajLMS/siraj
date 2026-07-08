@@ -1,0 +1,86 @@
+import { randomUUID } from "node:crypto";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import { AppPermission, StudentStatus } from "@/backend/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { logger } from "@/backend/lib/logger";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
+
+export namespace StudentOnboardingService {
+  export async function createStudent(
+    actorUserId: string,
+    input: StudentOnboardingInput,
+    locale?: string,
+    tx?: DBTransaction
+  ): Promise<StudentOnboardingResult> {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENTS_CREATE);
+    if (!hasPermission) {
+      throw new Error(t("insufficientPermissions"));
+    }
+
+    const parent = await ParentRepository.getParentProfile(input.parentId);
+    if (!parent) {
+      throw new Error(t("parentNotFound", { id: input.parentId }));
+    }
+
+    if (input.primaryTeacherId) {
+      const teacher = await TeacherRepository.findById(input.primaryTeacherId);
+      if (!teacher) {
+        throw new Error(t("teacherNotFound", { id: input.primaryTeacherId }));
+      }
+    }
+
+    const run = async (txObj: DBTransaction): Promise<StudentOnboardingResult> => {
+      const student = await StudentRepository.create(
+        {
+          parentId: input.parentId,
+          name: input.name,
+          dateOfBirth: input.dateOfBirth ?? null,
+          gender: input.gender ?? null,
+          language: input.language ?? null,
+          status: input.status ?? StudentStatus.ON_TRIAL,
+          primaryTeacherId: input.primaryTeacherId ?? null,
+          classesTotal: input.classesTotal ?? 0,
+          classesRemaining: input.classesRemaining ?? 0,
+          idempotencyKey: randomUUID(),
+        },
+        locale,
+        txObj
+      );
+
+      if (input.primaryTeacherId) {
+        await StudentRepository.createTeacherAssignment(
+          {
+            studentId: student.id,
+            teacherId: input.primaryTeacherId,
+            assignedByUserId: actorUserId,
+          },
+          txObj
+        );
+      }
+
+      logger.info("Student onboarded successfully", {
+        studentId: student.id,
+        parentId: input.parentId,
+      });
+
+      return {
+        studentId: student.id,
+        parentId: student.parentId,
+        name: student.name,
+        status: student.status as StudentStatus,
+        primaryTeacherId: student.primaryTeacherId,
+      };
+    };
+
+    if (tx) {
+      return await run(tx);
+    }
+
+    return await db.transaction(run);
+  }
+}
