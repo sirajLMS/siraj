@@ -1,11 +1,11 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
+import { AppDataGrid, ClassProfileLinkCell, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
+import { classHref, profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "./types";
 
@@ -65,22 +65,14 @@ export function AcademicScheduleDataGrid({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row }) => (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              height: "100%",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-              {row.className}
-            </Typography>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              ID: {row.classId}
-            </Typography>
-          </Box>
+          <ClassProfileLinkCell
+            href={classHref(row.id)}
+            name={row.className}
+            avatarSize={40}
+            label={`ID: ${row.classId}`}
+            typographyVariant="bodyMd"
+            fontWeight={700}
+          />
         ),
       },
       {
@@ -92,7 +84,7 @@ export function AcademicScheduleDataGrid({
           <PersonProfileLinkCell
             href={profileHrefForTeacher({ teacherId: row.instructorId })}
             name={row.instructor}
-            showAvatar={false}
+            avatarSize={32}
             typographyVariant="bodyMd"
             fontWeight={400}
           />

@@ -1,5 +1,5 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
-import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
+import { Box, IconButton, Link, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
@@ -84,25 +84,6 @@ export function TeacherDataGrid({
       ),
     },
     {
-      field: "image",
-      headerName: t("table.image"),
-      width: 100,
-      sortable: false,
-      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-          <Avatar
-            src={params.row.avatarUrl || undefined}
-            alt={params.row.name || ""}
-            sx={theme => ({
-              width: 40,
-              height: 40,
-              border: `1px solid ${theme.palette.border.light}`,
-            })}
-          />
-        </Box>
-      ),
-    },
-    {
       field: "name",
       headerName: t("table.name"),
       flex: 1.5,
@@ -110,7 +91,8 @@ export function TeacherDataGrid({
         <PersonProfileLinkCell
           href={profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id })}
           name={(params.value as string) ?? ""}
-          showAvatar={false}
+          avatarUrl={params.row.avatarUrl}
+          avatarSize={40}
           typographyVariant="bodyLg"
           fontWeight={700}
         />

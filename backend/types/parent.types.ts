@@ -78,6 +78,7 @@ export type ParentDashboardScheduleRow = {
   studentAvatarUrl: string | null;
   teacherId: string;
   teacherName: string;
+  teacherAvatarUrl: string | null;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;

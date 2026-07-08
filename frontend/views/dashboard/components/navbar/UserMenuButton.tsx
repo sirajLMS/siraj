@@ -2,10 +2,11 @@
 
 import { useQuery } from "@apollo/client/react";
 import { GroupsOutlined, LoginOutlined, LogoutOutlined, PersonOutlineOutlined } from "@mui/icons-material";
-import { Avatar, Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useMemo, useState } from "react";
+import { UserAvatar } from "@/frontend/components/ui";
 import type { SimulatablePermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { simulatablePermissionGroupsQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
@@ -123,9 +124,10 @@ function DualAvatarTrigger({
 }>) {
   return (
     <Box sx={{ position: "relative", width: { xs: 40, md: 48 }, height: { xs: 32, md: 40 } }}>
-      <Avatar
+      <UserAvatar
         src={primaryAvatarUrl}
-        alt={primaryName}
+        label={primaryName}
+        size={34}
         sx={{
           width: { xs: 28, md: 34 },
           height: { xs: 28, md: 34 },
@@ -135,9 +137,10 @@ function DualAvatarTrigger({
           border: theme => `2px solid ${theme.palette.headerContainer}`,
         }}
       />
-      <Avatar
+      <UserAvatar
         src={secondaryAvatarUrl}
-        alt={secondaryName ?? ""}
+        label={secondaryName ?? ""}
+        size={28}
         sx={{
           width: { xs: 24, md: 28 },
           height: { xs: 24, md: 28 },
@@ -241,9 +244,10 @@ function UserMenuTrigger({
           secondaryName={actorUserName ?? undefined}
         />
       ) : (
-        <Avatar
+        <UserAvatar
           src={avatarUrl}
-          alt={userName}
+          label={userName}
+          size={40}
           sx={{
             width: { xs: 32, md: 40 },
             height: { xs: 32, md: 40 },

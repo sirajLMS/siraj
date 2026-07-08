@@ -55,6 +55,7 @@ const mockSubjects = [
         __typename: "SubjectResource" as const,
       },
     ],
+    avatarUrl: null,
     __typename: "ClassSubject" as const,
   },
   {
@@ -67,6 +68,7 @@ const mockSubjects = [
     sortOrder: 1,
     category: mockCategories[0],
     resources: [],
+    avatarUrl: null,
     __typename: "ClassSubject" as const,
   },
   {
@@ -79,6 +81,7 @@ const mockSubjects = [
     sortOrder: 0,
     category: mockCategories[1],
     resources: [],
+    avatarUrl: null,
     __typename: "ClassSubject" as const,
   },
   {
@@ -91,6 +94,7 @@ const mockSubjects = [
     sortOrder: 0,
     category: mockCategories[2],
     resources: [],
+    avatarUrl: null,
     __typename: "ClassSubject" as const,
   },
 ];

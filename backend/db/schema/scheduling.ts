@@ -53,6 +53,7 @@ export const recurringSchedules = pgTable(
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
     subjectId: uuid("subject_id").references(() => classSubjects.id, { onDelete: "restrict" }),
+    avatarUrl: varchar("avatar_url", { length: 1024 }),
     durationMinutes: integer("duration_minutes").notNull(),
     defaultStartTime: time("default_start_time").notNull(),
     timezoneId: integer("timezone_id").references(() => timezones.id),

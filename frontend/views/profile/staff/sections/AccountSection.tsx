@@ -1,9 +1,9 @@
 "use client";
 
-import { Avatar, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
-import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
+import { SectionPanel, StatusBadge, UserAvatar } from "@/frontend/components/ui";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { InfoField } from "../../parent/sections/InfoField";
 import type { StaffAdminEditFormData } from "../staffProfileFormTypes";
@@ -39,11 +39,7 @@ export function AccountSection(props: AccountSectionProps) {
     return (
       <SectionPanel title={t("sections.account")}>
         <Stack spacing={2}>
-          <Avatar
-            src={props.avatarUrl ?? undefined}
-            alt={props.staffData.name ?? t("fields.fullName")}
-            sx={{ width: 64, height: 64 }}
-          />
+          <UserAvatar src={props.avatarUrl} label={props.staffData.name ?? t("fields.fullName")} size={64} />
           <TextField label={t("fields.fullName")} fullWidth size="small" {...props.register("name")} />
           <TextField
             label={t("fields.primaryEmail")}
@@ -66,11 +62,7 @@ export function AccountSection(props: AccountSectionProps) {
   return (
     <SectionPanel title={t("sections.account")}>
       <Stack spacing={2}>
-        <Avatar
-          src={props.avatarUrl ?? undefined}
-          alt={props.staffData.name ?? t("fields.fullName")}
-          sx={{ width: 64, height: 64 }}
-        />
+        <UserAvatar src={props.avatarUrl} label={props.staffData.name ?? t("fields.fullName")} size={64} />
         <InfoField label={t("fields.fullName")} value={toDisplayValue(props.staffData.name, tc("notSet"))} />
         <InfoField label={t("fields.primaryEmail")} value={toDisplayValue(props.staffData.email, tc("notSet"))} />
         {props.isAdminScope ? (

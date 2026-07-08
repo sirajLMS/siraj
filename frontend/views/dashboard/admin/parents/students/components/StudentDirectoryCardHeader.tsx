@@ -1,6 +1,7 @@
 "use client";
 
-import { Avatar, Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { UserAvatar } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import type { StudentAccountStatus, StudentDirectoryRowExtended } from "../types";
 
@@ -13,7 +14,7 @@ export function StudentDirectoryCardHeader({ row, statusLabels }: StudentDirecto
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Avatar src={row.avatarUrl || undefined} alt={row.name ?? ""} sx={{ width: 48, height: 48 }} />
+        <UserAvatar src={row.avatarUrl} label={row.name ?? ""} size={48} />
         <Box>
           <Typography
             variant="bodyLg"

@@ -1,7 +1,8 @@
 "use client";
 
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { UserAvatar } from "@/frontend/components/ui";
 
 export type ProfileHeaderProps = {
   name: string;
@@ -74,17 +75,15 @@ export function ProfileHeader({ name, email, role, avatarUrl }: ProfileHeaderPro
         pt: { xs: 0.5, md: 0 },
       })}
     >
-      <Avatar
-        src={avatarUrl ?? undefined}
+      <UserAvatar
+        src={avatarUrl}
+        label={name}
+        size={64}
         sx={theme => ({
-          width: 64,
-          height: 64,
-          flexShrink: 0,
           bgcolor: avatarUrl ? undefined : theme.palette.primary.main,
+          color: avatarUrl ? undefined : theme.palette.onPrimary,
         })}
-      >
-        {name.charAt(0).toUpperCase()}
-      </Avatar>
+      />
 
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Stack

@@ -1,7 +1,7 @@
 "use client";
 
 import { MailOutlined } from "@mui/icons-material";
-import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
@@ -11,11 +11,6 @@ import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { profileHrefForStaff } from "@/frontend/utils/profileHref";
 import { ManagerRowActions } from "./ManagerRowActions";
 import type { Manager } from "./types";
-
-const StyledManagerAvatar = styled(Avatar)({
-  width: 40,
-  height: 40,
-});
 
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "isStaff",
@@ -62,22 +57,19 @@ export function ManagersDataGrid({
         minWidth: 250,
         renderCell: params => (
           <Stack direction="row" spacing={2} sx={{ alignItems: "center", height: "100%" }}>
-            <StyledManagerAvatar src={params.row.avatarUrl || undefined} alt={params.row.name}>
-              {params.row.avatarUrl ? undefined : params.row.name.charAt(0).toUpperCase()}
-            </StyledManagerAvatar>
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-                alignItems: "center",
                 gap: 0.5,
               }}
             >
               <PersonProfileLinkCell
                 href={profileHrefForStaff({ userId: params.row.userId })}
                 name={params.row.name}
-                showAvatar={false}
+                avatarUrl={params.row.avatarUrl}
+                avatarSize={40}
                 typographyVariant="bodyMd"
                 fontWeight={700}
               />

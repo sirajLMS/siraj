@@ -4,6 +4,7 @@ import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.reposito
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
+import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -43,8 +44,14 @@ export namespace ScheduleService {
       status: (item.outcome || item.executionState) as ClassExecutionState,
       outcome: item.outcome as ClassOutcome,
       executionState: item.executionState as ClassExecutionState,
-      student: { id: item.studentId, name: item.student?.name || unknownName },
-      teacher: { id: item.teacherId, name: item.teacher?.user?.name || unknownName },
+      student: { id: item.studentId, name: item.student?.name || unknownName, avatarUrl: item.student?.avatarUrl ?? null },
+      teacher: {
+        id: item.teacherId,
+        name: item.teacher?.user?.name || unknownName,
+        avatarUrl: item.teacher?.user?.avatarUrl ?? null,
+      },
+      courseName: item.courseName ?? null,
+      avatarUrl: item.avatarUrl ?? null,
     };
   }
 
@@ -305,6 +312,7 @@ export namespace ScheduleService {
         subjectName: cls.subjectName,
         classType: cls.classType as ClassType | null | undefined,
         zoomMeetingUrl: cls.zoomMeetingUrl ?? null,
+        avatarUrl: resolveClassAvatarUrl(cls.recurringAvatarUrl, cls.subjectAvatarUrl),
       };
     });
 

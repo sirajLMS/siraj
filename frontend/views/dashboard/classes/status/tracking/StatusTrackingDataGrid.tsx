@@ -1,15 +1,15 @@
 "use client";
 
 import { BlockOutlined, WarningAmberOutlined } from "@mui/icons-material";
-import { Avatar, Box, type Theme, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { alpha, styled } from "@mui/material/styles";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
+import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import { Link } from "@/shared/i18n/routing";
 import { StatusAction } from "./StatusBadgeAction";
 import {
   computeSessionStatus,
@@ -19,12 +19,6 @@ import {
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "./types";
-
-const StyledClassNameText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  whiteSpace: "normal",
-  wordBreak: "break-word",
-}));
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {
   [SessionStatus.REGULAR]: "regular",
@@ -41,37 +35,6 @@ function getStatusIcon(sessionStatus: SessionStatus) {
     return <WarningAmberOutlined sx={{ fontSize: 12 }} />;
   }
   return undefined;
-}
-
-function sessionLabelStyles(
-  theme: Theme,
-  sessionStatus: SessionStatus
-): {
-  color?: string;
-  backgroundColor?: string;
-} {
-  switch (sessionStatus) {
-    case SessionStatus.SUSPENDED_PENDING:
-      return {
-        color: theme.palette.status.onBlockedContainer,
-        backgroundColor: theme.palette.status.blockedContainer,
-      };
-    case SessionStatus.PENDING_VERIFICATION:
-      return {
-        color: theme.palette.status.onPendingContainer,
-        backgroundColor: theme.palette.status.pendingContainer,
-      };
-    case SessionStatus.ON_LEAVE:
-      return {
-        color: theme.palette.secondaryContainer,
-        backgroundColor: theme.palette.onSecondaryContainer,
-      };
-    case SessionStatus.REGULAR:
-      return {
-        color: theme.palette.status.onActiveContainer,
-        backgroundColor: theme.palette.status.activeContainer,
-      };
-  }
 }
 
 export function StatusTrackingDataGrid({
@@ -102,61 +65,27 @@ export function StatusTrackingDataGrid({
         flex: 1.3,
         minWidth: 220,
         renderCell: ({ row }) => {
-          const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
-          const styles = sessionLabelStyles(theme, status);
           const studentProfileHref = row.studentId ? studentHref(row.studentId) : undefined;
           const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
           return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-              <Avatar
-                alt={row.studentName ?? ""}
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1.5,
-                  typography: "bodyMd",
-                  fontWeight: 700,
-                  backgroundColor: styles.backgroundColor,
-                  color: styles.color,
-                }}
-              >
-                {row.studentInitials ?? ""}
-              </Avatar>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                {studentProfileHref ? (
-                  <Link href={studentProfileHref} style={{ textDecoration: "none" }}>
-                    <Typography
-                      variant="bodyMd"
-                      sx={{
-                        fontWeight: 700,
-                        color: theme.palette.primary.main,
-                        "&:hover": { textDecoration: "underline" },
-                      }}
-                    >
-                      {row.studentName ?? ""}
-                    </Typography>
-                  </Link>
-                ) : (
-                  <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-                    {row.studentName ?? ""}
-                  </Typography>
-                )}
-                {teacherProfileHref ? (
-                  <Link href={teacherProfileHref} style={{ textDecoration: "none" }}>
-                    <StyledClassNameText
-                      variant="labelMd"
-                      sx={{
-                        color: theme.palette.primary.main,
-                        "&:hover": { textDecoration: "underline" },
-                      }}
-                    >
-                      {row.teacherName ?? ""}
-                    </StyledClassNameText>
-                  </Link>
-                ) : (
-                  <StyledClassNameText variant="labelMd">{row.teacherName ?? ""}</StyledClassNameText>
-                )}
-              </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", height: "100%" }}>
+              <PersonProfileLinkCell
+                href={studentProfileHref}
+                name={row.studentName ?? ""}
+                avatarUrl={row.studentAvatarUrl}
+                avatarSize={40}
+                typographyVariant="bodyMd"
+                fontWeight={700}
+              />
+              <PersonProfileLink
+                href={teacherProfileHref}
+                name={row.teacherName ?? ""}
+                avatarUrl={row.teacherAvatarUrl}
+                showAvatar={false}
+                typographyVariant="labelMd"
+                fontWeight={600}
+                emphasizeLink={Boolean(teacherProfileHref)}
+              />
             </Box>
           );
         },
@@ -166,25 +95,16 @@ export function StatusTrackingDataGrid({
         headerName: labels.teacher,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => {
-          const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
-          if (!teacherProfileHref) {
-            return <Typography variant="bodyMd">{row.teacherName ?? ""}</Typography>;
-          }
-          return (
-            <Link href={teacherProfileHref} style={{ textDecoration: "none", alignSelf: "center" }}>
-              <Typography
-                variant="bodyMd"
-                sx={{
-                  color: theme.palette.primary.main,
-                  "&:hover": { textDecoration: "underline" },
-                }}
-              >
-                {row.teacherName ?? ""}
-              </Typography>
-            </Link>
-          );
-        },
+        renderCell: ({ row }) => (
+          <PersonProfileLinkCell
+            href={profileHrefForTeacher({ teacherId: row.teacherId })}
+            name={row.teacherName ?? ""}
+            avatarUrl={row.teacherAvatarUrl}
+            avatarSize={32}
+            typographyVariant="bodyMd"
+            fontWeight={600}
+          />
+        ),
       },
       {
         field: "schedule",

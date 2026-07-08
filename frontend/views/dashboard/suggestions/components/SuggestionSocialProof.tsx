@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Avatar, Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { UserAvatar } from "@/frontend/components/ui";
 import { suggestionContributorStatsQueryDocument } from "@/frontend/graphql/sharedDocuments/suggestion.documents";
 import type { SuggestionSocialProofProps } from "../types/suggestionsView.types";
 
@@ -30,12 +31,12 @@ export function SuggestionSocialProof({ labels }: Readonly<SuggestionSocialProof
     <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
       <Box sx={{ display: "flex" }}>
         {displayContributors.map(contributor => (
-          <Avatar
+          <UserAvatar
             key={contributor?.id ?? ""}
+            label={contributor?.name ?? ""}
+            size={32}
             sx={theme => ({
-              width: 32,
-              height: 32,
-              fontSize: 12,
+              typography: "labelSm",
               backgroundColor: theme.palette.secondaryContainer,
               color: theme.palette.onSecondaryContainer,
               border: `2px solid ${theme.palette.background.paper}`,
@@ -43,14 +44,13 @@ export function SuggestionSocialProof({ labels }: Readonly<SuggestionSocialProof
             })}
           >
             {getInitials(contributor?.name ?? "")}
-          </Avatar>
+          </UserAvatar>
         ))}
         {remainingCount > 0 && (
-          <Avatar
+          <UserAvatar
+            size={32}
             sx={theme => ({
-              width: 32,
-              height: 32,
-              fontSize: 10,
+              typography: "labelSm",
               backgroundColor: theme.palette.surfaceContainer,
               color: theme.palette.onSurfaceVariant,
               border: `2px solid ${theme.palette.background.paper}`,
@@ -58,7 +58,7 @@ export function SuggestionSocialProof({ labels }: Readonly<SuggestionSocialProof
             })}
           >
             +{remainingCount}
-          </Avatar>
+          </UserAvatar>
         )}
       </Box>
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, fontStyle: "italic" })}>

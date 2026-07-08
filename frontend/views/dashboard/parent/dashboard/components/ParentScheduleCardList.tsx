@@ -97,7 +97,7 @@ function ScheduleCard({
             <PersonProfileLink
               href={teacherProfileHref}
               name={teacherLabel}
-              showAvatar={false}
+              avatarSize={32}
               typographyVariant="labelMd"
               fontWeight={400}
               emphasizeLink={Boolean(teacherProfileHref)}

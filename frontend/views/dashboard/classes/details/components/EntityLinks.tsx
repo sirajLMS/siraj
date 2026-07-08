@@ -1,23 +1,7 @@
 "use client";
 
-import { Avatar, Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { avatarInitials } from "@/frontend/utils/avatar";
+import { PersonProfileLink } from "@/frontend/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import { Link } from "@/shared/i18n/routing";
-
-const StyledEntityLink = styled(Link)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontWeight: 600,
-  textDecoration: "none",
-  "&:hover": {
-    textDecoration: "underline",
-  },
-}));
-
-const StyledTeacherEntityLink = styled(StyledEntityLink)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-}));
 
 interface StudentEntityLinkProps {
   readonly studentId: string;
@@ -36,39 +20,16 @@ export function StudentEntityLink({
   showAvatar = false,
   variant = "titleLg",
 }: StudentEntityLinkProps) {
-  const href = studentHref(studentId);
-
-  if (showAvatar) {
-    return (
-      <Box
-        component={Link}
-        href={href}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          textDecoration: "none",
-          color: "inherit",
-        }}
-      >
-        <Avatar src={avatarUrl ?? undefined} alt={name} sx={{ width: avatarSize, height: avatarSize }}>
-          {avatarInitials(name)}
-        </Avatar>
-        <Box>
-          <Typography variant={variant} sx={{ color: theme => theme.palette.primary.main, fontWeight: 600 }}>
-            {name}
-          </Typography>
-        </Box>
-      </Box>
-    );
-  }
-
   return (
-    <StyledEntityLink href={href}>
-      <Typography variant={variant} component="span" sx={{ fontWeight: 600 }}>
-        {name}
-      </Typography>
-    </StyledEntityLink>
+    <PersonProfileLink
+      href={studentHref(studentId)}
+      name={name}
+      avatarUrl={avatarUrl}
+      showAvatar={showAvatar}
+      avatarSize={avatarSize}
+      typographyVariant={variant}
+      fontWeight={600}
+    />
   );
 }
 
@@ -93,57 +54,16 @@ export function TeacherEntityLink({
 }: TeacherEntityLinkProps) {
   const href = profileHrefForTeacher({ userId, teacherId });
 
-  if (!href) {
-    return (
-      <Typography
-        variant={variant}
-        component="span"
-        sx={{ fontWeight: 600, color: theme => theme.palette.text.secondary }}
-      >
-        {name}
-      </Typography>
-    );
-  }
-
-  if (showAvatar) {
-    return (
-      <Box
-        component={Link}
-        href={href}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          textDecoration: "none",
-          color: "inherit",
-        }}
-      >
-        <Avatar
-          src={avatarUrl ?? undefined}
-          alt={name}
-          sx={theme => ({
-            width: avatarSize,
-            height: avatarSize,
-            backgroundColor: theme.palette.primaryContainer,
-            color: theme.palette.onPrimaryContainer,
-          })}
-        >
-          {avatarInitials(name)}
-        </Avatar>
-        <Box>
-          <Typography variant={variant} sx={{ color: theme => theme.palette.primary.main, fontWeight: 600 }}>
-            {name}
-          </Typography>
-        </Box>
-      </Box>
-    );
-  }
-
   return (
-    <StyledTeacherEntityLink href={href}>
-      <Typography variant={variant} component="span" sx={{ fontWeight: 600 }}>
-        {name}
-      </Typography>
-    </StyledTeacherEntityLink>
+    <PersonProfileLink
+      href={href}
+      name={name}
+      avatarUrl={avatarUrl}
+      showAvatar={showAvatar}
+      avatarSize={avatarSize}
+      typographyVariant={variant}
+      fontWeight={600}
+      emphasizeLink={Boolean(href)}
+    />
   );
 }

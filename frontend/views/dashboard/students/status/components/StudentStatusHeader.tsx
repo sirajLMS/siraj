@@ -1,8 +1,9 @@
 import { Fingerprint, HistoryOutlined, MailOutlineOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
+import { UserAvatar } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
@@ -45,12 +46,11 @@ function StudentAvatar({
   const theme = useTheme();
   return (
     <Box sx={{ position: "relative" }}>
-      <Avatar
-        src={student.avatarUrl ?? undefined}
-        alt={student.name}
+      <UserAvatar
+        src={student.avatarUrl}
+        label={student.name}
+        size={96}
         sx={{
-          width: 96,
-          height: 96,
           border: `4px solid ${theme.palette.background.paper}`,
           boxShadow: theme.palette.shadow.card,
         }}

@@ -13,6 +13,7 @@ export interface ParentScheduleRow {
   readonly studentAvatarUrl?: string;
   readonly teacherId?: string;
   readonly teacherName: string;
+  readonly teacherAvatarUrl?: string;
   readonly bookingStatus: ParentBookingStatus;
   readonly liveClassStatus: ParentLiveClassStatus;
   readonly videoEnabled: boolean;

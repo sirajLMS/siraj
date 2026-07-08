@@ -54,7 +54,7 @@ export function StudentCreditDataGrid({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <PersonProfileLinkCell name={row.studentName} href={studentHref(row.id)} showAvatar={false} fontWeight={700} />
+          <PersonProfileLinkCell name={row.studentName} href={studentHref(row.id)} avatarSize={40} fontWeight={700} />
         ),
       },
       {

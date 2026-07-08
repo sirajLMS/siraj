@@ -5,7 +5,7 @@ import { Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
-import { ActionIconLink as StyledHistoryIconLink } from "@/frontend/components/ui";
+import { ActionIconLink as StyledHistoryIconLink, PersonProfileLinkCell } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
@@ -19,10 +19,6 @@ import {
   StyledActionsCellBox,
   StyledGridDetailsLink,
   StyledMonospaceLabel,
-  StyledScheduleNameLink,
-  StyledScheduleTeacherLink,
-  StyledStudentNameText,
-  StyledTeacherNameText,
 } from "./ScheduleOverviewDataGrid.styles";
 
 interface UseScheduleColumnsParams {
@@ -94,27 +90,33 @@ function renderStudentCell(row: DailyScheduleRow) {
   const studentName = row.student?.name ?? "Unknown Student";
   const studentId = row.student?.id;
 
-  if (!studentId) {
-    return <StyledStudentNameText variant="bodyMd">{studentName}</StyledStudentNameText>;
-  }
-
-  return <StyledScheduleNameLink href={studentHref(studentId)}>{studentName}</StyledScheduleNameLink>;
+  return (
+    <PersonProfileLinkCell
+      href={studentId ? studentHref(studentId) : undefined}
+      name={studentName}
+      avatarUrl={row.student?.avatarUrl}
+      avatarSize={32}
+      typographyVariant="bodyMd"
+      fontWeight={600}
+    />
+  );
 }
 
 function renderTeacherCell(row: DailyScheduleRow) {
   const teacherName = row.teacher?.name ?? "Unknown Teacher";
   const teacherId = row.teacher?.id;
 
-  if (!teacherId) {
-    return <StyledTeacherNameText variant="bodyMd">{teacherName}</StyledTeacherNameText>;
-  }
-
-  const href = profileHrefForTeacher({ teacherId });
-  if (!href) {
-    return <StyledTeacherNameText variant="bodyMd">{teacherName}</StyledTeacherNameText>;
-  }
-
-  return <StyledScheduleTeacherLink href={href}>{teacherName}</StyledScheduleTeacherLink>;
+  return (
+    <PersonProfileLinkCell
+      href={teacherId ? profileHrefForTeacher({ teacherId }) : undefined}
+      name={teacherName}
+      avatarUrl={row.teacher?.avatarUrl}
+      avatarSize={32}
+      typographyVariant="bodyMd"
+      fontWeight={600}
+      emphasizeLink={Boolean(teacherId)}
+    />
+  );
 }
 
 function buildActionsColumn(

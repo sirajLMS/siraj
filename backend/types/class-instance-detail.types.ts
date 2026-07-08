@@ -55,6 +55,7 @@ export type ClassInstanceDetailReturnType = Omit<
   isRescheduled: boolean;
   executionState: ClassExecutionState | null;
   outcome: ClassOutcome | null;
+  avatarUrl?: string | null;
   student: ClassInstanceStudentReturnType;
   teacher: ClassInstanceTeacherReturnType;
   performance: ClassInstancePerformanceReturnType | null;

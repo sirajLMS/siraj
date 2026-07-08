@@ -1,7 +1,7 @@
 import { EditOutlined } from "@mui/icons-material";
-import { Avatar, Box, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { StatusBadge } from "@/frontend/components/ui";
+import { StatusBadge, UserAvatar } from "@/frontend/components/ui";
 
 interface ParentProfileHeaderProps {
   readonly name: string;
@@ -28,14 +28,13 @@ function ParentProfileHeader({ name, avatarUrl, status, onEditAvatar }: ParentPr
       }}
     >
       <Box sx={{ position: "relative" }}>
-        <Avatar
+        <UserAvatar
           src={avatarUrl}
-          alt={name}
-          sx={{
-            width: 128,
-            height: 128,
+          label={name}
+          size={128}
+          sx={theme => ({
             border: `4px solid ${theme.palette.primary.main}1A`,
-          }}
+          })}
         />
         <Box
           component="button"

@@ -11,7 +11,8 @@ import {
   PlayCircleOutlineOutlined,
   SensorsOutlined,
 } from "@mui/icons-material";
-import { Avatar, Box, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { UserAvatar } from "@/frontend/components/ui";
 import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/types/shared.types";
 import type { TeacherDashboardLabels } from "@/shared/messages/types/dashboard/teachers/dashboard";
 
@@ -50,7 +51,9 @@ export function StudentProgressFeed({ items, title, labels }: Readonly<StudentPr
             const EventIcon = resolveFeedIcon(item.eventKind);
             return (
               <Box key={item.id} sx={{ p: 2, display: "flex", alignItems: "flex-start", gap: 2 }}>
-                <Avatar sx={{ width: 40, height: 40, typography: "labelMd" }}>{item.studentInitials}</Avatar>
+                <UserAvatar label={item.studentName} size={40}>
+                  {item.studentInitials}
+                </UserAvatar>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, alignItems: "flex-start" }}>
                     <Typography sx={{ typography: "bodyLg", fontWeight: 600 }}>{item.studentName}</Typography>

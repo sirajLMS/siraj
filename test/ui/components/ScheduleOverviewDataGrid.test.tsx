@@ -74,8 +74,10 @@ const mockRows: readonly DailyScheduleRow[] = [
     status: null,
     outcome: ClassOutcome.Pending,
     executionState: ClassExecutionState.NotActivated,
-    student: { id: "student-1", name: "Ahmed Hassan" },
-    teacher: { id: "teacher-1", name: "Dr. Sarah" },
+    avatarUrl: null,
+    courseName: null,
+    student: { id: "student-1", name: "Ahmed Hassan", avatarUrl: null },
+    teacher: { id: "teacher-1", name: "Dr. Sarah", avatarUrl: null },
   },
   {
     id: "row-2",
@@ -88,8 +90,10 @@ const mockRows: readonly DailyScheduleRow[] = [
     status: null,
     outcome: ClassOutcome.Taken,
     executionState: ClassExecutionState.Completed,
-    student: { id: "student-2", name: "Fatima Ali" },
-    teacher: { id: "teacher-2", name: "Mr. Omar" },
+    avatarUrl: null,
+    courseName: null,
+    student: { id: "student-2", name: "Fatima Ali", avatarUrl: null },
+    teacher: { id: "teacher-2", name: "Mr. Omar", avatarUrl: null },
   },
 ];
 

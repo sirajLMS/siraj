@@ -239,6 +239,7 @@ export function CreateSubjectDialog({
       description: data.description || null,
       isActive: data.isActive ?? null,
       sortOrder: null,
+      avatarUrl: null,
     });
   };
 

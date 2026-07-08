@@ -38,11 +38,15 @@ export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
         student {
           id
           name
+          avatarUrl
         }
         teacher {
           id
           name
+          avatarUrl
         }
+        courseName
+        avatarUrl
       }
       pageInfo {
         count
@@ -97,11 +101,15 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
       student {
         id
         name
+        avatarUrl
       }
       teacher {
         id
         name
+        avatarUrl
       }
+      courseName
+      avatarUrl
     }
   }
 `;
@@ -180,9 +188,13 @@ export const statusTrackingScheduleQueryDocument: TypedDocumentNode<
       studentId
       studentName
       studentInitials
+      studentAvatarUrl
       studentStatus
       teacherId
       teacherName
+      teacherAvatarUrl
+      courseName
+      avatarUrl
       scheduledStartAt
       scheduledEndAt
       durationMinutes

@@ -1,12 +1,9 @@
 "use client";
 
-import { Avatar, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
+import { UserAvatar } from "@/frontend/components/ui/avatar/UserAvatar";
 import { Link } from "@/shared/i18n/routing";
-
-function getInitial(name: string | null | undefined, fallback: string): string {
-  return (name?.trim()?.[0] ?? fallback).toUpperCase();
-}
 
 export type PersonProfileLinkProps = {
   readonly href?: string | null;
@@ -56,9 +53,12 @@ export function PersonProfileLink({
   const content = (
     <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
       {showAvatar ? (
-        <Avatar src={avatarUrl ?? undefined} sx={{ width: avatarSize, height: avatarSize }}>
-          {getInitial(name, fallbackInitial)}
-        </Avatar>
+        <UserAvatar
+          src={avatarUrl}
+          label={name || fallbackInitial}
+          size={avatarSize}
+          children={name ? undefined : fallbackInitial}
+        />
       ) : null}
       <Stack spacing={0.25} sx={{ minWidth: 0 }}>
         {label ? (

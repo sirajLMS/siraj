@@ -22,6 +22,7 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
     studentAvatarUrl: t.exposeString("studentAvatarUrl", { nullable: true }),
     teacherId: t.exposeString("teacherId"),
     teacherName: t.exposeString("teacherName"),
+    teacherAvatarUrl: t.exposeString("teacherAvatarUrl", { nullable: true }),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),

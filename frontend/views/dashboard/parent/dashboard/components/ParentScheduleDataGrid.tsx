@@ -96,7 +96,8 @@ export function ParentScheduleDataGrid({
           <PersonProfileLinkCell
             href={row.teacherId ? profileHrefForTeacher({ teacherId: row.teacherId }) : undefined}
             name={row.teacherName}
-            showAvatar={false}
+            avatarUrl={row.teacherAvatarUrl}
+            avatarSize={32}
             typographyVariant="bodyMd"
             fontWeight={400}
             emphasizeLink={Boolean(row.teacherId)}

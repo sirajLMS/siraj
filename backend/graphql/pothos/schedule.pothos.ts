@@ -46,6 +46,7 @@ const DailyScheduleListUserItemObject = DailyScheduleListUserItemRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
   }),
 });
 
@@ -65,6 +66,8 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     student: t.expose("student", { type: DailyScheduleListUserItemObject }),
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
+    courseName: t.exposeString("courseName", { nullable: true }),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
   }),
 });
 
@@ -162,9 +165,13 @@ export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRe
     studentId: t.exposeString("studentId"),
     studentName: t.exposeString("studentName"),
     studentInitials: t.exposeString("studentInitials"),
+    studentAvatarUrl: t.exposeString("studentAvatarUrl", { nullable: true }),
     studentStatus: t.expose("studentStatus", { type: StudentStatusPothosObject }),
     teacherId: t.exposeString("teacherId"),
     teacherName: t.exposeString("teacherName"),
+    teacherAvatarUrl: t.exposeString("teacherAvatarUrl", { nullable: true }),
+    courseName: t.exposeString("courseName", { nullable: true }),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),

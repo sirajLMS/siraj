@@ -43,6 +43,7 @@ const mockSubject: SubjectDetailData = {
   isActive: true,
   sortOrder: 0,
   category: { id: "cat-1", name: "Quran", slug: "quran" },
+  avatarUrl: null,
   resources: mockResources,
 };
 

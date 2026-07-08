@@ -10,30 +10,32 @@ export function profileHrefForUser(userId: string): string {
   return `/users/${userId}/profile`;
 }
 
+function profileHrefWithEntityFallback(
+  userId: string | null | undefined,
+  entityId: string | null | undefined,
+  entityPath: (id: string) => string
+): string | undefined {
+  if (userId) {
+    return profileHrefForUser(userId);
+  }
+  if (entityId) {
+    return entityPath(entityId);
+  }
+  return undefined;
+}
+
 export function profileHrefForTeacher(ids: {
   readonly userId?: string | null;
   readonly teacherId?: string | null;
 }): string | undefined {
-  if (ids.userId) {
-    return profileHrefForUser(ids.userId);
-  }
-  if (ids.teacherId) {
-    return `/teachers/${ids.teacherId}/profile`;
-  }
-  return undefined;
+  return profileHrefWithEntityFallback(ids.userId, ids.teacherId, id => `/teachers/${id}/profile`);
 }
 
 export function profileHrefForParent(ids: {
   readonly userId?: string | null;
   readonly parentId?: string | null;
 }): string | undefined {
-  if (ids.userId) {
-    return profileHrefForUser(ids.userId);
-  }
-  if (ids.parentId) {
-    return `/parents/${ids.parentId}/profile`;
-  }
-  return undefined;
+  return profileHrefWithEntityFallback(ids.userId, ids.parentId, id => `/parents/${id}/profile`);
 }
 
 export function profileHrefForStaff(ids: { readonly userId?: string | null }): string | undefined {
@@ -45,6 +47,10 @@ export function profileHrefForStaff(ids: { readonly userId?: string | null }): s
 
 export function studentHref(studentId: string): string {
   return `/students/${studentId}`;
+}
+
+export function classHref(classInstanceId: string): string {
+  return `/classes/${classInstanceId}`;
 }
 
 export function ownProfileHref(): string {

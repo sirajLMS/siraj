@@ -10,6 +10,7 @@ export type ClassSubjectSubmitInput = {
   slug: string;
   categoryId: string;
   description?: string | null;
+  avatarUrl?: string | null;
   isActive?: boolean;
   sortOrder?: number;
 };
@@ -19,6 +20,7 @@ export type ClassSubjectUpdateInput = {
   slug?: string;
   categoryId?: string;
   description?: string | null;
+  avatarUrl?: string | null;
   isActive?: boolean;
   sortOrder?: number;
 };

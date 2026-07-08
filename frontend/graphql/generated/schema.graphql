@@ -365,6 +365,7 @@ enum ClassExecutionState {
 }
 
 type ClassInstanceDetail {
+  avatarUrl: String
   classType: ClassType
   courseName: String
   durationMinutes: Int
@@ -433,6 +434,7 @@ type ClassStatusEvent {
 }
 
 type ClassSubject {
+  avatarUrl: String
   category: ClassCategory
   categoryId: String
   description: String
@@ -445,6 +447,7 @@ type ClassSubject {
 }
 
 input ClassSubjectCreateInput {
+  avatarUrl: String
   categoryId: String!
   description: String
   isActive: Boolean
@@ -454,6 +457,7 @@ input ClassSubjectCreateInput {
 }
 
 input ClassSubjectUpdateInput {
+  avatarUrl: String
   categoryId: String
   description: String
   isActive: Boolean
@@ -875,6 +879,8 @@ input CreateTeacherNoteInput {
 }
 
 type DailyScheduleList {
+  avatarUrl: String
+  courseName: String
   duration: Int
   executionState: ClassExecutionState
   id: String
@@ -890,6 +896,7 @@ type DailyScheduleList {
 }
 
 type DailyScheduleListUserItem {
+  avatarUrl: String
   id: String
   name: String
 }
@@ -1139,6 +1146,7 @@ input FolderCreateInput {
 }
 
 type FutureClass {
+  avatarUrl: String
   classType: ClassType
   courseName: String
   durationMinutes: Int
@@ -1672,6 +1680,7 @@ type ParentDashboardScheduleRow {
   studentId: String
   studentInitials: String
   studentName: String
+  teacherAvatarUrl: String
   teacherId: String
   teacherName: String
   zoomMeetingUrl: String
@@ -2193,6 +2202,8 @@ type StartPermissionGroupSimulationResponse {
 }
 
 type StatusTrackingScheduleRow {
+  avatarUrl: String
+  courseName: String
   durationMinutes: Int
   executionState: ClassExecutionState
   id: String
@@ -2200,10 +2211,12 @@ type StatusTrackingScheduleRow {
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
+  studentAvatarUrl: String
   studentId: String
   studentInitials: String
   studentName: String
   studentStatus: StudentStatus
+  teacherAvatarUrl: String
   teacherId: String
   teacherName: String
 }

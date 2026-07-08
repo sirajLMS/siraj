@@ -1,10 +1,10 @@
 "use client";
 
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
-import { Avatar, Box, Grid, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui";
+import { BaseCard, UserAvatar } from "@/frontend/components/ui";
 import { useRouter } from "@/shared/i18n/routing";
 import type { BentoCardProps, ReassignmentBentoGridProps } from "../types";
 
@@ -21,16 +21,16 @@ function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardP
         transition: "box-shadow 0.2s",
       })}
     >
-      <Avatar
+      <UserAvatar
+        size={48}
         sx={theme => ({
           border: `2px solid ${theme.palette.primary.main}`,
           color: theme.palette.primary.main,
-          width: 48,
-          height: 48,
+          backgroundColor: theme.palette.background.paper,
         })}
       >
         <Icon />
-      </Avatar>
+      </UserAvatar>
       <Box>
         <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
           {title}

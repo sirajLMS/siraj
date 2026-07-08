@@ -31,8 +31,10 @@ const MOCK_SCHEDULE: DailyScheduleRow[] = [
     status: null,
     outcome: ClassOutcome.Pending,
     executionState: ClassExecutionState.NotActivated,
-    student: { id: "student-1", name: "Omar Khalid" },
-    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed" },
+    avatarUrl: null,
+    courseName: null,
+    student: { id: "student-1", name: "Omar Khalid", avatarUrl: null },
+    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed", avatarUrl: null },
   },
   {
     id: "9083",
@@ -45,8 +47,10 @@ const MOCK_SCHEDULE: DailyScheduleRow[] = [
     status: null,
     outcome: ClassOutcome.Pending,
     executionState: ClassExecutionState.Running,
-    student: { id: "student-2", name: "Layla Ismail" },
-    teacher: { id: "teacher-sarah", name: "Sarah Johnson" },
+    avatarUrl: null,
+    courseName: null,
+    student: { id: "student-2", name: "Layla Ismail", avatarUrl: null },
+    teacher: { id: "teacher-sarah", name: "Sarah Johnson", avatarUrl: null },
   },
   {
     id: "9084",
@@ -59,8 +63,10 @@ const MOCK_SCHEDULE: DailyScheduleRow[] = [
     status: null,
     outcome: ClassOutcome.Taken,
     executionState: ClassExecutionState.Completed,
-    student: { id: "student-3", name: "Omar Ahmed" },
-    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed" },
+    avatarUrl: null,
+    courseName: null,
+    student: { id: "student-3", name: "Omar Ahmed", avatarUrl: null },
+    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed", avatarUrl: null },
   },
 ];
 

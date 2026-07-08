@@ -27,6 +27,42 @@ const HoverTypography = styled(Typography)(({ theme }) => ({
   },
 }));
 
+function EditableTypographyEditField({
+  textField,
+  inputValue,
+  error,
+  onInputChange,
+  onKeyDown,
+  inputRef,
+  endAdornment,
+}: {
+  textField: TextFieldProps;
+  inputValue: string;
+  error: string | undefined | null;
+  onInputChange: (value: string) => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  endAdornment: React.ReactNode;
+}) {
+  return (
+    <TextField
+      {...textField}
+      value={inputValue}
+      onChange={e => onInputChange(e.target.value)}
+      error={!!error}
+      helperText={error}
+      onKeyDown={onKeyDown}
+      autoFocus
+      inputRef={inputRef}
+      slotProps={{
+        input: {
+          endAdornment,
+        },
+      }}
+    />
+  );
+}
+
 export const EditableTypography: React.FC<EditableTypographyProps> = ({
   typography,
   textField,
@@ -125,25 +161,19 @@ export const EditableTypography: React.FC<EditableTypographyProps> = ({
 
   if (isEditing) {
     return (
-      <TextField
-        {...textField}
-        value={inputValue}
-        onChange={e => {
-          setInputValue(e.target.value);
+      <EditableTypographyEditField
+        textField={textField}
+        inputValue={inputValue}
+        error={error}
+        onInputChange={nextValue => {
+          setInputValue(nextValue);
           if (isValid) {
-            setError(isValid(e.target.value));
+            setError(isValid(nextValue));
           }
         }}
-        error={!!error}
-        helperText={error}
         onKeyDown={handleKeyDown}
-        autoFocus
         inputRef={inputRef}
-        slotProps={{
-          input: {
-            endAdornment,
-          },
-        }}
+        endAdornment={endAdornment}
       />
     );
   }

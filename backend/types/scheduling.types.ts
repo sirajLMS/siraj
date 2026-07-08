@@ -26,6 +26,7 @@ export type DailyScheduleTeacher = TeacherEntity & { user: UserSelectType };
 
 export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "createdAt" | "updatedAt"> & {
   courseName: string | null;
+  avatarUrl?: string | null;
   instanceId: string;
   scheduledDate: string;
   startTime: string;

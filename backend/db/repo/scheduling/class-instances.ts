@@ -2,7 +2,8 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
-import { classInstances, students, teachers, users } from "@/backend/db/schema";
+import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import {
@@ -35,8 +36,18 @@ export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
   const studentMap = new Map(studentsData.map(s => [s.id, s]));
   const teacherMap = new Map(teachersData.map(tc => [tc.teacher.id, { ...tc.teacher, user: tc.user }]));
 
+  const subject = row.subjectId
+    ? (await queryDb.select().from(classSubjects).where(eq(classSubjects.id, row.subjectId)).limit(1))[0]
+    : undefined;
+  const recurring = row.recurringScheduleId
+    ? (await queryDb.select().from(recurringSchedules).where(eq(recurringSchedules.id, row.recurringScheduleId)).limit(1))[0]
+    : undefined;
+
   return {
     ...row,
+    subject,
+    recurring,
+    avatarUrl: resolveClassAvatarUrl(recurring?.avatarUrl, subject?.avatarUrl),
     student: studentMap.get(row.studentId),
     teacher: teacherMap.get(row.teacherId),
   };

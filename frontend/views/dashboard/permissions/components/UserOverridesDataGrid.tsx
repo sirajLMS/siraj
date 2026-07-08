@@ -2,16 +2,15 @@
 
 import { useQuery } from "@apollo/client/react";
 import { CheckCircleOutlined, WarningOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, CircularProgress, Tooltip, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
 import { profileHrefForUser } from "@/frontend/utils/profileHref";
-import { Link } from "@/shared/i18n/routing";
 
 export interface UserOverridesDataGridProps {
   readonly users: readonly User[];
@@ -249,63 +248,17 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         minWidth: 220,
         renderCell: params => {
           const user = params.row;
-          const profileHref = user.id ? profileHrefForUser(user.id) : undefined;
-          const nameTypography = (
-            <Typography
-              variant="bodyMd"
-              sx={{
-                fontWeight: 600,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                color: theme => (profileHref ? theme.palette.primary.main : theme.palette.text.primary),
-              }}
-            >
-              {user.name}
-            </Typography>
-          );
-
           return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
-              <Avatar
-                src={user.avatarUrl ?? undefined}
-                alt={user.name ?? ""}
-                sx={theme => ({
-                  width: 32,
-                  height: 32,
-                  backgroundColor: theme.palette.primaryContainer,
-                  color: theme.palette.onPrimaryContainer,
-                  typography: "bodyMd",
-                  fontWeight: 600,
-                })}
-              >
-                {user.name
-                  ?.split(" ")
-                  .map(w => w[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </Avatar>
-              <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                {profileHref ? (
-                  <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
-                    {nameTypography}
-                  </Link>
-                ) : (
-                  nameTypography
-                )}
-                <Typography
-                  variant="labelMd"
-                  sx={theme => ({
-                    color: theme.palette.text.secondary,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  })}
-                >
-                  {user.email}
-                </Typography>
-              </Box>
+            <Box sx={{ display: "flex", alignItems: "center", py: 1, height: "100%" }}>
+              <PersonProfileLinkCell
+                href={user.id ? profileHrefForUser(user.id) : undefined}
+                name={user.name ?? ""}
+                avatarUrl={user.avatarUrl}
+                avatarSize={32}
+                label={user.email ?? undefined}
+                typographyVariant="bodyMd"
+                fontWeight={600}
+              />
             </Box>
           );
         },

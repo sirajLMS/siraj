@@ -2,11 +2,17 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircleOutlined, EditOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
-import { Avatar, Box, CircularProgress, IconButton, Typography } from "@mui/material";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
-import { PageContainer, PageHeader, type PageHeaderBreadcrumb, PrimaryPageAction } from "@/frontend/components/ui";
+import {
+  PageContainer,
+  PageHeader,
+  type PageHeaderBreadcrumb,
+  PrimaryPageAction,
+  UserAvatar,
+} from "@/frontend/components/ui";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { ContextualHelperCards } from "./components/ContextualHelperCards";
 import { CourseDetailsSection } from "./components/CourseDetailsSection";
@@ -23,12 +29,11 @@ function MobileProfileHeader({ studentData, onEditAvatar }: Readonly<MobileProfi
   return (
     <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", alignItems: "center", py: 4 }}>
       <Box sx={{ position: "relative", width: 96, height: 96, mb: 2 }}>
-        <Avatar
+        <UserAvatar
           src={studentData.profileImage}
-          alt={studentData.studentName}
+          label={studentData.studentName}
+          size={96}
           sx={theme => ({
-            width: "100%",
-            height: "100%",
             border: `4px solid ${theme.palette.background.paper}`,
             boxShadow: theme.palette.shadow.card,
           })}

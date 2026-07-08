@@ -8,6 +8,7 @@ const CLASS_SUBJECT_FIELDS = gql`
     name
     slug
     description
+    avatarUrl
     isActive
     sortOrder
     categoryId

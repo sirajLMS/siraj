@@ -1,20 +1,11 @@
 "use client";
 
 import { CloudUploadOutlined } from "@mui/icons-material";
-import {
-  Avatar,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useRef, useState } from "react";
+import { UserAvatar } from "@/frontend/components/ui";
 
 interface AvatarUploadDialogProps {
   readonly open: boolean;
@@ -93,21 +84,14 @@ export function AvatarUploadDialog({
           }}
         >
           <Box sx={{ position: "relative" }}>
-            <Avatar
+            <UserAvatar
               src={displayUrl}
-              alt={parentName}
+              label={parentName}
+              size={120}
               sx={theme => ({
-                width: 120,
-                height: 120,
                 border: `4px solid ${theme.palette.primary.main}1A`,
               })}
-            >
-              {parentName
-                .split(" ")
-                .map(n => n[0])
-                .join("")
-                .toUpperCase()}
-            </Avatar>
+            />
             <IconButton
               onClick={() => fileInputRef.current?.click()}
               sx={theme => ({

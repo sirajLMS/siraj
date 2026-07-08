@@ -1,11 +1,12 @@
 "use client";
 
 import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
-import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
-import { PaginationControls } from "@/frontend/components/ui";
+import { PaginationControls, PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 
@@ -38,16 +39,16 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
     >
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
         <Box sx={{ display: "flex", gap: 1.5 }}>
-          <Avatar
-            src={row.avatarUrl}
-            alt={row.name}
-            sx={theme => ({ width: 48, height: 48, backgroundColor: theme.palette.surfaceContainer })}
-          />
           <Stack>
-            <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-              {row.name}
-            </Typography>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            <PersonProfileLink
+              href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
+              name={row.name}
+              avatarUrl={row.avatarUrl}
+              avatarSize={48}
+              typographyVariant="titleLg"
+              fontWeight={600}
+            />
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, pl: 7 })}>
               {labels.guardianOf(row.guardianOf)}
             </Typography>
           </Stack>

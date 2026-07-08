@@ -270,7 +270,7 @@ function ParentStudentsDataGrid({ rows, loading, onRefetch }: ParentStudentsData
             teacherId: params.row.teacherId,
           })}
           name={params.row.teacher.trim() || tc("notSet")}
-          showAvatar={false}
+          avatarSize={32}
           fontWeight={400}
           emphasizeLink={Boolean(params.row.teacherUserId || params.row.teacherId)}
         />

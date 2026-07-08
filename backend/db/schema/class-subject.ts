@@ -11,6 +11,7 @@ export const classSubjects = pgTable(
     name: varchar("name", { length: 200 }).notNull(),
     slug: varchar("slug", { length: 100 }).notNull().unique(),
     description: text("description"),
+    avatarUrl: varchar("avatar_url", { length: 1024 }),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),

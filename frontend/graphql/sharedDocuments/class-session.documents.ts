@@ -26,6 +26,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       isRescheduled
       executionState
       outcome
+      avatarUrl
       student {
         id
         name

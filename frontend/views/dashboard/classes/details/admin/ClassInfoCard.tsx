@@ -2,14 +2,13 @@
 
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LanguageIcon from "@mui/icons-material/Language";
-import { Avatar, Box, Chip, Divider, Stack, Typography } from "@mui/material";
+import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/components/ui";
+import { BaseCard, UserAvatar } from "@/frontend/components/ui";
 import type {
   ClassInstanceStudentInfo,
   ClassInstanceTeacherInfo,
 } from "@/frontend/graphql/generated/gql/graphql-types";
-import { avatarInitials } from "@/frontend/utils/avatar";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 import { StudentEntityLink, TeacherEntityLink } from "../components/EntityLinks";
@@ -52,20 +51,6 @@ const StyledActiveConnectionCaption = styled(Typography)(({ theme }) => ({
   letterSpacing: "0.05em",
 }));
 
-const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
-  width: 64,
-  height: 64,
-  backgroundColor: theme.palette.background.default,
-  color: theme.palette.primary.main,
-}));
-
-const StyledTeacherAvatar = styled(Avatar)(({ theme }) => ({
-  width: 64,
-  height: 64,
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-}));
-
 const StyledPersonRoleCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   display: "block",
@@ -89,37 +74,12 @@ function LinkedAvatar({
   href,
   name,
   avatarUrl,
-  variant,
 }: {
   readonly href?: string;
   readonly name: string;
   readonly avatarUrl?: string;
-  readonly variant: "student" | "teacher";
 }) {
-  const avatar =
-    variant === "student" ? (
-      <StyledStudentAvatar
-        src={avatarUrl}
-        alt={name}
-        sx={theme => ({
-          backgroundColor: theme.palette.background.default,
-          color: theme.palette.primary.main,
-        })}
-      >
-        {avatarInitials(name)}
-      </StyledStudentAvatar>
-    ) : (
-      <StyledTeacherAvatar
-        alt={name}
-        src={avatarUrl}
-        sx={theme => ({
-          backgroundColor: theme.palette.primaryContainer,
-          color: theme.palette.onPrimaryContainer,
-        })}
-      >
-        {avatarInitials(name)}
-      </StyledTeacherAvatar>
-    );
+  const avatar = <UserAvatar src={avatarUrl} label={name} size={64} />;
 
   if (!href) {
     return avatar;
@@ -191,7 +151,6 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
             href={studentProfileHref}
             name={student.name ?? ""}
             avatarUrl={student.avatarUrl ?? undefined}
-            variant="student"
           />
           <Box>
             <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -219,7 +178,6 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
             href={teacherProfileHref}
             name={teacher.name ?? ""}
             avatarUrl={teacher.avatarUrl ?? undefined}
-            variant="teacher"
           />
           <Box>
             <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>

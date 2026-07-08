@@ -93,6 +93,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     isRescheduled: t.exposeBoolean("isRescheduled"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     student: t.expose("student", { type: ClassInstanceStudentPothosObject }),
     teacher: t.expose("teacher", { type: ClassInstanceTeacherPothosObject }),
     performance: t.expose("performance", {
@@ -159,6 +160,7 @@ export const FutureClassPothosObject = FutureClassRef.implement({
     subjectName: t.exposeString("subjectName", { nullable: true }),
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
   }),
 });
 

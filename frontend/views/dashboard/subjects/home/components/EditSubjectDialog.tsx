@@ -255,6 +255,7 @@ export function EditSubjectDialog({
       description: data.description || null,
       isActive: data.isActive ?? null,
       sortOrder: null,
+      avatarUrl: null,
     });
   };
 

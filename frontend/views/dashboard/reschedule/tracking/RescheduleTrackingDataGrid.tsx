@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckOutlined, CloseOutlined, Details as DetailsIcon } from "@mui/icons-material";
-import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -33,24 +33,10 @@ export function RescheduleTrackingDataGrid({
         minWidth: 200,
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, alignSelf: "center", height: "100%" }}>
-            <Avatar
-              src={row.teacherAvatarUrl ?? undefined}
-              sx={theme => ({
-                width: 36,
-                height: 36,
-                typography: "labelMd",
-                fontWeight: 700,
-                backgroundColor: theme.palette.secondaryContainer,
-                color: theme.palette.onSecondaryContainer,
-              })}
-            >
-              {row.teacherInitials}
-            </Avatar>
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
                 justifyContent: "center",
                 gap: 0.5,
               }}
@@ -58,7 +44,8 @@ export function RescheduleTrackingDataGrid({
               <PersonProfileLinkCell
                 href={profileHrefForTeacher({ teacherId: row.teacherId })}
                 name={row.teacherName ?? ""}
-                showAvatar={false}
+                avatarUrl={row.teacherAvatarUrl}
+                avatarSize={36}
                 typographyVariant="bodyMd"
                 fontWeight={700}
               />
@@ -78,7 +65,7 @@ export function RescheduleTrackingDataGrid({
           <PersonProfileLinkCell
             href={row.studentId ? studentHref(row.studentId) : undefined}
             name={row.studentName ?? ""}
-            showAvatar={false}
+            avatarSize={36}
             typographyVariant="bodyMd"
             fontWeight={400}
             emphasizeLink={Boolean(row.studentId)}

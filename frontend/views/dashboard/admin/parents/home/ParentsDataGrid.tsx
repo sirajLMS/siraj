@@ -5,7 +5,7 @@ import {
   ErrorOutlined as ErrorIcon,
   SettingsOutlined as SettingsIcon,
 } from "@mui/icons-material";
-import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -64,21 +64,6 @@ export function ParentsDataGrid({
         ),
       },
       {
-        field: "image",
-        headerName: labels.image,
-        width: 80,
-        sortable: false,
-        renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-            <Avatar
-              src={row.avatarUrl}
-              alt={row.name}
-              sx={{ width: 40, height: 40, border: theme => `1px solid ${theme.palette.border.light}` }}
-            />
-          </Box>
-        ),
-      },
-      {
         field: "name",
         headerName: labels.name,
         flex: 1.5,
@@ -88,7 +73,8 @@ export function ParentsDataGrid({
             <PersonProfileLinkCell
               href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
               name={row.name}
-              showAvatar={false}
+              avatarUrl={row.avatarUrl}
+              avatarSize={40}
               typographyVariant="bodyLg"
               fontWeight={600}
             />

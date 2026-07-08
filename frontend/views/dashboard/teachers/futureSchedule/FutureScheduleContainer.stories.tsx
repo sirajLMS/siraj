@@ -41,6 +41,7 @@ const MOCK_CLASSES = [
     subjectName: null,
     classType: null,
     zoomMeetingUrl: null,
+    avatarUrl: null,
   },
   {
     __typename: "FutureClass" as const,
@@ -59,6 +60,7 @@ const MOCK_CLASSES = [
     subjectName: null,
     classType: null,
     zoomMeetingUrl: null,
+    avatarUrl: null,
   },
   {
     __typename: "FutureClass" as const,
@@ -77,6 +79,7 @@ const MOCK_CLASSES = [
     subjectName: null,
     classType: null,
     zoomMeetingUrl: null,
+    avatarUrl: null,
   },
 ];
 

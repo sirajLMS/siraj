@@ -50,6 +50,7 @@ export type FutureClassReturnType = {
   subjectName?: string | null;
   classType?: ClassType | null;
   zoomMeetingUrl?: string | null;
+  avatarUrl?: string | null;
 };
 
 export type TeacherFutureScheduleReturnType = {
@@ -95,6 +96,7 @@ export type WeeklyWorkloadMetricsReturnType = {
 export type DailyScheduleListUserItem = {
   id: string;
   name: string;
+  avatarUrl?: string | null;
 };
 
 export type DailyScheduleListReturnType = {
@@ -110,6 +112,8 @@ export type DailyScheduleListReturnType = {
   executionState: ClassExecutionState;
   student: DailyScheduleListUserItem;
   teacher: DailyScheduleListUserItem;
+  courseName?: string | null;
+  avatarUrl?: string | null;
 };
 
 export type AdminDashboardScheduleInputType = {
@@ -133,9 +137,13 @@ export type StatusTrackingScheduleRow = {
   studentId: string;
   studentName: string;
   studentInitials: string;
+  studentAvatarUrl?: string | null;
   studentStatus: import("@/backend/enum").StudentStatus;
   teacherId: string;
   teacherName: string;
+  teacherAvatarUrl?: string | null;
+  courseName?: string | null;
+  avatarUrl?: string | null;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;

@@ -43,6 +43,132 @@ function getRoomIcon(room: string) {
   return LocationOnOutlined;
 }
 
+type AcademicCardLabels = AcademicScheduleCardListProps["labels"];
+
+function ClassCardHeader({
+  row,
+  labels,
+}: {
+  row: AcademicClassRow;
+  labels: AcademicCardLabels;
+}) {
+  const statusLabels: Record<ClassSessionStatus, string> = {
+    active: labels.active,
+    upcoming: labels.upcoming,
+    missed: labels.missed,
+  };
+
+  return (
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+      <Box>
+        <Typography
+          variant="titleLg"
+          sx={theme => ({
+            fontFamily: '"Hanken Grotesk", sans-serif',
+            fontWeight: 600,
+            color: theme.palette.primary.main,
+            lineHeight: 1.2,
+          })}
+        >
+          {row.className}
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
+          <PersonOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />
+          <PersonProfileLink
+            href={profileHrefForTeacher({ teacherId: row.instructorId })}
+            name={row.instructor}
+            avatarSize={32}
+            typographyVariant="bodyMd"
+            fontWeight={400}
+          />
+        </Box>
+      </Box>
+      <StatusBadge category="classSession" status={row.sessionStatus} label={statusLabels[row.sessionStatus]} />
+    </Box>
+  );
+}
+
+function ClassCardMetadata({ row }: { row: AcademicClassRow }) {
+  return (
+    <Box
+      sx={theme => ({
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        py: 1.5,
+        borderTop: `1px solid ${theme.palette.border.light}`,
+        borderBottom: `1px solid ${theme.palette.border.light}`,
+        mb: 2,
+      })}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+        <ScheduleOutlined sx={theme => ({ fontSize: 16, color: theme.palette.header })} />
+        <Typography variant="labelMd" sx={theme => ({ fontWeight: 500, color: theme.palette.primary.main })}>
+          {row.time}
+        </Typography>
+      </Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+        <Box component={getRoomIcon(row.room)} sx={theme => ({ fontSize: 16, color: theme.palette.header })} />
+        <Typography variant="labelMd" sx={theme => ({ fontWeight: 500, color: theme.palette.primary.main })}>
+          {row.room}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+function ClassCardActions({
+  row,
+  labels,
+  onJoin,
+  onLeave,
+}: {
+  row: AcademicClassRow;
+  labels: AcademicCardLabels;
+  onJoin: (id: string) => void;
+  onLeave: (id: string) => void;
+}) {
+  const actionLabels = {
+    joinSession: labels.joinSession,
+    leaveClass: labels.leaveClass,
+    viewRecording: labels.viewRecording,
+  };
+
+  if (row.sessionStatus === "missed") {
+    return (
+      <ClassSessionActionButton
+        action="view_recording"
+        classId={row.id}
+        labels={actionLabels}
+        onJoin={onJoin}
+        onLeave={onLeave}
+        fullWidth
+      />
+    );
+  }
+
+  return (
+    <Box sx={{ display: "flex", gap: 1.5 }}>
+      <ClassSessionActionButton
+        action={row.action === "leave_disabled" ? "leave_disabled" : "leave_enabled"}
+        classId={row.id}
+        labels={actionLabels}
+        onJoin={onJoin}
+        onLeave={onLeave}
+        fullWidth
+      />
+      <ClassSessionActionButton
+        action="join_session"
+        classId={row.id}
+        labels={actionLabels}
+        onJoin={onJoin}
+        onLeave={onLeave}
+        fullWidth
+      />
+    </Box>
+  );
+}
+
 const AcademicClassCard = ({
   row,
   labels,
@@ -55,18 +181,6 @@ const AcademicClassCard = ({
   onLeave: (id: string) => void;
 }) => {
   const isMissed = row.sessionStatus === "missed";
-
-  const actionLabels = {
-    joinSession: labels.joinSession,
-    leaveClass: labels.leaveClass,
-    viewRecording: labels.viewRecording,
-  };
-
-  const statusLabels: Record<ClassSessionStatus, string> = {
-    active: labels.active,
-    upcoming: labels.upcoming,
-    missed: labels.missed,
-  };
 
   return (
     <Card
@@ -84,87 +198,9 @@ const AcademicClassCard = ({
       })}
     >
       <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-          <Box>
-            <Typography
-              variant="titleLg"
-              sx={theme => ({
-                fontFamily: '"Hanken Grotesk", sans-serif',
-                fontWeight: 600,
-                color: theme.palette.primary.main,
-                lineHeight: 1.2,
-              })}
-            >
-              {row.className}
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
-              <PersonOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />
-              <PersonProfileLink
-                href={profileHrefForTeacher({ teacherId: row.instructorId })}
-                name={row.instructor}
-                showAvatar={false}
-                typographyVariant="bodyMd"
-                fontWeight={400}
-              />
-            </Box>
-          </Box>
-          <StatusBadge category="classSession" status={row.sessionStatus} label={statusLabels[row.sessionStatus]} />
-        </Box>
-
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            py: 1.5,
-            borderTop: `1px solid ${theme.palette.border.light}`,
-            borderBottom: `1px solid ${theme.palette.border.light}`,
-            mb: 2,
-          })}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-            <ScheduleOutlined sx={theme => ({ fontSize: 16, color: theme.palette.header })} />
-            <Typography variant="labelMd" sx={theme => ({ fontWeight: 500, color: theme.palette.primary.main })}>
-              {row.time}
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-            <Box component={getRoomIcon(row.room)} sx={theme => ({ fontSize: 16, color: theme.palette.header })} />
-            <Typography variant="labelMd" sx={theme => ({ fontWeight: 500, color: theme.palette.primary.main })}>
-              {row.room}
-            </Typography>
-          </Box>
-        </Box>
-
-        {isMissed ? (
-          <ClassSessionActionButton
-            action="view_recording"
-            classId={row.id}
-            labels={actionLabels}
-            onJoin={onJoin}
-            onLeave={onLeave}
-            fullWidth
-          />
-        ) : (
-          <Box sx={{ display: "flex", gap: 1.5 }}>
-            <ClassSessionActionButton
-              action={row.action === "leave_disabled" ? "leave_disabled" : "leave_enabled"}
-              classId={row.id}
-              labels={actionLabels}
-              onJoin={onJoin}
-              onLeave={onLeave}
-              fullWidth
-            />
-            <ClassSessionActionButton
-              action="join_session"
-              classId={row.id}
-              labels={actionLabels}
-              onJoin={onJoin}
-              onLeave={onLeave}
-              fullWidth
-            />
-          </Box>
-        )}
+        <ClassCardHeader row={row} labels={labels} />
+        <ClassCardMetadata row={row} />
+        <ClassCardActions row={row} labels={labels} onJoin={onJoin} onLeave={onLeave} />
       </CardContent>
     </Card>
   );

@@ -225,6 +225,7 @@ export type ClassOutcome =
   | 'TAKEN';
 
 export type ClassSubjectCreateInput = {
+  avatarUrl: string | null | undefined;
   categoryId: string;
   description: string | null | undefined;
   isActive: boolean | null | undefined;
@@ -234,6 +235,7 @@ export type ClassSubjectCreateInput = {
 };
 
 export type ClassSubjectUpdateInput = {
+  avatarUrl: string | null | undefined;
   categoryId: string | null | undefined;
   description: string | null | undefined;
   isActive: boolean | null | undefined;
@@ -1326,7 +1328,7 @@ export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassIn
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance = { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null };
 
-export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: string | null, teacherTimezone: string | null, zoomMeetingUrl: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: string | null, teacherTimezone: string | null, zoomMeetingUrl: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, avatarUrl: string | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
 
 export type ClassInstanceQuery_Query = { classInstance: ClassInstanceQuery_classInstance_ClassInstanceDetail | null };
 
@@ -1462,13 +1464,13 @@ export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
 
 export type ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory = { id: string | null, name: string | null, slug: string | null };
 
-export type ClassSubjectFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type ClassSubjectFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type SubjectResourceFieldsFragment = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
 export type ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
-export type ClassSubjectsQuery_classSubjects_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type ClassSubjectsQuery_classSubjects_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type ClassSubjectsQuery_Query = { classSubjects: Array<ClassSubjectsQuery_classSubjects_ClassSubject> | null };
 
@@ -1482,7 +1484,7 @@ export type ClassSubjectsQuery = ClassSubjectsQuery_Query;
 
 export type ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
-export type ClassSubjectByIdQuery_classSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type ClassSubjectByIdQuery_classSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type ClassSubjectByIdQuery_Query = { classSubject: ClassSubjectByIdQuery_classSubject_ClassSubject | null };
 
@@ -1494,7 +1496,7 @@ export type ClassSubjectByIdQueryVariables = Exact<{
 
 export type ClassSubjectByIdQuery = ClassSubjectByIdQuery_Query;
 
-export type CreateClassSubjectMutation_createClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type CreateClassSubjectMutation_createClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type CreateClassSubjectMutation_Mutation = { createClassSubject: CreateClassSubjectMutation_createClassSubject_ClassSubject | null };
 
@@ -1506,7 +1508,7 @@ export type CreateClassSubjectMutationVariables = Exact<{
 
 export type CreateClassSubjectMutation = CreateClassSubjectMutation_Mutation;
 
-export type UpdateClassSubjectMutation_updateClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+export type UpdateClassSubjectMutation_updateClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
 
 export type UpdateClassSubjectMutation_Mutation = { updateClassSubject: UpdateClassSubjectMutation_updateClassSubject_ClassSubject | null };
 
@@ -1860,7 +1862,7 @@ export type ParentBillingSummaryQueryVariables = Exact<{
 
 export type ParentBillingSummaryQuery = ParentBillingSummaryQuery_Query;
 
-export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: Types.BookingStatus | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, zoomMeetingUrl: string | null, classTimeFormatted: string | null };
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: Types.BookingStatus | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, zoomMeetingUrl: string | null, classTimeFormatted: string | null };
 
 export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2316,11 +2318,11 @@ export type ClearWeeklyScheduleMutation = ClearWeeklyScheduleMutation_Mutation;
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
-export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem = { id: string | null, name: string | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
-export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
-export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2349,11 +2351,11 @@ export type DailyScheduleMetricsQueryVariables = Exact<{
 
 export type DailyScheduleMetricsQuery = DailyScheduleMetricsQuery_Query;
 
-export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem = { id: string | null, name: string | null };
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
-export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null };
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
-export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
 export type DailyScheduleListQuery_Query = { dailyScheduleList: Array<DailyScheduleListQuery_dailyScheduleList_DailyScheduleList> | null };
 
@@ -2396,7 +2398,7 @@ export type RescheduleTrackingMetricsQueryVariables = Exact<{ [key: string]: nev
 
 export type RescheduleTrackingMetricsQuery = RescheduleTrackingMetricsQuery_Query;
 
-export type StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentStatus: Types.StudentStatus | null, teacherId: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null };
+export type StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, studentStatus: Types.StudentStatus | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, courseName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null };
 
 export type StatusTrackingScheduleQuery_Query = { statusTrackingSchedule: Array<StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow> | null };
 
@@ -2767,7 +2769,7 @@ export type LogTeacherSupportRequestMutationVariables = Exact<{
 
 export type LogTeacherSupportRequestMutation = LogTeacherSupportRequestMutation_Mutation;
 
-export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: Types.ClassType | null, zoomMeetingUrl: string | null };
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: Types.ClassType | null, zoomMeetingUrl: string | null, avatarUrl: string | null };
 
 export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
 

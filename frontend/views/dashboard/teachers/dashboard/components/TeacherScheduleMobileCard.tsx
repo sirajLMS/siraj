@@ -1,9 +1,9 @@
 "use client";
 
 import { AccessTimeOutlined, VideocamOffOutlined, VideocamOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, alpha, Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { alpha, Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { ActionIconLink, StatusBadge } from "@/frontend/components/ui";
+import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/utils/profileHref";
@@ -267,7 +267,9 @@ function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
         borderTop: `1px solid ${theme.palette.border.light}`,
       })}
     >
-      <Avatar sx={{ width: 32, height: 32, typography: "labelMd" }}>{row.studentInitials}</Avatar>
+      <UserAvatar label={row.studentName} size={32}>
+        {row.studentInitials}
+      </UserAvatar>
       {href ? (
         <Typography
           component={Link}

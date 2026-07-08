@@ -21,21 +21,21 @@ function expectActions(
 }
 
 describe("resolveTeacherScheduleSessionActions", () => {
-  test("NOT_ACTIVATED + PENDING inside window exposes activate and join video", () => {
-    expectActions(
-      { executionState: ClassExecutionState.NOT_ACTIVATED, outcome: ClassOutcome.PENDING },
-      { activate: true, start: false, markAbsent: false, requestLeave: false, joinVideo: true }
-    );
-  });
+  const pendingActivateActions: TeacherScheduleSessionActions = {
+    activate: true,
+    start: false,
+    markAbsent: false,
+    requestLeave: false,
+    joinVideo: true,
+  };
 
-  test("NOT_ACTIVATED + PENDING outside window still shows activate and join video", () => {
+  test.each([
+    ["inside window", {}],
+    ["outside window", { activateEnabled: false }],
+  ])("NOT_ACTIVATED + PENDING %s exposes activate and join video", (_label, overrides) => {
     expectActions(
-      {
-        activateEnabled: false,
-        executionState: ClassExecutionState.NOT_ACTIVATED,
-        outcome: ClassOutcome.PENDING,
-      },
-      { activate: true, start: false, markAbsent: false, requestLeave: false, joinVideo: true }
+      { executionState: ClassExecutionState.NOT_ACTIVATED, outcome: ClassOutcome.PENDING, ...overrides },
+      pendingActivateActions
     );
   });
 

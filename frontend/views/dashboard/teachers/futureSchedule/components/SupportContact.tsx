@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { Avatar, Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
+import { UserAvatar } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import type { SupportContactProps } from "../types";
@@ -47,7 +48,7 @@ export function SupportContact({ contact }: Readonly<SupportContactProps>) {
             alignItems: "center",
           }}
         >
-          <Avatar alt={contact.name ?? ""} src={contact.avatarUrl ?? undefined} sx={{ width: 40, height: 40 }} />
+          <UserAvatar src={contact.avatarUrl} label={contact.name ?? ""} size={40} />
           <Box>
             <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
               {contact.name}

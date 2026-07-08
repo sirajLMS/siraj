@@ -9,12 +9,14 @@ import {
   classSubjects,
   leaveQuotaUsage,
   leaveRequests,
+  recurringSchedules,
   students,
   teachers,
   users,
 } from "@/backend/db/schema";
 import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/backend/enum";
+import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import type {
@@ -63,6 +65,12 @@ async function hydrateDailyScheduleRows(
 ): Promise<DailyScheduleResult[]> {
   const studentIds = Array.from(new Set(instances.map(instance => instance.studentId)));
   const teacherIds = Array.from(new Set(instances.map(instance => instance.teacherId)));
+  const subjectIds = Array.from(
+    new Set(instances.map(instance => instance.subjectId).filter((id): id is string => Boolean(id)))
+  );
+  const recurringScheduleIds = Array.from(
+    new Set(instances.map(instance => instance.recurringScheduleId).filter((id): id is string => Boolean(id)))
+  );
 
   const studentsData =
     studentIds.length > 0 ? await t.select().from(students).where(inArray(students.id, studentIds)) : [];
@@ -74,19 +82,33 @@ async function hydrateDailyScheduleRows(
           .innerJoin(users, eq(teachers.userId, users.id))
           .where(inArray(teachers.id, teacherIds))
       : [];
+  const subjectsData =
+    subjectIds.length > 0 ? await t.select().from(classSubjects).where(inArray(classSubjects.id, subjectIds)) : [];
+  const recurringData =
+    recurringScheduleIds.length > 0
+      ? await t.select().from(recurringSchedules).where(inArray(recurringSchedules.id, recurringScheduleIds))
+      : [];
 
   const studentMap = new Map(studentsData.map(student => [student.id, student]));
   const teacherMap = new Map(
     teachersData.map(teacherRow => [teacherRow.teacher.id, { ...teacherRow.teacher, user: teacherRow.user }])
   );
+  const subjectMap = new Map(subjectsData.map(subject => [subject.id, subject]));
+  const recurringMap = new Map(recurringData.map(schedule => [schedule.id, schedule]));
 
   return instances.map((instance): DailyScheduleResult => {
     const student = studentMap.get(instance.studentId);
     const teacher = teacherMap.get(instance.teacherId);
+    const subject = instance.subjectId ? subjectMap.get(instance.subjectId) : undefined;
+    const recurring = instance.recurringScheduleId
+      ? recurringMap.get(instance.recurringScheduleId)
+      : undefined;
+    const avatarUrl = resolveClassAvatarUrl(recurring?.avatarUrl, subject?.avatarUrl);
 
     return {
       ...instance,
-      courseName: null,
+      courseName: subject?.name ?? null,
+      avatarUrl,
       instanceId: instance.id,
       scheduledDate: instance.scheduledStartAt.toISOString().split("T")[0],
       startTime: instance.scheduledStartAt.toISOString(),
@@ -608,6 +630,8 @@ export type FutureClassRow = {
   classType?: string | null;
   subjectId?: string | null;
   subjectName?: string | null;
+  subjectAvatarUrl?: string | null;
+  recurringAvatarUrl?: string | null;
   zoomMeetingUrl?: string | null;
 };
 
@@ -631,11 +655,14 @@ export async function getTeacherFutureClasses(
       classType: classInstances.classType,
       subjectId: classInstances.subjectId,
       subjectName: classSubjects.name,
+      subjectAvatarUrl: classSubjects.avatarUrl,
+      recurringAvatarUrl: recurringSchedules.avatarUrl,
       zoomMeetingUrl: classInstances.zoomMeetingUrl,
     })
     .from(classInstances)
     .innerJoin(students, eq(classInstances.studentId, students.id))
     .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+    .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
     .where(
       and(
         eq(classInstances.teacherId, teacherId),
@@ -759,9 +786,13 @@ export type StatusTrackingRow = {
   studentId: string;
   studentName: string;
   studentInitials: string;
+  studentAvatarUrl: string | null;
   studentStatus: StudentStatus;
   teacherId: string;
   teacherName: string;
+  teacherAvatarUrl: string | null;
+  courseName: string | null;
+  avatarUrl: string | null;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
@@ -786,6 +817,7 @@ export const getStatusTrackingRows = async (
         id: classInstances.id,
         studentId: students.id,
         studentName: students.name,
+        studentAvatarUrl: students.avatarUrl,
         studentStatus: students.status,
         teacherId: classInstances.teacherId,
         scheduledStartAt: classInstances.scheduledStartAt,
@@ -795,11 +827,17 @@ export const getStatusTrackingRows = async (
         outcome: classInstances.outcome,
         isFrozen: classInstances.isFrozen,
         teacherUserName: users.name,
+        teacherAvatarUrl: users.avatarUrl,
+        subjectName: classSubjects.name,
+        subjectAvatarUrl: classSubjects.avatarUrl,
+        recurringAvatarUrl: recurringSchedules.avatarUrl,
       })
       .from(classInstances)
       .innerJoin(students, eq(classInstances.studentId, students.id))
       .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
+      .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
       .where(
         and(
           isNull(classInstances.deletedAt),
@@ -819,9 +857,13 @@ export const getStatusTrackingRows = async (
         .slice(0, 2)
         .map((w: string) => w[0]?.toUpperCase() ?? "")
         .join(""),
+      studentAvatarUrl: r.studentAvatarUrl ?? null,
       studentStatus: r.studentStatus as StudentStatus,
       teacherId: r.teacherId,
       teacherName: r.teacherUserName,
+      teacherAvatarUrl: r.teacherAvatarUrl ?? null,
+      courseName: r.subjectName ?? null,
+      avatarUrl: resolveClassAvatarUrl(r.recurringAvatarUrl, r.subjectAvatarUrl),
       scheduledStartAt: r.scheduledStartAt,
       scheduledEndAt: r.scheduledEndAt,
       durationMinutes: r.durationMinutes,

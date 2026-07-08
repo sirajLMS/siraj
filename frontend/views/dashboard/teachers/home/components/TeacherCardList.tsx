@@ -1,5 +1,5 @@
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PaginationControls, PersonProfileLink } from "@/frontend/components/ui";
@@ -77,21 +77,12 @@ function TeacherCard({
       })}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-        <Avatar
-          src={row.avatarUrl || undefined}
-          alt={row.name || ""}
-          sx={theme => ({
-            width: 48,
-            height: 48,
-            filter: row.status === AccountStatus.Deactivated ? "grayscale(1)" : "none",
-            border: `1px solid ${theme.palette.border.main}`,
-          })}
-        />
         <Box sx={{ flex: 1 }}>
           <PersonProfileLink
             href={profileHrefForTeacher({ userId: row.userId, teacherId: row.id })}
             name={row.name ?? ""}
-            showAvatar={false}
+            avatarUrl={row.avatarUrl}
+            avatarSize={48}
             typographyVariant="titleLg"
             fontWeight={600}
           />

@@ -73,6 +73,7 @@ export namespace ClassSubjectRepository {
           slug: input.slug,
           categoryId: input.categoryId,
           description: input.description ?? null,
+          avatarUrl: input.avatarUrl ?? null,
           isActive: input.isActive ?? true,
           sortOrder: input.sortOrder ?? 0,
         })
@@ -126,6 +127,7 @@ export namespace ClassSubjectRepository {
           slug: input.slug ?? existing.slug,
           categoryId: input.categoryId ?? existing.categoryId,
           description: input.description === undefined ? existing.description : input.description,
+          avatarUrl: input.avatarUrl === undefined ? existing.avatarUrl : input.avatarUrl,
           isActive: input.isActive ?? existing.isActive,
           sortOrder: input.sortOrder ?? existing.sortOrder,
           updatedAt: now,

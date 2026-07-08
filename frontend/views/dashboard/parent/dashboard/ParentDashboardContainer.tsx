@@ -42,6 +42,7 @@ function useScheduleRows(
                 readonly studentAvatarUrl?: string | null;
                 readonly teacherId?: string | null;
                 readonly teacherName?: string | null;
+                readonly teacherAvatarUrl?: string | null;
                 readonly bookingStatus?: string | null;
                 readonly executionState?: string | null;
                 readonly outcome?: string | null;
@@ -67,6 +68,7 @@ function useScheduleRows(
       studentAvatarUrl: r.studentAvatarUrl ?? undefined,
       teacherId: r.teacherId ?? undefined,
       teacherName: r.teacherName ?? "",
+      teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
       bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
       liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),
       videoEnabled: !!r.zoomMeetingUrl,

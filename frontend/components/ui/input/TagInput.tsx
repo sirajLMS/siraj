@@ -49,6 +49,68 @@ const ChipEditInput = styled(InputBase)(({ theme }) => ({
   height: "24px",
 }));
 
+const chipAnimationSx = {
+  m: 0.5,
+  transition: "all 0.2s ease",
+  animation: "fadeIn 0.3s",
+  "@keyframes fadeIn": {
+    "0%": {
+      opacity: 0,
+      transform: "scale(0.9)",
+    },
+    "100%": {
+      opacity: 1,
+      transform: "scale(1)",
+    },
+  },
+} as const;
+
+function TagInputChipList({
+  tags,
+  editingIndex,
+  editingValue,
+  editInputRef,
+  onEditInputChange,
+  onEditKeyDown,
+  onEditBlur,
+  onDelete,
+  onChipDoubleClick,
+}: {
+  tags: readonly string[];
+  editingIndex: number | null;
+  editingValue: string;
+  editInputRef: React.RefObject<HTMLInputElement | null>;
+  onEditInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onEditKeyDown: (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => void;
+  onEditBlur: (index: number) => void;
+  onDelete: (index: number) => (e: MouseEvent) => void;
+  onChipDoubleClick: (index: number) => void;
+}) {
+  return tags.map((tag, index) =>
+    editingIndex === index ? (
+      <ChipEditInput
+        key={tag}
+        inputRef={editInputRef}
+        value={editingValue}
+        onChange={onEditInputChange}
+        onKeyDown={e => onEditKeyDown(e, index)}
+        onBlur={() => onEditBlur(index)}
+        autoFocus
+      />
+    ) : (
+      <Chip
+        key={tag}
+        label={tag}
+        onDelete={onDelete(index)}
+        onClick={e => e.stopPropagation()}
+        onDoubleClick={() => onChipDoubleClick(index)}
+        size="small"
+        sx={chipAnimationSx}
+      />
+    )
+  );
+}
+
 export function TagInput({ label, placeholder, onChange, initialTags = [] }: TagInputProps) {
   const t = useTranslations("ui.tagInput");
   const [tags, setTags] = useState<string[]>(initialTags);
@@ -197,43 +259,17 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
       </Typography>
 
       <TagContainer ref={containerRef} onClick={handleContainerClick} elevation={0}>
-        {tags.map((tag, index) =>
-          editingIndex === index ? (
-            <ChipEditInput
-              key={tag}
-              inputRef={editInputRef}
-              value={editingValue}
-              onChange={handleEditInputChange}
-              onKeyDown={e => handleEditKeyDown(e, index)}
-              onBlur={() => handleEditBlur(index)}
-              autoFocus
-            />
-          ) : (
-            <Chip
-              key={tag}
-              label={tag}
-              onDelete={handleDelete(index)}
-              onClick={e => e.stopPropagation()}
-              onDoubleClick={() => handleChipDoubleClick(index)}
-              size="small"
-              sx={{
-                m: 0.5,
-                transition: "all 0.2s ease",
-                animation: "fadeIn 0.3s",
-                "@keyframes fadeIn": {
-                  "0%": {
-                    opacity: 0,
-                    transform: "scale(0.9)",
-                  },
-                  "100%": {
-                    opacity: 1,
-                    transform: "scale(1)",
-                  },
-                },
-              }}
-            />
-          )
-        )}
+        <TagInputChipList
+          tags={tags}
+          editingIndex={editingIndex}
+          editingValue={editingValue}
+          editInputRef={editInputRef}
+          onEditInputChange={handleEditInputChange}
+          onEditKeyDown={handleEditKeyDown}
+          onEditBlur={handleEditBlur}
+          onDelete={handleDelete}
+          onChipDoubleClick={handleChipDoubleClick}
+        />
         <StyledInputBase
           inputRef={inputRef}
           value={inputValue}

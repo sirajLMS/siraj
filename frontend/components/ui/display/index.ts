@@ -1,3 +1,5 @@
+export * from "./ClassProfileLink";
+export * from "./ClassProfileLinkCell";
 export * from "./CountryDisplay";
 export * from "./LanguageDisplay";
 export * from "./LocaleEmoji";

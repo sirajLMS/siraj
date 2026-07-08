@@ -1,8 +1,8 @@
 "use client";
 
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard, StatusBadge } from "@/frontend/components/ui";
+import { BaseCard, StatusBadge, UserAvatar } from "@/frontend/components/ui";
 import type { StudentContextCardProps } from "../types";
 
 export function StudentContextCard({ student }: Readonly<StudentContextCardProps>) {
@@ -11,12 +11,12 @@ export function StudentContextCard({ student }: Readonly<StudentContextCardProps
   return (
     <BaseCard>
       <Stack spacing={3} sx={{ alignItems: "center", textAlign: "center" }}>
-        <Avatar
-          src={student.avatarUrl || undefined}
-          alt={student.name}
+        <UserAvatar
+          src={student.avatarUrl}
+          label={student.name}
+          size={96}
+          variant="rounded"
           sx={theme => ({
-            width: 96,
-            height: 96,
             border: `2px solid ${theme.palette.primary.main}`,
             borderRadius: 3,
           })}

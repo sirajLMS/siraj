@@ -17,6 +17,7 @@ export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
         studentAvatarUrl
         teacherId
         teacherName
+        teacherAvatarUrl
         scheduledStartAt
         scheduledEndAt
         durationMinutes

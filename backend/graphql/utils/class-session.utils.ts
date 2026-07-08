@@ -1,5 +1,6 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
+import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/class-instance-performance.types";
@@ -35,6 +36,50 @@ function truncateQualifications(value: string | null | undefined, maxLength = 80
   return `${trimmed.slice(0, maxLength)}...`;
 }
 
+function resolveInstanceAvatarUrl(instance: ClassInstanceWithRelations): string | null {
+  return resolveClassAvatarUrl(
+    (instance as { recurring?: { avatarUrl?: string | null } }).recurring?.avatarUrl,
+    (instance as { subject?: { avatarUrl?: string | null } }).subject?.avatarUrl
+  );
+}
+
+function buildStudentParticipant(instance: ClassInstanceWithRelations, unknownName: string) {
+  return {
+    id: instance.student?.id || instance.studentId,
+    name: instance.student?.name || unknownName,
+    grade: null,
+    level: null,
+    avatarUrl: instance.student?.avatarUrl ?? null,
+  };
+}
+
+function buildTeacherParticipant(instance: ClassInstanceWithRelations, unknownName: string) {
+  return {
+    id: instance.teacher?.id || instance.teacherId,
+    name: instance.teacher?.user?.name || unknownName,
+    title: truncateQualifications(instance.teacher?.qualifications),
+    avatarUrl: instance.teacher?.user?.avatarUrl ?? null,
+  };
+}
+
+function buildPerformanceBlock(perf: ClassInstancePerformanceSelectType | null) {
+  if (!perf) return null;
+  return {
+    id: perf.id,
+    engagementScore: perf.engagementScore ?? null,
+    assessmentProgress: perf.assessmentProgress ?? null,
+    assessmentTotal: perf.assessmentTotal ?? null,
+    focusLevel: perf.focusLevel ?? null,
+    sessionHealth: perf.sessionHealth ?? null,
+    heatmapData: perf.heatmapData ?? null,
+    latencyMs: perf.latencyMs ?? null,
+    authorizationLabel: perf.authorizationLabel ?? null,
+    attendanceRate: perf.attendanceRate ?? null,
+    avgGrade: perf.avgGrade ?? null,
+    lastClassDaysAgo: perf.lastClassDaysAgo ?? null,
+  };
+}
+
 export async function buildClassInstanceDetail(
   instance: ClassInstanceWithRelations,
   perf: ClassInstancePerformanceSelectType | null,
@@ -59,6 +104,7 @@ export async function buildClassInstanceDetail(
     ...instance,
     instanceId: instance.id,
     courseName,
+    avatarUrl: resolveInstanceAvatarUrl(instance),
     classType,
     scheduledDate: start.toISOString().split("T")[0],
     startTime,
@@ -74,35 +120,9 @@ export async function buildClassInstanceDetail(
     studentTimezone,
     teacherTimezone,
     zoomMeetingUrl: instance.zoomMeetingUrl ?? null,
-    student: {
-      id: instance.student?.id || instance.studentId,
-      name: instance.student?.name || unknownName,
-      grade: null,
-      level: null,
-      avatarUrl: instance.student?.avatarUrl ?? null,
-    },
-    teacher: {
-      id: instance.teacher?.id || instance.teacherId,
-      name: instance.teacher?.user?.name || unknownName,
-      title: truncateQualifications(instance.teacher?.qualifications),
-      avatarUrl: instance.teacher?.user?.avatarUrl ?? null,
-    },
-    performance: perf
-      ? {
-          id: perf.id,
-          engagementScore: perf.engagementScore ?? null,
-          assessmentProgress: perf.assessmentProgress ?? null,
-          assessmentTotal: perf.assessmentTotal ?? null,
-          focusLevel: perf.focusLevel ?? null,
-          sessionHealth: perf.sessionHealth ?? null,
-          heatmapData: perf.heatmapData ?? null,
-          latencyMs: perf.latencyMs ?? null,
-          authorizationLabel: perf.authorizationLabel ?? null,
-          attendanceRate: perf.attendanceRate ?? null,
-          avgGrade: perf.avgGrade ?? null,
-          lastClassDaysAgo: perf.lastClassDaysAgo ?? null,
-        }
-      : null,
+    student: buildStudentParticipant(instance, unknownName),
+    teacher: buildTeacherParticipant(instance, unknownName),
+    performance: buildPerformanceBlock(perf),
   };
 }
 

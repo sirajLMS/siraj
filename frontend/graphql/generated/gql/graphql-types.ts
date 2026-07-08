@@ -397,6 +397,7 @@ export enum ClassExecutionState {
 
 export type ClassInstanceDetail = {
   __typename?: 'ClassInstanceDetail';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   classType: Maybe<ClassType>;
   courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
@@ -470,6 +471,7 @@ export type ClassStatusEvent = {
 
 export type ClassSubject = {
   __typename?: 'ClassSubject';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   category: Maybe<ClassCategory>;
   categoryId: Maybe<Scalars['String']['output']>;
   description: Maybe<Scalars['String']['output']>;
@@ -482,6 +484,7 @@ export type ClassSubject = {
 };
 
 export type ClassSubjectCreateInput = {
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
   categoryId: Scalars['String']['input'];
   description: InputMaybe<Scalars['String']['input']>;
   isActive: InputMaybe<Scalars['Boolean']['input']>;
@@ -491,6 +494,7 @@ export type ClassSubjectCreateInput = {
 };
 
 export type ClassSubjectUpdateInput = {
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
   categoryId: InputMaybe<Scalars['String']['input']>;
   description: InputMaybe<Scalars['String']['input']>;
   isActive: InputMaybe<Scalars['Boolean']['input']>;
@@ -921,6 +925,8 @@ export type CreateTeacherNoteInput = {
 
 export type DailyScheduleList = {
   __typename?: 'DailyScheduleList';
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  courseName: Maybe<Scalars['String']['output']>;
   duration: Maybe<Scalars['Int']['output']>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
@@ -937,6 +943,7 @@ export type DailyScheduleList = {
 
 export type DailyScheduleListUserItem = {
   __typename?: 'DailyScheduleListUserItem';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
 };
@@ -1192,6 +1199,7 @@ export type FolderCreateInput = {
 
 export type FutureClass = {
   __typename?: 'FutureClass';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   classType: Maybe<ClassType>;
   courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
@@ -2195,6 +2203,7 @@ export type ParentDashboardScheduleRow = {
   studentId: Maybe<Scalars['String']['output']>;
   studentInitials: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
+  teacherAvatarUrl: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
   zoomMeetingUrl: Maybe<Scalars['String']['output']>;
@@ -3011,6 +3020,8 @@ export type StartPermissionGroupSimulationResponse = {
 
 export type StatusTrackingScheduleRow = {
   __typename?: 'StatusTrackingScheduleRow';
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
@@ -3018,10 +3029,12 @@ export type StatusTrackingScheduleRow = {
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
+  studentAvatarUrl: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
   studentInitials: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
   studentStatus: Maybe<StudentStatus>;
+  teacherAvatarUrl: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
 };

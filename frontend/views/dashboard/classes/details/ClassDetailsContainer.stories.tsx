@@ -42,6 +42,7 @@ const mockInstance: ClassInstanceDetail = {
   isRescheduled: false,
   outcome: ClassOutcome.Pending,
   payrollCredited: false,
+  avatarUrl: null,
   student: {
     id: "88290",
     name: "Ahmed Omar",

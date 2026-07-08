@@ -2,8 +2,9 @@
 "use client";
 
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
-import { Avatar, AvatarGroup, Box, Typography } from "@mui/material";
+import { AvatarGroup, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { UserAvatar } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import type { AvailabilityInsightsProps, InsightCardProps } from "../types";
 
@@ -79,15 +80,16 @@ function TimezoneInsight({
         })}
       >
         {timezones.map((tz, index) => (
-          <Avatar
+          <UserAvatar
             key={tz}
+            size={32}
             sx={theme => ({
               backgroundColor: index === 0 ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
               color: index === 0 ? theme.palette.onPrimaryContainer : theme.palette.onSecondaryContainer,
             })}
           >
             {tz}
-          </Avatar>
+          </UserAvatar>
         ))}
       </AvatarGroup>
 

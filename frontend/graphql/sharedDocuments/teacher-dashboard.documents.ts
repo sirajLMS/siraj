@@ -113,6 +113,7 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
         subjectName
         classType
         zoomMeetingUrl
+        avatarUrl
       }
       importantNotes {
         id

@@ -79,7 +79,8 @@ export function ReportsDataGrid({ rows, labels, reportType, onRowClick }: Readon
           <PersonProfileLinkCell
             name={row.name}
             href={nameHrefForRow(row, reportType)}
-            showAvatar={false}
+            fallbackInitial={row.avatarInitials}
+            avatarSize={32}
             fontWeight={600}
           />
         ),
