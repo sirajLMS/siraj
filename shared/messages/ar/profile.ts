@@ -101,4 +101,30 @@ export const profile: ProfileLabels = {
       editHint: "Banking updates require closing the current record and submitting new details through staff tools.",
     },
   },
+  students: {
+    title: "الطلاب المعينون",
+    description: "راجع الطلاب المعينين حالياً لهذا المعلم.",
+    allClasses: "جميع الصفوف",
+    mobileListLabel: "قائمة الطلاب المعينين",
+    pagination: "عرض {start} إلى {end} من أصل {total} سجل",
+    noRows: "لا يوجد طلاب معينون",
+    columns: {
+      studentName: "اسم الطالب",
+      parent: "ولي الأمر",
+      class: "الصف",
+      status: "الحالة",
+      hoursPerWeek: "الساعات أسبوعياً",
+      classes: "الحصص",
+    },
+    classUnknown: "صف غير محدد",
+    parentUnknown: "ولي أمر غير محدد",
+    empty: {
+      title: "لا يوجد طلاب معينون حالياً",
+      description: "لا توجد تعيينات طلاب نشطة لهذا المعلم في الوقت الحالي.",
+    },
+    errors: {
+      failedToLoad: "تعذر تحميل الطلاب المعينين.",
+      retry: "إعادة المحاولة",
+    },
+  },
 };

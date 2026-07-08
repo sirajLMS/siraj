@@ -14,7 +14,7 @@ import { ParentOwnProfilePothosObject } from "./parent-portal.pothos";
 import { ParentProfilePothosObject } from "./parent-profile.pothos";
 import { ManagerDirectoryRowPothosObject } from "./staff-directory.pothos";
 import { TeacherProfileResultPothosObject, TeacherProfileUpdateInputPothosObject } from "./staff-profile.pothos";
-import { TeacherOwnProfilePothosObject } from "./teacher-portal.pothos";
+import { TeacherAssignedStudentsResultPothosObject, TeacherOwnProfilePothosObject } from "./teacher-portal.pothos";
 
 export const ProfileAudiencePothosEnum = gqlSchemaBuilder.enumType("ProfileAudience", {
   values: ["teacher", "parent", "staff"] as const,
@@ -25,7 +25,6 @@ export const ProfileScopePothosEnum = gqlSchemaBuilder.enumType("ProfileScope", 
 });
 
 const TeacherBankingSummaryRef = gqlSchemaBuilder.objectRef<TeacherBankingSummaryReturnType>("TeacherBankingSummary");
-
 export const TeacherBankingSummaryPothosObject = TeacherBankingSummaryRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
@@ -61,6 +60,7 @@ export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
     parentAdminProfile: t.expose("parentAdminProfile", { type: ParentProfilePothosObject, nullable: true }),
     staffProfile: t.expose("staffProfile", { type: ManagerDirectoryRowPothosObject, nullable: true }),
     bankingSummary: t.expose("bankingSummary", { type: TeacherBankingSummaryPothosObject, nullable: true }),
+    assignedStudents: t.expose("assignedStudents", { type: TeacherAssignedStudentsResultPothosObject, nullable: true }),
   }),
 });
 

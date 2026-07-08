@@ -15,5 +15,5 @@ export default async function RootPage({ params }: { readonly params: Promise<{ 
     redirect({ href: "/login", locale });
   }
 
-  return <> </>;
+  return null;
 }

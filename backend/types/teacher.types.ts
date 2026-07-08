@@ -169,6 +169,10 @@ export type TeacherDirectoryReturnType = {
 export type TeacherAssignedStudentReturnType = {
   id: string;
   name: string;
+  studentAvatarUrl: string | null;
+  parentName: string | null;
+  parentAvatarUrl: string | null;
+  className: string | null;
   status: StudentStatus;
   hoursPerWeek: number;
   classesRemaining: number;

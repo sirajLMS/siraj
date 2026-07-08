@@ -44,12 +44,19 @@ const createMockHandlers = () => ({
   onDelete: mock(() => {}),
 });
 
+type ExecutionState = "NOT_ACTIVATED" | "ACTIVATED" | "RUNNING" | "COMPLETED";
+
+function setupAdminActionsBar(executionState: ExecutionState, permissions: AppPermission[] = []) {
+  const handlers = createMockHandlers();
+  renderWithWrapper(<AdminActionsBar {...handlers} executionState={executionState} labels={mockLabels} />, {
+    permissions,
+  });
+  return handlers;
+}
+
 describe("AdminActionsBar", () => {
   test("renders force activate button enabled when NOT_ACTIVATED", () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="NOT_ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("NOT_ACTIVATED");
 
     const forceActivateButton = screen.getByRole("button", { name: /force-activate/i });
     expect(forceActivateButton).toBeVisible();
@@ -57,20 +64,14 @@ describe("AdminActionsBar", () => {
   });
 
   test("disables force activate button when already ACTIVATED", () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("ACTIVATED");
 
     const forceActivateButton = screen.getByRole("button", { name: /force-activate/i });
     expect(forceActivateButton).toBeDisabled();
   });
 
   test("shows disabled tooltip for force activate when ACTIVATED", async () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("ACTIVATED");
 
     const user = userEvent.setup();
     await user.hover(screen.getByTestId("tooltip-target-force-activate"));
@@ -79,10 +80,7 @@ describe("AdminActionsBar", () => {
   });
 
   test("shows disabled tooltip for stop when ACTIVATED", async () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("ACTIVATED");
 
     const user = userEvent.setup();
     await user.hover(screen.getByTestId("tooltip-target-stop-pause"));
@@ -91,10 +89,7 @@ describe("AdminActionsBar", () => {
   });
 
   test("renders stop button disabled when not RUNNING", () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("ACTIVATED");
 
     const stopButton = screen.getByRole("button", { name: /stop-pause/i });
     expect(stopButton).toBeVisible();
@@ -102,20 +97,14 @@ describe("AdminActionsBar", () => {
   });
 
   test("renders stop button enabled when RUNNING", () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="RUNNING" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("RUNNING");
 
     const stopButton = screen.getByRole("button", { name: /stop-pause/i });
     expect(stopButton).not.toBeDisabled();
   });
 
   test("renders delete button", () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="NOT_ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("NOT_ACTIVATED");
 
     const deleteButton = screen.getByRole("button", { name: /delete-instance/i });
     expect(deleteButton).toBeVisible();
@@ -123,30 +112,21 @@ describe("AdminActionsBar", () => {
   });
 
   test("reschedule button visible with SessionReschedule permission", () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="NOT_ACTIVATED" labels={mockLabels} />, {
-      permissions: [AppPermission.SessionReschedule],
-    });
+    setupAdminActionsBar("NOT_ACTIVATED", [AppPermission.SessionReschedule]);
 
     const rescheduleButton = screen.getByRole("button", { name: /reschedule/i });
     expect(rescheduleButton).toBeVisible();
   });
 
   test("reschedule button hidden without SessionReschedule permission", () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="NOT_ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    setupAdminActionsBar("NOT_ACTIVATED");
 
     const rescheduleButton = screen.queryByRole("button", { name: /reschedule/i });
     expect(rescheduleButton).toBeNull();
   });
 
   test("clicking force activate calls handler when NOT_ACTIVATED", async () => {
-    const handlers = createMockHandlers();
-    renderWithWrapper(<AdminActionsBar {...handlers} executionState="NOT_ACTIVATED" labels={mockLabels} />, {
-      permissions: [],
-    });
+    const handlers = setupAdminActionsBar("NOT_ACTIVATED");
 
     const user = userEvent.setup();
     const forceActivateButton = screen.getByRole("button", { name: /force-activate/i });

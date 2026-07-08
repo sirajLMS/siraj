@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { logger, verifyToken } from "@/backend/lib";
 import {
   ImpersonationService,
@@ -8,7 +9,7 @@ import {
   type UserPermissionContext,
 } from "@/backend/services";
 
-export async function getServerUserContext(): Promise<{
+async function getServerUserContextImpl(): Promise<{
   userId: string | null;
   actorUserId?: string;
   isImpersonating: boolean;
@@ -92,3 +93,5 @@ export async function getServerUserContext(): Promise<{
     context,
   };
 }
+
+export const getServerUserContext = cache(getServerUserContextImpl);

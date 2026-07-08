@@ -28,6 +28,138 @@ interface SearchScheduleFilterDrawerProps {
   readonly onApply: () => void;
 }
 
+function DaysOfWeekSelect({
+  value,
+  onChange,
+}: {
+  readonly value: DayOfWeek[];
+  readonly onChange: (event: SelectChangeEvent<string[]>) => void;
+}) {
+  const t = useTranslations("dashboard.searchSchedule");
+
+  return (
+    <FormControl size="small" fullWidth>
+      <InputLabel id="search-schedule-days-label">{t("daysOfWeek")}</InputLabel>
+      <Select
+        labelId="search-schedule-days-label"
+        label={t("daysOfWeek")}
+        multiple
+        value={value}
+        onChange={onChange}
+        renderValue={selected => (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {selected.slice(0, 2).map(day => (
+              <Chip key={day} label={t(`day.${day.toLowerCase() as Lowercase<DayOfWeek>}`)} size="small" />
+            ))}
+            {selected.length > 2 ? <Chip label={`+${selected.length - 2}`} size="small" /> : null}
+          </Box>
+        )}
+      >
+        {Object.values(DayOfWeek).map(day => (
+          <MenuItem key={day} value={day}>
+            {t(`day.${day.toLowerCase() as Lowercase<DayOfWeek>}`)}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+}
+
+interface FilterFieldsProps {
+  readonly draft: SearchScheduleDraftFilters;
+  readonly onDraftChange: (draft: Partial<SearchScheduleDraftFilters>) => void;
+}
+
+function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
+  const t = useTranslations("dashboard.searchSchedule");
+
+  const handleDaysOfWeekChange = (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value;
+    const selectedDays = typeof value === "string" ? value.split(",") : value;
+    onDraftChange({
+      daysOfWeek: selectedDays.length > 0 ? (selectedDays as DayOfWeek[]) : null,
+    });
+  };
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, px: 2, py: 2, flex: 1, overflowY: "auto" }}>
+      <TextField
+        select
+        label={t("teacherGender")}
+        value={draft.gender ?? ""}
+        size="small"
+        fullWidth
+        onChange={event => {
+          const value = event.target.value;
+          onDraftChange({ gender: value ? (value as Gender) : null });
+        }}
+      >
+        <MenuItem value="">{t("allGenders")}</MenuItem>
+        <MenuItem value="MALE">{t("male")}</MenuItem>
+        <MenuItem value="FEMALE">{t("female")}</MenuItem>
+      </TextField>
+
+      <TextField
+        label={t("minAvailableDays")}
+        type="number"
+        size="small"
+        fullWidth
+        value={draft.minAvailableDays ?? ""}
+        onChange={event =>
+          onDraftChange({
+            minAvailableDays: event.target.value ? Number(event.target.value) : null,
+          })
+        }
+        slotProps={{ htmlInput: { min: 1 } }}
+      />
+
+      <TextField
+        label={t("minTotalGaps")}
+        type="number"
+        size="small"
+        fullWidth
+        value={draft.minTotalGaps ?? ""}
+        onChange={event =>
+          onDraftChange({
+            minTotalGaps: event.target.value ? Number(event.target.value) : null,
+          })
+        }
+        slotProps={{ htmlInput: { min: 1 } }}
+      />
+
+      <DaysOfWeekSelect value={draft.daysOfWeek ?? []} onChange={handleDaysOfWeekChange} />
+    </Box>
+  );
+}
+
+interface DrawerActionsProps {
+  readonly onClear: () => void;
+  readonly onApply: () => void;
+}
+
+function DrawerActions({ onClear, onApply }: Readonly<DrawerActionsProps>) {
+  const t = useTranslations("dashboard.searchSchedule");
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        gap: 1,
+        p: 2,
+        borderTop: 1,
+        borderColor: "divider",
+      }}
+    >
+      <Button variant="outlined" fullWidth onClick={onClear}>
+        {t("clearFilters")}
+      </Button>
+      <Button variant="contained" fullWidth onClick={onApply}>
+        {t("applyFilters")}
+      </Button>
+    </Box>
+  );
+}
+
 export function SearchScheduleFilterDrawer({
   open,
   draft,
@@ -38,14 +170,6 @@ export function SearchScheduleFilterDrawer({
   const t = useTranslations("dashboard.searchSchedule");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  const handleDaysOfWeekChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    const selectedDays = typeof value === "string" ? value.split(",") : value;
-    onDraftChange({
-      daysOfWeek: selectedDays.length > 0 ? (selectedDays as DayOfWeek[]) : null,
-    });
-  };
 
   const handleClear = () => {
     onDraftChange(getClearDrawerFiltersPatch());
@@ -77,93 +201,9 @@ export function SearchScheduleFilterDrawer({
           <Typography variant="titleLg">{t("filters")}</Typography>
         </Box>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, px: 2, py: 2, flex: 1, overflowY: "auto" }}>
-          <TextField
-            select
-            label={t("teacherGender")}
-            value={draft.gender ?? ""}
-            size="small"
-            fullWidth
-            onChange={event => {
-              const value = event.target.value;
-              onDraftChange({ gender: value ? (value as Gender) : null });
-            }}
-          >
-            <MenuItem value="">{t("allGenders")}</MenuItem>
-            <MenuItem value="MALE">{t("male")}</MenuItem>
-            <MenuItem value="FEMALE">{t("female")}</MenuItem>
-          </TextField>
+        <FilterFields draft={draft} onDraftChange={onDraftChange} />
 
-          <TextField
-            label={t("minAvailableDays")}
-            type="number"
-            size="small"
-            fullWidth
-            value={draft.minAvailableDays ?? ""}
-            onChange={event =>
-              onDraftChange({
-                minAvailableDays: event.target.value ? Number(event.target.value) : null,
-              })
-            }
-            slotProps={{ htmlInput: { min: 1 } }}
-          />
-
-          <TextField
-            label={t("minTotalGaps")}
-            type="number"
-            size="small"
-            fullWidth
-            value={draft.minTotalGaps ?? ""}
-            onChange={event =>
-              onDraftChange({
-                minTotalGaps: event.target.value ? Number(event.target.value) : null,
-              })
-            }
-            slotProps={{ htmlInput: { min: 1 } }}
-          />
-
-          <FormControl size="small" fullWidth>
-            <InputLabel id="search-schedule-days-label">{t("daysOfWeek")}</InputLabel>
-            <Select
-              labelId="search-schedule-days-label"
-              label={t("daysOfWeek")}
-              multiple
-              value={draft.daysOfWeek ?? []}
-              onChange={handleDaysOfWeekChange}
-              renderValue={selected => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.slice(0, 2).map(day => (
-                    <Chip key={day} label={t(`day.${day.toLowerCase() as Lowercase<DayOfWeek>}`)} size="small" />
-                  ))}
-                  {selected.length > 2 ? <Chip label={`+${selected.length - 2}`} size="small" /> : null}
-                </Box>
-              )}
-            >
-              {Object.values(DayOfWeek).map(day => (
-                <MenuItem key={day} value={day}>
-                  {t(`day.${day.toLowerCase() as Lowercase<DayOfWeek>}`)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            gap: 1,
-            p: 2,
-            borderTop: 1,
-            borderColor: "divider",
-          }}
-        >
-          <Button variant="outlined" fullWidth onClick={handleClear}>
-            {t("clearFilters")}
-          </Button>
-          <Button variant="contained" fullWidth onClick={handleApply}>
-            {t("applyFilters")}
-          </Button>
-        </Box>
+        <DrawerActions onClear={handleClear} onApply={handleApply} />
       </Box>
     </Drawer>
   );

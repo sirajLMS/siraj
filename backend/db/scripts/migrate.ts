@@ -2,6 +2,7 @@ import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import { migrate as migrateNeon } from "drizzle-orm/neon-serverless/migrator";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
+import { getEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { db, getDrizzleDbPool } from "../drizzleDb";
 
@@ -10,7 +11,7 @@ import { db, getDrizzleDbPool } from "../drizzleDb";
  * This is useful for running migrations in production or in CI/CD pipelines
  */
 export async function runMigrations(closePool: boolean) {
-  const provider = process.env.DB_PROVIDER || "postgres";
+  const provider = getEnv("DB_PROVIDER", "postgres");
 
   logger.log(`Running migrations with provider: ${provider}`);
 

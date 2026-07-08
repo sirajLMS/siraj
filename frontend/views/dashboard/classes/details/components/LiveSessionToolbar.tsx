@@ -160,11 +160,12 @@ function LeaveDialog({ open, reason, isProcessing, onReasonChange, onClose, onSu
   );
 }
 
-interface AbsentDialogProps {
+interface ConfirmationDialogProps {
   readonly open: boolean;
-  readonly isMarkingAbsent: boolean;
+  readonly isProcessing: boolean;
   readonly onClose: () => void;
   readonly onSubmit: () => void;
+  readonly submitColor: "warning" | "error";
   readonly labels: {
     readonly title: string;
     readonly confirmation: string;
@@ -173,7 +174,7 @@ interface AbsentDialogProps {
   };
 }
 
-function AbsentDialog({ open, isMarkingAbsent, onClose, onSubmit, labels }: AbsentDialogProps) {
+function ConfirmationDialog({ open, isProcessing, onClose, onSubmit, submitColor, labels }: ConfirmationDialogProps) {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>{labels.title}</DialogTitle>
@@ -182,37 +183,7 @@ function AbsentDialog({ open, isMarkingAbsent, onClose, onSubmit, labels }: Abse
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{labels.cancel}</Button>
-        <Button onClick={onSubmit} variant="contained" color="warning" disabled={isMarkingAbsent}>
-          {labels.submit}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
-interface ResetDialogProps {
-  readonly open: boolean;
-  readonly isResetting: boolean;
-  readonly onClose: () => void;
-  readonly onSubmit: () => void;
-  readonly labels: {
-    readonly title: string;
-    readonly confirmation: string;
-    readonly cancel: string;
-    readonly submit: string;
-  };
-}
-
-function ResetDialog({ open, isResetting, onClose, onSubmit, labels }: ResetDialogProps) {
-  return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{labels.title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.confirmation}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{labels.cancel}</Button>
-        <Button onClick={onSubmit} variant="contained" color="error" disabled={isResetting}>
+        <Button onClick={onSubmit} variant="contained" color={submitColor} disabled={isProcessing}>
           {labels.submit}
         </Button>
       </DialogActions>
@@ -404,11 +375,12 @@ export function LiveSessionToolbar({
       />
 
       {/* Mark Absent Confirmation Dialog */}
-      <AbsentDialog
+      <ConfirmationDialog
         open={absentDialogOpen}
-        isMarkingAbsent={isMarkingAbsent}
+        isProcessing={isMarkingAbsent}
         onClose={handleAbsentClose}
         onSubmit={handleAbsentSubmit}
+        submitColor="warning"
         labels={{
           title: t("absentDialogTitle"),
           confirmation: t("absentConfirmation"),
@@ -434,11 +406,12 @@ export function LiveSessionToolbar({
       />
 
       {/* Reset Confirmation Dialog */}
-      <ResetDialog
+      <ConfirmationDialog
         open={resetDialogOpen}
-        isResetting={isResetting}
+        isProcessing={isResetting}
         onClose={handleResetClose}
         onSubmit={handleResetSubmit}
+        submitColor="error"
         labels={{
           title: t("resetDialogTitle"),
           confirmation: t("resetConfirmation"),

@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 
-const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_BASE_URL, process.env.ALLOWED_ORIGIN, "http://localhost:3000"].filter(
+const envConfig = getEnvironmentConfig();
+const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_BASE_URL, envConfig.allowedOrigin, "http://localhost:3000"].filter(
   Boolean
 ) as string[];
 
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
       maxAge: 365 * 24 * 60 * 60, // 1 year
       sameSite: "lax",
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: envConfig.nodeEnv === "production",
     });
     return response;
   } catch {

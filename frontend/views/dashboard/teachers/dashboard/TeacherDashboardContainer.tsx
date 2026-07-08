@@ -33,6 +33,7 @@ import { useTeacherDashboardLastUpdated } from "./utils/useTeacherDashboardLastU
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
 type SnackbarSeverity = "success" | "error" | "info";
+type StringOrDateOrNull = string | Date | null;
 
 const ACTIVATION_WINDOW_BEFORE_MINUTES = 5;
 const ABSENT_WAITING_MINUTES = 30;
@@ -41,8 +42,8 @@ interface RawRow {
   readonly id?: string | null;
   readonly studentId?: string | null;
   readonly studentName?: string | null;
-  readonly scheduledStartAt?: string | Date | null;
-  readonly scheduledEndAt?: string | Date | null;
+  readonly scheduledStartAt?: StringOrDateOrNull;
+  readonly scheduledEndAt?: StringOrDateOrNull;
   readonly durationMinutes?: number | null;
   readonly executionState?: string | null;
   readonly outcome?: string | null;
@@ -57,7 +58,36 @@ interface RawFeedItem {
   readonly scheduledTimeFormatted?: string | null;
   readonly durationMinutes?: number | null;
   readonly eventKind?: string | null;
-  readonly occurredAt?: string | Date | null;
+  readonly occurredAt?: StringOrDateOrNull;
+}
+
+function deriveRowStatus(
+  executionState: string,
+  outcome: string,
+  activateEnabled: boolean,
+  now: Date,
+  endAt: Date
+): TeacherScheduleRow["status"] {
+  if (outcome === "TAKEN" || executionState === "COMPLETED") {
+    return "completed";
+  }
+  if (outcome === "ABSENT" || outcome === "LEAVE") {
+    return "missed";
+  }
+  if (executionState === "ACTIVATED") {
+    return "activated";
+  }
+  if (executionState === "RUNNING") {
+    return "active";
+  }
+  if (executionState === "NOT_ACTIVATED" && outcome === "PENDING") {
+    const missedDeadline = new Date(endAt.getTime() + DEFAULT_MISSED_GRACE_MINUTES * 60000);
+    if (now > missedDeadline) {
+      return "missed";
+    }
+    return activateEnabled ? "pending" : "upcoming";
+  }
+  return "upcoming";
 }
 
 function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: string): TeacherScheduleRow[] {
@@ -84,23 +114,7 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
     const absentWaitingDeadline = new Date(startAt.getTime() + ABSENT_WAITING_MINUTES * 60000);
     const markAbsentEnabled = !isLiveSession || now >= absentWaitingDeadline;
 
-    let status: TeacherScheduleRow["status"] = "upcoming";
-    if (outcome === "TAKEN" || executionState === "COMPLETED") {
-      status = "completed";
-    } else if (outcome === "ABSENT" || outcome === "LEAVE") {
-      status = "missed";
-    } else if (executionState === "ACTIVATED") {
-      status = "activated";
-    } else if (executionState === "RUNNING") {
-      status = "active";
-    } else if (executionState === "NOT_ACTIVATED" && outcome === "PENDING") {
-      const missedDeadline = new Date(endAt.getTime() + DEFAULT_MISSED_GRACE_MINUTES * 60000);
-      if (now > missedDeadline) {
-        status = "missed";
-      } else {
-        status = activateEnabled ? "pending" : "upcoming";
-      }
-    }
+    const status = deriveRowStatus(executionState, outcome, activateEnabled, now, endAt);
 
     return {
       id: row.id || `row-${idx}`,
@@ -229,16 +243,24 @@ export function TeacherDashboardContainer() {
       }
     : null;
 
-  const progressFeed = useMemo(
-    () =>
-      mapProgressFeed(
-        dashboardData?.teacherDashboard?.progressFeed,
-        labels.progressFeed,
-        labels.schedule.durationValue,
-        value => formatter.relativeTime(value, { now: Date.now() })
-      ),
-    [dashboardData?.teacherDashboard?.progressFeed, formatter, labels.progressFeed, labels.schedule.durationValue]
-  );
+  const progressFeed = useMemo(() => {
+    if (dataArrivedAt === null) {
+      return [];
+    }
+
+    return mapProgressFeed(
+      dashboardData?.teacherDashboard?.progressFeed,
+      labels.progressFeed,
+      labels.schedule.durationValue,
+      value => formatter.relativeTime(value, { now: dataArrivedAt })
+    );
+  }, [
+    dashboardData?.teacherDashboard?.progressFeed,
+    dataArrivedAt,
+    formatter,
+    labels.progressFeed,
+    labels.schedule.durationValue,
+  ]);
 
   const handleDateChange = (date: string) => {
     setFilterDate(date);

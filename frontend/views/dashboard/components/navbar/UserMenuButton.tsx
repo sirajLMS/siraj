@@ -6,6 +6,7 @@ import { Avatar, Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@m
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useMemo, useState } from "react";
+import type { SimulatablePermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { simulatablePermissionGroupsQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
@@ -149,6 +150,163 @@ function DualAvatarTrigger({
   );
 }
 
+interface UserMenuState {
+  readonly isImpersonating: boolean;
+  readonly isSimulatingGroup: boolean;
+  readonly impersonationStatus: ReturnType<typeof useImpersonation>["status"];
+  readonly simulationStatus: ReturnType<typeof usePermissionGroupSimulation>["status"];
+}
+
+function computeSecondaryLine(
+  state: Readonly<UserMenuState>,
+  tImpersonation: ReturnType<typeof useTranslations>
+): string | undefined {
+  const { isImpersonating, isSimulatingGroup, impersonationStatus, simulationStatus } = state;
+  if (isImpersonating) {
+    const actorName = impersonationStatus?.actorUser?.name;
+    return actorName ? tImpersonation("actorIdentity", { name: actorName }) : undefined;
+  }
+  if (isSimulatingGroup && simulationStatus?.groupName) {
+    return simulationStatus.groupName;
+  }
+  return undefined;
+}
+
+function UserMenuTrigger({
+  userName,
+  avatarUrl,
+  displayName,
+  isImpersonating,
+  isSimulatingGroup,
+  simulationStatus,
+  actorUserName,
+  open,
+  onClick,
+}: Readonly<{
+  userName: string;
+  avatarUrl: string;
+  displayName: string;
+  isImpersonating: boolean;
+  isSimulatingGroup: boolean;
+  simulationStatus: ReturnType<typeof usePermissionGroupSimulation>["status"];
+  actorUserName?: string;
+  open: boolean;
+  onClick: (event: React.MouseEvent<HTMLElement>) => void;
+}>) {
+  return (
+    <ButtonBase
+      onClick={onClick}
+      sx={theme => ({
+        borderRadius: isImpersonating || isSimulatingGroup ? 2 : "50%",
+        padding: 0.5,
+        border: isImpersonating || isSimulatingGroup ? "none" : `2px solid ${theme.palette.onHeaderContainer}`,
+        transition: "all 0.2s ease-in-out",
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        "&:hover": {
+          transform: "scale(1.05)",
+          boxShadow: theme.palette.shadow.cardHover,
+        },
+      })}
+      aria-label="user profile menu"
+      aria-controls={open ? "user-profile-menu" : undefined}
+      aria-haspopup="true"
+      aria-expanded={open ? "true" : undefined}
+    >
+      {isSimulatingGroup && simulationStatus?.groupName ? (
+        <Box
+          sx={{
+            display: { xs: "flex", sm: "none" },
+            flexDirection: "column",
+            alignItems: "flex-end",
+            minWidth: 0,
+            maxWidth: 120,
+          }}
+        >
+          <Typography variant="labelMd" noWrap sx={{ fontWeight: 500, lineHeight: 1.2 }}>
+            {userName}
+          </Typography>
+          <Typography variant="labelSm" noWrap sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+            {simulationStatus.groupName}
+          </Typography>
+        </Box>
+      ) : null}
+      {isImpersonating ? (
+        <DualAvatarTrigger
+          primaryAvatarUrl={avatarUrl}
+          primaryName={displayName}
+          secondaryAvatarUrl={avatarUrl}
+          secondaryName={actorUserName ?? undefined}
+        />
+      ) : (
+        <Avatar
+          src={avatarUrl}
+          alt={userName}
+          sx={{
+            width: { xs: 32, md: 40 },
+            height: { xs: 32, md: 40 },
+          }}
+        />
+      )}
+    </ButtonBase>
+  );
+}
+
+function GroupSimulationMenu({
+  anchorEl,
+  open,
+  onClose,
+  groupsLoading,
+  simulatableGroups,
+  simulationLoading,
+  onSelectGroup,
+  tCommon,
+}: Readonly<{
+  anchorEl: HTMLElement | null;
+  open: boolean;
+  onClose: () => void;
+  groupsLoading: boolean;
+  simulatableGroups: ReadonlyArray<SimulatablePermissionGroup>;
+  simulationLoading: boolean;
+  onSelectGroup: (slug: string) => void;
+  tCommon: ReturnType<typeof useTranslations>;
+}>) {
+  return (
+    <Menu
+      anchorEl={anchorEl}
+      open={open}
+      onClose={onClose}
+      anchorOrigin={{ vertical: "top", horizontal: "left" }}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      slotProps={{
+        paper: {
+          sx: theme => ({
+            ml: -1,
+            minWidth: 220,
+            maxHeight: 320,
+            boxShadow: theme.palette.shadow.card,
+            border: `1px solid ${theme.palette.outlineVariant}`,
+            borderRadius: 2,
+          }),
+        },
+      }}
+    >
+      {groupsLoading ? (
+        <MenuItem disabled>
+          <Typography variant="bodyMd">{tCommon("loading")}</Typography>
+        </MenuItem>
+      ) : (
+        simulatableGroups.map(group => (
+          <MenuItem key={group.slug} disabled={simulationLoading} onClick={() => onSelectGroup(group.slug ?? "")}>
+            <Typography variant="bodyMd">{group.name}</Typography>
+          </MenuItem>
+        ))
+      )}
+    </Menu>
+  );
+}
+
 export function UserMenuButton({
   userName,
   userEmail,
@@ -230,75 +388,37 @@ export function UserMenuButton({
   const actorUser = impersonationStatus?.actorUser;
   const displayName = isImpersonating ? (targetUser?.name ?? userName) : userName;
   const displayEmail = isImpersonating ? (targetUser?.email ?? userEmail) : userEmail;
-  const actorSecondaryLine = isImpersonating
-    ? actorUser?.name
-      ? tImpersonation("actorIdentity", { name: actorUser.name })
-      : undefined
-    : isSimulatingGroup && simulationStatus?.groupName
-      ? simulationStatus.groupName
-      : undefined;
 
-  const triggerAvatarUrl = avatarUrl;
-  const actorAvatarUrl = avatarUrl;
+  const actorSecondaryLine = computeSecondaryLine(
+    { isImpersonating, isSimulatingGroup, impersonationStatus, simulationStatus },
+    tImpersonation
+  );
+
+  const triggerProps: Readonly<{
+    userName: string;
+    avatarUrl: string;
+    displayName: string;
+    isImpersonating: boolean;
+    isSimulatingGroup: boolean;
+    simulationStatus: ReturnType<typeof usePermissionGroupSimulation>["status"];
+    actorUserName?: string;
+    open: boolean;
+    onClick: (event: React.MouseEvent<HTMLElement>) => void;
+  }> = {
+    userName,
+    avatarUrl,
+    displayName,
+    isImpersonating,
+    isSimulatingGroup,
+    simulationStatus,
+    actorUserName: actorUser?.name ?? undefined,
+    open,
+    onClick: handleClick,
+  };
 
   return (
     <>
-      <ButtonBase
-        onClick={handleClick}
-        sx={theme => ({
-          borderRadius: isImpersonating || isSimulatingGroup ? 2 : "50%",
-          padding: 0.5,
-          border: isImpersonating || isSimulatingGroup ? "none" : `2px solid ${theme.palette.onHeaderContainer}`,
-          transition: "all 0.2s ease-in-out",
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          "&:hover": {
-            transform: "scale(1.05)",
-            boxShadow: theme.palette.shadow.cardHover,
-          },
-        })}
-        aria-label="user profile menu"
-        aria-controls={open ? "user-profile-menu" : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
-      >
-        {isSimulatingGroup && simulationStatus?.groupName ? (
-          <Box
-            sx={{
-              display: { xs: "flex", sm: "none" },
-              flexDirection: "column",
-              alignItems: "flex-end",
-              minWidth: 0,
-              maxWidth: 120,
-            }}
-          >
-            <Typography variant="labelMd" noWrap sx={{ fontWeight: 500, lineHeight: 1.2 }}>
-              {userName}
-            </Typography>
-            <Typography variant="labelSm" noWrap sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-              {simulationStatus.groupName}
-            </Typography>
-          </Box>
-        ) : null}
-        {isImpersonating ? (
-          <DualAvatarTrigger
-            primaryAvatarUrl={triggerAvatarUrl}
-            primaryName={displayName}
-            secondaryAvatarUrl={actorAvatarUrl}
-            secondaryName={actorUser?.name ?? undefined}
-          />
-        ) : (
-          <Avatar
-            src={avatarUrl}
-            alt={userName}
-            sx={{
-              width: { xs: 32, md: 40 },
-              height: { xs: 32, md: 40 },
-            }}
-          />
-        )}
-      </ButtonBase>
+      <UserMenuTrigger {...triggerProps} />
 
       <Menu
         id="user-profile-menu"
@@ -392,44 +512,19 @@ export function UserMenuButton({
         ) : null}
       </Menu>
 
-      <Menu
+      <GroupSimulationMenu
         anchorEl={groupMenuAnchor}
         open={groupMenuOpen}
         onClose={() => setGroupMenuAnchor(null)}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: theme => ({
-              ml: -1,
-              minWidth: 220,
-              maxHeight: 320,
-              boxShadow: theme.palette.shadow.card,
-              border: `1px solid ${theme.palette.outlineVariant}`,
-              borderRadius: 2,
-            }),
-          },
+        groupsLoading={groupsLoading}
+        simulatableGroups={simulatableGroups}
+        simulationLoading={simulationLoading}
+        onSelectGroup={slug => {
+          handleClose();
+          void startSimulation(slug);
         }}
-      >
-        {groupsLoading ? (
-          <MenuItem disabled>
-            <Typography variant="bodyMd">{tCommon("loading")}</Typography>
-          </MenuItem>
-        ) : (
-          simulatableGroups.map(group => (
-            <MenuItem
-              key={group.slug}
-              disabled={simulationLoading}
-              onClick={() => {
-                handleClose();
-                void startSimulation(group.slug ?? "");
-              }}
-            >
-              <Typography variant="bodyMd">{group.name}</Typography>
-            </MenuItem>
-          ))
-        )}
-      </Menu>
+        tCommon={tCommon}
+      />
     </>
   );
 }

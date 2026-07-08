@@ -45,6 +45,34 @@ function enforceBulkLimit(count: number, operation: string): void {
   }
 }
 
+/**
+ * Shared resolver logic for bulk move/copy mutations: validate paths, enforce limits,
+ * authorise, then delegate to the service's bulk transfer method.
+ * @param operation - "move" or "copy" — used both for the limit error and method dispatch.
+ * @param input - GraphQL mutation input containing sourcePaths and destinationPath.
+ * @param ctx - GraphQL resolver context (for auth and locale).
+ * @returns The BulkOperationResult returned by the storage service.
+ */
+async function resolveBulkTransfer(
+  operation: "move" | "copy",
+  input: { sourcePaths: string[]; destinationPath: string },
+  ctx: { locale: string }
+) {
+  const userId = await requireAuth(ctx);
+  const sanitizedSourcePaths = sanitizeAndValidatePaths(input.sourcePaths);
+  const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
+  validateStoragePath(sanitizedDestPath);
+  enforceBulkLimit(sanitizedSourcePaths.length, operation);
+  await authorizeBulkPaths(userId, sanitizedSourcePaths, ctx.locale);
+  const storageService = await getStorageService();
+  const payload = {
+    ...input,
+    sourcePaths: sanitizedSourcePaths,
+    destinationPath: sanitizedDestPath,
+  };
+  return operation === "move" ? await storageService.moveItems(payload) : await storageService.copyItems(payload);
+}
+
 gqlSchemaBuilder.mutationFields(t => ({
   renameFile: t.field({
     authScopes: { loggedIn: true },
@@ -132,20 +160,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }, ctx) => {
-      const userId = await requireAuth(ctx);
-      const sanitizedSourcePaths = sanitizeAndValidatePaths(input.sourcePaths);
-      const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
-      validateStoragePath(sanitizedDestPath);
-      enforceBulkLimit(sanitizedSourcePaths.length, "move");
-      await authorizeBulkPaths(userId, sanitizedSourcePaths, ctx.locale);
-      const storageService = await getStorageService();
-      return await storageService.moveItems({
-        ...input,
-        sourcePaths: sanitizedSourcePaths,
-        destinationPath: sanitizedDestPath,
-      });
-    },
+    resolve: async (_parent, { input }, ctx) => resolveBulkTransfer("move", input, ctx),
   }),
 
   copyStorageItems: t.field({
@@ -157,20 +172,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }, ctx) => {
-      const userId = await requireAuth(ctx);
-      const sanitizedSourcePaths = sanitizeAndValidatePaths(input.sourcePaths);
-      const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
-      validateStoragePath(sanitizedDestPath);
-      enforceBulkLimit(sanitizedSourcePaths.length, "copy");
-      await authorizeBulkPaths(userId, sanitizedSourcePaths, ctx.locale);
-      const storageService = await getStorageService();
-      return await storageService.copyItems({
-        ...input,
-        sourcePaths: sanitizedSourcePaths,
-        destinationPath: sanitizedDestPath,
-      });
-    },
+    resolve: async (_parent, { input }, ctx) => resolveBulkTransfer("copy", input, ctx),
   }),
 
   deleteStorageItems: t.field({

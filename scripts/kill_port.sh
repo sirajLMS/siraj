@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if running as root, if not elevate privileges
+if [ "$EUID" -ne 0 ]; then
+    echo "This script requires root privileges to find all processes."
+    exec sudo "$0" "$@"
+fi
+
 # need to install lsof
 # sudo apt install lsof
 

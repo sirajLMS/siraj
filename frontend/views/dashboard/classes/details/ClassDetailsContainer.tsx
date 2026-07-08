@@ -79,28 +79,66 @@ interface ActionFeedbackState {
   readonly severity: "success" | "error";
 }
 
-export function ClassDetailsContainer() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const router = useRouter();
-  const locale = useLocale();
-  const t = useTranslations("dashboard.classDetails");
+function DeleteConfirmationDialog({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  cancelLabel,
+  confirmLabel,
+}: {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
+  readonly title: string;
+  readonly message: string;
+  readonly cancelLabel: string;
+  readonly confirmLabel: string;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{message}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{cancelLabel}</Button>
+        <Button onClick={onConfirm} color="error" variant="contained">
+          {confirmLabel}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
-  const params = useParams();
-  const rawId = params?.id;
-  const id = typeof rawId === "string" ? rawId : "";
-  const hasPermission = useUserStore(state => state.hasPermission);
+function ActionFeedbackAlert({ feedbackState }: { readonly feedbackState: ActionFeedbackState | null }) {
+  if (!feedbackState) return null;
+  return (
+    <Alert
+      severity={feedbackState.severity}
+      sx={theme => ({
+        mb: 2,
+        [theme.breakpoints.down("lg")]: {
+          borderRadius: 0,
+          paddingInline: theme.spacing(2),
+          borderInlineStart: "none",
+          borderInlineEnd: "none",
+        },
+      })}
+    >
+      {feedbackState.message}
+    </Alert>
+  );
+}
 
-  const [isWarningDismissed, setIsWarningDismissed] = useState(false);
-  const [feedbackState, setFeedbackState] = useState<ActionFeedbackState | null>(null);
-  const [shouldLoadEvents, setShouldLoadEvents] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const { data, loading, error } = useQuery(classInstanceQueryDocument, {
-    variables: { id },
-    skip: !id,
-  });
-
+function useEventLogDownload(
+  id: string,
+  shouldLoadEvents: boolean,
+  setShouldLoadEvents: (value: boolean) => void,
+  setFeedbackState: (state: ActionFeedbackState | null) => void,
+  t: ReturnType<typeof useTranslations>
+) {
   const { data: eventsData, error: eventsError } = useQuery(classStatusEventsQueryDocument, {
     variables: { classInstanceId: id },
     skip: !id || !shouldLoadEvents,
@@ -128,7 +166,7 @@ export function ClassDetailsContainer() {
         setShouldLoadEvents(false);
       }
     }
-  }, [eventsData, shouldLoadEvents, id, t]);
+  }, [eventsData, shouldLoadEvents, id, t, setFeedbackState, setShouldLoadEvents]);
 
   useEffect(() => {
     if (shouldLoadEvents && eventsError) {
@@ -136,25 +174,101 @@ export function ClassDetailsContainer() {
       setFeedbackState({ message: t("loadError"), severity: "error" });
       setShouldLoadEvents(false);
     }
-  }, [eventsError, shouldLoadEvents, t]);
+  }, [eventsError, shouldLoadEvents, t, setFeedbackState, setShouldLoadEvents]);
+}
 
-  const {
-    forceActivate,
-    activate,
-    stopClass: stopClassMutation,
-    deleteClass: deleteClassMutation,
-    startSession: startSessionMutation,
-    markAbsent: markAbsentMutation,
-    processLeave: processLeaveMutation,
-    resetSession: resetSessionMutation,
-    isStarting,
-    isMarkingAbsent,
-    isProcessingLeave,
-    isResetting,
-  } = useClassMutations({
+interface ClassActionHandlers {
+  readonly handleForceActivate: () => Promise<void>;
+  readonly handleStop: () => Promise<void>;
+  readonly handleActivate: () => Promise<void>;
+  readonly handleDeleteConfirm: () => Promise<void>;
+  readonly handleReschedule: () => void;
+  readonly handleInfoEdit: () => void;
+}
+
+function useClassActionHandlers(
+  id: string,
+  mutations: ReturnType<typeof useClassMutations>,
+  router: ReturnType<typeof useRouter>,
+  setFeedbackState: (state: ActionFeedbackState | null) => void,
+  t: ReturnType<typeof useTranslations<"string">>
+): ClassActionHandlers {
+  return {
+    handleForceActivate: async () => {
+      try {
+        await mutations.forceActivate();
+        setFeedbackState({ message: t("actionFeedback.forceActivateSuccess"), severity: "success" });
+      } catch {
+        // Error feedback is handled by useClassMutations onError
+      }
+    },
+    handleStop: async () => {
+      try {
+        await mutations.stopClass();
+        setFeedbackState({ message: t("actionFeedback.stopSuccess"), severity: "success" });
+      } catch {
+        // Error feedback is handled by useClassMutations onError
+      }
+    },
+    handleActivate: async () => {
+      try {
+        await mutations.activate();
+        setFeedbackState({ message: t("actionFeedback.activateSuccess"), severity: "success" });
+      } catch {
+        // Error feedback is handled by useClassMutations onError
+      }
+    },
+    handleDeleteConfirm: async () => {
+      try {
+        await mutations.deleteClass();
+        router.push("/dashboard");
+      } catch {
+        setFeedbackState({ message: t("actionFeedback.deleteError"), severity: "error" });
+      }
+    },
+    handleReschedule: () => {
+      router.push(`/reschedule?classInstanceId=${id}`);
+    },
+    handleInfoEdit: () => {
+      router.push(`/classes/${id}/audit`);
+    },
+  };
+}
+
+function useClassDetailsQuery(id: string) {
+  const { data, loading, error } = useQuery(classInstanceQueryDocument, {
+    variables: { id },
+    skip: !id,
+  });
+  return { data, loading, error };
+}
+
+export function ClassDetailsContainer() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("dashboard.classDetails");
+
+  const params = useParams();
+  const rawId = params?.id;
+  const id = typeof rawId === "string" ? rawId : "";
+  const hasPermission = useUserStore(state => state.hasPermission);
+
+  const [isWarningDismissed, setIsWarningDismissed] = useState(false);
+  const [feedbackState, setFeedbackState] = useState<ActionFeedbackState | null>(null);
+  const [shouldLoadEvents, setShouldLoadEvents] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const { data, loading, error } = useClassDetailsQuery(id);
+  useEventLogDownload(id, shouldLoadEvents, setShouldLoadEvents, setFeedbackState, t);
+
+  const mutations = useClassMutations({
     id,
     onError: message => setFeedbackState({ message, severity: "error" }),
   });
+
+  const handlers = useClassActionHandlers(id, mutations, router, setFeedbackState, t);
 
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
   const canActivate = hasPermission(AppPermission.SessionActivateClass);
@@ -191,121 +305,35 @@ export function ClassDetailsContainer() {
   const formattedStartTime = formatScheduleTimeOnly(instance.startTime, locale);
   const formattedEndTime = formatScheduleTimeOnly(instance.endTime, locale);
 
-  const handleForceActivate = async () => {
-    try {
-      await forceActivate();
-      setFeedbackState({ message: t("actionFeedback.forceActivateSuccess"), severity: "success" });
-    } catch {
-      // Error feedback is handled by useClassMutations onError
-    }
-  };
-
-  const handleStop = async () => {
-    try {
-      await stopClassMutation();
-      setFeedbackState({ message: t("actionFeedback.stopSuccess"), severity: "success" });
-    } catch {
-      // Error feedback is handled by useClassMutations onError
-    }
-  };
-
-  const handleActivate = async () => {
-    try {
-      await activate();
-      setFeedbackState({ message: t("actionFeedback.activateSuccess"), severity: "success" });
-    } catch {
-      // Error feedback is handled by useClassMutations onError
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      await deleteClassMutation();
-      router.push("/dashboard");
-    } catch {
-      setFeedbackState({ message: t("actionFeedback.deleteError"), severity: "error" });
-    }
-  };
-
-  const handleDeleteRequest = () => {
-    setDeleteDialogOpen(true);
-  };
-
-  const handleGenerateLog = () => {
-    setShouldLoadEvents(true);
-  };
-
-  const handleReschedule = () => {
-    router.push(`/reschedule?classInstanceId=${id}`);
-  };
-
-  const handleInfoEdit = () => {
-    router.push(`/classes/${id}/audit`);
-  };
-
-  const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
-
   const sessionActionProps = {
     formattedScheduledDate,
     formattedStartTime,
     formattedEndTime,
-    onStart: () => startSessionMutation(),
-    onAbsent: () => markAbsentMutation(),
-    onLeave: (reason: string) => processLeaveMutation(reason),
-    onReset: () => resetSessionMutation(),
-    isStarting,
-    isMarkingAbsent,
-    isProcessingLeave,
-    isResetting,
+    onStart: () => mutations.startSession(),
+    onAbsent: () => mutations.markAbsent(),
+    onLeave: (reason: string) => mutations.processLeave(reason),
+    onReset: () => mutations.resetSession(),
+    isStarting: mutations.isStarting,
+    isMarkingAbsent: mutations.isMarkingAbsent,
+    isProcessingLeave: mutations.isProcessingLeave,
+    isResetting: mutations.isResetting,
     error: null,
   };
 
-  const actionFeedbackAlert = feedbackState ? (
-    <Alert
-      severity={feedbackState.severity}
-      sx={theme => ({
-        mb: 2,
-        [theme.breakpoints.down("lg")]: {
-          borderRadius: 0,
-          paddingInline: theme.spacing(2),
-          borderInlineStart: "none",
-          borderInlineEnd: "none",
-        },
-      })}
-    >
-      {feedbackState.message}
-    </Alert>
-  ) : null;
-
-  const deleteDialog = (
-    <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
-      <DialogTitle>{t("deleteConfirm.title")}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{t("deleteConfirm.message")}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setDeleteDialogOpen(false)}>{t("deleteConfirm.cancel")}</Button>
-        <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-          {t("deleteConfirm.confirm")}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   return (
     <PageContainer>
-      {pageHeader}
-      {actionFeedbackAlert}
+      <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />
+      <ActionFeedbackAlert feedbackState={feedbackState} />
       {canOverride ? (
         <AdminView
           instance={instance}
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={() => setIsWarningDismissed(true)}
-          onForceActivate={handleForceActivate}
-          onStop={handleStop}
-          onGenerateLog={handleGenerateLog}
-          onReschedule={handleReschedule}
-          onDelete={handleDeleteRequest}
+          onForceActivate={handlers.handleForceActivate}
+          onStop={handlers.handleStop}
+          onGenerateLog={() => setShouldLoadEvents(true)}
+          onReschedule={handlers.handleReschedule}
+          onDelete={() => setDeleteDialogOpen(true)}
           {...sessionActionProps}
         />
       ) : (
@@ -315,15 +343,23 @@ export function ClassDetailsContainer() {
             viewMode={isParentView ? "parent" : "teacher"}
             isWarningDismissed={isWarningDismissed}
             onDismissWarning={() => setIsWarningDismissed(true)}
-            onActivate={handleActivate}
-            onStop={handleStop}
-            onInfoEdit={handleInfoEdit}
-            onDelete={handleDeleteRequest}
+            onActivate={handlers.handleActivate}
+            onStop={handlers.handleStop}
+            onInfoEdit={handlers.handleInfoEdit}
+            onDelete={() => setDeleteDialogOpen(true)}
             {...sessionActionProps}
           />
         </RequirePermission>
       )}
-      {deleteDialog}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handlers.handleDeleteConfirm}
+        title={t("deleteConfirm.title")}
+        message={t("deleteConfirm.message")}
+        cancelLabel={t("deleteConfirm.cancel")}
+        confirmLabel={t("deleteConfirm.confirm")}
+      />
     </PageContainer>
   );
 }

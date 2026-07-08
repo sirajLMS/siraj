@@ -320,6 +320,32 @@ const en: MessageSchema = {
         editHint: "Banking updates require closing the current record and submitting new details through staff tools.",
       },
     },
+    students: {
+      title: "Assigned Students",
+      description: "Review students currently assigned to this teacher.",
+      allClasses: "All Classes",
+      mobileListLabel: "Assigned students list",
+      pagination: "Showing {start} to {end} of {total} entries",
+      noRows: "No assigned students found",
+      columns: {
+        studentName: "Student Name",
+        parent: "Parent",
+        class: "Class",
+        status: "Status",
+        hoursPerWeek: "Hours / Week",
+        classes: "Classes",
+      },
+      classUnknown: "Unassigned class",
+      parentUnknown: "Unassigned parent",
+      empty: {
+        title: "No students assigned yet",
+        description: "This teacher does not have active student assignments right now.",
+      },
+      errors: {
+        failedToLoad: "Failed to load assigned students.",
+        retry: "Retry",
+      },
+    },
   },
   auth: {
     login: {

@@ -15,6 +15,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { useRouter } from "@/shared/i18n/routing";
 import { TeacherBankingTab } from "./banking/TeacherBankingTab";
+import { AssignedStudentsTab } from "./students/AssignedStudentsTab";
 import { type TeacherOwnEditFormData, TeacherProfileEditForm } from "./TeacherProfileEditForm";
 import { TeacherProfileView } from "./TeacherProfileView";
 
@@ -40,7 +41,7 @@ export function TeacherProfileContainer({
   const tc = useTranslations("profile");
   const router = useRouter();
 
-  const { data, loading, error } = useQuery(profileByUserIdQueryDocument, {
+  const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
   });
 
@@ -83,6 +84,19 @@ export function TeacherProfileContainer({
 
   if (activeTab === "banking" && scope === "other") {
     return <TeacherBankingTab targetUserId={targetUserId} mode={mode} />;
+  }
+
+  if (activeTab === "students" && scope === "other") {
+    return (
+      <AssignedStudentsTab
+        assignedStudents={profile?.assignedStudents}
+        loading={loading}
+        hasError={Boolean(error)}
+        onRetry={() => {
+          void refetch();
+        }}
+      />
+    );
   }
 
   if (loading) {

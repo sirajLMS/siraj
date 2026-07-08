@@ -20,6 +20,10 @@ export const TeacherAssignedStudentPothosObject = TeacherAssignedStudentRef.impl
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
+    studentAvatarUrl: t.exposeString("studentAvatarUrl", { nullable: true }),
+    parentName: t.exposeString("parentName", { nullable: true }),
+    parentAvatarUrl: t.exposeString("parentAvatarUrl", { nullable: true }),
+    className: t.exposeString("className", { nullable: true }),
     status: t.expose("status", { type: StudentStatusPothosObject }),
     hoursPerWeek: t.exposeFloat("hoursPerWeek"),
     classesRemaining: t.exposeInt("classesRemaining"),

@@ -99,4 +99,30 @@ export interface ProfileLabels {
       readonly editHint: string;
     };
   };
+  readonly students: {
+    readonly title: string;
+    readonly description: string;
+    readonly allClasses: string;
+    readonly mobileListLabel: string;
+    readonly pagination: string;
+    readonly noRows: string;
+    readonly columns: {
+      readonly studentName: string;
+      readonly parent: string;
+      readonly class: string;
+      readonly status: string;
+      readonly hoursPerWeek: string;
+      readonly classes: string;
+    };
+    readonly classUnknown: string;
+    readonly parentUnknown: string;
+    readonly empty: {
+      readonly title: string;
+      readonly description: string;
+    };
+    readonly errors: {
+      readonly failedToLoad: string;
+      readonly retry: string;
+    };
+  };
 }

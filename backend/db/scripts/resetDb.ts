@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import { getEnv, requireEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { assertDestructiveDbCommandAllowed } from "@/scripts/lib/destructiveDbGuard";
 import { runMigrations } from "./migrate";
@@ -24,7 +25,7 @@ function parseDatabaseUrl(url: string) {
       user: matchWithoutPort[1],
       password: matchWithoutPort[2],
       host: matchWithoutPort[3],
-      port: process.env.PGPORT || "5432",
+      port: getEnv("PGPORT", "5432"),
       database: matchWithoutPort[4],
     };
   }
@@ -33,8 +34,11 @@ function parseDatabaseUrl(url: string) {
 }
 
 async function resetDatabase() {
-  if (!process.env.DATABASE_URL) {
-    logger.error("DATABASE_URL is not set in .env");
+  let dbUrl: string;
+  try {
+    dbUrl = requireEnv("DATABASE_URL");
+  } catch (error) {
+    logger.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 
@@ -44,8 +48,6 @@ async function resetDatabase() {
     logger.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
-
-  const dbUrl = process.env.DATABASE_URL;
   logger.debug(`Resetting database: ${dbUrl}`);
 
   const { user, password, host, port, database } = parseDatabaseUrl(dbUrl);

@@ -350,6 +350,108 @@ function checkCodescene(filePath: string): CheckResult {
   return { name: "codescene --file", passed: result.passed, output: result.output };
 }
 
+// ─── Argument Parsing ──────────────────────────────────────────────────────
+
+interface ParsedArgs {
+  filePath: string | null;
+  lifecycle: Lifecycle | null;
+}
+
+function parseArgs(args: string[]): ParsedArgs {
+  let filePath: string | null = null;
+  let lifecycle: Lifecycle | null = null;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--lifecycle") {
+      lifecycle = args[i + 1] as Lifecycle;
+      i++;
+    } else if (!args[i].startsWith("--")) {
+      filePath = args[i];
+    }
+  }
+
+  return { filePath, lifecycle };
+}
+
+// ─── Validation ────────────────────────────────────────────────────────────
+
+function validateArgs(filePath: string | null, lifecycle: Lifecycle | null): void {
+  if (!filePath) {
+    logFail("Missing <file-path> argument.");
+    console.error("Usage: bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>");
+    process.exit(2);
+  }
+
+  const validLifecycles: Lifecycle[] = ["tsgo", "biome", "lint", "codescene", "sonar-results"];
+  if (!lifecycle || !validLifecycles.includes(lifecycle)) {
+    logFail(`Invalid or missing --lifecycle argument.`);
+    console.error(`Valid stages: ${validLifecycles.join(", ")}`);
+    process.exit(2);
+  }
+
+  const absPath = resolve(PROJECT_ROOT, filePath);
+  if (!existsSync(absPath)) {
+    logFail(`File not found: ${filePath}`);
+    process.exit(2);
+  }
+}
+
+// ─── Progressive Check Runner ───────────────────────────────────────────────
+
+function failOnResult(result: CheckResult, failMsg: string): void {
+  if (!result.passed) {
+    logFail(failMsg);
+    console.log("\n" + result.output);
+    process.exit(1);
+  }
+}
+
+async function runProgressiveChecks(
+  filePath: string,
+  relPath: string,
+  lifecycle: Lifecycle,
+  targetDepth: number
+): Promise<void> {
+  // Step 1: tsgo (always runs first, project-wide, filtered for this file)
+  const tsgoResult = checkTsgo(filePath);
+  failOnResult(tsgoResult, "tsgo FAILED — stopping here. Fix type errors before proceeding.");
+  logPass(`tsgo passed (no errors for ${relPath})`);
+
+  if (targetDepth <= LIFECYCLE_ORDER.tsgo) {
+    console.log(`\n${GREEN}✅ All checks for lifecycle "tsgo" passed.${NC}`);
+    process.exit(0);
+  }
+
+  // Step 2: biome:check (file-level)
+  const biomeResult = checkBiome(filePath);
+  failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding.");
+  logPass("biome:check passed");
+
+  if (targetDepth <= LIFECYCLE_ORDER.biome) {
+    console.log(`\n${GREEN}✅ All checks for lifecycle "biome" passed.${NC}`);
+    process.exit(0);
+  }
+
+  // Step 3: lint via queue client (file-level)
+  const lintResult = await checkLint(filePath);
+  failOnResult(lintResult, "lint FAILED — stopping here. Fix lint errors before proceeding.");
+  logPass("lint passed (via queue client)");
+
+  if (targetDepth <= LIFECYCLE_ORDER.lint) {
+    console.log(`\n${GREEN}✅ All checks for lifecycle "lint" passed.${NC}`);
+    process.exit(0);
+  }
+
+  // Step 4: codescene --file (file-level)
+  const codesceneResult = checkCodescene(filePath);
+  failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.");
+  logPass("codescene passed");
+
+  // All checks passed for this lifecycle
+  console.log(`\n${GREEN}✅ All checks for lifecycle "${lifecycle}" passed for ${relPath}${NC}`);
+  process.exit(0);
+}
+
 // ─── Main ──────────────────────────────────────────────────────────────────
 
 function printHelp(): void {
@@ -390,106 +492,20 @@ async function main(): Promise<void> {
     process.exit(0);
   }
 
-  // Parse arguments
-  let filePath: string | null = null;
-  let lifecycle: Lifecycle | null = null;
+  const { filePath, lifecycle } = parseArgs(args);
+  validateArgs(filePath, lifecycle);
 
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--lifecycle") {
-      lifecycle = args[i + 1] as Lifecycle;
-      i++;
-    } else if (!args[i].startsWith("--")) {
-      filePath = args[i];
-    }
-  }
-
-  // Validate
-  if (!filePath) {
-    logFail("Missing <file-path> argument.");
-    console.error("Usage: bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>");
-    process.exit(2);
-  }
-
-  const validLifecycles: Lifecycle[] = ["tsgo", "biome", "lint", "codescene", "sonar-results"];
-  if (!lifecycle || !validLifecycles.includes(lifecycle)) {
-    logFail(`Invalid or missing --lifecycle argument.`);
-    console.error(`Valid stages: ${validLifecycles.join(", ")}`);
-    process.exit(2);
-  }
-
-  // Verify file exists
-  const absPath = resolve(PROJECT_ROOT, filePath);
-  if (!existsSync(absPath)) {
-    logFail(`File not found: ${filePath}`);
-    process.exit(2);
-  }
-
+  const absPath = resolve(PROJECT_ROOT, filePath!);
   const relPath = relative(PROJECT_ROOT, absPath);
-  const targetDepth = LIFECYCLE_ORDER[lifecycle];
+  const targetDepth = LIFECYCLE_ORDER[lifecycle!];
 
   logInfo(`File: ${relPath}`);
   logInfo(`Lifecycle: ${lifecycle} (depth: ${targetDepth})`);
   console.log("");
 
-  // Print which instruction files and AGENTS.md the subagent must read before fixing
-  printApplicableRuleFiles(filePath);
+  printApplicableRuleFiles(filePath!);
 
-  // ─── Progressive loop: tsgo → biome → lint → codescene (in strict order) ──
-
-  // Step 1: tsgo (always runs first, project-wide, filtered for this file)
-  const tsgoResult = checkTsgo(filePath);
-  if (!tsgoResult.passed) {
-    logFail("tsgo FAILED — stopping here. Fix type errors before proceeding.");
-    console.log("\n" + tsgoResult.output);
-    process.exit(1);
-  }
-  logPass(`tsgo passed (no errors for ${relPath})`);
-
-  if (targetDepth <= LIFECYCLE_ORDER.tsgo) {
-    console.log(`\n${GREEN}✅ All checks for lifecycle "tsgo" passed.${NC}`);
-    process.exit(0);
-  }
-
-  // Step 2: biome:check (file-level)
-  const biomeResult = checkBiome(filePath);
-  if (!biomeResult.passed) {
-    logFail("biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding.");
-    console.log("\n" + biomeResult.output);
-    process.exit(1);
-  }
-  logPass("biome:check passed");
-
-  if (targetDepth <= LIFECYCLE_ORDER.biome) {
-    console.log(`\n${GREEN}✅ All checks for lifecycle "biome" passed.${NC}`);
-    process.exit(0);
-  }
-
-  // Step 3: lint via queue client (file-level)
-  const lintResult = await checkLint(filePath);
-  if (!lintResult.passed) {
-    logFail("lint FAILED — stopping here. Fix lint errors before proceeding.");
-    console.log("\n" + lintResult.output);
-    process.exit(1);
-  }
-  logPass("lint passed (via queue client)");
-
-  if (targetDepth <= LIFECYCLE_ORDER.lint) {
-    console.log(`\n${GREEN}✅ All checks for lifecycle "lint" passed.${NC}`);
-    process.exit(0);
-  }
-
-  // Step 4: codescene --file (file-level)
-  const codesceneResult = checkCodescene(filePath);
-  if (!codesceneResult.passed) {
-    logFail("codescene FAILED — stopping here. Fix CodeScene health warnings.");
-    console.log("\n" + codesceneResult.output);
-    process.exit(1);
-  }
-  logPass("codescene passed");
-
-  // All checks passed for this lifecycle
-  console.log(`\n${GREEN}✅ All checks for lifecycle "${lifecycle}" passed for ${relPath}${NC}`);
-  process.exit(0);
+  await runProgressiveChecks(filePath!, relPath, lifecycle!, targetDepth);
 }
 
 void main();

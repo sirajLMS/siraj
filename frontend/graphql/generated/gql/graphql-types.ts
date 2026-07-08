@@ -3354,12 +3354,16 @@ export type TeacherAssignedClassesResult = {
 
 export type TeacherAssignedStudent = {
   __typename?: 'TeacherAssignedStudent';
+  className: Maybe<Scalars['String']['output']>;
   classesRemaining: Maybe<Scalars['Int']['output']>;
   classesTotal: Maybe<Scalars['Int']['output']>;
   hoursPerWeek: Maybe<Scalars['Float']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  parentAvatarUrl: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
   status: Maybe<StudentStatus>;
+  studentAvatarUrl: Maybe<Scalars['String']['output']>;
 };
 
 export type TeacherAssignedStudentsResult = {
@@ -3682,6 +3686,7 @@ export type TestSuperAdmin = {
 
 export type UnifiedProfile = {
   __typename?: 'UnifiedProfile';
+  assignedStudents: Maybe<TeacherAssignedStudentsResult>;
   audience: Maybe<ProfileAudience>;
   avatarUrl: Maybe<Scalars['String']['output']>;
   bankingSummary: Maybe<TeacherBankingSummary>;

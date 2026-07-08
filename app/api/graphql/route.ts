@@ -11,7 +11,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createGraphQLContext } from "@/backend/graphql/gqlContextFactory";
 import { graphQLSchema } from "@/backend/graphql/gqlSchema";
-import { ensureEnvironmentValidated } from "@/backend/lib/env";
+import { ensureEnvironmentValidated, getEnvironmentConfig } from "@/backend/lib/env";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backend/lib/ratelimit";
@@ -20,7 +20,8 @@ import { IdempotencyService } from "@/backend/services/idempotency.service";
 
 ensureEnvironmentValidated();
 
-const isProduction = process.env.NODE_ENV === "production";
+const envConfig = getEnvironmentConfig();
+const isProduction = envConfig.nodeEnv === "production";
 const MAX_GRAPHQL_DEPTH = 7;
 
 const cache = new ApolloCacheAdapter();
@@ -28,7 +29,7 @@ const server = new ApolloServer({
   schema: graphQLSchema,
   plugins: [
     // Install a landing page plugin based on NODE_ENV
-    process.env.NODE_ENV === "production"
+    isProduction
       ? ApolloServerPluginLandingPageDisabled()
       : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
     // Enforce @constraint directive validation at query time

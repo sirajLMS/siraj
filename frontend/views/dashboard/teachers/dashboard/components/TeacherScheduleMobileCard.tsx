@@ -132,6 +132,218 @@ function renderFooterAction(
   return null;
 }
 
+function StudentNameLink({
+  studentName,
+  studentHref,
+}: {
+  readonly studentName: string;
+  readonly studentHref?: string;
+}) {
+  if (studentHref) {
+    return (
+      <Typography
+        component={Link}
+        href={studentHref}
+        sx={{
+          typography: "titleLg",
+          color: theme => theme.palette.primary.main,
+          textDecoration: "none",
+          display: "block",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          "&:hover": { textDecoration: "underline" },
+        }}
+      >
+        {studentName}
+      </Typography>
+    );
+  }
+  return (
+    <Typography
+      sx={{
+        typography: "titleLg",
+        color: theme => theme.palette.primary.main,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {studentName}
+    </Typography>
+  );
+}
+
+function CardHeader({
+  row,
+  labels,
+  canActivate,
+  isLive,
+  studentHref,
+}: {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardLabels;
+  readonly canActivate: boolean;
+  readonly isLive: boolean;
+  readonly studentHref?: string;
+}) {
+  const badge = resolveTeacherStatusBadge(row.status);
+  return (
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1.5, mb: 1.5 }}>
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        {isLive && (
+          <Typography
+            sx={{ typography: "labelUppercase", color: theme => theme.palette.error.main, fontWeight: 700, mb: 0.5 }}
+          >
+            {labels.activeControls.liveNow}
+          </Typography>
+        )}
+        <StudentNameLink studentName={row.studentName} studentHref={studentHref} />
+        {!canActivate || row.status === "pending" || row.status === "connecting" ? null : (
+          <Box sx={{ mt: 0.75 }}>
+            <StatusBadge
+              category={badge.category}
+              status={badge.status}
+              label={getStatusLabel(row.status, labels.status)}
+              size="small"
+            />
+          </Box>
+        )}
+      </Box>
+      <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+        <Tooltip title={labels.schedule.classId}>
+          <ActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
+            <VisibilityOutlined fontSize="small" />
+          </ActionIconLink>
+        </Tooltip>
+      </Box>
+    </Box>
+  );
+}
+
+function TimeHighlight({ row, labels }: { readonly row: TeacherScheduleRow; readonly labels: TeacherDashboardLabels }) {
+  const duration = formatDurationMinutes(row.durationMinutes);
+  return (
+    <StyledTimeHighlight>
+      <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.primary.main, flexShrink: 0 })} />
+      <Box sx={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
+        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+          {labels.schedule.time}
+        </Typography>
+        <Typography
+          sx={{
+            typography: "bodyLg",
+            color: theme => theme.palette.primary.main,
+            fontWeight: 700,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {row.timeRange}
+        </Typography>
+      </Box>
+      {duration ? (
+        <Typography sx={{ typography: "bodyMd", fontFamily: "monospace", fontWeight: 700, flexShrink: 0 }}>
+          {duration}
+        </Typography>
+      ) : null}
+    </StyledTimeHighlight>
+  );
+}
+
+function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
+  return (
+    <Box
+      sx={theme => ({
+        display: "flex",
+        alignItems: "center",
+        gap: 1.5,
+        py: 1,
+        mb: 1.5,
+        borderTop: `1px solid ${theme.palette.border.light}`,
+      })}
+    >
+      <Avatar sx={{ width: 32, height: 32, typography: "labelMd" }}>{row.studentInitials}</Avatar>
+      <Typography sx={{ typography: "bodyMd", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+        {row.studentName}
+      </Typography>
+    </Box>
+  );
+}
+
+function VideoButton({
+  row,
+  labels,
+  tooltip,
+  onJoinVideo,
+}: {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardLabels;
+  readonly tooltip: string;
+  readonly onJoinVideo: (id: string) => void;
+}) {
+  return (
+    <Tooltip title={tooltip}>
+      <span>
+        <IconButton
+          disabled={!row.videoEnabled}
+          onClick={() => {
+            if (row.videoEnabled) {
+              onJoinVideo(row.id);
+            }
+          }}
+          aria-label={labels.actions.joinVideo}
+          sx={theme => ({
+            border: `1px solid ${theme.palette.border.light}`,
+            borderRadius: 1,
+            flexShrink: 0,
+          })}
+        >
+          {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
+        </IconButton>
+      </span>
+    </Tooltip>
+  );
+}
+
+function CardFooter({
+  row,
+  labels,
+  canActivate,
+  isCompleted,
+  sessionActions,
+  actionTooltips,
+  onJoinVideo,
+  onActivate,
+  onStartSession,
+  onMarkAbsent,
+  onRequestLeave,
+}: {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardLabels;
+  readonly canActivate: boolean;
+  readonly isCompleted: boolean;
+  readonly sessionActions: ReturnType<typeof resolveTeacherScheduleSessionActions>;
+  readonly actionTooltips: ReturnType<typeof resolveTeacherScheduleActionTooltips>;
+  readonly onJoinVideo: (id: string) => void;
+  readonly onActivate?: (id: string) => void;
+  readonly onStartSession?: (id: string) => void;
+  readonly onMarkAbsent?: (id: string) => void;
+  readonly onRequestLeave?: (id: string) => void;
+}) {
+  return (
+    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        {renderFooterAction(row, labels, canActivate, onActivate, onStartSession, onMarkAbsent, onRequestLeave)}
+      </Box>
+      {!isCompleted && sessionActions.joinVideo ? (
+        <VideoButton row={row} labels={labels} tooltip={actionTooltips.joinVideo} onJoinVideo={onJoinVideo} />
+      ) : null}
+    </Box>
+  );
+}
+
 export function TeacherScheduleMobileCard({
   row,
   labels,
@@ -144,8 +356,6 @@ export function TeacherScheduleMobileCard({
 }: Readonly<TeacherScheduleMobileCardProps>) {
   const isCompleted = row.status === "completed";
   const isLive = row.isLive === true;
-  const badge = resolveTeacherStatusBadge(row.status);
-  const duration = formatDurationMinutes(row.durationMinutes);
   const studentHref = row.studentId ? `/students/${row.studentId}` : undefined;
   const sessionActions = resolveTeacherScheduleSessionActions({
     executionState: row.executionState as ClassExecutionState | undefined,
@@ -159,134 +369,22 @@ export function TeacherScheduleMobileCard({
 
   return (
     <StyledScheduleCard elevation={0} isLive={isLive} sx={{ opacity: isCompleted ? 0.7 : 1 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1.5, mb: 1.5 }}>
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          {isLive && (
-            <Typography
-              sx={{ typography: "labelUppercase", color: theme => theme.palette.error.main, fontWeight: 700, mb: 0.5 }}
-            >
-              {labels.activeControls.liveNow}
-            </Typography>
-          )}
-          {studentHref ? (
-            <Typography
-              component={Link}
-              href={studentHref}
-              sx={{
-                typography: "titleLg",
-                color: theme => theme.palette.primary.main,
-                textDecoration: "none",
-                display: "block",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                "&:hover": { textDecoration: "underline" },
-              }}
-            >
-              {row.studentName}
-            </Typography>
-          ) : (
-            <Typography
-              sx={{
-                typography: "titleLg",
-                color: theme => theme.palette.primary.main,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {row.studentName}
-            </Typography>
-          )}
-          {!canActivate || row.status === "pending" || row.status === "connecting" ? null : (
-            <Box sx={{ mt: 0.75 }}>
-              <StatusBadge
-                category={badge.category}
-                status={badge.status}
-                label={getStatusLabel(row.status, labels.status)}
-                size="small"
-              />
-            </Box>
-          )}
-        </Box>
-        <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-          <Tooltip title={labels.schedule.classId}>
-            <ActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
-              <VisibilityOutlined fontSize="small" />
-            </ActionIconLink>
-          </Tooltip>
-        </Box>
-      </Box>
-
-      <StyledTimeHighlight>
-        <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.primary.main, flexShrink: 0 })} />
-        <Box sx={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {labels.schedule.time}
-          </Typography>
-          <Typography
-            sx={{
-              typography: "bodyLg",
-              color: theme => theme.palette.primary.main,
-              fontWeight: 700,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {row.timeRange}
-          </Typography>
-        </Box>
-        {duration ? (
-          <Typography sx={{ typography: "bodyMd", fontFamily: "monospace", fontWeight: 700, flexShrink: 0 }}>
-            {duration}
-          </Typography>
-        ) : null}
-      </StyledTimeHighlight>
-
-      <Box
-        sx={theme => ({
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          py: 1,
-          mb: 1.5,
-          borderTop: `1px solid ${theme.palette.border.light}`,
-        })}
-      >
-        <Avatar sx={{ width: 32, height: 32, typography: "labelMd" }}>{row.studentInitials}</Avatar>
-        <Typography sx={{ typography: "bodyMd", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-          {row.studentName}
-        </Typography>
-      </Box>
-
-      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          {renderFooterAction(row, labels, canActivate, onActivate, onStartSession, onMarkAbsent, onRequestLeave)}
-        </Box>
-        {!isCompleted && sessionActions.joinVideo ? (
-          <Tooltip title={actionTooltips.joinVideo}>
-            <span>
-              <IconButton
-                disabled={!row.videoEnabled}
-                onClick={() => {
-                  if (row.videoEnabled) {
-                    onJoinVideo(row.id);
-                  }
-                }}
-                aria-label={labels.actions.joinVideo}
-                sx={theme => ({
-                  border: `1px solid ${theme.palette.border.light}`,
-                  borderRadius: 1,
-                  flexShrink: 0,
-                })}
-              >
-                {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
-              </IconButton>
-            </span>
-          </Tooltip>
-        ) : null}
-      </Box>
+      <CardHeader row={row} labels={labels} canActivate={canActivate} isLive={isLive} studentHref={studentHref} />
+      <TimeHighlight row={row} labels={labels} />
+      <StudentInfoRow row={row} />
+      <CardFooter
+        row={row}
+        labels={labels}
+        canActivate={canActivate}
+        isCompleted={isCompleted}
+        sessionActions={sessionActions}
+        actionTooltips={actionTooltips}
+        onJoinVideo={onJoinVideo}
+        onActivate={onActivate}
+        onStartSession={onStartSession}
+        onMarkAbsent={onMarkAbsent}
+        onRequestLeave={onRequestLeave}
+      />
     </StyledScheduleCard>
   );
 }

@@ -9,86 +9,59 @@ import { parents, students, users } from "../../schema";
 import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 /**
+ * Helper to create a user with a given name and unique email
+ */
+async function createNamedUser(tx: DBTransaction, name: string, now: Date) {
+  const email = `${name.toLowerCase().replace(/\s+/g, "-")}-${randomUUID()}@example.com`;
+  const user = (
+    await tx.insert(users).values({ name, email, password: "password", createdAt: now, updatedAt: now }).returning()
+  )[0];
+  return user;
+}
+
+/**
+ * Helper to create a parent linked to a given user
+ */
+async function createParentForUser(tx: DBTransaction, userId: string, now: Date) {
+  const [parent] = (await tx
+    .insert(parents)
+    .values({ userId, status: "REGULAR", createdAt: now, updatedAt: now })
+    .returning()) as [ParentEntity];
+  return parent;
+}
+
+/**
+ * Helper to create a student for a given parent
+ */
+async function createStudentForParent(tx: DBTransaction, parentId: string, name: string, now: Date) {
+  const [student] = (await tx
+    .insert(students)
+    .values({
+      parentId,
+      name,
+      status: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [StudentEntity];
+  return student;
+}
+
+/**
  * Helper to setup common test data for RLS tests
  */
 async function setupTestData(tx: DBTransaction) {
   const now = new Date();
-  const parentAEmail = `parent-a-${randomUUID()}@example.com`;
-  const parentBEmail = `parent-b-${randomUUID()}@example.com`;
 
-  // 1. Create Parent A
-  const parentAUser = (
-    await tx
-      .insert(users)
-      .values({
-        name: "Parent A",
-        email: parentAEmail,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning()
-  )[0];
+  const parentAUser = await createNamedUser(tx, "Parent A", now);
+  const parentA = await createParentForUser(tx, parentAUser.id, now);
 
-  const [parentA] = (await tx
-    .insert(parents)
-    .values({
-      userId: parentAUser.id,
-      status: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [ParentEntity];
+  const parentBUser = await createNamedUser(tx, "Parent B", now);
+  const parentB = await createParentForUser(tx, parentBUser.id, now);
 
-  // 2. Create Parent B
-  const parentBUser = (
-    await tx
-      .insert(users)
-      .values({
-        name: "Parent B",
-        email: parentBEmail,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning()
-  )[0];
-
-  const [parentB] = (await tx
-    .insert(parents)
-    .values({
-      userId: parentBUser.id,
-      status: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [ParentEntity];
-
-  // 3. Create Student A (for Parent A)
-  const [studentA] = (await tx
-    .insert(students)
-    .values({
-      parentId: parentA.id,
-      name: "Student A",
-      status: "REGULAR",
-      idempotencyKey: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [StudentEntity];
-
-  // 4. Create Student B (for Parent B)
-  const [studentB] = (await tx
-    .insert(students)
-    .values({
-      parentId: parentB.id,
-      name: "Student B",
-      status: "REGULAR",
-      idempotencyKey: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [StudentEntity];
+  const studentA = await createStudentForParent(tx, parentA.id, "Student A", now);
+  const studentB = await createStudentForParent(tx, parentB.id, "Student B", now);
 
   return { parentAUser, parentBUser, studentA, studentB };
 }

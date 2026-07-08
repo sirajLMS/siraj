@@ -105,6 +105,22 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         verifiedByUserId
         verifiedByName
       }
+      assignedStudents {
+        id
+        totalCount
+        rows {
+          id
+          name
+          studentAvatarUrl
+          parentName
+          parentAvatarUrl
+          className
+          status
+          hoursPerWeek
+          classesRemaining
+          classesTotal
+        }
+      }
     }
   }
 `;

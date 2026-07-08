@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
+import type {
+  TeacherScheduleSessionActionInput,
+  TeacherScheduleSessionActions,
+} from "@/shared/lib/teacher-schedule-session-actions";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
 
 const baseInput = {
@@ -9,101 +13,57 @@ const baseInput = {
   isConnecting: false,
 };
 
+function expectActions(
+  overrides: Partial<TeacherScheduleSessionActionInput>,
+  expected: TeacherScheduleSessionActions
+): void {
+  expect(resolveTeacherScheduleSessionActions({ ...baseInput, ...overrides })).toEqual(expected);
+}
+
 describe("resolveTeacherScheduleSessionActions", () => {
   test("NOT_ACTIVATED + PENDING inside window exposes activate and join video", () => {
-    expect(
-      resolveTeacherScheduleSessionActions({
-        ...baseInput,
-        executionState: ClassExecutionState.NOT_ACTIVATED,
-        outcome: ClassOutcome.PENDING,
-      })
-    ).toEqual({
-      activate: true,
-      start: false,
-      markAbsent: false,
-      requestLeave: false,
-      joinVideo: true,
-    });
+    expectActions(
+      { executionState: ClassExecutionState.NOT_ACTIVATED, outcome: ClassOutcome.PENDING },
+      { activate: true, start: false, markAbsent: false, requestLeave: false, joinVideo: true }
+    );
   });
 
   test("NOT_ACTIVATED + PENDING outside window still shows activate and join video", () => {
-    expect(
-      resolveTeacherScheduleSessionActions({
-        ...baseInput,
+    expectActions(
+      {
         activateEnabled: false,
         executionState: ClassExecutionState.NOT_ACTIVATED,
         outcome: ClassOutcome.PENDING,
-      })
-    ).toEqual({
-      activate: true,
-      start: false,
-      markAbsent: false,
-      requestLeave: false,
-      joinVideo: true,
-    });
+      },
+      { activate: true, start: false, markAbsent: false, requestLeave: false, joinVideo: true }
+    );
   });
 
   test("ACTIVATED exposes start, absent, leave, and join video", () => {
-    expect(
-      resolveTeacherScheduleSessionActions({
-        ...baseInput,
-        executionState: ClassExecutionState.ACTIVATED,
-        outcome: ClassOutcome.PENDING,
-      })
-    ).toEqual({
-      activate: false,
-      start: true,
-      markAbsent: true,
-      requestLeave: true,
-      joinVideo: true,
-    });
+    expectActions(
+      { executionState: ClassExecutionState.ACTIVATED, outcome: ClassOutcome.PENDING },
+      { activate: false, start: true, markAbsent: true, requestLeave: true, joinVideo: true }
+    );
   });
 
   test("RUNNING exposes absent and leave only", () => {
-    expect(
-      resolveTeacherScheduleSessionActions({
-        ...baseInput,
-        executionState: ClassExecutionState.RUNNING,
-        outcome: ClassOutcome.PENDING,
-      })
-    ).toEqual({
-      activate: false,
-      start: false,
-      markAbsent: true,
-      requestLeave: true,
-      joinVideo: true,
-    });
+    expectActions(
+      { executionState: ClassExecutionState.RUNNING, outcome: ClassOutcome.PENDING },
+      { activate: false, start: false, markAbsent: true, requestLeave: true, joinVideo: true }
+    );
   });
 
   test("COMPLETED exposes join video only when available", () => {
-    expect(
-      resolveTeacherScheduleSessionActions({
-        ...baseInput,
-        executionState: ClassExecutionState.COMPLETED,
-        outcome: ClassOutcome.TAKEN,
-      })
-    ).toEqual({
-      activate: false,
-      start: false,
-      markAbsent: false,
-      requestLeave: false,
-      joinVideo: true,
-    });
+    expectActions(
+      { executionState: ClassExecutionState.COMPLETED, outcome: ClassOutcome.TAKEN },
+      { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: true }
+    );
   });
 
   test("terminal NOT_ACTIVATED outcomes expose no controls", () => {
-    expect(
-      resolveTeacherScheduleSessionActions({
-        ...baseInput,
-        executionState: ClassExecutionState.NOT_ACTIVATED,
-        outcome: ClassOutcome.ABSENT,
-      })
-    ).toEqual({
-      activate: false,
-      start: false,
-      markAbsent: false,
-      requestLeave: false,
-      joinVideo: false,
-    });
+    expectActions(
+      { executionState: ClassExecutionState.NOT_ACTIVATED, outcome: ClassOutcome.ABSENT },
+      { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: false }
+    );
   });
 });

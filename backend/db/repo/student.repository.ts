@@ -468,6 +468,7 @@ export namespace StudentRepository {
     tx?: DBTransaction
   ): Promise<Types.TeacherAssignedStudentsResult> => {
     const queryDb = tx ?? db;
+    const parentUsers = alias(users, "assigned_students_parent_users");
 
     const assignedStudentIds = queryDb
       .select({ studentId: teacherAssignments.studentId })
@@ -478,12 +479,18 @@ export namespace StudentRepository {
       .select({
         id: students.id,
         name: students.name,
+        studentAvatarUrl: students.avatarUrl,
+        parentName: parentUsers.name,
+        parentAvatarUrl: parentUsers.avatarUrl,
+        className: sql<string | null>`null`,
         status: students.status,
         hoursPerWeek: students.hoursPerWeek,
         classesRemaining: students.classesRemaining,
         classesTotal: students.classesTotal,
       })
       .from(students)
+      .innerJoin(parents, eq(students.parentId, parents.id))
+      .leftJoin(parentUsers, eq(parents.userId, parentUsers.id))
       .where(or(eq(students.primaryTeacherId, teacherId), inArray(students.id, assignedStudentIds)))
       .orderBy(students.name);
 
@@ -491,6 +498,10 @@ export namespace StudentRepository {
       rows: rows.map(row => ({
         id: row.id,
         name: row.name,
+        studentAvatarUrl: row.studentAvatarUrl,
+        parentName: row.parentName,
+        parentAvatarUrl: row.parentAvatarUrl,
+        className: row.className,
         status: row.status as StudentStatus,
         hoursPerWeek: row.hoursPerWeek ? Number.parseFloat(row.hoursPerWeek) : 0,
         classesRemaining: row.classesRemaining,

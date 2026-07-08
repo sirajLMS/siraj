@@ -73,11 +73,6 @@ export type SuggestionSearchResultType = {
   parentName: string;
 };
 
-export type SuggestionSubmitInputType = {
-  readonly submitterName: string;
-  readonly body: string;
-};
-
 export type SuggestionContributor = {
   readonly id: string;
   readonly name: string;

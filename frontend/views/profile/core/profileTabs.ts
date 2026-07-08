@@ -50,6 +50,10 @@ export function getVisibleProfileTabs({
       return false;
     }
 
+    if (tab.id === "students" && !hasPermission(AppPermission.UserEditProfile)) {
+      return false;
+    }
+
     return true;
   });
 }

@@ -18,25 +18,31 @@ export namespace ClassCategoryRepository {
     return client.select().from(classCategories).where(condition);
   }
 
-  export async function listCategories(tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
+  async function executeQuery<T>(
+    tx: DBTransaction | undefined,
+    errorLabel: string,
+    query: (client: DBTransaction | typeof db) => Promise<T>
+  ): Promise<T> {
     try {
       const client = tx ?? db;
-      return await selectActiveCategories(client).orderBy(asc(classCategories.sortOrder));
+      return await query(client);
     } catch (error) {
-      logger.error("Error listing class categories:", error);
+      logger.error(errorLabel, error);
       throw error;
     }
   }
 
+  export async function listCategories(tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
+    return executeQuery(tx, "Error listing class categories:", client =>
+      selectActiveCategories(client).orderBy(asc(classCategories.sortOrder))
+    );
+  }
+
   export async function loadByIds(ids: string[], tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
-    try {
-      if (ids.length === 0) return [];
-      const client = tx ?? db;
-      return await selectActiveCategories(client, inArray(classCategories.id, ids));
-    } catch (error) {
-      logger.error("Error loading class categories by IDs:", error);
-      throw error;
-    }
+    if (ids.length === 0) return [];
+    return executeQuery(tx, "Error loading class categories by IDs:", client =>
+      selectActiveCategories(client, inArray(classCategories.id, ids))
+    );
   }
 
   export async function getCategoryById(

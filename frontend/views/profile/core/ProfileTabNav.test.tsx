@@ -40,7 +40,28 @@ describe("ProfileTabNav", () => {
     });
 
     expect(screen.queryByText("Banking")).toBeNull();
+    expect(screen.queryByText("Students")).toBeNull();
     expect(screen.getAllByText("Notifications").length).toBeGreaterThan(0);
+  });
+
+  test("hides Students tab for teacher admin without edit permission", () => {
+    mockNavigation();
+    renderWithWrapper(<ProfileTabNav audience="teacher" scope="other" currentTab="profile" onTabChange={() => {}} />, {
+      ...enLocale,
+      permissions: [AppPermission.AuthViewOwnProfile],
+    });
+
+    expect(screen.queryByText("Students")).toBeNull();
+  });
+
+  test("shows Students tab for teacher admin with edit permission", () => {
+    mockNavigation();
+    renderWithWrapper(<ProfileTabNav audience="teacher" scope="other" currentTab="profile" onTabChange={() => {}} />, {
+      ...enLocale,
+      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
+    });
+
+    expect(screen.getAllByText("Students").length).toBeGreaterThan(0);
   });
 
   test("shows Permissions tab for staff admin in other scope", () => {

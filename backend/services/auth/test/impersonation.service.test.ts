@@ -59,6 +59,21 @@ async function expectRejection(fn: () => Promise<unknown>): Promise<Error> {
 describe("ImpersonationService.assertCanImpersonate", () => {
   const locale = "en";
 
+  function mockActorAndTarget(
+    actorType: "superAdmin" | "nonSuperAdmin",
+    targetOverrides: Parameters<typeof mockTargetUser>[0],
+    _targetId: string = TARGET_ID
+  ) {
+    const actorSpy = actorType === "superAdmin" ? mockSuperAdminActor() : mockNonSuperAdminActor();
+    const targetSpy = mockTargetUser(targetOverrides);
+    return { actorSpy, targetSpy };
+  }
+
+  function restoreSpies(spies: { actorSpy: ReturnType<typeof spyOn>; targetSpy?: ReturnType<typeof spyOn> }) {
+    spies.actorSpy.mockRestore();
+    spies.targetSpy?.mockRestore();
+  }
+
   test("rejects self-impersonation", async () => {
     const actorSpy = mockSuperAdminActor();
     const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, ACTOR_ID, locale));
@@ -74,23 +89,19 @@ describe("ImpersonationService.assertCanImpersonate", () => {
   });
 
   test("rejects super admin target", async () => {
-    const actorSpy = mockSuperAdminActor();
-    const targetSpy = mockTargetUser({ isSuperAdmin: true });
+    const spies = mockActorAndTarget("superAdmin", { isSuperAdmin: true }, SUPER_TARGET_ID);
     const error = await expectRejection(() =>
       ImpersonationService.assertCanImpersonate(ACTOR_ID, SUPER_TARGET_ID, locale)
     );
     expect(error.message).toContain("super administrator");
-    actorSpy.mockRestore();
-    targetSpy.mockRestore();
+    restoreSpies(spies);
   });
 
   test("rejects inactive target", async () => {
-    const actorSpy = mockSuperAdminActor();
-    const targetSpy = mockTargetUser({ isActive: false });
+    const spies = mockActorAndTarget("superAdmin", { isActive: false });
     const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, locale));
     expect(error.message).toContain("inactive");
-    actorSpy.mockRestore();
-    targetSpy.mockRestore();
+    restoreSpies(spies);
   });
 
   test("allows super admin to impersonate regular user", async () => {
