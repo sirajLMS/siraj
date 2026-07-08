@@ -7,8 +7,7 @@ import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 
 import { ProfileAdministrationPanel } from "@/frontend/components/auth/ProfileAdministrationPanel";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { PageHeader } from "@/frontend/components/ui/PageHeader";
+import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
 import { SystemConfigSection } from "./components/SystemConfigSection";

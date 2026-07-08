@@ -6,8 +6,8 @@ import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { StatusAction } from "./StatusBadgeAction";
 import {
   computeSessionStatus,

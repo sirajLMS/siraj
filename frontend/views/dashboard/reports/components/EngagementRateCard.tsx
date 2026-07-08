@@ -2,7 +2,7 @@
 
 import { TrendingUpOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 
 interface EngagementRateCardProps {
   readonly rate: number;

@@ -4,8 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { PageHeader } from "@/frontend/components/ui/PageHeader";
+import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher-portal.documents";
 

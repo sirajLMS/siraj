@@ -1,6 +1,6 @@
 import { Alert, Button } from "@mui/material";
 import type { useTranslations } from "next-intl";
-import { PageContainer } from "./PageContainer";
+import { PageContainer } from "../container/page/PageContainer";
 
 type ErrorStateProps = {
   readonly t?: ReturnType<typeof useTranslations>;

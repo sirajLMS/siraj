@@ -6,8 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { PageHeader } from "@/frontend/components/ui/PageHeader";
+import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { StudentStatus } from "@/shared/lib/enum";
 import { StudentStatus as StudentStatusEnum } from "@/shared/lib/enum";
 import { AdminHoldControls } from "./components/AdminHoldControls";

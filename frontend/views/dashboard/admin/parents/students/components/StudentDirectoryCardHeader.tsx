@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Box, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import type { StudentAccountStatus, StudentDirectoryRowExtended } from "../types";
 
 interface StudentDirectoryCardHeaderProps {

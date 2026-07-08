@@ -1,6 +1,6 @@
 import { Button, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { SectionPanel } from "./SectionPanel";
+import { SectionPanel } from "../container/SectionPanel";
 
 const meta: Meta<typeof SectionPanel> = {
   title: "UI/SectionPanel",

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { StoryBookPageContainer } from "@/frontend/components/ui/StoryBookPageContainer";
+import { StoryBookPageContainer } from "@/frontend/components/ui/story/StoryBookPageContainer";
 import { AdminBillingContainer } from "./AdminBillingContainer";
 
 const meta: Meta<typeof AdminBillingContainer> = {

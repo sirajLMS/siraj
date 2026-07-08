@@ -3,8 +3,8 @@
 import { Box, Grid, Input, MenuItem, Select } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
-import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
 import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethod } from "./types";
 

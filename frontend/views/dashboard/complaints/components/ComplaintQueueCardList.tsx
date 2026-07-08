@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PaginationControls } from "@/frontend/components/ui/PaginationControls";
+import { PaginationControls } from "@/frontend/components/ui/filter/PaginationControls";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { AdminComplaintRow } from "../types/complaints.types";
 import { ComplaintQueueCard } from "./ComplaintQueueCard";

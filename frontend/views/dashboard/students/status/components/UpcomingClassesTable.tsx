@@ -3,8 +3,8 @@ import { Box, Button, Paper, Typography, useMediaQuery, useTheme } from "@mui/ma
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "../types";

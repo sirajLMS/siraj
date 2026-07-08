@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ExportButton, SectionPanel, StatusBadge } from "@/frontend/components/ui";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import type { GroupClassStudent } from "@/frontend/graphql/generated/gql/graphql-types";
 import { GroupClassAttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 

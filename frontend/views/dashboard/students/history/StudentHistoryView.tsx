@@ -1,7 +1,7 @@
 "use client";
 
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
+import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { StudentHistoryDesktop } from "./components/StudentHistoryDesktop";
 import { StudentHistoryMobile } from "./components/StudentHistoryMobile";

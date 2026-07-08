@@ -4,7 +4,7 @@ import { WarningAmberOutlined } from "@mui/icons-material";
 import type { SxProps } from "@mui/material";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction } from "./ActionButtons";
+import { FilterButton, PrimaryPageAction } from "../button/ActionButtons";
 
 export interface BaseDeleteDialogProps {
   open: boolean;

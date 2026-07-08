@@ -10,8 +10,8 @@ import {
 import { Grid, Input, InputAdornment } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
+import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
-import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
 import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
 
 interface Props {

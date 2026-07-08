@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";

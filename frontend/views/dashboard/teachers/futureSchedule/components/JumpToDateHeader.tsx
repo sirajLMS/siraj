@@ -13,7 +13,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import type { JumpToDateHeaderProps } from "../types";
 
 function shiftDate(selectedDate: string, delta: number): string {

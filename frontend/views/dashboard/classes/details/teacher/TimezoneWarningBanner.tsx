@@ -4,8 +4,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Alert, Box, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { edgeToEdgeSx } from "@/frontend/components/ui/edgeToEdgeSx";
-import { mergeSx } from "@/frontend/components/ui/mergeSx";
+import { edgeToEdgeSx } from "@/frontend/utils/sx/edgeToEdgeSx";
+import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import { classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
 
 interface TimezoneWarningBannerProps {

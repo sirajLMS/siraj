@@ -3,7 +3,7 @@ import { Avatar, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/m
 import type { Theme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { useRouter } from "@/shared/i18n/routing";
 import { StudentStatus } from "@/shared/lib/enum";
 import type { StudentStatusHeaderProps } from "../types";

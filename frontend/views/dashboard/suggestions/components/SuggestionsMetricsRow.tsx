@@ -2,8 +2,7 @@
 
 import { CheckCircleOutlined, ContentCopyOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { MetricCard } from "@/frontend/components/ui";
-import type { MetricCardVariant } from "@/frontend/components/ui/MetricCard";
+import { MetricCard, type MetricCardVariant } from "@/frontend/components/ui";
 import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
 import type { SuggestionsMetricsRowProps } from "../types/suggestionsView.types";
 

@@ -6,7 +6,7 @@ import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import { getTrackingStatusIcon, getTrackingStatusLabel } from "./tracking.helpers";
 import type { RescheduleTrackingDataGridProps, TrackingRow } from "./tracking.types";

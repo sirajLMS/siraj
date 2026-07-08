@@ -2,7 +2,7 @@ import { SaveOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 
-import { PrimaryPageAction } from "@/frontend/components/ui/ActionButtons";
+import { PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
 import type { TeacherProfileFormActionsProps } from "../types";
 
 export function TeacherProfileFormActions({

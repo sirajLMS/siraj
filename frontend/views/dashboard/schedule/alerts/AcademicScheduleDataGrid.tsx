@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "./types";
 

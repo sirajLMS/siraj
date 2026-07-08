@@ -5,9 +5,7 @@ import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material"
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { SectionPanel } from "@/frontend/components/ui";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { PageHeader } from "@/frontend/components/ui/PageHeader";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentHandbookUrlQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
 

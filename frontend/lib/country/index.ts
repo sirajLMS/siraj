@@ -71,7 +71,7 @@ const countries: readonly CountryType[] = [
   { code: "AF", phone: "93", emoji: "🇦🇫" },
   { code: "AG", phone: "1-268", emoji: "🇦🇬" },
   { code: "AI", phone: "1-264", emoji: "🇦🇮" },
-  
+
   { code: "AL", phone: "355", emoji: "🇦🇱" },
   { code: "AM", phone: "374", emoji: "🇦🇲" },
   { code: "AO", phone: "244", emoji: "🇦🇴" },
@@ -102,7 +102,7 @@ const countries: readonly CountryType[] = [
   { code: "BW", phone: "267", emoji: "🇧🇼" },
   { code: "BY", phone: "375", emoji: "🇧🇾" },
   { code: "BZ", phone: "501", emoji: "🇧🇿" },
-  
+
   { code: "CA", phone: "1", emoji: "🇨🇦" },
   { code: "CC", phone: "61", emoji: "🇨🇨" },
   { code: "CD", phone: "243", emoji: "🇨🇩" },
@@ -133,7 +133,7 @@ const countries: readonly CountryType[] = [
   { code: "FI", phone: "358", emoji: "🇫🇮" },
   { code: "FJ", phone: "679", emoji: "🇫🇯" },
   { code: "FK", phone: "500", emoji: "🇫🇰" },
-  
+
   { code: "FM", phone: "691", emoji: "🇫🇲" },
   { code: "FO", phone: "298", emoji: "🇫🇴" },
   { code: "FR", phone: "33", emoji: "🇫🇷" },
@@ -164,7 +164,7 @@ const countries: readonly CountryType[] = [
   { code: "HU", phone: "36", emoji: "🇭🇺" },
   { code: "IE", phone: "353", emoji: "🇮🇪" },
   { code: "IM", phone: "44", emoji: "🇮🇲" },
-  
+
   { code: "IN", phone: "91", emoji: "🇮🇳" },
   { code: "IO", phone: "246", emoji: "🇮🇴" },
   { code: "IR", phone: "98", emoji: "🇮🇷" },
@@ -195,7 +195,7 @@ const countries: readonly CountryType[] = [
   { code: "MD", phone: "373", emoji: "🇲🇩" },
   { code: "ME", phone: "382", emoji: "🇲🇪" },
   { code: "MF", phone: "590", emoji: "🇲🇫" },
-  
+
   { code: "MG", phone: "261", emoji: "🇲🇬" },
   { code: "MH", phone: "692", emoji: "🇲🇭" },
   { code: "MK", phone: "389", emoji: "🇲🇰" },
@@ -226,7 +226,7 @@ const countries: readonly CountryType[] = [
   { code: "NU", phone: "683", emoji: "🇳🇺" },
   { code: "NZ", phone: "64", emoji: "🇳🇿" },
   { code: "PA", phone: "507", emoji: "🇵🇦" },
-  
+
   { code: "PE", phone: "51", emoji: "🇵🇪" },
   { code: "PF", phone: "689", emoji: "🇵🇫" },
   { code: "PG", phone: "675", emoji: "🇵🇬" },
@@ -257,7 +257,7 @@ const countries: readonly CountryType[] = [
   { code: "SN", phone: "221", emoji: "🇸🇳" },
   { code: "SR", phone: "597", emoji: "🇸🇷" },
   { code: "ST", phone: "239", emoji: "🇸🇹" },
-  
+
   { code: "SV", phone: "503", emoji: "🇸🇻" },
   { code: "SX", phone: "1-721", emoji: "🇸🇽" },
   { code: "SZ", phone: "268", emoji: "🇸🇿" },

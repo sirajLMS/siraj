@@ -5,7 +5,7 @@ import { GroupsOutlined, PendingActionsOutlined, SpeedOutlined } from "@mui/icon
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { MetricCard } from "@/frontend/components/ui/MetricCard";
+import { MetricCard } from "@/frontend/components/ui";
 import { onboardingMetricsQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 
 const METRIC_ITEMS = [

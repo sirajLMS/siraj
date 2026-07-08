@@ -4,7 +4,7 @@ import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, Grid, IconButton, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import type { MiniCalendarDate } from "../types";
 
 interface MiniCalendarProps {

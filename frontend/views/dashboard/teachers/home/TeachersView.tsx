@@ -3,10 +3,8 @@
 import { EditCalendarOutlined } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PrimaryPageAction } from "@/frontend/components/ui/ActionButtons";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { PageHeader } from "@/frontend/components/ui/PageHeader";
-import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
 import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { TeacherCardList } from "./components/TeacherCardList";
 import { TeacherDataGrid } from "./components/TeacherDataGrid";

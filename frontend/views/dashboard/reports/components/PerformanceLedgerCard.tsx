@@ -2,8 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";

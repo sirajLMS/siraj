@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { PaginationControls } from "@/frontend/components/ui/PaginationControls";
+import { PaginationControls } from "@/frontend/components/ui/filter/PaginationControls";
 import type { SearchSchedulePageInfo } from "./SearchScheduleView";
 
 interface SearchSchedulePaginationFooterProps {

@@ -3,8 +3,8 @@
 import { alpha, Box, Paper, type SxProps, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { edgeToEdgeSx } from "./edgeToEdgeSx";
-import { mergeSx } from "./mergeSx";
+import { edgeToEdgeSx } from "../../../utils/sx/edgeToEdgeSx";
+import { mergeSx } from "../../../utils/sx/mergeSx";
 
 interface SectionPanelProps {
   readonly title?: ReactNode;

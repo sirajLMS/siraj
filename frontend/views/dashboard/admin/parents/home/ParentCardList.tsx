@@ -4,8 +4,8 @@ import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } f
 import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PaginationControls } from "@/frontend/components/ui";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 

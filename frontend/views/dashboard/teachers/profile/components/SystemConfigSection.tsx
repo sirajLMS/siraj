@@ -4,9 +4,9 @@ import { AccountCircleOutlined, InfoOutlined, SettingsSuggestOutlined } from "@m
 import { Box, Switch, TextField, Tooltip, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { labelSx } from "@/frontend/components/ui/form";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { TeacherProfileFormData } from "../schemas/teacherProfileSchema";
 import { SectionHeader } from "./SectionHeader";
 

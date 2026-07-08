@@ -4,7 +4,7 @@
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Avatar, AvatarGroup, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import type { AvailabilityInsightsProps, InsightCardProps } from "../types";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {

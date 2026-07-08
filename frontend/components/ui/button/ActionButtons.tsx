@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, type ButtonProps } from "@mui/material";
-import { mergeSx } from "./mergeSx";
+import { mergeSx } from "../../../utils/sx/mergeSx";
 
 export function PrimaryPageAction({ sx, ...props }: Readonly<ButtonProps>) {
   return (

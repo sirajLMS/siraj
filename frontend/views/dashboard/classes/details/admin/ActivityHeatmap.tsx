@@ -4,7 +4,7 @@ import { Box, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { BaseCard } from "@/frontend/components/ui";
-import { mergeSx } from "@/frontend/components/ui/mergeSx";
+import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import { classDetailsCardInnerPaddingSx, classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
 
 interface ActivityHeatmapProps {

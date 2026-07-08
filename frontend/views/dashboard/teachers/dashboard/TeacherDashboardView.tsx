@@ -10,12 +10,12 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import { mergeSx } from "@/frontend/components/ui/mergeSx";
 import type {
   MissedClassAlert,
   StudentProgressFeedItem,
   TeacherScheduleRow,
 } from "@/frontend/stores/teacherDashboardTypes";
+import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { ParentSupportFab } from "../../parent/dashboard/components/ParentSupportFab";

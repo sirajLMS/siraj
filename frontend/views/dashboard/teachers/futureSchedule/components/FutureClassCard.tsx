@@ -9,8 +9,8 @@ import {
 } from "@mui/icons-material";
 import { alpha, Box, Button, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { FutureClassCardProps } from "../types";
 

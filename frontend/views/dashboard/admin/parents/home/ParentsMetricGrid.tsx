@@ -2,7 +2,7 @@
 
 import { Grid } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { MetricCard } from "@/frontend/components/ui/MetricCard";
+import { MetricCard } from "@/frontend/components/ui";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 interface ParentsMetricGridProps {

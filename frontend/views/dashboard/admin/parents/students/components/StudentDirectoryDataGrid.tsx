@@ -6,7 +6,7 @@ import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
 

@@ -1,7 +1,7 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { addDays, format } from "date-fns";
-import { StoryBookPageContainer } from "@/frontend/components/ui/StoryBookPageContainer";
+import { StoryBookPageContainer } from "@/frontend/components/ui/story/StoryBookPageContainer";
 import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";

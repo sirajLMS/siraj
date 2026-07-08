@@ -3,7 +3,7 @@ import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/mat
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PaginationControls } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";

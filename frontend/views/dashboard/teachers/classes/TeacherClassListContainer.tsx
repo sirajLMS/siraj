@@ -5,8 +5,7 @@ import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material"
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { PageHeader } from "@/frontend/components/ui/PageHeader";
+import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher-portal.documents";
 

@@ -2,8 +2,7 @@
 
 import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { PageHeader } from "@/frontend/components/ui/PageHeader";
+import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 import { FutureClassCard } from "./components/FutureClassCard";
 import { ImportantNotes } from "./components/ImportantNotes";

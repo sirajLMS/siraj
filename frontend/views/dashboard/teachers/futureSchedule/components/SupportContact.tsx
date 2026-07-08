@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import { Avatar, Box, Button, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import type { SupportContactProps } from "../types";
 
