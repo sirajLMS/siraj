@@ -57,6 +57,159 @@ async function executeManagerUpdate(
   }
 }
 
+interface EditProfileDialogProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: () => void;
+  readonly manager: Manager;
+  readonly editPhone: string;
+  readonly editSkypeId: string | null;
+  readonly onPhoneChange: (value: string) => void;
+  readonly onSkypeIdChange: (value: string) => void;
+  readonly updateLoading: boolean;
+}
+
+function EditProfileDialog({
+  open,
+  onClose,
+  onSubmit,
+  manager,
+  editPhone,
+  editSkypeId,
+  onPhoneChange,
+  onSkypeIdChange,
+  updateLoading,
+}: Readonly<EditProfileDialogProps>) {
+  const t = useTranslations("dashboard.managersDirectory");
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>{t("actions.editProfile")}</DialogTitle>
+      <DialogContent>
+        <Typography variant="bodyMd" sx={theme => ({ mb: 2, color: theme.palette.text.secondary })}>
+          {manager.name}
+        </Typography>
+        <StyledEditField>
+          <Input
+            value={editPhone}
+            onChange={e => onPhoneChange(e.target.value)}
+            placeholder={t("fields.phone")}
+            fullWidth
+          />
+          <Input
+            value={editSkypeId ?? ""}
+            onChange={e => onSkypeIdChange(e.target.value)}
+            placeholder={t("fields.skypeId")}
+            fullWidth
+          />
+        </StyledEditField>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{t("actions.cancel")}</Button>
+        <Button onClick={onSubmit} variant="contained" disabled={updateLoading}>
+          {updateLoading ? t("actions.processing") : t("actions.save")}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+interface DeactivateDialogProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: () => void;
+  readonly isDeactivate: boolean;
+  readonly manager: Manager;
+  readonly updateLoading: boolean;
+}
+
+function DeactivateDialog({
+  open,
+  onClose,
+  onSubmit,
+  isDeactivate,
+  manager,
+  updateLoading,
+}: Readonly<DeactivateDialogProps>) {
+  const t = useTranslations("dashboard.managersDirectory");
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>{isDeactivate ? t("actions.deactivate") : t("actions.activate")}</DialogTitle>
+      <DialogContent>
+        <Typography variant="bodyMd">
+          {isDeactivate
+            ? t("actions.deactivateConfirmation", { name: manager.name })
+            : t("actions.activateConfirmation", { name: manager.name })}
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{t("actions.cancel")}</Button>
+        <Button
+          onClick={onSubmit}
+          variant="contained"
+          disabled={updateLoading}
+          sx={theme => ({
+            backgroundColor: isDeactivate ? theme.palette.error.main : theme.palette.success.main,
+            "&:hover": {
+              backgroundColor: isDeactivate ? theme.palette.error.dark : theme.palette.success.dark,
+            },
+          })}
+        >
+          {updateLoading ? t("actions.processing") : isDeactivate ? t("actions.deactivate") : t("actions.activate")}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+interface ActionMenuProps {
+  readonly anchorEl: HTMLElement | null;
+  readonly menuOpen: boolean;
+  readonly onMenuClose: () => void;
+  readonly onEditClick: () => void;
+  readonly onDeactivateClick: () => void;
+  readonly manager: Manager;
+  readonly isDeactivate: boolean;
+}
+
+function ActionMenu({
+  anchorEl,
+  menuOpen,
+  onMenuClose,
+  onEditClick,
+  onDeactivateClick,
+  manager,
+  isDeactivate,
+}: Readonly<ActionMenuProps>) {
+  const t = useTranslations("dashboard.managersDirectory");
+
+  return (
+    <Menu anchorEl={anchorEl} open={menuOpen} onClose={onMenuClose}>
+      <ViewAsUserButton
+        variant="menuItem"
+        targetUserId={manager.userId}
+        targetUserName={manager.name}
+        targetIsSuperAdmin={manager.targetIsSuperAdmin}
+        onMenuClose={onMenuClose}
+      />
+      <MenuItem onClick={onEditClick}>
+        <EditOutlined fontSize="small" sx={theme => ({ mr: 1, color: theme.palette.text.secondary })} />
+        {t("actions.editProfile")}
+      </MenuItem>
+      <MenuItem
+        onClick={onDeactivateClick}
+        sx={theme => ({
+          color: isDeactivate ? theme.palette.error.main : theme.palette.success.main,
+        })}
+      >
+        <DeleteOutlined fontSize="small" sx={{ mr: 1 }} />
+        {isDeactivate ? t("actions.deactivate") : t("actions.activate")}
+      </MenuItem>
+    </Menu>
+  );
+}
+
 export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>) {
   const t = useTranslations("dashboard.managersDirectory");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -118,84 +271,36 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
         <SettingsOutlined fontSize="small" />
       </IconButton>
 
-      <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
-        <ViewAsUserButton
-          variant="menuItem"
-          targetUserId={manager.userId}
-          targetUserName={manager.name}
-          targetIsSuperAdmin={manager.targetIsSuperAdmin}
-          onMenuClose={handleMenuClose}
-        />
-        <MenuItem onClick={handleEditClick}>
-          <EditOutlined fontSize="small" sx={theme => ({ mr: 1, color: theme.palette.text.secondary })} />
-          {t("actions.editProfile")}
-        </MenuItem>
-        <MenuItem
-          onClick={handleDeactivateClick}
-          sx={theme => ({
-            color: isDeactivate ? theme.palette.error.main : theme.palette.success.main,
-          })}
-        >
-          <DeleteOutlined fontSize="small" sx={{ mr: 1 }} />
-          {isDeactivate ? t("actions.deactivate") : t("actions.activate")}
-        </MenuItem>
-      </Menu>
+      <ActionMenu
+        anchorEl={anchorEl}
+        menuOpen={menuOpen}
+        onMenuClose={handleMenuClose}
+        onEditClick={handleEditClick}
+        onDeactivateClick={handleDeactivateClick}
+        manager={manager}
+        isDeactivate={isDeactivate}
+      />
 
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{t("actions.editProfile")}</DialogTitle>
-        <DialogContent>
-          <Typography variant="bodyMd" sx={theme => ({ mb: 2, color: theme.palette.text.secondary })}>
-            {manager.name}
-          </Typography>
-          <StyledEditField>
-            <Input
-              value={editPhone}
-              onChange={e => setEditPhone(e.target.value)}
-              placeholder={t("fields.phone")}
-              fullWidth
-            />
-            <Input
-              value={editSkypeId ?? ""}
-              onChange={e => setEditSkypeId(e.target.value)}
-              placeholder={t("fields.skypeId")}
-              fullWidth
-            />
-          </StyledEditField>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)}>{t("actions.cancel")}</Button>
-          <Button onClick={handleEditSubmit} variant="contained" disabled={updateLoading}>
-            {updateLoading ? t("actions.processing") : t("actions.save")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <EditProfileDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        onSubmit={handleEditSubmit}
+        manager={manager}
+        editPhone={editPhone}
+        editSkypeId={editSkypeId}
+        onPhoneChange={setEditPhone}
+        onSkypeIdChange={setEditSkypeId}
+        updateLoading={updateLoading}
+      />
 
-      <Dialog open={deactivateDialogOpen} onClose={() => setDeactivateDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{isDeactivate ? t("actions.deactivate") : t("actions.activate")}</DialogTitle>
-        <DialogContent>
-          <Typography variant="bodyMd">
-            {isDeactivate
-              ? t("actions.deactivateConfirmation", { name: manager.name })
-              : t("actions.activateConfirmation", { name: manager.name })}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeactivateDialogOpen(false)}>{t("actions.cancel")}</Button>
-          <Button
-            onClick={handleDeactivateSubmit}
-            variant="contained"
-            disabled={updateLoading}
-            sx={theme => ({
-              backgroundColor: isDeactivate ? theme.palette.error.main : theme.palette.success.main,
-              "&:hover": {
-                backgroundColor: isDeactivate ? theme.palette.error.dark : theme.palette.success.dark,
-              },
-            })}
-          >
-            {updateLoading ? t("actions.processing") : isDeactivate ? t("actions.deactivate") : t("actions.activate")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DeactivateDialog
+        open={deactivateDialogOpen}
+        onClose={() => setDeactivateDialogOpen(false)}
+        onSubmit={handleDeactivateSubmit}
+        isDeactivate={isDeactivate}
+        manager={manager}
+        updateLoading={updateLoading}
+      />
     </>
   );
 }

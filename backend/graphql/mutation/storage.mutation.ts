@@ -2,6 +2,7 @@ import logger from "@/backend/lib/logger";
 import { sanitizeStoragePath, validateStoragePath } from "@/backend/lib/path-validator";
 import { StorageAuthService, StorageManageService } from "@/backend/services/storage";
 import { getStorageService } from "@/backend/storage/storage.service";
+import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import * as StoragePothos from "../pothos";
 import { requireAuth } from "../utils/requireAuth";
@@ -56,7 +57,7 @@ function enforceBulkLimit(count: number, operation: string): void {
 async function resolveBulkTransfer(
   operation: "move" | "copy",
   input: { sourcePaths: string[]; destinationPath: string },
-  ctx: { locale: string }
+  ctx: BaseContext
 ) {
   const userId = await requireAuth(ctx);
   const sanitizedSourcePaths = sanitizeAndValidatePaths(input.sourcePaths);

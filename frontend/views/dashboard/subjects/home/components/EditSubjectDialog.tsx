@@ -243,6 +243,7 @@ export function EditSubjectDialog({
   categories,
   isLoading,
 }: Readonly<EditSubjectDialogProps>) {
+  const t = useTranslations("dashboard.subjects");
   const { control, errors, handleSubmit } = useEditSubjectForm(open, subject);
 
   const handleFormSubmit = (data: EditSubjectFormValues) => {
@@ -267,7 +268,7 @@ export function EditSubjectDialog({
       maxWidth="sm"
       aria-labelledby="edit-subject-dialog-title"
     >
-      <DialogTitle id="edit-subject-dialog-title">{useTranslations("dashboard.subjects")("editSubject")}</DialogTitle>
+      <DialogTitle id="edit-subject-dialog-title">{t("editSubject")}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box
           component="form"

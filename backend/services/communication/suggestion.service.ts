@@ -9,14 +9,14 @@ import type {
   SuggestionReturnType,
   SuggestionSearchResultType,
   SuggestionSelectType,
-  SuggestionSubmitInputType,
+  SuggestionSubmitInput,
 } from "@/backend/types";
 import { AppPermission, NotificationEventType, SuggestionStatus } from "@/shared/lib/enum";
 
 export namespace SuggestionService {
   export async function submitSuggestion(
     actorUserId: string,
-    input: SuggestionSubmitInputType,
+    input: SuggestionSubmitInput,
     locale?: string
   ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(

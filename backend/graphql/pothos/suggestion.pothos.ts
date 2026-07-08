@@ -11,7 +11,7 @@ import type {
   SuggestionReturnType,
   SuggestionSearchResultType,
   SuggestionSelectType,
-  SuggestionSubmitInputType,
+  SuggestionSubmitInput,
 } from "@/backend/types";
 import { SuggestionStatus } from "@/shared/lib/enum";
 
@@ -121,7 +121,7 @@ export const SuggestionContributorStatsPothosObject = SuggestionContributorStats
 });
 
 export const SubmitSuggestionInputPothosObject = gqlSchemaBuilder
-  .inputRef<SuggestionSubmitInputType>("SubmitSuggestionInput")
+  .inputRef<SuggestionSubmitInput>("SubmitSuggestionInput")
   .implement({
     description: "Input for submitting a new suggestion.",
     fields: t => ({

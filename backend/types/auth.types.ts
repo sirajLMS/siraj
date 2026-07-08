@@ -13,9 +13,9 @@ import type {
 import type { Email } from "@/backend/lib/email";
 import type { AccountStatus, AppPermission, UserRole } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
-
 import type { SafeUser, UserReturnType } from "./user.types";
 
+export type { PermissionGroupReturnType } from "./permission-group.types";
 export type { SafeUser, UserReturnType, UserSelectType } from "./user.types";
 
 export type UserCreateInput = {

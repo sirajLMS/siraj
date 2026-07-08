@@ -182,48 +182,96 @@ export namespace TeacherRepository {
     };
   };
 
+  const buildTeacherProfileSelect = () => ({
+    id: teachers.id,
+    userId: teachers.userId,
+    name: users.name,
+    email: users.email,
+    phone: teachers.phone,
+    nationalId: teachers.nationalId,
+    dateOfBirth: teachers.dateOfBirth,
+    gender: teachers.gender,
+    address: teachers.address,
+    qualifications: teachers.qualifications,
+    skypeId: teachers.skypeId,
+    zoomLink: teachers.zoomLink,
+    zoomUsername: teachers.zoomUsername,
+    timezone: teachers.timezone,
+    hourlyRate: teachers.hourlyRate,
+    rateCurrency: teachers.rateCurrency,
+    paymentMethod: teachers.paymentMethod,
+    status: teachers.status,
+    updatedAt: teachers.updatedAt,
+    totalClasses: sql<number>`(
+      SELECT COUNT(*)
+      FROM class_instances
+      WHERE class_instances.teacher_id = ${teachers.id}
+        AND class_instances.outcome = 'TAKEN'
+        AND class_instances.execution_state = 'COMPLETED'
+        AND class_instances.deleted_at IS NULL
+    )`.mapWith(Number),
+    avgEngagementScore: sql<number>`(
+      SELECT COALESCE(AVG(class_instance_performance.engagement_score), 0)
+      FROM class_instance_performance
+      JOIN class_instances ON class_instances.id = class_instance_performance.class_instance_id
+      WHERE class_instances.teacher_id = ${teachers.id}
+        AND class_instance_performance.engagement_score IS NOT NULL
+    )`.mapWith(Number),
+  });
+
+  const mapTeacherProfileRow = (teacher: {
+    id: string;
+    userId: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    nationalId: string | null;
+    dateOfBirth: string | Date | null;
+    gender: Gender | null;
+    address: string | null;
+    qualifications: string | null;
+    skypeId: string | null;
+    zoomLink: string | null;
+    zoomUsername: string | null;
+    timezone: string;
+    hourlyRate: string | null;
+    rateCurrency: string | null;
+    paymentMethod: PaymentMethod | null;
+    status: AccountStatus;
+    updatedAt: Date;
+    totalClasses: number;
+    avgEngagementScore: number;
+  }): TeacherProfileReturnType => ({
+    id: teacher.id,
+    userId: teacher.userId,
+    name: teacher.name,
+    email: teacher.email,
+    phone: teacher.phone,
+    nationalId: teacher.nationalId,
+    gender: teacher.gender,
+    address: teacher.address,
+    qualifications: teacher.qualifications,
+    skypeId: teacher.skypeId,
+    zoomLink: teacher.zoomLink,
+    zoomUsername: teacher.zoomUsername,
+    timezone: teacher.timezone,
+    hourlyRate: teacher.hourlyRate,
+    rateCurrency: teacher.rateCurrency,
+    paymentMethod: teacher.paymentMethod,
+    status: teacher.status,
+    dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth).toISOString() : null,
+    updatedAt: new Date(teacher.updatedAt).toISOString(),
+    totalClasses: teacher.totalClasses,
+    avgEngagementScore: teacher.avgEngagementScore,
+  });
+
   export const getTeacherProfileForEdit = async (
     teacherId: string,
     tx?: DBTransaction
   ): Promise<TeacherProfileReturnType | null> => {
     const queryDb = tx ?? db;
     const [teacher] = await queryDb
-      .select({
-        id: teachers.id,
-        userId: teachers.userId,
-        name: users.name,
-        email: users.email,
-        phone: teachers.phone,
-        nationalId: teachers.nationalId,
-        dateOfBirth: teachers.dateOfBirth,
-        gender: teachers.gender,
-        address: teachers.address,
-        qualifications: teachers.qualifications,
-        skypeId: teachers.skypeId,
-        zoomLink: teachers.zoomLink,
-        zoomUsername: teachers.zoomUsername,
-        timezone: teachers.timezone,
-        hourlyRate: teachers.hourlyRate,
-        rateCurrency: teachers.rateCurrency,
-        paymentMethod: teachers.paymentMethod,
-        status: teachers.status,
-        updatedAt: teachers.updatedAt,
-        totalClasses: sql<number>`(
-          SELECT COUNT(*)
-          FROM class_instances
-          WHERE class_instances.teacher_id = ${teachers.id}
-            AND class_instances.outcome = 'TAKEN'
-            AND class_instances.execution_state = 'COMPLETED'
-            AND class_instances.deleted_at IS NULL
-        )`.mapWith(Number),
-        avgEngagementScore: sql<number>`(
-          SELECT COALESCE(AVG(class_instance_performance.engagement_score), 0)
-          FROM class_instance_performance
-          JOIN class_instances ON class_instances.id = class_instance_performance.class_instance_id
-          WHERE class_instances.teacher_id = ${teachers.id}
-            AND class_instance_performance.engagement_score IS NOT NULL
-        )`.mapWith(Number),
-      })
+      .select(buildTeacherProfileSelect())
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
       .where(eq(teachers.id, teacherId))
@@ -231,29 +279,12 @@ export namespace TeacherRepository {
 
     if (!teacher) return null;
 
-    return {
-      id: teacher.id,
-      userId: teacher.userId,
-      name: teacher.name,
-      email: teacher.email,
-      phone: teacher.phone,
-      nationalId: teacher.nationalId,
+    return mapTeacherProfileRow({
+      ...teacher,
       gender: teacher.gender as Gender | null,
-      address: teacher.address,
-      qualifications: teacher.qualifications,
-      skypeId: teacher.skypeId,
-      zoomLink: teacher.zoomLink,
-      zoomUsername: teacher.zoomUsername,
-      timezone: teacher.timezone,
-      hourlyRate: teacher.hourlyRate,
-      rateCurrency: teacher.rateCurrency,
       paymentMethod: teacher.paymentMethod as PaymentMethod | null,
       status: teacher.status as AccountStatus,
-      dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth).toISOString() : null,
-      updatedAt: new Date(teacher.updatedAt).toISOString(),
-      totalClasses: teacher.totalClasses,
-      avgEngagementScore: teacher.avgEngagementScore,
-    };
+    });
   };
 
   export const updateTeacherProfile = async (

@@ -495,17 +495,21 @@ async function main(): Promise<void> {
   const { filePath, lifecycle } = parseArgs(args);
   validateArgs(filePath, lifecycle);
 
-  const absPath = resolve(PROJECT_ROOT, filePath!);
+  // After validation, both are guaranteed non-null
+  const filePathSafe = filePath as string;
+  const lifecycleSafe = lifecycle as Lifecycle;
+
+  const absPath = resolve(PROJECT_ROOT, filePathSafe);
   const relPath = relative(PROJECT_ROOT, absPath);
-  const targetDepth = LIFECYCLE_ORDER[lifecycle!];
+  const targetDepth = LIFECYCLE_ORDER[lifecycleSafe];
 
   logInfo(`File: ${relPath}`);
-  logInfo(`Lifecycle: ${lifecycle} (depth: ${targetDepth})`);
+  logInfo(`Lifecycle: ${lifecycleSafe} (depth: ${targetDepth})`);
   console.log("");
 
-  printApplicableRuleFiles(filePath!);
+  printApplicableRuleFiles(filePathSafe);
 
-  await runProgressiveChecks(filePath!, relPath, lifecycle!, targetDepth);
+  await runProgressiveChecks(filePathSafe, relPath, lifecycleSafe, targetDepth);
 }
 
 void main();

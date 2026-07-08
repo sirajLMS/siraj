@@ -29,9 +29,41 @@ type BankingFieldProps = {
   readonly optional?: boolean;
 };
 
+function MaskedIcon() {
+  return <VisibilityOffOutlined sx={theme => ({ fontSize: 18, color: theme.palette.text.secondary })} />;
+}
+
+function FieldValueDisplay({
+  value,
+  monospace = false,
+  optional = false,
+  notProvidedText,
+  notSetText,
+}: {
+  readonly value: string | null | undefined;
+  readonly monospace?: boolean;
+  readonly optional?: boolean;
+  readonly notProvidedText: string;
+  readonly notSetText: string;
+}) {
+  const displayValue = value?.trim() ? value : optional ? notProvidedText : notSetText;
+
+  return (
+    <Typography
+      sx={{
+        typography: "bodyMd",
+        fontFamily: monospace ? "monospace" : undefined,
+        fontStyle: optional && !value?.trim() ? "italic" : undefined,
+        color: theme => (optional && !value?.trim() ? theme.palette.text.secondary : theme.palette.text.primary),
+      }}
+    >
+      {displayValue}
+    </Typography>
+  );
+}
+
 function BankingField({ label, value, masked = false, monospace = false, optional = false }: BankingFieldProps) {
   const t = useTranslations("profile");
-  const displayValue = value?.trim() ? value : optional ? t("banking.notProvided") : t("notSet");
 
   return (
     <Box>
@@ -57,19 +89,14 @@ function BankingField({ label, value, masked = false, monospace = false, optiona
           gap: 1,
         })}
       >
-        <Typography
-          sx={{
-            typography: "bodyMd",
-            fontFamily: monospace ? "monospace" : undefined,
-            fontStyle: optional && !value?.trim() ? "italic" : undefined,
-            color: theme => (optional && !value?.trim() ? theme.palette.text.secondary : theme.palette.text.primary),
-          }}
-        >
-          {displayValue}
-        </Typography>
-        {masked ? (
-          <VisibilityOffOutlined sx={theme => ({ fontSize: 18, color: theme.palette.text.secondary })} />
-        ) : null}
+        <FieldValueDisplay
+          value={value}
+          monospace={monospace}
+          optional={optional}
+          notProvidedText={t("banking.notProvided")}
+          notSetText={t("notSet")}
+        />
+        {masked ? <MaskedIcon /> : null}
       </Box>
     </Box>
   );
@@ -88,6 +115,25 @@ function formatVerifiedDate(value: string | null | undefined): string | null {
   return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
+function PrivacyNoticeContent({ t }: { readonly t: ReturnType<typeof useTranslations> }) {
+  return (
+    <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
+      <LockOutlined sx={theme => ({ color: theme.palette.primary.main, mt: 0.25 })} />
+      <Box>
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", mb: 0.5 }}>
+          <ShieldOutlined sx={{ fontSize: 16, color: theme => theme.palette.primary.main }} />
+          <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
+            {t("adminOnly")}
+          </Typography>
+        </Stack>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+          {t("encryptedNotice")}
+        </Typography>
+      </Box>
+    </Stack>
+  );
+}
+
 function PrivacyNotice() {
   const t = useTranslations("profile.banking");
 
@@ -104,20 +150,7 @@ function PrivacyNotice() {
           bgcolor: theme.palette.surfaceContainerHigh,
         })}
       >
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
-          <LockOutlined sx={theme => ({ color: theme.palette.primary.main, mt: 0.25 })} />
-          <Box>
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", mb: 0.5 }}>
-              <ShieldOutlined sx={{ fontSize: 16, color: theme => theme.palette.primary.main }} />
-              <Typography sx={{ typography: "labelMd", color: theme => theme.palette.primary.main }}>
-                {t("adminOnly")}
-              </Typography>
-            </Stack>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {t("encryptedNotice")}
-            </Typography>
-          </Box>
-        </Stack>
+        <PrivacyNoticeContent t={t} />
       </Paper>
     </Box>
   );
@@ -156,6 +189,73 @@ type VerificationFooterProps = {
   readonly targetUserId: string;
 };
 
+function VerificationStatus({
+  isVerified,
+  verifiedDate,
+  verifiedByName,
+  t,
+}: {
+  readonly isVerified: boolean;
+  readonly verifiedDate: string | null;
+  readonly verifiedByName: string | null | undefined;
+  readonly t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+      <CheckCircleOutlined
+        sx={theme => ({
+          color: isVerified ? theme.palette.success.main : theme.palette.text.secondary,
+        })}
+      />
+      <Box>
+        <Typography sx={{ typography: "labelSm", color: theme => theme.palette.text.secondary }}>
+          {isVerified ? t("verified") : t("notVerified")}
+        </Typography>
+        {verifiedDate ? (
+          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            {t("fields.verifiedAt")}: {verifiedDate}
+          </Typography>
+        ) : null}
+        {verifiedByName ? (
+          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            {t("fields.verifiedBy")}: {verifiedByName}
+          </Typography>
+        ) : null}
+      </Box>
+    </Stack>
+  );
+}
+
+function EditAction({
+  mode,
+  editHref,
+  t,
+}: {
+  readonly mode: "view" | "edit";
+  readonly editHref: string;
+  readonly t: ReturnType<typeof useTranslations>;
+}) {
+  if (mode === "view") {
+    return (
+      <Button
+        component={Link}
+        href={editHref}
+        variant="contained"
+        startIcon={<EditNoteOutlined />}
+        sx={{ alignSelf: { xs: "stretch", md: "center" } }}
+      >
+        {t("actions.manage")}
+      </Button>
+    );
+  }
+
+  return (
+    <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+      {t("actions.editHint")}
+    </Typography>
+  );
+}
+
 function VerificationFooter({ banking, mode, targetUserId }: VerificationFooterProps) {
   const t = useTranslations("profile.banking");
   const verifiedDate = formatVerifiedDate(banking.verifiedAt);
@@ -176,44 +276,13 @@ function VerificationFooter({ banking, mode, targetUserId }: VerificationFooterP
         gap: 2,
       })}
     >
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-        <CheckCircleOutlined
-          sx={theme => ({
-            color: isVerified ? theme.palette.success.main : theme.palette.text.secondary,
-          })}
-        />
-        <Box>
-          <Typography sx={{ typography: "labelSm", color: theme => theme.palette.text.secondary }}>
-            {isVerified ? t("verified") : t("notVerified")}
-          </Typography>
-          {verifiedDate ? (
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t("fields.verifiedAt")}: {verifiedDate}
-            </Typography>
-          ) : null}
-          {banking.verifiedByName ? (
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-              {t("fields.verifiedBy")}: {banking.verifiedByName}
-            </Typography>
-          ) : null}
-        </Box>
-      </Stack>
-
-      {mode === "view" ? (
-        <Button
-          component={Link}
-          href={editHref}
-          variant="contained"
-          startIcon={<EditNoteOutlined />}
-          sx={{ alignSelf: { xs: "stretch", md: "center" } }}
-        >
-          {t("actions.manage")}
-        </Button>
-      ) : (
-        <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-          {t("actions.editHint")}
-        </Typography>
-      )}
+      <VerificationStatus
+        isVerified={isVerified}
+        verifiedDate={verifiedDate}
+        verifiedByName={banking.verifiedByName}
+        t={t}
+      />
+      <EditAction mode={mode} editHref={editHref} t={t} />
     </Box>
   );
 }

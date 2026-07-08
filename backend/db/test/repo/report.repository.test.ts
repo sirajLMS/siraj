@@ -31,6 +31,33 @@ function expectAllInstancesAggregated(row: AttendanceReportRow) {
   expect(row.paidUSD).toBe(50);
 }
 
+/**
+ * Runs the attendance report grouped by `groupBy`, asserts a single-row result,
+ * and validates the group key/label plus aggregate totals for all four mock instances.
+ * Used by TEACHER and STUDENT grouping tests that share the same single-row structure.
+ */
+async function expectSingleRowAggregatedReport(
+  tx: DBTransaction,
+  teacherId: string,
+  groupBy: ReportGroupingMode,
+  expectedGroupKey: string,
+  expectedGroupLabel: string
+) {
+  const filters = buildMayFilters(teacherId, groupBy);
+
+  const results = await ReportRepository.generateAttendanceReport(filters, tx);
+
+  expect(results).toBeArray();
+  expect(results.length).toBe(1);
+
+  const row = results[0];
+  expect(row.groupKey).toBe(expectedGroupKey);
+  expect(row.groupLabel).toBe(expectedGroupLabel);
+  expectAllInstancesAggregated(row);
+
+  return { row };
+}
+
 async function setupTestData(tx: DBTransaction) {
   // Setup teacher and student entities using setupTestEntities helper
   const { student, teacher, teacherUser } = await setupTestEntities(tx, "rep");
@@ -138,22 +165,15 @@ describe("ReportRepository — generateAttendanceReport", () => {
   });
 
   reportRepoTest("aggregates and groups correctly by TEACHER", async tx => {
-    // Arrange
     const { teacher, teacherUser } = await setupTestData(tx);
-
-    const filters = buildMayFilters(teacher.id, ReportGroupingMode.TEACHER);
-
-    // Act
-    const results = await ReportRepository.generateAttendanceReport(filters, tx);
-
-    // Assert
-    expect(results).toBeArray();
-    expect(results.length).toBe(1);
-
-    const row = results[0];
-    expect(row.groupKey).toBe(teacher.id);
-    expect(row.groupLabel).toBe(teacherUser.name);
-    expectAllInstancesAggregated(row);
+    const { row } = await expectSingleRowAggregatedReport(
+      tx,
+      teacher.id,
+      ReportGroupingMode.TEACHER,
+      teacher.id,
+      teacherUser.name
+    );
+    expect(row).toBeDefined();
   });
 
   reportRepoTest("filters by teacherId correctly", async tx => {

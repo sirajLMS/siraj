@@ -45,14 +45,74 @@ function buildParentInput(formData: ParentOwnEditFormData) {
   };
 }
 
+function ParentContactSection({
+  parentData,
+  t,
+  tc,
+}: {
+  readonly parentData: {
+    readonly name?: string | null;
+    readonly email?: string | null;
+    readonly phone?: string | null;
+  };
+  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
+  readonly tc: ReturnType<typeof useTranslations<"profile">>;
+}) {
+  return (
+    <Grid size={{ xs: 12, md: 6 }}>
+      <Paper variant="outlined" sx={{ p: 3 }}>
+        <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
+        <Stack spacing={1}>
+          <Typography sx={{ typography: "bodyMd" }}>{parentData.name}</Typography>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+            {parentData.email}
+          </Typography>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+            {parentData.phone ?? tc("notSet")}
+          </Typography>
+        </Stack>
+      </Paper>
+    </Grid>
+  );
+}
+
+function ParentSocialSection({
+  parentData,
+  t,
+  tc,
+}: {
+  readonly parentData: {
+    readonly whatsapp?: string | null;
+    readonly facebook?: string | null;
+  };
+  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
+  readonly tc: ReturnType<typeof useTranslations<"profile">>;
+}) {
+  return (
+    <Grid size={{ xs: 12, md: 6 }}>
+      <Paper variant="outlined" sx={{ p: 3 }}>
+        <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.social")}</Typography>
+        <Stack spacing={1}>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+            {t("fields.whatsapp")}: {parentData.whatsapp ?? tc("notSet")}
+          </Typography>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+            {t("fields.facebook")}: {parentData.facebook ?? tc("notSet")}
+          </Typography>
+        </Stack>
+      </Paper>
+    </Grid>
+  );
+}
+
 function ParentViewMode({
   parentData,
   t,
   tc,
 }: {
   readonly parentData: {
-    readonly name: string;
-    readonly email: string;
+    readonly name?: string | null;
+    readonly email?: string | null;
     readonly phone?: string | null;
     readonly whatsapp?: string | null;
     readonly facebook?: string | null;
@@ -62,34 +122,37 @@ function ParentViewMode({
 }) {
   return (
     <Grid container spacing={3}>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
-          <Stack spacing={1}>
-            <Typography sx={{ typography: "bodyMd" }}>{parentData.name}</Typography>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {parentData.email}
-            </Typography>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {parentData.phone ?? tc("notSet")}
-            </Typography>
-          </Stack>
-        </Paper>
-      </Grid>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.social")}</Typography>
-          <Stack spacing={1}>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {t("fields.whatsapp")}: {parentData.whatsapp ?? tc("notSet")}
-            </Typography>
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {t("fields.facebook")}: {parentData.facebook ?? tc("notSet")}
-            </Typography>
-          </Stack>
-        </Paper>
-      </Grid>
+      <ParentContactSection parentData={parentData} t={t} tc={tc} />
+      <ParentSocialSection parentData={parentData} t={t} tc={tc} />
     </Grid>
+  );
+}
+
+function ParentEditFormFields({
+  register,
+  t,
+}: {
+  readonly register: ReturnType<typeof useForm<ParentOwnEditFormData>>["register"];
+  readonly t: ReturnType<typeof useTranslations<"profile.parent">>;
+}) {
+  return (
+    <>
+      {(["phone", "whatsapp", "facebook", "twitter", "skype", "defaultZoomLink"] as const).map(field => (
+        <Box key={field}>
+          <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t(`fields.${field}`)}</Typography>
+          <Box
+            component="input"
+            {...register(field)}
+            sx={theme => ({
+              width: "100%",
+              p: 1.5,
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.divider}`,
+            })}
+          />
+        </Box>
+      ))}
+    </>
   );
 }
 
@@ -159,21 +222,7 @@ function ParentEditForm({
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2} sx={{ maxWidth: 480 }}>
-        {(["phone", "whatsapp", "facebook", "twitter", "skype", "defaultZoomLink"] as const).map(field => (
-          <Box key={field}>
-            <Typography sx={{ typography: "labelMd", mb: 0.5 }}>{t(`fields.${field}`)}</Typography>
-            <Box
-              component="input"
-              {...register(field)}
-              sx={theme => ({
-                width: "100%",
-                p: 1.5,
-                borderRadius: 1,
-                border: `1px solid ${theme.palette.divider}`,
-              })}
-            />
-          </Box>
-        ))}
+        <ParentEditFormFields register={register} t={t} />
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {tc("actions.save")}
         </PrimaryPageAction>

@@ -1,8 +1,8 @@
 import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 
 export interface TeacherScheduleSessionActionInput {
-  readonly executionState: ClassExecutionState | string | null | undefined;
-  readonly outcome: ClassOutcome | string | null | undefined;
+  readonly executionState?: ClassExecutionState | string | null | undefined;
+  readonly outcome?: ClassOutcome | string | null | undefined;
   readonly activateEnabled: boolean;
   readonly canActivate: boolean;
   readonly videoEnabled: boolean;

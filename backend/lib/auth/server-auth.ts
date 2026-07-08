@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
-import { logger, verifyToken } from "@/backend/lib";
+import { type CustomJWTPayload, logger, verifyToken } from "@/backend/lib";
 import {
   ImpersonationService,
   PermissionGroupSimulationService,
@@ -9,26 +9,28 @@ import {
   type UserPermissionContext,
 } from "@/backend/services";
 
-async function getServerUserContextImpl(): Promise<{
+type ServerUserContextResult = {
   userId: string | null;
   actorUserId?: string;
   isImpersonating: boolean;
   isSimulatingGroup: boolean;
   simulatedGroupSlug?: string;
   context: UserPermissionContext | null;
-}> {
+};
+
+function emptyContextResult(): ServerUserContextResult {
+  return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
+}
+
+async function getSessionCookies(): Promise<{ sessionId: string | null; token: string | null }> {
   const cookieStore = await cookies();
-  const sessionId = cookieStore.get("session_id")?.value;
-  const token = cookieStore.get("access_token")?.value;
+  return {
+    sessionId: cookieStore.get("session_id")?.value ?? null,
+    token: cookieStore.get("access_token")?.value ?? null,
+  };
+}
 
-  if (!sessionId || !token) {
-    logger.info("[AuthRedirect] getServerUserContext: no session cookies", {
-      hasSessionId: Boolean(sessionId),
-      hasAccessToken: Boolean(token),
-    });
-    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
-  }
-
+async function validateSessionAndToken(sessionId: string, token: string): Promise<{ userId: string } | null> {
   let session: Awaited<ReturnType<typeof SessionService.validateSession>>;
   try {
     session = await SessionService.validateSession(sessionId);
@@ -43,7 +45,7 @@ async function getServerUserContextImpl(): Promise<{
     logger.info("[AuthRedirect] getServerUserContext: session validation returned no userId", {
       hasSession: Boolean(session),
     });
-    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
+    return null;
   }
 
   const payload = await verifyToken(token);
@@ -51,47 +53,88 @@ async function getServerUserContextImpl(): Promise<{
     logger.info("[AuthRedirect] getServerUserContext: access token invalid or wrong type", {
       tokenType: payload?.type ?? null,
     });
-    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
+    return null;
   }
 
-  const impersonationIdentity = await ImpersonationService.resolveAuthIdentityFromToken(payload, sessionId);
-  if (!impersonationIdentity) {
+  return { userId: session.userId };
+}
+
+async function resolveImpersonation(
+  payload: CustomJWTPayload,
+  sessionId: string
+): Promise<ServerUserContextResult | null> {
+  const identity = await ImpersonationService.resolveAuthIdentityFromToken(payload, sessionId);
+  if (!identity) {
     logger.info("[AuthRedirect] getServerUserContext: impersonation identity resolution failed");
-    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
+    return null;
   }
 
-  if (impersonationIdentity.isImpersonating) {
-    const context = await PermissionsService.getUserContext(impersonationIdentity.effectiveUserId);
+  if (identity.isImpersonating) {
+    const context = await PermissionsService.getUserContext(identity.effectiveUserId);
     return {
-      userId: impersonationIdentity.effectiveUserId,
-      actorUserId: impersonationIdentity.actorUserId,
+      userId: identity.effectiveUserId,
+      actorUserId: identity.actorUserId,
       isImpersonating: true,
       isSimulatingGroup: false,
       context,
     };
   }
 
-  const groupSimulationIdentity = await PermissionGroupSimulationService.resolveGroupSimulationFromToken(
-    payload,
-    sessionId
-  );
-  if (!groupSimulationIdentity) {
+  return null;
+}
+
+async function resolveGroupSimulation(
+  payload: CustomJWTPayload,
+  sessionId: string
+): Promise<ServerUserContextResult | null> {
+  const identity = await PermissionGroupSimulationService.resolveGroupSimulationFromToken(payload, sessionId);
+  if (!identity) {
     logger.info("[AuthRedirect] getServerUserContext: group simulation identity resolution failed");
-    return { userId: null, isImpersonating: false, isSimulatingGroup: false, context: null };
+    return null;
   }
 
   const context =
-    groupSimulationIdentity.isSimulatingGroup && groupSimulationIdentity.simulatedGroupSlug
-      ? await PermissionsService.getPermissionGroupContext(groupSimulationIdentity.simulatedGroupSlug)
-      : await PermissionsService.getUserContext(groupSimulationIdentity.realUserId);
+    identity.isSimulatingGroup && identity.simulatedGroupSlug
+      ? await PermissionsService.getPermissionGroupContext(identity.simulatedGroupSlug)
+      : await PermissionsService.getUserContext(identity.realUserId);
 
   return {
-    userId: groupSimulationIdentity.realUserId,
+    userId: identity.realUserId,
     isImpersonating: false,
-    isSimulatingGroup: groupSimulationIdentity.isSimulatingGroup,
-    simulatedGroupSlug: groupSimulationIdentity.simulatedGroupSlug,
+    isSimulatingGroup: identity.isSimulatingGroup,
+    simulatedGroupSlug: identity.simulatedGroupSlug,
     context,
   };
+}
+
+async function getServerUserContextImpl(): Promise<ServerUserContextResult> {
+  const { sessionId, token } = await getSessionCookies();
+
+  if (!sessionId || !token) {
+    logger.info("[AuthRedirect] getServerUserContext: no session cookies", {
+      hasSessionId: Boolean(sessionId),
+      hasAccessToken: Boolean(token),
+    });
+    return emptyContextResult();
+  }
+
+  const sessionInfo = await validateSessionAndToken(sessionId, token);
+  if (!sessionInfo) {
+    return emptyContextResult();
+  }
+
+  const payload = await verifyToken(token);
+  if (!payload) {
+    return emptyContextResult();
+  }
+
+  const impersonationResult = await resolveImpersonation(payload, sessionId);
+  if (impersonationResult !== null) {
+    return impersonationResult;
+  }
+
+  const groupSimulationResult = await resolveGroupSimulation(payload, sessionId);
+  return groupSimulationResult ?? emptyContextResult();
 }
 
 export const getServerUserContext = cache(getServerUserContextImpl);
