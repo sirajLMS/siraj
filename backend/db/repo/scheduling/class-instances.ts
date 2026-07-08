@@ -40,7 +40,13 @@ export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
     ? (await queryDb.select().from(classSubjects).where(eq(classSubjects.id, row.subjectId)).limit(1))[0]
     : undefined;
   const recurring = row.recurringScheduleId
-    ? (await queryDb.select().from(recurringSchedules).where(eq(recurringSchedules.id, row.recurringScheduleId)).limit(1))[0]
+    ? (
+        await queryDb
+          .select()
+          .from(recurringSchedules)
+          .where(eq(recurringSchedules.id, row.recurringScheduleId))
+          .limit(1)
+      )[0]
     : undefined;
 
   return {
