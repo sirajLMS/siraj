@@ -41,6 +41,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepare": "husky",
+    "postinstall": "rm -rf node_modules/*/node_modules/typescript && node -e \"const fs = require('fs'); const file = 'node_modules/typescript/lib/version.cjs'; if (fs.existsSync(file)) fs.writeFileSync(file, 'module.exports = { ...require(\\\"@typescript/typescript6\\\"), version: \\\"7.0.2\\\", versionMajorMinor: \\\"7.0\\\" };');\"",
     "db": "bun run scripts/dbActions.ts"
   },
   "dependencies": {
@@ -225,6 +226,7 @@
     "ts-morph": "^28.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.23.0",
+    "@typescript/typescript6": "^6.0.2",
     "typescript": "~7.0.2",
     "typescript-eslint": "^8.63.0",
     "vite": "^8.1.3",
