@@ -7,7 +7,6 @@ import {
   simulatablePermissionGroupsQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { UserRole } from "@/shared/lib/enum";
 import { UserMenuButton } from "./UserMenuButton";
 
 const baseMocks = [
@@ -101,7 +100,7 @@ function StoryShell({ mocks, children }: Readonly<{ mocks: Array<Record<string, 
       id: "actor-id",
       name: "Super Admin",
       email: "admin@example.com",
-      role: UserRole.SUPER_ADMIN,
+      role: "SUPER_ADMIN",
       permissions: [],
       avatarUrl: "",
       notificationCount: 0,

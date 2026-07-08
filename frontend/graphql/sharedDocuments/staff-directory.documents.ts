@@ -60,7 +60,6 @@ export const managerDirectoryQueryDocument: TypedDocumentNode<
         email
         avatarUrl
         phone
-        skypeId
         status
         roleSlug
         roleName
@@ -92,7 +91,6 @@ export const updateManagerProfileMutationDocument: TypedDocumentNode<
       email
       avatarUrl
       phone
-      skypeId
       status
       roleSlug
       roleName

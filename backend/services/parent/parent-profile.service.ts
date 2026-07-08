@@ -1,4 +1,5 @@
 import { ParentRepository, SessionRepository } from "@/backend/db";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
@@ -8,7 +9,6 @@ import type {
   ParentProfileResult,
   ParentProfileUpdateInput,
 } from "@/backend/types";
-import { AppPermission } from "@/backend/enum";
 
 export type {
   AssociatedStudentResult,

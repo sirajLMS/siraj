@@ -22,7 +22,11 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, ClassType as ClassTypeEnum, type CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  ClassType as ClassTypeEnum,
+  type CreateRecurringClassInput,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/recurring-class.documents";
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";

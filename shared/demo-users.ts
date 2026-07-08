@@ -1,5 +1,5 @@
 // DEV ONLY: Never use these credentials in production
-import { SystemPermissionGroupSlug } from "./lib/enum";
+import { SystemPermissionGroupSlug } from "@/backend/enum";
 
 interface InternalDemoUser {
   name: string;

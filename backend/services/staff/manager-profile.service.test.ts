@@ -11,7 +11,6 @@ const targetRow = {
   email: "target@example.com",
   avatarUrl: null,
   phone: null,
-  skypeId: null,
   status: AccountStatus.ACTIVATED,
   roleSlug: "staff",
   roleName: "Staff",
@@ -20,7 +19,6 @@ const targetRow = {
 const updatedRow = {
   ...targetRow,
   phone: "+966500000000",
-  skypeId: "target.skype",
   status: AccountStatus.DEACTIVATED,
 };
 
@@ -48,7 +46,6 @@ describe("ManagerProfileService admin update", () => {
 
     const result = await ManagerProfileService.updateManagerProfile("actor-user-1", "staff-profile-1", {
       phone: "+966500000000",
-      skypeId: "target.skype",
       status: AccountStatus.DEACTIVATED,
     });
 

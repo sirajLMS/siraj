@@ -23,7 +23,6 @@ export const parentProfileQueryDocument: TypedDocumentNode<
       facebook
       whatsapp
       twitter
-      skype
       defaultZoomLink
       invoiceType
       feeAmount

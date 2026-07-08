@@ -17,7 +17,6 @@ export const teacherProfileForEditQueryDocument: TypedDocumentNode<
       gender
       address
       qualifications
-      skypeId
       zoomLink
       zoomUsername
       timezone
@@ -47,7 +46,6 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
       gender
       address
       qualifications
-      skypeId
       zoomLink
       zoomUsername
       timezone

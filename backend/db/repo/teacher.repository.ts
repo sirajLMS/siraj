@@ -290,10 +290,11 @@ export namespace TeacherRepository {
   ): Promise<boolean> => {
     const queryDb = tx ?? db;
     const now = new Date();
-    const { timezone: tzInput, ...restInput } = input;
+    const { timezone: tzInput, status: statusInput, ...restInput } = input;
     const setInput = {
       ...restInput,
       ...(tzInput == null ? {} : { timezone: tzInput }),
+      ...(statusInput == null ? {} : { status: statusInput }),
       updatedAt: now,
     };
     const [updated] = await queryDb

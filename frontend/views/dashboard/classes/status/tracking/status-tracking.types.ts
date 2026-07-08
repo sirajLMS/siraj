@@ -1,11 +1,16 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { StatusTrackingScheduleRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ClassExecutionState, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { SessionStatus } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
+export enum SessionStatus {
+  REGULAR = "regular",
+  SUSPENDED_PENDING = "suspended_pending",
+  ON_LEAVE = "on_leave",
+  PENDING_VERIFICATION = "pending_verification",
+}
+
 export type { StatusTrackingScheduleRow };
-export { SessionStatus };
 export type StatusTrackingRow = StatusTrackingScheduleRow;
 
 export interface StatusTrackingLabels {

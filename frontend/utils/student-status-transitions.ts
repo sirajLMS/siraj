@@ -1,20 +1,20 @@
-import { ALLOWED_STATUS_TRANSITIONS, StudentStatus } from "@/shared/lib/enum";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
-const STATUS_KEY_MAP: Record<string, StudentStatus> = {
-  ON_TRIAL: StudentStatus.ON_TRIAL,
-  REGULAR: StudentStatus.REGULAR,
-  SUSPENDED: StudentStatus.SUSPENDED,
-  ON_LEAVE: StudentStatus.ON_LEAVE,
-  DEACTIVATED: StudentStatus.DEACTIVATED,
+export const ALLOWED_STATUS_TRANSITIONS: Record<StudentStatus, readonly StudentStatus[]> = {
+  [StudentStatus.OnTrial]: [StudentStatus.Regular, StudentStatus.Deactivated],
+  [StudentStatus.Regular]: [StudentStatus.Suspended, StudentStatus.OnLeave, StudentStatus.Deactivated],
+  [StudentStatus.Suspended]: [StudentStatus.Regular, StudentStatus.Deactivated],
+  [StudentStatus.OnLeave]: [StudentStatus.Regular, StudentStatus.Deactivated],
+  [StudentStatus.Deactivated]: [StudentStatus.Regular],
 };
 
+// GraphQL StudentStatus enum values are SCREAMING_SNAKE strings (e.g. StudentStatus.OnTrial = "ON_TRIAL").
+// Object.entries on the Record yields the enum *values* (SCREAMING_SNAKE strings) as keys,
+// which already match what consumers expect, so no reverse lookup is needed.
 function mapTransitions(): Record<string, StudentStatus[]> {
   const result: Record<string, StudentStatus[]> = {};
   for (const [key, targets] of Object.entries(ALLOWED_STATUS_TRANSITIONS)) {
-    const mappedKey = STATUS_KEY_MAP[key];
-    if (mappedKey) {
-      result[mappedKey] = targets.map(t => STATUS_KEY_MAP[t]).filter((t): t is StudentStatus => t !== undefined);
-    }
+    result[key] = [...targets] as StudentStatus[];
   }
   return result;
 }

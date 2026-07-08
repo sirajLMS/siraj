@@ -28,11 +28,7 @@ function staffTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   });
 }
 
-async function createStaffUser(
-  tx: DBTransaction,
-  name: string,
-  overrides: { phone?: string | null; skypeId?: string | null } = {}
-) {
+async function createStaffUser(tx: DBTransaction, name: string, overrides: { phone?: string | null } = {}) {
   const now = new Date();
   const user = await createTestUser(tx, {
     name,
@@ -44,7 +40,6 @@ async function createStaffUser(
     .values({
       userId: user.id,
       phone: overrides.phone ?? null,
-      skypeId: overrides.skypeId ?? null,
       status: AccountStatus.ACTIVATED,
       createdAt: now,
       updatedAt: now,
@@ -117,17 +112,15 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
     expect(found?.email).toBe(user.email);
   });
 
-  staffTest("includes skypeId and phone fields", async tx => {
-    await createStaffUser(tx, "SkypePhone", {
+  staffTest("includes phone field", async tx => {
+    await createStaffUser(tx, "PhoneOnly", {
       phone: "+1234567890",
-      skypeId: "live:test.skype",
     });
 
     const result = await StaffProfileRepository.getManagerDirectory(null, undefined, tx);
-    const found = result.rows.find(r => r.name === "SkypePhone");
+    const found = result.rows.find(r => r.name === "PhoneOnly");
     expect(found).toBeDefined();
     expect(found?.phone).toBe("+1234567890");
-    expect(found?.skypeId).toBe("live:test.skype");
   });
 
   staffTest("returns empty array when no staff profiles exist", async tx => {
@@ -253,27 +246,23 @@ describe("StaffProfileRepository — findByUserId", () => {
 });
 
 describe("StaffProfileRepository — updateManagerProfile", () => {
-  staffTest("updates phone and skypeId", async tx => {
-    const { profile } = await createStaffUser(tx, "UpdateBoth");
+  staffTest("updates phone", async tx => {
+    const { profile } = await createStaffUser(tx, "UpdatePhone");
 
     const result = await updateProfile(tx, profile.id, {
       phone: "+1234567890",
       phoneIsSet: true,
-      skypeId: "test.skype",
-      skypeIdIsSet: true,
     });
     expect(result.phone).toBe("+1234567890");
-    expect(result.skypeId).toBe("test.skype");
   });
 
-  staffTest("updates only phone when skypeId is not set", async tx => {
-    const { profile } = await createStaffUser(tx, "UpdatePhone", {
-      skypeId: "original.skype",
+  staffTest("updates only phone when given", async tx => {
+    const { profile } = await createStaffUser(tx, "UpdatePhoneOnly", {
+      phone: "+1111111111",
     });
 
     const result = await updateProfile(tx, profile.id, { phone: "+9876543210", phoneIsSet: true });
     expect(result.phone).toBe("+9876543210");
-    expect(result.skypeId).toBe("original.skype");
   });
 
   staffTest("sets phone to null when explicitly passed as null", async tx => {
@@ -285,14 +274,13 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
     expect(result.phone).toBeNull();
   });
 
-  staffTest("updates only skypeId when phone is not set", async tx => {
-    const { profile } = await createStaffUser(tx, "UpdateSkype", {
+  staffTest("updates phone to new value when only phone is given", async tx => {
+    const { profile } = await createStaffUser(tx, "UpdatePhoneOnly2", {
       phone: "+5555555555",
     });
 
-    const result = await updateProfile(tx, profile.id, { skypeId: "new.skype.id", skypeIdIsSet: true });
-    expect(result.skypeId).toBe("new.skype.id");
-    expect(result.phone).toBe("+5555555555");
+    const result = await updateProfile(tx, profile.id, { phone: "+6666666666", phoneIsSet: true });
+    expect(result.phone).toBe("+6666666666");
   });
 
   staffTest("updates status when statusIsSet is true", async tx => {
@@ -321,12 +309,10 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
   staffTest("does not update fields when neither flag is set", async tx => {
     const { profile } = await createStaffUser(tx, "NoUpdate", {
       phone: "+9999999999",
-      skypeId: "keep.skype",
     });
 
     const result = await updateProfile(tx, profile.id, {});
     expect(result.phone).toBe("+9999999999");
-    expect(result.skypeId).toBe("keep.skype");
   });
 
   staffTest("persists update to database", async tx => {
@@ -417,7 +403,6 @@ describe("StaffProfileRepository — create", () => {
         userId: user.id,
         status: AccountStatus.ACTIVATED,
         phone: "+1234567890",
-        skypeId: "test_skype",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -428,7 +413,6 @@ describe("StaffProfileRepository — create", () => {
     expect(result.userId).toBe(user.id);
     expect(result.status).toBe(AccountStatus.ACTIVATED);
     expect(result.phone).toBe("+1234567890");
-    expect(result.skypeId).toBe("test_skype");
   });
 
   staffTest("rejects duplicate staff profile for same user", async tx => {

@@ -24,7 +24,6 @@ const mockParent = {
   facebook: null,
   whatsapp: null,
   twitter: null,
-  skype: null,
   defaultZoomLink: null,
   invoiceType: null,
   feeAmount: null,

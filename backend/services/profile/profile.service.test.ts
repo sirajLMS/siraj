@@ -26,7 +26,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      skype: "parent.skype",
       defaultZoomLink: "https://zoom.us/j/123",
       invoiceType: "monthly",
       feeAmount: "500",
@@ -42,7 +41,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      skype: "parent.skype",
       defaultZoomLink: "https://zoom.us/j/123",
       invoiceType: "monthly",
       feeAmount: "500",
@@ -58,7 +56,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      skype: "parent.skype",
       defaultZoomLink: "https://zoom.us/j/123",
     };
 
@@ -69,7 +66,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      skype: "parent.skype",
       defaultZoomLink: "https://zoom.us/j/123",
       invoiceType: undefined,
       feeAmount: undefined,

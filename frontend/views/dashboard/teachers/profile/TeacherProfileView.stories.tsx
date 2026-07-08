@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
-import { Gender, PaymentMethod } from "@/shared/lib/enum";
+import { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
 import { TeacherProfileView } from "./TeacherProfileView";
 import type { TeacherProfileData } from "./types";
@@ -11,12 +11,12 @@ const INITIAL_PROFILE: TeacherProfileData = {
   fullName: "Amina Hassan",
   email: "amina.hassan@example.com",
   phone: "+20 100 555 0123",
-  gender: Gender.FEMALE,
+  gender: Gender.Female,
   timezone: "Africa/Cairo",
   address: "Nasr City, Cairo",
   baseSalary: 780,
   currency: "USD",
-  paymentMethod: PaymentMethod.PAYPAL,
+  paymentMethod: PaymentMethod.Paypal,
   zoomLink: "https://zoom.us/j/1234567890",
   accountStatus: true,
   updatedAt: "2026-07-08T12:00:00.000Z",

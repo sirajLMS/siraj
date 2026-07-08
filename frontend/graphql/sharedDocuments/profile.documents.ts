@@ -35,7 +35,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         gender
         address
         qualifications
-        skypeId
         zoomLink
         zoomUsername
         timezone
@@ -55,7 +54,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         facebook
         whatsapp
         twitter
-        skype
         defaultZoomLink
       }
       parentAdminProfile {
@@ -71,7 +69,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         facebook
         whatsapp
         twitter
-        skype
         defaultZoomLink
         invoiceType
         feeAmount
@@ -105,7 +102,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         email
         avatarUrl
         phone
-        skypeId
         status
         roleSlug
         roleName
@@ -188,7 +184,6 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         facebook
         whatsapp
         twitter
-        skype
         defaultZoomLink
       }
       staffProfile {
@@ -197,7 +192,6 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         name
         email
         phone
-        skypeId
         status
       }
     }
@@ -239,7 +233,6 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         facebook
         whatsapp
         twitter
-        skype
         defaultZoomLink
         invoiceType
         feeAmount
@@ -253,7 +246,6 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         name
         email
         phone
-        skypeId
         status
       }
     }

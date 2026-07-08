@@ -32,7 +32,15 @@ export type DateLike = Date | string | null;
 export type OutcomeLike = string | null | undefined;
 export type ExecutionStateLike = string | null | undefined;
 
-export type ClassInstanceDashboardStatus = string;
+export type ClassInstanceDashboardStatus =
+  | "PENDING"
+  | "TAKEN"
+  | "ABSENT"
+  | "LEAVE"
+  | "NOT_ACTIVATED"
+  | "ACTIVATED"
+  | "RUNNING"
+  | "COMPLETED";
 
 export interface ClassInstanceDashboardStatusInput {
   readonly outcome: OutcomeLike;
@@ -93,8 +101,9 @@ export function resolveClassInstanceDashboardStatus(
   actualEndAt?: DateLike,
   options?: ClassInstanceStatusResolveOptions & { scheduledEndAt?: DateLike }
 ): ClassInstanceDashboardStatus {
-  const normalizedOutcome = (outcome ?? ClassOutcomeValues.PENDING) as string;
-  const normalizedExecutionState = (executionState ?? ClassExecutionStateValues.NOT_ACTIVATED) as string;
+  const normalizedOutcome = (outcome ?? ClassOutcomeValues.PENDING) as ClassInstanceDashboardStatus;
+  const normalizedExecutionState = (executionState ??
+    ClassExecutionStateValues.NOT_ACTIVATED) as ClassInstanceDashboardStatus;
 
   if (normalizedExecutionState === ClassExecutionStateValues.RUNNING) {
     return ClassExecutionStateValues.RUNNING;

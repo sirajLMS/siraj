@@ -50,5 +50,6 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
       hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       rateCurrency: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       paymentMethod: t.field({ type: PaymentMethodPothosObject, required: false }),
+      status: t.field({ type: AccountStatusPothosObject, required: false }),
     }),
   });

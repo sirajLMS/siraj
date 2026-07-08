@@ -8,8 +8,8 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
   AppPermission,
-  AccountStatus as GqlAccountStatus,
   type Gender,
+  AccountStatus as GqlAccountStatus,
   type PaymentMethod,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {

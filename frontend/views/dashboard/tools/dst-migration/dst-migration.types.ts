@@ -31,4 +31,8 @@ export interface DstMigrationMetrics {
   readonly unchanged: number;
 }
 
-export type { MigrationStatus } from "@/shared/lib/enum";
+export enum MigrationStatus {
+  IDLE = "idle",
+  RUNNING = "running",
+  COMPLETE = "complete",
+}
