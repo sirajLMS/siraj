@@ -44,6 +44,7 @@ export function StatusTrackingDataGrid({
   onReschedule,
   onVerify,
   onJoin,
+  loading = false,
 }: StatusTrackingDataGridProps) {
   const theme = useTheme();
   const locale = useLocale();
@@ -155,6 +156,7 @@ export function StatusTrackingDataGrid({
     <AppDataGrid<StatusTrackingRow>
       rows={rows}
       columns={columns}
+      loading={loading}
       getRowId={row => row.id ?? ""}
       autoHeight
       rowHeight={100}

@@ -119,9 +119,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         dueDate: inv.dueDate ?? "",
         paidDate: inv.paidDate ?? "—",
         fee: `${inv.currency} ${inv.amount}`,
-        status: (inv.status === InvoiceStatus.Paid
-          ? InvoiceStatus.Paid
-          : InvoiceStatus.Unpaid) as unknown as InvoiceStatus,
+        status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
       })),
     [data?.parentInvoiceHistory]
   );

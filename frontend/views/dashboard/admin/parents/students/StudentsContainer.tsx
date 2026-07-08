@@ -88,7 +88,7 @@ export function StudentsContainer() {
     };
   }, [searchQuery, filterArgs]);
 
-  const { data, error } = useQuery(studentDirectoryQueryDocument, {
+  const { data, loading, error } = useQuery(studentDirectoryQueryDocument, {
     variables: {
       filterArgs: computedFilterArgs,
       orderBy: null,
@@ -111,7 +111,7 @@ export function StudentsContainer() {
   }, [error, notifications, t]);
 
   const rows = useMemo(() => buildStudentRows(data), [data]);
-  const totalCount = data?.studentDirectory?.totalCount ?? 0;
+  const totalCount = data ? (data.studentDirectory?.totalCount ?? 0) : undefined;
   const counts = useMemo(() => buildStatusCounts(rows), [rows]);
   const viewMetrics = useMemo(() => buildViewMetrics(counts, t), [counts, t]);
   const mobileMetrics = useMemo(() => buildMobileMetrics(counts, t), [counts, t]);
@@ -144,6 +144,7 @@ export function StudentsContainer() {
         page={page}
         pageSize={pageSize}
         labels={labels}
+        loading={loading}
         onSearchChange={setSearchQuery}
         onAddStudent={handleAddStudent}
         onViewProfile={handleViewProfile}

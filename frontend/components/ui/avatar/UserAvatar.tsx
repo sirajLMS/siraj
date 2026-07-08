@@ -7,24 +7,26 @@ export type UserAvatarProps = Omit<BaseAvatarProps, "variant"> & {
   readonly variant?: BaseAvatarProps["variant"];
 };
 
+const FALLBACK_SX = {
+  typography: "labelMd",
+  fontWeight: 700,
+} as const;
+
 export function UserAvatar({ variant = "circular", sx, ...props }: UserAvatarProps) {
+  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
   return (
     <BaseAvatar
       variant={variant}
       sx={[
-        theme => ({
-          ...(!props.src
-            ? {
+        theme =>
+          props.src
+            ? { border: `1px solid ${theme.palette.border.light}` }
+            : {
                 backgroundColor: theme.palette.primaryContainer,
                 color: theme.palette.onPrimaryContainer,
-                typography: "labelMd",
-                fontWeight: 700,
-              }
-            : {
-                border: `1px solid ${theme.palette.border.light}`,
-              }),
-        }),
-        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+                ...FALLBACK_SX,
+              },
+        ...normalizedSx,
       ]}
       {...props}
     />

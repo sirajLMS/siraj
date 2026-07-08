@@ -12,9 +12,14 @@ import { PermissionCatalogToolbar } from "./PermissionCatalogToolbar";
 export interface PermissionCatalogSectionProps {
   readonly permissions: readonly Permission[];
   readonly groups: readonly PermissionGroup[];
+  readonly loading?: boolean;
 }
 
-export function PermissionCatalogSection({ permissions, groups }: Readonly<PermissionCatalogSectionProps>) {
+export function PermissionCatalogSection({
+  permissions,
+  groups,
+  loading = false,
+}: Readonly<PermissionCatalogSectionProps>) {
   const t = useTranslations("dashboard.permissions");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -58,7 +63,7 @@ export function PermissionCatalogSection({ permissions, groups }: Readonly<Permi
         <PermissionCatalogCardList permissions={filteredPermissions} groups={groups} />
       ) : (
         <SectionPanel title={t("catalogTab")}>
-          <PermissionCatalogDataGrid permissions={filteredPermissions} groups={groups} />
+          <PermissionCatalogDataGrid permissions={filteredPermissions} groups={groups} loading={loading} />
         </SectionPanel>
       )}
     </Box>

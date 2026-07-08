@@ -13,9 +13,7 @@ async function resolveTeacherDashboard(
     const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
     throw new Error(tFunc("unauthorized"));
   }
-  const pagination = args.pagination
-    ? new PaginationArgs(args.pagination as ConstructorParameters<typeof PaginationArgs>[0])
-    : null;
+  const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
   const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher", ctx.locale, pagination);
   return {
     ...result,

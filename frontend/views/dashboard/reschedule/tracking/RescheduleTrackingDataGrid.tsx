@@ -23,6 +23,7 @@ export function RescheduleTrackingDataGrid({
   pageSize = 10,
   totalCount,
   onPageChange,
+  loading = false,
 }: RescheduleTrackingDataGridProps) {
   const columns = useMemo<GridColDef<TrackingRow>[]>(
     () => [
@@ -231,6 +232,7 @@ export function RescheduleTrackingDataGrid({
     <AppDataGrid<TrackingRow>
       rows={rows}
       columns={columns}
+      loading={loading}
       getRowId={row => row.id ?? ""}
       autoHeight
       ariaLabel="reschedule-tracking-table"

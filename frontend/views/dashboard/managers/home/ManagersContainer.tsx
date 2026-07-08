@@ -27,7 +27,7 @@ export function ManagersContainer() {
   const pageSize = useManagersDirectoryStore(state => state.pageSize);
   const setPage = useManagersDirectoryStore(state => state.setPage);
 
-  const { data } = useQuery(managerDirectoryQueryDocument, {
+  const { data, loading } = useQuery(managerDirectoryQueryDocument, {
     variables: {
       paginationArgs: {
         first: pageSize,
@@ -38,8 +38,8 @@ export function ManagersContainer() {
         last: null,
         maxCount: null,
       },
-      roleFilter: roleFilter !== "all" ? roleFilter : null,
-      statusFilter: statusFilter !== "all" ? statusFilter : null,
+      roleFilter: roleFilter === "all" ? null : roleFilter,
+      statusFilter: statusFilter === "all" ? null : statusFilter,
     },
     fetchPolicy: "cache-and-network",
   });
@@ -75,7 +75,7 @@ export function ManagersContainer() {
         alerts: 0,
       };
 
-  const totalCount = data?.managerDirectory?.totalCount ?? 0;
+  const totalCount = data ? (data.managerDirectory?.totalCount ?? 0) : undefined;
 
   return (
     <RequirePermission permissions={[AppPermission.StaffViewDirectory]}>
@@ -90,6 +90,7 @@ export function ManagersContainer() {
         statusFilter={statusFilter}
         onRoleFilterChange={setRoleFilter}
         onStatusFilterChange={setStatusFilter}
+        loading={loading}
       />
     </RequirePermission>
   );

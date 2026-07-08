@@ -1,5 +1,5 @@
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
-import { type AccountStatus, AppPermission } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -44,7 +44,7 @@ export namespace StaffDirectoryService {
           name: row.name,
           email: row.email,
           avatarUrl: row.avatarUrl,
-          status: row.status as AccountStatus,
+          status: row.status,
           zoomLink: row.zoomLink,
         })),
         totalTeachers: totalCount,

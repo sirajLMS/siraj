@@ -199,7 +199,7 @@ export function ClassAuditContainer() {
   const audit = data?.groupClassAudit;
   const labels = useAuditLabels(t, audit ?? null);
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
         <CircularProgress />

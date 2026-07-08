@@ -32,6 +32,7 @@ interface AdminInvoicesDataGridProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
+  readonly loading?: boolean;
 }
 
 // Invoice ID text styled with primary color and bold weight for emphasis
@@ -99,6 +100,7 @@ export function AdminInvoicesDataGrid({
   pageSize = 10,
   totalCount,
   onPageChange,
+  loading = false,
 }: Readonly<AdminInvoicesDataGridProps>) {
   const columns = useMemo<GridColDef<AdminInvoiceRow>[]>(
     () => [
@@ -175,6 +177,7 @@ export function AdminInvoicesDataGrid({
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
+      loading={loading}
       emptyMessage={labels.noEntries}
       {...(isServerPagination
         ? {

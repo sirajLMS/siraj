@@ -17,7 +17,8 @@ interface StudentsDesktopViewProps {
   readonly filtersLabel: string;
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
-  readonly totalStudents: number;
+  readonly totalStudents?: number;
+  readonly loading?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
   readonly onPageChange?: (page: number) => void;
@@ -37,6 +38,7 @@ export function StudentsDesktopView({
   metrics,
   rows,
   totalStudents,
+  loading,
   page,
   pageSize,
   onPageChange,
@@ -76,6 +78,7 @@ export function StudentsDesktopView({
           onPageChange={onPageChange}
           onViewProfile={onViewProfile}
           onViewHistory={onViewHistory}
+          loading={loading}
         />
       </SectionPanel>
     </PageContainer>

@@ -16,6 +16,7 @@ export interface UserOverridesDataGridProps {
   readonly users: readonly User[];
   readonly groups: readonly PermissionGroup[];
   readonly onManageOverrides: (userId: string) => void;
+  readonly loading?: boolean;
 }
 
 interface OverridesInfo {
@@ -236,7 +237,12 @@ function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOver
   );
 }
 
-export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Readonly<UserOverridesDataGridProps>) {
+export function UserOverridesDataGrid({
+  users,
+  groups,
+  onManageOverrides,
+  loading = false,
+}: Readonly<UserOverridesDataGridProps>) {
   const t = useTranslations("dashboard.permissions");
 
   const columns = useMemo<GridColDef<User>[]>(() => {
@@ -357,6 +363,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         columns={columns}
         getRowId={row => row.id ?? row.email ?? ""}
         emptyMessage={t("noPermissionsFound")}
+        loading={loading}
         autoHeight
       />
     </Box>

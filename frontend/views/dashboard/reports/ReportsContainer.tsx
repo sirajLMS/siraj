@@ -67,6 +67,7 @@ interface ReportsMainContentProps {
   readonly reportType: ReportType;
   readonly teachers: readonly { readonly id: string; readonly name: string }[];
   readonly canGenerate: boolean;
+  readonly loading?: boolean;
   readonly onFromDateChange: (date: string) => void;
   readonly onToDateChange: (date: string) => void;
   readonly onTeacherChange: (id: string) => void;
@@ -86,6 +87,7 @@ function ReportsMainContent({
   reportType,
   teachers,
   canGenerate,
+  loading,
   onFromDateChange,
   onToDateChange,
   onTeacherChange,
@@ -166,6 +168,7 @@ function ReportsMainContent({
       rows={rows}
       summary={summary}
       canGenerate={canGenerate}
+      loading={loading}
       onFromDateChange={onFromDateChange}
       onToDateChange={onToDateChange}
       onTeacherChange={onTeacherChange}
@@ -235,7 +238,7 @@ function useReportData(activeFilters: {
       .map(t => ({ id: t.id, name: t.name }));
   }, [teachersData]);
 
-  const { data: reportData } = useQuery(generateAttendanceReportQueryDocument, {
+  const { data: reportData, loading: reportLoading } = useQuery(generateAttendanceReportQueryDocument, {
     variables: { filters: activeFilters },
     fetchPolicy: "network-only",
   });
@@ -287,7 +290,7 @@ function useReportData(activeFilters: {
     };
   }, [rows, reportData]);
 
-  return { reportData, teachers, rows, summary };
+  return { reportData, reportLoading, teachers, rows, summary };
 }
 
 function useReportHandlers({
@@ -402,7 +405,7 @@ export function ReportsContainer() {
     setReportType,
   } = useReportFilters();
 
-  const { reportData, teachers, rows, summary } = useReportData(activeFilters);
+  const { reportData, reportLoading, teachers, rows, summary } = useReportData(activeFilters);
 
   const { handleSubmit, handleExportCsv, handlePrintReport, handleRowClick } = useReportHandlers({
     fromDate,
@@ -426,6 +429,7 @@ export function ReportsContainer() {
         reportType={reportType}
         teachers={teachers}
         canGenerate={canGenerate}
+        loading={reportLoading}
         onFromDateChange={setFromDate}
         onToDateChange={setToDate}
         onTeacherChange={setTeacherId}

@@ -10,10 +10,11 @@ interface StudentsViewProps {
   readonly metrics: readonly MetricItem[];
   readonly mobileMetrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
-  readonly totalStudents: number;
+  readonly totalStudents?: number;
   readonly searchQuery: string;
   readonly page: number;
   readonly pageSize: number;
+  readonly loading?: boolean;
   readonly labels: StudentsViewLabels;
   readonly onSearchChange: (query: string) => void;
   readonly onAddStudent: () => void;
@@ -31,6 +32,7 @@ export function StudentsView({
   searchQuery,
   page,
   pageSize,
+  loading,
   labels,
   onSearchChange,
   onAddStudent,
@@ -53,6 +55,7 @@ export function StudentsView({
         searchQuery={searchQuery}
         mobileMetrics={mobileMetrics}
         rows={rows}
+        loading={loading}
         page={page}
         pageSize={pageSize}
         totalCount={totalStudents}
@@ -82,6 +85,7 @@ export function StudentsView({
       filtersLabel={labels.filters}
       metrics={metrics}
       rows={rows}
+      loading={loading}
       totalStudents={totalStudents}
       page={page}
       pageSize={pageSize}

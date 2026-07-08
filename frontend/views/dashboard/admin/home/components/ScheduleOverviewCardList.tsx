@@ -1,7 +1,7 @@
 "use client";
 
 import { AccessTimeOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, Box, Paper, Stack, type Theme, Tooltip, Typography } from "@mui/material";
+import { Avatar, Box, CircularProgress, Paper, Stack, type Theme, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { useLocale } from "next-intl";
 import { ActionIconLink } from "@/frontend/components/ui";
@@ -33,6 +33,7 @@ interface ScheduleOverviewCardListProps {
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly emptyMessage: string;
+  readonly loading?: boolean;
 }
 
 function getNameInitials(name: string): string {
@@ -446,12 +447,20 @@ export function ScheduleOverviewCardList({
   statusLabels,
   detailsLabel,
   emptyMessage,
+  loading = false,
 }: ScheduleOverviewCardListProps) {
   const locale = useLocale();
   const { hasPermission } = useUserStore();
   const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
 
   if (rows.length === 0) {
+    if (loading) {
+      return (
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
     return (
       <StyledEmptyStateBox>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>

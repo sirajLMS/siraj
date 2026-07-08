@@ -113,6 +113,18 @@ interface DeactivateDialogProps {
   readonly updateLoading: boolean;
 }
 
+type TranslatorFn = ReturnType<typeof useTranslations>;
+
+function resolveSubmitLabel(
+  state: { readonly updateLoading: boolean; readonly isDeactivate: boolean },
+  t: TranslatorFn
+): string {
+  if (state.updateLoading) {
+    return t("actions.processing");
+  }
+  return state.isDeactivate ? t("actions.deactivate") : t("actions.activate");
+}
+
 function DeactivateDialog({
   open,
   onClose,
@@ -146,7 +158,7 @@ function DeactivateDialog({
             },
           })}
         >
-          {updateLoading ? t("actions.processing") : isDeactivate ? t("actions.deactivate") : t("actions.activate")}
+          {resolveSubmitLabel({ updateLoading, isDeactivate }, t)}
         </Button>
       </DialogActions>
     </Dialog>

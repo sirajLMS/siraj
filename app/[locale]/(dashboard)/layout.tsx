@@ -22,8 +22,9 @@ export default async function DashboardLayout({
   }
 
   if (!userId || !context) {
+    const reason = userId ? "missing permission context" : "missing userId";
     logger.info("[AuthRedirect] Dashboard layout redirecting to login", {
-      reason: !userId ? "missing userId" : "missing permission context",
+      reason,
       hasUserId: Boolean(userId),
       hasContext: Boolean(context),
       isImpersonating,

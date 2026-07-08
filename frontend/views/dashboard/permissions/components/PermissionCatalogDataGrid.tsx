@@ -10,6 +10,7 @@ import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/g
 export interface PermissionCatalogDataGridProps {
   readonly permissions: readonly Permission[];
   readonly groups: readonly PermissionGroup[];
+  readonly loading?: boolean;
 }
 
 interface PermissionKeyCellProps {
@@ -77,7 +78,11 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
   );
 }
 
-export function PermissionCatalogDataGrid({ permissions, groups }: Readonly<PermissionCatalogDataGridProps>) {
+export function PermissionCatalogDataGrid({
+  permissions,
+  groups,
+  loading = false,
+}: Readonly<PermissionCatalogDataGridProps>) {
   const t = useTranslations("dashboard.permissions");
 
   const columns = useMemo<GridColDef<Permission>[]>(() => {
@@ -133,6 +138,7 @@ export function PermissionCatalogDataGrid({ permissions, groups }: Readonly<Perm
         columns={columns}
         getRowId={row => row.id ?? row.key ?? ""}
         emptyMessage={t("noPermissionsFound")}
+        loading={loading}
         autoHeight
       />
     </Box>

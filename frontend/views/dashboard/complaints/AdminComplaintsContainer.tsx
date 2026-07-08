@@ -153,7 +153,7 @@ export function AdminComplaintsContainer() {
     }
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />

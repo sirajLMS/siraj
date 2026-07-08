@@ -32,7 +32,8 @@ export function formatScheduleTimeOnly(value: string | null | undefined, locale:
       withoutTimezone = withoutTimezone.slice(0, lastOpen).trim();
     }
   }
-  const timeMatch = withoutTimezone.match(/\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?/i);
+  const TIME_PATTERN = /\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?/i;
+  const timeMatch = TIME_PATTERN.exec(withoutTimezone);
   const result = timeMatch?.[0] ?? withoutTimezone;
   if (locale === "ar") {
     return result.replace(/\s?AM/i, " ص").replace(/\s?PM/i, " م");

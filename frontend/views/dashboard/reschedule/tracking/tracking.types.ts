@@ -63,6 +63,7 @@ export interface RescheduleTrackingDataGridProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
+  readonly loading?: boolean;
 }
 
 export type RescheduleTrackingCardListLabels = RescheduleTrackingCommonLabels;
@@ -97,6 +98,7 @@ export interface RescheduleTrackingViewProps {
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly TrackingRow[];
   readonly labels: RescheduleTrackingViewLabels;
+  readonly loading?: boolean;
   readonly onApprove: (id: string) => void;
   readonly onReject: (id: string) => void;
   readonly onView: (id: string) => void;
@@ -105,7 +107,7 @@ export interface RescheduleTrackingViewProps {
   readonly statusFilter: LeaveRequestStatus | null;
   readonly page: number;
   readonly pageSize: number;
-  readonly totalCount: number;
+  readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;
 }
 

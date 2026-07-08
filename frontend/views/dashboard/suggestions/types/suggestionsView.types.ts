@@ -17,6 +17,7 @@ export interface AdminSuggestionsViewProps {
   readonly labels: SuggestionsAdminLabels;
   readonly summary: AdminSuggestionsSummary;
   readonly rows: readonly AdminSuggestionRow[];
+  readonly loading?: boolean;
   readonly searchQuery: string;
   readonly activeTab: SuggestionStatus;
   readonly canManage: boolean;
@@ -39,6 +40,7 @@ export interface SuggestionsDataGridProps {
   readonly onMarkDuplicate: (id: string) => void;
   readonly onDelete: (id: string) => void;
   readonly columns?: readonly GridColDef<AdminSuggestionRow>[];
+  readonly loading?: boolean;
 }
 
 export interface SuggestionsCardListProps {

@@ -1,5 +1,7 @@
 import type { dstMigrationEntries, dstMigrationRuns } from "@/backend/db/schema";
-import type { DstMigrationResult, MigrationStatus } from "@/backend/enum";
+import type { MigrationStatus } from "@/backend/enum";
+
+export type { DstMigrationResult, MigrationStatus } from "@/backend/enum";
 export type DstMigrationRunSelectType = typeof dstMigrationRuns.$inferSelect;
 export type DstMigrationRunInsertType = typeof dstMigrationRuns.$inferInsert;
 
@@ -46,5 +48,3 @@ export type DstMigrationReportReturnType = {
   readonly checkedEmptyItems: readonly DstCheckedEmptyItemReturnType[];
   readonly status: MigrationStatus;
 };
-
-export type { DstMigrationResult, MigrationStatus };

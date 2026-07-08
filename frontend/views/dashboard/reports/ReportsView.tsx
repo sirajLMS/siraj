@@ -45,6 +45,7 @@ export function ReportsView({
   rows,
   summary,
   canGenerate,
+  loading,
   onFromDateChange,
   onToDateChange,
   onTeacherChange,
@@ -103,6 +104,7 @@ export function ReportsView({
       rows={rows}
       summary={summary}
       canGenerate={canGenerate}
+      loading={loading}
       onFromDateChange={onFromDateChange}
       onToDateChange={onToDateChange}
       onTeacherChange={onTeacherChange}

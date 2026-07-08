@@ -86,7 +86,7 @@ export function ScheduleAlertsContainer() {
       sessionStatus: status,
     };
   });
-  const totalCount = scheduleResult?.pageInfo?.total ?? scheduleResult?.totalCount ?? 0;
+  const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
   const alerts: ScheduleAlert[] = [];
 

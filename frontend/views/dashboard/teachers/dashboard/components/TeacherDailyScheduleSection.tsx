@@ -33,6 +33,7 @@ interface TeacherDailyScheduleSectionProps {
   readonly labels: TeacherDashboardLabels;
   readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly canActivate: boolean;
+  readonly loading?: boolean;
   readonly emptyMessage: string;
   readonly onJoinVideo: (id: string) => void;
   readonly onActivate?: (id: string) => void;
@@ -57,6 +58,7 @@ export function TeacherDailyScheduleSection({
   labels,
   instanceStatusLabels,
   canActivate,
+  loading,
   emptyMessage,
   onJoinVideo,
   onActivate,
@@ -93,6 +95,7 @@ export function TeacherDailyScheduleSection({
           onStartSession={onStartSession}
           onMarkAbsent={onMarkAbsent}
           onRequestLeave={onRequestLeave}
+          loading={loading}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}

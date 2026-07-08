@@ -28,6 +28,7 @@ interface StudentCreditDataGridProps {
   readonly labels: StudentCreditDataGridLabels;
   readonly canManage: boolean;
   readonly onSendReminder: (id: string) => void;
+  readonly loading?: boolean;
 }
 
 function formatClassesLeft(row: StudentCreditRow): string {
@@ -45,6 +46,7 @@ export function StudentCreditDataGrid({
   labels,
   canManage,
   onSendReminder,
+  loading = false,
 }: Readonly<StudentCreditDataGridProps>) {
   const columns = useMemo<GridColDef<StudentCreditRow>[]>(
     () => [
@@ -132,5 +134,13 @@ export function StudentCreditDataGrid({
     [canManage, labels, onSendReminder]
   );
 
-  return <AppDataGrid rows={rows} columns={columns} getRowId={row => row.id} emptyMessage={labels.noEntries} />;
+  return (
+    <AppDataGrid
+      rows={rows}
+      columns={columns}
+      loading={loading}
+      getRowId={row => row.id}
+      emptyMessage={labels.noEntries}
+    />
+  );
 }

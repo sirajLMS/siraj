@@ -15,6 +15,7 @@ export function RescheduleTrackingView({
   metrics,
   rows,
   labels,
+  loading,
   onApprove,
   onReject,
   onView,
@@ -124,6 +125,7 @@ export function RescheduleTrackingView({
             pageSize={pageSize}
             totalCount={totalCount}
             onPageChange={onPageChange}
+            loading={loading}
           />
         )}
       </SectionPanel>

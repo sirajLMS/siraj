@@ -95,7 +95,7 @@ export class SessionRedisService {
     if (!this.isPlainObject(obj.impersonation)) {
       return false;
     }
-    const imp = obj.impersonation as Record<string, unknown>;
+    const imp = obj.impersonation;
     if (
       typeof imp.targetUserId !== "string" ||
       typeof imp.startedAt !== "string" ||
@@ -117,7 +117,7 @@ export class SessionRedisService {
     if (!this.isPlainObject(obj.groupSimulation)) {
       return false;
     }
-    const sim = obj.groupSimulation as Record<string, unknown>;
+    const sim = obj.groupSimulation;
     return typeof sim.groupSlug === "string" && typeof sim.startedAt === "string" && typeof sim.expiresAt === "string";
   }
 
@@ -129,7 +129,7 @@ export class SessionRedisService {
     if (!this.isPlainObject(data)) {
       return false;
     }
-    const obj = data as Record<string, unknown>;
+    const obj = data;
     if (typeof obj.userId !== "string" || typeof obj.hashedId !== "string" || typeof obj.payload !== "string") {
       return false;
     }

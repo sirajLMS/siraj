@@ -31,6 +31,7 @@ export function AdminBillingDesktopView({
   invoices,
   creditRows,
   searchQuery,
+  loading,
   canManage,
   canCreate,
   onSearchChange,
@@ -78,6 +79,7 @@ export function AdminBillingDesktopView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
+          loading={loading}
         />
       </SectionPanel>
 

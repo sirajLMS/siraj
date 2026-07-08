@@ -19,6 +19,7 @@ interface StudentsMobileViewProps {
   readonly searchQuery: string;
   readonly mobileMetrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
+  readonly loading?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -39,6 +40,7 @@ export function StudentsMobileView({
   searchQuery,
   mobileMetrics,
   rows,
+  loading,
   page,
   pageSize,
   totalCount,
@@ -120,6 +122,7 @@ export function StudentsMobileView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
+          loading={loading}
         />
 
         <RequirePermission permissions={[AppPermission.StudentsCreate]}>

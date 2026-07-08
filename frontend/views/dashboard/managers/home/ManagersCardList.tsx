@@ -104,7 +104,7 @@ export function ManagersCardList({
             <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", mb: 3 }}>
               <Box sx={{ position: "relative" }}>
                 <StyledProfileAvatar src={manager.avatarUrl || undefined} alt={manager.name}>
-                  {!manager.avatarUrl ? manager.name.charAt(0).toUpperCase() : undefined}
+                  {manager.avatarUrl ? undefined : manager.name.charAt(0).toUpperCase()}
                 </StyledProfileAvatar>
                 <StyledStatusIndicator status={manager.status === "active" ? "active" : "blocked"} />
               </Box>

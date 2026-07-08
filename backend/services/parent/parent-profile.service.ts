@@ -159,7 +159,7 @@ export namespace ParentProfileService {
     }
 
     const parent = await ParentRepository.findByUserId(actorUserId);
-    if (!parent || parent.id !== parentId) {
+    if (parent?.id !== parentId) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
     }

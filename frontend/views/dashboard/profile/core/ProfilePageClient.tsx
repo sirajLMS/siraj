@@ -64,7 +64,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
       ),
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <ProfileShell {...shellProps} loading>
         {null}

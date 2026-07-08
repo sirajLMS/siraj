@@ -128,7 +128,7 @@ function useTrackingQueries(statusFilter: LeaveRequestStatus | null, pageSize: n
     [rowsData?.rescheduleTrackingRows?.rows, locale]
   );
 
-  const totalCount = rowsData?.rescheduleTrackingRows?.totalCount ?? 0;
+  const totalCount = rowsData ? (rowsData.rescheduleTrackingRows?.totalCount ?? 0) : undefined;
 
   return {
     rows,
@@ -140,6 +140,8 @@ function useTrackingQueries(statusFilter: LeaveRequestStatus | null, pageSize: n
     metricsError,
     refetchRows,
     refetchMetrics,
+    rowsData,
+    metricsData,
   };
 }
 
@@ -224,6 +226,8 @@ export function RescheduleTrackingContainer() {
     metricsError,
     refetchRows,
     refetchMetrics,
+    rowsData,
+    metricsData,
   } = useTrackingQueries(statusFilter, pageSize, page, locale);
 
   const { handleApprove, handleReject, handleView, handleExport } = useTrackingHandlers(
@@ -242,7 +246,7 @@ export function RescheduleTrackingContainer() {
     [setStatusFilter]
   );
 
-  if (rowsLoading || metricsLoading) {
+  if ((rowsLoading && !rowsData) || (metricsLoading && !metricsData)) {
     return <TrackingLoadingState />;
   }
 
@@ -257,6 +261,7 @@ export function RescheduleTrackingContainer() {
         metrics={metrics}
         rows={rows}
         labels={labels}
+        loading={rowsLoading}
         onApprove={handleApprove}
         onReject={handleReject}
         onView={handleView}

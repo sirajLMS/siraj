@@ -91,7 +91,11 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     setSnackbarOpen(true);
   };
 
-  const { data: invoicesData, refetch: refetchInvoices } = useQuery(adminInvoicesQueryDocument, {
+  const {
+    data: invoicesData,
+    loading: invoicesLoading,
+    refetch: refetchInvoices,
+  } = useQuery(adminInvoicesQueryDocument, {
     variables: {
       paginationArgs: {
         first: pageSize,
@@ -164,7 +168,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
 
-  const totalCount = invoicesData?.adminInvoices?.totalCount ?? 0;
+  const totalCount = invoicesData ? (invoicesData.adminInvoices?.totalCount ?? 0) : undefined;
 
   const summary: AdminBillingSummary = useMemo(
     () => ({
@@ -239,6 +243,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         page={page}
         pageSize={pageSize}
         totalCount={totalCount}
+        loading={invoicesLoading}
         onPageChange={setPage}
       />
       <Snackbar

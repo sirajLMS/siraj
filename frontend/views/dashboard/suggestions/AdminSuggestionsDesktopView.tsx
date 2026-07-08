@@ -12,6 +12,7 @@ export function AdminSuggestionsDesktopView({
   summary,
   rows,
   searchQuery,
+  loading,
   activeTab,
   canManage,
   canDelete,
@@ -50,6 +51,7 @@ export function AdminSuggestionsDesktopView({
           onRespond={onRespond}
           onMarkDuplicate={onMarkDuplicate}
           onDelete={onDelete}
+          loading={loading}
         />
       </SectionPanel>
     </PageContainer>

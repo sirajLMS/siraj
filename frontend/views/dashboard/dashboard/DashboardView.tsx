@@ -52,6 +52,7 @@ export function DashboardView({
   onDateChange,
   onTeacherChange,
   onSubmit,
+  loading,
 }: AdminDashboardViewProps) {
   return (
     <PageContainer sx={{ gap: { xs: 0, md: undefined } }}>
@@ -95,6 +96,7 @@ export function DashboardView({
           onDateChange={onDateChange}
           onTeacherChange={onTeacherChange}
           onSubmit={onSubmit}
+          loading={loading}
         />
       </RequirePermission>
     </PageContainer>

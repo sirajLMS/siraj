@@ -71,12 +71,13 @@ export interface ScheduleOverviewData {
   readonly nextDayLabel: string;
   readonly page: number;
   readonly pageSize: number;
-  readonly totalCount: number;
+  readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;
   readonly onSearchChange: (value: string) => void;
   readonly onDateChange: (date: string) => void;
   readonly onTeacherChange: (teacher: string) => void;
   readonly onSubmit: () => void;
+  readonly loading?: boolean;
 }
 
 export interface UserInfo {

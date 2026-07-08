@@ -86,13 +86,13 @@ export function SingleGroupView({
         </Tabs>
       </Box>
 
-      {isLoading && (
+      {isLoading && !permissions && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress color="primary" />
         </Box>
       )}
 
-      {!isLoading && (
+      {(!isLoading || permissions) && (
         <Box sx={{ mt: 1 }}>
           {activeSubTab === "current" && (
             <CurrentPermissionsTab
@@ -101,6 +101,7 @@ export function SingleGroupView({
               permissionsCount={permissionsCount}
               onRevokePermission={handleRevokePermission}
               onSwitchToAddTab={() => setActiveSubTab("add")}
+              loading={isLoading}
             />
           )}
 
@@ -115,6 +116,7 @@ export function SingleGroupView({
               onPermissionToggle={handleAddPermissionToggle}
               onSearchChange={setSearchQuery}
               onCategoryChange={setSelectedCategory}
+              loading={isLoading}
             />
           )}
 
@@ -129,6 +131,7 @@ export function SingleGroupView({
               onUserToggle={handleAssignedUserToggle}
               onSearchChange={setSearchQuery}
               onAssignGroup={onAssignGroup}
+              loading={isLoading}
             />
           )}
         </Box>

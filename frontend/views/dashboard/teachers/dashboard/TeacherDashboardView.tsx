@@ -44,6 +44,7 @@ interface TeacherDashboardViewProps {
   readonly canActivate: boolean;
   readonly canManualEntry: boolean;
   readonly canPrintSchedule: boolean;
+  readonly loading?: boolean;
   readonly onPrintSchedule: () => void;
   readonly onManualEntry: () => void;
   readonly onNewSession: () => void;
@@ -102,6 +103,7 @@ interface MobileScheduleSectionProps {
   readonly scheduleRows: readonly TeacherScheduleRow[];
   readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
+  readonly loading?: boolean;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
   readonly onJoinVideo: (id: string) => void;
@@ -121,6 +123,7 @@ function MobileScheduleSection({
   scheduleRows,
   labels,
   canActivate,
+  loading,
   dateValue,
   onDateChange,
   onJoinVideo,
@@ -165,6 +168,7 @@ function MobileScheduleSection({
           onStartSession={onStartSession}
           onMarkAbsent={onMarkAbsent}
           onRequestLeave={onRequestLeave}
+          loading={loading}
         />
       </SectionPanel>
 
@@ -231,6 +235,7 @@ export function TeacherDashboardView({
   lastUpdated,
   activationError,
   canActivate,
+  loading,
   onJoinVideo,
   onActivate,
   onStartSession,
@@ -292,6 +297,7 @@ export function TeacherDashboardView({
             scheduleRows={scheduleRows}
             labels={labels}
             canActivate={canActivate}
+            loading={loading}
             dateValue={dateValue}
             onDateChange={onDateChange}
             onJoinVideo={onJoinVideo}
@@ -319,6 +325,7 @@ export function TeacherDashboardView({
             labels={labels}
             instanceStatusLabels={labels.instanceStatusLabels}
             canActivate={canActivate}
+            loading={loading}
             emptyMessage={labels.schedule.noEntries}
             onJoinVideo={onJoinVideo}
             onActivate={onActivate}

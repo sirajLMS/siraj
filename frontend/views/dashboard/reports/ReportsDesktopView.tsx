@@ -39,6 +39,7 @@ export function ReportsDesktopView({
   rows,
   summary,
   canGenerate,
+  loading,
   onFromDateChange,
   onToDateChange,
   onTeacherChange,
@@ -83,7 +84,13 @@ export function ReportsDesktopView({
       </BaseCard>
 
       <SectionPanel>
-        <ReportsDataGrid rows={rows} labels={tableLabels} reportType={reportType} onRowClick={onRowClick} />
+        <ReportsDataGrid
+          rows={rows}
+          labels={tableLabels}
+          reportType={reportType}
+          loading={loading}
+          onRowClick={onRowClick}
+        />
         <ReportsTotalsRow
           summary={summary}
           totalsLabel={totalsLabel}

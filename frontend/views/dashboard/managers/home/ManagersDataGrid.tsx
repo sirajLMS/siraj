@@ -31,6 +31,7 @@ interface ManagersDataGridProps {
   pageSize?: number;
   totalCount?: number;
   onPageChange?: (page: number) => void;
+  readonly loading?: boolean;
 }
 
 export function ManagersDataGrid({
@@ -39,6 +40,7 @@ export function ManagersDataGrid({
   pageSize = 10,
   totalCount,
   onPageChange,
+  loading = false,
 }: Readonly<ManagersDataGridProps>) {
   const t = useTranslations("dashboard.managersDirectory");
 
@@ -134,6 +136,7 @@ export function ManagersDataGrid({
         columns={columns}
         getRowId={row => row.userId}
         emptyMessage={t("noEntries")}
+        loading={loading}
         autoHeight
         rowHeight={80}
         {...(isServerPagination

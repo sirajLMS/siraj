@@ -92,7 +92,7 @@ export function LanguageSwitcher() {
               <LanguageOption
                 key={language.code}
                 onClick={() => {
-                  handleLanguageChange(language.code as Locale);
+                  handleLanguageChange(language.code);
                 }}
                 elevation={0}
                 square

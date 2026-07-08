@@ -65,34 +65,48 @@ export function ViewAsUserButton({
     }
   };
 
-  const trigger =
-    variant === "menuItem" ? (
-      <MenuItem onClick={openDialog}>
-        <LoginOutlined fontSize="small" sx={{ mr: 1 }} />
-        {t("loginAs")}
-      </MenuItem>
-    ) : variant === "link" ? (
-      <Link
-        component="button"
-        type="button"
-        variant="bodyMd"
-        underline="hover"
-        onClick={openDialog}
-        sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
-      >
-        {t("loginAs")}
-      </Link>
-    ) : variant === "button" ? (
-      <Button variant="outlined" size={size} startIcon={<LoginOutlined />} onClick={openDialog}>
-        {t("loginAs")}
-      </Button>
-    ) : (
-      <Tooltip title={t("loginAs")}>
-        <IconButton size={size} onClick={openDialog} aria-label={t("loginAs")}>
+  const loginLabel = t("loginAs");
+
+  function renderTrigger() {
+    if (variant === "menuItem") {
+      return (
+        <MenuItem onClick={openDialog}>
+          <LoginOutlined fontSize="small" sx={{ mr: 1 }} />
+          {loginLabel}
+        </MenuItem>
+      );
+    }
+    if (variant === "link") {
+      return (
+        <Link
+          component="button"
+          type="button"
+          variant="bodyMd"
+          underline="hover"
+          onClick={openDialog}
+          sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
+        >
+          {loginLabel}
+        </Link>
+      );
+    }
+    if (variant === "button") {
+      return (
+        <Button variant="outlined" size={size} startIcon={<LoginOutlined />} onClick={openDialog}>
+          {loginLabel}
+        </Button>
+      );
+    }
+    return (
+      <Tooltip title={loginLabel}>
+        <IconButton size={size} onClick={openDialog} aria-label={loginLabel}>
           <VisibilityOutlined fontSize="small" />
         </IconButton>
       </Tooltip>
     );
+  }
+
+  const trigger = renderTrigger();
 
   return (
     <>

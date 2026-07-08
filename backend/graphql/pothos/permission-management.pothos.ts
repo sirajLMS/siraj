@@ -17,9 +17,7 @@ function clearGroupUsersCache() {
 }
 
 async function getGroupUsersMap(): Promise<Map<string, GroupUserEntity[]>> {
-  if (!groupUsersCache) {
-    groupUsersCache = await PermissionManagementRepository.listAllGroupUsers();
-  }
+  groupUsersCache ??= await PermissionManagementRepository.listAllGroupUsers();
   return groupUsersCache;
 }
 
@@ -273,7 +271,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: async (_root, args, ctx) => {
       const formattedOverrides = args.overrides.map(o => ({
         permissionId: o.permissionId,
-        state: o.state as OverrideState,
+        state: o.state,
       }));
       await PermissionManagementService.updateUserOverrides(
         ctx.user?.id || "",

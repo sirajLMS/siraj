@@ -129,7 +129,7 @@ export function AdminDashboardContainer() {
   const scheduleResult = dashboardData?.adminDashboardSchedule;
   const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null);
   const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
-  const totalCount = scheduleResult?.pageInfo?.total ?? scheduleResult?.totalCount ?? 0;
+  const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
   const selectedMetricLabel = filters.selectedStatus
     ? t(`admin.metrics.${filters.selectedStatus}` as "admin.metrics.total")
@@ -137,6 +137,7 @@ export function AdminDashboardContainer() {
 
   return (
     <DashboardView
+      loading={loading}
       todayClassesTitle={t("admin.todayClasses")}
       lastUpdated={lastUpdated}
       metrics={metricsList}

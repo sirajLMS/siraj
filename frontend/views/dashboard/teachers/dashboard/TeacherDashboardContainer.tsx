@@ -184,7 +184,11 @@ export function TeacherDashboardContainer() {
     skip: null,
   };
 
-  const { data: dashboardData, refetch } = useQuery(teacherDashboardQueryDocument, {
+  const {
+    data: dashboardData,
+    loading: dashboardLoading,
+    refetch,
+  } = useQuery(teacherDashboardQueryDocument, {
     variables: { date: filterDate, pagination: paginationArgs },
     fetchPolicy: "cache-and-network",
   });
@@ -231,7 +235,7 @@ export function TeacherDashboardContainer() {
   const teacherId = dashboardId.split("-")[2] || "";
 
   const scheduleRows = mapRows(dashboardData?.teacherDashboard?.scheduleRows, filterDate);
-  const totalCount = dashboardData?.teacherDashboard?.totalCount ?? 0;
+  const totalCount = dashboardData?.teacherDashboard ? (dashboardData.teacherDashboard.totalCount ?? 0) : undefined;
   const dashboardMetrics = dashboardData?.teacherDashboard?.metrics;
   const metricItems = buildTeacherActiveMetricItems(dashboardMetrics, labels.activeMetrics);
 
@@ -346,6 +350,7 @@ export function TeacherDashboardContainer() {
         canActivate={canActivate}
         canManualEntry={canActivate}
         canPrintSchedule={true}
+        loading={dashboardLoading}
         onPrintSchedule={() => {
           globalThis.print();
         }}

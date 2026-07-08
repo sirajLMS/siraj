@@ -208,7 +208,7 @@ export function AdminSuggestionsContainer() {
     void deleteSuggestion({ variables: { suggestionId: deletingId } });
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />
@@ -231,6 +231,7 @@ export function AdminSuggestionsContainer() {
         activeTab={activeTab}
         canManage={canManage}
         canDelete={canDelete}
+        loading={loading}
         onSearchChange={setSearchQuery}
         onTabChange={setActiveTab}
         onMarkReviewed={handleMarkReviewed}

@@ -49,7 +49,7 @@ export namespace ClassSessionService {
     }
 
     const teacher = await SchedulingRepository.getTeacherByUserId(userId);
-    if (teacher && instance.teacherId === teacher.id) {
+    if (instance.teacherId === teacher?.id) {
       return;
     }
 

@@ -141,7 +141,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
   const records = useMemo(() => mapComplaintRecords(data?.parentComplaints), [data?.parentComplaints]);
 
   if (!parentId) return <AccessDeniedView />;
-  if (loading) return <LoadingView />;
+  if (loading && !data) return <LoadingView />;
 
   if (error) {
     logger.error("Error loading parent complaints:", { error });

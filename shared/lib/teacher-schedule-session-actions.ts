@@ -41,8 +41,8 @@ export interface TeacherScheduleSessionActions {
 export function resolveTeacherScheduleSessionActions(
   input: TeacherScheduleSessionActionInput
 ): TeacherScheduleSessionActions {
-  const executionState = (input.executionState ?? ClassExecutionStateValues.NOT_ACTIVATED) as string;
-  const outcome = (input.outcome ?? ClassOutcomeValues.PENDING) as string;
+  const executionState = input.executionState ?? ClassExecutionStateValues.NOT_ACTIVATED;
+  const outcome = input.outcome ?? ClassOutcomeValues.PENDING;
   const none = { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: false };
 
   if (executionState === ClassExecutionStateValues.COMPLETED) {

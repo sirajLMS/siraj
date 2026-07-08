@@ -1,5 +1,5 @@
 import { cert, deleteApp, getApp, getApps, initializeApp } from "firebase-admin/app";
-import type { BatchResponse, SendResponse } from "firebase-admin/messaging";
+import type { BatchResponse, Message, SendResponse } from "firebase-admin/messaging";
 import { getMessaging } from "firebase-admin/messaging";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
@@ -71,11 +71,13 @@ export class FcmPushAdapter implements IPushChannel {
     );
 
     try {
-      const response = await this.context.messaging.sendEachForMulticast({
-        tokens,
+      const messages: Message[] = tokens.map(token => ({
+        token,
         notification: { title: payload.title, body: payload.body },
         data: payload.data ?? {},
-      });
+      }));
+
+      const response = await this.context.messaging.sendEach(messages);
 
       const result = await this.processMulticastResponse(response, deliveries, deviceTokens, payload.userId);
 

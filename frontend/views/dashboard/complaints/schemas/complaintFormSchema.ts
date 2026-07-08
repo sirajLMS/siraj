@@ -4,7 +4,7 @@ import type { ComplaintValidationLabels } from "@/shared/messages/types/dashboar
 
 export const complaintFormSchema = (labels: ComplaintValidationLabels) =>
   z.object({
-    category: z.nativeEnum(ComplaintCategory, {
+    category: z.enum(ComplaintCategory, {
       message: labels.categoryRequired,
     }),
     studentId: z.string().min(1, labels.studentRequired),

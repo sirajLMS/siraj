@@ -33,6 +33,7 @@ interface AcademicScheduleDataGridProps {
   readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
   readonly onPageChange?: (page: number) => void;
+  readonly loading?: boolean;
 }
 
 const SESSION_STATUS_LABELS: Record<ClassSessionStatus, keyof AcademicScheduleDataGridLabels> = {
@@ -50,6 +51,7 @@ export function AcademicScheduleDataGrid({
   onJoin,
   onLeave,
   onPageChange,
+  loading = false,
 }: AcademicScheduleDataGridProps) {
   const columns = useMemo<GridColDef<AcademicClassRow>[]>(() => {
     const actionLabels = {
@@ -143,6 +145,7 @@ export function AcademicScheduleDataGrid({
     <AppDataGrid<AcademicClassRow>
       rows={rows}
       columns={columns}
+      loading={loading}
       getRowId={row => row.id}
       autoHeight
       rowHeight={100}

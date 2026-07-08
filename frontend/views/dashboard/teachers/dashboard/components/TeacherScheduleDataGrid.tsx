@@ -22,6 +22,7 @@ interface TeacherScheduleDataGridProps {
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
   readonly onRequestLeave?: (id: string) => void;
+  readonly loading?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -50,6 +51,7 @@ export function TeacherScheduleDataGrid({
   onStartSession,
   onMarkAbsent,
   onRequestLeave,
+  loading = false,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -151,6 +153,7 @@ export function TeacherScheduleDataGrid({
       columns={columns}
       getRowId={row => row.id}
       emptyMessage={emptyMessage}
+      loading={loading}
       disableRowSelectionOnClick
       autoHeight
       {...(isServerPagination

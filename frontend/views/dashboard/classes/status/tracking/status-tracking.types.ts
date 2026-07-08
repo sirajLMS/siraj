@@ -146,6 +146,7 @@ export interface StatusTrackingDataGridProps {
   readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
   readonly onJoin: (id: string) => void;
+  readonly loading?: boolean;
 }
 
 export interface StatusTrackingCardListProps {

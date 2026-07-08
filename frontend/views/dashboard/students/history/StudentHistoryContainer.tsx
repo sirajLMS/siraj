@@ -95,7 +95,7 @@ export function StudentHistoryContainer() {
     [setSelectedDay]
   );
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
         <CircularProgress />

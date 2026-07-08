@@ -26,6 +26,7 @@ interface ReportsDataGridProps {
   readonly labels: ReportsDataGridLabels;
   readonly reportType: ReportType;
   readonly onRowClick?: (row: ReportLedgerRow) => void;
+  readonly loading?: boolean;
 }
 
 function nameHrefForRow(row: ReportLedgerRow, reportType: ReportType): string | undefined {
@@ -64,7 +65,13 @@ function renderCountCell(value: number, tone: "default" | "error" | "primary" = 
   );
 }
 
-export function ReportsDataGrid({ rows, labels, reportType, onRowClick }: Readonly<ReportsDataGridProps>) {
+export function ReportsDataGrid({
+  rows,
+  labels,
+  reportType,
+  loading = false,
+  onRowClick,
+}: Readonly<ReportsDataGridProps>) {
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
@@ -168,6 +175,7 @@ export function ReportsDataGrid({ rows, labels, reportType, onRowClick }: Readon
       <AppDataGrid
         rows={rows}
         columns={columns}
+        loading={loading}
         emptyMessage={labels.noEntries}
         autoHeight
         disableColumnMenu

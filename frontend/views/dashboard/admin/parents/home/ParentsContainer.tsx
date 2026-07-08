@@ -165,7 +165,7 @@ export function ParentsContainer() {
     resetFilters,
   } = useParentsStore();
 
-  const { data } = useQuery(parentDirectoryQueryDocument, {
+  const { data, loading } = useQuery(parentDirectoryQueryDocument, {
     variables: {
       search: searchQuery || null,
       statusFilter: statusFilter || null,
@@ -226,7 +226,8 @@ export function ParentsContainer() {
         labels={labels}
         page={page}
         pageSize={pageSize}
-        totalCount={directory?.totalCount ?? 0}
+        totalCount={directory ? (directory.totalCount ?? 0) : undefined}
+        loading={loading}
         statusFilter={statusFilter}
         filterPanelOpen={filterPanelOpen}
         onAddParent={handleAddParent}

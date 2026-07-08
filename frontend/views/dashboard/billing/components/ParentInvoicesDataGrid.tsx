@@ -35,6 +35,7 @@ interface ParentInvoicesDataGridProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
+  readonly loading?: boolean;
 }
 
 // Fee amount text styled with primary color and bold weight for emphasis
@@ -53,6 +54,7 @@ export function ParentInvoicesDataGrid({
   pageSize = 10,
   totalCount,
   onPageChange,
+  loading = false,
 }: Readonly<ParentInvoicesDataGridProps>) {
   const columns = useMemo<GridColDef<ParentInvoiceRow>[]>(
     () => [
@@ -171,6 +173,7 @@ export function ParentInvoicesDataGrid({
     <AppDataGrid
       rows={rows}
       columns={columns}
+      loading={loading}
       getRowId={row => row.id}
       emptyMessage={labels.noEntries}
       {...(isServerPagination

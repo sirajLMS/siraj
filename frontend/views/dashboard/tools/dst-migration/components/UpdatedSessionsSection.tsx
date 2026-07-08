@@ -11,9 +11,10 @@ import { UpdatedSessionsDataGrid } from "./UpdatedSessionsDataGrid";
 interface Props {
   readonly sessions: readonly UpdatedSession[];
   readonly successfulCount: number;
+  readonly loading?: boolean;
 }
 
-export function UpdatedSessionsSection({ sessions, successfulCount }: Readonly<Props>) {
+export function UpdatedSessionsSection({ sessions, successfulCount, loading }: Readonly<Props>) {
   const t = useTranslations("dashboard.dstMigration");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
@@ -68,7 +69,7 @@ export function UpdatedSessionsSection({ sessions, successfulCount }: Readonly<P
         {isMobile ? (
           <UpdatedSessionsCardList sessions={sessions} successfulCount={successfulCount} />
         ) : (
-          <UpdatedSessionsDataGrid sessions={sessions} />
+          <UpdatedSessionsDataGrid sessions={sessions} loading={loading} />
         )}
       </Box>
     </Box>

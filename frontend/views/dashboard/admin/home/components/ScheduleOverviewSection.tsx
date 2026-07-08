@@ -136,6 +136,7 @@ const DesktopLayout = ({
   onDateChange,
   onTeacherChange,
   onSubmit,
+  loading,
 }: ScheduleOverviewSectionProps) => (
   <StyledDesktopPanel elevation={0}>
     <SectionPanel
@@ -195,6 +196,7 @@ const DesktopLayout = ({
         statusLabels={statusLabels}
         detailsLabel={detailsLabel}
         emptyMessage={emptyMessage}
+        loading={loading}
       />
     </SectionPanel>
   </StyledDesktopPanel>
@@ -227,8 +229,9 @@ const MobileLayout = ({
   onDateChange,
   onTeacherChange,
   onSubmit,
+  loading,
 }: ScheduleOverviewSectionProps) => {
-  const pageCount = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 0;
+  const pageCount = totalCount !== undefined && totalCount > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   return (
     <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
@@ -291,13 +294,14 @@ const MobileLayout = ({
           statusLabels={statusLabels}
           detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
+          loading={loading}
         />
       </SectionPanel>
 
       <PaginationControls
         page={page}
         pageCount={pageCount}
-        rowCount={totalCount}
+        rowCount={totalCount ?? 0}
         pageSize={pageSize}
         onPageChange={onPageChange}
       />

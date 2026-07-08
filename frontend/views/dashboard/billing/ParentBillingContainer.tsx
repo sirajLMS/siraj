@@ -89,7 +89,7 @@ export function ParentBillingContainer() {
     },
   });
 
-  const totalCount = data?.parentInvoiceHistory?.totalCount ?? 0;
+  const totalCount = data ? (data.parentInvoiceHistory?.totalCount ?? 0) : undefined;
 
   const invoices = useMemo(() => data?.parentInvoiceHistory?.rows ?? [], [data?.parentInvoiceHistory]);
 
@@ -121,7 +121,7 @@ export function ParentBillingContainer() {
     [summaryData?.parentBillingSummary]
   );
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />
@@ -152,6 +152,7 @@ export function ParentBillingContainer() {
     page,
     pageSize,
     totalCount,
+    loading,
     onPageChange: setPage,
   };
 

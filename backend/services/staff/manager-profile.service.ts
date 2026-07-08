@@ -20,7 +20,7 @@ export namespace ManagerProfileService {
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     const targetRow = await StaffProfileRepository.findByStaffProfileId(targetStaffProfileId);
-    if (!targetRow || targetRow.id !== actorUserId) {
+    if (targetRow?.id !== actorUserId) {
       throw new Error(t("insufficientPermissions"));
     }
 

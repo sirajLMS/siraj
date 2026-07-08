@@ -20,6 +20,7 @@ interface StudentDirectoryDataGridProps {
   readonly onPageChange?: (page: number) => void;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
+  readonly loading?: boolean;
 }
 
 function formatHours(hours: number): string {
@@ -35,6 +36,7 @@ export function StudentDirectoryDataGrid({
   onPageChange,
   onViewProfile,
   onViewHistory,
+  loading = false,
 }: StudentDirectoryDataGridProps) {
   const columns = useMemo<GridColDef<StudentDirectoryRowExtended>[]>(
     () => [
@@ -175,6 +177,7 @@ export function StudentDirectoryDataGrid({
       rows={rows}
       columns={columns}
       getRowId={row => row.id ?? ""}
+      loading={loading}
       autoHeight
       ariaLabel="student-directory-table"
       emptyMessage={labels.noEntries}

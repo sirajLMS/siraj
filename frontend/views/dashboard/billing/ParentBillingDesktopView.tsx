@@ -14,6 +14,7 @@ export function ParentBillingDesktopView({
   summary,
   invoices,
   searchQuery,
+  loading,
   canView,
   onSearchChange,
   onPayNow,
@@ -55,6 +56,7 @@ export function ParentBillingDesktopView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
+          loading={loading}
         />
       </SectionPanel>
     </PageContainer>

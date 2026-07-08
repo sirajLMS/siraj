@@ -50,7 +50,7 @@ interface ScheduleAlertsViewProps {
   readonly metrics: readonly AlertsMetric[];
   readonly metricLabels: Record<string, { label: string; subLabel: string }>;
   readonly classes: readonly AcademicClassRow[];
-  readonly totalClasses: number;
+  readonly totalClasses?: number;
   readonly currentPage: number;
   readonly pageSize: number;
   readonly labels: ScheduleAlertsLabels;
@@ -129,7 +129,7 @@ const MobileAlertsLayout = ({
 }: {
   labels: ScheduleAlertsLabels;
   classes: readonly AcademicClassRow[];
-  totalCount: number;
+  totalCount?: number;
   currentPage: number;
   pageSize: number;
   onFilter: () => void;
@@ -196,6 +196,7 @@ const DesktopAlertsLayout = ({
   totalClasses,
   currentPage,
   pageSize,
+  loading,
   onFilter,
   onExport,
   onJoin,
@@ -205,9 +206,10 @@ const DesktopAlertsLayout = ({
 }: {
   labels: ScheduleAlertsLabels;
   classes: readonly AcademicClassRow[];
-  totalClasses: number;
+  totalClasses?: number;
   currentPage: number;
   pageSize: number;
+  loading?: boolean;
   onFilter: () => void;
   onExport: () => void;
   onJoin: (id: string) => void;
@@ -239,10 +241,78 @@ const DesktopAlertsLayout = ({
         onJoin={onJoin}
         onLeave={onLeave}
         onPageChange={onPageChange}
+        loading={loading}
       />
     </SectionPanel>
   );
 };
+
+interface ScheduleBodyProps {
+  readonly loading: boolean | undefined;
+  readonly isMobile: boolean;
+  readonly labels: ScheduleAlertsLabels;
+  readonly classes: readonly AcademicClassRow[];
+  readonly totalClasses?: number;
+  readonly currentPage: number;
+  readonly pageSize: number;
+  readonly onFilter: () => void;
+  readonly onExport: () => void;
+  readonly onJoin: (id: string) => void;
+  readonly onLeave: (id: string) => void;
+  readonly onPageChange: (page: number) => void;
+  readonly cardListLabels: CardListLabels;
+  readonly gridLabels: AcademicScheduleDataGridLabels;
+}
+
+function renderScheduleBody(props: ScheduleBodyProps) {
+  if (props.loading) {
+    return (
+      <Box
+        sx={theme => ({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 8,
+          color: theme.palette.text.secondary,
+        })}
+      >
+        <Typography variant="bodyLg">{props.labels.loading}</Typography>
+      </Box>
+    );
+  }
+  if (props.isMobile) {
+    return (
+      <MobileAlertsLayout
+        labels={props.labels}
+        classes={props.classes}
+        totalCount={props.totalClasses}
+        currentPage={props.currentPage}
+        pageSize={props.pageSize}
+        onFilter={props.onFilter}
+        onExport={props.onExport}
+        onJoin={props.onJoin}
+        onLeave={props.onLeave}
+        onPageChange={props.onPageChange}
+        cardListLabels={props.cardListLabels}
+      />
+    );
+  }
+  return (
+    <DesktopAlertsLayout
+      labels={props.labels}
+      classes={props.classes}
+      totalClasses={props.totalClasses}
+      currentPage={props.currentPage}
+      pageSize={props.pageSize}
+      onFilter={props.onFilter}
+      onExport={props.onExport}
+      onJoin={props.onJoin}
+      onLeave={props.onLeave}
+      onPageChange={props.onPageChange}
+      gridLabels={props.gridLabels}
+    />
+  );
+}
 
 export function ScheduleAlertsView({
   alerts,
@@ -288,6 +358,23 @@ export function ScheduleAlertsView({
     endOfSchedule: labels.endOfSchedule,
   };
 
+  const scheduleBody = renderScheduleBody({
+    loading,
+    isMobile,
+    labels,
+    classes,
+    totalClasses,
+    currentPage,
+    pageSize,
+    onFilter,
+    onExport,
+    onJoin,
+    onLeave,
+    onPageChange,
+    cardListLabels,
+    gridLabels,
+  });
+
   return (
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
@@ -302,47 +389,7 @@ export function ScheduleAlertsView({
         onDownloadReport={onDownloadReport}
       />
 
-      {loading ? (
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            py: 8,
-            color: theme.palette.text.secondary,
-          })}
-        >
-          <Typography variant="bodyLg">{labels.loading}</Typography>
-        </Box>
-      ) : isMobile ? (
-        <MobileAlertsLayout
-          labels={labels}
-          classes={classes}
-          totalCount={totalClasses}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          onFilter={onFilter}
-          onExport={onExport}
-          onJoin={onJoin}
-          onLeave={onLeave}
-          onPageChange={onPageChange}
-          cardListLabels={cardListLabels}
-        />
-      ) : (
-        <DesktopAlertsLayout
-          labels={labels}
-          classes={classes}
-          totalClasses={totalClasses}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          onFilter={onFilter}
-          onExport={onExport}
-          onJoin={onJoin}
-          onLeave={onLeave}
-          onPageChange={onPageChange}
-          gridLabels={gridLabels}
-        />
-      )}
+      {scheduleBody}
     </PageContainer>
   );
 }

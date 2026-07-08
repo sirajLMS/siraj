@@ -90,6 +90,7 @@ export function SuggestionsDataGrid({
   onRespond,
   onMarkDuplicate,
   onDelete,
+  loading = false,
 }: Readonly<SuggestionsDataGridProps>) {
   const columns = useMemo<GridColDef<AdminSuggestionRow>[]>(
     () => [
@@ -165,5 +166,13 @@ export function SuggestionsDataGrid({
     [canManage, canDelete, labels, onMarkReviewed, onRespond, onMarkDuplicate, onDelete]
   );
 
-  return <AppDataGrid rows={rows} columns={columns} getRowId={row => row.id} emptyMessage={labels.table.noEntries} />;
+  return (
+    <AppDataGrid
+      rows={rows}
+      columns={columns}
+      getRowId={row => row.id}
+      emptyMessage={labels.table.noEntries}
+      loading={loading}
+    />
+  );
 }

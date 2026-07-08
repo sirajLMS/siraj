@@ -49,6 +49,7 @@ interface ParentsViewProps {
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentsViewLabels;
+  readonly loading?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -199,6 +200,7 @@ interface ParentRecordsSectionProps {
   readonly isMobile: boolean;
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentsViewLabels;
+  readonly loading?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -217,6 +219,7 @@ function ParentRecordsSection({
   isMobile,
   rows,
   labels,
+  loading,
   page,
   pageSize,
   totalCount,
@@ -270,6 +273,7 @@ function ParentRecordsSection({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
+          loading={loading}
         />
       )}
     </SectionPanel>
@@ -280,6 +284,7 @@ export function ParentsView({
   metrics,
   rows,
   labels,
+  loading,
   page,
   pageSize,
   totalCount,
@@ -319,6 +324,7 @@ export function ParentsView({
         isMobile={isMobile}
         rows={rows}
         labels={labels}
+        loading={loading}
         page={page}
         pageSize={pageSize}
         totalCount={totalCount}

@@ -36,13 +36,13 @@ function EditableTypographyEditField({
   inputRef,
   endAdornment,
 }: {
-  textField: TextFieldProps;
-  inputValue: string;
-  error: string | undefined | null;
-  onInputChange: (value: string) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  endAdornment: React.ReactNode;
+  readonly textField: TextFieldProps;
+  readonly inputValue: string;
+  readonly error: string | undefined | null;
+  readonly onInputChange: (value: string) => void;
+  readonly onKeyDown: (e: React.KeyboardEvent) => void;
+  readonly inputRef: React.RefObject<HTMLInputElement | null>;
+  readonly endAdornment: React.ReactNode;
 }) {
   return (
     <TextField

@@ -20,8 +20,8 @@ export type BaseAvatarProps = {
 const ROUNDED_BORDER_RADIUS = 1.5;
 
 export function BaseAvatar({ src, label = "", size = 40, variant = "circular", sx, children }: BaseAvatarProps) {
-  const hasImage = Boolean(src);
   const initials = children ?? (label ? avatarInitials(label) : "");
+  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
 
   return (
     <Avatar
@@ -35,10 +35,10 @@ export function BaseAvatar({ src, label = "", size = 40, variant = "circular", s
           flexShrink: 0,
           ...(variant === "rounded" ? { borderRadius: ROUNDED_BORDER_RADIUS } : {}),
         },
-        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+        ...normalizedSx,
       ]}
     >
-      {!hasImage ? initials : null}
+      {src ? null : initials}
     </Avatar>
   );
 }

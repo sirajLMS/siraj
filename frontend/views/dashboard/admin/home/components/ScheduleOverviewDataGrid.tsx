@@ -12,7 +12,7 @@ interface ScheduleOverviewDataGridProps {
   readonly rows: readonly DailyScheduleRow[];
   readonly page: number;
   readonly pageSize: number;
-  readonly totalCount: number;
+  readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;
   readonly headers: {
     readonly student: string;
@@ -29,6 +29,7 @@ interface ScheduleOverviewDataGridProps {
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly emptyMessage: string;
+  readonly loading?: boolean;
 }
 
 export function ScheduleOverviewDataGrid({
@@ -41,6 +42,7 @@ export function ScheduleOverviewDataGrid({
   statusLabels,
   detailsLabel,
   emptyMessage,
+  loading = false,
 }: ScheduleOverviewDataGridProps) {
   const { hasPermission } = useUserStore();
   const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
@@ -57,8 +59,13 @@ export function ScheduleOverviewDataGrid({
       rows={rows}
       columns={columns}
       getRowId={row => row.id ?? ""}
-      rowCount={totalCount}
-      paginationMode="server"
+      loading={loading}
+      {...(totalCount !== undefined
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+          }
+        : {})}
       paginationModel={paginationModel}
       onPaginationModelChange={model => {
         onPageChange(model.page);

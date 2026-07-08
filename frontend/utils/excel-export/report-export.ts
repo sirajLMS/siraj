@@ -231,7 +231,7 @@ function writeRowCells(
     else style = getBodyStyles(dataIdx, isFinancial);
 
     ws[cell] = {
-      v: typeof val === "number" ? val : (val as string),
+      v: val,
       t: typeof val === "number" ? "n" : "s",
       s: style,
     };
@@ -265,7 +265,7 @@ function writeTotalsRow(
   totalsValues.forEach((val, col) => {
     const cell = XLSX.utils.encode_cell({ r: totalsRow, c: col });
     ws[cell] = {
-      v: typeof val === "number" ? val : (val as string),
+      v: val,
       t: typeof val === "number" ? "n" : "s",
       s: totalsStyle,
     };

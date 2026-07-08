@@ -72,8 +72,8 @@ export function isClassInstancePastMissedGrace(
   row: ClassInstanceDashboardStatusInput,
   options?: ClassInstanceStatusResolveOptions
 ): boolean {
-  const normalizedOutcome = (row.outcome ?? ClassOutcomeValues.PENDING) as string;
-  const normalizedExecutionState = (row.executionState ?? ClassExecutionStateValues.NOT_ACTIVATED) as string;
+  const normalizedOutcome = row.outcome ?? ClassOutcomeValues.PENDING;
+  const normalizedExecutionState = row.executionState ?? ClassExecutionStateValues.NOT_ACTIVATED;
 
   if (
     normalizedExecutionState !== ClassExecutionStateValues.NOT_ACTIVATED ||

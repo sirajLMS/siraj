@@ -11,9 +11,10 @@ import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migrat
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
+  readonly loading?: boolean;
 }
 
-export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
+export function UpdatedSessionsDataGrid({ sessions, loading = false }: Readonly<Props>) {
   const t = useTranslations("dashboard.dstMigration");
 
   const columns = useMemo<GridColDef<UpdatedSession>[]>(
@@ -82,6 +83,7 @@ export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
       hideFooter
       ariaLabel="dst-updated-sessions-table"
       emptyMessage={t("sections.updated")}
+      loading={loading}
       sx={{ border: "none" }}
     />
   );

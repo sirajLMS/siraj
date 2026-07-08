@@ -73,6 +73,7 @@ interface CurrentPermissionsTabProps {
   readonly permissionsCount: number;
   readonly onRevokePermission: (permissionId: string) => Promise<void>;
   readonly onSwitchToAddTab: () => void;
+  readonly loading?: boolean;
 }
 
 export function CurrentPermissionsTab({
@@ -81,6 +82,7 @@ export function CurrentPermissionsTab({
   permissionsCount,
   onRevokePermission,
   onSwitchToAddTab,
+  loading = false,
 }: Readonly<CurrentPermissionsTabProps>) {
   const t = useTranslations("dashboard.permissions");
 
@@ -130,7 +132,7 @@ export function CurrentPermissionsTab({
 
   return (
     <SectionPanel title={t("currentPermissions")}>
-      {permissionsCount === 0 ? (
+      {permissionsCount === 0 && !loading ? (
         /* Empty State */
         <StyledEmptyStateContainer>
           {/* Icon Circle */}
@@ -154,6 +156,7 @@ export function CurrentPermissionsTab({
           columns={currentPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}
           emptyMessage={t("noPermissionsFound")}
+          loading={loading}
           autoHeight
         />
       )}

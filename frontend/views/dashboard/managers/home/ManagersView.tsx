@@ -13,7 +13,8 @@ import type { Manager, ManagerRoleFilter, ManagerStatusFilter, NonNullableManage
 interface ManagersViewProps {
   managers: Manager[];
   metrics: NonNullableManagerDirectoryMetrics;
-  totalManagers: number;
+  totalManagers?: number;
+  loading?: boolean;
   page?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
@@ -27,6 +28,7 @@ export function ManagersView({
   managers,
   metrics,
   totalManagers,
+  loading,
   page,
   pageSize,
   onPageChange,
@@ -77,6 +79,7 @@ export function ManagersView({
               pageSize={pageSize}
               totalCount={totalManagers}
               onPageChange={onPageChange}
+              loading={loading}
             />
           )}
         </Box>

@@ -78,7 +78,7 @@ export function RescheduleContainer() {
       }
     : fallbackSession;
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
         <CircularProgress />

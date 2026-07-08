@@ -54,7 +54,7 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
     notifications.show(t("notifications.noSubjectAssigned"), { severity: "info" });
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
         <Stack sx={{ alignItems: "center" }} spacing={2}>

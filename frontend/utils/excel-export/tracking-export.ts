@@ -113,7 +113,7 @@ export async function exportRescheduleTracking(data: TrackingExportData): Promis
     const r = dataStartRow + idx;
     const isAlt = idx % 2 === 1;
 
-    const statusValue = row.status != null ? (labels.statusLabels[row.status] ?? String(row.status)) : "";
+    const statusValue = row.status == null ? "" : (labels.statusLabels[row.status] ?? String(row.status));
     const values: string[] = [
       row.teacherName ?? "",
       row.studentName ?? "",

@@ -36,6 +36,7 @@ interface AddPermissionsTabProps {
   readonly onPermissionToggle: (id: string, checked: boolean) => void;
   readonly onSearchChange: (value: string) => void;
   readonly onCategoryChange: (value: string) => void;
+  readonly loading?: boolean;
 }
 
 export function AddPermissionsTab({
@@ -48,6 +49,7 @@ export function AddPermissionsTab({
   onPermissionToggle,
   onSearchChange,
   onCategoryChange,
+  loading = false,
 }: Readonly<AddPermissionsTabProps>) {
   const t = useTranslations("dashboard.permissions");
 
@@ -113,6 +115,7 @@ export function AddPermissionsTab({
           columns={addPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}
           emptyMessage={t("noPermissionsFound")}
+          loading={loading}
           autoHeight
         />
       </SectionPanel>

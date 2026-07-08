@@ -37,7 +37,7 @@ export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailCont
     [t, subject?.name]
   );
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
         <CircularProgress />

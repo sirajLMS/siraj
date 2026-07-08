@@ -14,6 +14,7 @@ export interface PermissionGroupsDataGridProps {
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
   readonly onAssignGroup: (id: string) => void;
+  readonly loading?: boolean;
 }
 
 interface RowActionsProps {
@@ -83,6 +84,7 @@ export function PermissionGroupsDataGrid({
   onEditGroup,
   onDeleteGroup,
   onAssignGroup,
+  loading = false,
 }: Readonly<PermissionGroupsDataGridProps>) {
   const t = useTranslations("dashboard.permissions");
 
@@ -173,6 +175,7 @@ export function PermissionGroupsDataGrid({
         columns={columns}
         getRowId={row => row.id ?? row.slug ?? ""}
         emptyMessage={t("noPermissionsFound")}
+        loading={loading}
         autoHeight
       />
     </Box>

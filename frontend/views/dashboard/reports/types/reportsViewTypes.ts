@@ -24,6 +24,7 @@ export interface ReportsSharedState {
   readonly rows: readonly ReportLedgerRow[];
   readonly summary: ReportsSummary;
   readonly canGenerate: boolean;
+  readonly loading?: boolean;
 }
 
 export interface ReportsSharedHandlers {

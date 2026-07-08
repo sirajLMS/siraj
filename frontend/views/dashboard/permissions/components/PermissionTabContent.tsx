@@ -42,7 +42,7 @@ export function PermissionTabContent({
 }: Readonly<PermissionTabContentProps>) {
   const t = useTranslations("dashboard.permissions");
 
-  if (isLoading) {
+  if (isLoading && !groups) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
         <CircularProgress color="primary" />
@@ -69,17 +69,21 @@ export function PermissionTabContent({
               onEditGroup={openEditDialog}
               onDeleteGroup={openDeleteDialog}
               onAssignGroup={openAssignDialog}
+              loading={isLoading}
             />
           </SectionPanel>
         ))}
 
-      {activeTab === "catalog" && <PermissionCatalogSection permissions={permissions} groups={groups} />}
+      {activeTab === "catalog" && (
+        <PermissionCatalogSection permissions={permissions} groups={groups} loading={isLoading} />
+      )}
 
       {activeTab === "overrides" && (
         <SectionPanel title={t("overridesTab")}>
           <UserOverridesDataGrid
             users={users}
             groups={groups}
+            loading={isLoading}
             onManageOverrides={userId => {
               setSelectedUserIdForOverrides(userId);
               openManageOverrides();

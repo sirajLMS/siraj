@@ -13,6 +13,7 @@ export interface ServerPaginatedDataGridProps<R extends GridValidRowModel> {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
+  readonly loading?: boolean;
 }
 
 export function ServerPaginatedDataGrid<R extends GridValidRowModel>({
@@ -25,6 +26,7 @@ export function ServerPaginatedDataGrid<R extends GridValidRowModel>({
   pageSize = 10,
   totalCount,
   onPageChange,
+  loading = false,
 }: Readonly<ServerPaginatedDataGridProps<R>>) {
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 
@@ -32,6 +34,7 @@ export function ServerPaginatedDataGrid<R extends GridValidRowModel>({
     <AppDataGrid<R>
       rows={rows as R[]}
       columns={columns as GridColDef<R>[]}
+      loading={loading}
       getRowId={getRowId}
       emptyMessage={emptyMessage}
       ariaLabel={ariaLabel}

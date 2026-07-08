@@ -44,6 +44,7 @@ export interface AdminBillingViewProps extends BillingCapabilityProps {
   readonly summary: AdminBillingSummary;
   readonly invoices: readonly AdminInvoiceRow[];
   readonly creditRows: readonly StudentCreditRow[];
+  readonly loading?: boolean;
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
   readonly onMarkAsPaid: (id: string) => void;
@@ -62,6 +63,7 @@ export interface ParentBillingViewProps extends BillingCapabilityProps {
   readonly labels: BillingLabels;
   readonly summary: ParentBillingSummary;
   readonly invoices: readonly ParentInvoiceRow[];
+  readonly loading?: boolean;
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
   readonly onPayNow: (id: string) => void;

@@ -16,7 +16,7 @@ import type { AcademicClassRow, ClassSessionStatus } from "./types";
 
 interface AcademicScheduleCardListProps {
   readonly rows: readonly AcademicClassRow[];
-  readonly totalCount: number;
+  readonly totalCount?: number;
   readonly currentPage: number;
   readonly pageSize: number;
   readonly labels: {
@@ -45,7 +45,7 @@ function getRoomIcon(room: string) {
 
 type AcademicCardLabels = AcademicScheduleCardListProps["labels"];
 
-function ClassCardHeader({ row, labels }: { row: AcademicClassRow; labels: AcademicCardLabels }) {
+function ClassCardHeader({ row, labels }: Readonly<{ row: AcademicClassRow; labels: AcademicCardLabels }>) {
   const statusLabels: Record<ClassSessionStatus, string> = {
     active: labels.active,
     upcoming: labels.upcoming,
@@ -82,7 +82,7 @@ function ClassCardHeader({ row, labels }: { row: AcademicClassRow; labels: Acade
   );
 }
 
-function ClassCardMetadata({ row }: { row: AcademicClassRow }) {
+function ClassCardMetadata({ row }: Readonly<{ row: AcademicClassRow }>) {
   return (
     <Box
       sx={theme => ({
@@ -116,12 +116,12 @@ function ClassCardActions({
   labels,
   onJoin,
   onLeave,
-}: {
+}: Readonly<{
   row: AcademicClassRow;
   labels: AcademicCardLabels;
   onJoin: (id: string) => void;
   onLeave: (id: string) => void;
-}) {
+}>) {
   const actionLabels = {
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
@@ -236,7 +236,8 @@ export function AcademicScheduleCardList({
   onLeave,
   onPageChange,
 }: AcademicScheduleCardListProps) {
-  const pageCount = Math.ceil(totalCount / pageSize);
+  const totalCountResolved = totalCount ?? 0;
+  const pageCount = totalCountResolved > 0 ? Math.ceil(totalCountResolved / pageSize) : 0;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -244,11 +245,11 @@ export function AcademicScheduleCardList({
         <AcademicClassCard key={row.id} row={row} labels={labels} onJoin={onJoin} onLeave={onLeave} />
       ))}
       <EndOfSchedule label={labels.endOfSchedule} />
-      {totalCount > 0 && (
+      {totalCountResolved > 0 && (
         <PaginationControls
           page={currentPage}
           pageCount={pageCount}
-          rowCount={totalCount}
+          rowCount={totalCountResolved}
           pageSize={pageSize}
           onPageChange={onPageChange}
         />

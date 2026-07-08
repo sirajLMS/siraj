@@ -93,8 +93,8 @@ export namespace StorageUtils {
 
   export const sanitizePath = (path: string): string => {
     return path
-      .replace(/\0/g, "")
-      .replace(/\\/g, "/")
+      .replaceAll("\0", "")
+      .replaceAll("\\", "/")
       .replace(/\/+/g, "/")
       .replace(/(?:^\/|\/(?=$))/g, "");
   };

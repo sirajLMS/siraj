@@ -27,7 +27,7 @@ async function computeContentHash(file: File): Promise<string> {
   const hashArray = new Uint8Array(hashBuffer);
   let binary = "";
   for (const byte of hashArray) {
-    binary += String.fromCharCode(byte);
+    binary += String.fromCodePoint(byte);
   }
   return btoa(binary);
 }

@@ -17,7 +17,7 @@ function resolveClassInstanceStatus(
   executionState: ClassExecutionState | null | undefined,
   _outcome: ClassOutcome | null | undefined
 ): ClassExecutionState {
-  const state = (executionState ?? ClassExecutionState.NOT_ACTIVATED) as ClassExecutionState;
+  const state = executionState ?? ClassExecutionState.NOT_ACTIVATED;
 
   if (state === ClassExecutionState.COMPLETED) return ClassExecutionState.COMPLETED;
   if (state === ClassExecutionState.ACTIVATED) return ClassExecutionState.ACTIVATED;

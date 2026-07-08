@@ -39,6 +39,7 @@ interface ParentsDataGridProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
+  readonly loading?: boolean;
 }
 
 export function ParentsDataGrid({
@@ -49,6 +50,7 @@ export function ParentsDataGrid({
   pageSize,
   totalCount,
   onPageChange,
+  loading = false,
 }: Readonly<ParentsDataGridProps>) {
   const columns = useMemo<GridColDef<ParentDirectoryRow>[]>(
     () => [
@@ -186,6 +188,7 @@ export function ParentsDataGrid({
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
+      loading={loading}
       autoHeight
       ariaLabel="parents-directory-table"
       emptyMessage={labels.noEntries}

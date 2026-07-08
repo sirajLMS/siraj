@@ -110,6 +110,7 @@ interface AssignedUsersTabProps {
   readonly onUserToggle: (id: string, checked: boolean) => void;
   readonly onSearchChange: (value: string) => void;
   readonly onAssignGroup: (id: string) => void;
+  readonly loading?: boolean;
 }
 
 export function AssignedUsersTab({
@@ -122,6 +123,7 @@ export function AssignedUsersTab({
   onUserToggle,
   onSearchChange,
   onAssignGroup,
+  loading = false,
 }: Readonly<AssignedUsersTabProps>) {
   const t = useTranslations("dashboard.permissions");
 
@@ -280,6 +282,7 @@ export function AssignedUsersTab({
           columns={assignedUsersColumns}
           getRowId={row => row.id ?? row.email ?? ""}
           emptyMessage={t("noAssignedUsers")}
+          loading={loading}
           autoHeight
         />
       </SectionPanel>

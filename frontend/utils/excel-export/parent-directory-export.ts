@@ -134,7 +134,7 @@ export async function exportParentDirectory(data: ParentDirectoryExportData): Pr
       else style = isAlt ? bodyAltStyle : bodyStyle;
 
       ws[cell] = {
-        v: typeof val === "number" ? val : (val as string),
+        v: val,
         t: typeof val === "number" ? "n" : "s",
         s: style,
       };

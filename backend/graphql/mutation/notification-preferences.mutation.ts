@@ -1,5 +1,4 @@
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
-import type { NotificationPreferenceUpdateInput } from "@/backend/types/notification-preferences.types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   NotificationPreferenceInputPothosObject,
@@ -16,11 +15,7 @@ gqlSchemaBuilder.mutationField("updateNotificationPreferences", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return NotificationPreferencesService.updatePreferences(
-        actorUserId,
-        args.input as NotificationPreferenceUpdateInput[],
-        ctx.locale
-      );
+      return NotificationPreferencesService.updatePreferences(actorUserId, args.input, ctx.locale);
     },
   })
 );
