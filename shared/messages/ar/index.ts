@@ -49,6 +49,7 @@ import {
 } from "./dashboard/teachers";
 import { errors } from "./errors";
 import { profile as profileLabels } from "./profile";
+import { countrySelect, genderSelector, languageSelector, tagInput } from "./ui";
 
 export const session: SessionLabels = {
   leaveProcessedDescription: "تمت معالجة طلب الإجازة، أعيدت جدولته إلى الجلسة {successorId}.",
@@ -78,6 +79,12 @@ export const arTranslations = {
   errors,
   profile: profileLabels,
   session,
+  ui: {
+    genderSelector,
+    countrySelect,
+    languageSelector,
+    tagInput,
+  },
   dashboard: {
     nav,
     layout,

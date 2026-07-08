@@ -52,6 +52,7 @@ import type {
 import type { ErrorsLabels } from "./errors";
 import type { ProfileLabels } from "./profile";
 import type { SessionLabels } from "./session";
+import type { UiLabels } from "./ui";
 
 export type {
   AdminDashboardLabels,
@@ -100,6 +101,7 @@ export type MessageSchema = {
   errors: ErrorsLabels;
   profile: ProfileLabels;
   session: SessionLabels;
+  ui: UiLabels;
   dashboard: {
     readonly nav: DashboardNavigationLabels;
     readonly layout: DashboardLayoutLabels;

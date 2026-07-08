@@ -3008,6 +3008,24 @@ const en: MessageSchema = {
       ADVANCE: "Advance Class",
     },
   },
+  ui: {
+    genderSelector: {
+      title: "Gender",
+      male: "Male",
+      female: "Female",
+      ariaLabel: "Gender selection button group",
+    },
+    countrySelect: {
+      selectCountry: "Select country",
+    },
+    languageSelector: {
+      selectLanguage: "Select language",
+    },
+    tagInput: {
+      label: "Add items",
+      placeholder: "Type and press Enter",
+    },
+  },
 };
 
 export default en;
