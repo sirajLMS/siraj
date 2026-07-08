@@ -28,8 +28,8 @@ jobs:
 
       - name: Run database migrations
         env:
-          # Pulled from GitHub repo secret (copy from .env.vercel once).
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_ENCRYPTION_KEY: ${{ secrets.DATABASE_ENCRYPTION_KEY }}
           DB_PROVIDER: neon
           # Migration only needs DB access; skip full production env validation.
           NODE_ENV: development

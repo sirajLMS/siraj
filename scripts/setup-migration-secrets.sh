@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# One-time setup: copy Neon DATABASE_URL from .env.vercel into GitHub Actions secrets.
+# One-time setup: copy Neon secrets from .env.vercel into GitHub Actions.
 # Requires: gh CLI authenticated, run from repo root.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -12,13 +12,21 @@ if [[ ! -f "${ENV_FILE}" ]]; then
   exit 1
 fi
 
-DATABASE_URL="$(grep -E '^DATABASE_URL=' "${ENV_FILE}" | head -1 | cut -d= -f2- | tr -d '"')"
-if [[ -z "${DATABASE_URL}" ]]; then
-  echo "DATABASE_URL not found in ${ENV_FILE}"
-  exit 1
-fi
+read_env_value() {
+  local key="$1"
+  grep -E "^${key}=" "${ENV_FILE}" | head -1 | cut -d= -f2- | tr -d '"'
+}
 
-echo "Setting GitHub secret DATABASE_URL for $(gh repo view --json nameWithOwner -q .nameWithOwner)..."
-printf '%s' "${DATABASE_URL}" | gh secret set DATABASE_URL
+REPO="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
+
+for key in DATABASE_URL DATABASE_ENCRYPTION_KEY; do
+  value="$(read_env_value "${key}")"
+  if [[ -z "${value}" ]]; then
+    echo "Missing ${key} in ${ENV_FILE}"
+    exit 1
+  fi
+  echo "Setting GitHub secret ${key} for ${REPO}..."
+  printf '%s' "${value}" | gh secret set "${key}"
+done
 
 echo "Done. Push to master to trigger .github/workflows/migrate-production.yml"
