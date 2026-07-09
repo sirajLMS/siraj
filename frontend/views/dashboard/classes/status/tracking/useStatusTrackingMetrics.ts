@@ -14,7 +14,7 @@ import {
   type RawMetric,
   SessionStatus,
   type StatusTrackingRow,
-} from "./types";
+} from "@/frontend/views/dashboard/classes/status/tracking/types";
 
 const METRIC_DEFINITIONS: readonly Omit<RawMetric, "count">[] = [
   { key: "regular", labelKey: "dashboard.statusTracking.metrics.regular", icon: CheckCircleOutlineOutlined },

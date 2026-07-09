@@ -1,2 +1,2 @@
-export * from "./DateNavigator";
-export * from "./PaginationControls";
+export * from "@/frontend/components/ui/filter/DateNavigator";
+export * from "@/frontend/components/ui/filter/PaginationControls";

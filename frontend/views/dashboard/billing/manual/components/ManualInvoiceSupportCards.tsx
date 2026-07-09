@@ -1,7 +1,7 @@
 "use client";
 
 import { HistoryOutlined, ReceiptLongOutlined, SecurityOutlined } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
@@ -22,6 +22,7 @@ const StyledSupportBody = styled(Typography)(({ theme }) => ({
 }));
 
 export function ManualInvoiceSupportCards({ labels }: Readonly<ManualInvoiceSupportCardsProps>) {
+  const theme = useTheme();
   return (
     <Box
       sx={{
@@ -37,7 +38,7 @@ export function ManualInvoiceSupportCards({ labels }: Readonly<ManualInvoiceSupp
 
         return (
           <BaseCard key={card.key}>
-            <Icon sx={{ color: theme => theme.palette.primary.main, mb: 1.5 }} />
+            <Icon sx={{ color: theme.palette.primary.main, mb: 1.5 }} />
             <Typography variant="titleLg" sx={{ mb: 1 }}>
               {cardLabels.title}
             </Typography>

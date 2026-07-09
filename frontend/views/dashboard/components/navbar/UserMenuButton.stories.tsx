@@ -7,7 +7,7 @@ import {
   simulatablePermissionGroupsQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { UserMenuButton } from "./UserMenuButton";
+import { UserMenuButton } from "@/frontend/views/dashboard/components/navbar/UserMenuButton";
 
 const baseMocks = [
   {

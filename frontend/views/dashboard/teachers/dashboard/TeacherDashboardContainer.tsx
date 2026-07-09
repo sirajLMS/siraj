@@ -21,15 +21,15 @@ import {
 import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import { ManualClassEntryDialog } from "@/frontend/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
+import { TeacherDashboardView } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardView";
+import { buildStudentProgressFeedItems } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildStudentProgressFeedItems";
+import { buildTeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
+import { buildTeacherActiveMetricItems } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
+import { useTeacherDashboardLastUpdated } from "@/frontend/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated";
 import type { TeacherScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule-instance-dashboard-status";
-import { ManualClassEntryDialog } from "./components/ManualClassEntryDialog";
-import { TeacherDashboardView } from "./TeacherDashboardView";
-import { buildStudentProgressFeedItems } from "./utils/buildStudentProgressFeedItems";
-import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
-import { buildTeacherActiveMetricItems } from "./utils/buildTeacherDashboardMetrics";
-import { useTeacherDashboardLastUpdated } from "./utils/useTeacherDashboardLastUpdated";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
 type SnackbarSeverity = "success" | "error" | "info";

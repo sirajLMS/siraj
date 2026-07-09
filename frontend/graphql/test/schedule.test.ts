@@ -1,20 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import { ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
-import { executeDstBulkUpdateMutationDocument } from "../sharedDocuments/dst-migration.documents";
+import { executeDstBulkUpdateMutationDocument } from "@/frontend/graphql/sharedDocuments/dst-migration.documents";
 import {
   adminDashboardScheduleQueryDocument,
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
-} from "../sharedDocuments/schedule.documents";
+} from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
-} from "../sharedDocuments/schedule-deletion.documents";
+} from "@/frontend/graphql/sharedDocuments/schedule-deletion.documents";
 import {
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
-} from "../sharedDocuments/weekly-schedule.documents";
+} from "@/frontend/graphql/sharedDocuments/weekly-schedule.documents";
 import {
   assertRecurringClassDenied,
   authenticatedRequest,
@@ -26,9 +25,10 @@ import {
   provisionTestSuperAdmin,
   verifyWeeklyScheduleGrid,
   verifyWorkloadMetrics,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
+import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
 
 async function assertDstBulkUpdateFails(token: string) {
   const result = await testClient.mutate({

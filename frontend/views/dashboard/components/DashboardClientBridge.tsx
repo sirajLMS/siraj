@@ -1,9 +1,9 @@
 import { NotificationsProvider } from "@toolpad/core/useNotifications";
 import type { ReactNode } from "react";
 import { AppPermission, type User } from "@/frontend/graphql/generated/gql/graphql-types";
+import { UserStoreInitializer } from "@/frontend/views/dashboard/components/client/UserStoreInitializer";
+import { DashboardLayout } from "@/frontend/views/dashboard/components/DashboardLayout";
 import { getDashboardLayoutData } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
-import { UserStoreInitializer } from "./client/UserStoreInitializer";
-import { DashboardLayout } from "./DashboardLayout";
 
 interface DashboardClientBridgeProps {
   readonly children: ReactNode;

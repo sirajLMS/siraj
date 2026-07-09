@@ -27,7 +27,9 @@ Invoice `payments` records how a parent paid an invoice but is disconnected from
 | Online platforms | PayPal, Wise, Skrill, etc. are `ONLINE_ACCOUNT` catalog rows |
 | Defaults | One default per direction — PAYIN slot + PAYOUT slot (Decision **1bA**) |
 | Migration | **8C clean-slate** — delete legacy tables/columns/enums; `drizzle-kit generate` fresh migration set (no backfill, no deprecations) |
-| Invoice payments | Add `payments.user_payment_method_id` FK; keep denormalized `payment_method_type` snapshot |
+| Invoice payments | `payments.user_payment_method_id` FK + **frozen `payment_method_snapshot` JSONB** |
+| Payout transactions | `teacher_payments.user_payment_method_id` FK + **frozen `payment_method_snapshot` JSONB** |
+| Transaction audit | **Option C — snapshots** on every pay-in/pay-out; live `user_payment_methods` rows remain mutable |
 | Catalog admin | Admin CRUD for all three catalog tables in v1 |
 | Credentials | **Never** store card PAN/CVV, PSP tokens, OAuth secrets, bank passwords |
 | Imports | `@/` alias only — no relative `../` or `./` |
@@ -37,27 +39,35 @@ Invoice `payments` records how a parent paid an invoice but is disconnected from
 
 | Question | Decision |
 |----------|----------|
-| Invoice payment snapshot | Keep `payments.payment_method_type` (`PaymentMethodType`) denormalized for historical rows when catalog/method is later deactivated; optional `user_payment_method_id` FK for live reference |
+| Transaction audit (pay-in + pay-out) | **Option C — snapshots:** every money-movement row stores immutable `payment_method_snapshot` JSONB at creation time; optional `user_payment_method_id` FK for traceability only |
+| Bank detail change history | **No** temporal `valid_from`/`valid_until` table on `user_payment_methods`; audit comes from transaction snapshots, not method version history |
 | Bank verification | Port admin verify workflow to `user_payment_methods.verified_at` / `verified_by_user_id` — **BANK_TRANSFER only** in v1 |
 | Catalog admin permissions | New `AppPermission` keys: `payment_methods.manage_catalogs`, `payment_methods.verify_bank_transfer` |
-| Teacher disbursements | `teacher_payments.banking_details_history_id` → `user_payment_method_id` |
+| Teacher disbursements | `teacher_payments.banking_details_history_id` → `user_payment_method_id` + `payment_method_snapshot` |
 
 ## Data model
 
 ```
 users
-  └── user_payment_methods (many)
+  └── user_payment_methods (many) — live/mutable saved methods
         type, direction, isDefault, label, details (JSONB), verifiedAt?
 
 supported_mobile_wallets     ─┐
 supported_payment_links       ├── catalog FK in details JSONB
 supported_online_accounts    ─┘
 
-payments.user_payment_method_id  → user_payment_methods (nullable FK)
-payments.payment_method_type     → PaymentMethodType snapshot (NOT NULL)
+payments (PAYIN)
+  user_payment_method_id       → user_payment_methods (nullable FK — traceability)
+  payment_method_type          → PaymentMethodType (denormalized for SQL filters)
+  payment_method_snapshot      → frozen JSONB at record time (audit source of truth)
 
-teacher_payments.user_payment_method_id → user_payment_methods (NOT NULL)
+teacher_payments (PAYOUT)
+  user_payment_method_id       → user_payment_methods (nullable FK — traceability)
+  payment_method_type          → PaymentMethodType (denormalized for SQL filters)
+  payment_method_snapshot      → frozen JSONB at record time (audit source of truth)
 ```
+
+**Snapshot rule:** On any pay-in or pay-out transaction, the service **must** copy the resolved method (type, details, catalog display metadata, label) into `payment_method_snapshot` before insert. Later edits/deletes on `user_payment_methods` must not change historical transaction rows.
 
 ### `user_payment_methods`
 
@@ -114,6 +124,125 @@ type PaymentMethodDetails =
 
 Validate `type` + `details` together via discriminated Zod at service boundary. Encrypt sensitive bank fields in `details` at app layer (same spirit as current `encryptedText`).
 
+### `PaymentMethodTransactionSnapshot` (frozen on every transaction)
+
+Written once at pay-in/pay-out creation. **Not** updated if the live method changes later.
+
+```ts
+type PaymentMethodCatalogSnapshot = {
+  catalogId: string;           // walletId | paymentLinkId | onlineAccountId when applicable
+  catalogSlug: string;         // e.g. vodafone_cash_eg, paypal
+  catalogName: LocalizedString;        // frozen copy from catalog at transaction time
+};
+
+type PaymentMethodTransactionSnapshot = {
+  userPaymentMethodId: string | null;  // copy of FK for convenience
+  type: PaymentMethodType;
+  direction: PaymentDirection;         // PAYIN or PAYOUT for this transaction
+  label: string | null;
+  details: PaymentMethodDetails;       // full routing used for this transaction (encrypt bank fields)
+  catalog: PaymentMethodCatalogSnapshot | null; // null for BANK_TRANSFER / CASH
+  snapshottedAt: string;               // ISO timestamp
+};
+```
+
+| Transaction table | Direction | Snapshot required |
+|-------------------|-----------|-------------------|
+| `payments` | PAYIN | **Yes** — `payment_method_snapshot` NOT NULL |
+| `teacher_payments` | PAYOUT | **Yes** — `payment_method_snapshot` NOT NULL |
+| Future pay-in/pay-out tables | either | Same pattern |
+
+Service helper: `buildPaymentMethodTransactionSnapshot(method, direction, locale)` — resolves catalog names, copies details, never reads from live method after insert.
+
+Display on historical transactions uses **snapshot** (masked per scope), not live `user_payment_methods`.
+
+## JSONB columns & typesafety
+
+PostgreSQL JSONB is **schema-less at the DB level** — Drizzle `.$type<T>()` is compile-time only. Runtime shape enforcement is **required** in the service layer before every write.
+
+**Drizzle MCP:** use `project-0-siraj-drizzle` `generate` / `check` for migrations (skills revision **12**, aligned). After schema edits: `check` → drop DB → `generate` (8C). Resolve `missing_hints` via `drizzle-hints` skill.
+
+### JSONB inventory
+
+| Table | Column | TypeScript type (`.$type<>`) | Runtime validator |
+|-------|--------|-------------------------------|-------------------|
+| `user_payment_methods` | `details` | `PaymentMethodDetails` | `parsePaymentMethodDetails(type, details)` |
+| `payments` | `payment_method_snapshot` | `PaymentMethodTransactionSnapshot` | `paymentMethodTransactionSnapshotSchema` |
+| `teacher_payments` | `payment_method_snapshot` | `PaymentMethodTransactionSnapshot` | same schema |
+| `supported_mobile_wallets` | `name` | `LocalizedString` | `localizedStringSchema` |
+| `supported_mobile_wallets` | `description` | `LocalizedString` | optional |
+| `supported_mobile_wallets` | `instructions` | `LocalizedString` | optional |
+| `supported_payment_links` | `name`, `description`, `instructions` | `LocalizedString` | same |
+| `supported_payment_links` | `url_allowlist` | `readonly string[]` | `z.array(z.string().min(1))` |
+| `supported_online_accounts` | `name`, `description`, `instructions`, `identifier_label` | `LocalizedString` | same |
+
+Non-JSONB enums (`type`, `direction`, `country_code`, etc.) use native PG enums / varchar — not JSONB.
+
+### Drizzle schema pattern (follow `permissions.ts`)
+
+```ts
+import type { PaymentMethodDetails, PaymentMethodTransactionSnapshot } from "@/backend/types/payment-method.types";
+import type { LocalizedString } from "@/backend/types/localized-string.types";
+
+// user_payment_methods
+details: jsonb("details").$type<PaymentMethodDetails>().notNull(),
+
+// payments / teacher_payments
+paymentMethodSnapshot: jsonb("payment_method_snapshot")
+  .$type<PaymentMethodTransactionSnapshot>()
+  .notNull(),
+
+// catalog tables (permissions precedent)
+name: jsonb("name").$type<LocalizedString>().notNull(),
+urlAllowlist: jsonb("url_allowlist").$type<readonly string[]>().notNull(),
+```
+
+Import types from `@/backend/types/*` in schema files — never inline object shapes in `.$type<>`.
+
+### Type layers (single canonical source)
+
+```
+backend/types/payment-method.types.ts     TS unions + Select/Return/Submit types
+backend/lib/payment-method.validation.ts  Zod schemas (runtime gate on write/read from external input)
+backend/db/schema/*.ts                    jsonb(...).$type<T>() from types file
+backend/services/payment-method/*         validate → encrypt → repo insert
+```
+
+`PaymentMethodDetails` is a **discriminated union** keyed by the row's `type` column — always validate `{ type, details }` together, never `details` alone.
+
+### Bank field encryption inside JSONB
+
+Old banking used `encryptedText` columns. New model stores bank routing **inside** `details` JSONB.
+
+- Extract shared `encryptField` / `decryptField` from `backend/db/schema/custom-types.ts` → `backend/lib/field-encryption.ts` (reuse AES-256-GCM logic)
+- **At rest in JSONB:** `BankTransferDetails` string fields (`iban`, `accountNumber`, …) stored as ciphertext strings
+- **Service I/O:** `PaymentMethodService` encrypts before insert/update, decrypts only for authorized read paths (admin verify, own-scope edit)
+- **Snapshots:** encrypt bank fields in `payment_method_snapshot.details` the same way — snapshot is immutable after insert
+- **Masking:** `payment-method-mask.ts` operates on decrypted values in memory, never logs plaintext
+
+Do **not** use untyped `jsonb("details")` without `.$type<>`. Do **not** skip Zod because TS compiles.
+
+### Validation rules (`backend/lib/payment-method.validation.ts`)
+
+| Payload | Rule |
+|---------|------|
+| `MOBILE_WALLET` details | `walletId` UUID + active catalog; `phone` E.164 vs catalog `phoneRegion` |
+| `PAYMENT_LINK` details | `paymentLinkId` + URL host ∈ `url_allowlist` |
+| `ONLINE_ACCOUNT` details | `onlineAccountId` + identifier per catalog `identifierKind` |
+| `BANK_TRANSFER` details | at least one routing field; encrypt sensitive fields before persist |
+| `CASH` details | optional `note` |
+| `PaymentMethodTransactionSnapshot` | full schema incl. `snapshottedAt` ISO string; immutable after write |
+| Catalog `LocalizedString` | reuse / share schema with permission catalog patterns |
+
+Repos receive **already-validated** typed objects from services — repos do not run Zod.
+
+### GraphQL / frontend
+
+- Pothos input objects mirror Zod shapes (not separate ad-hoc types)
+- Frontend forms use Zod (existing pattern); GraphQL codegen types from schema
+- Never import `@/backend/types` JSONB shapes in frontend — use generated GraphQL types only
+
+
 ### Removed (8C — delete, do not deprecate)
 
 - `teachers.payment_method` column
@@ -145,8 +274,11 @@ Validate `type` + `details` together via discriminated Zod at service boundary. 
 | `SupportedPaymentLink` | catalog return type | |
 | `SupportedOnlineAccount` | catalog return type | |
 | `PaymentMethodDefaults` | computed | `{ payinDefault, payoutDefault }` per user |
+| `PaymentMethodTransactionSnapshot` | `PaymentMethodTransactionSnapshot` | Read-only on transaction objects |
 
 Resolved fields on `UserPaymentMethod`: `displayName`, `catalogLogoUrl`, `maskedDetails` (scope-aware).
+
+Transaction objects (`Payment`, `TeacherPayment`) expose `paymentMethodSnapshot` (masked for non-admin) — **never** re-resolve from live method for display.
 
 ### Queries
 
@@ -184,7 +316,8 @@ Replace scalar `paymentMethod` and inline banking fields:
 | `TeacherProfileResult` | `paymentMethod` | `paymentMethods`, `defaultPayoutMethod` |
 | `ParentProfile` | `paymentMethod: String` | `paymentMethods`, `defaultPayinMethod` |
 | `UnifiedProfile` | `bankingSummary` | `paymentMethods` (masked, scope-aware) |
-| `recordPayment` input | `paymentMethod: PaymentMethod` | `paymentMethodType` + optional `userPaymentMethodId` |
+| `recordPayment` input | `paymentMethod: PaymentMethod` | `userPaymentMethodId` (optional) — service builds snapshot |
+| `createTeacherPayment` input | banking history id implicit | `userPaymentMethodId` — service builds snapshot |
 
 ## UI components
 
@@ -251,8 +384,9 @@ Port from `backend/services/profile/banking-summary.ts`:
 3. Catalog-driven pickers work for wallets, links, and online accounts; seeds include PayPal, Wise, Vodafone Cash, InstaPay
 4. Admin can CRUD catalog rows; inactive catalog rows block new user methods but don't break existing
 5. `BANK_TRANSFER` verification workflow works for admin; masked display for non-admin scopes
-6. Invoice `recordPayment` accepts `userPaymentMethodId` and stores type snapshot
-7. `teacher_payments` references `user_payment_method_id`
+6. Every pay-in (`payments`) and pay-out (`teacher_payments`) row stores immutable `payment_method_snapshot` at creation; audit does not depend on live method rows
+7. `teacher_payments` references `user_payment_method_id` + snapshot (replaces banking history FK)
 8. All profile/onboarding views use shared `PaymentMethod*` components — old `PaymentMethod` enum references fully removed from codebase
 9. `bun tsgo`, `test:db`, `test:graphql` pass; Storybook stories for new UI components
 10. `bun quality-gate` passes on touched files
+11. Every JSONB column uses `jsonb(...).$type<T>()` with `T` from `@/backend/types`; Zod validates all writes; bank fields encrypted inside JSONB at rest

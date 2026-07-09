@@ -6,7 +6,10 @@ import { AvatarGroup, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import type { AvailabilityInsightsProps, InsightCardProps } from "../types";
+import type {
+  AvailabilityInsightsProps,
+  InsightCardProps,
+} from "@/frontend/views/dashboard/teachers/availability/types";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (

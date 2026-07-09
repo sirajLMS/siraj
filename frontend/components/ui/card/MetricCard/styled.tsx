@@ -2,14 +2,14 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { motion } from "framer-motion";
-import { BaseCard } from "../BaseCard";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import {
   filledIconWrapSx,
   interactiveIconActiveSx,
   interactiveIconHoverSx,
   type MetricCardVariant,
   valueColor,
-} from "./utils";
+} from "@/frontend/components/ui/card/MetricCard/utils";
 
 export interface StyledCardProps {
   readonly isCompactSize: boolean;

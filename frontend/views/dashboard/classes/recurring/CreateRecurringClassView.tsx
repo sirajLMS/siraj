@@ -8,11 +8,11 @@ import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/lib/timezone";
+import { RecurringClassForm } from "@/frontend/views/dashboard/classes/recurring/RecurringClassForm";
+import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
+import { createRecurringClassSchema } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
+import { DEFAULT_DAY_SCHEDULE } from "@/frontend/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
-import { RecurringClassForm } from "./RecurringClassForm";
-import type { RecurringClassFormData } from "./recurringClassSchema";
-import { createRecurringClassSchema } from "./recurringClassSchema";
-import { DEFAULT_DAY_SCHEDULE } from "./types";
 
 interface CreateRecurringClassViewProps {
   readonly isSubmitting: boolean;

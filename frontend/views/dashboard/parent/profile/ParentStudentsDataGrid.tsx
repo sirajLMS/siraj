@@ -32,8 +32,8 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/utils/student-status-transitions";
+import type { ParentStudent } from "@/frontend/views/dashboard/parent/types/profile";
 import { useRouter } from "@/shared/i18n/routing";
-import type { ParentStudent } from "../types/profile";
 
 // ─── Reassign Teacher Dialog ──────────────────────────────────────────────────
 

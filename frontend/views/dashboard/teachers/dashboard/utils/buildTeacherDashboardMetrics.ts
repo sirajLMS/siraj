@@ -1,8 +1,8 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import { CalendarTodayOutlined, EventBusyOutlined, SensorsOutlined, VerifiedOutlined } from "@mui/icons-material";
 import type { TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics } from "@/frontend/graphql/generated/gql/operations";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 
 type RawMetrics =
   | TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics

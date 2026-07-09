@@ -14,8 +14,12 @@ import {
   StyledSubLabel,
   StyledValue,
   StyledValueContainer,
-} from "./styled";
-import { formatValue, type MetricCardSize, type MetricCardVariant } from "./utils";
+} from "@/frontend/components/ui/card/MetricCard/styled";
+import {
+  formatValue,
+  type MetricCardSize,
+  type MetricCardVariant,
+} from "@/frontend/components/ui/card/MetricCard/utils";
 
 export interface MetricCardProps {
   readonly icon: SvgIconComponent;

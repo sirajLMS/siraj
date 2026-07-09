@@ -10,10 +10,10 @@ import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/gra
 import { parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
+import ParentProfileEditView from "@/frontend/views/dashboard/parent/profile/edit/ParentProfileEditView";
+import type { ParentProfileEditFormData } from "@/frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema";
+import { parentProfileEditSchema } from "@/frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema";
 import { useRouter } from "@/shared/i18n/routing";
-import ParentProfileEditView from "./ParentProfileEditView";
-import type { ParentProfileEditFormData } from "./parentProfileEditSchema";
-import { parentProfileEditSchema } from "./parentProfileEditSchema";
 
 interface ParentProfileEditContainerProps {
   readonly id: string;

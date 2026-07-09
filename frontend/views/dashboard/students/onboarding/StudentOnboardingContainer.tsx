@@ -14,11 +14,14 @@ import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useCreateStudentOnboarding } from "@/frontend/hooks/useCreateStudentOnboarding";
 import { logger } from "@/frontend/utils/logger";
+import type { ParentOption } from "@/frontend/views/dashboard/students/onboarding/ParentAssignmentSection";
+import { StudentOnboardingView } from "@/frontend/views/dashboard/students/onboarding/StudentOnboardingView";
+import {
+  type StudentOnboardingFormData,
+  studentOnboardingSchema,
+} from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
+import type { TeacherOption } from "@/frontend/views/dashboard/students/onboarding/TeacherAssignmentSection";
 import { useRouter } from "@/shared/i18n/routing";
-import type { ParentOption } from "./ParentAssignmentSection";
-import { StudentOnboardingView } from "./StudentOnboardingView";
-import { type StudentOnboardingFormData, studentOnboardingSchema } from "./schemas/studentOnboardingSchema";
-import type { TeacherOption } from "./TeacherAssignmentSection";
 
 export function StudentOnboardingContainer() {
   const t = useTranslations("dashboard.studentOnboarding");

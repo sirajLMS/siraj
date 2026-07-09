@@ -7,11 +7,11 @@ import { useCallback, useState } from "react";
 import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile.types";
 import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
-import { ParentProfileContainer } from "../parent/ParentProfileContainer";
-import { StaffProfileContainer } from "../staff/StaffProfileContainer";
-import { TeacherProfileContainer } from "../teacher/TeacherProfileContainer";
-import { ProfileActionBar } from "./components/ProfileActionBar";
-import { ProfileShell } from "./ProfileShell";
+import { ProfileActionBar } from "@/frontend/views/dashboard/profile/core/components/ProfileActionBar";
+import { ProfileShell } from "@/frontend/views/dashboard/profile/core/ProfileShell";
+import { ParentProfileContainer } from "@/frontend/views/dashboard/profile/parent/ParentProfileContainer";
+import { StaffProfileContainer } from "@/frontend/views/dashboard/profile/staff/StaffProfileContainer";
+import { TeacherProfileContainer } from "@/frontend/views/dashboard/profile/teacher/TeacherProfileContainer";
 
 export type ProfilePageClientProps = {
   readonly scope: ProfileScope;

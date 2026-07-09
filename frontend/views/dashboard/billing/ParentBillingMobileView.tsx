@@ -4,11 +4,11 @@ import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Fab, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { BillingMetricsRow } from "./components/BillingMetricsRow";
-import { BillingMobileSearchBar } from "./components/BillingMobileSearchBar";
-import { ParentInvoicesCardList } from "./components/ParentInvoicesCardList";
-import type { ParentBillingViewProps } from "./types/billingViewTypes";
-import { buildParentMetrics } from "./utils/billingMetrics";
+import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
+import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
+import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";
+import type { ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 
 // Subtitle text for the empty state, styled with secondary text color
 const StyledEmptySubtitle = styled(Typography)(({ theme }) => ({

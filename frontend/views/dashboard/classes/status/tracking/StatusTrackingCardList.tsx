@@ -12,7 +12,7 @@ import {
   SessionStatus,
   type StatusTrackingCardListProps,
   type StatusTrackingRow,
-} from "./types";
+} from "@/frontend/views/dashboard/classes/status/tracking/types";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
   [SessionStatus.REGULAR]: "regular",

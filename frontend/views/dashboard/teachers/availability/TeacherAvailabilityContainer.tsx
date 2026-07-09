@@ -12,13 +12,13 @@ import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/graph
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { logger } from "@/frontend/utils/logger";
-import { TeacherAvailabilityView } from "./TeacherAvailabilityView";
+import { TeacherAvailabilityView } from "@/frontend/views/dashboard/teachers/availability/TeacherAvailabilityView";
 import type {
   AvailabilityEntry,
   AvailabilitySearchFormData,
   TeacherAvailabilityInsights,
   WeeklyAvailability,
-} from "./types";
+} from "@/frontend/views/dashboard/teachers/availability/types";
 
 function buildGraphQLInput(formData: AvailabilitySearchFormData) {
   const fromTime = formData.fromTime

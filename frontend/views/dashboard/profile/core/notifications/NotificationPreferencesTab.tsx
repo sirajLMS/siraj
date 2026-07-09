@@ -16,9 +16,9 @@ import {
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
   preferenceKey,
-} from "./notificationPreferenceTypes";
-import { PreferencesChannelTabs } from "./PreferencesChannelTabs";
-import { PreferencesMatrix } from "./PreferencesMatrix";
+} from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import { PreferencesChannelTabs } from "@/frontend/views/dashboard/profile/core/notifications/PreferencesChannelTabs";
+import { PreferencesMatrix } from "@/frontend/views/dashboard/profile/core/notifications/PreferencesMatrix";
 
 type NotificationPreferencesTabProps = {
   readonly isActive: boolean;

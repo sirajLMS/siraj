@@ -6,7 +6,7 @@ import { Alert, Box, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { edgeToEdgeSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
-import { classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
+import { classDetailsContentPaddingSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 
 interface TimezoneWarningBannerProps {
   readonly studentTimezone: string;

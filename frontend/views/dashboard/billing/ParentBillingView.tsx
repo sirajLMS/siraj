@@ -1,9 +1,9 @@
 "use client";
 
 import { useMediaQuery, useTheme } from "@mui/material";
-import { ParentBillingDesktopView } from "./ParentBillingDesktopView";
-import { ParentBillingMobileView } from "./ParentBillingMobileView";
-import type { ParentBillingViewProps } from "./types/billingViewTypes";
+import { ParentBillingDesktopView } from "@/frontend/views/dashboard/billing/ParentBillingDesktopView";
+import { ParentBillingMobileView } from "@/frontend/views/dashboard/billing/ParentBillingMobileView";
+import type { ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 export function ParentBillingView(props: Readonly<ParentBillingViewProps>) {
   const theme = useTheme();

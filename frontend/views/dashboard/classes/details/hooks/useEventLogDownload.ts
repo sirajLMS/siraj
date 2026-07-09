@@ -5,7 +5,7 @@ import type { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { classStatusEventsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
-import type { ActionFeedbackState } from "../types";
+import type { ActionFeedbackState } from "@/frontend/views/dashboard/classes/details/types";
 
 export function useEventLogDownload(
   id: string,

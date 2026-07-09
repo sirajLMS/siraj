@@ -7,8 +7,8 @@ import { useState } from "react";
 import { LanguageDisplay } from "@/frontend/components/ui/display";
 import { useLanguageSwitch } from "@/frontend/hooks/useLanguageSwitch";
 import { languages } from "@/frontend/lib/locale";
+import { NavbarIcon } from "@/frontend/views/dashboard/components/navbar/NavbarIcon";
 import type { Locale } from "@/shared/i18n/routing";
-import { NavbarIcon } from "./NavbarIcon";
 
 // --- Styled Components ---
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { MailOutlined, SendOutlined } from "@mui/icons-material";
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { ExportButton, PrimaryPageAction } from "@/frontend/components/ui";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
@@ -24,6 +24,7 @@ export function ManualInvoiceActions({
   onSubmit,
   onSubmitAndSendEmail,
 }: Readonly<ManualInvoiceActionsProps>) {
+  const theme = useTheme();
   const isMobile = variant === "mobile";
 
   const submitButton = (
@@ -48,9 +49,9 @@ export function ManualInvoiceActions({
           ? {
               height: 56,
               backgroundColor: "transparent",
-              color: theme => theme.palette.primary.main,
-              border: theme => `2px solid ${theme.palette.primary.main}`,
-              "&:hover": { backgroundColor: theme => theme.palette.action.hover },
+              color: theme.palette.primary.main,
+              border: `2px solid ${theme.palette.primary.main}`,
+              "&:hover": { backgroundColor: theme.palette.action.hover },
             }
           : { flex: 1, py: 2 }
       }

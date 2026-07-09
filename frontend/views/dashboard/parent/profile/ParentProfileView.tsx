@@ -10,13 +10,13 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
+import { AvatarUploadDialog } from "@/frontend/views/dashboard/parent/profile/AvatarUploadDialog";
+import ParentProfileActions from "@/frontend/views/dashboard/parent/profile/ParentProfileActions";
+import ParentProfileDetails from "@/frontend/views/dashboard/parent/profile/ParentProfileDetails";
+import ParentProfileHeader from "@/frontend/views/dashboard/parent/profile/ParentProfileHeader";
+import ParentStudentsDataGrid from "@/frontend/views/dashboard/parent/profile/ParentStudentsDataGrid";
+import type { ParentProfileData } from "@/frontend/views/dashboard/parent/types/profile";
 import { useRouter } from "@/shared/i18n/routing";
-import type { ParentProfileData } from "../types/profile";
-import { AvatarUploadDialog } from "./AvatarUploadDialog";
-import ParentProfileActions from "./ParentProfileActions";
-import ParentProfileDetails from "./ParentProfileDetails";
-import ParentProfileHeader from "./ParentProfileHeader";
-import ParentStudentsDataGrid from "./ParentStudentsDataGrid";
 
 interface ParentProfileViewProps {
   readonly parent: ParentProfileData;

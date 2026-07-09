@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppDataGridLoadingOverlay } from "./AppDataGridLoadingOverlay";
+import { AppDataGridLoadingOverlay } from "@/frontend/components/ui/dataGrid/AppDataGridLoadingOverlay";
 
 const meta: Meta<typeof AppDataGridLoadingOverlay> = {
   title: "UI/AppDataGridLoadingOverlay",

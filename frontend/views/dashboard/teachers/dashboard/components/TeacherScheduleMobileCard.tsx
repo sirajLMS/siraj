@@ -7,11 +7,14 @@ import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/u
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
+import {
+  getStatusLabel,
+  resolveTeacherStatusBadge,
+} from "@/frontend/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
 import { Link } from "@/shared/i18n/routing";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
-import { resolveTeacherScheduleActionTooltips } from "../utils/resolveTeacherScheduleActionTooltips";
-import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
 import { SessionActivateButton } from "./SessionActivateButton";
 import { TeacherActiveSessionControls } from "./TeacherActiveSessionControls";
 import { TeacherScheduleStatusContent } from "./TeacherScheduleStatusContent";

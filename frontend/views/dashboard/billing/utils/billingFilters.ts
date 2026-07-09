@@ -1,4 +1,7 @@
-import type { AdminBillingViewProps, ParentBillingViewProps } from "../types/billingViewTypes";
+import type {
+  AdminBillingViewProps,
+  ParentBillingViewProps,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 export function filterAdminInvoices(
   invoices: AdminBillingViewProps["invoices"],

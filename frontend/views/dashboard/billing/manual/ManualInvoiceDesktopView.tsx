@@ -6,14 +6,17 @@ import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
+import { BillingMonthSelector } from "@/frontend/views/dashboard/billing/manual/components/BillingMonthSelector";
+import { InvoiceDraftSummaryCard } from "@/frontend/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
+import { ManualInvoiceActions } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceActions";
+import { ManualInvoiceFormFields } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceFormFields";
+import { ManualInvoiceSupportCards } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceSupportCards";
+import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
+import type {
+  ParentInvoiceOption,
+  StudentOption,
+} from "@/frontend/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
-import { BillingMonthSelector } from "./components/BillingMonthSelector";
-import { InvoiceDraftSummaryCard } from "./components/InvoiceDraftSummaryCard";
-import { ManualInvoiceActions } from "./components/ManualInvoiceActions";
-import { ManualInvoiceFormFields } from "./components/ManualInvoiceFormFields";
-import { ManualInvoiceSupportCards } from "./components/ManualInvoiceSupportCards";
-import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
-import type { ParentInvoiceOption, StudentOption } from "./types/manualInvoiceViewTypes";
 
 const StyledBackButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.main,

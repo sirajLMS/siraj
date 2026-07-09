@@ -11,16 +11,19 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import { TeacherBankingTab } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingTab";
+import { TeacherProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/teacher/sections/TeacherProfileLoadingSkeleton";
+import { isTeacherAdminData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { AssignedStudentsTab } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsTab";
+import { TeacherAdminEditForm } from "@/frontend/views/dashboard/profile/teacher/TeacherAdminEditForm";
+import { TeacherProfileEditForm } from "@/frontend/views/dashboard/profile/teacher/TeacherProfileEditForm";
+import { TeacherProfileView } from "@/frontend/views/dashboard/profile/teacher/TeacherProfileView";
+import type {
+  TeacherAdminEditFormData,
+  TeacherOwnEditFormData,
+} from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
-import { TeacherBankingTab } from "./banking/TeacherBankingTab";
-import { TeacherProfileLoadingSkeleton } from "./sections/TeacherProfileLoadingSkeleton";
-import { isTeacherAdminData } from "./sections/teacherProfileTypes";
-import { AssignedStudentsTab } from "./students/AssignedStudentsTab";
-import { TeacherAdminEditForm } from "./TeacherAdminEditForm";
-import { TeacherProfileEditForm } from "./TeacherProfileEditForm";
-import { TeacherProfileView } from "./TeacherProfileView";
-import type { TeacherAdminEditFormData, TeacherOwnEditFormData } from "./teacherProfileFormTypes";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type TeacherOwnData = NonNullable<ProfileData["teacherOwnProfile"]>;

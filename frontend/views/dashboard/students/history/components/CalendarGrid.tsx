@@ -8,8 +8,8 @@ import {
   CalendarWeekdayHeader,
   computeCalendarGridLayout,
 } from "@/frontend/views/dashboard/shared/CalendarGridShared";
+import type { CalendarGridProps, ClassSession } from "@/frontend/views/dashboard/students/history/types";
 import { Link } from "@/shared/i18n/routing";
-import type { CalendarGridProps, ClassSession } from "../types";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,

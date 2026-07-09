@@ -1,4 +1,4 @@
-export type { CountryDetectionResult, CountryType } from "./country";
+export type { CountryDetectionResult, CountryType } from "@/frontend/lib/locale/country";
 export {
   countries,
   countryCodeToEmoji,
@@ -8,12 +8,12 @@ export {
   getCountryEmoji,
   preferredCountries,
   useCountryDetection,
-} from "./country";
-export type { LanguageType } from "./language";
+} from "@/frontend/lib/locale/country";
+export type { LanguageType } from "@/frontend/lib/locale/language";
 export {
   getLanguageByCode,
   getLanguageDisplayName,
   getLanguageEmoji,
   languageList,
   languages,
-} from "./language";
+} from "@/frontend/lib/locale/language";

@@ -1,15 +1,20 @@
 import { describe, expect, test } from "bun:test";
 import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherDirectoryQueryDocument } from "../sharedDocuments/staff-directory.documents";
+import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
-} from "../sharedDocuments/staff-profile.documents";
-import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import { authenticatedRequest, cleanupTestEntities, loginAndProvision, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { clearCookies, testClient } from "./testClient";
+} from "@/frontend/graphql/sharedDocuments/staff-profile.documents";
+import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
+import {
+  authenticatedRequest,
+  cleanupTestEntities,
+  loginAndProvision,
+  loginDemoUser,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { clearCookies, testClient } from "@/frontend/graphql/test/testClient";
 
 function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): TeacherProfileUpdateInput {
   return {

@@ -5,11 +5,15 @@ import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { FormProvider, useForm } from "react-hook-form";
 import { ExportButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { AvailabilityInsights } from "./components/AvailabilityInsights";
-import { AvailabilitySearchForm } from "./components/AvailabilitySearchForm";
-import { WeeklyAvailabilityGrid } from "./components/WeeklyAvailabilityGrid";
-import { availabilitySearchSchema } from "./schemas/availabilitySearchSchema";
-import type { AvailabilityEntry, AvailabilitySearchFormData, TeacherAvailabilityViewProps } from "./types";
+import { AvailabilityInsights } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilityInsights";
+import { AvailabilitySearchForm } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
+import { WeeklyAvailabilityGrid } from "@/frontend/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
+import { availabilitySearchSchema } from "@/frontend/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import type {
+  AvailabilityEntry,
+  AvailabilitySearchFormData,
+  TeacherAvailabilityViewProps,
+} from "@/frontend/views/dashboard/teachers/availability/types";
 
 export function TeacherAvailabilityView({
   availability,

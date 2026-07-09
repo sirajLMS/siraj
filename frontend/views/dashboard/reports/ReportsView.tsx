@@ -1,12 +1,15 @@
 "use client";
 
 import { useMediaQuery, useTheme } from "@mui/material";
+import type { ReportFiltersFormLabels } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
+import type { ReportsDataGridLabels } from "@/frontend/views/dashboard/reports/components/ReportsDataGrid";
+import { ReportsDesktopView } from "@/frontend/views/dashboard/reports/ReportsDesktopView";
+import { ReportsMobileView } from "@/frontend/views/dashboard/reports/ReportsMobileView";
 import type { LedgerStatus } from "@/frontend/views/dashboard/reports/types/reportsTypes";
-import type { ReportFiltersFormLabels } from "./components/ReportFiltersForm";
-import type { ReportsDataGridLabels } from "./components/ReportsDataGrid";
-import { ReportsDesktopView } from "./ReportsDesktopView";
-import { ReportsMobileView } from "./ReportsMobileView";
-import type { ReportsSharedViewProps, ReportsSummaryLabels } from "./types/reportsViewTypes";
+import type {
+  ReportsSharedViewProps,
+  ReportsSummaryLabels,
+} from "@/frontend/views/dashboard/reports/types/reportsViewTypes";
 
 export interface ReportsViewLabels {
   readonly pageTitle: string;

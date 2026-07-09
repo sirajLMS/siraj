@@ -4,9 +4,12 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { StatusBadge } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
-import { resolveTeacherScheduleActionTooltips } from "../utils/resolveTeacherScheduleActionTooltips";
-import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
+import {
+  getStatusLabel,
+  resolveTeacherStatusBadge,
+} from "@/frontend/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
 import { SessionActivateButton } from "./SessionActivateButton";
 
 export function TeacherScheduleStatusContent({

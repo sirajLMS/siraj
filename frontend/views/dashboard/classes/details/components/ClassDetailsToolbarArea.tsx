@@ -6,9 +6,12 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
-import { classDetailsContentPaddingSx, classDetailsSectionStackSx } from "../classDetailsMobileLayout";
-import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
-import { LiveSessionToolbar } from "./LiveSessionToolbar";
+import {
+  classDetailsContentPaddingSx,
+  classDetailsSectionStackSx,
+} from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
+import { LiveSessionToolbar } from "@/frontend/views/dashboard/classes/details/components/LiveSessionToolbar";
+import { TimezoneWarningBanner } from "@/frontend/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
 
 export interface ClassDetailsToolbarAreaProps {
   readonly instance: ClassInstanceDetail;

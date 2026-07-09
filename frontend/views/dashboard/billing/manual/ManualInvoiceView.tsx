@@ -5,11 +5,11 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
-import { ManualInvoiceDesktopView } from "./ManualInvoiceDesktopView";
-import { ManualInvoiceMobileView } from "./ManualInvoiceMobileView";
-import { manualInvoiceSchema } from "./schemas/manualInvoiceSchema";
-import type { ManualInvoiceViewProps } from "./types/manualInvoiceViewTypes";
-import { formatDraftTotal } from "./utils/manualInvoiceFormatters";
+import { ManualInvoiceDesktopView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceDesktopView";
+import { ManualInvoiceMobileView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceMobileView";
+import { manualInvoiceSchema } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
+import type { ManualInvoiceViewProps } from "@/frontend/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
+import { formatDraftTotal } from "@/frontend/views/dashboard/billing/manual/utils/manualInvoiceFormatters";
 
 export function ManualInvoiceView({
   labels,

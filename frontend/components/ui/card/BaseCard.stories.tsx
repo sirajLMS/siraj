@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { BaseCard } from "./BaseCard";
+import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 
 const meta: Meta<typeof BaseCard> = {
   title: "UI/BaseCard",

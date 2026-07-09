@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { NotificationChannel, NotificationEventType } from "../generated/gql/graphql-types";
+import { NotificationChannel, NotificationEventType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
-} from "../sharedDocuments/notification-preferences.documents";
-import { authenticatedRequest, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { clearCookies, testClient } from "./testClient";
+} from "@/frontend/graphql/sharedDocuments/notification-preferences.documents";
+import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { clearCookies, testClient } from "@/frontend/graphql/test/testClient";
 
 describe("GraphQL Notification Preferences Integration Tests", () => {
   setupTestServerLifecycle();

@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { CountryDisplay } from "./CountryDisplay";
+import { CountryDisplay } from "@/frontend/components/ui/display/CountryDisplay";
 
 const meta: Meta<typeof CountryDisplay> = {
   title: "UI/Display/CountryDisplay",

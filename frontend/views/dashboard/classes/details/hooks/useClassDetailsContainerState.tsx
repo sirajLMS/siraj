@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ActionFeedbackState } from "../types";
+import type { ActionFeedbackState } from "@/frontend/views/dashboard/classes/details/types";
 
 export function useClassDetailsContainerState() {
   const [isWarningDismissed, setIsWarningDismissed] = useState(false);

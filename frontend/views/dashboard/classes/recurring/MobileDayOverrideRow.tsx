@@ -5,7 +5,7 @@ import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/ma
 import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { AppTimePicker } from "@/frontend/components/ui/form";
-import type { DayScheduleConfig } from "./types";
+import type { DayScheduleConfig } from "@/frontend/views/dashboard/classes/recurring/types";
 
 const TIME_FORMAT = "HH:mm";
 

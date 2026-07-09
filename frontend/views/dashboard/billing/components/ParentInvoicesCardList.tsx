@@ -5,7 +5,7 @@ import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ParentInvoiceRow } from "../types/parentBillingTypes";
+import type { ParentInvoiceRow } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
   readonly viewDetails: string;

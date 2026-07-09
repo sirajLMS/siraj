@@ -59,8 +59,8 @@ Early dev: **delete** legacy surfaces in schema files, then regenerate a fresh m
 3. **Delete** `paymentMethodEnum` from `enums.ts` (old `PAYPAL` \| `BANK_ACCOUNT`)
 4. **Delete** `teachers.payment_method`, `parents.payment_method` columns
 5. **Delete** `teacher-banking.ts` schema file (`teacher_banking_details_history` table)
-6. Update `teacher_payments`: delete `banking_details_history_id` → add `user_payment_method_id`
-7. Update `payments`: delete `payment_method` column → add `user_payment_method_id` (nullable FK) + `payment_method_type` (`PaymentMethodType`)
+6. Update `teacher_payments`: delete `banking_details_history_id` → add `user_payment_method_id` + `payment_method_snapshot` JSONB
+7. Update `payments`: delete `payment_method` column → add `user_payment_method_id` + `payment_method_type` + `payment_method_snapshot` JSONB
 8. Add partial unique indexes for default slots on `user_payment_methods`
 9. Edit Drizzle schema to final shape → drop local DB → `drizzle-kit generate` (clean migration set)
 10. Apply migrations + reseed catalogs + demo user methods
@@ -84,15 +84,110 @@ In `PaymentMethodService.setDefault` / `create` / `update`:
 3. Set target row `isDefault = true`
 4. Repo provides `clearDefaultsInSlot(userId, slot, tx)` — no business logic in repo
 
+## Transaction snapshots (Option C)
+
+Every pay-in and pay-out stores a **frozen** `payment_method_snapshot` at insert time. Replaces temporal `teacher_banking_details_history` for audit — no method version table.
+
+```
+recordPayment / createTeacherPayment
+        │
+        ▼
+PaymentMethodService.buildTransactionSnapshot(methodId, direction)
+        │  resolve catalog display names
+        │  copy type + label + details (encrypt bank fields)
+        ▼
+INSERT payments | teacher_payments
+  user_payment_method_id  (nullable FK — traceability)
+  payment_method_type     (denormalized for queries)
+  payment_method_snapshot (NOT NULL — audit source of truth)
+```
+
+Rules:
+
+- Snapshot is **immutable** after insert — no updates to snapshot column
+- UI/history for past transactions reads snapshot only, never re-fetches live method
+- `user_payment_methods` may be edited/deleted freely; transactions remain auditable
+- Ad-hoc pay-in without saved method: build snapshot from inline input; `user_payment_method_id` null
+
+Helper location: `backend/services/payment-method/payment-method-snapshot.ts`
+
+## JSONB typesafety (Drizzle + runtime validation)
+
+Drizzle `jsonb()` columns are **untyped at the database** — `.$type<T>()` is compile-time only. Full spec in [spec.md § JSONB columns & typesafety](./spec.md#jsonb-columns--typesafety).
+
+### Repo precedent
+
+Follow `backend/db/schema/permissions.ts`:
+
+```ts
+import type { LocalizedString } from "@/backend/types/localized-string.types";
+import type { PaymentMethodDetails } from "@/backend/types/payment-method.types";
+
+name: jsonb("name").$type<LocalizedString>().notNull(),
+details: jsonb("details").$type<PaymentMethodDetails>().notNull(),
+```
+
+Import `T` from `@/backend/types/*` — never inline shapes in schema files.
+
+### Three-layer contract
+
+| Layer | Responsibility |
+|-------|----------------|
+| `backend/types/payment-method.types.ts` | Canonical TS unions (`PaymentMethodDetails`, `PaymentMethodTransactionSnapshot`) |
+| `backend/lib/payment-method.validation.ts` | Zod schemas; `parsePaymentMethodDetails(type, details)` discriminated on row `type` |
+| `backend/db/schema/*.ts` | `jsonb(...).$type<T>()` wired to types file |
+
+Services validate → encrypt bank fields → pass typed objects to repos. Repos never run Zod.
+
+### Bank encryption inside JSONB
+
+`encryptedText` custom type cannot wrap nested JSON keys. Refactor:
+
+1. **Create** `backend/lib/field-encryption.ts` — export `encryptField` / `decryptField` (AES-256-GCM from `custom-types.ts`)
+2. **Update** `backend/db/schema/custom-types.ts` — delegate to `field-encryption.ts`
+3. **Create** `backend/lib/payment-method-jsonb.ts` — `encryptBankTransferDetails` / `decryptBankTransferDetails` for `BankTransferDetails` string fields before persist / after authorized read
+4. Apply same encryption in `buildTransactionSnapshot` so snapshots store ciphertext at rest
+
+### Drizzle MCP workflow (Phase 2 gate)
+
+Use `project-0-siraj-drizzle` MCP tools (same JSON envelope as CLI):
+
+1. After all schema files have `.$type<>` on every JSONB column → `check` (expect `ok`)
+2. Drop local DB → `generate` (8C clean migration set)
+3. On `missing_hints` → `drizzle-hints` skill, re-call `generate`
+4. Apply via normal migration path + reseed
+
+Skills revision **12** matches installed `drizzle-kit` (verified). `check` returns `{ status: "ok", dialect: "postgresql" }` on current schema.
+
+### JSONB column checklist (Phase 2 review gate)
+
+Before `generate`, confirm each file:
+
+| Schema file | JSONB columns with `.$type<>` |
+|-------------|-------------------------------|
+| `user-payment-methods.ts` | `details` → `PaymentMethodDetails` |
+| `billing.ts` | `payment_method_snapshot` → `PaymentMethodTransactionSnapshot` |
+| `teacher-payments.ts` | `payment_method_snapshot` → `PaymentMethodTransactionSnapshot` |
+| `supported-mobile-wallets.ts` | `name`, `description`, `instructions` → `LocalizedString` |
+| `supported-payment-links.ts` | `name`, `description`, `instructions` → `LocalizedString`; `url_allowlist` → `readonly string[]` |
+| `supported-online-accounts.ts` | `name`, `description`, `instructions`, `identifier_label` → `LocalizedString` |
+
+
 ## Billing integration
 
-`billing.repository.recordPayment`:
+`billing.repository.recordPayment` / `PaymentMethodService.recordPayin`:
 
-- Accept optional `userPaymentMethodId`
-- Snapshot `paymentMethodType` from resolved method (or from input when FK absent)
-- Validate method belongs to invoice parent user and supports `PAYIN`
+- Accept `userPaymentMethodId` (optional) or inline method input
+- Call `buildTransactionSnapshot` with `direction=PAYIN`
+- Persist snapshot + type + FK on `payments` row
+- Validate method belongs to invoice parent user and supports `PAYIN` when FK provided
 
-`teacher_payments` creation links `userPaymentMethodId` of teacher's payout method used.
+`PaymentMethodService.recordPayout` (replaces `TeacherBankingRepository.createTeacherPayment`):
+
+- Accept `userPaymentMethodId`
+- Require verified method for real payouts; test payouts may skip verify
+- Call `buildTransactionSnapshot` with `direction=PAYOUT`
+- Persist snapshot + type + FK on `teacher_payments` row
 
 ## Catalog admin
 
@@ -109,7 +204,8 @@ Seed permissions + assign to admin group. Admin UI at `frontend/views/dashboard/
 |------|------------|
 | GraphQL union/input complexity for `details` | Typed inputs per `PaymentMethodType`; Pothos input objects mirror Zod |
 | ~90 files touch payment/banking | Shared UI components; phased replacement in tasks.md |
-| Encrypted bank field migration | Re-seed under 8C; encrypt on write in service |
+| Mutable method + stale audit on payouts | **Option C:** immutable `payment_method_snapshot` on every transaction row |
+| Encrypted bank fields in snapshots | Encrypt in snapshot `details` same as live methods; re-seed under 8C |
 | Catalog deactivation with existing user methods | Allow read/display; block new creates referencing inactive catalog |
 | Old `PaymentMethod` enum (`PAYPAL` \| `BANK_ACCOUNT`) | **Delete** from TS/PG/GraphQL; replace with `PaymentMethodType` everywhere |
 
@@ -131,7 +227,7 @@ Read before editing each path prefix:
 | `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | `**/*.test.ts` | `.agents/instructions/tests.instructions.md` |
 
-**Cross-cutting:** `@/` imports only; no `console.*`; MUI `sx`; Apollo from `@apollo/client/react`; **no deprecations** — delete legacy code outright.
+**Cross-cutting:** `@/` imports only; no `console.*`; MUI `sx`; Apollo from `@apollo/client/react`; **no deprecations** — delete legacy code outright; **every JSONB column** uses `.$type<T>()` + Zod on writes.
 
 ## Rollback
 
@@ -157,29 +253,33 @@ Grouped by phase. Paths are relative to repo root.
 | `backend/enum/billing.enum.ts` | **Update** — **delete** `PaymentMethod` enum; keep `InvoiceStatus`, `InvoiceType` |
 | `backend/enum/permission.enum.ts` | **Update** — catalog + verify permissions |
 | `backend/enum/index.ts` | **Update** — export new enum file |
-| `backend/types/payment-method.types.ts` | **Create** — Select/Insert/Return/Submit types + details union |
-| `backend/types/billing.types.ts` | **Update** — `PaymentRecordInput` + snapshot type |
-| `backend/types/teacher.types.ts` | **Update** — **delete** banking history + summary types |
+| `backend/types/payment-method.types.ts` | **Create** — Select/Insert/Return/Submit + details union + `PaymentMethodTransactionSnapshot` |
+| `backend/types/billing.types.ts` | **Update** — `PaymentRecordInput` + snapshot on payment rows |
+| `backend/types/teacher.types.ts` | **Update** — **delete** banking history types; add payout input with snapshot |
 | `backend/types/parent.types.ts` | **Update** — remove `paymentMethod` scalar |
 | `backend/types/profile.types.ts` | **Update** — replace `bankingSummary` with payment methods |
 | `backend/types/teacher-onboarding.types.ts` | **Update** — payment method input |
 | `backend/types/index.ts` | **Update** — export payment-method types |
-| `backend/lib/payment-method.validation.ts` | **Create** — discriminated Zod schemas |
+| `backend/lib/payment-method.validation.ts` | **Create** — discriminated Zod schemas + `localizedStringSchema` + snapshot schema |
+| `backend/lib/field-encryption.ts` | **Create** — extract `encryptField` / `decryptField` from `custom-types.ts` |
+| `backend/lib/payment-method-jsonb.ts` | **Create** — encrypt/decrypt `BankTransferDetails` fields inside JSONB |
+| `backend/db/schema/custom-types.ts` | **Update** — delegate to `field-encryption.ts` |
 | `frontend/lib/payment-method.ts` | **Create** — label helpers, mask display, catalog option builders |
 
 ### Phase 2 — Schema + migration + seeds
 
 | File | Action |
 |------|--------|
-| `backend/db/schema/user-payment-methods.ts` | **Create** |
-| `backend/db/schema/supported-mobile-wallets.ts` | **Create** |
-| `backend/db/schema/supported-payment-links.ts` | **Create** |
-| `backend/db/schema/supported-online-accounts.ts` | **Create** |
+| `backend/db/schema/user-payment-methods.ts` | **Create** — `details` jsonb `.$type<PaymentMethodDetails>()` |
+| `backend/db/schema/supported-mobile-wallets.ts` | **Create** — `LocalizedString` jsonb columns |
+| `backend/db/schema/supported-payment-links.ts` | **Create** — `LocalizedString` + `url_allowlist` `.$type<readonly string[]>()` |
+| `backend/db/schema/supported-online-accounts.ts` | **Create** — `LocalizedString` jsonb columns |
 | `backend/db/schema/enums.ts` | **Update** — add new PG enums; **delete** `paymentMethodEnum` |
 | `backend/db/schema/teachers.ts` | **Update** — drop `payment_method` |
 | `backend/db/schema/parents.ts` | **Update** — drop `payment_method` |
 | `backend/db/schema/teacher-banking.ts` | **Delete** — replace with payment methods |
-| `backend/db/schema/billing.ts` | **Update** — `user_payment_method_id` + type snapshot |
+| `backend/db/schema/billing.ts` | **Update** — delete `payment_method`; add FK + `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()` |
+| `backend/db/schema/teacher-payments.ts` | **Create** — `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()` |
 | `backend/db/schema/index.ts` | **Update** |
 | `backend/db/drizzleRelations.ts` | **Update** |
 | `backend/db/seeds/*` | **Update** — catalog seeds + demo user methods |
@@ -204,7 +304,8 @@ Grouped by phase. Paths are relative to repo root.
 
 | File | Action |
 |------|--------|
-| `backend/services/payment-method/payment-method.service.ts` | **Create** |
+| `backend/services/payment-method/payment-method-snapshot.ts` | **Create** — `buildTransactionSnapshot` |
+| `backend/services/payment-method/payment-method.service.ts` | **Create** — includes `recordPayin` / `recordPayout` |
 | `backend/services/payment-method/payment-method-mask.ts` | **Create** |
 | `backend/services/payment-method/payment-catalog.service.ts` | **Create** |
 | `backend/services/payment-method/index.ts` | **Create** |

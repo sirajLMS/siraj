@@ -2,13 +2,13 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { CombinedGraphQLErrors } from "@apollo/client";
 import type { InvoiceType as InvoiceTypeEnumType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { InvoiceType as InvoiceTypeEnum } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createManualInvoiceMutationDocument } from "../sharedDocuments";
+import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   endImpersonationMutationDocument,
   impersonationStatusQueryDocument,
   meQueryDocument,
   startImpersonationMutationDocument,
-} from "../sharedDocuments/auth.documents";
+} from "@/frontend/graphql/sharedDocuments/auth.documents";
 import {
   authenticatedRequest,
   cleanupTestEntities,
@@ -16,9 +16,9 @@ import {
   loginAndProvision,
   loginDemoUser,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { clearCookies, testClient } from "./testClient";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { clearCookies, testClient } from "@/frontend/graphql/test/testClient";
 
 const TEST_REASON = "GraphQL integration test impersonation";
 

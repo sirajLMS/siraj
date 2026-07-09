@@ -1,6 +1,9 @@
 import type { useTranslations } from "next-intl";
+import type {
+  TeacherDashboardLabels,
+  TeacherDashboardViewLabels,
+} from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { buildClassInstanceStatusLabels } from "@/frontend/views/dashboard/utils/classInstanceStatusLabels";
-import type { TeacherDashboardLabels, TeacherDashboardViewLabels } from "../types/teacherDashboardLabels";
 
 type TeacherDashboardTranslator = ReturnType<typeof useTranslations<"dashboard.teacherDashboard">>;
 type DashboardTranslator = ReturnType<typeof useTranslations<"dashboard">>;

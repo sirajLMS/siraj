@@ -9,10 +9,10 @@ import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedD
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import { CreateRecurringClassView } from "@/frontend/views/dashboard/classes/recurring/CreateRecurringClassView";
+import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
+import { mapFormDataToInput } from "@/frontend/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
 import { useRouter } from "@/shared/i18n/routing";
-import { CreateRecurringClassView } from "./CreateRecurringClassView";
-import type { RecurringClassFormData } from "./recurringClassSchema";
-import { mapFormDataToInput } from "./utils/mapRecurringClassFormData";
 
 export function CreateRecurringClassContainer() {
   const t = useTranslations("dashboard.createRecurringClass");

@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { GenderSelector, type GenderSelectorProps } from "@/frontend/components/ui/input/GenderSelector";
 import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
-import { GenderSelector, type GenderSelectorProps } from "./GenderSelector";
 
 function GenderSelectorStory({
   initialGender = Gender.Male,

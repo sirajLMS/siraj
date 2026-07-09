@@ -6,10 +6,13 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import type { SchedulePagination } from "../ParentDashboardView";
-import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
-import type { ParentBookingStatus, ParentScheduleRow } from "../types/parentDashboardTypes";
-import { ParentClassStatusIndicator } from "./ParentClassStatusIndicator";
+import { ParentClassStatusIndicator } from "@/frontend/views/dashboard/parent/dashboard/components/ParentClassStatusIndicator";
+import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
+import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
+import type {
+  ParentBookingStatus,
+  ParentScheduleRow,
+} from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 
 interface ParentScheduleDataGridProps {
   readonly rows: readonly ParentScheduleRow[];

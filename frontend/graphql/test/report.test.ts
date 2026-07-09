@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { ReportGroupingMode } from "../generated/gql/graphql-types";
-import { meQueryDocument } from "../sharedDocuments/auth.documents";
+import { ReportGroupingMode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import {
   assignPermissionGroupToUserMutationDocument,
   createPermissionGroupMutationDocument,
   deletePermissionGroupMutationDocument,
   permissionsQueryDocument,
   revokePermissionGroupFromUserMutationDocument,
-} from "../sharedDocuments/permission-management.documents";
-import { generateAttendanceReportQueryDocument } from "../sharedDocuments/report.documents";
+} from "@/frontend/graphql/sharedDocuments/permission-management.documents";
+import { generateAttendanceReportQueryDocument } from "@/frontend/graphql/sharedDocuments/report.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,
@@ -16,8 +16,8 @@ import {
   cleanupTestSuperAdmin,
   loginAndProvision,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   setupTestServerLifecycle();

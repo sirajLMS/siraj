@@ -7,14 +7,14 @@ import {
   ClassExecutionState,
   type ClassInstanceDetail,
 } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ActivityHeatmap } from "@/frontend/views/dashboard/classes/details/admin/ActivityHeatmap";
+import { AdminActionsBar } from "@/frontend/views/dashboard/classes/details/admin/AdminActionsBar";
+import { ClassInfoCard } from "@/frontend/views/dashboard/classes/details/admin/ClassInfoCard";
+import { LivePerformanceGrid } from "@/frontend/views/dashboard/classes/details/admin/LivePerformanceGrid";
+import { MetadataCard } from "@/frontend/views/dashboard/classes/details/admin/MetadataCard";
+import { classDetailsSectionStackSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
+import { ClassDetailsToolbarArea } from "@/frontend/views/dashboard/classes/details/components/ClassDetailsToolbarArea";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
-import { classDetailsSectionStackSx } from "../classDetailsMobileLayout";
-import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
-import { ActivityHeatmap } from "./ActivityHeatmap";
-import { AdminActionsBar } from "./AdminActionsBar";
-import { ClassInfoCard } from "./ClassInfoCard";
-import { LivePerformanceGrid } from "./LivePerformanceGrid";
-import { MetadataCard } from "./MetadataCard";
 
 export interface ClassDetailsAdminViewProps {
   readonly instance: ClassInstanceDetail;

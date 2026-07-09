@@ -10,14 +10,14 @@ import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
+import { DaysScheduleSection } from "@/frontend/views/dashboard/classes/recurring/DaysScheduleSection";
+import { DurationInput } from "@/frontend/views/dashboard/classes/recurring/DurationInput";
+import { EntitySelect } from "@/frontend/views/dashboard/classes/recurring/EntitySelect";
+import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
+import { TimeInput } from "@/frontend/views/dashboard/classes/recurring/TimeInput";
+import type { SimpleEntity } from "@/frontend/views/dashboard/classes/recurring/types";
+import { CLASS_TYPE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
-import { DaysScheduleSection } from "./DaysScheduleSection";
-import { DurationInput } from "./DurationInput";
-import { EntitySelect } from "./EntitySelect";
-import type { RecurringClassFormData } from "./recurringClassSchema";
-import { TimeInput } from "./TimeInput";
-import type { SimpleEntity } from "./types";
-import { CLASS_TYPE_OPTIONS } from "./types";
 
 interface RecurringClassFormFieldsProps {
   readonly register: UseFormRegister<RecurringClassFormData>;

@@ -5,9 +5,9 @@ import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/ma
 import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { AppTimePicker } from "@/frontend/components/ui/form";
-import { MobileDayOverrideRow } from "./MobileDayOverrideRow";
-import type { DayScheduleConfig } from "./types";
-import { WeekendDayRow } from "./WeekendDayRow";
+import { MobileDayOverrideRow } from "@/frontend/views/dashboard/classes/recurring/MobileDayOverrideRow";
+import type { DayScheduleConfig } from "@/frontend/views/dashboard/classes/recurring/types";
+import { WeekendDayRow } from "@/frontend/views/dashboard/classes/recurring/WeekendDayRow";
 
 const TIME_FORMAT = "HH:mm";
 

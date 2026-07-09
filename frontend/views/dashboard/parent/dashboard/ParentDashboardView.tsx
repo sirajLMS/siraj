@@ -3,20 +3,20 @@
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import { AcademicProgressSummary } from "./components/AcademicProgressSummary";
-import { ParentDashboardMetricsRow } from "./components/ParentDashboardMetrics";
-import { ParentScheduleCardList } from "./components/ParentScheduleCardList";
-import { ParentScheduleDataGrid } from "./components/ParentScheduleDataGrid";
-import { ParentSupportFab } from "./components/ParentSupportFab";
-import { ParentWelcomeHero } from "./components/ParentWelcomeHero";
-import { WorkshopPromoCard } from "./components/WorkshopPromoCard";
-import type { ParentDashboardLabels } from "./types/parentDashboardLabels";
+import { AcademicProgressSummary } from "@/frontend/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
+import { ParentDashboardMetricsRow } from "@/frontend/views/dashboard/parent/dashboard/components/ParentDashboardMetrics";
+import { ParentScheduleCardList } from "@/frontend/views/dashboard/parent/dashboard/components/ParentScheduleCardList";
+import { ParentScheduleDataGrid } from "@/frontend/views/dashboard/parent/dashboard/components/ParentScheduleDataGrid";
+import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";
+import { ParentWelcomeHero } from "@/frontend/views/dashboard/parent/dashboard/components/ParentWelcomeHero";
+import { WorkshopPromoCard } from "@/frontend/views/dashboard/parent/dashboard/components/WorkshopPromoCard";
+import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type {
   ParentDashboardMetrics,
   ParentScheduleRow,
   StudentProgressItem,
   WorkshopPromo,
-} from "./types/parentDashboardTypes";
+} from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 
 export interface SchedulePagination {
   readonly page: number;

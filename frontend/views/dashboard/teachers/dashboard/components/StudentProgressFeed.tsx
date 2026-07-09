@@ -14,7 +14,7 @@ import {
 import { Box, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { UserAvatar } from "@/frontend/components/ui";
 import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/types/shared.types";
-import type { TeacherDashboardLabels } from "@/shared/messages/types/dashboard/teachers/dashboard";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 interface StudentProgressFeedProps {
   readonly items: readonly StudentProgressFeedItem[];

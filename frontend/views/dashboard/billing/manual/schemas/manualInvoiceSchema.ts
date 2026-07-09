@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { BILLING_MONTH_IDS } from "@/frontend/views/dashboard/billing/manual/constants/billingMonths";
 import type { BillingManualValidationLabels } from "@/shared/messages/types/dashboard/billing/manual";
-import { BILLING_MONTH_IDS } from "../constants/billingMonths";
 
 export const manualInvoiceSchema = (labels: BillingManualValidationLabels) =>
   z

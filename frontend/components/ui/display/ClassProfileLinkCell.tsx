@@ -1,6 +1,6 @@
 "use client";
 
-import { ClassProfileLink, type ClassProfileLinkProps } from "./ClassProfileLink";
+import { ClassProfileLink, type ClassProfileLinkProps } from "@/frontend/components/ui/display/ClassProfileLink";
 
 export type ClassProfileLinkCellProps = ClassProfileLinkProps;
 

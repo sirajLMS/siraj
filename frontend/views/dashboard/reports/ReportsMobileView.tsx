@@ -1,6 +1,11 @@
 "use client";
 
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
+import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
+import { PerformanceLedgerCardList } from "@/frontend/views/dashboard/reports/components/PerformanceLedgerCardList";
+import { ReportFiltersCollapsible } from "@/frontend/views/dashboard/reports/components/ReportFiltersCollapsible";
+import type { ReportFiltersFormLabels } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
 import type {
   LedgerStatus,
   ReportLedgerRow,
@@ -8,11 +13,6 @@ import type {
   ReportTeacherOption,
   ReportType,
 } from "@/frontend/views/dashboard/reports/types/reportsTypes";
-import { EngagementRateCard } from "./components/EngagementRateCard";
-import { FinancialDistributionCard } from "./components/FinancialDistributionCard";
-import { PerformanceLedgerCardList } from "./components/PerformanceLedgerCardList";
-import { ReportFiltersCollapsible } from "./components/ReportFiltersCollapsible";
-import type { ReportFiltersFormLabels } from "./components/ReportFiltersForm";
 
 interface ReportsMobileViewProps {
   readonly pageTitle: string;

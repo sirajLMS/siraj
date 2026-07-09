@@ -5,8 +5,8 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import { logger } from "@/frontend/utils/logger";
-import type { RecurringClassFormData } from "../recurringClassSchema";
-import { mapFormDataToServiceInput } from "../utils/mapRecurringClassFormData";
+import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
+import { mapFormDataToServiceInput } from "@/frontend/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
 
 export async function createRecurringClass(
   data: RecurringClassFormData,

@@ -5,9 +5,14 @@ import {
   permissionGroupSimulationStatusQueryDocument,
   simulatablePermissionGroupsQueryDocument,
   startPermissionGroupSimulationMutationDocument,
-} from "../sharedDocuments/auth.documents";
-import { authenticatedRequest, cleanupTestSuperAdmin, loginAndProvision, provisionTestSuperAdmin } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+} from "@/frontend/graphql/sharedDocuments/auth.documents";
+import {
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginAndProvision,
+  provisionTestSuperAdmin,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 describe("GraphQL Permission Group Simulation Integration Tests", () => {
   setupTestServerLifecycle();

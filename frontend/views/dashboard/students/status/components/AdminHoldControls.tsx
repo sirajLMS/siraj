@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StatusUpdateFormData } from "../schemas/statusUpdateSchema";
-import type { AdminHoldControlsProps } from "../types";
+import type { StatusUpdateFormData } from "@/frontend/views/dashboard/students/status/schemas/statusUpdateSchema";
+import type { AdminHoldControlsProps } from "@/frontend/views/dashboard/students/status/types";
 
 function StatusSelectionField() {
   const t = useTranslations("dashboard.studentStatus");

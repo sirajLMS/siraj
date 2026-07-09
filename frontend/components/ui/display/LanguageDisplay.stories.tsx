@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { LanguageDisplay } from "./LanguageDisplay";
+import { LanguageDisplay } from "@/frontend/components/ui/display/LanguageDisplay";
 
 const meta: Meta<typeof LanguageDisplay> = {
   title: "UI/Display/LanguageDisplay",

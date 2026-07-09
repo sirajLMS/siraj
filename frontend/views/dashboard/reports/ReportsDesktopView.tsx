@@ -3,13 +3,19 @@
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { BaseCard, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { EngagementRateCard } from "./components/EngagementRateCard";
-import { FinancialDistributionCard } from "./components/FinancialDistributionCard";
-import type { ReportFiltersFormLabels } from "./components/ReportFiltersForm";
-import { ReportFiltersForm } from "./components/ReportFiltersForm";
-import { ReportsDataGrid, type ReportsDataGridLabels } from "./components/ReportsDataGrid";
-import { ReportsTotalsRow } from "./components/ReportsTotalsRow";
-import type { ReportsSharedViewProps, ReportsSummaryLabels } from "./types/reportsViewTypes";
+import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
+import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
+import type { ReportFiltersFormLabels } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
+import { ReportFiltersForm } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
+import {
+  ReportsDataGrid,
+  type ReportsDataGridLabels,
+} from "@/frontend/views/dashboard/reports/components/ReportsDataGrid";
+import { ReportsTotalsRow } from "@/frontend/views/dashboard/reports/components/ReportsTotalsRow";
+import type {
+  ReportsSharedViewProps,
+  ReportsSummaryLabels,
+} from "@/frontend/views/dashboard/reports/types/reportsViewTypes";
 
 interface ReportsDesktopViewProps extends ReportsSharedViewProps {
   readonly pageTitle: string;

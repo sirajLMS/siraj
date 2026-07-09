@@ -1,6 +1,6 @@
 "use client";
 
-import { PersonProfileLink, type PersonProfileLinkProps } from "./PersonProfileLink";
+import { PersonProfileLink, type PersonProfileLinkProps } from "@/frontend/components/ui/display/PersonProfileLink";
 
 export type PersonProfileLinkCellProps = PersonProfileLinkProps;
 

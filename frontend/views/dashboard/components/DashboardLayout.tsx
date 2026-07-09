@@ -2,12 +2,12 @@
 
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
+import { BottomNavbar } from "@/frontend/views/dashboard/components/BottomNavbar";
+import { Sidebar } from "@/frontend/views/dashboard/components/Sidebar";
+import { TopNavbar } from "@/frontend/views/dashboard/components/TopNavbar";
 import { getActiveNavKey } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 import { usePathname } from "@/shared/i18n/routing";
-import { BottomNavbar } from "./BottomNavbar";
-import { Sidebar } from "./Sidebar";
-import { TopNavbar } from "./TopNavbar";
 
 interface DashboardLayoutProps {
   readonly children: ReactNode;

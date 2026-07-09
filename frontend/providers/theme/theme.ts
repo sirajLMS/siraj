@@ -2,11 +2,11 @@ import { createTheme, type PaletteMode, responsiveFontSizes } from "@mui/materia
 import "@mui/x-data-grid/themeAugmentation";
 import { arEG as muiArEg, enUS as muiEnUS } from "@mui/material/locale";
 import { arSD as dataGridArSD, enUS as dataGridEnUS } from "@mui/x-data-grid/locales";
-import { components } from "./components";
-import { layoutSettings } from "./layoutSettings";
-import { darkPalette } from "./palette/darkPalette";
-import { lightPalette } from "./palette/lightPalette";
-import { typography } from "./typography";
+import { components } from "@/frontend/providers/theme/components";
+import { layoutSettings } from "@/frontend/providers/theme/layoutSettings";
+import { darkPalette } from "@/frontend/providers/theme/palette/darkPalette";
+import { lightPalette } from "@/frontend/providers/theme/palette/lightPalette";
+import { typography } from "@/frontend/providers/theme/typography";
 
 const locales = (locale: string = "en") => {
   switch (locale) {

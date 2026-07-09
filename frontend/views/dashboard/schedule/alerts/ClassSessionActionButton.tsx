@@ -2,7 +2,7 @@
 
 import { LoginOutlined, LogoutOutlined, OndemandVideoOutlined } from "@mui/icons-material";
 import { alpha, Button } from "@mui/material";
-import type { ClassSessionAction } from "./types";
+import type { ClassSessionAction } from "@/frontend/views/dashboard/schedule/alerts/types";
 
 interface ClassSessionActionButtonProps {
   readonly action: ClassSessionAction;

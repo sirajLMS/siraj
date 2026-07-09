@@ -1,9 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { classInstanceQueryDocument } from "../sharedDocuments/class-session.documents";
-import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teacher-dashboard.documents";
-import { assertOperationDenied, authenticatedRequest, loginAndProvision, loginUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+import { classInstanceQueryDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
+import { createTeacherManualClassEntryMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-dashboard.documents";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  loginAndProvision,
+  loginUser,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 describe("GraphQL Class Instance Detail Query", () => {
   setupTestServerLifecycle();

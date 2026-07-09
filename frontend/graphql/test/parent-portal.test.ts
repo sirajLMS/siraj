@@ -3,10 +3,10 @@ import {
   parentAssignedStudentsQueryDocument,
   parentHandbookUrlQueryDocument,
   parentOwnProfileQueryDocument,
-} from "../sharedDocuments/parent-portal.documents";
-import { loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
+import { loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 describe("GraphQL Parent Portal Integration Tests", () => {
   setupTestServerLifecycle();

@@ -17,4 +17,4 @@ export {
   type StatusTrackingViewProps,
   type SuspensionAnalyticsLabels,
   type SuspensionAnalyticsProps,
-} from "./status-tracking.types";
+} from "@/frontend/views/dashboard/classes/status/tracking/status-tracking.types";

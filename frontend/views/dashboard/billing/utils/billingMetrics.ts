@@ -8,10 +8,10 @@ import {
   TrendingUpOutlined,
   WarningAmberOutlined,
 } from "@mui/icons-material";
+import type { BillingMetricItem } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
+import type { AdminBillingSummary } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type { ParentBillingSummary } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
-import type { BillingMetricItem } from "../components/BillingMetricsRow";
-import type { AdminBillingSummary } from "../types/billingViewTypes";
-import type { ParentBillingSummary } from "../types/parentBillingTypes";
 
 export function buildAdminMetrics(summary: AdminBillingSummary, labels: BillingLabels): BillingMetricItem[] {
   return [

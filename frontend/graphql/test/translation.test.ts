@@ -1,10 +1,13 @@
 import { describe, expect, test } from "bun:test";
+import {
+  translatedMessageQueryDocument,
+  welcomeMessageQueryDocument,
+} from "@/frontend/graphql/sharedDocuments/translation.documents";
+import { loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
-import { translatedMessageQueryDocument, welcomeMessageQueryDocument } from "../sharedDocuments/translation.documents";
-import { loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
 
 describe("GraphQL Translation Integration Tests", () => {
   setupTestServerLifecycle();

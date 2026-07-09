@@ -12,8 +12,8 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
 import { useRouter } from "@/shared/i18n/routing";
-import { ReportsView } from "./ReportsView";
 import type { ReportLedgerRow, ReportsSummary, ReportType } from "./types/reportsTypes";
 
 function formatHours(hours: number): string {

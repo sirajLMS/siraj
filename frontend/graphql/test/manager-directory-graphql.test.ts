@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import crypto from "node:crypto";
-import { ManagerAccountType } from "../generated/gql/graphql-types";
+import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   managerDirectoryQueryDocument,
   updateManagerProfileMutationDocument,
-} from "../sharedDocuments/staff-directory.documents";
+} from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import {
   authenticatedRequest,
   cleanupTestEntities,
@@ -13,9 +13,9 @@ import {
   loginAndProvision,
   provisionTestManager,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 async function getManagers(token: string) {
   const data = await authenticatedRequest(token, "query", managerDirectoryQueryDocument);

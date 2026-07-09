@@ -11,8 +11,8 @@ import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
 import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
-import { ClassSessionActionButton } from "./ClassSessionActionButton";
-import type { AcademicClassRow, ClassSessionStatus } from "./types";
+import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
+import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
 
 interface AcademicScheduleCardListProps {
   readonly rows: readonly AcademicClassRow[];

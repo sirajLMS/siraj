@@ -4,10 +4,16 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import { ParentAssignmentSection, type ParentOption } from "./ParentAssignmentSection";
-import { StudentInfoSection } from "./StudentInfoSection";
-import type { StudentOnboardingFormData } from "./schemas/studentOnboardingSchema";
-import { TeacherAssignmentSection, type TeacherOption } from "./TeacherAssignmentSection";
+import {
+  ParentAssignmentSection,
+  type ParentOption,
+} from "@/frontend/views/dashboard/students/onboarding/ParentAssignmentSection";
+import { StudentInfoSection } from "@/frontend/views/dashboard/students/onboarding/StudentInfoSection";
+import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
+import {
+  TeacherAssignmentSection,
+  type TeacherOption,
+} from "@/frontend/views/dashboard/students/onboarding/TeacherAssignmentSection";
 
 interface StudentOnboardingViewProps {
   readonly register: UseFormRegister<StudentOnboardingFormData>;

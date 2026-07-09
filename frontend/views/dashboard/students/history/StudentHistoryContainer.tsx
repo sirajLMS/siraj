@@ -9,9 +9,9 @@ import { useCallback, useEffect, useMemo } from "react";
 import { studentClassHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-history.documents";
 import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
 import { logger } from "@/frontend/utils/logger";
-import { StudentHistoryView } from "./StudentHistoryView";
-import type { ClassSession, StudentHistoryMetrics } from "./types";
-import { mapStatusToAttendance } from "./types";
+import { StudentHistoryView } from "@/frontend/views/dashboard/students/history/StudentHistoryView";
+import type { ClassSession, StudentHistoryMetrics } from "@/frontend/views/dashboard/students/history/types";
+import { mapStatusToAttendance } from "@/frontend/views/dashboard/students/history/types";
 
 export function StudentHistoryContainer() {
   const params = useParams<{ id: string }>();

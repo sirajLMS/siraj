@@ -1,8 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { studentDirectoryQueryDocument } from "../sharedDocuments/student-directory.documents";
-import { authenticatedRequest, cleanupTestEntities, loginAndProvision, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
+import {
+  authenticatedRequest,
+  cleanupTestEntities,
+  loginAndProvision,
+  loginDemoUser,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 describe("studentDirectory GraphQL Integration Tests", () => {
   setupTestServerLifecycle();

@@ -1,0 +1,5 @@
+{
+  "version": 2,
+  "name": "fix-import-aliases",
+  "description": "Fix import path aliases to use @/ instead of relative ./ or ../ imports"
+}

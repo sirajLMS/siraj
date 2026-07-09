@@ -1,16 +1,16 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { IanaTimezone, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { statusTrackingScheduleQueryDocument } from "../sharedDocuments/schedule.documents";
-import { changeStudentStatusMutationDocument } from "../sharedDocuments/student-lifecycle.documents";
+import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
+import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
   loginDemoUser,
   provisionTestEntities,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 /**
  * Helper to fetch status tracking schedule with a given token.

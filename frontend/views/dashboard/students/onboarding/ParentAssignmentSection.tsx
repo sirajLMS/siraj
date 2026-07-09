@@ -5,7 +5,7 @@ import { Autocomplete, Box, InputAdornment, TextField } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
-import type { StudentOnboardingFormData } from "./schemas/studentOnboardingSchema";
+import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
 export interface ParentOption {
   readonly id: string;

@@ -3,8 +3,12 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { NotificationChannel, NotificationEventType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { NOTIFICATION_CHANNELS, NOTIFICATION_EVENT_TYPES, preferenceKey } from "./notificationPreferenceTypes";
-import { PreferencesMatrix } from "./PreferencesMatrix";
+import {
+  NOTIFICATION_CHANNELS,
+  NOTIFICATION_EVENT_TYPES,
+  preferenceKey,
+} from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import { PreferencesMatrix } from "@/frontend/views/dashboard/profile/core/notifications/PreferencesMatrix";
 
 const mockPreferences = NOTIFICATION_CHANNELS.flatMap(channel =>
   NOTIFICATION_EVENT_TYPES.map(eventType => ({

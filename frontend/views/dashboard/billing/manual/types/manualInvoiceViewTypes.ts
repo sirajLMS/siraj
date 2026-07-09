@@ -1,5 +1,5 @@
+import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
-import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 
 export type ManualInvoiceLabels = BillingManualLabels;
 

@@ -14,31 +14,36 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [ ] Update `backend/enum/billing.enum.ts` — **delete** `PaymentMethod` enum (keep `InvoiceStatus`, `InvoiceType`)
 - [ ] Update `backend/enum/permission.enum.ts` — `PAYMENT_METHODS_MANAGE_CATALOGS`, `PAYMENT_METHODS_VERIFY_BANK_TRANSFER`
 - [ ] Update `backend/enum/index.ts`
-- [ ] Create `backend/types/payment-method.types.ts` — Select/Insert/Return/Submit + details union
-- [ ] Update `backend/types/billing.types.ts` — `PaymentRecordInput` with `userPaymentMethodId`
-- [ ] Update `backend/types/teacher.types.ts` — remove banking history types
+- [ ] Create `backend/types/payment-method.types.ts` — includes `PaymentMethodTransactionSnapshot`
+- [ ] Update `backend/types/billing.types.ts` — `PaymentRecordInput` + snapshot fields on `PaymentSelectType`
+- [ ] Update `backend/types/teacher.types.ts` — delete banking history types; `CreateTeacherPaymentInput` uses snapshot
 - [ ] Update `backend/types/parent.types.ts` — remove scalar `paymentMethod`
 - [ ] Update `backend/types/profile.types.ts` — replace `bankingSummary` with payment methods
 - [ ] Update `backend/types/teacher-onboarding.types.ts`
 - [ ] Update `backend/types/index.ts`
-- [ ] Create `backend/lib/payment-method.validation.ts` — discriminated Zod
+- [ ] Create `backend/lib/payment-method.validation.ts` — discriminated Zod + `localizedStringSchema` + `PaymentMethodTransactionSnapshot` schema
+- [ ] Create `backend/lib/field-encryption.ts` — extract `encryptField` / `decryptField` from `custom-types.ts`
+- [ ] Create `backend/lib/payment-method-jsonb.ts` — encrypt/decrypt `BankTransferDetails` inside JSONB
+- [ ] Update `backend/db/schema/custom-types.ts` — delegate to `field-encryption.ts`
 - [ ] Create `frontend/lib/payment-method.ts` — display helpers
 - [ ] Gate: `bun tsgo`
 
 ## Phase 2 — Schema + migration + seeds
 
-- [ ] Create `backend/db/schema/user-payment-methods.ts`
-- [ ] Create `backend/db/schema/supported-mobile-wallets.ts`
-- [ ] Create `backend/db/schema/supported-payment-links.ts`
-- [ ] Create `backend/db/schema/supported-online-accounts.ts`
+- [ ] Create `backend/db/schema/user-payment-methods.ts` — `details` jsonb `.$type<PaymentMethodDetails>()`
+- [ ] Create `backend/db/schema/supported-mobile-wallets.ts` — `name`/`description`/`instructions` `.$type<LocalizedString>()`
+- [ ] Create `backend/db/schema/supported-payment-links.ts` — `LocalizedString` columns + `url_allowlist` `.$type<readonly string[]>()`
+- [ ] Create `backend/db/schema/supported-online-accounts.ts` — `LocalizedString` columns incl. `identifier_label`
 - [ ] Update `backend/db/schema/enums.ts` — add `paymentMethodTypeEnum`, `paymentDirectionEnum`, `identifierKindEnum`; **delete** `paymentMethodEnum`
 - [ ] Update `backend/db/schema/teachers.ts` — drop `payment_method`
 - [ ] Update `backend/db/schema/parents.ts` — drop `payment_method`
 - [ ] Delete `backend/db/schema/teacher-banking.ts`
-- [ ] Update `backend/db/schema/billing.ts` — **delete** `payment_method` column; add `user_payment_method_id` + `payment_method_type`
+- [ ] Create `backend/db/schema/teacher-payments.ts` — FK + `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()`
+- [ ] Update `backend/db/schema/billing.ts` — delete `payment_method`; add FK + `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()`
 - [ ] Update `backend/db/schema/index.ts`
 - [ ] Update `backend/db/drizzleRelations.ts` — remove teacher banking relations; add payment method relations
-- [ ] Drop local DB + `drizzle-kit generate` clean migration set (8C — no backfill)
+- [ ] JSONB gate: every new schema file uses `jsonb(...).$type<T>()` — no bare `jsonb()` columns
+- [ ] Drizzle MCP `check` → drop local DB → `generate` (8C — no backfill); resolve `missing_hints` via drizzle-hints skill
 - [ ] Seed catalog rows (PayPal, Wise, Vodafone Cash, Etisalat Cash, STC Pay, InstaPay)
 - [ ] Seed demo user payment methods
 - [ ] Seed new permissions in permission groups
@@ -63,8 +68,10 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ## Phase 4 — Services
 
-- [ ] Create `backend/services/payment-method/payment-method.service.ts`
+- [ ] Create `backend/services/payment-method/payment-method-snapshot.ts` — `buildTransactionSnapshot` (uses `payment-method-jsonb` lib for bank encryption)
+- [ ] Create `backend/services/payment-method/payment-method-snapshot.test.ts`
 - [ ] Create `backend/services/payment-method/payment-method-mask.ts`
+- [ ] Create `backend/services/payment-method/payment-method.service.ts` — CRUD, defaults, `recordPayin`, `recordPayout`
 - [ ] Create `backend/services/payment-method/payment-catalog.service.ts`
 - [ ] Create `backend/services/payment-method/index.ts`
 - [ ] Delete `backend/services/profile/banking-summary.ts`
@@ -83,7 +90,9 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ## Phase 5 — Pothos + GraphQL
 
-- [ ] Create `backend/graphql/pothos/payment-method.pothos.ts`
+- [ ] Create `backend/graphql/pothos/payment-method.pothos.ts` — `PaymentMethodTransactionSnapshot` object
+- [ ] Update `backend/graphql/pothos/billing.pothos.ts` — expose `paymentMethodSnapshot` on `Payment`
+- [ ] Update payout pothos — expose `paymentMethodSnapshot` on `TeacherPayment` (if exposed in GraphQL)
 - [ ] Update `backend/graphql/pothos/enum.pothos.ts` — add new enums; **delete** `PaymentMethodPothosObject`
 - [ ] Update `backend/graphql/pothos/profile.pothos.ts` — **delete** `TeacherBankingSummaryPothosObject`; add payment methods
 - [ ] Update `backend/graphql/pothos/staff-profile.pothos.ts`

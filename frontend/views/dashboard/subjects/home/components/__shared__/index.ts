@@ -1,7 +1,7 @@
-export { ActiveToggleField } from "./ActiveToggleField";
-export { CategorySelectField } from "./CategorySelectField";
-export { EntityFormDialogActions } from "./EntityFormDialogActions";
-export { LabeledTextField } from "./LabeledTextField";
+export { ActiveToggleField } from "@/frontend/views/dashboard/subjects/home/components/__shared__/ActiveToggleField";
+export { CategorySelectField } from "@/frontend/views/dashboard/subjects/home/components/__shared__/CategorySelectField";
+export { EntityFormDialogActions } from "@/frontend/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
+export { LabeledTextField } from "@/frontend/views/dashboard/subjects/home/components/__shared__/LabeledTextField";
 export {
   type CategoryFormValues,
   categoryFormSchema,
@@ -10,4 +10,4 @@ export {
   type SubjectFormValues,
   slugify,
   subjectFormSchema,
-} from "./subjectFormShared";
+} from "@/frontend/views/dashboard/subjects/home/components/__shared__/subjectFormShared";

@@ -9,10 +9,9 @@ import { useTranslations } from "next-intl";
 import { create } from "zustand";
 import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
-import type { RawMetric } from "@/frontend/views/dashboard/classes/status/tracking/types";
+import { StatusTrackingView } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingView";
+import type { RawMetric, StatusTrackingRow } from "@/frontend/views/dashboard/classes/status/tracking/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { StatusTrackingView } from "./StatusTrackingView";
-import type { StatusTrackingRow } from "./types";
 
 interface StoryStatusTrackingState {
   readonly metrics: readonly RawMetric[];

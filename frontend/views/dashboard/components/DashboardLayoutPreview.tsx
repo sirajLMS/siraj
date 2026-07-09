@@ -6,6 +6,7 @@ import {
   BOTTOM_NAV_SCROLL_THRESHOLD,
   BottomNavItemView,
 } from "@/frontend/views/dashboard/components/BottomNavItemView";
+import type { TranslatedNavItem } from "@/frontend/views/dashboard/components/client/SidebarShell";
 import {
   LanguageSwitcher,
   NavbarChrome,
@@ -13,7 +14,6 @@ import {
   ThemeSwitcher,
   UserMenuButton,
 } from "@/frontend/views/dashboard/components/navbar";
-import type { TranslatedNavItem } from "./client/SidebarShell";
 
 interface DashboardLayoutPreviewProps {
   readonly children?: ReactNode;

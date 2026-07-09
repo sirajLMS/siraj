@@ -1,5 +1,5 @@
 import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/types/shared.types";
-import type { TeacherDashboardLabels } from "@/shared/messages/types/dashboard/teachers/dashboard";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 interface RawProgressFeedItem {
   readonly id?: string | null;

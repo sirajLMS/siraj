@@ -3,8 +3,8 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
+import { StudentEntityLink } from "@/frontend/views/dashboard/classes/details/components/EntityLinks";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
-import { StudentEntityLink } from "../components/EntityLinks";
 
 const STATUS_COLOR_MAP: Record<ClassInstanceStatus, "active" | "confirmed" | "pending" | "completed" | "cancelled"> = {
   active: "active",

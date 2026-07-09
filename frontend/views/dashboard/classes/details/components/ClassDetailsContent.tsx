@@ -3,14 +3,21 @@
 import type { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
-import { ClassDetailsAdminView } from "../admin/ClassDetailsAdminView";
-import { ClassDetailsHeader } from "../ClassDetailsHeader";
-import type { useClassActionHandlers } from "../hooks/useClassActionHandlers";
-import { ClassDetailsTeacherView } from "../teacher/ClassDetailsTeacherView";
-import type { ActionFeedbackState, AdminViewProps, TeacherViewProps } from "../types";
-import { useAdminViewLabels, useTeacherViewLabels } from "../useClassDetailsLabels";
-import { ActionFeedbackAlert } from "./ActionFeedbackAlert";
-import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
+import { ClassDetailsAdminView } from "@/frontend/views/dashboard/classes/details/admin/ClassDetailsAdminView";
+import { ClassDetailsHeader } from "@/frontend/views/dashboard/classes/details/ClassDetailsHeader";
+import { ActionFeedbackAlert } from "@/frontend/views/dashboard/classes/details/components/ActionFeedbackAlert";
+import { DeleteConfirmationDialog } from "@/frontend/views/dashboard/classes/details/components/DeleteConfirmationDialog";
+import type { useClassActionHandlers } from "@/frontend/views/dashboard/classes/details/hooks/useClassActionHandlers";
+import { ClassDetailsTeacherView } from "@/frontend/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
+import type {
+  ActionFeedbackState,
+  AdminViewProps,
+  TeacherViewProps,
+} from "@/frontend/views/dashboard/classes/details/types";
+import {
+  useAdminViewLabels,
+  useTeacherViewLabels,
+} from "@/frontend/views/dashboard/classes/details/useClassDetailsLabels";
 
 const AdminView = (props: AdminViewProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");

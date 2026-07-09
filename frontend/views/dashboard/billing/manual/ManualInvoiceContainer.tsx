@@ -10,11 +10,14 @@ import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDo
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
 import { logger } from "@/frontend/utils/logger";
+import { ManualInvoiceView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceView";
+import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
+import type {
+  ParentInvoiceOption,
+  StudentOption,
+} from "@/frontend/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
+import { buildManualInvoiceLabels } from "@/frontend/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import { useRouter } from "@/shared/i18n/routing";
-import { ManualInvoiceView } from "./ManualInvoiceView";
-import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
-import type { ParentInvoiceOption, StudentOption } from "./types/manualInvoiceViewTypes";
-import { buildManualInvoiceLabels } from "./utils/buildManualInvoiceLabels";
 
 const MONTH_MAP: Record<string, number> = {
   jan: 1,

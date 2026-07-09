@@ -8,7 +8,11 @@ import { Controller, useFormContext } from "react-hook-form";
 import { labelSx, outlinedInputSx, timeInputOutlinedSx } from "@/frontend/components/ui/form/field/formFieldStyles";
 import { AppTimePicker } from "@/frontend/components/ui/form/time/AppTimePicker";
 import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { AvailabilitySearchFormData, AvailabilitySearchFormProps, TimeFieldProps } from "../types";
+import type {
+  AvailabilitySearchFormData,
+  AvailabilitySearchFormProps,
+  TimeFieldProps,
+} from "@/frontend/views/dashboard/teachers/availability/types";
 
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();

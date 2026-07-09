@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import { TimezoneDisplay } from "./TimezoneDisplay";
 
 const meta: Meta<typeof TimezoneDisplay> = {
   title: "UI/Display/TimezoneDisplay",

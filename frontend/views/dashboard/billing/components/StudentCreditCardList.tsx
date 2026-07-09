@@ -4,7 +4,7 @@ import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
+import type { StudentCreditRow, StudentCreditStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 interface StudentCreditCardListLabels {
   readonly classesLeft: string;

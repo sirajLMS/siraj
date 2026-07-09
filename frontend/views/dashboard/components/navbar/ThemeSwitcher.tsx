@@ -2,8 +2,8 @@
 
 import { DarkMode, LightMode } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { useThemeMode } from "../../../../hooks/useThemeMode";
-import { NavbarIcon } from "./NavbarIcon";
+import { useThemeMode } from "@/frontend/hooks/useThemeMode";
+import { NavbarIcon } from "@/frontend/views/dashboard/components/navbar/NavbarIcon";
 
 export function ThemeSwitcher() {
   const t = useTranslations("common");

@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { LanguageSelector, type LanguageSelectorProps } from "@/frontend/components/ui/input/LanguageSelector";
 import { AppLanguage } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type LanguageType, languages } from "@/frontend/lib/locale";
-import { LanguageSelector, type LanguageSelectorProps } from "./LanguageSelector";
 
 function LanguageSelectorStory({
   initialLanguageCode,

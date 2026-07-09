@@ -20,7 +20,7 @@ import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
-} from "./notificationPreferenceTypes";
+} from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 
 type PreferencesMatrixProps = {
   readonly preferences: readonly NotificationPrefRow[];

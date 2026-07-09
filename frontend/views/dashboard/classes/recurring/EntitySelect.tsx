@@ -3,7 +3,7 @@
 import { ExpandMoreOutlined } from "@mui/icons-material";
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import type { SimpleEntity } from "./types";
+import type { SimpleEntity } from "@/frontend/views/dashboard/classes/recurring/types";
 
 interface EntitySelectProps {
   readonly value: string;

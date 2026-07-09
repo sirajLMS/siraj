@@ -9,11 +9,11 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { logger } from "@/frontend/utils/logger";
+import { StatusTrackingView } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingView";
+import type { StatusTrackingRow } from "@/frontend/views/dashboard/classes/status/tracking/types";
+import { useStatusTrackingLabels } from "@/frontend/views/dashboard/classes/status/tracking/useStatusTrackingLabels";
+import { useStatusTrackingMetrics } from "@/frontend/views/dashboard/classes/status/tracking/useStatusTrackingMetrics";
 import { useRouter } from "@/shared/i18n/routing";
-import { StatusTrackingView } from "./StatusTrackingView";
-import type { StatusTrackingRow } from "./types";
-import { useStatusTrackingLabels } from "./useStatusTrackingLabels";
-import { useStatusTrackingMetrics } from "./useStatusTrackingMetrics";
 
 export function StatusTrackingContainer() {
   const router = useRouter();

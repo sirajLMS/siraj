@@ -2,7 +2,7 @@
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Chip, Typography } from "@mui/material";
-import type { WorkshopPromo } from "../types/parentDashboardTypes";
+import type { WorkshopPromo } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 
 interface WorkshopPromoCardProps {
   readonly promo: WorkshopPromo;

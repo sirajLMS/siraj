@@ -2,8 +2,8 @@
 
 import { Card, type CardProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { edgeToEdgeCardPaddingSx, edgeToEdgeCardShellSx } from "../../../utils/sx/edgeToEdgeSx";
-import { mergeSx } from "../../../utils/sx/mergeSx";
+import { edgeToEdgeCardPaddingSx, edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
+import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 
 interface BaseCardProps extends CardProps {
   readonly interactive?: boolean;

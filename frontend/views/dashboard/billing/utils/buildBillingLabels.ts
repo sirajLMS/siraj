@@ -1,6 +1,6 @@
 import type { useTranslations } from "next-intl";
+import { buildManualInvoiceLabels } from "@/frontend/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
-import { buildManualInvoiceLabels } from "../manual/utils/buildManualInvoiceLabels";
 
 type BillingTranslator = ReturnType<typeof useTranslations<"dashboard.billing">>;
 

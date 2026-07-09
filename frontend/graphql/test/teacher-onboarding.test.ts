@@ -2,8 +2,13 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { CountryCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-onboarding.documents";
-import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+import {
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 const createMinimalTeacherInput = (
   overrides?: Partial<{
@@ -82,7 +87,7 @@ describe("Teacher Onboarding GraphQL API", () => {
   });
 
   test("Teacher denied creating teacher", async () => {
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
     const token = await loginDemoUser("teacher_default");
 
     const result = await testClient.mutate({
@@ -97,7 +102,7 @@ describe("Teacher Onboarding GraphQL API", () => {
   });
 
   test("Parent denied creating teacher", async () => {
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
     const token = await loginDemoUser("parent_default");
 
     const result = await testClient.mutate({
@@ -112,7 +117,7 @@ describe("Teacher Onboarding GraphQL API", () => {
   });
 
   test("Unauthenticated denied creating teacher", async () => {
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
 
     const result = await testClient.mutate({
       mutation: createTeacherMutationDocument,

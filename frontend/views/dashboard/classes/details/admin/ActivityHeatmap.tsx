@@ -5,7 +5,10 @@ import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { BaseCard } from "@/frontend/components/ui";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
-import { classDetailsCardInnerPaddingSx, classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
+import {
+  classDetailsCardInnerPaddingSx,
+  classDetailsContentPaddingSx,
+} from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 
 interface ActivityHeatmapProps {
   readonly data: readonly number[];

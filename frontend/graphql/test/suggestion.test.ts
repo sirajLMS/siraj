@@ -3,10 +3,10 @@ import {
   adminSuggestionsQueryDocument,
   markSuggestionReviewedMutationDocument,
   submitSuggestionMutationDocument,
-} from "../sharedDocuments";
-import { authenticatedRequest, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/sharedDocuments";
+import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

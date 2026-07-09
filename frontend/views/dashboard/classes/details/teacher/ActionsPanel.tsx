@@ -12,7 +12,7 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { BaseCard } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
-import { classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
+import { classDetailsContentPaddingSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 
 interface ActionConfig {
   readonly key: string;

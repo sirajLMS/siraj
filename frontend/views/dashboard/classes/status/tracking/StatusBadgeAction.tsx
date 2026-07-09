@@ -7,7 +7,11 @@ import {
   PowerSettingsNewOutlined,
 } from "@mui/icons-material";
 import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography, useTheme } from "@mui/material";
-import { computeSessionStatus, SessionStatus, type StatusActionProps } from "./types";
+import {
+  computeSessionStatus,
+  SessionStatus,
+  type StatusActionProps,
+} from "@/frontend/views/dashboard/classes/status/tracking/types";
 
 const StyledActionButton = styled(Button, {
   shouldForwardProp: prop => prop !== "minWidthLg",

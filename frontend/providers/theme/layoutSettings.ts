@@ -1,4 +1,4 @@
-import type { MuiThemeLayoutSettings } from "./types";
+import type { MuiThemeLayoutSettings } from "@/frontend/providers/theme/types";
 
 // Configuration values retrieved from DESIGN.md
 export const layoutSettings: MuiThemeLayoutSettings = {

@@ -4,7 +4,7 @@ import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { MobileMenuButton } from "../client/MobileMenuButton";
+import { MobileMenuButton } from "@/frontend/views/dashboard/components/client/MobileMenuButton";
 
 interface NavbarChromeProps {
   readonly roleLabel: string;

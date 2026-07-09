@@ -2,7 +2,7 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Link, Paper, Typography } from "@mui/material";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 interface ActivationPolicyPanelProps {
   readonly labels: TeacherDashboardLabels["policy"];

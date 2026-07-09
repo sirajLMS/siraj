@@ -1,3 +1,3 @@
-export * from "./BaseAvatar";
-export * from "./ClassAvatar";
-export * from "./UserAvatar";
+export * from "@/frontend/components/ui/avatar/BaseAvatar";
+export * from "@/frontend/components/ui/avatar/ClassAvatar";
+export * from "@/frontend/components/ui/avatar/UserAvatar";

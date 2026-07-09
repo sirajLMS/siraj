@@ -2,8 +2,13 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { IanaTimezone, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parent-onboarding.documents";
-import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+import {
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 const createMinimalParentInput = (
   overrides?: Partial<{
@@ -111,7 +116,7 @@ describe("Parent Onboarding GraphQL API", () => {
 
   test("Teacher denied creating parent", async () => {
     const token = await loginDemoUser("teacher_default");
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
 
     const result = await testClient.mutate({
       mutation: createParentMutationDocument,
@@ -126,7 +131,7 @@ describe("Parent Onboarding GraphQL API", () => {
   });
 
   test("Unauthenticated denied creating parent", async () => {
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
 
     const result = await testClient.mutate({
       mutation: createParentMutationDocument,

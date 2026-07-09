@@ -3,7 +3,11 @@
 
 import { alpha, Box, Paper, Typography } from "@mui/material";
 import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { AvailabilityEntry, WeeklyAvailabilityGridLabels, WeeklyAvailabilityGridProps } from "../types";
+import type {
+  AvailabilityEntry,
+  WeeklyAvailabilityGridLabels,
+  WeeklyAvailabilityGridProps,
+} from "@/frontend/views/dashboard/teachers/availability/types";
 
 const DAYS: DayOfWeek[] = [
   DayOfWeek.Monday,

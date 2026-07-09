@@ -10,8 +10,11 @@ import type {
   ClassInstanceTeacherInfo,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import {
+  StudentEntityLink,
+  TeacherEntityLink,
+} from "@/frontend/views/dashboard/classes/details/components/EntityLinks";
 import { Link } from "@/shared/i18n/routing";
-import { StudentEntityLink, TeacherEntityLink } from "../components/EntityLinks";
 
 interface ClassInfoCardProps {
   readonly courseName: string;

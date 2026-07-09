@@ -3,7 +3,7 @@ import { Box, Grid, Link, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/components/ui";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
-import type { ParentProfileData } from "../types/profile";
+import type { ParentProfileData } from "@/frontend/views/dashboard/parent/types/profile";
 
 interface ParentProfileDetailsProps {
   readonly parent: ParentProfileData;

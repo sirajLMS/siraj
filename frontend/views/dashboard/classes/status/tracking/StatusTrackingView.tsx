@@ -5,16 +5,16 @@ import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import { StatusTrackingCardList } from "./StatusTrackingCardList";
-import { StatusTrackingDataGrid } from "./StatusTrackingDataGrid";
-import { SuspensionAnalytics } from "./SuspensionAnalytics";
+import { StatusTrackingCardList } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingCardList";
+import { StatusTrackingDataGrid } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingDataGrid";
+import { SuspensionAnalytics } from "@/frontend/views/dashboard/classes/status/tracking/SuspensionAnalytics";
 import type {
   CardListLabels,
   DesktopLayoutProps,
   MobileLayoutProps,
   StatusTrackingViewProps,
   SuspensionAnalyticsLabels,
-} from "./types";
+} from "@/frontend/views/dashboard/classes/status/tracking/types";
 
 const StyledMobileFab = styled(Fab)(({ theme }) => ({
   position: "fixed",

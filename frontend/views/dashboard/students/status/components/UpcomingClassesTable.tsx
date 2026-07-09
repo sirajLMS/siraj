@@ -7,9 +7,9 @@ import { PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "@/frontend/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "../types";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {

@@ -8,13 +8,13 @@ import {
   updateSessionStatusAbsentMutationDocument,
   updateSessionStatusLeaveMutationDocument,
   updateSessionStatusStartMutationDocument,
-} from "../sharedDocuments/class-session.documents";
-import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
+} from "@/frontend/graphql/sharedDocuments/class-session.documents";
+import { dailyScheduleListQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
-} from "../sharedDocuments/teacher-dashboard.documents";
-import { cleanupTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
+} from "@/frontend/graphql/sharedDocuments/teacher-dashboard.documents";
+import { cleanupTestEntitiesMutationDocument } from "@/frontend/graphql/sharedDocuments/test-helper.documents";
 import { authenticatedRequest, createManualClassEntry, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";

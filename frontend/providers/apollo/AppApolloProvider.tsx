@@ -7,10 +7,15 @@ import { Box, CircularProgress } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { NetworkConnectivityContext } from "@/frontend/context/NetworkConnectivityContext";
 import { useApolloConnectivity } from "@/frontend/hooks/useApolloConnectivity";
-import { NetworkConnectivityContext } from "../../context/NetworkConnectivityContext";
-import { InitializingUI } from "./AppApolloProviderHelpers";
-import { createAuthLink, createConnectivityLink, createErrorLinkHandler, sha256 } from "./utils";
+import { InitializingUI } from "@/frontend/providers/apollo/AppApolloProviderHelpers";
+import {
+  createAuthLink,
+  createConnectivityLink,
+  createErrorLinkHandler,
+  sha256,
+} from "@/frontend/providers/apollo/utils";
 
 export function AppApolloProvider({ children }: { readonly children: React.ReactNode }) {
   const t = useTranslations("common");

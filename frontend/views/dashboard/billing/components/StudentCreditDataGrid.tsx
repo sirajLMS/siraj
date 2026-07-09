@@ -7,7 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { studentHref } from "@/frontend/utils/profileHref";
-import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
+import type { StudentCreditRow, StudentCreditStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 export interface StudentCreditDataGridLabels {
   readonly student: string;

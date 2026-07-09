@@ -14,11 +14,11 @@ import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { LanguageDisplay } from "@/frontend/components/ui/display";
 import { AppDatePicker } from "@/frontend/components/ui/form";
-import type { StudentQuotaFormData } from "../schemas/studentQuotaSchema";
-import { GENDER_OPTIONS } from "../types";
-import { QuotaFormField } from "./QuotaFormField";
-import { quotaInputSx } from "./quotaFieldStyles";
-import { SectionHeader } from "./SectionHeader";
+import { QuotaFormField } from "@/frontend/views/dashboard/students/quota/components/QuotaFormField";
+import { quotaInputSx } from "@/frontend/views/dashboard/students/quota/components/quotaFieldStyles";
+import { SectionHeader } from "@/frontend/views/dashboard/students/quota/components/SectionHeader";
+import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/quota/schemas/studentQuotaSchema";
+import { GENDER_OPTIONS } from "@/frontend/views/dashboard/students/quota/types";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 

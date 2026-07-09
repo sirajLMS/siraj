@@ -14,7 +14,7 @@ import {
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 interface TeacherActiveSessionControlsProps {
   readonly labels: TeacherDashboardLabels["activeControls"];

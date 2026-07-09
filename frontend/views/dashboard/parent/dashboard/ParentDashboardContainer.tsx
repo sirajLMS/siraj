@@ -9,8 +9,8 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { ParentDashboardView } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
 import { useRouter } from "@/shared/i18n/routing";
-import { ParentDashboardView } from "./ParentDashboardView";
 import type {
   ParentDashboardMetrics,
   ParentScheduleRow,

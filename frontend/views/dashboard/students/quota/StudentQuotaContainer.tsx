@@ -11,10 +11,10 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument, updateStudentQuotaMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { StudentQuotaView } from "@/frontend/views/dashboard/students/quota/StudentQuotaView";
+import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/quota/schemas/studentQuotaSchema";
+import type { StudentProfileData } from "@/frontend/views/dashboard/students/quota/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { StudentQuotaView } from "./StudentQuotaView";
-import type { StudentQuotaFormData } from "./schemas/studentQuotaSchema";
-import type { StudentProfileData } from "./types";
 
 export function StudentQuotaContainer() {
   const t = useTranslations("dashboard.studentQuota");

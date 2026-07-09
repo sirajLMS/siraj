@@ -3,9 +3,9 @@
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { StudentHistoryDesktop } from "./components/StudentHistoryDesktop";
-import { StudentHistoryMobile } from "./components/StudentHistoryMobile";
-import type { StudentHistoryViewProps } from "./types";
+import { StudentHistoryDesktop } from "@/frontend/views/dashboard/students/history/components/StudentHistoryDesktop";
+import { StudentHistoryMobile } from "@/frontend/views/dashboard/students/history/components/StudentHistoryMobile";
+import type { StudentHistoryViewProps } from "@/frontend/views/dashboard/students/history/types";
 
 export function StudentHistoryView({
   studentName,

@@ -3,13 +3,19 @@
 import { Autocomplete, Box, TextField } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import { ManualInvoiceDateField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceDateField";
+import { ManualInvoiceFeeField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceFeeField";
+import {
+  FieldLabel,
+  MobileFieldCard,
+} from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceFormLayout";
+import { ManualInvoiceParentField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceParentField";
+import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
+import type {
+  ParentInvoiceOption,
+  StudentOption,
+} from "@/frontend/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
-import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
-import type { ParentInvoiceOption, StudentOption } from "../types/manualInvoiceViewTypes";
-import { ManualInvoiceDateField } from "./ManualInvoiceDateField";
-import { ManualInvoiceFeeField } from "./ManualInvoiceFeeField";
-import { FieldLabel, MobileFieldCard } from "./ManualInvoiceFormLayout";
-import { ManualInvoiceParentField } from "./ManualInvoiceParentField";
 
 interface ManualInvoiceFormFieldsProps {
   readonly control: Control<ManualInvoiceFormData>;

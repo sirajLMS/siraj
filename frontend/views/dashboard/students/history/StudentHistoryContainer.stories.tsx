@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { create } from "zustand";
 import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { StudentHistoryView } from "./StudentHistoryView";
-import type { ClassSession, StudentHistoryMetrics } from "./types";
+import { StudentHistoryView } from "@/frontend/views/dashboard/students/history/StudentHistoryView";
+import type { ClassSession, StudentHistoryMetrics } from "@/frontend/views/dashboard/students/history/types";
 
 interface MockStudentHistoryState {
   readonly studentName: string;

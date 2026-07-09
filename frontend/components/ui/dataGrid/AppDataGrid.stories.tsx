@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppDataGrid } from "./AppDataGrid";
+import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 
 // cspell:ignore Lannister, Cersei, Targaryen, Daenerys
 

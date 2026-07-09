@@ -3,11 +3,11 @@
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, TextField } from "@mui/material";
 import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { BillingMetricsRow } from "./components/BillingMetricsRow";
-import { ParentInvoicesDataGrid } from "./components/ParentInvoicesDataGrid";
-import type { ParentBillingViewProps } from "./types/billingViewTypes";
-import { buildParentMetrics } from "./utils/billingMetrics";
-import { getParentInvoiceGridLabels } from "./utils/label-mappers";
+import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
+import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
+import type { ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
+import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
 
 export function ParentBillingDesktopView({
   labels,

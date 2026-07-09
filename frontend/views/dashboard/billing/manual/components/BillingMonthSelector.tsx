@@ -4,9 +4,9 @@ import { Box, Checkbox, FormControlLabel, FormHelperText, Typography } from "@mu
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import { BILLING_MONTH_IDS } from "@/frontend/views/dashboard/billing/manual/constants/billingMonths";
+import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
-import { BILLING_MONTH_IDS } from "../constants/billingMonths";
-import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 
 interface BillingMonthSelectorProps {
   readonly control: Control<ManualInvoiceFormData>;

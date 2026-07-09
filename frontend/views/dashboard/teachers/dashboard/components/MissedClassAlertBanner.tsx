@@ -3,7 +3,7 @@
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Alert, Box, Typography } from "@mui/material";
 import type { MissedClassAlert } from "@/frontend/stores/teacherDashboardTypes";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 interface MissedClassAlertBannerProps {
   readonly alert: MissedClassAlert;

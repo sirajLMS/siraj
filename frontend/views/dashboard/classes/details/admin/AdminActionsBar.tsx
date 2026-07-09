@@ -12,8 +12,11 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import {
+  getForceActivateDisabledTooltip,
+  getStopDisabledTooltip,
+} from "@/frontend/views/dashboard/classes/details/admin/adminActionTooltips";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
-import { getForceActivateDisabledTooltip, getStopDisabledTooltip } from "./adminActionTooltips";
 
 type AdminActionLabels = AdminViewLabels["adminActions"];
 

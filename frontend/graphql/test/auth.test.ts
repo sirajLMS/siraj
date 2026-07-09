@@ -7,10 +7,10 @@ import {
   refreshTokenMutationDocument,
   userQueryDocument,
   usersQueryDocument,
-} from "../sharedDocuments/auth.documents";
-import { authenticatedRequest, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { clearCookies, testClient } from "./testClient";
+} from "@/frontend/graphql/sharedDocuments/auth.documents";
+import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { clearCookies, testClient } from "@/frontend/graphql/test/testClient";
 
 async function expectDemoLoginSucceeds(groupSlug: string): Promise<void> {
   const result = await testClient.mutate({

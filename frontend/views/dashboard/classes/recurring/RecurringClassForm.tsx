@@ -11,9 +11,9 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
+import { RecurringClassFormFields } from "@/frontend/views/dashboard/classes/recurring/RecurringClassFormFields";
+import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
-import { RecurringClassFormFields } from "./RecurringClassFormFields";
-import type { RecurringClassFormData } from "./recurringClassSchema";
 
 interface RecurringClassFormProps {
   readonly register: UseFormRegister<RecurringClassFormData>;

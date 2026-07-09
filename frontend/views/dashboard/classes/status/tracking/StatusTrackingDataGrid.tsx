@@ -10,7 +10,7 @@ import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/components/
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import { StatusAction } from "./StatusBadgeAction";
+import { StatusAction } from "@/frontend/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
   computeSessionStatus,
   formatScheduleRange,
@@ -18,7 +18,7 @@ import {
   type StatusTrackingDataGridLabels,
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
-} from "./types";
+} from "@/frontend/views/dashboard/classes/status/tracking/types";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {
   [SessionStatus.REGULAR]: "regular",

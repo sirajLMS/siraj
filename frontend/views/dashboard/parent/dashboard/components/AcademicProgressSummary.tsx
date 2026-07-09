@@ -2,7 +2,7 @@
 
 import { AnalyticsOutlined, DownloadOutlined } from "@mui/icons-material";
 import { Box, Button, LinearProgress, Paper, Stack, Typography } from "@mui/material";
-import type { StudentProgressItem } from "../types/parentDashboardTypes";
+import type { StudentProgressItem } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 
 interface AcademicProgressSummaryProps {
   readonly studentProgress: readonly StudentProgressItem[];

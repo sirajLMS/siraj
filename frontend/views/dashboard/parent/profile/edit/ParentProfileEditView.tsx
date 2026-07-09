@@ -5,11 +5,11 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { FeesContractSection } from "../../../admin/parents/onboarding/FeesContractSection";
-import { ParentInfoSection } from "../../../admin/parents/onboarding/ParentInfoSection";
-import { SocialCommsSection } from "../../../admin/parents/onboarding/SocialCommsSection";
-import type { ParentOnboardingFormData } from "../../../admin/parents/onboarding/schemas/parentOnboardingSchema";
-import type { ParentProfileEditFormData } from "./parentProfileEditSchema";
+import { FeesContractSection } from "@/frontend/views/dashboard/admin/parents/onboarding/FeesContractSection";
+import { ParentInfoSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentInfoSection";
+import { SocialCommsSection } from "@/frontend/views/dashboard/admin/parents/onboarding/SocialCommsSection";
+import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import type { ParentProfileEditFormData } from "@/frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema";
 
 interface Props {
   readonly register: UseFormRegister<ParentProfileEditFormData>;

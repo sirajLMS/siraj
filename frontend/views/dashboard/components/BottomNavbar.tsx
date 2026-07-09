@@ -2,8 +2,11 @@
 
 import { Box, Paper } from "@mui/material";
 import { useTranslations } from "next-intl";
+import {
+  BOTTOM_NAV_SCROLL_THRESHOLD,
+  BottomNavItemView,
+} from "@/frontend/views/dashboard/components/BottomNavItemView";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
-import { BOTTOM_NAV_SCROLL_THRESHOLD, BottomNavItemView } from "./BottomNavItemView";
 
 interface BottomNavbarProps {
   readonly items: readonly NavItem[];

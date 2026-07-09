@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import type { QuotaFormFieldProps } from "../types";
+import type { QuotaFormFieldProps } from "@/frontend/views/dashboard/students/quota/types";
 
 export function QuotaFormField({ label, children, extraLabel, helperText }: QuotaFormFieldProps) {
   return (

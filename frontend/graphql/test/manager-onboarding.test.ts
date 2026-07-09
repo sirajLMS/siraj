@@ -2,8 +2,13 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/graphql/sharedDocuments/manager-onboarding.documents";
-import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+import {
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 const createMinimalManagerInput = (
   overrides?: Partial<{
@@ -65,7 +70,7 @@ describe("Manager Onboarding GraphQL API", () => {
 
   test("Admin denied creating manager", async () => {
     const token = await loginDemoUser("academy_admin");
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
     const result = await testClient.mutate({
       mutation: createManagerMutationDocument,
       variables: { input: createMinimalManagerInput() },
@@ -77,7 +82,7 @@ describe("Manager Onboarding GraphQL API", () => {
 
   test("Teacher denied creating manager", async () => {
     const token = await loginDemoUser("teacher_default");
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
     const result = await testClient.mutate({
       mutation: createManagerMutationDocument,
       variables: { input: createMinimalManagerInput() },
@@ -88,7 +93,7 @@ describe("Manager Onboarding GraphQL API", () => {
   });
 
   test("Unauthenticated denied creating manager", async () => {
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
 
     const result = await testClient.mutate({
       mutation: createManagerMutationDocument,

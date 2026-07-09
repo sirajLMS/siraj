@@ -2,16 +2,16 @@
 
 import { Box, Grid } from "@mui/material";
 import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import { classDetailsSectionStackSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
+import { ClassDetailsToolbarArea } from "@/frontend/views/dashboard/classes/details/components/ClassDetailsToolbarArea";
+import { ActionsPanel } from "@/frontend/views/dashboard/classes/details/teacher/ActionsPanel";
+import { ClassInstanceDetailsCard } from "@/frontend/views/dashboard/classes/details/teacher/ClassInstanceDetailsCard";
+import { PerformanceOverviewCard } from "@/frontend/views/dashboard/classes/details/teacher/PerformanceOverviewCard";
+import { RemarksCard } from "@/frontend/views/dashboard/classes/details/teacher/RemarksCard";
+import { StudentProfileCard } from "@/frontend/views/dashboard/classes/details/teacher/StudentProfileCard";
+import type { ClassDetailsViewMode } from "@/frontend/views/dashboard/classes/details/types";
+import type { TeacherViewLabels } from "@/frontend/views/dashboard/classes/details/useClassDetailsLabels";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
-import { classDetailsSectionStackSx } from "../classDetailsMobileLayout";
-import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
-import type { ClassDetailsViewMode } from "../types";
-import type { TeacherViewLabels } from "../useClassDetailsLabels";
-import { ActionsPanel } from "./ActionsPanel";
-import { ClassInstanceDetailsCard } from "./ClassInstanceDetailsCard";
-import { PerformanceOverviewCard } from "./PerformanceOverviewCard";
-import { RemarksCard } from "./RemarksCard";
-import { StudentProfileCard } from "./StudentProfileCard";
 
 const EXECUTION_STATE_TO_STATUS: Record<string, ClassInstanceStatus> = {
   NOT_ACTIVATED: "pending",

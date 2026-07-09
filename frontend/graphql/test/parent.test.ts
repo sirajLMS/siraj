@@ -6,17 +6,17 @@ import {
   parentInvoiceHistoryQueryDocument,
   parentProfileQueryDocument,
   updateStudentQuotaMutationDocument,
-} from "../sharedDocuments";
-import { parentDirectoryQueryDocument } from "../sharedDocuments/parent-directory.documents";
+} from "@/frontend/graphql/sharedDocuments";
+import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,
   cleanupTestEntities,
   type LoginAndProvisionResult,
   loginAndProvision,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 describe("GraphQL Parent Directory Tests", () => {
   setupTestServerLifecycle();

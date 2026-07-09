@@ -1,14 +1,19 @@
 import { describe, expect, test } from "bun:test";
-import { ComplaintCategory, ComplaintStatus } from "../generated/gql/graphql-types";
+import { ComplaintCategory, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   adminComplaintQueueQueryDocument,
   deleteComplaintMutationDocument,
   parentComplaintsQueryDocument,
   respondToComplaintMutationDocument,
   submitComplaintMutationDocument,
-} from "../sharedDocuments";
-import { assertOperationDenied, authenticatedRequest, expectMutationError, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+} from "@/frontend/graphql/sharedDocuments";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  expectMutationError,
+  loginDemoUser,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

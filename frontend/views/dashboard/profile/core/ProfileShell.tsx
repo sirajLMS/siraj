@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile.types";
 import { PageContainer } from "@/frontend/components/ui";
-import { ProfileHeader } from "./ProfileHeader";
-import { ProfileSkeleton } from "./ProfileSkeleton";
-import { ProfileTabNav } from "./ProfileTabNav";
+import { ProfileHeader } from "@/frontend/views/dashboard/profile/core/ProfileHeader";
+import { ProfileSkeleton } from "@/frontend/views/dashboard/profile/core/ProfileSkeleton";
+import { ProfileTabNav } from "@/frontend/views/dashboard/profile/core/ProfileTabNav";
 
 export type ProfileShellProps = {
   readonly loading?: boolean;

@@ -7,7 +7,7 @@ import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { TeacherScheduleSessionActionsCell } from "./TeacherScheduleSessionActionsCell";
 import { TeacherScheduleStudentCell } from "./TeacherScheduleStudentCell";
 

@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { SuspensionAnalyticsLabels } from "./types";
+import type { SuspensionAnalyticsLabels } from "@/frontend/views/dashboard/classes/status/tracking/types";
 
 const BAR_HEIGHTS: Array<{ pct: number; isHighlighted: boolean }> = [
   { pct: 40, isHighlighted: false },

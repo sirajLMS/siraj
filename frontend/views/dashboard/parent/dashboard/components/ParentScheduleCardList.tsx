@@ -4,9 +4,9 @@ import { ScheduleOutlined, VideocamOutlined } from "@mui/icons-material";
 import { Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
 import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import type { SchedulePagination } from "../ParentDashboardView";
-import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
-import type { ParentScheduleRow } from "../types/parentDashboardTypes";
+import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
+import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
+import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 
 interface ParentScheduleCardListProps {
   readonly rows: readonly ParentScheduleRow[];

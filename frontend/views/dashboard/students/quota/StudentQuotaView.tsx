@@ -13,16 +13,20 @@ import {
   PrimaryPageAction,
   UserAvatar,
 } from "@/frontend/components/ui";
-import type { MessageSchema } from "@/shared/messages/types/message";
-import { ContextualHelperCards } from "./components/ContextualHelperCards";
-import { CourseDetailsSection } from "./components/CourseDetailsSection";
-import { StudentInformationSection } from "./components/StudentInformationSection";
+import { ContextualHelperCards } from "@/frontend/views/dashboard/students/quota/components/ContextualHelperCards";
+import { CourseDetailsSection } from "@/frontend/views/dashboard/students/quota/components/CourseDetailsSection";
+import { StudentInformationSection } from "@/frontend/views/dashboard/students/quota/components/StudentInformationSection";
 import {
   createStudentQuotaSchema,
   type StudentQuotaFormData,
   type StudentQuotaFormInput,
-} from "./schemas/studentQuotaSchema";
-import type { FormActionsProps, MobileProfileHeaderProps, StudentQuotaViewProps } from "./types";
+} from "@/frontend/views/dashboard/students/quota/schemas/studentQuotaSchema";
+import type {
+  FormActionsProps,
+  MobileProfileHeaderProps,
+  StudentQuotaViewProps,
+} from "@/frontend/views/dashboard/students/quota/types";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 function MobileProfileHeader({ studentData, onEditAvatar }: Readonly<MobileProfileHeaderProps>) {
   const t = useTranslations("dashboard.studentQuota");

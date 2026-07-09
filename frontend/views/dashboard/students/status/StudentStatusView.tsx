@@ -8,12 +8,18 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AdminHoldControls } from "./components/AdminHoldControls";
-import { PolicyOverviewCard, SuspensionWarningBanner } from "./components/PolicyOverviewCard";
-import { StudentStatusHeader } from "./components/StudentStatusHeader";
-import { UpcomingClassesTable } from "./components/UpcomingClassesTable";
-import { type StatusUpdateFormData, statusUpdateSchema } from "./schemas/statusUpdateSchema";
-import type { StudentStatusViewProps } from "./types";
+import { AdminHoldControls } from "@/frontend/views/dashboard/students/status/components/AdminHoldControls";
+import {
+  PolicyOverviewCard,
+  SuspensionWarningBanner,
+} from "@/frontend/views/dashboard/students/status/components/PolicyOverviewCard";
+import { StudentStatusHeader } from "@/frontend/views/dashboard/students/status/components/StudentStatusHeader";
+import { UpcomingClassesTable } from "@/frontend/views/dashboard/students/status/components/UpcomingClassesTable";
+import {
+  type StatusUpdateFormData,
+  statusUpdateSchema,
+} from "@/frontend/views/dashboard/students/status/schemas/statusUpdateSchema";
+import type { StudentStatusViewProps } from "@/frontend/views/dashboard/students/status/types";
 
 export function StudentStatusView({ student, isUpdating, onUpdateStatus }: Readonly<StudentStatusViewProps>) {
   const t = useTranslations("dashboard.studentStatus");

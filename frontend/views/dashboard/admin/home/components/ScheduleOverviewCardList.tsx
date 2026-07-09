@@ -8,6 +8,8 @@ import { ActionIconLink } from "@/frontend/components/ui";
 import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
+import { StyledScheduleNameLink } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import {
   formatDurationMinutes,
@@ -15,8 +17,6 @@ import {
   formatScheduleYourTime,
 } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
-import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
-import { StyledScheduleNameLink } from "./ScheduleOverviewDataGrid.styles";
 
 interface ScheduleOverviewCardListProps {
   readonly rows: readonly DailyScheduleRow[];

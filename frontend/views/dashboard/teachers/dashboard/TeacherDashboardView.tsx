@@ -17,8 +17,8 @@ import type {
 } from "@/frontend/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
+import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { ParentSupportFab } from "../../parent/dashboard/components/ParentSupportFab";
 import { ActivationPolicyPanel } from "./components/ActivationPolicyPanel";
 import { MissedClassAlertBanner } from "./components/MissedClassAlertBanner";
 import { StudentProgressFeed } from "./components/StudentProgressFeed";

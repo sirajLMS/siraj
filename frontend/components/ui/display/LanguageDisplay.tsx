@@ -6,8 +6,8 @@ import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import { useLocale } from "next-intl";
 import type * as React from "react";
+import { LocaleEmoji } from "@/frontend/components/ui/display/LocaleEmoji";
 import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/lib/locale";
-import { LocaleEmoji } from "./LocaleEmoji";
 
 export type LanguageDisplayProps = {
   readonly code?: string | null;

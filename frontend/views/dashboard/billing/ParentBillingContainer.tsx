@@ -14,10 +14,10 @@ import {
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { logger } from "@/frontend/utils/logger";
-import { ParentBillingView } from "./ParentBillingView";
-import type { ParentBillingViewProps } from "./types/billingViewTypes";
-import { filterParentInvoices } from "./utils/billingFilters";
-import { buildBillingLabels } from "./utils/buildBillingLabels";
+import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
+import type { ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
+import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

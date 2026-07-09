@@ -5,7 +5,7 @@ import { alpha, Box, Grid, IconButton, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import type { MiniCalendarDate } from "../types";
+import type { MiniCalendarDate } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 interface MiniCalendarProps {
   readonly selectedDate: string;

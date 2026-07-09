@@ -11,8 +11,8 @@ import {
 import { Box, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ExportButton, MetricCard, PageHeader } from "@/frontend/components/ui";
-import type { StudentHistoryDesktopProps } from "../types";
-import { CalendarGrid } from "./CalendarGrid";
+import { CalendarGrid } from "@/frontend/views/dashboard/students/history/components/CalendarGrid";
+import type { StudentHistoryDesktopProps } from "@/frontend/views/dashboard/students/history/types";
 
 export function StudentHistoryDesktop({
   studentName,

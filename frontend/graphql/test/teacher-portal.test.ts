@@ -3,10 +3,10 @@ import {
   teacherAssignedClassesQueryDocument,
   teacherAssignedStudentsQueryDocument,
   teacherOwnProfileQueryDocument,
-} from "../sharedDocuments/teacher-portal.documents";
-import { assertOperationDenied, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/sharedDocuments/teacher-portal.documents";
+import { assertOperationDenied, loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 describe("GraphQL Teacher Portal Integration Tests", () => {
   setupTestServerLifecycle();

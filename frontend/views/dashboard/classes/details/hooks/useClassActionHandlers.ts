@@ -1,9 +1,8 @@
 "use client";
 import type { useTranslations } from "next-intl";
-
+import type { useClassMutations } from "@/frontend/views/dashboard/classes/details/hooks/useClassMutations";
+import type { ActionFeedbackState, ClassActionHandlers } from "@/frontend/views/dashboard/classes/details/types";
 import type { useRouter } from "@/shared/i18n/routing";
-import type { ActionFeedbackState, ClassActionHandlers } from "../types";
-import type { useClassMutations } from "./useClassMutations";
 
 export function useClassActionHandlers(
   id: string,

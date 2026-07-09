@@ -3,8 +3,8 @@
 import { OpenInNewOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { SuspensionAnalyticsChart } from "./SuspensionAnalyticsChart";
-import type { SuspensionAnalyticsProps } from "./types";
+import { SuspensionAnalyticsChart } from "@/frontend/views/dashboard/classes/status/tracking/SuspensionAnalyticsChart";
+import type { SuspensionAnalyticsProps } from "@/frontend/views/dashboard/classes/status/tracking/types";
 
 const StyledCtaContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),

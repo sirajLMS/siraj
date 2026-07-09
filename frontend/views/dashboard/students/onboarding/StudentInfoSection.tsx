@@ -17,7 +17,7 @@ import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import { AppLanguage, Gender, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StudentOnboardingFormData } from "./schemas/studentOnboardingSchema";
+import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
 interface StudentInfoSectionProps {
   readonly register: UseFormRegister<StudentOnboardingFormData>;

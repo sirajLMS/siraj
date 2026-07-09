@@ -10,11 +10,19 @@ import {
   PageHeader,
   SectionPanel,
 } from "@/frontend/components/ui";
-import { AcademicScheduleCardList } from "./AcademicScheduleCardList";
-import { AcademicScheduleDataGrid, type AcademicScheduleDataGridLabels } from "./AcademicScheduleDataGrid";
-import { InstitutionalReportCard } from "./InstitutionalReportCard";
-import { ScheduleAlertBanners } from "./ScheduleAlertBanners";
-import type { AcademicClassRow, AlertsMetric, ScheduleAlert, ScheduleAlertType } from "./types";
+import { AcademicScheduleCardList } from "@/frontend/views/dashboard/schedule/alerts/AcademicScheduleCardList";
+import {
+  AcademicScheduleDataGrid,
+  type AcademicScheduleDataGridLabels,
+} from "@/frontend/views/dashboard/schedule/alerts/AcademicScheduleDataGrid";
+import { InstitutionalReportCard } from "@/frontend/views/dashboard/schedule/alerts/InstitutionalReportCard";
+import { ScheduleAlertBanners } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertBanners";
+import type {
+  AcademicClassRow,
+  AlertsMetric,
+  ScheduleAlert,
+  ScheduleAlertType,
+} from "@/frontend/views/dashboard/schedule/alerts/types";
 
 export interface ScheduleAlertsLabels {
   readonly pageTitle: string;

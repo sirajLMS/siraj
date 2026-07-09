@@ -6,9 +6,15 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { useScheduleAlertsStore } from "@/frontend/stores/scheduleAlertsStore";
+import { ScheduleAlertsView } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertsView";
+import type {
+  AcademicClassRow,
+  AlertsMetric,
+  ClassSessionAction,
+  ClassSessionStatus,
+  ScheduleAlert,
+} from "@/frontend/views/dashboard/schedule/alerts/types";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
-import { ScheduleAlertsView } from "./ScheduleAlertsView";
-import type { AcademicClassRow, AlertsMetric, ClassSessionAction, ClassSessionStatus, ScheduleAlert } from "./types";
 
 function getTodayString() {
   const today = new Date();

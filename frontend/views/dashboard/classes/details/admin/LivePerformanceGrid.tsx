@@ -17,7 +17,7 @@ const METRIC_ICONS: Record<string, SvgIconComponent> = {
   health: FavoriteIcon,
 };
 
-import { classDetailsContentPaddingSx } from "../classDetailsMobileLayout";
+import { classDetailsContentPaddingSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 
 interface LivePerformanceGridProps {
   readonly metrics: readonly PerformanceMetric[];

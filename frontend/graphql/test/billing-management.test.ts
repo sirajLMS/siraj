@@ -5,7 +5,7 @@ import {
   createManualInvoiceMutationDocument,
   deleteInvoiceMutationDocument,
   markInvoicePaidMutationDocument,
-} from "../sharedDocuments";
+} from "@/frontend/graphql/sharedDocuments";
 import {
   assertOperationDenied,
   authenticatedRequest,
@@ -14,8 +14,8 @@ import {
   expectMutationError,
   loginAndProvision,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

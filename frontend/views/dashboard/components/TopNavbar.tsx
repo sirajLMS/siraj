@@ -3,7 +3,13 @@
 import { alpha, Box, Typography } from "@mui/material";
 import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
 import { formatUserRoleLabel } from "@/frontend/utils/formatUserRoleLabel";
-import { LanguageSwitcher, NavbarChrome, NotificationButton, ThemeSwitcher, UserMenuButton } from "./navbar";
+import {
+  LanguageSwitcher,
+  NavbarChrome,
+  NotificationButton,
+  ThemeSwitcher,
+  UserMenuButton,
+} from "@/frontend/views/dashboard/components/navbar";
 
 interface TopNavbarProps {
   readonly userName: string;

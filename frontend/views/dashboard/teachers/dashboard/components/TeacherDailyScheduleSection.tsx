@@ -5,7 +5,7 @@ import { styled } from "@mui/material/styles";
 import { DateNavigator, SectionPanel } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { TeacherScheduleDataGrid } from "./TeacherScheduleDataGrid";
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({

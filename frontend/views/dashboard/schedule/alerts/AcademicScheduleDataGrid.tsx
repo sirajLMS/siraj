@@ -6,8 +6,8 @@ import { useMemo } from "react";
 import { AppDataGrid, ClassProfileLinkCell, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { classHref, profileHrefForTeacher } from "@/frontend/utils/profileHref";
-import { ClassSessionActionButton } from "./ClassSessionActionButton";
-import type { AcademicClassRow, ClassSessionStatus } from "./types";
+import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
+import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
 
 export interface AcademicScheduleDataGridLabels {
   readonly className: string;

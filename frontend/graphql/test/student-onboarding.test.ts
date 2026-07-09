@@ -9,8 +9,8 @@ import {
   loginAndProvision,
   loginDemoUser,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
 const createMinimalParentInput = (overrides?: Partial<{ name: string; email: string }>) => ({
   name: overrides?.name ?? "Student Onboard Parent",
@@ -96,7 +96,7 @@ describe("Student Onboarding GraphQL API", () => {
 
   test("Teacher denied creating student", async () => {
     const token = await loginDemoUser("teacher_default");
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
 
     const result = await testClient.mutate({
       mutation: createStudentMutationDocument,
@@ -111,7 +111,7 @@ describe("Student Onboarding GraphQL API", () => {
   });
 
   test("Unauthenticated denied creating student", async () => {
-    const { testClient } = await import("./testClient");
+    const { testClient } = await import("@/frontend/graphql/test/testClient");
 
     const result = await testClient.mutate({
       mutation: createStudentMutationDocument,

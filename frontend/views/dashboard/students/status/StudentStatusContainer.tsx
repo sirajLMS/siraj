@@ -16,8 +16,8 @@ import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/stu
 import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
 import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/student-status.documents";
 import { logger } from "@/frontend/utils/logger";
-import { StudentStatusView } from "./StudentStatusView";
-import type { StudentStatusPageData, UpcomingClassDisplay } from "./types";
+import { StudentStatusView } from "@/frontend/views/dashboard/students/status/StudentStatusView";
+import type { StudentStatusPageData, UpcomingClassDisplay } from "@/frontend/views/dashboard/students/status/types";
 
 export function StudentStatusContainer() {
   const t = useTranslations("dashboard.studentStatus");

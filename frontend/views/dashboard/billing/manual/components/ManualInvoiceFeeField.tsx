@@ -5,8 +5,8 @@ import { InputAdornment, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
-import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 
 interface ManualInvoiceFeeFieldProps {
   readonly control: Control<ManualInvoiceFormData>;

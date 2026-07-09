@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import { meQueryDocument } from "../sharedDocuments/auth.documents";
-import { profileByUserIdQueryDocument } from "../sharedDocuments/profile.documents";
-import { authenticatedRequest, loginDemoUser } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
+import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments/profile.documents";
+import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 describe("GraphQL Profile Integration Tests", () => {
   setupTestServerLifecycle();

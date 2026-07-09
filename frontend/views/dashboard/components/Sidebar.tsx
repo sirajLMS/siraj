@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { SidebarShell, type TranslatedNavItem } from "@/frontend/views/dashboard/components/client/SidebarShell";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
-import { SidebarShell, type TranslatedNavItem } from "./client/SidebarShell";
 
 interface SidebarProps {
   readonly navItems: readonly NavItem[];

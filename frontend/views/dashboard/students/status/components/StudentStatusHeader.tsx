@@ -6,8 +6,8 @@ import { useCallback } from "react";
 import { UserAvatar } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
-import type { StudentStatusHeaderProps } from "../types";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "success",

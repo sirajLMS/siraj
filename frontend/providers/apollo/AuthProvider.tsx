@@ -6,13 +6,13 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AuthContext } from "@/frontend/context/AuthContext";
 import type { MutationLoginArgs, User } from "@/frontend/graphql/generated/gql/graphql-types";
 import * as Document from "@/frontend/graphql/sharedDocuments";
+import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import { dedupedRefreshToken } from "@/frontend/lib/dedupedRefreshToken";
+import logger from "@/frontend/lib/logger";
 import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/lib/safeRedirect";
-import { AuthContext } from "../../context/AuthContext";
-import { useAuthToken } from "../../hooks/useAuthToken";
-import logger from "../../lib/logger";
 
 // A simple UI for the initial loading state
 function LoadingUI({

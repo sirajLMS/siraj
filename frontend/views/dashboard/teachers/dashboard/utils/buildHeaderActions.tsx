@@ -5,7 +5,7 @@ import { Button, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 export function buildHeaderActions({
   labels,

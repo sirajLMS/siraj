@@ -2,7 +2,7 @@
 
 import { Box, CircularProgress } from "@mui/material";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
-import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
+import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { TeacherScheduleMobileCardList } from "./TeacherScheduleMobileCard";
 
 interface TeacherScheduleCardListProps {

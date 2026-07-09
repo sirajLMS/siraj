@@ -3,22 +3,22 @@ import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
-} from "../sharedDocuments";
-import { deleteClassInstanceMutationDocument } from "../sharedDocuments/class-session.documents";
+} from "@/frontend/graphql/sharedDocuments";
+import { deleteClassInstanceMutationDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
 import {
   cleanupTestEntitiesMutationDocument,
   cleanupTestGroupClassMutationDocument,
   createTestGroupClassMutationDocument,
-} from "../sharedDocuments/test-helper.documents";
+} from "@/frontend/graphql/sharedDocuments/test-helper.documents";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
   createManualClassEntry,
   loginAndProvision,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

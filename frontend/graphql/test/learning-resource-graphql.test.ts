@@ -5,16 +5,16 @@ import {
   learningResourcesQueryDocument,
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
-} from "../sharedDocuments/learning-resource.documents";
+} from "@/frontend/graphql/sharedDocuments/learning-resource.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,
   cleanupTestSuperAdmin,
   loginDemoUser,
   provisionTestSuperAdmin,
-} from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 async function uploadDummyFile(token: string): Promise<{ id: string; path: string }> {
   const fileContent = Buffer.from("hello world");

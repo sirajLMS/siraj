@@ -2,7 +2,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import WarningIcon from "@mui/icons-material/Warning";
 import type { Meta, StoryObj } from "@storybook/react";
 import { expect } from "storybook/test";
-import { MetricCard } from ".";
+import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
 
 const meta: Meta<typeof MetricCard> = {
   title: "UI/MetricCard",

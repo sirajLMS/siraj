@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { SidebarShell, type TranslatedNavItem } from "@/frontend/views/dashboard/components/client/SidebarShell";
+import { DashboardLayoutPreview } from "@/frontend/views/dashboard/components/DashboardLayoutPreview";
+import { useDashboardLayoutProps } from "@/frontend/views/dashboard/components/useDashboardLayoutProps";
 import { BOTTOM_NAV_ITEMS, SIDEBAR_NAV_ITEMS } from "@/frontend/views/dashboard/config/mockNavigationConfig";
-import { SidebarShell, type TranslatedNavItem } from "./client/SidebarShell";
-import { DashboardLayoutPreview } from "./DashboardLayoutPreview";
-import { useDashboardLayoutProps } from "./useDashboardLayoutProps";
 
 interface MockDashboardLayoutContainerProps {
   readonly children?: ReactNode;
