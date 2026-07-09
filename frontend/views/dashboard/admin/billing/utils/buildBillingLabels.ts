@@ -115,6 +115,29 @@ function buildStatusLabels(t: BillingTranslator) {
   };
 }
 
+function buildPaymentLabels(t: BillingTranslator) {
+  return {
+    paymentMethodSelector: {
+      bank_account: t("paymentMethodSelector.bank_account"),
+      paypal: t("paymentMethodSelector.paypal"),
+      label: t("paymentMethodSelector.label"),
+    },
+    paymentStatusBadge: {
+      paid: t("paymentStatusBadge.paid"),
+      pending: t("paymentStatusBadge.pending"),
+      unpaid: t("paymentStatusBadge.unpaid"),
+      overdue: t("paymentStatusBadge.overdue"),
+      cancelled: t("paymentStatusBadge.cancelled"),
+      refunded: t("paymentStatusBadge.refunded"),
+    },
+    paymentSummaryCard: {
+      amount: t("paymentSummaryCard.amount"),
+      date: t("paymentSummaryCard.date"),
+      paymentMethod: t("paymentSummaryCard.paymentMethod"),
+    },
+  };
+}
+
 export function buildBillingLabels(t: BillingTranslator): BillingLabels {
   return {
     ...buildPageLabels(t),
@@ -122,6 +145,7 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     ...buildSectionAndSearchLabels(t),
     ...buildTableLabels(t),
     ...buildStatusLabels(t),
+    ...buildPaymentLabels(t),
     manual: buildManualInvoiceLabels((key: string) => {
       if (key === "createSuccess") return t.raw(`manual.${key}`) as string;
       return t(`manual.${key}`);

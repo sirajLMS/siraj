@@ -1,6 +1,6 @@
-import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import { billingManual } from "@/shared/messages/ar/dashboard/billing/manual";
 import { payment } from "@/shared/messages/ar/dashboard/billing/payment";
+import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
 export const billing: BillingLabels = {
   ...payment,

@@ -159,6 +159,24 @@ const mockLabels: BillingLabels = {
   errors: {
     invalidId: "Invalid ID",
   },
+  paymentMethodSelector: {
+    bank_account: "Bank Account",
+    paypal: "PayPal",
+    label: "Payment Method",
+  },
+  paymentStatusBadge: {
+    paid: "Paid",
+    pending: "Pending",
+    unpaid: "Unpaid",
+    overdue: "Overdue",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+  },
+  paymentSummaryCard: {
+    amount: "Amount",
+    date: "Date",
+    paymentMethod: "Payment Method",
+  },
 };
 
 const baseProps: UserBillingProfileViewProps = {

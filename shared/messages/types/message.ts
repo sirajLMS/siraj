@@ -26,7 +26,11 @@ import type {
 } from "@/shared/messages/types/dashboard/core";
 
 import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "@/shared/messages/types/dashboard/managers";
-import type { ParentOnboardingLabels, ParentProfileLabels, ParentsDirectoryLabels } from "@/shared/messages/types/dashboard/parents";
+import type {
+  ParentOnboardingLabels,
+  ParentProfileLabels,
+  ParentsDirectoryLabels,
+} from "@/shared/messages/types/dashboard/parents";
 import type { PermissionsLabels } from "@/shared/messages/types/dashboard/permissions";
 import type { ReportsLabels } from "@/shared/messages/types/dashboard/reports";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/messages/types/dashboard/resources";
