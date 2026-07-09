@@ -1,4 +1,4 @@
-import { BookRepository } from "@/backend/db/repo/book.repository";
+import { BookRepository } from "@/backend/db/repo/books/book.repository";
 import { AppPermission } from "@/backend/enum";
 import { DomainError, UnauthorizedError } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";

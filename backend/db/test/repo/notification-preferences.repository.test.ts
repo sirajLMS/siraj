@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { NotificationPreferencesRepository } from "@/backend/db/repo/notification-preferences.repository";
+import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";

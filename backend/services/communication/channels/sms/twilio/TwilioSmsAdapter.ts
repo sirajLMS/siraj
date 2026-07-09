@@ -1,5 +1,5 @@
 import twilio from "twilio";
-import { NotificationRepository } from "@/backend/db/repo/notification.repository";
+import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";

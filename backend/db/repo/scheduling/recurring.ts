@@ -7,7 +7,7 @@ import {
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
 import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 

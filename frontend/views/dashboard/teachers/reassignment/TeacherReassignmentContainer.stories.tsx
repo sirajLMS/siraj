@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
-import { TeacherReassignmentContainer } from "./TeacherReassignmentContainer";
+import { TeacherReassignmentContainer } from "@/frontend/views/dashboard/teachers/reassignment/TeacherReassignmentContainer";
 
 const MOCK_STUDENT_RESULT = {
   __typename: "AssociatedStudent" as const,

@@ -1,7 +1,7 @@
 import { cert, deleteApp, getApp, getApps, initializeApp } from "firebase-admin/app";
 import type { BatchResponse, Message, SendResponse } from "firebase-admin/messaging";
 import { getMessaging } from "firebase-admin/messaging";
-import { NotificationRepository } from "@/backend/db/repo/notification.repository";
+import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";

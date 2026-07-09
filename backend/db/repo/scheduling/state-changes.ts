@@ -6,7 +6,7 @@ import {
   type DBTransaction,
   performRescheduleValidations,
 } from "@/backend/db/repo/scheduling/shared";
-import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { classInstances, classStatusEvents, leaveRequests, parents, students, teachers } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";

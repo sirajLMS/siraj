@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { logger } from "@/frontend/utils/logger";
-import { FutureScheduleView } from "./FutureScheduleView";
-import type { ImportantNoteItem, SupportContactData } from "./types";
+import { FutureScheduleView } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleView";
+import type { ImportantNoteItem, SupportContactData } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 const MOCK_NOTES: readonly ImportantNoteItem[] = [
   {

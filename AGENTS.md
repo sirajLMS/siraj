@@ -74,6 +74,7 @@ The codebase follows strict layer separation. Each layer has its own `AGENTS.md`
 | Database Repositories | `backend/db/repo/` | `backend/db/repo/AGENTS.md` |
 | Database Seeds | `backend/db/seeds/` | `backend/db/seeds/AGENTS.md` |
 | Backend Types | `backend/types/` | `backend/types/AGENTS.md` |
+| Backend Enums | `backend/enum/` | `backend/enum/AGENTS.md` |
 
 ### Data Flow
 

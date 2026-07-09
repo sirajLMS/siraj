@@ -1,4 +1,4 @@
-import { BillingRepository } from "@/backend/db/repo/billing.repository";
+import { BillingRepository } from "@/backend/db/repo/billing/billing.repository";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";

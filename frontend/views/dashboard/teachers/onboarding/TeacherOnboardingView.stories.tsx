@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TeacherOnboardingView } from "./TeacherOnboardingView";
+import { TeacherOnboardingView } from "@/frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView";
 
 const mockLabels = {
   pageTitle: "Teacher Onboarding",

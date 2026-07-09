@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { CacheDbRepository } from "@/backend/db/repo/cache.repository";
+import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
 import logger from "@/backend/lib/logger";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
 

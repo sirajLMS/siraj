@@ -1,5 +1,5 @@
 import type { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
+import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 
 export interface TeacherProfileData {
   readonly id: string;

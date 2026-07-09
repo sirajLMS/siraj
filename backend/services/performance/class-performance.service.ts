@@ -1,4 +1,4 @@
-import { ClassPerformanceRepository } from "@/backend/db/repo/class-performance.repository";
+import { ClassPerformanceRepository } from "@/backend/db/repo/classes/class-performance.repository";
 import type { ClassInstancePerformanceInsertType } from "@/backend/types";
 
 export namespace ClassPerformanceService {

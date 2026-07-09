@@ -12,9 +12,13 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { useFutureScheduleDateStore } from "@/frontend/stores/futureScheduleDateStore";
 import { logger } from "@/frontend/utils/logger";
+import { FutureScheduleView } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleView";
+import type {
+  FutureScheduleContainerProps,
+  ImportantNoteItem,
+  SupportContactData,
+} from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 import { getErrorMessage } from "@/shared/utils/error";
-import { FutureScheduleView } from "./FutureScheduleView";
-import type { FutureScheduleContainerProps, ImportantNoteItem, SupportContactData } from "./types";
 
 export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleContainerProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");

@@ -4,11 +4,11 @@ import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { CurrentTeacherCard } from "./components/CurrentTeacherCard";
-import { ManagementControlsCard } from "./components/ManagementControlsCard";
-import { ReassignmentBentoGrid } from "./components/ReassignmentBentoGrid";
-import { StudentContextCard } from "./components/StudentContextCard";
-import type { TeacherReassignmentViewProps } from "./types";
+import { CurrentTeacherCard } from "@/frontend/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
+import { ManagementControlsCard } from "@/frontend/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
+import { ReassignmentBentoGrid } from "@/frontend/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";
+import { StudentContextCard } from "@/frontend/views/dashboard/teachers/reassignment/components/StudentContextCard";
+import type { TeacherReassignmentViewProps } from "@/frontend/views/dashboard/teachers/reassignment/types";
 
 export function TeacherReassignmentView({
   student,

@@ -1,8 +1,8 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
-import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
-import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
-import { UserRepository } from "@/backend/db/repo/user.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
+import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
+import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";

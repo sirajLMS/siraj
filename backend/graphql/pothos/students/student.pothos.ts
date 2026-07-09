@@ -1,4 +1,4 @@
-import { StudentRepository } from "@/backend/db/repo/student.repository";
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { OrderSortDirection } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {

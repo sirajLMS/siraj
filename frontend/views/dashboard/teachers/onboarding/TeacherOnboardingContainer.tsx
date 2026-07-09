@@ -5,9 +5,9 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useCreateTeacherOnboarding } from "@/frontend/hooks/useCreateTeacherOnboarding";
 import { logger } from "@/frontend/utils/logger";
-import type { TeacherOnboardingFormData } from "./schemas/teacherOnboardingSchema";
-import { TeacherOnboardingView } from "./TeacherOnboardingView";
-import { useTeacherOnboardingLabels } from "./useTeacherOnboardingLabels";
+import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
+import { TeacherOnboardingView } from "@/frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView";
+import { useTeacherOnboardingLabels } from "@/frontend/views/dashboard/teachers/onboarding/useTeacherOnboardingLabels";
 
 export function TeacherOnboardingContainer() {
   const { execute, loading } = useCreateTeacherOnboarding();

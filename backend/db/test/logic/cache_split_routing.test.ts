@@ -2,7 +2,7 @@ import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { CacheDbRepository } from "@/backend/db/repo/cache.repository";
+import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema/cache";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";

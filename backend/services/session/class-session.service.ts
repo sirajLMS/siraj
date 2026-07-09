@@ -1,6 +1,6 @@
-import { ParentRepository } from "@/backend/db/repo/parent.repository";
+import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { AppPermission } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { getBackendTranslations } from "@/backend/lib/intl";

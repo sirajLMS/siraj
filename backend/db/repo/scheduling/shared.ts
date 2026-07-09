@@ -5,8 +5,8 @@ import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 export type { DBTransaction };
 
-import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";

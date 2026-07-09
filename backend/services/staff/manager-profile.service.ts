@@ -1,5 +1,5 @@
 import { StaffProfileRepository } from "@/backend/db";
-import type { ManagerProfileUpdateInput } from "@/backend/db/repo/staff-profile.repository";
+import type { ManagerProfileUpdateInput } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";

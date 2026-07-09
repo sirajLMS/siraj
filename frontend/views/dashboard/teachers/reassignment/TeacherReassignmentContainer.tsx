@@ -16,15 +16,15 @@ import {
 } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { logger } from "@/frontend/utils/logger";
-import { useRouter } from "@/shared/i18n/routing";
-import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "../../admin/parents/students/types";
-import { TeacherReassignmentView } from "./TeacherReassignmentView";
+import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/admin/parents/students/types";
+import { TeacherReassignmentView } from "@/frontend/views/dashboard/teachers/reassignment/TeacherReassignmentView";
 import type {
   ReassignmentStudentData,
   ReassignmentSubmitInput,
   ReassignmentTeacherOption,
   StatusChangeInput,
-} from "./types";
+} from "@/frontend/views/dashboard/teachers/reassignment/types";
+import { useRouter } from "@/shared/i18n/routing";
 
 type StudentQueryData = Operations.StudentByIdQuery;
 type TeachersQueryData = Operations.TeachersQuery;

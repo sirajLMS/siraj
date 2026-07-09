@@ -3,7 +3,7 @@
 import { Box, Grid, Input, Typography } from "@mui/material";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
+import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 interface BankingLedgerSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;

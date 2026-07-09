@@ -1,5 +1,5 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import logger from "@/backend/lib/logger";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 

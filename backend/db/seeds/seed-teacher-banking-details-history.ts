@@ -1,4 +1,4 @@
-import { TeacherBankingRepository } from "@/backend/db/repo/teacher-banking.repository";
+import { TeacherBankingRepository } from "@/backend/db/repo/teachers/teacher-banking.repository";
 import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, UserSelectType } from "@/backend/types";

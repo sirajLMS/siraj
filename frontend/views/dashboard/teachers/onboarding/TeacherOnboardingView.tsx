@@ -8,14 +8,14 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { BankingLedgerSection } from "@/frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection";
+import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
+import { SalaryDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
+import { TeacherInfoSection } from "@/frontend/views/dashboard/teachers/onboarding/components/TeacherInfoSection";
+import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
+import { teacherOnboardingSchema } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
+import { CountryCode, Gender } from "@/frontend/views/dashboard/teachers/onboarding/types";
 import type { MessageSchema } from "@/shared/messages/types/message";
-import { BankingLedgerSection } from "./components/BankingLedgerSection";
-import { OfficialDetailsSection } from "./components/OfficialDetailsSection";
-import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
-import { TeacherInfoSection } from "./components/TeacherInfoSection";
-import type { TeacherOnboardingFormData } from "./schemas/teacherOnboardingSchema";
-import { teacherOnboardingSchema } from "./schemas/teacherOnboardingSchema";
-import { CountryCode, Gender } from "./types";
 
 interface TeacherOnboardingViewProps {
   readonly isSubmitting: boolean;

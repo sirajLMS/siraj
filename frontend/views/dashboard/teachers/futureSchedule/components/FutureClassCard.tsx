@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { FutureClassCardProps } from "../types";
+import type { FutureClassCardProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {
   const dateObj = new Date(date);

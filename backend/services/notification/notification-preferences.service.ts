@@ -1,4 +1,4 @@
-import { NotificationPreferencesRepository } from "@/backend/db/repo/notification-preferences.repository";
+import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

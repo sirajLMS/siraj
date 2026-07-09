@@ -1,5 +1,5 @@
-import { GroupClassRepository } from "@/backend/db/repo/group-class.repository";
-import { NotificationRepository } from "@/backend/db/repo/notification.repository";
+import { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
+import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   AppPermission,

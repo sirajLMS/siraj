@@ -1,4 +1,4 @@
-import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";

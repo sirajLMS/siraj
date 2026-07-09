@@ -1,35 +1,50 @@
 export type { UserReturnType, UserSelectType } from "@/backend/types";
-export { AuditRepository } from "./audit.repository";
-export { BillingRepository } from "./billing.repository";
-export { CacheDbRepository } from "./cache.repository";
-export { ClassCategoryRepository } from "./class-category.repository";
-export { ClassPerformanceRepository } from "./class-performance.repository";
-export { ClassSubjectRepository } from "./class-subject.repository";
-export { ComplaintRepository } from "./complaint.repository";
-export { ComplaintResponseRepository } from "./complaint-response.repository";
-export { DstMigrationRepository } from "./dst-migration.repository";
-export { GroupClassRepository } from "./group-class.repository";
-export { ImpersonationRepository } from "./impersonation.repository";
-export { LearningResourceRepository } from "./learning-resource.repository";
-export { NotificationRepository } from "./notification.repository";
-export { NotificationPreferencesRepository } from "./notification-preferences.repository";
-export { ParentRepository } from "./parent.repository";
-export { PermissionManagementRepository } from "./permission-management.repository";
-export { RateLimitRepository } from "./ratelimit.repository";
-export { ReportGroupingMode, ReportRepository } from "./report.repository";
+export { AuditRepository } from "./audit";
+export { ImpersonationRepository } from "./auth";
+export { BillingRepository } from "./billing/billing.repository";
+export { BookRepository } from "./books/book.repository";
+export { ReportGroupingMode, ReportRepository } from "./books/report.repository";
+export { ClassCategoryRepository } from "./classes/class-category.repository";
+export { ClassPerformanceRepository } from "./classes/class-performance.repository";
+export { ClassSubjectRepository } from "./classes/class-subject.repository";
+export { DstMigrationRepository } from "./classes/dst-migration.repository";
+export { GroupClassRepository } from "./classes/group-class.repository";
+export { SubjectResourceRepository } from "./classes/subject-resource.repository";
+export {
+  ComplaintRepository,
+  ComplaintResponseRepository,
+} from "./complaints";
+export {
+  NotificationPreferencesRepository,
+  NotificationRepository,
+} from "./notifications";
+export {
+  ParentRepository,
+  SuggestionRepository,
+} from "./parents";
+export { PermissionManagementRepository } from "./permissions";
 export { SchedulingRepository } from "./scheduling";
-export { SessionRepository } from "./session.repository";
-export { SignedUrlRepository } from "./signedUrl.repository";
-export { SoftDeleteRepository } from "./soft-delete.repository";
-export { StaffProfileRepository } from "./staff-profile.repository";
-export { StorageDbRepository } from "./storage.repository";
-export { StudentRepository } from "./student.repository";
-export { StudentHistoryRepository } from "./student-history.repository";
-export { SubjectResourceRepository } from "./subject-resource.repository";
-export { SuggestionRepository } from "./suggestion.repository";
-export { SystemSettingsRepository } from "./system-settings.repository";
-export { TeacherRepository } from "./teacher.repository";
-export { TeacherAvailabilityRepository } from "./teacher-availability.repository";
-export { TeacherBankingRepository } from "./teacher-banking.repository";
-export { TeacherNotesRepository } from "./teacher-notes.repository";
-export { UserRepository } from "./user.repository";
+export {
+  CacheDbRepository,
+  RateLimitRepository,
+  SessionRepository,
+  SignedUrlRepository,
+  SoftDeleteRepository,
+  SystemSettingsRepository,
+} from "./shared";
+export {
+  LearningResourceRepository,
+  StorageDbRepository,
+} from "./storage";
+export {
+  StudentHistoryRepository,
+  StudentRepository,
+} from "./students";
+export {
+  StaffProfileRepository,
+  TeacherAvailabilityRepository,
+  TeacherBankingRepository,
+  TeacherNotesRepository,
+  TeacherRepository,
+} from "./teachers";
+export { UserRepository } from "./users";

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
-import { CountryCode, Gender } from "../types";
+import { CountryCode, Gender } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
-export type { TeacherOnboardingFormData } from "../types";
+export type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
 export const teacherOnboardingSchema = (validationLabels: {
   readonly fullNameRequired: string;

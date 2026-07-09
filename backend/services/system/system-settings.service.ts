@@ -1,4 +1,4 @@
-import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";

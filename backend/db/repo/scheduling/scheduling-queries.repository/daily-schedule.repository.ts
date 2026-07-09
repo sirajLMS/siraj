@@ -25,7 +25,7 @@ export const getAdminDashboardSchedule = async (
   }
 
   const runner = async (t: DBTransaction): Promise<AdminDashboardScheduleResult> => {
-    const { SystemSettingsRepository } = await import("@/backend/db/repo/system-settings.repository");
+    const { SystemSettingsRepository } = await import("@/backend/db/repo/shared/system-settings.repository");
     const { DEFAULT_MISSED_GRACE_MINUTES } = await import("@/shared/lib/schedule/schedule-instance-dashboard-status");
     const missedGraceMinutes = await SystemSettingsRepository.getIntValue(
       "session_missed_grace_minutes",

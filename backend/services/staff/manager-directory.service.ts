@@ -1,4 +1,4 @@
-import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
+import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

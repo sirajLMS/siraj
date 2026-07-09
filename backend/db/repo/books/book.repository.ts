@@ -1,7 +1,7 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { books } from "@/backend/db/schema";
 import type { AvailabilityStatus } from "@/backend/enum";
 import type { PaginationArgs } from "@/backend/types";

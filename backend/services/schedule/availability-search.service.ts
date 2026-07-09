@@ -1,4 +1,4 @@
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";

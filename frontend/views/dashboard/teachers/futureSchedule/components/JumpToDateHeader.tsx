@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import type { JumpToDateHeaderProps } from "../types";
+import type { JumpToDateHeaderProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 function shiftDate(selectedDate: string, delta: number): string {
   const d = new Date(selectedDate + "T00:00:00");

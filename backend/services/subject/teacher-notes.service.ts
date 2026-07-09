@@ -1,4 +1,4 @@
-import { TeacherNotesRepository } from "@/backend/db/repo/teacher-notes.repository";
+import { TeacherNotesRepository } from "@/backend/db/repo/teachers/teacher-notes.repository";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

@@ -2,7 +2,7 @@ import {
   getWeeklyScheduleGrid,
   getWeeklyWorkloadMetrics,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
-import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";

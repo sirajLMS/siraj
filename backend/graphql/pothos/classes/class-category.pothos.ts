@@ -1,4 +1,4 @@
-import { ClassCategoryRepository } from "@/backend/db/repo/class-category.repository";
+import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassCategoryReturnType } from "@/backend/types";
