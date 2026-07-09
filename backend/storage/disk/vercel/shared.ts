@@ -1,6 +1,6 @@
 import { type ListBlobResult, list } from "@vercel/blob";
 import logger from "@/backend/lib/logger";
-import type { VercelContext } from "./types";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 
 export async function getBlobs(
   ctx: VercelContext,

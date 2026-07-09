@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SystemSettingsRepository } from "@/backend/db/repo";
 import { systemSettings } from "@/backend/db/schema";
-import { runInRollback } from "../test-utils";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 async function createTestSetting(
   tx: DBTransaction,

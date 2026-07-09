@@ -1,10 +1,14 @@
 import logger from "@/backend/lib/logger";
+import {
+  calculateTotalFiles,
+  formatFileTypeBreakdown,
+  updateFileTypeMap,
+} from "@/backend/storage/disk/shared/stats-operations.helper";
+import { getBlobs } from "@/backend/storage/disk/vercel/shared";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/shared/utils/storage.utils";
-import { calculateTotalFiles, formatFileTypeBreakdown, updateFileTypeMap } from "../../shared/stats-operations.helper";
-import { getBlobs } from "../shared";
-import type { VercelContext } from "../types";
 
 export async function storageStatistics(ctx: VercelContext, searchPath?: string | null): Promise<Types.StorageStats> {
   try {

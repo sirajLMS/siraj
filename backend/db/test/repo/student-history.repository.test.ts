@@ -2,8 +2,8 @@ import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { StudentHistoryRepository } from "@/backend/db/repo";
 import { classInstancePerformance, classInstances } from "@/backend/db/schema";
-import { setupTestEntities } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { setupTestEntities } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 describe("StudentHistoryRepository", () => {
   it("getMonthlyCalendar returns sessions for specific month", async () => {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { VercelAdapter } from "@/backend/storage/disk/vercel/adapter";
 import { testLogger } from "@/shared/lib/testlogger";
-import { VercelAdapter } from "./adapter";
 
 describe("Vercel Blob Storage Integration Test", () => {
   const hasToken = !!process.env.BLOB_READ_WRITE_TOKEN;

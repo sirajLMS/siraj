@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { AccountStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { ManagerProfileService } from "./manager-profile.service";
+import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
 
 const targetRow = {
   id: "target-user-1",

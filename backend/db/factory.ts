@@ -10,10 +10,10 @@ import {
   poolMax,
   resolveConnectionStrategy,
 } from "@/backend/db/connection-strategy";
+import { relations } from "@/backend/db/drizzleRelations";
 import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { isVercelRuntime } from "@/backend/lib/runtime";
-import { relations } from "./drizzleRelations";
 
 export type DatabaseProvider = "postgres" | "neon";
 

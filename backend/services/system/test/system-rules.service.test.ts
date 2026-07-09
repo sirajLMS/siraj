@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { and, eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
+import { setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
 import { testLogger } from "@/shared/lib/testlogger";
-import { leaveQuotaUsage, systemSettings } from "../../../db/schema";
-import { setupTeacher } from "../../../db/test/entity-setup";
 
 async function setTeacherMaxLeaves(tx: DBTransaction, value: string) {
   await tx

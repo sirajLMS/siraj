@@ -142,7 +142,7 @@ describe("PermissionManagementRepository", () => {
       // Verify in database
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, group.id)).limit(1);
       expect(dbGroup).toBeDefined();
-      expect(dbGroup.name).toEqual(loc("Test Group Created"));
+      expect(dbGroup.name).toEqual({ ar: "Test Group Created" });
     });
 
     testRepoError("createGroup should throw on database error", () =>
@@ -189,7 +189,7 @@ describe("PermissionManagementRepository", () => {
 
       // Verify db
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, group.id)).limit(1);
-      expect(dbGroup.name).toEqual(loc("Updated Group Name"));
+      expect(dbGroup.name).toEqual({ ar: "Updated Group Name" });
     });
 
     testRepo("updateGroup should throw on non-existent group or system group", async tx => {

@@ -1,9 +1,9 @@
 import { put } from "@vercel/blob";
 import logger from "@/backend/lib/logger";
+import { prepareUploadHelper, uploadFileHelper } from "@/backend/storage/disk/shared/upload-operations.helper";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
+import { calculateHash } from "@/backend/storage/disk/vercel/utils";
 import * as Types from "@/backend/types";
-import { prepareUploadHelper, uploadFileHelper } from "../../shared/upload-operations.helper";
-import type { VercelContext } from "../types";
-import { calculateHash } from "../utils";
 
 export async function prepareUpload(
   ctx: VercelContext,

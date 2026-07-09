@@ -5,10 +5,10 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { TeacherRepository } from "@/backend/db/repo";
 import { teachers, users } from "@/backend/db/schema";
+import { createTestUser, setupTeacher } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus } from "@/backend/enum";
 import { PaginationArgs } from "@/backend/types";
-import { createTestUser, setupTeacher } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 describe("TeacherRepository", () => {
   it("getTeacherDirectory returns all non-deleted teachers sorted by name", async () => {

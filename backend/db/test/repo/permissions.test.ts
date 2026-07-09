@@ -97,18 +97,19 @@ describe("Permissions and Permission Groups Database Constraints", () => {
     "Should prevent updating action of system permissions",
     tx =>
       tx.update(permissions).set({ action: "modified_action" }).where(eq(permissions.key, AppPermission.AUTH_LOGIN)),
-    "Cannot modify core properties of system permissions; only description can be updated"
+    "Cannot modify core properties of system permissions; only description and category can be updated"
   );
 
-  testConstraint(
-    "Should prevent updating category of system permissions",
-    tx =>
-      tx
-        .update(permissions)
-        .set({ category: loc("Modified Category") })
-        .where(eq(permissions.key, AppPermission.AUTH_LOGIN)),
-    "Cannot modify core properties of system permissions; only description can be updated"
-  );
+  testConstraint("Should allow updating the category of a system permission", async tx => {
+    const newCategory = loc("Modified Category");
+    const [updated] = await tx
+      .update(permissions)
+      .set({ category: newCategory })
+      .where(eq(permissions.key, AppPermission.AUTH_LOGIN))
+      .returning();
+
+    expect(updated.category).toEqual(newCategory);
+  });
 
   testConstraint(
     "Should prevent updating slug of system permission groups",

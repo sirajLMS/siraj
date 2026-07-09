@@ -1,12 +1,12 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import { loadListEntities, paginateStorageItems } from "@/backend/storage/disk/shared/list-operations.helper";
+import { getBlobs } from "@/backend/storage/disk/vercel/shared";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
+import { cleanVercelPath } from "@/backend/storage/disk/vercel/utils";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/shared/utils/storage.utils";
-import { loadListEntities, paginateStorageItems } from "../../shared/list-operations.helper";
-import { getBlobs } from "../shared";
-import type { VercelContext } from "../types";
-import { cleanVercelPath } from "../utils";
 
 export async function listFiles(
   ctx: VercelContext,

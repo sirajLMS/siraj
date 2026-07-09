@@ -1,9 +1,9 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
-import { createGcpAdapter } from "./disk/gcp";
-import { createLocalAdapter } from "./disk/local";
-import type { StorageService } from "./disk/storage.service.interface";
-import { createVercelAdapter } from "./disk/vercel";
+import { createGcpAdapter } from "@/backend/storage/disk/gcp";
+import { createLocalAdapter } from "@/backend/storage/disk/local";
+import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
+import { createVercelAdapter } from "@/backend/storage/disk/vercel";
 
 /**
  * Supported storage providers

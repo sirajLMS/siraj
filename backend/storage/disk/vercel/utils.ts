@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { StorageValidationError } from "../storage.service.interface";
+import { StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 
 export function cleanVercelPath(inputPath: string): string {
   if (!inputPath || inputPath.length === 0) {

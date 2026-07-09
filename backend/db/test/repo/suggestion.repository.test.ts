@@ -5,9 +5,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SuggestionRepository } from "@/backend/db/repo";
 import { suggestions } from "@/backend/db/schema";
+import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { SuggestionStatus } from "@/backend/enum";
-import { createTestParent, createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

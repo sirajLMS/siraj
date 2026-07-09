@@ -2,10 +2,15 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo";
 import { teacherAvailabilityWindows, teacherRecurringUnavailability } from "@/backend/db/schema";
+import {
+  createMockClassInstance,
+  createTestTeacher,
+  createTestUser,
+  setupStudent,
+} from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import type { CrossStaffSearchInput } from "@/backend/types";
-import { createMockClassInstance, createTestTeacher, createTestUser, setupStudent } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 const TEST_MONDAY_RANGE = {
   fromDate: "2026-01-05",

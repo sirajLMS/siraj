@@ -1,9 +1,9 @@
+import { resolveConnectionStrategy } from "@/backend/db/connection-strategy";
+import { relations } from "@/backend/db/drizzleRelations";
+import { createDatabase, createPool } from "@/backend/db/factory";
 import { ensureEnvironmentValidated, getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
-import { resolveConnectionStrategy } from "./connection-strategy";
-import { relations } from "./drizzleRelations";
-import { createDatabase, createPool } from "./factory";
 
 const DB_KEY = Symbol.for("siraj.db");
 const DB_POOL_KEY = Symbol.for("siraj.dbPool");
