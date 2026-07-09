@@ -298,7 +298,12 @@ export namespace ProfileService {
     };
   }
 
-  async function loadStaffRoleProfiles(targetUserId: string, scope: ProfileScope, roleIds: ResolvedRoleIds) {
+  async function loadStaffRoleProfiles(
+    targetUserId: string,
+    scope: ProfileScope,
+    roleIds: ResolvedRoleIds,
+    locale?: string
+  ) {
     if (roleIds.audience !== "staff" || !roleIds.staffProfileId) {
       return { staffProfile: null, staffPermissionGroups: null, staffPermissionOverrides: null };
     }
@@ -309,7 +314,7 @@ export namespace ProfileService {
     }
 
     const [staffPermissionGroups, staffPermissionOverrides] = await Promise.all([
-      StaffProfileRepository.getUserPermissionGroups(targetUserId),
+      StaffProfileRepository.getUserPermissionGroups(targetUserId, locale),
       StaffProfileRepository.getUserPermissionOverrides(targetUserId),
     ]);
 
@@ -326,7 +331,7 @@ export namespace ProfileService {
     const [teacherProfiles, parentProfiles, staffProfiles] = await Promise.all([
       loadTeacherRoleProfiles(actorUserId, targetUserId, scope, roleIds, locale),
       loadParentRoleProfiles(actorUserId, targetUserId, scope, roleIds, locale),
-      loadStaffRoleProfiles(targetUserId, scope, roleIds),
+      loadStaffRoleProfiles(targetUserId, scope, roleIds, locale),
     ]);
 
     return {

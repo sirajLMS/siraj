@@ -45,8 +45,8 @@ export namespace PermissionManagementService {
     return user;
   }
 
-  async function requireGroupExists(groupId: string, t: TranslationFn<ErrorsLabels>) {
-    const group = await PermissionManagementRepository.getGroupById(groupId);
+  async function requireGroupExists(groupId: string, t: TranslationFn<ErrorsLabels>, locale?: string) {
+    const group = await PermissionManagementRepository.getGroupById(groupId, locale);
     if (!group) throw new Error(t("permissionGroupNotFound", { id: groupId }));
     return group;
   }
@@ -54,7 +54,7 @@ export namespace PermissionManagementService {
   async function requireBulkGroupSetup(actorUserId: string, groupId: string, locale?: string) {
     await requireAssignAccess(actorUserId, locale);
     const t = await getBackendTranslations({ locale, namespace: "errors" });
-    await requireGroupExists(groupId, t);
+    await requireGroupExists(groupId, t, locale);
     return t;
   }
 
@@ -133,12 +133,12 @@ export namespace PermissionManagementService {
    */
   export async function listPermissions(actorUserId: string, locale?: string): Promise<PermissionEntity[]> {
     await requireManageAccess(actorUserId, locale);
-    return PermissionManagementRepository.listAllPermissions();
+    return PermissionManagementRepository.listAllPermissions(locale);
   }
 
   export async function listGroups(actorUserId: string, locale?: string): Promise<GroupWithPermissionIds[]> {
     await requireManageAccess(actorUserId, locale);
-    return PermissionManagementRepository.listAllGroups();
+    return PermissionManagementRepository.listAllGroups(locale);
   }
 
   export async function getGroup(
@@ -148,7 +148,7 @@ export namespace PermissionManagementService {
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, locale);
     const t = await getBackendTranslations({ locale, namespace: "errors" });
-    return requireGroupExists(groupId, t);
+    return requireGroupExists(groupId, t, locale);
   }
 
   // ─── Write Operations ─────────────────────────────────────────────────────
@@ -177,13 +177,16 @@ export namespace PermissionManagementService {
       counter++;
     }
 
-    return PermissionManagementRepository.createGroup({
-      name: trimmedName,
-      slug,
-      description: input.description?.trim() ?? null,
-      permissionIds: input.permissionIds,
-      createdByUserId: actorUserId,
-    });
+    return PermissionManagementRepository.createGroup(
+      {
+        name: trimmedName,
+        slug,
+        description: input.description?.trim() ?? null,
+        permissionIds: input.permissionIds,
+        createdByUserId: actorUserId,
+      },
+      locale
+    );
   }
 
   export async function updateGroup(
@@ -310,7 +313,7 @@ export namespace PermissionManagementService {
     const user = await requireUserExistsFull(userId, t);
 
     if (user.isSuperAdmin) {
-      const allPerms = await PermissionManagementRepository.listAllPermissions();
+      const allPerms = await PermissionManagementRepository.listAllPermissions(locale);
       return allPerms.map(p => p.key);
     }
 
@@ -322,7 +325,7 @@ export namespace PermissionManagementService {
     const overrides = await PermissionManagementRepository.getUserOverrides(userId);
     if (overrides.length === 0) return [...effectiveSet];
 
-    const allPerms = await PermissionManagementRepository.listAllPermissions();
+    const allPerms = await PermissionManagementRepository.listAllPermissions(locale);
     const permMap = new Map(allPerms.map(p => [p.id, p.key]));
 
     for (const override of overrides) {

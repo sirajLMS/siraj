@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo";
+import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -12,11 +13,9 @@ import { AuthUtils } from "@/backend/utils";
 export namespace DemoAuthService {
   /**
    * Retrieves all available permission groups from the database for demo login purposes.
-   *
-   * @drizzle `db.query.permissionGroups.findMany`
-   * @returns An array of permission groups containing their slug, name, and description.
+   * Resolves localized name/description for the request locale.
    */
-  export async function getAvailableDemoGroups() {
+  export async function getAvailableDemoGroups(locale?: string) {
     try {
       const groups = await db.query.permissionGroups.findMany({
         columns: {
@@ -25,9 +24,14 @@ export namespace DemoAuthService {
           description: true,
         },
       });
-      // also if we want to add super_admin as a group artificially, we can check.
-      // But typically super_admin is also in permission_groups in some systems, wait: "we wanna get the available groups from the database itself not hardcoded at all".
-      return groups;
+      return groups.map(group => {
+        const description = resolveLocalized(group.description, locale);
+        return {
+          slug: group.slug,
+          name: resolveLocalized(group.name, locale),
+          description: description === "" ? null : description,
+        };
+      });
     } catch (error) {
       logger.error("Failed to fetch demo groups", { error });
       return [];

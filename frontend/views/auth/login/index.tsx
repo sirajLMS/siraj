@@ -8,7 +8,7 @@ import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments/au
 import { useAuth } from "@/frontend/hooks/useAuth";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import logger from "@/frontend/lib/logger";
-import { isSafeRedirect } from "@/frontend/lib/safeRedirect";
+import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/lib/safeRedirect";
 import { LoginView } from "./LoginView";
 import type { LoginFormData } from "./schemas/loginSchema";
 
@@ -32,7 +32,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
     }
 
     redirectedRef.current = true;
-    const redirectUrl = searchParams.get("redirect");
+    const redirectUrl = searchParams.get(LOGIN_REDIRECT_PARAM);
     const targetUrl = isSafeRedirect(redirectUrl);
     logger.info({ caller: "LoginContainer" }, "[AuthRedirect] Hard-redirecting authenticated user away from login", {
       reason: "isAuthenticated is true after refreshToken — using full navigation so server reads new cookies",
@@ -51,7 +51,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
   }, [authError]);
 
   const handleLoginSubmit = async (data: LoginFormData) => {
-    const redirectUrl = searchParams.get("redirect");
+    const redirectUrl = searchParams.get(LOGIN_REDIRECT_PARAM);
     setLoginResult(null);
 
     try {
@@ -68,7 +68,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
   };
 
   const handleFastLogin = async (groupSlug: string) => {
-    const redirectUrl = searchParams.get("redirect");
+    const redirectUrl = searchParams.get(LOGIN_REDIRECT_PARAM);
     setLoginResult(null);
 
     try {

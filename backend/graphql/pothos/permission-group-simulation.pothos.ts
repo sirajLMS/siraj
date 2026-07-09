@@ -30,7 +30,8 @@ gqlSchemaBuilder.queryFields(t => ({
       return PermissionGroupSimulationService.getStatusForSession(
         ctx.sessionId,
         actorUserId,
-        ctx.isSimulatingGroup && ctx.simulatedGroupSlug ? { groupSlug: ctx.simulatedGroupSlug } : undefined
+        ctx.isSimulatingGroup && ctx.simulatedGroupSlug ? { groupSlug: ctx.simulatedGroupSlug } : undefined,
+        ctx.locale
       );
     },
   }),
@@ -43,7 +44,7 @@ gqlSchemaBuilder.queryFields(t => ({
       if (!actorUserId) {
         return [];
       }
-      const groups = await PermissionGroupSimulationService.listSimulatableGroups(actorUserId);
+      const groups = await PermissionGroupSimulationService.listSimulatableGroups(actorUserId, ctx.locale);
       if (ctx.isSimulatingGroup && ctx.simulatedGroupSlug) {
         return groups.filter(group => group.slug !== ctx.simulatedGroupSlug);
       }

@@ -1,4 +1,5 @@
-import { boolean, index, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, jsonb, pgTable, primaryKey, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import type { LocalizedString } from "@/backend/types/localized-string.types";
 import { appPermissionEnum } from "./enums";
 import { users } from "./users";
 
@@ -7,6 +8,7 @@ import { users } from "./users";
  * NOTE: The isSystem field defaults to false. The database enforces a trigger constraint
  * (trg_protect_system_permissions) preventing the creation of any new system permissions (is_system = true)
  * or converting an existing custom permission to a system permission. System permissions are immutable.
+ * description and category are JSONB locale maps (LocalizedString).
  */
 export const permissions = pgTable(
   "permissions",
@@ -15,17 +17,21 @@ export const permissions = pgTable(
     key: appPermissionEnum("key").notNull().unique(),
     resource: varchar("resource", { length: 100 }).notNull(),
     action: varchar("action", { length: 100 }).notNull(),
-    description: text("description").notNull(),
-    category: varchar("category", { length: 100 }).notNull(),
+    description: jsonb("description").$type<LocalizedString>().notNull(),
+    category: jsonb("category").$type<LocalizedString>().notNull(),
     isSystem: boolean("is_system").notNull().default(false),
   },
   table => [index("permissions_key_idx").on(table.key)]
 );
 
+/**
+ * Permission groups. name/description are JSONB locale maps.
+ * Uniqueness is on slug only (name is localized and not unique).
+ */
 export const permissionGroups = pgTable("permission_groups", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull().unique(),
-  description: text("description"),
+  name: jsonb("name").$type<LocalizedString>().notNull(),
+  description: jsonb("description").$type<LocalizedString>(),
   isSystem: boolean("is_system").notNull().default(false),
   slug: varchar("slug", { length: 100 }).notNull().unique(),
   createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),

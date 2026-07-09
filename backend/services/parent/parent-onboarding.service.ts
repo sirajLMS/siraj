@@ -89,7 +89,7 @@ export namespace ParentOnboardingService {
       );
 
       // Step 3: Assign permission group
-      const groups = await PermissionManagementRepository.listAllGroups(txObj);
+      const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.PARENT_DEFAULT);
       if (!targetGroup) {
         throw new Error(t("permission.groupNotFound"));

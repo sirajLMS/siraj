@@ -96,7 +96,7 @@ export namespace TeacherOnboardingService {
     t: TranslationFn<ErrorsLabels>,
     txObj: DBTransaction
   ): Promise<void> {
-    const groups = await PermissionManagementRepository.listAllGroups(txObj);
+    const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
     const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.TEACHER_DEFAULT);
     if (!targetGroup) {
       throw new Error(t("permission.groupNotFound"));

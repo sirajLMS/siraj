@@ -11,6 +11,10 @@ import { PaginationArgs } from "@/backend/types";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
+function loc(en: string, ar?: string) {
+  return { ar: ar ?? en, en };
+}
+
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
   try {
@@ -61,10 +65,10 @@ async function createTestPermissionGroup(tx: DBTransaction, name: string, slug: 
   const groups = await tx
     .insert(permissionGroups)
     .values({
-      name,
+      name: loc(name),
       slug,
       isSystem: false,
-      description: `Test group ${name}`,
+      description: loc(`Test group ${name}`),
       createdAt: now,
       updatedAt: now,
     })

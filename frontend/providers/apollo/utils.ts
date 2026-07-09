@@ -4,6 +4,7 @@ import { ApolloLink, CombinedGraphQLErrors, Observable } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
 import CryptoJS from "crypto-js";
 import logger from "@/frontend/lib/logger";
+import { buildLoginHref } from "@/frontend/lib/safeRedirect";
 import { isNetworkError } from "@/frontend/utils/errorUtils";
 
 // Browser-compatible SHA256 function for persisted queries
@@ -124,8 +125,7 @@ function handleAuthError(error: unknown, operationName: string | undefined): boo
 
     const search = globalThis.window.location.search;
     const currentUrl = `${pathname}${search}`;
-    const encodedRedirect = encodeURIComponent(currentUrl);
-    const targetUrl = `/login?redirect=${encodedRedirect}`;
+    const targetUrl = buildLoginHref(currentUrl);
     logger.warn(
       { caller: "ApolloErrorLink.handleAuthError" },
       "[AuthRedirect] GraphQL auth error — redirecting to login",

@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import {
   groupPermissions,
   permissionGroups,
@@ -9,16 +9,65 @@ import {
 } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { localeJsonKey, resolveLocalized, setLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import type {
   CreateGroupInput,
   GroupUserEntity,
   GroupWithPermissionIds,
+  LocalizedString,
   PermissionReturnType,
+  PermissionSelectType,
   UpdateGroupInput,
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
+import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/localized-string.types";
+
+function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
+  return {
+    id: row.id,
+    key: row.key,
+    resource: row.resource,
+    action: row.action,
+    description: resolveLocalized(row.description, locale),
+    category: resolveLocalized(row.category, locale),
+    isSystem: row.isSystem,
+  };
+}
+
+function toGroupReturn(
+  group: {
+    id: string;
+    name: LocalizedString;
+    slug: string;
+    description: LocalizedString | null;
+    isSystem: boolean;
+    createdByUserId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  },
+  permissionIds: string[],
+  locale?: string
+): GroupWithPermissionIds {
+  const resolvedDescription = resolveLocalized(group.description, locale);
+  return {
+    id: group.id,
+    name: resolveLocalized(group.name, locale),
+    slug: group.slug,
+    description: resolvedDescription === "" ? null : resolvedDescription,
+    isSystem: group.isSystem,
+    createdByUserId: group.createdByUserId,
+    createdAt: group.createdAt,
+    updatedAt: group.updatedAt,
+    permissionIds,
+  };
+}
+
+function localizedOrderExpr(column: typeof permissions.category | typeof permissionGroups.name, locale?: string) {
+  const key = localeJsonKey(locale);
+  return sql`coalesce(${column}->>${key}, ${column}->>${DEFAULT_CONTENT_LOCALE})`;
+}
 
 export namespace PermissionManagementRepository {
   /**
@@ -26,15 +75,16 @@ export namespace PermissionManagementRepository {
    * NOTE: The is_system field for permissions is protected by a database trigger (trg_protect_system_permissions).
    * Creating any new permission with is_system = true or updating an existing custom permission
    * to be a system permission is strictly prohibited by the database schema.
-   * @returns PermissionReturnType[]
+   * @returns PermissionReturnType[] with description/category resolved for locale
    */
-  export async function listAllPermissions(tx?: DBTransaction): Promise<PermissionReturnType[]> {
+  export async function listAllPermissions(locale?: string, tx?: DBTransaction): Promise<PermissionReturnType[]> {
     try {
       const client = tx ?? db;
-      return await client
+      const rows = await client
         .select()
         .from(permissions)
-        .orderBy(permissions.category, permissions.resource, permissions.action);
+        .orderBy(localizedOrderExpr(permissions.category, locale), permissions.resource, permissions.action);
+      return rows.map(row => toPermissionReturn(row, locale));
     } catch (error) {
       logger.error("Error listing all permissions:", error);
       throw error;
@@ -44,7 +94,7 @@ export namespace PermissionManagementRepository {
   /**
    * Returns left-joined aggregation of groups and their permissionIds.
    */
-  export async function listAllGroups(tx?: DBTransaction): Promise<GroupWithPermissionIds[]> {
+  export async function listAllGroups(locale?: string, tx?: DBTransaction): Promise<GroupWithPermissionIds[]> {
     try {
       const client = tx ?? db;
       const rows = await client
@@ -61,22 +111,28 @@ export namespace PermissionManagementRepository {
         })
         .from(permissionGroups)
         .leftJoin(groupPermissions, eq(groupPermissions.groupId, permissionGroups.id))
-        .orderBy(permissionGroups.name);
+        .orderBy(localizedOrderExpr(permissionGroups.name, locale));
 
       const groupMap = new Map<string, GroupWithPermissionIds>();
       for (const row of rows) {
         if (!groupMap.has(row.id)) {
-          groupMap.set(row.id, {
-            id: row.id,
-            name: row.name,
-            slug: row.slug,
-            description: row.description,
-            isSystem: row.isSystem,
-            createdByUserId: row.createdByUserId,
-            createdAt: row.createdAt,
-            updatedAt: row.updatedAt,
-            permissionIds: [],
-          });
+          groupMap.set(
+            row.id,
+            toGroupReturn(
+              {
+                id: row.id,
+                name: row.name,
+                slug: row.slug,
+                description: row.description,
+                isSystem: row.isSystem,
+                createdByUserId: row.createdByUserId,
+                createdAt: row.createdAt,
+                updatedAt: row.updatedAt,
+              },
+              [],
+              locale
+            )
+          );
         }
         if (row.permissionId) {
           groupMap.get(row.id)?.permissionIds.push(row.permissionId);
@@ -92,7 +148,11 @@ export namespace PermissionManagementRepository {
   /**
    * Returns a group by its ID including its permissionIds.
    */
-  export async function getGroupById(groupId: string, tx?: DBTransaction): Promise<GroupWithPermissionIds | null> {
+  export async function getGroupById(
+    groupId: string,
+    locale?: string,
+    tx?: DBTransaction
+  ): Promise<GroupWithPermissionIds | null> {
     try {
       const client = tx ?? db;
       const [group] = await client.select().from(permissionGroups).where(eq(permissionGroups.id, groupId)).limit(1);
@@ -101,17 +161,11 @@ export namespace PermissionManagementRepository {
 
       const gpList = await client.select().from(groupPermissions).where(eq(groupPermissions.groupId, groupId));
 
-      return {
-        id: group.id,
-        name: group.name,
-        slug: group.slug,
-        description: group.description,
-        isSystem: group.isSystem,
-        createdByUserId: group.createdByUserId,
-        createdAt: group.createdAt,
-        updatedAt: group.updatedAt,
-        permissionIds: gpList.map(gp => gp.permissionId),
-      };
+      return toGroupReturn(
+        group,
+        gpList.map(gp => gp.permissionId),
+        locale
+      );
     } catch (error) {
       logger.error(`Error fetching group by ID ${groupId}:`, error);
       throw error;
@@ -120,16 +174,27 @@ export namespace PermissionManagementRepository {
 
   /**
    * Atomic transaction inserting group + permissions.
+   * Writes name/description into the request-locale key of the JSONB map.
    */
-  export async function createGroup(input: CreateGroupInput, tx?: DBTransaction): Promise<GroupWithPermissionIds> {
+  export async function createGroup(
+    input: CreateGroupInput,
+    locale?: string,
+    tx?: DBTransaction
+  ): Promise<GroupWithPermissionIds> {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const now = new Date();
+      const nameMap = setLocalized(null, locale ?? DEFAULT_CONTENT_LOCALE, input.name);
+      const descriptionMap =
+        input.description === undefined || input.description === null
+          ? null
+          : setLocalized(null, locale ?? DEFAULT_CONTENT_LOCALE, input.description);
+
       const [insertedGroup] = await t
         .insert(permissionGroups)
         .values({
-          name: input.name,
+          name: nameMap,
           slug: input.slug,
-          description: input.description ?? null,
+          description: descriptionMap,
           isSystem: input.isSystem ?? false,
           createdByUserId: input.createdByUserId ?? null,
           createdAt: now,
@@ -146,17 +211,7 @@ export namespace PermissionManagementRepository {
         );
       }
 
-      return {
-        id: insertedGroup.id,
-        name: insertedGroup.name,
-        slug: insertedGroup.slug,
-        description: insertedGroup.description,
-        isSystem: insertedGroup.isSystem,
-        createdByUserId: insertedGroup.createdByUserId,
-        createdAt: insertedGroup.createdAt,
-        updatedAt: insertedGroup.updatedAt,
-        permissionIds: input.permissionIds,
-      };
+      return toGroupReturn(insertedGroup, input.permissionIds, locale);
     };
 
     try {
@@ -172,6 +227,7 @@ export namespace PermissionManagementRepository {
 
   /**
    * Atomic transaction. Clears and replaces groupPermissions. Throws if isSystem.
+   * Merges name/description into the request-locale key of existing JSONB maps.
    */
   export async function updateGroup(
     input: UpdateGroupInput,
@@ -191,13 +247,23 @@ export namespace PermissionManagementRepository {
         throw new Error(tFunc("cannotModifySystemPermissionGroup"));
       }
 
+      const contentLocale = locale ?? DEFAULT_CONTENT_LOCALE;
       const now = new Date();
+      const nextName =
+        input.name === undefined ? existing.name : setLocalized(existing.name, contentLocale, input.name);
+      const nextDescription =
+        input.description === undefined
+          ? existing.description
+          : input.description === null
+            ? null
+            : setLocalized(existing.description, contentLocale, input.description);
+
       const [updatedGroup] = await t
         .update(permissionGroups)
         .set({
-          name: input.name ?? existing.name,
+          name: nextName,
           slug: input.slug ?? existing.slug,
-          description: input.description === undefined ? existing.description : input.description,
+          description: nextDescription,
           isSystem: input.isSystem ?? existing.isSystem,
           updatedAt: now,
         })
@@ -219,17 +285,11 @@ export namespace PermissionManagementRepository {
 
       const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
 
-      return {
-        id: updatedGroup.id,
-        name: updatedGroup.name,
-        slug: updatedGroup.slug,
-        description: updatedGroup.description,
-        isSystem: updatedGroup.isSystem,
-        createdByUserId: updatedGroup.createdByUserId,
-        createdAt: updatedGroup.createdAt,
-        updatedAt: updatedGroup.updatedAt,
-        permissionIds: gpList.map(gp => gp.permissionId),
-      };
+      return toGroupReturn(
+        updatedGroup,
+        gpList.map(gp => gp.permissionId),
+        locale
+      );
     };
 
     try {

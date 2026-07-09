@@ -1,6 +1,7 @@
-import { asc, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
+import { localeJsonKey, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { adminAuditLogs, permissionGroups } from "@/backend/db/schema";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
@@ -10,6 +11,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import type { RedisGroupSimulationSessionData } from "@/backend/types/auth.types";
+import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/localized-string.types";
 
 export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
 
@@ -92,9 +94,11 @@ export namespace PermissionGroupSimulationService {
   }
 
   export async function listSimulatableGroups(
-    actorUserId: string
+    actorUserId: string,
+    locale?: string
   ): Promise<Types.SimulatablePermissionGroupReturnType[]> {
     const actorContext = await PermissionsService.getUserContext(actorUserId);
+    const key = localeJsonKey(locale);
 
     const groups = await db
       .select({
@@ -103,7 +107,7 @@ export namespace PermissionGroupSimulationService {
         description: permissionGroups.description,
       })
       .from(permissionGroups)
-      .orderBy(asc(permissionGroups.name));
+      .orderBy(sql`coalesce(${permissionGroups.name}->>${key}, ${permissionGroups.name}->>${DEFAULT_CONTENT_LOCALE})`);
 
     const excludedSlugs = new Set(NON_SIMULATABLE_GROUP_SLUGS);
     if (actorContext.isSuperAdmin) {
@@ -116,11 +120,14 @@ export namespace PermissionGroupSimulationService {
 
     return groups
       .filter(group => !excludedSlugs.has(group.slug))
-      .map(group => ({
-        slug: group.slug,
-        name: group.name,
-        description: group.description,
-      }));
+      .map(group => {
+        const description = resolveLocalized(group.description, locale);
+        return {
+          slug: group.slug,
+          name: resolveLocalized(group.name, locale),
+          description: description === "" ? null : description,
+        };
+      });
   }
 
   export async function assertCanSimulateGroup(actorUserId: string, groupSlug: string, locale?: string): Promise<void> {
@@ -230,7 +237,8 @@ export namespace PermissionGroupSimulationService {
   export async function getStatusForSession(
     rawSessionId: string,
     actorUserId: string,
-    fallback?: { groupSlug?: string; startedAt?: Date; expiresAt?: Date }
+    fallback?: { groupSlug?: string; startedAt?: Date; expiresAt?: Date },
+    locale?: string
   ): Promise<Types.PermissionGroupSimulationStatusReturnType> {
     const active = await getActiveGroupSimulation(rawSessionId, actorUserId);
     if (!active) {
@@ -244,7 +252,7 @@ export namespace PermissionGroupSimulationService {
         return {
           isActive: true,
           groupSlug: fallback.groupSlug,
-          groupName: group?.name,
+          groupName: group?.name ? resolveLocalized(group.name, locale) : undefined,
           startedAt: fallback.startedAt,
           expiresAt: fallback.expiresAt,
         };
@@ -262,7 +270,7 @@ export namespace PermissionGroupSimulationService {
     return {
       isActive: true,
       groupSlug: active.data.groupSlug,
-      groupName: group?.name,
+      groupName: group?.name ? resolveLocalized(group.name, locale) : undefined,
       startedAt: new Date(active.data.startedAt),
       expiresAt: active.expiresAt,
     };

@@ -8,6 +8,10 @@ import { getErrorMessage } from "@/shared/utils/error";
 import { createTestPermission } from "../entity-setup";
 import { createTestUser, runInRollback } from "../test-utils";
 
+function loc(en: string, ar?: string) {
+  return { ar: ar ?? en, en };
+}
+
 function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     expect(typeof fn).toBe("function");
@@ -47,7 +51,7 @@ const badTx = {
 describe("PermissionManagementRepository", () => {
   describe("Group Management", () => {
     testRepo("listAllPermissions should return all permissions ordered by category, resource, action", async tx => {
-      const perms = await PermissionManagementRepository.listAllPermissions(tx);
+      const perms = await PermissionManagementRepository.listAllPermissions(undefined, tx);
       expect(perms).toBeDefined();
       expect(Array.isArray(perms)).toBe(true);
       if (perms.length > 0) {
@@ -61,11 +65,11 @@ describe("PermissionManagementRepository", () => {
     });
 
     testRepoError("listAllPermissions should throw on database error", () =>
-      PermissionManagementRepository.listAllPermissions(badTx)
+      PermissionManagementRepository.listAllPermissions(undefined, badTx)
     );
 
     testRepo("listAllGroups should return all groups with permissionIds", async tx => {
-      const groups = await PermissionManagementRepository.listAllGroups(tx);
+      const groups = await PermissionManagementRepository.listAllGroups(undefined, tx);
       expect(groups).toBeDefined();
       expect(Array.isArray(groups)).toBe(true);
 
@@ -80,7 +84,7 @@ describe("PermissionManagementRepository", () => {
     });
 
     testRepoError("listAllGroups should throw on database error", () =>
-      PermissionManagementRepository.listAllGroups(badTx)
+      PermissionManagementRepository.listAllGroups(undefined, badTx)
     );
 
     testRepo("getGroupById should retrieve group and return null if not found", async tx => {
@@ -93,21 +97,26 @@ describe("PermissionManagementRepository", () => {
           slug: "getgroup_test",
           permissionIds: [perm.id],
         },
+        undefined,
         tx
       );
 
-      const fetched = await PermissionManagementRepository.getGroupById(group.id, tx);
+      const fetched = await PermissionManagementRepository.getGroupById(group.id, undefined, tx);
       expect(fetched).not.toBeNull();
       expect(fetched?.id).toBe(group.id);
       expect(Array.isArray(fetched?.permissionIds)).toBe(true);
 
       // Random UUID
-      const nonExistent = await PermissionManagementRepository.getGroupById("00000000-0000-0000-0000-000000000000", tx);
+      const nonExistent = await PermissionManagementRepository.getGroupById(
+        "00000000-0000-0000-0000-000000000000",
+        undefined,
+        tx
+      );
       expect(nonExistent).toBeNull();
     });
 
     testRepoError("getGroupById should throw on database error", () =>
-      PermissionManagementRepository.getGroupById("00000000-0000-0000-0000-000000000000", badTx)
+      PermissionManagementRepository.getGroupById("00000000-0000-0000-0000-000000000000", undefined, badTx)
     );
 
     testRepo("createGroup should insert group and permission mapping", async tx => {
@@ -120,6 +129,7 @@ describe("PermissionManagementRepository", () => {
           description: "Test description",
           permissionIds: [perm.id],
         },
+        undefined,
         tx
       );
 
@@ -132,7 +142,7 @@ describe("PermissionManagementRepository", () => {
       // Verify in database
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, group.id)).limit(1);
       expect(dbGroup).toBeDefined();
-      expect(dbGroup.name).toBe("Test Group Created");
+      expect(dbGroup.name).toEqual(loc("Test Group Created"));
     });
 
     testRepoError("createGroup should throw on database error", () =>
@@ -142,6 +152,7 @@ describe("PermissionManagementRepository", () => {
           slug: "test_group_fail",
           permissionIds: [],
         },
+        undefined,
         badTx
       )
     );
@@ -157,6 +168,7 @@ describe("PermissionManagementRepository", () => {
           slug: "original_group",
           permissionIds: [perm1.id],
         },
+        undefined,
         tx
       );
 
@@ -177,7 +189,7 @@ describe("PermissionManagementRepository", () => {
 
       // Verify db
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, group.id)).limit(1);
-      expect(dbGroup.name).toBe("Updated Group Name");
+      expect(dbGroup.name).toEqual(loc("Updated Group Name"));
     });
 
     testRepo("updateGroup should throw on non-existent group or system group", async tx => {
@@ -242,6 +254,7 @@ describe("PermissionManagementRepository", () => {
           slug: "group_to_delete",
           permissionIds: [],
         },
+        undefined,
         tx
       );
 
@@ -293,6 +306,7 @@ describe("PermissionManagementRepository", () => {
           slug: "user_group",
           permissionIds: [],
         },
+        undefined,
         tx
       );
 
@@ -327,6 +341,7 @@ describe("PermissionManagementRepository", () => {
           slug: "early_exit_group",
           permissionIds: [],
         },
+        undefined,
         tx
       );
 
@@ -425,16 +440,17 @@ describe("PermissionManagementRepository", () => {
           slug: "ntx_group",
           permissionIds: [perm.id],
         },
+        undefined,
         tx
       );
       expect(group.id).toBeDefined();
 
       // List
-      const groups = await PermissionManagementRepository.listAllGroups(tx);
+      const groups = await PermissionManagementRepository.listAllGroups(undefined, tx);
       expect(groups.map(g => g.id)).toContain(group.id);
 
       // Get by ID
-      const fetched = await PermissionManagementRepository.getGroupById(group.id, tx);
+      const fetched = await PermissionManagementRepository.getGroupById(group.id, undefined, tx);
       expect(fetched?.id).toBe(group.id);
 
       // Update
@@ -477,8 +493,8 @@ describe("PermissionManagementRepository", () => {
           key: AppPermission.TEST_SYSTEM_ONLY,
           resource: "custom",
           action: "test_system_permission",
-          description: "Test description",
-          category: "Custom",
+          description: loc("Test description"),
+          category: loc("Custom"),
           isSystem: true,
         });
       } catch (e) {
@@ -495,8 +511,8 @@ describe("PermissionManagementRepository", () => {
           key: AppPermission.TEST_CUSTOM_ONLY,
           resource: "custom",
           action: "test_custom_permission",
-          description: "Test description",
-          category: "Custom",
+          description: loc("Test description"),
+          category: loc("Custom"),
           isSystem: false,
         })
         .returning();

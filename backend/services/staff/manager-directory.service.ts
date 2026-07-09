@@ -22,7 +22,7 @@ export namespace ManagerDirectoryService {
       throw new Error(t("unauthorizedAction"));
     }
 
-    return await StaffProfileRepository.getManagerDirectory(pagination, filters);
+    return await StaffProfileRepository.getManagerDirectory(pagination, filters, undefined, locale);
   }
 
   export async function getOnboardingMetrics(actorUserId: string, locale?: string): Promise<OnboardingMetricsResult> {

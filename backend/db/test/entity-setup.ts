@@ -12,6 +12,11 @@ import {
 import type { AppPermission } from "@/backend/enum";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
+/** LocalizedString helper for permission/group JSONB columns in tests. */
+export function loc(en: string, ar?: string): { ar: string; en: string } {
+  return { ar: ar ?? en, en };
+}
+
 export async function createTestUser(
   tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
@@ -42,8 +47,8 @@ export async function createTestPermission(
       key,
       resource: "test",
       action: "test_action",
-      description: "Test permission",
-      category: "Test",
+      description: loc("Test permission"),
+      category: loc("Test"),
       isSystem: false,
       ...overrides,
     })

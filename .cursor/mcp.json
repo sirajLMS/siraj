@@ -8,11 +8,7 @@
     },
     "drizzle": {
       "command": "/home/ahmed/.bun/bin/bun",
-      "args": [
-        "x",
-        "drizzle-kit",
-        "mcp"
-      ]
+      "args": ["x", "drizzle-kit", "mcp"]
     }
   }
 }

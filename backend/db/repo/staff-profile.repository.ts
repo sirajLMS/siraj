@@ -1,6 +1,7 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { localeJsonKey, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import {
   permissionGroups,
   permissions,
@@ -13,6 +14,7 @@ import type { AccountStatus, OverrideState } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
+  LocalizedString,
   ManagerDirectoryFilters,
   ManagerDirectoryMetrics,
   ManagerDirectoryResult,
@@ -24,6 +26,7 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
+import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/localized-string.types";
 
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;
@@ -85,8 +88,35 @@ export namespace StaffProfileRepository {
     phone: staffProfiles.phone,
     status: staffProfiles.status,
     roleSlug: permissionGroups.slug,
-    roleName: permissionGroups.name,
+    roleNameMap: permissionGroups.name,
   } as const;
+
+  function mapManagerDirectoryRow(
+    row: {
+      id: string;
+      staffProfileId: string;
+      name: string;
+      email: string;
+      avatarUrl: string | null;
+      phone: string | null;
+      status: string;
+      roleSlug: string | null;
+      roleNameMap: LocalizedString | null;
+    },
+    locale?: string
+  ): ManagerDirectoryRow {
+    return {
+      id: row.id,
+      staffProfileId: row.staffProfileId,
+      name: row.name,
+      email: row.email,
+      avatarUrl: row.avatarUrl,
+      phone: row.phone,
+      status: row.status as AccountStatus,
+      roleSlug: row.roleSlug,
+      roleName: row.roleNameMap ? resolveLocalized(row.roleNameMap, locale) : null,
+    };
+  }
 
   function resolveRoleCondition(filters?: ManagerDirectoryFilters) {
     if (filters?.roleFilter === "admin") {
@@ -119,7 +149,8 @@ export namespace StaffProfileRepository {
   export async function getManagerDirectory(
     pagination: PaginationArgs | null = null,
     filters?: ManagerDirectoryFilters,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<ManagerDirectoryResult> {
     const queryDb = tx ?? db;
     const whereClause = buildManagerDirectoryWhere(filters);
@@ -137,7 +168,7 @@ export namespace StaffProfileRepository {
       const [rows, metrics] = await Promise.all([baseQuery, getManagerDirectoryMetrics(queryDb)]);
       return {
         metrics,
-        rows: rows.map(row => ({ ...row, status: row.status as AccountStatus })),
+        rows: rows.map(row => mapManagerDirectoryRow(row, locale)),
         totalCount: rows.length,
         pageInfo: null,
       };
@@ -164,7 +195,7 @@ export namespace StaffProfileRepository {
 
     return {
       metrics,
-      rows: rows.map(row => ({ ...row, status: row.status as AccountStatus })),
+      rows: rows.map(row => mapManagerDirectoryRow(row, locale)),
       totalCount,
       pageInfo: {
         count: rows.length,
@@ -238,7 +269,8 @@ export namespace StaffProfileRepository {
 
   async function findManagerDirectoryRow(
     whereCondition: ReturnType<typeof eq>,
-    queryDb: typeof db | DBTransaction
+    queryDb: typeof db | DBTransaction,
+    locale?: string
   ): Promise<ManagerDirectoryRow | null> {
     const results = await queryDb
       .select(MANAGER_DIRECTORY_SELECT)
@@ -249,20 +281,25 @@ export namespace StaffProfileRepository {
       .where(whereCondition)
       .limit(1);
 
-    return (results[0] ? { ...results[0], status: results[0].status as AccountStatus } : null) ?? null;
+    return results[0] ? mapManagerDirectoryRow(results[0], locale) : null;
   }
 
-  export async function findByUserId(userId: string, tx?: DBTransaction): Promise<ManagerDirectoryRow | null> {
+  export async function findByUserId(
+    userId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<ManagerDirectoryRow | null> {
     const queryDb = tx ?? db;
-    return findManagerDirectoryRow(eq(users.id, userId), queryDb);
+    return findManagerDirectoryRow(eq(users.id, userId), queryDb, locale);
   }
 
   export async function findByStaffProfileId(
     staffProfileId: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<ManagerDirectoryRow | null> {
     const queryDb = tx ?? db;
-    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), queryDb);
+    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), queryDb, locale);
   }
 
   export async function updateManagerProfile(
@@ -308,7 +345,7 @@ export namespace StaffProfileRepository {
 
       logger.info("Manager profile updated", { staffProfileId });
 
-      return { ...updated[0], status: updated[0].status as AccountStatus };
+      return mapManagerDirectoryRow(updated[0], locale);
     };
 
     if (tx) {
@@ -331,11 +368,13 @@ export namespace StaffProfileRepository {
 
   export async function getUserPermissionGroups(
     userId: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<StaffPermissionGroupReturnType[]> {
     const queryDb = tx ?? db;
+    const key = localeJsonKey(locale);
 
-    return queryDb
+    const rows = await queryDb
       .select({
         id: permissionGroups.id,
         name: permissionGroups.name,
@@ -345,7 +384,17 @@ export namespace StaffProfileRepository {
       .from(userPermissionGroups)
       .innerJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
       .where(eq(userPermissionGroups.userId, userId))
-      .orderBy(permissionGroups.name);
+      .orderBy(sql`coalesce(${permissionGroups.name}->>${key}, ${permissionGroups.name}->>${DEFAULT_CONTENT_LOCALE})`);
+
+    return rows.map(row => {
+      const description = resolveLocalized(row.description, locale);
+      return {
+        id: row.id,
+        name: resolveLocalized(row.name, locale),
+        slug: row.slug,
+        description: description === "" ? null : description,
+      };
+    });
   }
 
   export async function getUserPermissionOverrides(

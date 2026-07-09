@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { SubjectDetailContainer } from "@/frontend/views/dashboard/subjects/detail/SubjectDetailContainer";
-import { redirect } from "@/shared/i18n/routing";
 
 export default async function SubjectDetailPage({
   params,
@@ -14,7 +14,7 @@ export default async function SubjectDetailPage({
   const { userId } = await getServerUserContext();
 
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

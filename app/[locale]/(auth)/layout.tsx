@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
+import { getAuthenticatedAuthBounceHref } from "@/frontend/lib/redirectToLogin";
 import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
 
 export default async function AuthLayout({
@@ -18,14 +19,16 @@ export default async function AuthLayout({
   }
 
   if (userId && context) {
-    logger.info("[AuthRedirect] Auth layout redirecting to dashboard", {
+    const targetHref = await getAuthenticatedAuthBounceHref();
+    logger.info("[AuthRedirect] Auth layout redirecting authenticated user away from auth page", {
       reason: "server sees valid session — authenticated user on auth page",
       hasUserId: true,
       hasContext: true,
       isImpersonating,
       isSimulatingGroup,
+      to: targetHref,
     });
-    redirect({ href: "/dashboard", locale });
+    redirect({ href: targetHref, locale });
     return;
   }
 

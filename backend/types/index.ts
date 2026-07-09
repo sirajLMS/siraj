@@ -110,6 +110,7 @@ export type {
 // Impersonation types
 export * from "./impersonation.types";
 export * from "./learning-resources.types";
+export * from "./localized-string.types";
 export * from "./manager-onboarding.types";
 export type {
   NotificationAlertReturnType as SystemAlert,

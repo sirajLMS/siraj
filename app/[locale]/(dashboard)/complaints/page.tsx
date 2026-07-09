@@ -1,6 +1,7 @@
 import { getCachedParentIdForComplaints } from "@/backend/lib/auth/cached-parent";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ParentComplaintsContainer } from "@/frontend/views/dashboard/complaints/ParentComplaintsContainer";
 import { redirect } from "@/shared/i18n/routing";
 
@@ -9,7 +10,7 @@ export default async function ComplaintsPage({ params }: { readonly params: Prom
   const { locale } = await params;
 
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
 
@@ -19,7 +20,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { requireTeacherIdForPage } from "@/backend/lib/auth/require-teacher-id";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { FutureScheduleContainer } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleContainer";
-import { redirect } from "@/shared/i18n/routing";
 
 export const metadata: Metadata = {
   title: "Future Schedule - Siraj LMS",
@@ -19,7 +19,7 @@ export default async function TeacherMeFutureSchedulePage({ params }: PageProps)
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

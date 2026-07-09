@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MutationLoginArgs, User } from "@/frontend/graphql/generated/gql/graphql-types";
 import * as Document from "@/frontend/graphql/sharedDocuments";
 import { dedupedRefreshToken } from "@/frontend/lib/dedupedRefreshToken";
-import { isSafeRedirect } from "@/frontend/lib/safeRedirect";
+import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/lib/safeRedirect";
 import { AuthContext } from "../../context/AuthContext";
 import { useAuthToken } from "../../hooks/useAuthToken";
 import logger from "../../lib/logger";
@@ -123,13 +123,14 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     } finally {
       clearAuthData();
       await client.clearStore();
+      const targetUrl = buildLoginHrefFromWindow();
       logger.info({ caller: "AuthProvider.logout" }, "[AuthRedirect] Redirecting to login after logout", {
         reason: "user initiated logout",
         from: `${globalThis.location.pathname}${globalThis.location.search}`,
-        to: "/login",
+        to: targetUrl,
       });
       // Perform a hard redirect to ensure all state is cleared.
-      globalThis.location.href = "/login";
+      globalThis.location.href = targetUrl;
     }
   }, [logoutMutation, clearAuthData, client]);
 

@@ -1,4 +1,5 @@
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
 
 export default async function RootPage({ params }: { readonly params: Promise<{ locale: string }> }) {
@@ -12,7 +13,7 @@ export default async function RootPage({ params }: { readonly params: Promise<{ 
   if (userId && context) {
     redirect({ href: "/dashboard", locale });
   } else {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
   }
 
   return null;

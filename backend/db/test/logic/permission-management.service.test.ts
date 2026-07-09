@@ -9,6 +9,10 @@ import { PermissionsService, type UserPermissionContext } from "@/backend/servic
 import { getErrorMessage } from "@/shared/utils/error";
 import { runInRollback } from "../test-utils";
 
+function loc(en: string, ar?: string) {
+  return { ar: ar ?? en, en };
+}
+
 async function assertThrows(fn: () => Promise<unknown>, message: string) {
   let err: unknown = null;
   try {
@@ -142,8 +146,8 @@ describe("PermissionManagementService Business Logic", () => {
           key: AppPermission.TEST_CUSTOM_ONLY,
           resource: "test",
           action: "test_action_1",
-          description: "Test permission 1",
-          category: "Test",
+          description: loc("Test permission 1"),
+          category: loc("Test"),
           isSystem: false,
         })
         .returning();
@@ -164,8 +168,8 @@ describe("PermissionManagementService Business Logic", () => {
           key: AppPermission.TEST_CUSTOM_ALT,
           resource: "test",
           action: "test_action_2",
-          description: "Test permission 2",
-          category: "Test",
+          description: loc("Test permission 2"),
+          category: loc("Test"),
           isSystem: false,
         })
         .returning();
@@ -298,7 +302,7 @@ describe("PermissionManagementService Business Logic", () => {
         const [g] = await tx
           .insert(permissionGroups)
           .values({
-            name: "Assign Test Group",
+            name: loc("Assign Test Group"),
             slug: "assign_test_group",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -353,8 +357,8 @@ describe("PermissionManagementService Business Logic", () => {
             key: AppPermission.TEST_SYSTEM_ONLY,
             resource: "custom",
             action: "test_system_permission",
-            description: "Test description",
-            category: "Custom",
+            description: loc("Test description"),
+            category: loc("Custom"),
             isSystem: true,
           });
         } catch (e) {
@@ -390,7 +394,7 @@ describe("PermissionManagementService Business Logic", () => {
         const [g] = await tx
           .insert(permissionGroups)
           .values({
-            name: "Bulk Assign Test Group",
+            name: loc("Bulk Assign Test Group"),
             slug: "bulk_assign_test_group",
             createdAt: new Date(),
             updatedAt: new Date(),

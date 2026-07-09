@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import TeacherWeeklyScheduleContainer from "@/frontend/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleContainer";
-import { redirect } from "@/shared/i18n/routing";
 
 export const metadata: Metadata = {
   title: "Teacher Weekly Schedule - Siraj LMS",
@@ -22,7 +22,7 @@ export default async function TeacherWeeklySchedulePage({ params }: PageProps) {
   const { userId } = await getServerUserContext();
 
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

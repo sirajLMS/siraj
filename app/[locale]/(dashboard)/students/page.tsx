@@ -5,10 +5,10 @@ import { AppPermission } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { StudentsContainer } from "@/frontend/views/dashboard/admin/parents/students/StudentsContainer";
 import { ParentStudentsContainer } from "@/frontend/views/dashboard/parent/students/ParentStudentsContainer";
 import { TeacherStudentsContainer } from "@/frontend/views/dashboard/teachers/students/TeacherStudentsContainer";
-import { redirect } from "@/shared/i18n/routing";
 
 export const metadata: Metadata = {
   title: "Your Students - Siraj LMS",
@@ -48,7 +48,7 @@ export default async function StudentsPage({ params }: PageProps) {
 
   const { userId, context } = await getServerUserContext();
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

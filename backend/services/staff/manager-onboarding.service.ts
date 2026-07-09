@@ -77,7 +77,7 @@ export namespace ManagerOnboardingService {
       );
 
       // Step 3: Assign to target permission group
-      const groups = await PermissionManagementRepository.listAllGroups(txObj);
+      const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const targetGroup = groups.find(g => g.slug === targetGroupSlug);
       if (!targetGroup) {
         throw new Error(t("permission.groupNotFound"));

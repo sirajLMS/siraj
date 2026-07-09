@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { TeacherClassListContainer } from "@/frontend/views/dashboard/teachers/classes/TeacherClassListContainer";
-import { redirect } from "@/shared/i18n/routing";
 
 export const metadata: Metadata = {
   title: "Class Details - Siraj LMS",
@@ -18,7 +18,7 @@ export default async function TeacherMeClassesPage({ params }: PageProps) {
 
   const { userId } = await getServerUserContext();
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

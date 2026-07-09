@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { TeacherReassignmentContainer } from "@/frontend/views/dashboard/teachers/reassignment/TeacherReassignmentContainer";
-import { redirect } from "@/shared/i18n/routing";
 
 export default async function TeacherReassignmentPage({
   params,
@@ -14,7 +14,7 @@ export default async function TeacherReassignmentPage({
   const { userId } = await getServerUserContext();
 
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 

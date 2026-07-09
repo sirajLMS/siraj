@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib";
+import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { redirect } from "@/shared/i18n";
 
 interface PageProps {
@@ -12,7 +13,7 @@ export default async function TeacherMeProfileRedirectPage({ params }: PageProps
 
   const { userId } = await getServerUserContext();
   if (!userId) {
-    redirect({ href: "/login", locale });
+    await redirectToLogin(locale);
     return;
   }
 
