@@ -6,7 +6,7 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
-import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherAdminEditFormData } from "../teacherProfileFormTypes";
 import { InfoField } from "./InfoField";

@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";

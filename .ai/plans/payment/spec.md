@@ -76,7 +76,7 @@ teacher_payments (PAYOUT)
 | `id` | uuid PK | |
 | `user_id` | uuid FK → users | |
 | `type` | `payment_method_type` enum | |
-| `direction` | `payment_direction` enum | `PAYIN` \| `PAYOUT` \| `BOTH` |
+| `direction` | `payment_direction` enum | `PAYIN` (in) \| `PAYOUT` (out) \| `BOTH` |
 | `is_default` | boolean | At most one per direction slot (1bA) |
 | `label` | varchar(100) nullable | User nickname |
 | `details` | jsonb `$type<PaymentMethodDetails>` | Discriminated by `type` |
@@ -261,6 +261,22 @@ Repos receive **already-validated** typed objects from services — repos do not
 
 - `PaymentMethodType` — `MOBILE_WALLET`, `PAYMENT_LINK`, `ONLINE_ACCOUNT`, `BANK_TRANSFER`, `CASH`
 - `PaymentDirection` — `PAYIN`, `PAYOUT`, `BOTH`
+
+**Direction semantics (user methods + catalog `supportedDirections`):**
+
+| Enum | Meaning | UI label (en) | Use |
+|------|---------|---------------|-----|
+| `PAYIN` | Money **in** to Siraj / academy | **In** | Parent payments, invoice collection |
+| `PAYOUT` | Money **out** from Siraj / academy | **Out** | Teacher disbursements, refunds |
+| `BOTH` | Allowed for pay-in and pay-out | **Both** | Same saved method or catalog row usable either way |
+
+- **User method** `direction` on `user_payment_methods`: one of `PAYIN` \| `PAYOUT` \| `BOTH`
+- **Catalog** `supportedDirections` on wallet/link/online-account rows: same enum — filters pickers and admin forms
+- **Transaction** snapshot `direction`: always `PAYIN` or `PAYOUT` for that specific money movement (never `BOTH` on a transaction row)
+- **Defaults (1bA):** `BOTH` + `isDefault` occupies both pay-in and pay-out default slots
+
+UI: `next-intl` keys under `ui.paymentMethod.direction` — `in`, `out`, `both` — do not show raw enum strings to users.
+
 - `IdentifierKind` — `EMAIL`, `HANDLE`, `EMAIL_OR_HANDLE` (catalog metadata)
 
 `payments.payment_method_type` uses `PaymentMethodType` (replaces old `payment_method` column).

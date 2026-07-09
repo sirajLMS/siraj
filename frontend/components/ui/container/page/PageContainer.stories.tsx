@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { PageContainer } from "./PageContainer";
+import { PageContainer } from "@/frontend/components/ui/container/page/PageContainer";
 
 const meta: Meta<typeof PageContainer> = {
   title: "UI/PageContainer",

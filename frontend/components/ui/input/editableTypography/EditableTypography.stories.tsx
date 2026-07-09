@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import type { TypographyProps } from "@mui/material/Typography";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import { EditableTypography } from "@/frontend/components/ui/input/EditableTypography";
+import { EditableTypography } from "@/frontend/components/ui/input/editableTypography/EditableTypography";
 
 type EditableTypographyStoryProps = {
   readonly initialValue?: string;

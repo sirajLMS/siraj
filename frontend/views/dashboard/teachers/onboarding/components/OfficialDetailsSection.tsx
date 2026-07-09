@@ -4,7 +4,7 @@ import { Box, Grid, Input, MenuItem, Select, Typography } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { labelSx, outlinedInputSx, standardInputSx } from "@/frontend/components/ui/form";
-import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
 

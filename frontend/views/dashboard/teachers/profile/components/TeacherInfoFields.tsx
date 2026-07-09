@@ -2,7 +2,7 @@ import { Box, FormControlLabel, FormHelperText, Radio, RadioGroup, TextField, Ty
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
-import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherProfileFormData } from "../schemas/teacherProfileSchema";
 

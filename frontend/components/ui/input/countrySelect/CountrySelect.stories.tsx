@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import { CountrySelect, type CountrySelectProps } from "@/frontend/components/ui/input/CountrySelect";
+import { CountrySelect, type CountrySelectProps } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
 import { type CountryType, countries } from "@/frontend/lib/locale";
 
 function CountrySelectStory({

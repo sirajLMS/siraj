@@ -77,7 +77,7 @@ Notification: **delete** `BANKING_DETAILS_CHANGED`; add `PAYMENT_METHOD_CHANGED`
 
 ## Default slot logic (1bA)
 
-In `PaymentMethodService.setDefault` / `create` / `update`:
+Direction on a method is **In** (`PAYIN`), **Out** (`PAYOUT`), or **Both** (`BOTH`). In `PaymentMethodService.setDefault` / `create` / `update`:
 
 1. Determine affected slots from `direction` (`PAYIN`, `PAYOUT`, or both for `BOTH`)
 2. Within same transaction, unset `isDefault` on competing rows in those slots

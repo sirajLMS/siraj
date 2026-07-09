@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { PageHeader } from "./PageHeader";
+import { PageHeader } from "@/frontend/components/ui/container/page/PageHeader";
 
 const meta: Meta<typeof PageHeader> = {
   title: "UI/PageHeader",

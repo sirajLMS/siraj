@@ -6,7 +6,7 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
-import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethod } from "./types";

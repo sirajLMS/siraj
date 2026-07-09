@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { TagInput, type TagInputProps } from "@/frontend/components/ui/input/TagInput";
+import { TagInput, type TagInputProps } from "@/frontend/components/ui/input/tagInput/TagInput";
 
 function TagInputStory(props: Readonly<Partial<TagInputProps>>) {
   return (

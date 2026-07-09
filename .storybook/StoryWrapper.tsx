@@ -1,7 +1,7 @@
 // cspell:disable
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
-import { CssBaseline, GlobalStyles, type PaletteMode, ThemeProvider } from "@mui/material";
+import { Box, CssBaseline, GlobalStyles, type PaletteMode, ThemeProvider } from "@mui/material";
 import type { StoryContext, StoryFn } from "@storybook/react";
 import { NextIntlClientProvider } from "next-intl";
 import { useEffect, useMemo } from "react";
@@ -138,6 +138,13 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
     });
   }, []);
 
+  const isUiComponent =
+    context.parameters?.fileName?.includes("frontend/components/ui/") ||
+    context.title?.startsWith("UI/") ||
+    context.title?.startsWith("Form/");
+
+  const content = <RenderStory Story={Story} context={context} />;
+
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <ThemeContext.Provider value={themeContextValue}>
@@ -171,7 +178,23 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
                 },
               })}
             />
-            <RenderStory Story={Story} context={context} />
+            {isUiComponent ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "100vh",
+                  width: "100%",
+                  padding: 4,
+                  boxSizing: "border-box",
+                }}
+              >
+                {content}
+              </Box>
+            ) : (
+              content
+            )}
           </ThemeProvider>
         </CacheProvider>
       </ThemeContext.Provider>
