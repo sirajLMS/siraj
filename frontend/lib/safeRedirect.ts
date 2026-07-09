@@ -1,19 +1,8 @@
-const SAFE_URL_REGEX = /^https?:\/\//i;
+export { isSafeUrl } from "@/shared/lib/safe-url";
 
 export const LOGIN_REDIRECT_PARAM = "redirect";
 export const DEFAULT_POST_LOGIN_PATH = "/dashboard";
 const LOGIN_PATH = "/login";
-
-/**
- * Validates a URL to prevent javascript: protocol injection and other unsafe schemes.
- * Only allows http(s) URLs.
- */
-export function isSafeUrl(url: string): string {
-  if (!url || !SAFE_URL_REGEX.test(url)) {
-    return "";
-  }
-  return url;
-}
 
 /**
  * Returns true when `url` is a same-origin relative path (single leading `/`).

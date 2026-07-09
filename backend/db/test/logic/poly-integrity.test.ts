@@ -5,7 +5,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository, StorageDbRepository } from "@/backend/db/repo";
 import { storageFiles, userFiles, users } from "@/backend/db/schema";
 import type { UserSelectType } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Consolidated File Usage Integrity (Junction Tables)", () => {
   let testUser: UserSelectType | null = null;

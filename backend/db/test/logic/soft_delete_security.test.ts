@@ -5,7 +5,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository, SoftDeleteRepository } from "@/backend/db/repo";
 import { auditLogs, users } from "@/backend/db/schema";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { setupRlsPolicies } from "../test-utils";
 
 describe("Soft Delete Security (Issue #2)", () => {

@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository, StudentRepository } from "@/backend/db/repo";
 import { invoices, parents, students, users } from "@/backend/db/schema";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 
 const getCommonDates = () => ({ createdAt: new Date(), updatedAt: new Date() });

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { TeacherBankingRepository } from "@/backend/db/repo/teacher-banking.repository";
 import { teacherBankingDetailsHistory } from "@/backend/db/schema";
 import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { setupTeacher } from "../entity-setup";
 import { createTestUser, runInRollback } from "../test-utils";
 

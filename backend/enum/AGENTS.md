@@ -9,7 +9,7 @@ This directory contains all backend enum definitions, organized by domain. Each 
 ### Backend-Only
 - Enums in this directory are **backend-only**.
 - Frontend code must use GraphQL codegen enums from `@/frontend/graphql/generated/gql/graphql-types` instead of importing from `@/backend/enum`.
-- Shared layer code (`shared/`) must not import from `@/backend/enum` — shared code is used by both frontend and backend.
+- Shared layer code (`shared/`) must not import from `@/backend/enum` — shared code is used by both frontend and backend. Define cross-layer enums in `shared/constants/` instead; see `shared/AGENTS.md`.
 
 ### Import Convention
 - Prefer deep imports: `import { StudentStatus } from "@/backend/enum/student-lifecycle.enum"`.

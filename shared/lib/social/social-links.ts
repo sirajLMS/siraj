@@ -1,4 +1,4 @@
-import { isSafeUrl } from "@/frontend/lib/safeRedirect";
+import { isSafeUrl } from "@/shared/lib/safe-url";
 
 export type SocialLink = {
   readonly href: string;

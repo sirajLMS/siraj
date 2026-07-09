@@ -158,6 +158,9 @@
         "@vitest/coverage-v8": "^4.1.10",
         "autoprefixer": "^10.5.2",
         "babel-plugin-react-compiler": "1.0.0",
+        "cldr-core": "^48.2.0",
+        "cldr-dates-full": "^48.2.0",
+        "cldr-localenames-full": "^48.2.0",
         "drizzle-kit": "1.0.0-rc.4",
         "eslint": "^10.6.0",
         "eslint-config-next": "16.2.10",
@@ -2079,6 +2082,14 @@
     "classcat": ["classcat@5.0.5", "", {}, "sha512-JhZUT7JFcQy/EzW605k/ktHtncoo9vnyW/2GspNYwFlN1C/WmjuV/xtS04e9SOkL2sTdw0VAZ2UGCcQ9lR6p6w=="],
 
     "classnames": ["classnames@2.5.1", "", {}, "sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow=="],
+
+    "cldr-core": ["cldr-core@48.2.0", "", {}, "sha512-zfmLothncSwfv2jlevoSrgI2VGgH8SDGHXst6jUEotHA8nq9Igeg9jzdJDFtBso9pgJuG89DK16TzrmZDdo2Bg=="],
+
+    "cldr-dates-full": ["cldr-dates-full@48.2.0", "", { "peerDependencies": { "cldr-numbers-full": "48.2.0" } }, "sha512-zMrKvjMO414HDftLr6vKH1fNQHakFNe+F1h4S0eg+zmL4WRi9pI41fxB3UrTJDY42MEM87jCuAw/qlqCgYKcAQ=="],
+
+    "cldr-localenames-full": ["cldr-localenames-full@48.2.0", "", { "peerDependencies": { "cldr-core": "48.2.0" } }, "sha512-4o0paYDz0UXhfhChAVFkmVl2CP0YTSEqE6WrC0fNafaSC5u5DAXphxH3SZ1Ujczarikr8DToKZfiok6EqWLdNQ=="],
+
+    "cldr-numbers-full": ["cldr-numbers-full@48.2.0", "", { "peerDependencies": { "cldr-core": "48.2.0" } }, "sha512-0EQ+UkVDsyXOlxnWnL1RIENVZFqCnb04D1Yrku0obnOyttbuZz8tHmUd5c5AEvhGS/Gg2zI4fTaCm51LSGITog=="],
 
     "cli-cursor": ["cli-cursor@5.0.0", "", { "dependencies": { "restore-cursor": "^5.0.0" } }, "sha512-aCj4O5wKyszjMmDT4tZj93kxyydN/K5zPWSCe6/0AV/AA1pqe5ZBIw0a2ZfPQV7lL5/yb5HsUreJ6UFAF1tEQw=="],
 

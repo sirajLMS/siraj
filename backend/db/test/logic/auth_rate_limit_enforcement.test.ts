@@ -4,7 +4,7 @@ import { eq, like } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { RateLimitRepository } from "@/backend/db/repo";
 import { authRateLimits, passwordResetTokens } from "@/backend/db/schema";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 /** Generate a unique IP address to avoid collision across parallel test runs. */
 function uniqueTestIp(): string {

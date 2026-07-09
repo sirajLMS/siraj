@@ -21,7 +21,7 @@ import { type AccountStatus, StudentStatus, type UserRole } from "@/backend/enum
 import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/user.types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { IP_ADDRESS_1 } from "../const";
 
 describe("Audit Trail System", () => {

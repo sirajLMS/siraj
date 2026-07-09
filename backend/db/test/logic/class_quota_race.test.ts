@@ -6,7 +6,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { Gender } from "@/backend/enum";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 
 async function createBaseTestData(

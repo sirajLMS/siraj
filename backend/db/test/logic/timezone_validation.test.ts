@@ -5,7 +5,7 @@ import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { RecurringScheduleEntity } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 /**
  * Runs an operation expected to violate a database constraint and asserts an error is thrown.

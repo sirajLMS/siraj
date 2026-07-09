@@ -1,13 +1,12 @@
-import type { InvoiceStatus, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   ParentBillingSummary,
   ParentInvoiceRow,
 } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
 
-export type AdminInvoiceStatus = "OVERDUE" | "PENDING" | InvoiceStatus;
-
-export type StudentCreditStatus = "negative_balance" | "active_credit";
+export type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus };
 
 export interface AdminBillingSummary {
   readonly totalOutstanding: string;

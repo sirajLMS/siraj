@@ -65,6 +65,7 @@ The codebase follows strict layer separation. Each layer has its own `AGENTS.md`
 | Layer | Path | AGENTS.md Location |
 |-------|------|-------------------|
 | App Router | `app/` | `app/AGENTS.md` |
+| Shared | `shared/` | `shared/AGENTS.md` |
 | Frontend Views | `frontend/views/` | `frontend/views/AGENTS.md` |
 | Frontend Stores | `frontend/stores/` | `frontend/stores/AGENTS.md` |
 | Frontend GraphQL | `frontend/graphql/` | `frontend/graphql/AGENTS.md` |
@@ -107,6 +108,10 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 - The `@/*` path alias maps to the project root (`./`), configured in `tsconfig.json` under `compilerOptions.paths`
 - All imports use this pattern: `import { logger } from "@/backend/lib"` (never relative paths)
 - Examples: `@/backend/services/` → `./backend/services/`, `@/frontend/views/` → `./frontend/views/`
+
+### Shared Layer
+- `shared/` is used by both frontend and backend — it must **never** import from `@/frontend/**`, `@/backend/**`, or `@/app/**` (ESLint enforced).
+- Cross-layer enums and constants belong in `shared/constants/`; utilities in `shared/lib/`. See `shared/AGENTS.md`.
 
 ### Database Testing Critical Rules
 - **ALWAYS use `runInRollback` wrapper** for database tests
@@ -302,6 +307,7 @@ both `backend.instructions.md` and `tests.instructions.md`). Read ALL matching f
 | File Path Prefix | Additional AGENTS.md Files |
 |---|---|
 | `app/` | `app/AGENTS.md` |
+| `shared/` | `shared/AGENTS.md` |
 | `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | `frontend/stores/` | `frontend/stores/AGENTS.md`, `frontend/AGENTS.md` |
 | `frontend/graphql/sharedDocuments/` | `frontend/graphql/sharedDocuments/AGENTS.md`, `frontend/graphql/AGENTS.md`, `frontend/AGENTS.md` |

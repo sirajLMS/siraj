@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { format } from "node:util";
 
-import { formatTimestamp } from "./date-utils";
+import { formatTimestamp } from "@/shared/utils/date-utils";
 
 type LogLevel = "log" | "info" | "warn" | "error" | "debug";
 

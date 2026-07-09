@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { buildSocialLink } from "@/shared/lib/social-links";
+import { buildSocialLink } from "@/shared/lib/social/social-links";
 
 describe("buildSocialLink", () => {
   describe("whatsapp", () => {

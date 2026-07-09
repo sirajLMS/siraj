@@ -3,7 +3,7 @@ import {
   type ClassInstanceStatusResolveOptions,
   DEFAULT_MISSED_GRACE_MINUTES,
   resolveClassInstanceDashboardStatus,
-} from "@/shared/lib/schedule-instance-dashboard-status";
+} from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 export type ScheduleInstanceDisplayStatus = ClassOutcome | ClassExecutionState;
 

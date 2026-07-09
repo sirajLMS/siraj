@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import {
   computeDailyScheduleMetricsFromRows,
   DEFAULT_MISSED_GRACE_MINUTES,
   isClassInstancePastMissedGrace,
   matchesDashboardMetricFilter,
   resolveClassInstanceDashboardStatus,
-} from "@/shared/lib/schedule-instance-dashboard-status";
+} from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 describe("schedule-instance-dashboard-status", () => {
   test("RUNNING execution state maps to running, not pending", () => {

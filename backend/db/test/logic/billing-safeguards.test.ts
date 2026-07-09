@@ -4,7 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository } from "@/backend/db/repo";
 import { currencyExchangeAuditLogs, currencyExchangeRates, systemSettings } from "@/backend/db/schema";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll } from "bun:test";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { startTestServer, stopTestServer } from "./testServer";
 
 let startedSuitesCount = 0;

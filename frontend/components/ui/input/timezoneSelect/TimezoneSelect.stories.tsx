@@ -37,7 +37,6 @@ export const Empty: Story = {};
 
 export const Required: Story = {
   args: {
-    initialTimezone: toGraphqlIanaTimezone("Asia/Riyadh"),
     required: true,
   },
 };
@@ -48,5 +47,11 @@ export const Arabic: Story = {
   },
   args: {
     initialTimezone: toGraphqlIanaTimezone("Asia/Riyadh"),
+  },
+};
+
+export const OffsetSorted: Story = {
+  args: {
+    initialTimezone: toGraphqlIanaTimezone("Etc/GMT+12"),
   },
 };

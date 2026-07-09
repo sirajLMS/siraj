@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { invoices, parents, students, users } from "@/backend/db/schema";
 import type { InvoiceInsertType } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 
 describe("Invoice Referential Integrity", () => {

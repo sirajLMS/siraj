@@ -14,7 +14,7 @@ import type {
   ClassSessionStatus,
   ScheduleAlert,
 } from "@/frontend/views/dashboard/schedule/alerts/types";
-import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
+import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 function getTodayString() {
   const today = new Date();

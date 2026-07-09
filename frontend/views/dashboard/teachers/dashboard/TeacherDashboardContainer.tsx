@@ -29,7 +29,7 @@ import { buildTeacherActiveMetricItems } from "@/frontend/views/dashboard/teache
 import { useTeacherDashboardLastUpdated } from "@/frontend/views/dashboard/teachers/dashboard/utils/useTeacherDashboardLastUpdated";
 import type { TeacherScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
-import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule-instance-dashboard-status";
+import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
 type SnackbarSeverity = "success" | "error" | "info";

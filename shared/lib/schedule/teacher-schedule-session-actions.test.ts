@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import type {
   TeacherScheduleSessionActionInput,
   TeacherScheduleSessionActions,
-} from "@/shared/lib/teacher-schedule-session-actions";
-import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
+} from "@/shared/lib/schedule/teacher-schedule-session-actions";
+import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 
 const baseInput = {
   activateEnabled: true,

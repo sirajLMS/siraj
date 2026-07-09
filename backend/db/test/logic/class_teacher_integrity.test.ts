@@ -9,7 +9,7 @@ import type { ParentEntity } from "@/backend/types/parent.types";
 import type { StudentEntity } from "@/backend/types/student.types";
 import type { TeacherEntity } from "@/backend/types/teacher.types";
 import type { UserSelectType } from "@/backend/types/user.types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, name: string, email: string) {

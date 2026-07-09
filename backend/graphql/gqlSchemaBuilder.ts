@@ -13,9 +13,10 @@ import { GraphQLError } from "graphql";
 import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
 import type { AppPermission } from "@/backend/enum";
 import type { AuthContexts, BaseContext } from "@/backend/graphql/gqlContext";
-import type { Email, PhoneNumber } from "@/backend/lib";
+import type { Email } from "@/backend/lib";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { PhoneNumber } from "@/shared/lib/phone";
 
 export interface PothosTypes {
   DrizzleRelations: DrizzleRelations;

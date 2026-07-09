@@ -7,7 +7,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
-import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
+import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 import { SessionActivateButton } from "./SessionActivateButton";
 import { TeacherActiveSessionControls } from "./TeacherActiveSessionControls";
 

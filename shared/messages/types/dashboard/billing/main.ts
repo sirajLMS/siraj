@@ -1,8 +1,4 @@
-import type { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type {
-  AdminInvoiceStatus,
-  StudentCreditStatus,
-} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type { AdminInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
 import type { BillingManualLabels } from "./manual";
 
 export interface BillingLabels {
@@ -81,7 +77,7 @@ export interface BillingLabels {
     readonly emptyTitle: string;
     readonly emptySubtitle: string;
   };
-  readonly invoiceStatus: Record<AdminInvoiceStatus | InvoiceStatus, string>;
+  readonly invoiceStatus: Record<AdminInvoiceStatus, string>;
   readonly creditStatus: Record<StudentCreditStatus, string>;
   readonly manual: BillingManualLabels;
   readonly markAsPaidSuccess: string;

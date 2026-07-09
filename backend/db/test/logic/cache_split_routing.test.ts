@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { CacheDbRepository } from "@/backend/db/repo/cache.repository";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema/cache";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 
 describe("Cache Split Routing & Functionality", () => {

@@ -1,4 +1,4 @@
-import { BaseLogger } from "./base-logger";
+import { BaseLogger } from "@/shared/lib/logger/base-logger";
 
 class TestLogger extends BaseLogger {
   constructor() {

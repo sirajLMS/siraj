@@ -1,7 +1,7 @@
 import { appendFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { spawn, spawnSync } from "bun";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 let serverProcess: ReturnType<typeof spawn> | undefined;
 

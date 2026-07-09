@@ -5,11 +5,11 @@ import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import { useLocale } from "next-intl";
 import type * as React from "react";
-import { fromGraphqlIanaTimezone, getTimezoneDisplayName } from "@/frontend/lib/timezone";
+import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/lib/timezone";
 
 export type TimezoneDisplayProps = {
   readonly timezone?: string | null;
-  readonly showId?: boolean;
+  readonly showOffset?: boolean;
   readonly fallback?: string;
   readonly typographyVariant?: TypographyProps["variant"];
   readonly sx?: SxProps<Theme>;
@@ -17,7 +17,7 @@ export type TimezoneDisplayProps = {
 
 export const TimezoneDisplay: React.FC<TimezoneDisplayProps> = ({
   timezone,
-  showId = true,
+  showOffset = true,
   fallback,
   typographyVariant,
   sx,
@@ -29,8 +29,9 @@ export const TimezoneDisplay: React.FC<TimezoneDisplayProps> = ({
   }
 
   const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
-  const label = getTimezoneDisplayName(normalizedTimezone, locale);
-  const display = showId ? label : label.replace(` (${normalizedTimezone})`, "");
+  const display = showOffset
+    ? getTimezoneSelectLabel(normalizedTimezone, locale)
+    : getTimezonePathLabel(normalizedTimezone, locale);
 
   return (
     <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>

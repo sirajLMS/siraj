@@ -17,10 +17,10 @@ export const Default: Story = {
   },
 };
 
-export const WithoutId: Story = {
+export const WithoutOffset: Story = {
   args: {
     timezone: IanaTimezone.AsiaRiyadh,
-    showId: false,
+    showOffset: false,
   },
 };
 

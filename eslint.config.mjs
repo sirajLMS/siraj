@@ -194,16 +194,41 @@ const eslintConfig = defineConfig([
   //     },
   //   },
 
-  // Enforce @/ path alias in backend code — relative ./ or ../ imports are banned
+  // Enforce @/ path alias — relative ./ or ../ imports are banned
   // except for barrel files (**/index.ts) which legitimately re-export siblings.
   {
-    files: ["backend/**/*.{ts,tsx}"],
+    files: [
+      "app/**/*.{ts,tsx}",
+      "backend/**/*.{ts,tsx}",
+      "frontend/**/*.{ts,tsx}",
+      "shared/**/*.{ts,tsx}",
+      "test/**/*.{ts,tsx}",
+      "scripts/**/*.{ts,tsx}",
+    ],
     rules: {
       "no-restricted-syntax": [
         "error",
         {
           selector: "ImportDeclaration[source.value=/^\\.\\.?\\//]",
-          message: "Backend imports must use @/ path alias, not relative ./ or ../ — see AGENTS.md",
+          message: "Imports must use @/ path alias, not relative ./ or ../ — see AGENTS.md",
+        },
+      ],
+    },
+  },
+
+  // Shared code must not depend on frontend, backend, or app layers.
+  {
+    files: ["shared/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/frontend/**", "@/backend/**", "@/app/**"],
+              message: "Shared code must not import from frontend, backend, or app layers — see shared/AGENTS.md",
+            },
+          ],
         },
       ],
     },

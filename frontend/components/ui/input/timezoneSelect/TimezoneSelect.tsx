@@ -1,10 +1,14 @@
 "use client";
 
 import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useMemo } from "react";
+import { LocaleEmoji } from "@/frontend/components/ui/display";
 import type { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   fromGraphqlIanaTimezone,
@@ -23,6 +27,8 @@ export type TimezoneSelectProps = {
   readonly disabled?: boolean;
   readonly autoComplete?: string;
   readonly style?: React.CSSProperties;
+  readonly error?: boolean;
+  readonly helperText?: string;
 };
 
 export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
@@ -35,6 +41,8 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
   disabled,
   autoComplete = "off",
   style,
+  error,
+  helperText,
 }: TimezoneSelectProps): React.ReactNode => {
   const t = useTranslations("ui.timezoneSelect");
   const locale = useLocale();
@@ -48,6 +56,10 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
     const optionId = fromGraphqlIanaTimezone(value);
     return options.find(option => option.id === optionId) ?? null;
   }, [options, value]);
+
+  const showRequiredError = Boolean(required) && !value;
+  const showError = Boolean(error) || showRequiredError;
+  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
 
   return (
     <Autocomplete<TimezoneOption, false, false, false>
@@ -63,14 +75,43 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
       onBlur={onBlurAction}
       isOptionEqualToValue={(option, optionValue) => option.id === optionValue.id}
       getOptionLabel={option => option.label}
+      renderOption={(props, option) => {
+        const { key, ...optionProps } = props;
+        return (
+          <Box key={key} component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }} {...optionProps}>
+            <LocaleEmoji emoji={option.emoji} />
+            <Typography component="span" variant="bodyMd">
+              {option.pathLabel}
+            </Typography>
+            <Typography component="span" variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              ({option.offsetLabel})
+            </Typography>
+          </Box>
+        );
+      }}
       renderInput={params => (
         <TextField
           {...params}
           label={label ?? t("selectTimezone")}
           required={required}
+          error={showError}
+          helperText={resolvedHelperText}
           onBlur={onBlurAction}
           slotProps={{
             ...params.slotProps,
+            input: {
+              ...params.slotProps.input,
+              startAdornment: selectedOption ? (
+                <>
+                  <InputAdornment position="start">
+                    <LocaleEmoji emoji={selectedOption.emoji} />
+                  </InputAdornment>
+                  {params.slotProps.input?.startAdornment}
+                </>
+              ) : (
+                params.slotProps.input?.startAdornment
+              ),
+            },
             htmlInput: {
               ...params.slotProps.htmlInput,
               autoComplete,

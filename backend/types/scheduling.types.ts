@@ -18,7 +18,7 @@ import type { PageInfo, PaginationArgs } from "@/backend/types/pagination.types"
 import type { StudentEntity } from "@/backend/types/student.types";
 import type { TeacherEntity } from "@/backend/types/teacher.types";
 import type { UserSelectType } from "@/backend/types/user.types";
-import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule-instance-dashboard-status";
+import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
 export type RecurringScheduleInsertInput = typeof recurringSchedules.$inferInsert;

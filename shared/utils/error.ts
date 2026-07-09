@@ -1,4 +1,4 @@
-import { parseUnknownPayload } from "./parseUnknown";
+import { parseUnknownPayload } from "@/shared/utils/parseUnknown";
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {

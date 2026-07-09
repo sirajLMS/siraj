@@ -6,7 +6,7 @@ import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
-import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
+import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { DashboardView } from "../../dashboard/DashboardView";
 import { buildAdminDashboardMetrics } from "../home/utils/adminDashboardMetrics";
 import {

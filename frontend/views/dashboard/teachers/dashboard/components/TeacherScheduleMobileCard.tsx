@@ -14,7 +14,7 @@ import {
   resolveTeacherStatusBadge,
 } from "@/frontend/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
 import { Link } from "@/shared/i18n/routing";
-import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
+import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 import { SessionActivateButton } from "./SessionActivateButton";
 import { TeacherActiveSessionControls } from "./TeacherActiveSessionControls";
 import { TeacherScheduleStatusContent } from "./TeacherScheduleStatusContent";

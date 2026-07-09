@@ -50,7 +50,7 @@ import {
 } from "./dashboard/teachers";
 import { errors } from "./errors";
 import { profile as profileLabels } from "./profile";
-import { countrySelect, genderSelector, languageSelector, tagInput, timezoneSelect } from "./ui";
+import { countrySelect, genderSelector, languageSelector, phoneInput, tagInput, timezoneSelect } from "./ui";
 
 export const session: SessionLabels = {
   leaveProcessedDescription: "تمت معالجة طلب الإجازة، أعيدت جدولته إلى الجلسة {successorId}.",
@@ -84,6 +84,7 @@ export const arTranslations = {
     genderSelector,
     countrySelect,
     languageSelector,
+    phoneInput,
     tagInput,
     timezoneSelect,
   },

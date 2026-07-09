@@ -1,7 +1,7 @@
 import { type PhoneNumber as GooglePhoneNumber, PhoneNumberFormat, PhoneNumberUtil } from "google-libphonenumber";
 
 /**
- * TypeScript wrapper class for Google's PhoneNumber with validation support
+ * TypeScript wrapper class for Google's PhoneNumber with validation support.
  */
 export class PhoneNumber {
   public readonly number: string;
@@ -19,7 +19,6 @@ export class PhoneNumber {
 
   public static readonly util = PhoneNumberUtil.getInstance();
 
-  // Enum wrapper for CountryCodeSource
   public static readonly CountryCodeSource = {
     FROM_NUMBER_WITH_PLUS_SIGN: "FROM_NUMBER_WITH_PLUS_SIGN",
     FROM_NUMBER_WITH_IDD: "FROM_NUMBER_WITH_IDD",
@@ -27,7 +26,6 @@ export class PhoneNumber {
     FROM_DEFAULT_COUNTRY: "FROM_DEFAULT_COUNTRY",
     UNSPECIFIED: "UNSPECIFIED",
     toGoogleEnum(source: string): number {
-      // google lib phone number uses numbers for enums
       switch (source) {
         case "FROM_NUMBER_WITH_PLUS_SIGN":
           return 1;
@@ -61,7 +59,6 @@ export class PhoneNumber {
     },
   };
 
-  // Country Code properties and methods
   get hasCountryCode(): boolean {
     return this.googlePhoneNumber.hasCountryCode();
   }
@@ -79,7 +76,6 @@ export class PhoneNumber {
     return clone;
   }
 
-  // National Number properties and methods
   get hasNationalNumber(): boolean {
     return this.googlePhoneNumber.hasNationalNumber();
   }
@@ -97,7 +93,6 @@ export class PhoneNumber {
     return clone;
   }
 
-  // Extension properties and methods
   get hasExtension(): boolean {
     return this.googlePhoneNumber.hasExtension();
   }
@@ -115,7 +110,6 @@ export class PhoneNumber {
     return clone;
   }
 
-  // Italian Leading Zero properties and methods
   get hasItalianLeadingZero(): boolean {
     return this.googlePhoneNumber.hasItalianLeadingZero();
   }
@@ -133,7 +127,6 @@ export class PhoneNumber {
     return clone;
   }
 
-  // Number of Leading Zeros properties and methods
   get hasNumberOfLeadingZeros(): boolean {
     return this.googlePhoneNumber.hasNumberOfLeadingZeros();
   }
@@ -151,7 +144,6 @@ export class PhoneNumber {
     return clone;
   }
 
-  // Raw Input properties and methods
   get hasRawInput(): boolean {
     return this.googlePhoneNumber.hasRawInput();
   }
@@ -169,7 +161,6 @@ export class PhoneNumber {
     return clone;
   }
 
-  // Country Code Source properties and methods
   get hasCountryCodeSource(): boolean {
     return this.googlePhoneNumber.hasCountryCodeSource();
   }
@@ -188,7 +179,6 @@ export class PhoneNumber {
     return clone;
   }
 
-  // Preferred Domestic Carrier Code properties and methods
   get hasPreferredDomesticCarrierCode(): boolean {
     return this.googlePhoneNumber.hasPreferredDomesticCarrierCode();
   }
@@ -206,11 +196,10 @@ export class PhoneNumber {
     return clone;
   }
 
-  // Utility methods
-  // Note: google lib phone number does not support clear, mergeFrom, exactlySameAs, hashCode, or deep clone methods directly.
-  // For equality, compare E164 formatted numbers.
   equals(other: unknown): boolean {
-    if (this === other) return true;
+    if (this === other) {
+      return true;
+    }
     if (other instanceof PhoneNumber) {
       return this.number === other.number;
     }
@@ -222,7 +211,6 @@ export class PhoneNumber {
   }
 
   private clone(): PhoneNumber {
-    // Shallow clone by re-parsing the E164 number
     return new PhoneNumber(this.number);
   }
 }

@@ -1,5 +1,5 @@
 import { GraphQLScalarType, Kind } from "graphql";
-import { PhoneNumber } from "@/backend/lib";
+import { PhoneNumber } from "@/shared/lib/phone";
 
 // Pothos custom scalar for PhoneNumber
 export const PhoneNumberScalar = new GraphQLScalarType({

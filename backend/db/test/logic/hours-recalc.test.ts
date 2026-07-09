@@ -7,7 +7,7 @@ import { parents, recurringScheduleDays, recurringSchedules, students, teachers,
 import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/user.types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("hoursPerWeek Recalculation Triggers", () => {
   let parentUser: Pick<UserReturnType, "id"> | null = null;

@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { teacherBankingDetailsHistory, teachers, users } from "@/backend/db/schema";
 import type { TeacherBankingDetailsHistoryInsertInput, TeacherEntityInput } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date) {

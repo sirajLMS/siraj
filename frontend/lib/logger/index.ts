@@ -1,5 +1,5 @@
 import type { ApiLogOptions, LogEntry, LoggerConfig, LogLevel } from "@/frontend/lib/logger/types";
-import { formatTimestamp } from "@/shared/lib/date-utils";
+import { formatTimestamp } from "@/shared/utils/date-utils";
 
 type LogOptions = {
   caller: string;

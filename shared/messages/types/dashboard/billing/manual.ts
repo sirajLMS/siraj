@@ -1,4 +1,4 @@
-import type { BillingMonthId } from "@/frontend/views/dashboard/billing/manual/constants/billingMonths";
+import type { BillingMonthId } from "@/shared/constants/billing-months";
 
 export interface BillingManualValidationLabels {
   readonly parentRequired: string;

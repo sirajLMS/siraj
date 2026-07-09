@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { invoices, parents, payments, students, users } from "@/backend/db/schema";
 import type { InvoiceInsertType, PaymentInsertType } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 
 async function createTestParent(args: { tx: DBTransaction; suffix: string; now: Date }) {

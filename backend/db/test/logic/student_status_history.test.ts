@@ -4,7 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { studentStatusHistory, students } from "@/backend/db/schema";
 import { StudentStatus } from "@/backend/enum";
 import type { StudentStatusHistorySelectType } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { createTestUser, setupStudent } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

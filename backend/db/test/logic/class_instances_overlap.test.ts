@@ -5,7 +5,7 @@ import { SchedulingRepository } from "@/backend/db/repo";
 import { students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { Gender } from "@/backend/enum";
 import type { StudentEntity, TeacherEntity } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

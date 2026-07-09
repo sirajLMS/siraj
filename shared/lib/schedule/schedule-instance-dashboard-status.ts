@@ -1,16 +1,4 @@
-const ClassOutcomeValues = {
-  PENDING: "PENDING",
-  TAKEN: "TAKEN",
-  ABSENT: "ABSENT",
-  LEAVE: "LEAVE",
-} as const;
-
-const ClassExecutionStateValues = {
-  NOT_ACTIVATED: "NOT_ACTIVATED",
-  ACTIVATED: "ACTIVATED",
-  RUNNING: "RUNNING",
-  COMPLETED: "COMPLETED",
-} as const;
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
 export const DEFAULT_MISSED_GRACE_MINUTES = 15;
 
@@ -72,13 +60,10 @@ export function isClassInstancePastMissedGrace(
   row: ClassInstanceDashboardStatusInput,
   options?: ClassInstanceStatusResolveOptions
 ): boolean {
-  const normalizedOutcome = row.outcome ?? ClassOutcomeValues.PENDING;
-  const normalizedExecutionState = row.executionState ?? ClassExecutionStateValues.NOT_ACTIVATED;
+  const normalizedOutcome = row.outcome ?? ClassOutcome.PENDING;
+  const normalizedExecutionState = row.executionState ?? ClassExecutionState.NOT_ACTIVATED;
 
-  if (
-    normalizedExecutionState !== ClassExecutionStateValues.NOT_ACTIVATED ||
-    normalizedOutcome !== ClassOutcomeValues.PENDING
-  ) {
+  if (normalizedExecutionState !== ClassExecutionState.NOT_ACTIVATED || normalizedOutcome !== ClassOutcome.PENDING) {
     return false;
   }
 
@@ -101,25 +86,25 @@ export function resolveClassInstanceDashboardStatus(
   actualEndAt?: DateLike,
   options?: ClassInstanceStatusResolveOptions & { scheduledEndAt?: DateLike }
 ): ClassInstanceDashboardStatus {
-  const normalizedOutcome = (outcome ?? ClassOutcomeValues.PENDING) as ClassInstanceDashboardStatus;
+  const normalizedOutcome = (outcome ?? ClassOutcome.PENDING) as ClassInstanceDashboardStatus;
   const normalizedExecutionState = (executionState ??
-    ClassExecutionStateValues.NOT_ACTIVATED) as ClassInstanceDashboardStatus;
+    ClassExecutionState.NOT_ACTIVATED) as ClassInstanceDashboardStatus;
 
-  if (normalizedExecutionState === ClassExecutionStateValues.RUNNING) {
-    return ClassExecutionStateValues.RUNNING;
+  if (normalizedExecutionState === ClassExecutionState.RUNNING) {
+    return ClassExecutionState.RUNNING;
   }
 
-  if (normalizedExecutionState === ClassExecutionStateValues.COMPLETED) {
+  if (normalizedExecutionState === ClassExecutionState.COMPLETED) {
     return normalizedOutcome;
   }
 
-  if (normalizedExecutionState === ClassExecutionStateValues.ACTIVATED) {
+  if (normalizedExecutionState === ClassExecutionState.ACTIVATED) {
     const startAt = toDate(actualStartAt);
     const endAt = toDate(actualEndAt);
     if (startAt && !endAt) {
-      return ClassExecutionStateValues.RUNNING;
+      return ClassExecutionState.RUNNING;
     }
-    return ClassExecutionStateValues.ACTIVATED;
+    return ClassExecutionState.ACTIVATED;
   }
 
   if (
@@ -128,7 +113,7 @@ export function resolveClassInstanceDashboardStatus(
       options
     )
   ) {
-    return ClassOutcomeValues.ABSENT;
+    return ClassOutcome.ABSENT;
   }
 
   return normalizedOutcome;
@@ -150,17 +135,17 @@ function dashboardStatusMatchesMetric(
 ): boolean {
   switch (metricFilter) {
     case "taken":
-      return dashboardStatus === ClassOutcomeValues.TAKEN;
+      return dashboardStatus === ClassOutcome.TAKEN;
     case "pending":
-      return dashboardStatus === ClassOutcomeValues.PENDING;
+      return dashboardStatus === ClassOutcome.PENDING;
     case "absent":
-      return dashboardStatus === ClassOutcomeValues.ABSENT;
+      return dashboardStatus === ClassOutcome.ABSENT;
     case "leave":
-      return dashboardStatus === ClassOutcomeValues.LEAVE;
+      return dashboardStatus === ClassOutcome.LEAVE;
     case "activated":
-      return dashboardStatus === ClassExecutionStateValues.ACTIVATED;
+      return dashboardStatus === ClassExecutionState.ACTIVATED;
     case "running":
-      return dashboardStatus === ClassExecutionStateValues.RUNNING;
+      return dashboardStatus === ClassExecutionState.RUNNING;
     default:
       return false;
   }

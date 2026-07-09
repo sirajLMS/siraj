@@ -5,7 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, students, users } from "@/backend/db/schema";
 import type { ParentEntity, StudentEntity } from "@/backend/types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 /**

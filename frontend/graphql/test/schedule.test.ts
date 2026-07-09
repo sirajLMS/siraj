@@ -28,7 +28,7 @@ import {
 } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";
-import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
+import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 async function assertDstBulkUpdateFails(token: string) {
   const result = await testClient.mutate({

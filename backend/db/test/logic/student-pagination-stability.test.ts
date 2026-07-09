@@ -9,7 +9,7 @@ import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { ParentEntity, StudentEntity, StudentFilterArgs } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/auth.types";
-import { testLogger } from "@/shared/lib/testlogger";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Issue #25: Student Pagination Cursor Stability", () => {
   let testParent: ParentEntity;

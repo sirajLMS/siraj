@@ -3115,6 +3115,14 @@ const en: MessageSchema = {
     },
     timezoneSelect: {
       selectTimezone: "Select timezone",
+      required: "Timezone is required",
+    },
+    phoneInput: {
+      label: "Phone number",
+      selectCountry: "Select country",
+      invalidPrefix: "Invalid calling code",
+      invalidPhone: "Enter a valid phone number",
+      required: "Phone number is required",
     },
   },
 };
