@@ -2,9 +2,13 @@ import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { permissionGroups, permissions } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { getErrorMessage } from "@/shared/utils/error";
-import { runInRollback } from "../test-utils";
+
+function loc(en: string, ar?: string) {
+  return { ar: ar ?? en, en };
+}
 
 type Tx = DBTransaction;
 
@@ -57,36 +61,36 @@ describe("Permissions and Permission Groups Database Constraints", () => {
   );
 
   testConstraint("Should allow updating the description of a system permission", async tx => {
-    const newDesc = "Updated login description";
+    const newDesc = loc("Updated login description");
     const [updated] = await tx
       .update(permissions)
       .set({ description: newDesc })
       .where(eq(permissions.key, AppPermission.AUTH_LOGIN))
       .returning();
 
-    expect(updated.description).toBe(newDesc);
+    expect(updated.description).toEqual(newDesc);
   });
 
   testConstraint("Should allow updating the description of a system permission group", async tx => {
-    const newDesc = "Updated super admin description";
+    const newDesc = loc("Updated super admin description");
     const [updated] = await tx
       .update(permissionGroups)
       .set({ description: newDesc })
       .where(eq(permissionGroups.slug, "super_admin"))
       .returning();
 
-    expect(updated.description).toBe(newDesc);
+    expect(updated.description).toEqual(newDesc);
   });
 
   testConstraint("Should allow updating the name of a system permission group", async tx => {
-    const newName = "Updated Super Admin Name";
+    const newName = loc("Updated Super Admin Name");
     const [updated] = await tx
       .update(permissionGroups)
       .set({ name: newName })
       .where(eq(permissionGroups.slug, "super_admin"))
       .returning();
 
-    expect(updated.name).toBe(newName);
+    expect(updated.name).toEqual(newName);
   });
 
   testConstraint(
@@ -101,7 +105,7 @@ describe("Permissions and Permission Groups Database Constraints", () => {
     tx =>
       tx
         .update(permissions)
-        .set({ category: "Modified Category" })
+        .set({ category: loc("Modified Category") })
         .where(eq(permissions.key, AppPermission.AUTH_LOGIN)),
     "Cannot modify core properties of system permissions; only description can be updated"
   );
@@ -129,9 +133,9 @@ describe("Permissions and Permission Groups Database Constraints", () => {
     const [newGroup] = await tx
       .insert(permissionGroups)
       .values({
-        name: "Custom Group",
+        name: loc("Custom Group"),
         slug: "custom_group",
-        description: "Custom description",
+        description: loc("Custom description"),
         isSystem: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -143,12 +147,12 @@ describe("Permissions and Permission Groups Database Constraints", () => {
     // Update non-system group name and description
     const [updatedGroup] = await tx
       .update(permissionGroups)
-      .set({ name: "Custom Group Updated", description: "Updated custom description" })
+      .set({ name: loc("Custom Group Updated"), description: loc("Updated custom description") })
       .where(eq(permissionGroups.id, newGroup.id))
       .returning();
 
-    expect(updatedGroup.name).toBe("Custom Group Updated");
-    expect(updatedGroup.description).toBe("Updated custom description");
+    expect(updatedGroup.name).toEqual(loc("Custom Group Updated"));
+    expect(updatedGroup.description).toEqual(loc("Updated custom description"));
 
     // Update non-system group slug (allowed since not system)
     const [slugUpdatedGroup] = await tx

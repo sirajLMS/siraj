@@ -5,6 +5,14 @@
       "headers": {
         "X-Goog-Api-Key": "AQ.Ab8RN6LVQAjlDkmVC4cH7Yi1Pkv60JTZhiROKI194KLQrYD3Dw"
       }
+    },
+    "drizzle": {
+      "command": "/home/ahmed/.bun/bin/bun",
+      "args": [
+        "x",
+        "drizzle-kit",
+        "mcp"
+      ]
     }
   }
 }

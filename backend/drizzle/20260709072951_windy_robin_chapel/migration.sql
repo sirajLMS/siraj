@@ -1,6 +1,6 @@
 CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'teacher.view_students', 'teacher.view_own_profile', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.view_students', 'parent.view_own_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage');--> statement-breakpoint
+CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'auth.edit_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'teacher.view_students', 'teacher.view_own_profile', 'teacher.edit_own_profile', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.create', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'user.edit_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.view_students', 'parent.view_own_profile', 'parent.edit_own_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage');--> statement-breakpoint
 CREATE TYPE "availability_status" AS ENUM('AVAILABLE', 'OUT_OF_STOCK');--> statement-breakpoint
 CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
 CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
@@ -170,6 +170,7 @@ CREATE TABLE "class_subjects" (
 	"name" varchar(200) NOT NULL,
 	"slug" varchar(100) NOT NULL UNIQUE,
 	"description" text,
+	"avatar_url" varchar(1024),
 	"is_active" boolean DEFAULT true NOT NULL,
 	"sort_order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -328,7 +329,6 @@ CREATE TABLE "parents" (
 	"facebook" varchar(512),
 	"whatsapp" varchar(50),
 	"twitter" varchar(255),
-	"skype" varchar(255),
 	"default_zoom_link" varchar(1024),
 	"invoice_type" "invoice_type",
 	"fee_amount" numeric(12,2),
@@ -348,8 +348,8 @@ CREATE TABLE "group_permissions" (
 --> statement-breakpoint
 CREATE TABLE "permission_groups" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"name" varchar(255) NOT NULL UNIQUE,
-	"description" text,
+	"name" jsonb NOT NULL,
+	"description" jsonb,
 	"is_system" boolean DEFAULT false NOT NULL,
 	"slug" varchar(100) NOT NULL UNIQUE,
 	"created_by_user_id" uuid,
@@ -362,8 +362,8 @@ CREATE TABLE "permissions" (
 	"key" "app_permission" NOT NULL UNIQUE,
 	"resource" varchar(100) NOT NULL,
 	"action" varchar(100) NOT NULL,
-	"description" text NOT NULL,
-	"category" varchar(100) NOT NULL,
+	"description" jsonb NOT NULL,
+	"category" jsonb NOT NULL,
 	"is_system" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
@@ -512,6 +512,7 @@ CREATE TABLE "recurring_schedules" (
 	"student_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
 	"subject_id" uuid,
+	"avatar_url" varchar(1024),
 	"duration_minutes" integer NOT NULL,
 	"default_start_time" time NOT NULL,
 	"timezone_id" integer,
@@ -551,7 +552,6 @@ CREATE TABLE "staff_profiles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
 	"phone" varchar(50),
-	"skype_id" varchar(255),
 	"status" "account_status" NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
@@ -833,7 +833,6 @@ CREATE TABLE "teachers" (
 	"gender" "gender",
 	"address" text,
 	"qualifications" text,
-	"skype_id" varchar(255),
 	"zoom_link" varchar(1024),
 	"zoom_username" varchar(255),
 	"zoom_password" text,

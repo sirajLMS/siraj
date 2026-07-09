@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "next-devtools": {
-      "command": "bun",
+      "command": "/home/ahmed/.bun/bin/bun",
       "args": [
         "x",
         "-y",
@@ -10,11 +10,18 @@
     },
     "mui-mcp": {
       "type": "stdio",
-      "command": "bun",
+      "command": "/home/ahmed/.bun/bin/bun",
       "args": [
         "x",
         "-y",
         "@mui/mcp@0.2.0"
+      ]
+    },
+    "drizzle": {
+      "command": "npx",
+      "args": [
+        "drizzle-kit",
+        "mcp"
       ]
     }
   }

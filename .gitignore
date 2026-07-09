@@ -88,3 +88,5 @@ prompt/
 .gitwandrc
 *.txt
 .playwright-cli
+
+skills-lock.json

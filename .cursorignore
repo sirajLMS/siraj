@@ -16,7 +16,6 @@ tsconfig.tsbuildinfo
 # editor / IDE files
 .vscode
 .idea
-.cursor
 .continue
 .claude
 .gemini

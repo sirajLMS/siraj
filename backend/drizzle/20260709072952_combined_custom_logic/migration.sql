@@ -8,6 +8,7 @@ EXCEPTION
         RETURN NULL;
 END;
 $$ LANGUAGE plpgsql STABLE;
+--> statement-breakpoint
 
 
 -- Source: 3-system_permissions_and_groups.sql
@@ -20,29 +21,45 @@ DO $$ BEGIN
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
+--> statement-breakpoint
 
 -- Story 15: Add ON_APP notification channel
 ALTER TYPE notification_channel ADD VALUE IF NOT EXISTS 'ON_APP';
+--> statement-breakpoint
 
 -- Story 15: Add new notification event types for suggestions and complaints
 ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'NEW_COMPLAINT';
+--> statement-breakpoint
 ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'NEW_SUGGESTION';
+--> statement-breakpoint
 ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'SUGGESTION_ACKNOWLEDGED';
+--> statement-breakpoint
 ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'SUGGESTION_DUPLICATE_MARKED';
+--> statement-breakpoint
 
 -- Story 15: Add new columns to suggestions table
 ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS status suggestion_status NOT NULL DEFAULT 'PENDING';
+--> statement-breakpoint
 ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS duplicate_of_id uuid REFERENCES suggestions(id) ON DELETE SET NULL;
+--> statement-breakpoint
 ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS admin_response text;
+--> statement-breakpoint
 ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_by_user_id uuid REFERENCES users(id) ON DELETE SET NULL;
+--> statement-breakpoint
 ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
+--> statement-breakpoint
 ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+--> statement-breakpoint
 
 -- Story 15: Add indexes for new suggestions columns
 CREATE INDEX IF NOT EXISTS suggestions_status_idx ON suggestions (status);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS suggestions_duplicate_of_id_idx ON suggestions (duplicate_of_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS suggestions_reviewed_by_user_id_idx ON suggestions (reviewed_by_user_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS suggestions_deleted_at_idx ON suggestions (deleted_at);
+--> statement-breakpoint
 
 INSERT INTO
     permissions (
@@ -56,902 +73,911 @@ INSERT INTO
     )
 VALUES (
         gen_random_uuid (),
-        'auth.login',
+        'auth.login'::app_permission,
         'auth',
         'login',
-        'Login to system',
-        'Authentication',
+        '{"ar": "Login to system", "en": "Login to system"}'::jsonb,
+        '{"ar": "المصادقة", "en": "Authentication"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'auth.view_own_profile',
+        'auth.view_own_profile'::app_permission,
         'auth',
         'view_own_profile',
-        'View own profile',
-        'Authentication',
+        '{"ar": "View own profile", "en": "View own profile"}'::jsonb,
+        '{"ar": "المصادقة", "en": "Authentication"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'dashboard.view',
+        'dashboard.view'::app_permission,
         'dashboard',
         'view',
-        'View dashboard',
-        'Dashboard',
+        '{"ar": "View dashboard", "en": "View dashboard"}'::jsonb,
+        '{"ar": "لوحة التحكم", "en": "Dashboard"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'dashboard.view_metrics',
+        'dashboard.view_metrics'::app_permission,
         'dashboard',
         'view_metrics',
-        'View dashboard metrics',
-        'Dashboard',
+        '{"ar": "View dashboard metrics", "en": "View dashboard metrics"}'::jsonb,
+        '{"ar": "لوحة التحكم", "en": "Dashboard"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'dashboard.filter_metrics',
+        'dashboard.filter_metrics'::app_permission,
         'dashboard',
         'filter_metrics',
-        'Filter dashboard metrics',
-        'Dashboard',
+        '{"ar": "Filter dashboard metrics", "en": "Filter dashboard metrics"}'::jsonb,
+        '{"ar": "لوحة التحكم", "en": "Dashboard"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'dashboard.metrics.view_all',
+        'dashboard.metrics.view_all'::app_permission,
         'dashboard',
         'metrics.view_all',
-        'View all dashboard metrics',
-        'Dashboard',
+        '{"ar": "View all dashboard metrics", "en": "View all dashboard metrics"}'::jsonb,
+        '{"ar": "لوحة التحكم", "en": "Dashboard"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'dashboard.search',
+        'dashboard.search'::app_permission,
         'dashboard',
         'search',
-        'Global search on admin schedule table',
-        'Dashboard',
+        '{"ar": "Global search on admin schedule table", "en": "Global search on admin schedule table"}'::jsonb,
+        '{"ar": "لوحة التحكم", "en": "Dashboard"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.view_list',
+        'schedule.view_list'::app_permission,
         'schedule',
         'view_list',
-        'View daily schedule list',
-        'Scheduling',
+        '{"ar": "View daily schedule list", "en": "View daily schedule list"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.filter_advanced',
+        'schedule.filter_advanced'::app_permission,
         'schedule',
         'filter_advanced',
-        'Advanced filtering of schedule',
-        'Scheduling',
+        '{"ar": "Advanced filtering of schedule", "en": "Advanced filtering of schedule"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.view_all',
+        'schedule.view_all'::app_permission,
         'schedule',
         'view_all',
-        'View all schedules',
-        'Scheduling',
+        '{"ar": "View all schedules", "en": "View all schedules"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.view_assigned',
+        'schedule.view_assigned'::app_permission,
         'schedule',
         'view_assigned',
-        'View assigned teacher schedule',
-        'Scheduling',
+        '{"ar": "View assigned teacher schedule", "en": "View assigned teacher schedule"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.view_family',
+        'schedule.view_family'::app_permission,
         'schedule',
         'view_family',
-        'View family student schedule',
-        'Scheduling',
+        '{"ar": "View family student schedule", "en": "View family student schedule"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.search_availability',
+        'schedule.search_availability'::app_permission,
         'schedule',
         'search_availability',
-        'Search teacher availability',
-        'Scheduling',
+        '{"ar": "Search teacher availability", "en": "Search teacher availability"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.manage_recurring',
+        'schedule.manage_recurring'::app_permission,
         'schedule',
         'manage_recurring',
-        'Manage recurring schedules',
-        'Scheduling',
+        '{"ar": "Manage recurring schedules", "en": "Manage recurring schedules"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.dst_migrate',
+        'schedule.dst_migrate'::app_permission,
         'schedule',
         'dst_migrate',
-        'Run DST migration',
-        'Scheduling',
+        '{"ar": "Run DST migration", "en": "Run DST migration"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.view_timezones',
+        'schedule.view_timezones'::app_permission,
         'schedule',
         'view_timezones',
-        'View multi-timezone schedule columns',
-        'Scheduling',
+        '{"ar": "View multi-timezone schedule columns", "en": "View multi-timezone schedule columns"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.view_details',
+        'session.view_details'::app_permission,
         'session',
         'view_details',
-        'View class details',
-        'Scheduling',
+        '{"ar": "View class details", "en": "View class details"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.activate_class',
+        'session.activate_class'::app_permission,
         'session',
         'activate_class',
-        'Activate a class within time window',
-        'Scheduling',
+        '{"ar": "Activate a class within time window", "en": "Activate a class within time window"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.activate_override',
+        'session.activate_override'::app_permission,
         'session',
         'activate_override',
-        'Bypass time window enforcement to manually activate a class session',
-        'Scheduling',
+        '{"ar": "Bypass time window enforcement to manually activate a class session", "en": "Bypass time window enforcement to manually activate a class session"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.update_status.start',
+        'session.update_status.start'::app_permission,
         'session',
         'update_status.start',
-        'Transition an activated session to RUNNING state upon student arrival',
-        'Scheduling',
+        '{"ar": "Transition an activated session to RUNNING state upon student arrival", "en": "Transition an activated session to RUNNING state upon student arrival"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.update_status.absent',
+        'session.update_status.absent'::app_permission,
         'session',
         'update_status.absent',
-        'Mark student as absent after waiting period and credit teacher payroll',
-        'Scheduling',
+        '{"ar": "Mark student as absent after waiting period and credit teacher payroll", "en": "Mark student as absent after waiting period and credit teacher payroll"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.update_status.leave',
+        'session.update_status.leave'::app_permission,
         'session',
         'update_status.leave',
-        'Process excused cancellation and trigger reschedule workflow',
-        'Scheduling',
+        '{"ar": "Process excused cancellation and trigger reschedule workflow", "en": "Process excused cancellation and trigger reschedule workflow"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.reschedule',
+        'session.reschedule'::app_permission,
         'session',
         'reschedule',
-        'Reschedule a class',
-        'Scheduling',
+        '{"ar": "Reschedule a class", "en": "Reschedule a class"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.reset',
+        'session.reset'::app_permission,
         'session',
         'reset',
-        'Destructively clear session data and revert to NOT_ACTIVATED state',
-        'Scheduling',
+        '{"ar": "Destructively clear session data and revert to NOT_ACTIVATED state", "en": "Destructively clear session data and revert to NOT_ACTIVATED state"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'session.override_actions',
+        'session.override_actions'::app_permission,
         'session',
         'override_actions',
-        'Admin override toolbar on class details page',
-        'Scheduling',
+        '{"ar": "Admin override toolbar on class details page", "en": "Admin override toolbar on class details page"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'history.view_calendar',
+        'history.view_calendar'::app_permission,
         'history',
         'view_calendar',
-        'View student class history calendar',
-        'History',
+        '{"ar": "View student class history calendar", "en": "View student class history calendar"}'::jsonb,
+        '{"ar": "السجل", "en": "History"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'history.view_details',
+        'history.view_details'::app_permission,
         'history',
         'view_details',
-        'View session metadata in history modal drill-down',
-        'History',
+        '{"ar": "View session metadata in history modal drill-down", "en": "View session metadata in history modal drill-down"}'::jsonb,
+        '{"ar": "السجل", "en": "History"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'teacher.view_dashboard',
+        'teacher.view_dashboard'::app_permission,
         'teacher',
         'view_dashboard',
-        'Access teacher dashboard',
-        'Teacher',
+        '{"ar": "Access teacher dashboard", "en": "Access teacher dashboard"}'::jsonb,
+        '{"ar": "المعلم", "en": "Teacher"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'teacher.view_students',
+        'teacher.view_students'::app_permission,
         'teacher',
         'view_students',
-        'View students assigned to the logged-in teacher',
-        'Teacher',
+        '{"ar": "View students assigned to the logged-in teacher", "en": "View students assigned to the logged-in teacher"}'::jsonb,
+        '{"ar": "المعلم", "en": "Teacher"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'teacher.view_own_profile',
+        'teacher.view_own_profile'::app_permission,
         'teacher',
         'view_own_profile',
-        'View own teacher profile and salary (read-only)',
-        'Teacher',
+        '{"ar": "View own teacher profile and salary (read-only)", "en": "View own teacher profile and salary (read-only)"}'::jsonb,
+        '{"ar": "المعلم", "en": "Teacher"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'system.enforce_time_window',
+        'system.enforce_time_window'::app_permission,
         'system',
         'enforce_time_window',
-        'Validate activation time window',
-        'System',
+        '{"ar": "Validate activation time window", "en": "Validate activation time window"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'system.enforce_leave_limit',
+        'system.enforce_leave_limit'::app_permission,
         'system',
         'enforce_leave_limit',
-        'System-level validation gate that enforces teacher leave quota limits per calendar month',
-        'System',
+        '{"ar": "System-level validation gate that enforces teacher leave quota limits per calendar month", "en": "System-level validation gate that enforces teacher leave quota limits per calendar month"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'teachers.list',
+        'teachers.list'::app_permission,
         'teachers',
         'list',
-        'List teachers',
-        'Teachers',
+        '{"ar": "List teachers", "en": "List teachers"}'::jsonb,
+        '{"ar": "المعلمون", "en": "Teachers"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'teachers.create',
+        'teachers.create'::app_permission,
         'teachers',
         'create',
-        'Create teacher accounts',
-        'Teachers',
+        '{"ar": "Create teacher accounts", "en": "Create teacher accounts"}'::jsonb,
+        '{"ar": "المعلمون", "en": "Teachers"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'teachers.edit',
+        'teachers.edit'::app_permission,
         'teachers',
         'edit',
-        'Edit teacher profiles',
-        'Teachers',
+        '{"ar": "Edit teacher profiles", "en": "Edit teacher profiles"}'::jsonb,
+        '{"ar": "المعلمون", "en": "Teachers"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'teachers.manage_schedule',
+        'teachers.manage_schedule'::app_permission,
         'teachers',
         'manage_schedule',
-        'Manage teacher schedules',
-        'Teachers',
+        '{"ar": "Manage teacher schedules", "en": "Manage teacher schedules"}'::jsonb,
+        '{"ar": "المعلمون", "en": "Teachers"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'parents.list',
+        'parents.list'::app_permission,
         'parents',
         'list',
-        'List parents',
-        'Parents',
+        '{"ar": "List parents", "en": "List parents"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'parents.create',
+        'parents.create'::app_permission,
         'parents',
         'create',
-        'Create parent accounts',
-        'Parents',
+        '{"ar": "Create parent accounts", "en": "Create parent accounts"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'parents.edit',
+        'parents.edit'::app_permission,
         'parents',
         'edit',
-        'Edit parent profiles',
-        'Parents',
+        '{"ar": "Edit parent profiles", "en": "Edit parent profiles"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'students.list',
+        'students.list'::app_permission,
         'students',
         'list',
-        'List students',
-        'Students',
+        '{"ar": "List students", "en": "List students"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'students.edit',
+        'students.create'::app_permission,
+        'students',
+        'create',
+        '{"ar": "Create student profiles", "en": "Create student profiles"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'students.edit'::app_permission,
         'students',
         'edit',
-        'Edit student profiles',
-        'Students',
+        '{"ar": "Edit student profiles", "en": "Edit student profiles"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'students.change_teacher',
+        'students.change_teacher'::app_permission,
         'students',
         'change_teacher',
-        'Reassign student teacher',
-        'Students',
+        '{"ar": "Reassign student teacher", "en": "Reassign student teacher"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'students.change_status',
+        'students.change_status'::app_permission,
         'students',
         'change_status',
-        'Change student status',
-        'Students',
+        '{"ar": "Change student status", "en": "Change student status"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'students.override_quota',
+        'students.override_quota'::app_permission,
         'students',
         'override_quota',
-        'Override student class quota',
-        'Students',
+        '{"ar": "Override student class quota", "en": "Override student class quota"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'invoices.list',
+        'invoices.list'::app_permission,
         'invoices',
         'list',
-        'List invoices',
-        'Billing',
+        '{"ar": "List invoices", "en": "List invoices"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'invoices.delete',
+        'invoices.delete'::app_permission,
         'invoices',
         'delete',
-        'Delete invoices',
-        'Billing',
+        '{"ar": "Delete invoices", "en": "Delete invoices"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'invoices.create',
+        'invoices.create'::app_permission,
         'invoices',
         'create',
-        'Create invoices',
-        'Billing',
+        '{"ar": "Create invoices", "en": "Create invoices"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'invoices.mark_paid',
+        'invoices.mark_paid'::app_permission,
         'invoices',
         'mark_paid',
-        'Mark invoice as paid',
-        'Billing',
+        '{"ar": "Mark invoice as paid", "en": "Mark invoice as paid"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'invoices.edit',
+        'invoices.edit'::app_permission,
         'invoices',
         'edit',
-        'Edit invoices',
-        'Billing',
+        '{"ar": "Edit invoices", "en": "Edit invoices"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'resources.list',
+        'resources.list'::app_permission,
         'resources',
         'list',
-        'List learning resources',
-        'Resources',
+        '{"ar": "List learning resources", "en": "List learning resources"}'::jsonb,
+        '{"ar": "الموارد", "en": "Resources"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'resources.delete',
+        'resources.delete'::app_permission,
         'resources',
         'delete',
-        'Delete learning resources',
-        'Resources',
+        '{"ar": "Delete learning resources", "en": "Delete learning resources"}'::jsonb,
+        '{"ar": "الموارد", "en": "Resources"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'resources.upload',
+        'resources.upload'::app_permission,
         'resources',
         'upload',
-        'Upload learning resources',
-        'Resources',
+        '{"ar": "Upload learning resources", "en": "Upload learning resources"}'::jsonb,
+        '{"ar": "الموارد", "en": "Resources"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'reports.generate',
+        'reports.generate'::app_permission,
         'reports',
         'generate',
-        'Generate reports',
-        'Reports',
+        '{"ar": "Generate reports", "en": "Generate reports"}'::jsonb,
+        '{"ar": "التقارير", "en": "Reports"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'complaints.list',
+        'complaints.list'::app_permission,
         'complaints',
         'list',
-        'List complaints',
-        'Communications',
+        '{"ar": "List complaints", "en": "List complaints"}'::jsonb,
+        '{"ar": "التواصل", "en": "Communications"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'complaints.delete',
+        'complaints.delete'::app_permission,
         'complaints',
         'delete',
-        'Delete complaints',
-        'Communications',
+        '{"ar": "Delete complaints", "en": "Delete complaints"}'::jsonb,
+        '{"ar": "التواصل", "en": "Communications"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'complaints.respond',
+        'complaints.respond'::app_permission,
         'complaints',
         'respond',
-        'Respond to complaints',
-        'Communications',
+        '{"ar": "Respond to complaints", "en": "Respond to complaints"}'::jsonb,
+        '{"ar": "التواصل", "en": "Communications"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'staff.list',
+        'staff.list'::app_permission,
         'staff',
         'list',
-        'List staff accounts',
-        'Administration',
+        '{"ar": "List staff accounts", "en": "List staff accounts"}'::jsonb,
+        '{"ar": "الإدارة", "en": "Administration"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'staff.create',
+        'staff.create'::app_permission,
         'staff',
         'create',
-        'Create staff accounts',
-        'Administration',
+        '{"ar": "Create staff accounts", "en": "Create staff accounts"}'::jsonb,
+        '{"ar": "الإدارة", "en": "Administration"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'staff.edit',
+        'staff.edit'::app_permission,
         'staff',
         'edit',
-        'Edit staff accounts',
-        'Administration',
+        '{"ar": "Edit staff accounts", "en": "Edit staff accounts"}'::jsonb,
+        '{"ar": "الإدارة", "en": "Administration"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'permission_groups.manage',
+        'permission_groups.manage'::app_permission,
         'permission_groups',
         'manage',
-        'Manage permission groups',
-        'Administration',
+        '{"ar": "Manage permission groups", "en": "Manage permission groups"}'::jsonb,
+        '{"ar": "الإدارة", "en": "Administration"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'permission_groups.assign',
+        'permission_groups.assign'::app_permission,
         'permission_groups',
         'assign',
-        'Assign permission groups to users',
-        'Administration',
+        '{"ar": "Assign permission groups to users", "en": "Assign permission groups to users"}'::jsonb,
+        '{"ar": "الإدارة", "en": "Administration"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'notification.view_alerts',
+        'notification.view_alerts'::app_permission,
         'notification',
         'view_alerts',
-        'Access global notifications UI with system alerts',
-        'Notifications',
+        '{"ar": "Access global notifications UI with system alerts", "en": "Access global notifications UI with system alerts"}'::jsonb,
+        '{"ar": "الإشعارات", "en": "Notifications"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'billing.view_unpaid_invoices',
+        'billing.view_unpaid_invoices'::app_permission,
         'billing',
         'view_unpaid_invoices',
-        'View accounts with pending or overdue financial balances',
-        'Billing',
+        '{"ar": "View accounts with pending or overdue financial balances", "en": "View accounts with pending or overdue financial balances"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'user.view_profile',
+        'user.view_profile'::app_permission,
         'user',
         'view_profile',
-        'View specific user comprehensive account and billing details',
-        'Users',
+        '{"ar": "View specific user comprehensive account and billing details", "en": "View specific user comprehensive account and billing details"}'::jsonb,
+        '{"ar": "المستخدمون", "en": "Users"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'staff.view_directory',
+        'staff.view_directory'::app_permission,
         'staff',
         'view_directory',
-        'Access the global Teachers Directory with summary metrics and data table',
-        'Administration',
+        '{"ar": "Access the global Teachers Directory with summary metrics and data table", "en": "Access the global Teachers Directory with summary metrics and data table"}'::jsonb,
+        '{"ar": "الإدارة", "en": "Administration"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.view_weekly',
+        'schedule.view_weekly'::app_permission,
         'schedule',
         'view_weekly',
-        'View a specific teacher weekly calendar grid with colored time-blocks',
-        'Scheduling',
+        '{"ar": "View a specific teacher weekly calendar grid with colored time-blocks", "en": "View a specific teacher weekly calendar grid with colored time-blocks"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.view_workload',
+        'schedule.view_workload'::app_permission,
         'schedule',
         'view_workload',
-        'View aggregated weekly capacity metrics (Weekly hours worked)',
-        'Scheduling',
+        '{"ar": "View aggregated weekly capacity metrics (Weekly hours worked)", "en": "View aggregated weekly capacity metrics (Weekly hours worked)"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.create_class',
+        'schedule.create_class'::app_permission,
         'schedule',
         'create_class',
-        'Access the Add Class workflow and create new recurring scheduled sessions',
-        'Scheduling',
+        '{"ar": "Access the Add Class workflow and create new recurring scheduled sessions", "en": "Access the Add Class workflow and create new recurring scheduled sessions"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.delete_class',
+        'schedule.delete_class'::app_permission,
         'schedule',
         'delete_class',
-        'Delete a specific recurring class block from a teacher schedule',
-        'Scheduling',
+        '{"ar": "Delete a specific recurring class block from a teacher schedule", "en": "Delete a specific recurring class block from a teacher schedule"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'schedule.clear_weekly',
+        'schedule.clear_weekly'::app_permission,
         'schedule',
         'clear_weekly',
-        'Bulk erase a teacher entire weekly schedule in a single action',
-        'Scheduling',
+        '{"ar": "Bulk erase a teacher entire weekly schedule in a single action", "en": "Bulk erase a teacher entire weekly schedule in a single action"}'::jsonb,
+        '{"ar": "الجدولة", "en": "Scheduling"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'staff.edit_profile',
+        'staff.edit_profile'::app_permission,
         'staff',
         'edit_profile',
-        'Edit teacher profile including PII, salary, and official details',
-        'Administration',
+        '{"ar": "Edit teacher profile including PII, salary, and official details", "en": "Edit teacher profile including PII, salary, and official details"}'::jsonb,
+        '{"ar": "الإدارة", "en": "Administration"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'system.bulk_update_dst',
+        'system.bulk_update_dst'::app_permission,
         'system',
         'bulk_update_dst',
-        'Execute global DST adjustment algorithm across entire database',
-        'System',
+        '{"ar": "Execute global DST adjustment algorithm across entire database", "en": "Execute global DST adjustment algorithm across entire database"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'parent.view_directory',
+        'parent.view_directory'::app_permission,
         'parent',
         'view_directory',
-        'Access global Parents Directory with status metrics and unpaid invoices',
-        'Parents',
+        '{"ar": "Access global Parents Directory with status metrics and unpaid invoices", "en": "Access global Parents Directory with status metrics and unpaid invoices"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     -- Story 8: Parent Profile & Account Lifecycle
     (
         gen_random_uuid (),
-        'parent.view_profile',
+        'parent.view_profile'::app_permission,
         'parent',
         'view_profile',
-        'Access detailed Parent Profile view with PII, social media links, and fee details',
-        'Parents',
+        '{"ar": "Access detailed Parent Profile view with PII, social media links, and fee details", "en": "Access detailed Parent Profile view with PII, social media links, and fee details"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'parent.view_students',
+        'parent.view_students'::app_permission,
         'parent',
         'view_students',
-        'View students assigned to the logged-in parent',
-        'Parents',
+        '{"ar": "View students assigned to the logged-in parent", "en": "View students assigned to the logged-in parent"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'parent.view_own_profile',
+        'parent.view_own_profile'::app_permission,
         'parent',
         'view_own_profile',
-        'View own parent profile and social links (read-only)',
-        'Parents',
+        '{"ar": "View own parent profile and social links (read-only)", "en": "View own parent profile and social links (read-only)"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'parent.manage_status',
+        'parent.manage_status'::app_permission,
         'parent',
         'manage_status',
-        'Suspend or revoke a parent''s access to the LMS by setting account status to DEACTIVATED',
-        'Parents',
+        '{"ar": "Suspend or revoke a parent''s access to the LMS by setting account status to DEACTIVATED", "en": "Suspend or revoke a parent''s access to the LMS by setting account status to DEACTIVATED"}'::jsonb,
+        '{"ar": "أولياء الأمور", "en": "Parents"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'student.view_associated',
+        'student.view_associated'::app_permission,
         'student',
         'view_associated',
-        'View the aggregated list of students associated with a specific parent, including teacher and quota data',
-        'Students',
+        '{"ar": "View the aggregated list of students associated with a specific parent, including teacher and quota data", "en": "View the aggregated list of students associated with a specific parent, including teacher and quota data"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'student.edit_quota',
+        'student.edit_quota'::app_permission,
         'student',
         'edit_quota',
-        'Manually override a student''s classesRemaining integer, directly impacting billing cycle triggers',
-        'Students',
+        '{"ar": "Manually override a student''s classesRemaining integer, directly impacting billing cycle triggers", "en": "Manually override a student''s classesRemaining integer, directly impacting billing cycle triggers"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'billing.view_history',
+        'billing.view_history'::app_permission,
         'billing',
         'view_history',
-        'Access the full invoice ledger for a single parent, including paid and unpaid invoices',
-        'Billing',
+        '{"ar": "Access the full invoice ledger for a single parent, including paid and unpaid invoices", "en": "Access the full invoice ledger for a single parent, including paid and unpaid invoices"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'document.manage_parent_docs',
+        'document.manage_parent_docs'::app_permission,
         'document',
         'manage_parent_docs',
-        'Attach and view external files (contracts, ID verification) linked to a specific Parent record',
-        'Documents',
+        '{"ar": "Attach and view external files (contracts, ID verification) linked to a specific Parent record", "en": "Attach and view external files (contracts, ID verification) linked to a specific Parent record"}'::jsonb,
+        '{"ar": "المستندات", "en": "Documents"}'::jsonb,
         true
     ),
     -- Story 9: Invoice Generation & Processing (billing domain)
     (
         gen_random_uuid (),
-        'billing.create_invoice',
+        'billing.create_invoice'::app_permission,
         'billing',
         'create_invoice',
-        'Manually generate a custom invoice outside the automated package renewal cycle',
-        'Billing',
+        '{"ar": "Manually generate a custom invoice outside the automated package renewal cycle", "en": "Manually generate a custom invoice outside the automated package renewal cycle"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'billing.update_status_paid',
+        'billing.update_status_paid'::app_permission,
         'billing',
         'update_status_paid',
-        'Manually verify and log the settlement of an outstanding invoice by marking it as Paid',
-        'Billing',
+        '{"ar": "Manually verify and log the settlement of an outstanding invoice by marking it as Paid", "en": "Manually verify and log the settlement of an outstanding invoice by marking it as Paid"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'billing.delete_invoice',
+        'billing.delete_invoice'::app_permission,
         'billing',
         'delete_invoice',
-        'Destructively remove a financial record from the parent billing ledger',
-        'Billing',
+        '{"ar": "Destructively remove a financial record from the parent billing ledger", "en": "Destructively remove a financial record from the parent billing ledger"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
         true
     ),
     -- Story 9: Student Metadata & Lifecycle Management
     (
         gen_random_uuid (),
-        'student.reassign_teacher',
+        'student.reassign_teacher'::app_permission,
         'student',
         'reassign_teacher',
-        'Dynamically change a student assigned instructor from the parent profile view',
-        'Students',
+        '{"ar": "Dynamically change a student assigned instructor from the parent profile view", "en": "Dynamically change a student assigned instructor from the parent profile view"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'student.manage_status',
+        'student.manage_status'::app_permission,
         'student',
         'manage_status',
-        'Alter a student global enrollment state (Regular, On Leave, Suspended) from parent profile',
-        'Students',
+        '{"ar": "Alter a student global enrollment state (Regular, On Leave, Suspended) from parent profile", "en": "Alter a student global enrollment state (Regular, On Leave, Suspended) from parent profile"}'::jsonb,
+        '{"ar": "الطلاب", "en": "Students"}'::jsonb,
         true
     ),
     -- Automated System Synchronization
     (
         gen_random_uuid (),
-        'system.sync_notifications',
+        'system.sync_notifications'::app_permission,
         'system',
         'sync_notifications',
-        'Internal rule that forces the global notification tray to reflect real-time billing changes',
-        'System',
+        '{"ar": "Internal rule that forces the global notification tray to reflect real-time billing changes", "en": "Internal rule that forces the global notification tray to reflect real-time billing changes"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     -- Automated Student Status Enforcement
     (
         gen_random_uuid (),
-        'system.enforce_suspended_lock',
+        'system.enforce_suspended_lock'::app_permission,
         'system',
         'enforce_suspended_lock',
-        'Automated rule that locks UI controls on teacher schedule when student is Suspended',
-        'System',
+        '{"ar": "Automated rule that locks UI controls on teacher schedule when student is Suspended", "en": "Automated rule that locks UI controls on teacher schedule when student is Suspended"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'system.process_student_leave',
+        'system.process_student_leave'::app_permission,
         'system',
         'process_student_leave',
-        'Automated workflow that marks future classes as excused and queues rescheduling when student is On Leave',
-        'System',
+        '{"ar": "Automated workflow that marks future classes as excused and queues rescheduling when student is On Leave", "en": "Automated workflow that marks future classes as excused and queues rescheduling when student is On Leave"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     -- Story 11: System-Level Resource Access Restriction
     (
         gen_random_uuid (),
-        'system.restrict_resource_access',
+        'system.restrict_resource_access'::app_permission,
         'system',
         'restrict_resource_access',
-        'Enforce isolation of learning resources storage from unauthorized external access',
-        'System',
+        '{"ar": "Enforce isolation of learning resources storage from unauthorized external access", "en": "Enforce isolation of learning resources storage from unauthorized external access"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     -- Story 12: Custom Reporting and Analytics
     (
         gen_random_uuid (),
-        'report.generate_custom',
+        'report.generate_custom'::app_permission,
         'report',
         'generate_custom',
-        'Authorizes access to the overarching Reports interface and the dynamic aggregation query engine to evaluate operational parameters.',
-        'Reporting',
+        '{"ar": "Authorizes access to the overarching Reports interface and the dynamic aggregation query engine to evaluate operational parameters.", "en": "Authorizes access to the overarching Reports interface and the dynamic aggregation query engine to evaluate operational parameters."}'::jsonb,
+        '{"ar": "التقارير", "en": "Reporting"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'report.view_financials',
+        'report.view_financials'::app_permission,
         'report',
         'view_financials',
-        'Authorizes the query engine to calculate and render highly sensitive payroll and financial metrics within generated reports.',
-        'Reporting',
+        '{"ar": "Authorizes the query engine to calculate and render highly sensitive payroll and financial metrics within generated reports.", "en": "Authorizes the query engine to calculate and render highly sensitive payroll and financial metrics within generated reports."}'::jsonb,
+        '{"ar": "التقارير", "en": "Reporting"}'::jsonb,
         true
     ),
     -- Story 14: Complaints, Suggestions, Communication Channels
     (
         gen_random_uuid (),
-        'support.submit_complaint',
+        'support.submit_complaint'::app_permission,
         'support',
         'submit_complaint',
-        'Submit a new complaint from the parent dashboard',
-        'Support',
+        '{"ar": "Submit a new complaint from the parent dashboard", "en": "Submit a new complaint from the parent dashboard"}'::jsonb,
+        '{"ar": "الدعم", "en": "Support"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'support.view_history',
+        'support.view_history'::app_permission,
         'support',
         'view_history',
-        'View own complaint submission history as a parent',
-        'Support',
+        '{"ar": "View own complaint submission history as a parent", "en": "View own complaint submission history as a parent"}'::jsonb,
+        '{"ar": "الدعم", "en": "Support"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'communication.submit_suggestion',
+        'communication.submit_suggestion'::app_permission,
         'communication',
         'submit_suggestion',
-        'Submit a new suggestion from the parent dashboard',
-        'Communication',
+        '{"ar": "Submit a new suggestion from the parent dashboard", "en": "Submit a new suggestion from the parent dashboard"}'::jsonb,
+        '{"ar": "التواصل", "en": "Communication"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'system.dispatch_email',
+        'system.dispatch_email'::app_permission,
         'system',
         'dispatch_email',
-        'Internal permission allowing the system to dispatch outbound email notifications',
-        'System',
+        '{"ar": "Internal permission allowing the system to dispatch outbound email notifications", "en": "Internal permission allowing the system to dispatch outbound email notifications"}'::jsonb,
+        '{"ar": "النظام", "en": "System"}'::jsonb,
         true
     ),
     -- Story 15: Suggestion Review Workflow
     (
         gen_random_uuid (),
-        'suggestions.list',
+        'suggestions.list'::app_permission,
         'suggestions',
         'list',
-        'List and filter all parent suggestions with review status and duplicate grouping',
-        'Communications',
+        '{"ar": "List and filter all parent suggestions with review status and duplicate grouping", "en": "List and filter all parent suggestions with review status and duplicate grouping"}'::jsonb,
+        '{"ar": "التواصل", "en": "Communications"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'suggestions.review',
+        'suggestions.review'::app_permission,
         'suggestions',
         'review',
-        'Review a suggestion: mark as reviewed with admin response or mark as duplicate of another suggestion',
-        'Communications',
+        '{"ar": "Review a suggestion: mark as reviewed with admin response or mark as duplicate of another suggestion", "en": "Review a suggestion: mark as reviewed with admin response or mark as duplicate of another suggestion"}'::jsonb,
+        '{"ar": "التواصل", "en": "Communications"}'::jsonb,
         true
     ),
     (
         gen_random_uuid (),
-        'suggestions.delete',
+        'suggestions.delete'::app_permission,
         'suggestions',
         'delete',
-        'Soft-delete a suggestion record from the system',
-        'Communications',
+        '{"ar": "Soft-delete a suggestion record from the system", "en": "Soft-delete a suggestion record from the system"}'::jsonb,
+        '{"ar": "التواصل", "en": "Communications"}'::jsonb,
         true
     ) ON CONFLICT (key) DO
 UPDATE
@@ -961,6 +987,7 @@ SET
     description = EXCLUDED.description,
     category = EXCLUDED.category,
     is_system = EXCLUDED.is_system;
+--> statement-breakpoint
 
 INSERT INTO
     permission_groups (
@@ -974,8 +1001,8 @@ INSERT INTO
     )
 VALUES (
         gen_random_uuid (),
-        'Super Admin',
-        'Full system access',
+        '{"ar": "المشرف الأعلى", "en": "Super Admin"}'::jsonb,
+        '{"ar": "وصول كامل للنظام", "en": "Full system access"}'::jsonb,
         true,
         'super_admin',
         NOW(),
@@ -983,8 +1010,8 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Admin',
-        'Full operational oversight for the sprint',
+        '{"ar": "المسؤول", "en": "Admin"}'::jsonb,
+        '{"ar": "إشراف تشغيلي كامل", "en": "Full operational oversight for the sprint"}'::jsonb,
         true,
         'academy_admin',
         NOW(),
@@ -992,8 +1019,8 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Teacher',
-        'Default permissions for teacher accounts',
+        '{"ar": "معلم", "en": "Teacher"}'::jsonb,
+        '{"ar": "الصلاحيات الافتراضية لحسابات المعلمين", "en": "Default permissions for teacher accounts"}'::jsonb,
         true,
         'teacher_default',
         NOW(),
@@ -1001,8 +1028,8 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Parent',
-        'Default permissions for parent accounts',
+        '{"ar": "ولي أمر", "en": "Parent"}'::jsonb,
+        '{"ar": "الصلاحيات الافتراضية لحسابات أولياء الأمور", "en": "Default permissions for parent accounts"}'::jsonb,
         true,
         'parent_default',
         NOW(),
@@ -1010,8 +1037,8 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Staff',
-        'Default permissions for staff accounts',
+        '{"ar": "موظف", "en": "Staff"}'::jsonb,
+        '{"ar": "الصلاحيات الافتراضية لحسابات الموظفين", "en": "Default permissions for staff accounts"}'::jsonb,
         true,
         'staff_default',
         NOW(),
@@ -1019,8 +1046,8 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'System Automated',
-        'Internal system rules for validation',
+        '{"ar": "نظام آلي", "en": "System Automated"}'::jsonb,
+        '{"ar": "قواعد النظام الداخلية للتحقق", "en": "Internal system rules for validation"}'::jsonb,
         true,
         'system_automated',
         NOW(),
@@ -1032,6 +1059,7 @@ SET
     description = EXCLUDED.description,
     is_system = EXCLUDED.is_system,
     updated_at = NOW();
+--> statement-breakpoint
 
 DELETE FROM group_permissions
 WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)
@@ -1088,6 +1116,7 @@ AND permission_id IN (
         'parents.create',
         'parents.edit',
         'students.list',
+        'students.create',
         'students.edit',
         'students.change_teacher',
         'students.change_status',
@@ -1138,6 +1167,7 @@ AND permission_id IN (
         'suggestions.delete'
     )
 );
+--> statement-breakpoint
 
 INSERT INTO
     group_permissions (group_id, permission_id)
@@ -1188,6 +1218,7 @@ WHERE
         'parents.create',
         'parents.edit',
         'students.list',
+        'students.create',
         'students.edit',
         'students.change_teacher',
         'students.change_status',
@@ -1245,6 +1276,7 @@ WHERE
         'suggestions.review',
         'suggestions.delete'
     );
+--> statement-breakpoint
 
 INSERT INTO
     group_permissions (group_id, permission_id)
@@ -1297,6 +1329,7 @@ WHERE
         'student.reassign_teacher',
         'student.manage_status',
         'students.list',
+        'students.create',
         'resources.list',
         'resources.upload',
         'resources.delete',
@@ -1310,6 +1343,7 @@ WHERE
         'suggestions.list',
         'suggestions.review'
     );
+--> statement-breakpoint
 
 INSERT INTO
     group_permissions (group_id, permission_id)
@@ -1334,6 +1368,7 @@ WHERE
         'schedule.view_weekly',
         'schedule.view_workload'
     );
+--> statement-breakpoint
 
 INSERT INTO
     group_permissions (group_id, permission_id)
@@ -1355,6 +1390,7 @@ WHERE
         'parent.view_students',
         'parent.view_own_profile'
     );
+--> statement-breakpoint
 
 INSERT INTO
     group_permissions (group_id, permission_id)
@@ -1374,6 +1410,7 @@ WHERE
         'students.list',
         'complaints.list'
     );
+--> statement-breakpoint
 
 INSERT INTO
     group_permissions (group_id, permission_id)
@@ -1392,6 +1429,7 @@ WHERE
         'system.restrict_resource_access',
         'system.dispatch_email'
     );
+--> statement-breakpoint
 
 -- Triggers to protect system permissions and groups from deletion or mutation of is_system
 CREATE OR REPLACE FUNCTION protect_system_permissions()
@@ -1420,9 +1458,8 @@ BEGIN
             IF TG_TABLE_NAME = 'permissions' THEN
                 IF NEW.key IS DISTINCT FROM OLD.key OR 
                    NEW.resource IS DISTINCT FROM OLD.resource OR 
-                   NEW.action IS DISTINCT FROM OLD.action OR 
-                   NEW.category IS DISTINCT FROM OLD.category THEN
-                    RAISE EXCEPTION 'Cannot modify core properties of system permissions; only description can be updated';
+                   NEW.action IS DISTINCT FROM OLD.action THEN
+                    RAISE EXCEPTION 'Cannot modify core properties of system permissions; only description and category can be updated';
                 END IF;
             ELSIF TG_TABLE_NAME = 'permission_groups' THEN
                 IF NEW.slug IS DISTINCT FROM OLD.slug THEN
@@ -1435,26 +1472,34 @@ BEGIN
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_protect_system_permissions ON permissions;
+--> statement-breakpoint
 
 CREATE TRIGGER trg_protect_system_permissions
 BEFORE INSERT OR UPDATE OR DELETE ON permissions
 FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_protect_system_permission_groups ON permission_groups;
+--> statement-breakpoint
 
 CREATE TRIGGER trg_protect_system_permission_groups
 BEFORE UPDATE OR DELETE ON permission_groups
 FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
+--> statement-breakpoint
 
 -- Source: 30-a-class_instances_rls_policies.sql
 -- Class Instance RLS policies for scoping access based on current_user_id()
 
 ALTER TABLE "class_instances" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "class_instances" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS class_instances_access_select_policy ON "class_instances";
+--> statement-breakpoint
 CREATE POLICY class_instances_access_select_policy ON "class_instances"
 AS RESTRICTIVE FOR SELECT
 USING (
@@ -1467,8 +1512,10 @@ USING (
     (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
   )
 );
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS class_instances_access_update_policy ON "class_instances";
+--> statement-breakpoint
 CREATE POLICY class_instances_access_update_policy ON "class_instances"
 AS RESTRICTIVE FOR UPDATE
 USING (
@@ -1491,6 +1538,7 @@ WITH CHECK (
     (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
   )
 );
+--> statement-breakpoint
 
 
 -- Source: 30-b-class_instances_state_transition_trigger.sql
@@ -1529,11 +1577,14 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql STABLE;
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_enforce_class_instance_transition ON class_instances;
+--> statement-breakpoint
 CREATE TRIGGER trg_enforce_class_instance_transition
 BEFORE UPDATE ON class_instances
 FOR EACH ROW EXECUTE FUNCTION fn_enforce_class_instance_transition();
+--> statement-breakpoint
 
 
 -- Source: 30-c-class_instances_auto_miss_transition.sql
@@ -1572,6 +1623,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql STABLE;
+--> statement-breakpoint
 
 
 -- Source: 4-class_categories_and_subjects.sql
@@ -1594,8 +1646,10 @@ CREATE TABLE IF NOT EXISTS class_categories (
   updated_at timestamptz(3) NOT NULL DEFAULT NOW(),
   deleted_at timestamptz(3)
 );
+--> statement-breakpoint
 
 CREATE INDEX IF NOT EXISTS class_categories_slug_idx ON class_categories (slug);
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS class_subjects (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1609,9 +1663,12 @@ CREATE TABLE IF NOT EXISTS class_subjects (
   updated_at timestamptz(3) NOT NULL DEFAULT NOW(),
   deleted_at timestamptz(3)
 );
+--> statement-breakpoint
 
 CREATE INDEX IF NOT EXISTS class_subjects_category_id_idx ON class_subjects (category_id);
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS class_subjects_slug_idx ON class_subjects (slug);
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS subject_resources (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1621,8 +1678,10 @@ CREATE TABLE IF NOT EXISTS subject_resources (
   sort_order integer NOT NULL DEFAULT 0,
   created_at timestamptz(3) NOT NULL DEFAULT NOW()
 );
+--> statement-breakpoint
 
 CREATE UNIQUE INDEX IF NOT EXISTS subject_resources_subject_id_learning_resource_id_idx ON subject_resources (subject_id, learning_resource_id);
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS teacher_important_notes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1638,8 +1697,10 @@ CREATE TABLE IF NOT EXISTS teacher_important_notes (
   updated_at timestamptz(3) NOT NULL DEFAULT NOW(),
   deleted_at timestamptz(3)
 );
+--> statement-breakpoint
 
 CREATE INDEX IF NOT EXISTS teacher_important_notes_teacher_id_idx ON teacher_important_notes (teacher_id);
+--> statement-breakpoint
 
 -- ============================================================
 -- 2. ALTER TABLE — Add subject_id FK to scheduling tables
@@ -1647,9 +1708,11 @@ CREATE INDEX IF NOT EXISTS teacher_important_notes_teacher_id_idx ON teacher_imp
 
 ALTER TABLE recurring_schedules
   ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;
+--> statement-breakpoint
 
 ALTER TABLE class_instances
   ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;
+--> statement-breakpoint
 
 -- subject_id indexes are created by the drizzle schema migration (same_sphinx);
 -- CONCURRENTLY cannot run inside drizzle's transactional migrator.
@@ -1659,19 +1722,33 @@ ALTER TABLE class_instances
 -- ============================================================
 
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.list';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.create';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.update';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.delete';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.list';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.create';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.update';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.delete';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.view_resources';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.manage_resources';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.list';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.create';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.update';
+--> statement-breakpoint
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.delete';
+--> statement-breakpoint
 
 
 -- Source: 4a-class_categories_and_subjects_seed.sql
@@ -1687,6 +1764,7 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
 END $$;
+--> statement-breakpoint
 
 -- ============================================================
 -- 1. INSERT INTO permissions — 13 new permission keys
@@ -1694,26 +1772,27 @@ END $$;
 
 INSERT INTO permissions (id, key, resource, action, description, category, is_system)
 VALUES
-  (gen_random_uuid(), 'subjects.list', 'subjects', 'list', 'List class subjects', 'Subjects', true),
-  (gen_random_uuid(), 'subjects.create', 'subjects', 'create', 'Create class subjects', 'Subjects', true),
-  (gen_random_uuid(), 'subjects.update', 'subjects', 'update', 'Update class subjects', 'Subjects', true),
-  (gen_random_uuid(), 'subjects.delete', 'subjects', 'delete', 'Delete class subjects', 'Subjects', true),
-  (gen_random_uuid(), 'categories.list', 'categories', 'list', 'List class categories', 'Categories', true),
-  (gen_random_uuid(), 'categories.create', 'categories', 'create', 'Create class categories', 'Categories', true),
-  (gen_random_uuid(), 'categories.update', 'categories', 'update', 'Update class categories', 'Categories', true),
-  (gen_random_uuid(), 'categories.delete', 'categories', 'delete', 'Delete class categories', 'Categories', true),
-  (gen_random_uuid(), 'subjects.view_resources', 'subjects', 'view_resources', 'View subject resources', 'Subjects', true),
-  (gen_random_uuid(), 'subjects.manage_resources', 'subjects', 'manage_resources', 'Attach and detach subject resources', 'Subjects', true),
-  (gen_random_uuid(), 'notes.list', 'notes', 'list', 'List teacher important notes', 'Notes', true),
-  (gen_random_uuid(), 'notes.create', 'notes', 'create', 'Create teacher important notes', 'Notes', true),
-  (gen_random_uuid(), 'notes.update', 'notes', 'update', 'Update teacher important notes', 'Notes', true),
-  (gen_random_uuid(), 'notes.delete', 'notes', 'delete', 'Delete teacher important notes', 'Notes', true)
+  (gen_random_uuid(), 'subjects.list'::app_permission, 'subjects', 'list', '{"ar": "List class subjects", "en": "List class subjects"}'::jsonb, '{"ar": "Subjects", "en": "Subjects"}'::jsonb, true),
+  (gen_random_uuid(), 'subjects.create'::app_permission, 'subjects', 'create', '{"ar": "Create class subjects", "en": "Create class subjects"}'::jsonb, '{"ar": "Subjects", "en": "Subjects"}'::jsonb, true),
+  (gen_random_uuid(), 'subjects.update'::app_permission, 'subjects', 'update', '{"ar": "Update class subjects", "en": "Update class subjects"}'::jsonb, '{"ar": "Subjects", "en": "Subjects"}'::jsonb, true),
+  (gen_random_uuid(), 'subjects.delete'::app_permission, 'subjects', 'delete', '{"ar": "Delete class subjects", "en": "Delete class subjects"}'::jsonb, '{"ar": "Subjects", "en": "Subjects"}'::jsonb, true),
+  (gen_random_uuid(), 'categories.list'::app_permission, 'categories', 'list', '{"ar": "List class categories", "en": "List class categories"}'::jsonb, '{"ar": "Categories", "en": "Categories"}'::jsonb, true),
+  (gen_random_uuid(), 'categories.create'::app_permission, 'categories', 'create', '{"ar": "Create class categories", "en": "Create class categories"}'::jsonb, '{"ar": "Categories", "en": "Categories"}'::jsonb, true),
+  (gen_random_uuid(), 'categories.update'::app_permission, 'categories', 'update', '{"ar": "Update class categories", "en": "Update class categories"}'::jsonb, '{"ar": "Categories", "en": "Categories"}'::jsonb, true),
+  (gen_random_uuid(), 'categories.delete'::app_permission, 'categories', 'delete', '{"ar": "Delete class categories", "en": "Delete class categories"}'::jsonb, '{"ar": "Categories", "en": "Categories"}'::jsonb, true),
+  (gen_random_uuid(), 'subjects.view_resources'::app_permission, 'subjects', 'view_resources', '{"ar": "View subject resources", "en": "View subject resources"}'::jsonb, '{"ar": "Subjects", "en": "Subjects"}'::jsonb, true),
+  (gen_random_uuid(), 'subjects.manage_resources'::app_permission, 'subjects', 'manage_resources', '{"ar": "Attach and detach subject resources", "en": "Attach and detach subject resources"}'::jsonb, '{"ar": "Subjects", "en": "Subjects"}'::jsonb, true),
+  (gen_random_uuid(), 'notes.list'::app_permission, 'notes', 'list', '{"ar": "List teacher important notes", "en": "List teacher important notes"}'::jsonb, '{"ar": "Notes", "en": "Notes"}'::jsonb, true),
+  (gen_random_uuid(), 'notes.create'::app_permission, 'notes', 'create', '{"ar": "Create teacher important notes", "en": "Create teacher important notes"}'::jsonb, '{"ar": "Notes", "en": "Notes"}'::jsonb, true),
+  (gen_random_uuid(), 'notes.update'::app_permission, 'notes', 'update', '{"ar": "Update teacher important notes", "en": "Update teacher important notes"}'::jsonb, '{"ar": "Notes", "en": "Notes"}'::jsonb, true),
+  (gen_random_uuid(), 'notes.delete'::app_permission, 'notes', 'delete', '{"ar": "Delete teacher important notes", "en": "Delete teacher important notes"}'::jsonb, '{"ar": "Notes", "en": "Notes"}'::jsonb, true)
 ON CONFLICT (key) DO UPDATE SET
   resource = EXCLUDED.resource,
   action = EXCLUDED.action,
   description = EXCLUDED.description,
   category = EXCLUDED.category,
   is_system = EXCLUDED.is_system;
+--> statement-breakpoint
 
 -- Re-enable the trigger (guaranteed even if INSERT fails above)
 DO $$
@@ -1722,6 +1801,7 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
 END $$;
+--> statement-breakpoint
 
 -- ============================================================
 -- 2. INSERT INTO group_permissions — assign to super_admin + academy_admin
@@ -1748,6 +1828,7 @@ WHERE g.slug = 'super_admin'
     'notes.delete'
   )
 ON CONFLICT DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -1770,6 +1851,7 @@ WHERE g.slug = 'academy_admin'
     'notes.delete'
   )
 ON CONFLICT DO NOTHING;
+--> statement-breakpoint
 
 -- ============================================================
 -- 3. INSERT default categories and subjects
@@ -1781,41 +1863,49 @@ VALUES
   ('Arabic Language', 'arabic-language', 'Arabic language and grammar studies', true, 2),
   ('Islamic Studies', 'islamic-studies', 'Islamic studies including fiqh, aqidah, and seerah', true, 3)
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
 SELECT cat.id, 'Quran Recitation', 'quran-recitation', 'Quran recitation practice and tajweed', true, 1
 FROM class_categories cat WHERE cat.slug = 'quran'
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
 SELECT cat.id, 'Quran Memorization', 'quran-memorization', 'Hifz — Quran memorization and review', true, 2
 FROM class_categories cat WHERE cat.slug = 'quran'
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
 SELECT cat.id, 'Arabic Grammar', 'arabic-grammar', 'Nahw and Sarf — Arabic grammar foundations', true, 1
 FROM class_categories cat WHERE cat.slug = 'arabic-language'
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
 SELECT cat.id, 'Arabic Conversation', 'arabic-conversation', 'Arabic speaking and conversation practice', true, 2
 FROM class_categories cat WHERE cat.slug = 'arabic-language'
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
 SELECT cat.id, 'Fiqh', 'fiqh', 'Islamic jurisprudence and rulings', true, 1
 FROM class_categories cat WHERE cat.slug = 'islamic-studies'
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
 SELECT cat.id, 'Aqidah', 'aqidah', 'Islamic creed and theology', true, 2
 FROM class_categories cat WHERE cat.slug = 'islamic-studies'
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
 SELECT cat.id, 'Seerah', 'seerah', 'Prophetic biography and life of the Prophet', true, 3
 FROM class_categories cat WHERE cat.slug = 'islamic-studies'
 ON CONFLICT (slug) DO NOTHING;
+--> statement-breakpoint
 
 
 -- Source: 4b-teacher_support_contact_setting.sql
@@ -1835,10 +1925,12 @@ ON CONFLICT (key) DO UPDATE SET
   description = EXCLUDED.description,
   category = EXCLUDED.category,
   updated_at = NOW();
+--> statement-breakpoint
 
 
 -- Source: add_test_custom_alt_permission.sql
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'test.custom_alt';
+--> statement-breakpoint
 
 
 -- Source: audit_log_immutability_trigger.sql
@@ -1859,21 +1951,26 @@ BEGIN
         $func$ LANGUAGE plpgsql;
     END IF;
 END $$;
+--> statement-breakpoint
 
 -- Drop trigger if it exists
 DROP TRIGGER IF EXISTS prevent_audit_log_mod_trigger ON audit_logs;
+--> statement-breakpoint
 
 -- Create trigger to prevent UPDATE and DELETE operations
 CREATE TRIGGER prevent_audit_log_mod_trigger
 BEFORE UPDATE OR DELETE ON audit_logs
 FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_modification();
+--> statement-breakpoint
 
 -- Also create trigger for admin_audit_logs table
 DROP TRIGGER IF EXISTS prevent_admin_audit_log_mod_trigger ON admin_audit_logs;
+--> statement-breakpoint
 
 CREATE TRIGGER prevent_admin_audit_log_mod_trigger
 BEFORE UPDATE OR DELETE ON admin_audit_logs
 FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_modification();
+--> statement-breakpoint
 
 
 -- Source: auth_rate_limiting.sql
@@ -1917,6 +2014,7 @@ BEGIN
     RETURN QUERY SELECT v_attempts, v_locked_until, (v_locked_until IS NOT NULL AND v_locked_until > v_now);
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- Function to reset auth attempts on success
 CREATE OR REPLACE FUNCTION reset_auth_attempts(
@@ -1929,6 +2027,7 @@ BEGIN
     WHERE ip_address = p_ip_address AND email = p_email;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- Function for cleanup of expired tokens and cache
 -- NOTE: Full security cleanup including new cache tables is handled in cache_split.sql
@@ -1944,31 +2043,44 @@ BEGIN
     DELETE FROM password_reset_tokens WHERE expires_at < NOW();
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 
 
 -- Source: books_rls_policies.sql
 -- 7. books configuration
 ALTER TABLE "books" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "books" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS books_select_policy ON "books";
+--> statement-breakpoint
 CREATE POLICY books_select_policy ON "books" FOR SELECT USING (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS books_insert_policy ON "books";
+--> statement-breakpoint
 CREATE POLICY books_insert_policy ON "books" FOR INSERT WITH CHECK (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS books_update_policy ON "books";
+--> statement-breakpoint
 CREATE POLICY books_update_policy ON "books" FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (
   deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')
 );
+--> statement-breakpoint
 DROP POLICY IF EXISTS books_soft_delete_policy ON "books";
+--> statement-breakpoint
 DROP POLICY IF EXISTS books_delete_policy ON "books";
+--> statement-breakpoint
 CREATE POLICY books_delete_policy ON "books" FOR DELETE USING (false);
+--> statement-breakpoint
 
 
 -- Source: cache_split.sql
 -- Ensure rate_limit_cache is UNLOGGED
 -- This is done via ALTER because Drizzle doesn't support UNLOGGED in schema yet
 ALTER TABLE IF EXISTS rate_limit_cache SET UNLOGGED;
+--> statement-breakpoint
 
 -- Update cleanup function to include the new table and maintain security hygiene
 CREATE OR REPLACE FUNCTION cleanup_expired_security_data() 
@@ -1998,6 +2110,7 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 
 -- Source: hours_per_week_recalculation.sql
@@ -2021,6 +2134,7 @@ BEGIN
   WHERE id = student_id_val;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- 2. Trigger function for recurring_schedules changes
 CREATE OR REPLACE FUNCTION trg_fn_recurring_schedules_hours_recalc()
@@ -2037,6 +2151,7 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- 3. Trigger function for recurring_schedule_days changes
 CREATE OR REPLACE FUNCTION trg_fn_recurring_schedule_days_hours_recalc()
@@ -2072,17 +2187,22 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- 4. Create Triggers
 DROP TRIGGER IF EXISTS trg_recalc_hours_recurring_schedules ON recurring_schedules;
+--> statement-breakpoint
 CREATE TRIGGER trg_recalc_hours_recurring_schedules
 AFTER INSERT OR UPDATE OR DELETE ON recurring_schedules
 FOR EACH ROW EXECUTE FUNCTION trg_fn_recurring_schedules_hours_recalc();
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_recalc_hours_recurring_schedule_days ON recurring_schedule_days;
+--> statement-breakpoint
 CREATE TRIGGER trg_recalc_hours_recurring_schedule_days
 AFTER INSERT OR UPDATE OR DELETE ON recurring_schedule_days
 FOR EACH ROW EXECUTE FUNCTION trg_fn_recurring_schedule_days_hours_recalc();
+--> statement-breakpoint
 
 -- 5. One-time recalculation for existing students
 -- DEPLOY SAFETY: This one-time backfill UPDATE runs across ALL students in a single statement.
@@ -2100,6 +2220,7 @@ SET hours_per_week = COALESCE((
     AND rs.deleted_at IS NULL
     AND rsd.is_active = true
 ), 0);
+--> statement-breakpoint
 
 -- Source: impersonation_sessions.sql
 -- Impersonation session tracking for super-admin "view as user" feature
@@ -2115,15 +2236,21 @@ CREATE TABLE IF NOT EXISTS impersonation_sessions (
   user_agent TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true
 );
+--> statement-breakpoint
 
 CREATE INDEX IF NOT EXISTS impersonation_sessions_actor_idx ON impersonation_sessions(actor_user_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS impersonation_sessions_target_idx ON impersonation_sessions(target_user_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS impersonation_sessions_session_idx ON impersonation_sessions(session_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS impersonation_sessions_active_actor_idx ON impersonation_sessions(actor_user_id, is_active);
+--> statement-breakpoint
 
 CREATE UNIQUE INDEX IF NOT EXISTS impersonation_sessions_one_active_per_actor
   ON impersonation_sessions(actor_user_id)
   WHERE is_active = true;
+--> statement-breakpoint
 
 
 -- Source: leave_quota_limits_trigger.sql
@@ -2158,18 +2285,24 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_enforce_leave_quota_limits ON leave_quota_usage;
+--> statement-breakpoint
 CREATE TRIGGER trg_enforce_leave_quota_limits
 BEFORE INSERT OR UPDATE ON leave_quota_usage
 FOR EACH ROW EXECUTE FUNCTION enforce_leave_quota_limits();
+--> statement-breakpoint
 
 
 -- Source: permissions_rls_policies.sql
 ALTER TABLE "students" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "students" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS students_select_policy ON "students";
+--> statement-breakpoint
 CREATE POLICY students_select_policy ON "students"
 FOR SELECT
 USING (
@@ -2177,8 +2310,10 @@ USING (
     OR
     parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())
 );
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS students_insert_policy ON "students";
+--> statement-breakpoint
 CREATE POLICY students_insert_policy ON "students"
 FOR INSERT
 WITH CHECK (
@@ -2186,8 +2321,10 @@ WITH CHECK (
     OR
     parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())
 );
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS students_update_policy ON "students";
+--> statement-breakpoint
 CREATE POLICY students_update_policy ON "students"
 FOR UPDATE
 USING (
@@ -2200,8 +2337,10 @@ WITH CHECK (
     OR
     parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())
 );
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS students_delete_policy ON "students";
+--> statement-breakpoint
 CREATE POLICY students_delete_policy ON "students"
 FOR DELETE
 USING (
@@ -2209,6 +2348,137 @@ USING (
     OR
     parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())
 );
+--> statement-breakpoint
+
+
+-- Source: profile_permissions.sql
+-- Profile module permissions
+
+-- Temporarily disable the system permission trigger to allow INSERT with is_system = true
+DO $$
+BEGIN
+  ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
+END $$;
+--> statement-breakpoint
+
+
+INSERT INTO permissions (id, key, resource, action, description, category, is_system)
+SELECT gen_random_uuid(), v.key::app_permission, v.resource, v.action, v.description::jsonb, v.category::jsonb, true
+FROM (VALUES
+    (
+      'auth.edit_own_profile',
+      'auth',
+      'edit_own_profile',
+      '{"ar": "تعديل حقول الملف الشخصي الأساسية", "en": "Edit own core profile fields"}',
+      '{"ar": "المصادقة", "en": "Authentication"}'
+    ),
+    (
+      'teacher.edit_own_profile',
+      'teacher',
+      'edit_own_profile',
+      '{"ar": "تعديل حقول ملف المعلم الشخصي", "en": "Edit own teacher profile fields"}',
+      '{"ar": "إدارة المعلمين", "en": "Teacher Management"}'
+    ),
+    (
+      'parent.edit_own_profile',
+      'parent',
+      'edit_own_profile',
+      '{"ar": "تعديل حقول ملف ولي الأمر الشخصي", "en": "Edit own parent profile fields"}',
+      '{"ar": "إدارة أولياء الأمور", "en": "Parent Management"}'
+    ),
+    (
+      'user.edit_profile',
+      'user',
+      'edit_profile',
+      '{"ar": "تعديل حقول ملف مستخدم آخر", "en": "Edit another user core profile fields"}',
+      '{"ar": "إدارة الموظفين", "en": "Staff Management"}'
+    )
+) AS v(key, resource, action, description, category)
+WHERE NOT EXISTS (SELECT 1 FROM permissions p WHERE p.key = v.key::app_permission);
+--> statement-breakpoint
+
+DO $$
+BEGIN
+  ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
+END $$;
+--> statement-breakpoint
+
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g
+JOIN permissions p ON p.key IN (
+    'auth.view_own_profile',
+    'auth.edit_own_profile',
+    'teacher.edit_own_profile',
+    'parent.edit_own_profile',
+    'user.view_profile',
+    'user.edit_profile'
+)
+WHERE g.slug = 'super_admin'
+  AND NOT EXISTS (
+    SELECT 1 FROM group_permissions gp WHERE gp.group_id = g.id AND gp.permission_id = p.id
+  );
+--> statement-breakpoint
+
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g
+JOIN permissions p ON p.key IN (
+    'auth.view_own_profile',
+    'auth.edit_own_profile',
+    'user.view_profile',
+    'user.edit_profile'
+)
+WHERE g.slug = 'academy_admin'
+  AND NOT EXISTS (
+    SELECT 1 FROM group_permissions gp WHERE gp.group_id = g.id AND gp.permission_id = p.id
+  );
+--> statement-breakpoint
+
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g
+JOIN permissions p ON p.key IN (
+    'auth.view_own_profile',
+    'auth.edit_own_profile',
+    'teacher.edit_own_profile'
+)
+WHERE g.slug = 'teacher_default'
+  AND NOT EXISTS (
+    SELECT 1 FROM group_permissions gp WHERE gp.group_id = g.id AND gp.permission_id = p.id
+  );
+--> statement-breakpoint
+
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g
+JOIN permissions p ON p.key IN (
+    'auth.view_own_profile',
+    'auth.edit_own_profile',
+    'parent.edit_own_profile'
+)
+WHERE g.slug = 'parent_default'
+  AND NOT EXISTS (
+    SELECT 1 FROM group_permissions gp WHERE gp.group_id = g.id AND gp.permission_id = p.id
+  );
+--> statement-breakpoint
+
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g
+JOIN permissions p ON p.key IN (
+    'auth.view_own_profile',
+    'auth.edit_own_profile'
+)
+WHERE g.slug = 'staff_default'
+  AND NOT EXISTS (
+    SELECT 1 FROM group_permissions gp WHERE gp.group_id = g.id AND gp.permission_id = p.id
+  );
+--> statement-breakpoint
 
 
 -- Source: soft_delete_rls_policies.sql
@@ -2218,99 +2488,165 @@ USING (
 
 -- 1. users configuration
 ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "users" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS users_select_policy ON "users";
+--> statement-breakpoint
 CREATE POLICY users_select_policy ON "users" FOR SELECT USING (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS users_insert_policy ON "users";
+--> statement-breakpoint
 CREATE POLICY users_insert_policy ON "users" FOR INSERT WITH CHECK (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS users_update_policy ON "users";
+--> statement-breakpoint
 CREATE POLICY users_update_policy ON "users" FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (
   deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')
 );
+--> statement-breakpoint
 DROP POLICY IF EXISTS users_soft_delete_policy ON "users";
+--> statement-breakpoint
 DROP POLICY IF EXISTS users_delete_policy ON "users";
+--> statement-breakpoint
 CREATE POLICY users_delete_policy ON "users" FOR DELETE USING (false);
+--> statement-breakpoint
 
 -- 2. recurring_schedules configuration
 ALTER TABLE "recurring_schedules" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "recurring_schedules" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS recurring_schedules_select_policy ON "recurring_schedules";
+--> statement-breakpoint
 CREATE POLICY recurring_schedules_select_policy ON "recurring_schedules" FOR SELECT USING (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS recurring_schedules_insert_policy ON "recurring_schedules";
+--> statement-breakpoint
 CREATE POLICY recurring_schedules_insert_policy ON "recurring_schedules" FOR INSERT WITH CHECK (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS recurring_schedules_update_policy ON "recurring_schedules";
+--> statement-breakpoint
 CREATE POLICY recurring_schedules_update_policy ON "recurring_schedules" FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (
   deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')
 );
+--> statement-breakpoint
 DROP POLICY IF EXISTS recurring_schedules_soft_delete_policy ON "recurring_schedules";
+--> statement-breakpoint
 DROP POLICY IF EXISTS recurring_schedules_delete_policy ON "recurring_schedules";
+--> statement-breakpoint
 CREATE POLICY recurring_schedules_delete_policy ON "recurring_schedules" FOR DELETE USING (false);
+--> statement-breakpoint
 
 -- 3. class_instances configuration
 ALTER TABLE "class_instances" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "class_instances" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS class_instances_select_policy ON "class_instances";
+--> statement-breakpoint
 CREATE POLICY class_instances_select_policy ON "class_instances" FOR SELECT USING (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS class_instances_insert_policy ON "class_instances";
+--> statement-breakpoint
 CREATE POLICY class_instances_insert_policy ON "class_instances" FOR INSERT WITH CHECK (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS class_instances_update_policy ON "class_instances";
+--> statement-breakpoint
 CREATE POLICY class_instances_update_policy ON "class_instances" FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (
   deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')
 );
+--> statement-breakpoint
 DROP POLICY IF EXISTS class_instances_soft_delete_policy ON "class_instances";
+--> statement-breakpoint
 DROP POLICY IF EXISTS class_instances_delete_policy ON "class_instances";
+--> statement-breakpoint
 CREATE POLICY class_instances_delete_policy ON "class_instances" FOR DELETE USING (false);
+--> statement-breakpoint
 
 -- 4. complaints configuration
 ALTER TABLE "complaints" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "complaints" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS complaints_select_policy ON "complaints";
+--> statement-breakpoint
 CREATE POLICY complaints_select_policy ON "complaints" FOR SELECT USING (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS complaints_insert_policy ON "complaints";
+--> statement-breakpoint
 CREATE POLICY complaints_insert_policy ON "complaints" FOR INSERT WITH CHECK (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS complaints_update_policy ON "complaints";
+--> statement-breakpoint
 CREATE POLICY complaints_update_policy ON "complaints" FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (
   deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')
 );
+--> statement-breakpoint
 DROP POLICY IF EXISTS complaints_soft_delete_policy ON "complaints";
+--> statement-breakpoint
 DROP POLICY IF EXISTS complaints_delete_policy ON "complaints";
+--> statement-breakpoint
 CREATE POLICY complaints_delete_policy ON "complaints" FOR DELETE USING (false);
+--> statement-breakpoint
 
 -- 5. learning_resources configuration
 ALTER TABLE "learning_resources" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "learning_resources" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS learning_resources_select_policy ON "learning_resources";
+--> statement-breakpoint
 CREATE POLICY learning_resources_select_policy ON "learning_resources" FOR SELECT USING (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS learning_resources_insert_policy ON "learning_resources";
+--> statement-breakpoint
 CREATE POLICY learning_resources_insert_policy ON "learning_resources" FOR INSERT WITH CHECK (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS learning_resources_update_policy ON "learning_resources";
+--> statement-breakpoint
 CREATE POLICY learning_resources_update_policy ON "learning_resources" FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (
   deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')
 );
+--> statement-breakpoint
 DROP POLICY IF EXISTS learning_resources_soft_delete_policy ON "learning_resources";
+--> statement-breakpoint
 DROP POLICY IF EXISTS learning_resources_delete_policy ON "learning_resources";
+--> statement-breakpoint
 CREATE POLICY learning_resources_delete_policy ON "learning_resources" FOR DELETE USING (false);
+--> statement-breakpoint
 
 -- 6. invoices configuration
 ALTER TABLE "invoices" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "invoices" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 DROP POLICY IF EXISTS invoices_select_policy ON "invoices";
+--> statement-breakpoint
 CREATE POLICY invoices_select_policy ON "invoices" FOR SELECT USING (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS invoices_insert_policy ON "invoices";
+--> statement-breakpoint
 CREATE POLICY invoices_insert_policy ON "invoices" FOR INSERT WITH CHECK (deleted_at IS NULL);
+--> statement-breakpoint
 DROP POLICY IF EXISTS invoices_update_policy ON "invoices";
+--> statement-breakpoint
 CREATE POLICY invoices_update_policy ON "invoices" FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (
   deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')
 );
+--> statement-breakpoint
 DROP POLICY IF EXISTS invoices_soft_delete_policy ON "invoices";
+--> statement-breakpoint
 DROP POLICY IF EXISTS invoices_delete_policy ON "invoices";
+--> statement-breakpoint
 CREATE POLICY invoices_delete_policy ON "invoices" FOR DELETE USING (false);
+--> statement-breakpoint
 
 
 -- Source: student_created_at_immutability.sql
@@ -2333,23 +2669,30 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_prevent_student_created_at_update ON students;
+--> statement-breakpoint
 
 CREATE TRIGGER trg_prevent_student_created_at_update
   BEFORE UPDATE ON students
   FOR EACH ROW
   EXECUTE FUNCTION prevent_student_created_at_update();
+--> statement-breakpoint
 
 
 -- Source: student_progress_rls.sql
 -- Enable RLS on the table
 ALTER TABLE "student_progress" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "student_progress" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 -- Drop policies if they exist for idempotency
 DROP POLICY IF EXISTS student_progress_teacher_policy ON "student_progress";
+--> statement-breakpoint
 DROP POLICY IF EXISTS student_progress_parent_policy ON "student_progress";
+--> statement-breakpoint
 
 -- 1. Teacher Policy: Allows teachers to manage progress for students they teach
 -- A teacher can manage a progress record if they are the one who logged it
@@ -2361,6 +2704,7 @@ USING (
 WITH CHECK (
     teacher_id IN (SELECT id FROM teachers WHERE user_id = current_user_id())
 );
+--> statement-breakpoint
 
 -- 2. Parent Policy: Allows parents to view progress for their children if parent_visible is true
 -- current_user_id() is defined in permissions_rls_policies.sql
@@ -2376,6 +2720,7 @@ USING (
         WHERE p.user_id = current_user_id()
     )
 );
+--> statement-breakpoint
 
 
 -- Source: student_status_transition_trigger.sql
@@ -2413,6 +2758,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- Function to log student status history
 CREATE OR REPLACE FUNCTION fn_log_student_status_history()
@@ -2442,20 +2788,25 @@ BEGIN
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- Drop triggers if they exist to ensure idempotency
 DROP TRIGGER IF EXISTS trg_enforce_student_status_transition ON students;
+--> statement-breakpoint
 DROP TRIGGER IF EXISTS trg_log_student_status_history ON students;
+--> statement-breakpoint
 
 -- Create Enforcement Trigger (BEFORE UPDATE)
 CREATE TRIGGER trg_enforce_student_status_transition
 BEFORE UPDATE ON students
 FOR EACH ROW EXECUTE FUNCTION fn_enforce_student_status_transition();
+--> statement-breakpoint
 
 -- Create Logging Trigger (AFTER INSERT OR UPDATE)
 CREATE TRIGGER trg_log_student_status_history
 AFTER INSERT OR UPDATE ON students
 FOR EACH ROW EXECUTE FUNCTION fn_log_student_status_history();
+--> statement-breakpoint
 
 
 -- Source: timezone_dst_logic.sql
@@ -2469,6 +2820,7 @@ BEGIN
     RETURN EXTRACT(EPOCH FROM (ts AT TIME ZONE tz - ts AT TIME ZONE 'UTC')) / 60;
 END;
 $$ LANGUAGE plpgsql STABLE;
+--> statement-breakpoint
 
 -- 2. Function to adjust a timestamp if a DST shift is detected
 CREATE OR REPLACE FUNCTION adjust_for_dst(ts TIMESTAMP WITH TIME ZONE, tz TEXT, original_offset_mins INTEGER)
@@ -2495,6 +2847,7 @@ BEGIN
     RETURN ts + (shift_mins || ' minutes')::INTERVAL;
 END;
 $$ LANGUAGE plpgsql STABLE;
+--> statement-breakpoint
 
 -- 3. Main job to auto-adjust future bookings for DST changes
 CREATE OR REPLACE FUNCTION auto_adjust_dst_bookings()
@@ -2537,6 +2890,7 @@ BEGIN
     RETURN updated_count;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 -- 4. Trigger to automatically snapshot timezone and offset on class creation if not provided
 CREATE OR REPLACE FUNCTION trg_snapshot_booking_timezone()
@@ -2562,11 +2916,14 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_class_instances_timezone_snapshot ON class_instances;
+--> statement-breakpoint
 CREATE TRIGGER trg_class_instances_timezone_snapshot
 BEFORE INSERT ON class_instances
 FOR EACH ROW EXECUTE FUNCTION trg_snapshot_booking_timezone();
+--> statement-breakpoint
 
 -- 5. Trigger for recurring_schedules to snapshot UTC offset
 CREATE OR REPLACE FUNCTION trg_snapshot_recurring_schedule_timezone()
@@ -2583,11 +2940,14 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_recurring_schedules_timezone_snapshot ON recurring_schedules;
+--> statement-breakpoint
 CREATE TRIGGER trg_recurring_schedules_timezone_snapshot
 BEFORE INSERT OR UPDATE ON recurring_schedules
 FOR EACH ROW EXECUTE FUNCTION trg_snapshot_recurring_schedule_timezone();
+--> statement-breakpoint
 
 -- 6. Trigger for teachers to link timezone_id
 CREATE OR REPLACE FUNCTION trg_teachers_timezone_id_sync()
@@ -2599,20 +2959,26 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+--> statement-breakpoint
 
 DROP TRIGGER IF EXISTS trg_teachers_timezone_id_sync ON teachers;
+--> statement-breakpoint
 CREATE TRIGGER trg_teachers_timezone_id_sync
 BEFORE INSERT OR UPDATE ON teachers
 FOR EACH ROW EXECUTE FUNCTION trg_teachers_timezone_id_sync();
+--> statement-breakpoint
 
 
 -- Source: user_notification_preferences.sql
 -- Enable RLS on the table
 ALTER TABLE "user_notification_preferences" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "user_notification_preferences" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 -- Drop policy if exists for idempotency
 DROP POLICY IF EXISTS notification_preferences_access_policy ON "user_notification_preferences";
+--> statement-breakpoint
 
 -- Create policy: Users can only manage their own preferences
 -- current_user_id() is defined in permissions_rls_policies.sql
@@ -2620,28 +2986,37 @@ CREATE POLICY notification_preferences_access_policy ON "user_notification_prefe
 FOR ALL
 USING (user_id = current_user_id())
 WITH CHECK (user_id = current_user_id());
+--> statement-breakpoint
 
 -- Enable RLS on device token and delivery tracking tables
 ALTER TABLE "user_device_tokens" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "user_device_tokens" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 ALTER TABLE "notification_deliveries" ENABLE ROW LEVEL SECURITY;
+--> statement-breakpoint
 ALTER TABLE "notification_deliveries" FORCE ROW LEVEL SECURITY;
+--> statement-breakpoint
 
 -- Drop policies if they exist for idempotency
 DROP POLICY IF EXISTS user_device_tokens_access_policy ON "user_device_tokens";
+--> statement-breakpoint
 DROP POLICY IF EXISTS notification_deliveries_access_policy ON "notification_deliveries";
+--> statement-breakpoint
 
 -- Users can only manage their own device tokens
 CREATE POLICY user_device_tokens_access_policy ON "user_device_tokens"
 FOR ALL
 USING (user_id = current_user_id())
 WITH CHECK (user_id = current_user_id());
+--> statement-breakpoint
 
 -- Users can only view their own notification deliveries
 CREATE POLICY notification_deliveries_access_policy ON "notification_deliveries"
 FOR ALL
 USING (user_id = current_user_id())
 WITH CHECK (user_id = current_user_id());
+--> statement-breakpoint
 
 

@@ -38,7 +38,7 @@
     "build-storybook": "storybook build",
     "prepare": "husky",
     "postinstall": "rm -rf node_modules/*/node_modules/typescript && bun -e \"const fs = require('fs'); const file = 'node_modules/typescript/lib/version.cjs'; if (fs.existsSync(file)) fs.writeFileSync(file, 'module.exports = { ...require(\\\"@typescript/typescript6\\\"), version: \\\"7.0.2\\\", versionMajorMinor: \\\"7.0\\\" };');\"",
-    "db": "bun run scripts/dbActions.ts"
+    "db": "bun run scripts/dbActions/index.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.2.6",
@@ -100,7 +100,7 @@
     "dataloader": "^2.2.3",
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "1.0.0-rc.3",
+    "drizzle-orm": "1.0.0-rc.4",
     "eslint-plugin-drizzle": "^0.2.3",
     "firebase-admin": "^14.1.0",
     "framer-motion": "^12.42.2",
@@ -194,7 +194,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.5.2",
     "babel-plugin-react-compiler": "1.0.0",
-    "drizzle-kit": "1.0.0-rc.3",
+    "drizzle-kit": "1.0.0-rc.4",
     "eslint": "^10.6.0",
     "eslint-config-next": "16.2.10",
     "eslint-plugin-react-refresh": "^0.5.3",

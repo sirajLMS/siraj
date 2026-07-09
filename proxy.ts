@@ -8,14 +8,17 @@ const intlMiddleware = createMiddleware(routing);
 export default function proxy(request: NextRequest) {
   const nonce = crypto.randomBytes(16).toString("base64");
   const pathname = request.nextUrl.pathname;
+  const search = request.nextUrl.search;
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
+  requestHeaders.set("x-search", search);
   requestHeaders.set("x-nonce", nonce);
 
   const intlResponse = intlMiddleware(request);
 
   if (intlResponse.headers.get("location")) {
     intlResponse.headers.set("x-pathname", pathname);
+    intlResponse.headers.set("x-search", search);
     intlResponse.headers.set("x-nonce", nonce);
     return intlResponse;
   }
@@ -39,6 +42,7 @@ export default function proxy(request: NextRequest) {
     response.headers.set(key, value);
   });
   response.headers.set("x-pathname", pathname);
+  response.headers.set("x-search", search);
   response.headers.set("x-nonce", nonce);
   response.headers.set("Content-Security-Policy", cspValue);
 
