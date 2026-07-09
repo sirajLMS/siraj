@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { StudentRepository } from "@/backend/db/repo";
+import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import type { StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
-import { setupStudent, setupTeacher } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {

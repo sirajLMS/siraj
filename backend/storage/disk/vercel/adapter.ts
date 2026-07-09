@@ -1,9 +1,9 @@
 import { getStringEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
-import { BaseAdapter } from "../base.adapter";
-import * as ops from "./operations";
-import type { VercelContext } from "./types";
+import { BaseAdapter } from "@/backend/storage/disk/base.adapter";
+import * as ops from "@/backend/storage/disk/vercel/operations";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 
 export class VercelAdapter extends BaseAdapter<VercelContext> {
   constructor() {

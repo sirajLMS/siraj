@@ -5,8 +5,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo";
 import { parents } from "@/backend/db/schema";
-import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

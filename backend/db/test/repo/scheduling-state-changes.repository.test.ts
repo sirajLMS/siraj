@@ -3,17 +3,17 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, leaveQuotaUsage, students, teacherAssignments } from "@/backend/db/schema";
-import type { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services";
 import {
   createMockClassInstance,
   createTestUser,
   setupStudent,
   setupTeacher,
   setupTestEntities,
-} from "../entity-setup";
-import { runInRollback } from "../test-utils";
-import { expectRepositoryError } from "./scheduling-test-helpers";
+} from "@/backend/db/test/entity-setup";
+import { expectRepositoryError } from "@/backend/db/test/repo/scheduling-test-helpers";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import type { AppPermission } from "@/backend/enum";
+import { PermissionsService } from "@/backend/services";
 
 describe("Scheduling Repository — State Changes & Leave Quota", () => {
   describe("State transitions and IDOR checks", () => {

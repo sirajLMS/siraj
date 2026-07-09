@@ -1,11 +1,11 @@
 import { copy, head } from "@vercel/blob";
 import logger from "@/backend/lib/logger";
+import { executeBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
+import { fileExists, fileInfoByPath } from "@/backend/storage/disk/vercel/operations/file.operations";
+import { getBlobs, isDirectory } from "@/backend/storage/disk/vercel/shared";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { executeBulkOperation } from "../../shared/bulk-operations.helper";
-import { getBlobs, isDirectory } from "../shared";
-import type { VercelContext } from "../types";
-import { fileExists, fileInfoByPath } from "./file.operations";
 
 export async function copyItems(
   ctx: VercelContext,

@@ -1,11 +1,11 @@
 import { copy, del, head, list } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
+import { getVercelBlobPath } from "@/backend/storage/disk/vercel/utils";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/shared/utils/storage.utils";
-import type { VercelContext } from "../types";
-import { getVercelBlobPath } from "../utils";
 
 export async function fileExists(ctx: VercelContext, filePath: string): Promise<boolean> {
   try {

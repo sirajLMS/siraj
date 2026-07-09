@@ -1,9 +1,9 @@
 import { SignedUrlRepository, StorageDbRepository } from "@/backend/db/repo";
 import { getStringEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
+import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { STORAGE_CONFIG, StorageValidationError } from "../storage.service.interface";
 
 /**
  * Common logic for preparing an upload across different storage providers

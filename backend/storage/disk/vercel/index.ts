@@ -1,5 +1,5 @@
-import type { StorageService } from "../storage.service.interface";
-import { VercelAdapter } from "./adapter";
+import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
+import { VercelAdapter } from "@/backend/storage/disk/vercel/adapter";
 
 export function createVercelAdapter(): StorageService {
   return new VercelAdapter();

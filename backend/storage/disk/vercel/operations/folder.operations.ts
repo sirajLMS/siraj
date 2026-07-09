@@ -1,10 +1,10 @@
 import { list } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import { createFolderHelper } from "@/backend/storage/disk/shared/folder-operations.helper";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { createFolderHelper } from "../../shared/folder-operations.helper";
-import type { VercelContext } from "../types";
 
 export async function createFolder(
   _ctx: VercelContext,

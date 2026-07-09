@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { recurringSchedules, teachers } from "@/backend/db/schema";
+import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import type { RecurringScheduleEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { setupStudent, setupTeacher } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 /**
  * Runs an operation expected to violate a database constraint and asserts an error is thrown.

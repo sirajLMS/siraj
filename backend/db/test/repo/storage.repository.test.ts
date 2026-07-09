@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { StorageDbRepository } from "@/backend/db/repo";
 import { storageFiles } from "@/backend/db/schema";
-import { createTestParent, createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 async function createTestFile(tx: DBTransaction, path?: string) {
   const [file] = await tx

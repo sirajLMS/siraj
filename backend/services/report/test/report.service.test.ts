@@ -2,7 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/report.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { ReportService } from "../report.service";
+import { ReportService } from "@/backend/services/report/report.service";
 
 describe("ReportService — generateAttendanceReport", () => {
   const dummyFilters = {

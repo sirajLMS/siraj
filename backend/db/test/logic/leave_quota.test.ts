@@ -4,10 +4,10 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
+import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { setupStudent, setupTeacher } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
   let errorCaught: Error | null = null;

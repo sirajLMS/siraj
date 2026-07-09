@@ -2,8 +2,8 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { LearningResourceRepository } from "@/backend/db/repo/learning-resource.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
 import * as storageServiceModule from "@/backend/storage/storage.service";
-import { LearningResourceService } from "../learning-resource.service";
 
 describe("LearningResourceService — deleteResource", () => {
   const dummyResourceId = "00000000-0000-0000-0000-000000000001";

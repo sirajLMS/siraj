@@ -4,9 +4,9 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository } from "@/backend/db/repo";
 import { invoices } from "@/backend/db/schema";
+import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { InvoiceStatus, InvoiceType } from "@/backend/enum";
-import { createTestParent, createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

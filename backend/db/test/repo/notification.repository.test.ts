@@ -5,10 +5,10 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo";
 import { notificationDeliveries, userNotificationPreferences } from "@/backend/db/schema";
+import { createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import type { CreateNotificationDeliveryInput } from "@/backend/types";
-import { createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 function notificationTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {

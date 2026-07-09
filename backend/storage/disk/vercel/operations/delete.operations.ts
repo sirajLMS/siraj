@@ -1,17 +1,17 @@
 import { del, head } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
-import type * as Types from "@/backend/types";
 import {
   type DeleteFnParams,
   executeBulkDelete,
   executeDeleteFile,
   validateDeletePermissions,
-} from "../../shared/delete-operations.helper";
-import { getBlobs, isDirectory } from "../shared";
-import type { VercelContext } from "../types";
-import { fileInfoByPath } from "./file.operations";
-import { directoryInfoByPath } from "./folder.operations";
+} from "@/backend/storage/disk/shared/delete-operations.helper";
+import { fileInfoByPath } from "@/backend/storage/disk/vercel/operations/file.operations";
+import { directoryInfoByPath } from "@/backend/storage/disk/vercel/operations/folder.operations";
+import { getBlobs, isDirectory } from "@/backend/storage/disk/vercel/shared";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
+import type * as Types from "@/backend/types";
 
 export async function deleteFile(ctx: VercelContext, filePath: string): Promise<Types.FileOperationResult> {
   return executeDeleteFile(filePath, async () => {

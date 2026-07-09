@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ImpersonationRepository } from "@/backend/db/repo";
 import { impersonationSessions } from "@/backend/db/schema/impersonation";
-import { createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 async function expectConstraintViolation(fn: () => Promise<unknown>): Promise<void> {
   let didThrow = false;

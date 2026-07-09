@@ -4,9 +4,9 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, students, teacherAssignments, users } from "@/backend/db/schema";
+import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
-import { createMockClassInstance, setupTestEntities } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 const NON_EXISTENT_ID = "00000000-0000-0000-0000-000000000000";
 

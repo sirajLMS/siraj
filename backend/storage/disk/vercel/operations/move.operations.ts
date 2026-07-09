@@ -1,18 +1,18 @@
 import { copy, del, head } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
-import type * as Types from "@/backend/types";
-import { executeBulkOperation } from "../../shared/bulk-operations.helper";
+import { executeBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import {
   loadMoveEntities,
   type MoveEntities,
   updateDbAfterMove,
   validateAndCalculateNewPath,
-} from "../../shared/move-operations.helper";
-import { getBlobs, isDirectory } from "../shared";
-import type { VercelContext } from "../types";
-import { fileExists, fileInfoByPath } from "./file.operations";
-import { directoryInfoByPath } from "./folder.operations";
+} from "@/backend/storage/disk/shared/move-operations.helper";
+import { fileExists, fileInfoByPath } from "@/backend/storage/disk/vercel/operations/file.operations";
+import { directoryInfoByPath } from "@/backend/storage/disk/vercel/operations/folder.operations";
+import { getBlobs, isDirectory } from "@/backend/storage/disk/vercel/shared";
+import type { VercelContext } from "@/backend/storage/disk/vercel/types";
+import type * as Types from "@/backend/types";
 
 export async function moveItems(
   ctx: VercelContext,

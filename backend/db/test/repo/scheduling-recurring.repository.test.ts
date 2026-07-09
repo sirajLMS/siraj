@@ -4,8 +4,8 @@ import { and, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
-import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {
   let errorCaught: unknown = null;

@@ -4,10 +4,16 @@ import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { notificationDeliveries, userDeviceTokens, users } from "@/backend/db/schema";
+import {
+  createTestUser,
+  runInRollback,
+  setupRlsPolicies,
+  setupRlsRole,
+  teardownRlsRole,
+} from "@/backend/db/test/test-utils";
 import { DevicePlatform, NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import type { UserReturnType } from "@/backend/types/auth.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { createTestUser, runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Notification Delivery Tracking", () => {
   beforeAll(async () => {
