@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AccountStatus, Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 
 const coreSchema = z.object({
   name: z.string().min(1),
@@ -19,7 +20,10 @@ const adminTeacherSchema = ownTeacherSchema.extend({
   qualifications: z.string().optional(),
   zoomUsername: z.string().optional(),
   zoomPassword: z.string().optional(),
-  timezone: z.string().optional(),
+  timezone: z
+    .string()
+    .optional()
+    .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
   hourlyRate: z.string().optional(),
   rateCurrency: z.string().optional(),
   paymentMethod: z.enum(PaymentMethod).optional().nullable(),

@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/user.types";
 import { testLogger } from "@/shared/lib/testlogger";
@@ -70,7 +71,6 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .values({
         userId: teacherUser.id,
         status: "ACTIVATED",
-        timezone: "UTC",
         createdAt: now,
         updatedAt: now,
       })
@@ -135,7 +135,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
         teacherId: testTeacher.id,
         durationMinutes: 60,
         defaultStartTime: "10:00:00",
-        timezone: "UTC",
+        timezone: IanaTimezone.UTC,
         createdAt: now,
         updatedAt: now,
       })

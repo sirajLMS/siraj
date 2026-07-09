@@ -1988,6 +1988,7 @@ const en: MessageSchema = {
         feeAmount: "Fee Amount",
         paymentMethod: "Payment Method",
         currency: "Currency",
+        timezone: "Timezone",
       },
       placeholders: {
         fullName: "e.g. Ahmed Al-Farsi",
@@ -2003,6 +2004,7 @@ const en: MessageSchema = {
         feeAmount: "0.00",
         paymentMethod: "Select Method",
         currency: "Select Currency",
+        timezone: "Select Timezone",
       },
       options: {
         invoiceType: {
@@ -2041,6 +2043,7 @@ const en: MessageSchema = {
         currencyRequired: "Currency is required",
         invoiceTypeRequired: "Invoice type is required",
         paymentMethodRequired: "Payment method is required",
+        timezoneRequired: "Timezone is required",
       },
     },
     managerOnboarding: {
@@ -3109,6 +3112,9 @@ const en: MessageSchema = {
     tagInput: {
       label: "Add items",
       placeholder: "Type and press Enter",
+    },
+    timezoneSelect: {
+      selectTimezone: "Select timezone",
     },
   },
 };

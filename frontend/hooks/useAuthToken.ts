@@ -1,4 +1,4 @@
-import { useNetworkConnectivity } from "./useNetworkConnectivity";
+import { useNetworkConnectivity } from "@/frontend/hooks/useNetworkConnectivity";
 
 // Convenience functions for global access to auth token management
 export const useAuthToken = () => {

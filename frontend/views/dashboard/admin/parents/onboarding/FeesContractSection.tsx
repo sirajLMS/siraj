@@ -2,18 +2,27 @@
 
 import { Box, Grid, Input, MenuItem, Select } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethod } from "./types";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
+  readonly control: Control<ParentOnboardingFormData>;
   readonly errors: FieldErrors<ParentOnboardingFormData>;
 }
 
-function InvoiceFields({ register, errors }: SectionProps) {
+interface InvoiceFieldsProps {
+  readonly register: UseFormRegister<ParentOnboardingFormData>;
+  readonly errors: FieldErrors<ParentOnboardingFormData>;
+}
+
+function InvoiceFields({ register, errors }: InvoiceFieldsProps) {
   const t = useTranslations("dashboard.parentOnboarding");
   return (
     <>
@@ -70,7 +79,7 @@ function InvoiceFields({ register, errors }: SectionProps) {
   );
 }
 
-function PaymentFields({ register, errors }: SectionProps) {
+function PaymentFields({ register, control, errors }: SectionProps) {
   const t = useTranslations("dashboard.parentOnboarding");
   return (
     <>
@@ -115,18 +124,40 @@ function PaymentFields({ register, errors }: SectionProps) {
           </Select>
         </FieldWrapper>
       </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <Controller
+          name="timezone"
+          control={control}
+          render={({ field }) => (
+            <FieldWrapper
+              label={t("fields.timezone")}
+              required
+              error={errors.timezone ? t(`validation.${errors.timezone.message}`) : undefined}
+            >
+              <TimezoneSelect
+                value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+                onChangeAction={value => {
+                  field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+                }}
+                onBlurAction={field.onBlur}
+                fullWidth
+              />
+            </FieldWrapper>
+          )}
+        />
+      </Grid>
     </>
   );
 }
 
-export function FeesContractSection({ register, errors }: SectionProps) {
+export function FeesContractSection({ register, control, errors }: SectionProps) {
   const t = useTranslations("dashboard.parentOnboarding");
 
   return (
     <SectionPanel title={t("sections.feesContract")}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <InvoiceFields register={register} errors={errors} />
-        <PaymentFields register={register} errors={errors} />
+        <PaymentFields register={register} control={control} errors={errors} />
       </Grid>
     </SectionPanel>
   );

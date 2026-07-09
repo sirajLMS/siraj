@@ -8,6 +8,7 @@ import {
   type ClassInstanceDetail,
   ClassOutcome,
   ClassType,
+  IanaTimezone,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
@@ -35,7 +36,7 @@ const mockInstance: ClassInstanceDetail = {
   remarks:
     "Student requested focus on Surah .. verses 120-140. Please ensure high-quality audio recording for parent review.",
   hasTimezoneMismatch: true,
-  studentTimezone: "GMT+3",
+  studentTimezone: IanaTimezone.AfricaCairo,
   teacherTimezone: null,
   zoomMeetingUrl: "",
   executionState: ClassExecutionState.NotActivated,

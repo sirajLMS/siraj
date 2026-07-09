@@ -7,13 +7,12 @@ import { styled } from "@mui/material/styles";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { resolveBrowserIanaTimezoneId } from "@/frontend/lib/timezone";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { RecurringClassForm } from "./RecurringClassForm";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 import { createRecurringClassSchema } from "./recurringClassSchema";
 import { DEFAULT_DAY_SCHEDULE } from "./types";
-
-const USER_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 interface CreateRecurringClassViewProps {
   readonly isSubmitting: boolean;
@@ -189,7 +188,7 @@ export function CreateRecurringClassView({
       defaultStartTime: "09:00",
       durationHours: 0,
       durationMinutes: 45,
-      timezone: USER_TIMEZONE,
+      timezone: resolveBrowserIanaTimezoneId(),
       classType: undefined,
       effectiveFrom: undefined,
       effectiveUntil: undefined,

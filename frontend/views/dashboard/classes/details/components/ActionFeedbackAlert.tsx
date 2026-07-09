@@ -1,5 +1,5 @@
 import { Alert } from "@mui/material";
-import type { ActionFeedbackState } from "../types";
+import type { ActionFeedbackState } from "@/frontend/views/dashboard/classes/details/types";
 
 export function ActionFeedbackAlert({ feedbackState }: { readonly feedbackState: ActionFeedbackState | null }) {
   if (!feedbackState) return null;

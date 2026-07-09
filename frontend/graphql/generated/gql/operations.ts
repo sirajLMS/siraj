@@ -562,8 +562,7 @@ export type CreateRecurringClassInput = {
   generateInstancesForWeeks: number | null | undefined;
   studentId: string;
   teacherId: string;
-  timezone: string;
-  timezoneId: number | null | undefined;
+  timezone: IanaTimezone;
 };
 
 export type CreateTeacherNoteInput = {
@@ -599,6 +598,453 @@ export type GroupClassAttendanceStatus =
   | 'LATE'
   | 'PENDING'
   | 'PRESENT';
+
+export type IanaTimezone =
+  | 'Africa_Abidjan'
+  | 'Africa_Accra'
+  | 'Africa_Addis_Ababa'
+  | 'Africa_Algiers'
+  | 'Africa_Asmara'
+  | 'Africa_Bamako'
+  | 'Africa_Bangui'
+  | 'Africa_Banjul'
+  | 'Africa_Bissau'
+  | 'Africa_Blantyre'
+  | 'Africa_Brazzaville'
+  | 'Africa_Bujumbura'
+  | 'Africa_Cairo'
+  | 'Africa_Casablanca'
+  | 'Africa_Ceuta'
+  | 'Africa_Conakry'
+  | 'Africa_Dakar'
+  | 'Africa_Dar_es_Salaam'
+  | 'Africa_Djibouti'
+  | 'Africa_Douala'
+  | 'Africa_El_Aaiun'
+  | 'Africa_Freetown'
+  | 'Africa_Gaborone'
+  | 'Africa_Harare'
+  | 'Africa_Johannesburg'
+  | 'Africa_Juba'
+  | 'Africa_Kampala'
+  | 'Africa_Khartoum'
+  | 'Africa_Kigali'
+  | 'Africa_Kinshasa'
+  | 'Africa_Lagos'
+  | 'Africa_Libreville'
+  | 'Africa_Lome'
+  | 'Africa_Luanda'
+  | 'Africa_Lubumbashi'
+  | 'Africa_Lusaka'
+  | 'Africa_Malabo'
+  | 'Africa_Maputo'
+  | 'Africa_Maseru'
+  | 'Africa_Mbabane'
+  | 'Africa_Mogadishu'
+  | 'Africa_Monrovia'
+  | 'Africa_Nairobi'
+  | 'Africa_Ndjamena'
+  | 'Africa_Niamey'
+  | 'Africa_Nouakchott'
+  | 'Africa_Ouagadougou'
+  | 'Africa_Porto_Novo'
+  | 'Africa_Sao_Tome'
+  | 'Africa_Tripoli'
+  | 'Africa_Tunis'
+  | 'Africa_Windhoek'
+  | 'America_Adak'
+  | 'America_Anchorage'
+  | 'America_Anguilla'
+  | 'America_Antigua'
+  | 'America_Araguaina'
+  | 'America_Argentina_Buenos_Aires'
+  | 'America_Argentina_Catamarca'
+  | 'America_Argentina_Cordoba'
+  | 'America_Argentina_Jujuy'
+  | 'America_Argentina_La_Rioja'
+  | 'America_Argentina_Mendoza'
+  | 'America_Argentina_Rio_Gallegos'
+  | 'America_Argentina_Salta'
+  | 'America_Argentina_San_Juan'
+  | 'America_Argentina_San_Luis'
+  | 'America_Argentina_Tucuman'
+  | 'America_Argentina_Ushuaia'
+  | 'America_Aruba'
+  | 'America_Asuncion'
+  | 'America_Atikokan'
+  | 'America_Bahia'
+  | 'America_Bahia_Banderas'
+  | 'America_Barbados'
+  | 'America_Belem'
+  | 'America_Belize'
+  | 'America_Blanc_Sablon'
+  | 'America_Boa_Vista'
+  | 'America_Bogota'
+  | 'America_Boise'
+  | 'America_Cambridge_Bay'
+  | 'America_Campo_Grande'
+  | 'America_Cancun'
+  | 'America_Caracas'
+  | 'America_Cayenne'
+  | 'America_Cayman'
+  | 'America_Chicago'
+  | 'America_Chihuahua'
+  | 'America_Ciudad_Juarez'
+  | 'America_Costa_Rica'
+  | 'America_Creston'
+  | 'America_Cuiaba'
+  | 'America_Curacao'
+  | 'America_Danmarkshavn'
+  | 'America_Dawson'
+  | 'America_Dawson_Creek'
+  | 'America_Denver'
+  | 'America_Detroit'
+  | 'America_Dominica'
+  | 'America_Edmonton'
+  | 'America_Eirunepe'
+  | 'America_El_Salvador'
+  | 'America_Fort_Nelson'
+  | 'America_Fortaleza'
+  | 'America_Glace_Bay'
+  | 'America_Goose_Bay'
+  | 'America_Grand_Turk'
+  | 'America_Grenada'
+  | 'America_Guadeloupe'
+  | 'America_Guatemala'
+  | 'America_Guayaquil'
+  | 'America_Guyana'
+  | 'America_Halifax'
+  | 'America_Havana'
+  | 'America_Hermosillo'
+  | 'America_Indiana_Indianapolis'
+  | 'America_Indiana_Knox'
+  | 'America_Indiana_Marengo'
+  | 'America_Indiana_Petersburg'
+  | 'America_Indiana_Tell_City'
+  | 'America_Indiana_Vevay'
+  | 'America_Indiana_Vincennes'
+  | 'America_Indiana_Winamac'
+  | 'America_Inuvik'
+  | 'America_Iqaluit'
+  | 'America_Jamaica'
+  | 'America_Juneau'
+  | 'America_Kentucky_Louisville'
+  | 'America_Kentucky_Monticello'
+  | 'America_Kralendijk'
+  | 'America_La_Paz'
+  | 'America_Lima'
+  | 'America_Los_Angeles'
+  | 'America_Lower_Princes'
+  | 'America_Maceio'
+  | 'America_Managua'
+  | 'America_Manaus'
+  | 'America_Marigot'
+  | 'America_Martinique'
+  | 'America_Matamoros'
+  | 'America_Mazatlan'
+  | 'America_Menominee'
+  | 'America_Merida'
+  | 'America_Metlakatla'
+  | 'America_Mexico_City'
+  | 'America_Miquelon'
+  | 'America_Moncton'
+  | 'America_Monterrey'
+  | 'America_Montevideo'
+  | 'America_Montserrat'
+  | 'America_Nassau'
+  | 'America_New_York'
+  | 'America_Nome'
+  | 'America_Noronha'
+  | 'America_North_Dakota_Beulah'
+  | 'America_North_Dakota_Center'
+  | 'America_North_Dakota_New_Salem'
+  | 'America_Nuuk'
+  | 'America_Ojinaga'
+  | 'America_Panama'
+  | 'America_Paramaribo'
+  | 'America_Phoenix'
+  | 'America_Port_au_Prince'
+  | 'America_Port_of_Spain'
+  | 'America_Porto_Velho'
+  | 'America_Puerto_Rico'
+  | 'America_Punta_Arenas'
+  | 'America_Rankin_Inlet'
+  | 'America_Recife'
+  | 'America_Regina'
+  | 'America_Resolute'
+  | 'America_Rio_Branco'
+  | 'America_Santarem'
+  | 'America_Santiago'
+  | 'America_Santo_Domingo'
+  | 'America_Sao_Paulo'
+  | 'America_Scoresbysund'
+  | 'America_Sitka'
+  | 'America_St_Barthelemy'
+  | 'America_St_Johns'
+  | 'America_St_Kitts'
+  | 'America_St_Lucia'
+  | 'America_St_Thomas'
+  | 'America_St_Vincent'
+  | 'America_Swift_Current'
+  | 'America_Tegucigalpa'
+  | 'America_Thule'
+  | 'America_Tijuana'
+  | 'America_Toronto'
+  | 'America_Tortola'
+  | 'America_Vancouver'
+  | 'America_Whitehorse'
+  | 'America_Winnipeg'
+  | 'America_Yakutat'
+  | 'Antarctica_Casey'
+  | 'Antarctica_Davis'
+  | 'Antarctica_DumontDUrville'
+  | 'Antarctica_Macquarie'
+  | 'Antarctica_Mawson'
+  | 'Antarctica_McMurdo'
+  | 'Antarctica_Palmer'
+  | 'Antarctica_Rothera'
+  | 'Antarctica_Syowa'
+  | 'Antarctica_Troll'
+  | 'Antarctica_Vostok'
+  | 'Arctic_Longyearbyen'
+  | 'Asia_Aden'
+  | 'Asia_Almaty'
+  | 'Asia_Amman'
+  | 'Asia_Anadyr'
+  | 'Asia_Aqtau'
+  | 'Asia_Aqtobe'
+  | 'Asia_Ashgabat'
+  | 'Asia_Atyrau'
+  | 'Asia_Baghdad'
+  | 'Asia_Bahrain'
+  | 'Asia_Baku'
+  | 'Asia_Bangkok'
+  | 'Asia_Barnaul'
+  | 'Asia_Beirut'
+  | 'Asia_Bishkek'
+  | 'Asia_Brunei'
+  | 'Asia_Chita'
+  | 'Asia_Choibalsan'
+  | 'Asia_Colombo'
+  | 'Asia_Damascus'
+  | 'Asia_Dhaka'
+  | 'Asia_Dili'
+  | 'Asia_Dubai'
+  | 'Asia_Dushanbe'
+  | 'Asia_Famagusta'
+  | 'Asia_Gaza'
+  | 'Asia_Hebron'
+  | 'Asia_Ho_Chi_Minh'
+  | 'Asia_Hong_Kong'
+  | 'Asia_Hovd'
+  | 'Asia_Irkutsk'
+  | 'Asia_Jakarta'
+  | 'Asia_Jayapura'
+  | 'Asia_Jerusalem'
+  | 'Asia_Kabul'
+  | 'Asia_Kamchatka'
+  | 'Asia_Karachi'
+  | 'Asia_Kathmandu'
+  | 'Asia_Khandyga'
+  | 'Asia_Kolkata'
+  | 'Asia_Krasnoyarsk'
+  | 'Asia_Kuala_Lumpur'
+  | 'Asia_Kuching'
+  | 'Asia_Kuwait'
+  | 'Asia_Macau'
+  | 'Asia_Magadan'
+  | 'Asia_Makassar'
+  | 'Asia_Manila'
+  | 'Asia_Muscat'
+  | 'Asia_Nicosia'
+  | 'Asia_Novokuznetsk'
+  | 'Asia_Novosibirsk'
+  | 'Asia_Omsk'
+  | 'Asia_Oral'
+  | 'Asia_Phnom_Penh'
+  | 'Asia_Pontianak'
+  | 'Asia_Pyongyang'
+  | 'Asia_Qatar'
+  | 'Asia_Qostanay'
+  | 'Asia_Qyzylorda'
+  | 'Asia_Riyadh'
+  | 'Asia_Sakhalin'
+  | 'Asia_Samarkand'
+  | 'Asia_Seoul'
+  | 'Asia_Shanghai'
+  | 'Asia_Singapore'
+  | 'Asia_Srednekolymsk'
+  | 'Asia_Taipei'
+  | 'Asia_Tashkent'
+  | 'Asia_Tbilisi'
+  | 'Asia_Tehran'
+  | 'Asia_Thimphu'
+  | 'Asia_Tokyo'
+  | 'Asia_Tomsk'
+  | 'Asia_Ulaanbaatar'
+  | 'Asia_Urumqi'
+  | 'Asia_Ust_Nera'
+  | 'Asia_Vientiane'
+  | 'Asia_Vladivostok'
+  | 'Asia_Yakutsk'
+  | 'Asia_Yangon'
+  | 'Asia_Yekaterinburg'
+  | 'Asia_Yerevan'
+  | 'Atlantic_Azores'
+  | 'Atlantic_Bermuda'
+  | 'Atlantic_Canary'
+  | 'Atlantic_Cape_Verde'
+  | 'Atlantic_Faroe'
+  | 'Atlantic_Madeira'
+  | 'Atlantic_Reykjavik'
+  | 'Atlantic_South_Georgia'
+  | 'Atlantic_St_Helena'
+  | 'Atlantic_Stanley'
+  | 'Australia_Adelaide'
+  | 'Australia_Brisbane'
+  | 'Australia_Broken_Hill'
+  | 'Australia_Darwin'
+  | 'Australia_Eucla'
+  | 'Australia_Hobart'
+  | 'Australia_Lindeman'
+  | 'Australia_Lord_Howe'
+  | 'Australia_Melbourne'
+  | 'Australia_Perth'
+  | 'Australia_Sydney'
+  | 'Etc_GMT_1'
+  | 'Etc_GMT_2'
+  | 'Etc_GMT_3'
+  | 'Etc_GMT_4'
+  | 'Etc_GMT_5'
+  | 'Etc_GMT_6'
+  | 'Etc_GMT_7'
+  | 'Etc_GMT_8'
+  | 'Etc_GMT_9'
+  | 'Etc_GMT_10'
+  | 'Etc_GMT_11'
+  | 'Etc_GMT_12'
+  | 'Etc_GMT_13'
+  | 'Etc_GMT_14'
+  | 'Etc_GMT_plus_1'
+  | 'Etc_GMT_plus_2'
+  | 'Etc_GMT_plus_3'
+  | 'Etc_GMT_plus_4'
+  | 'Etc_GMT_plus_5'
+  | 'Etc_GMT_plus_6'
+  | 'Etc_GMT_plus_7'
+  | 'Etc_GMT_plus_8'
+  | 'Etc_GMT_plus_9'
+  | 'Etc_GMT_plus_10'
+  | 'Etc_GMT_plus_11'
+  | 'Etc_GMT_plus_12'
+  | 'Europe_Amsterdam'
+  | 'Europe_Andorra'
+  | 'Europe_Astrakhan'
+  | 'Europe_Athens'
+  | 'Europe_Belgrade'
+  | 'Europe_Berlin'
+  | 'Europe_Bratislava'
+  | 'Europe_Brussels'
+  | 'Europe_Bucharest'
+  | 'Europe_Budapest'
+  | 'Europe_Busingen'
+  | 'Europe_Chisinau'
+  | 'Europe_Copenhagen'
+  | 'Europe_Dublin'
+  | 'Europe_Gibraltar'
+  | 'Europe_Guernsey'
+  | 'Europe_Helsinki'
+  | 'Europe_Isle_of_Man'
+  | 'Europe_Istanbul'
+  | 'Europe_Jersey'
+  | 'Europe_Kaliningrad'
+  | 'Europe_Kirov'
+  | 'Europe_Kyiv'
+  | 'Europe_Lisbon'
+  | 'Europe_Ljubljana'
+  | 'Europe_London'
+  | 'Europe_Luxembourg'
+  | 'Europe_Madrid'
+  | 'Europe_Malta'
+  | 'Europe_Mariehamn'
+  | 'Europe_Minsk'
+  | 'Europe_Monaco'
+  | 'Europe_Moscow'
+  | 'Europe_Oslo'
+  | 'Europe_Paris'
+  | 'Europe_Podgorica'
+  | 'Europe_Prague'
+  | 'Europe_Riga'
+  | 'Europe_Rome'
+  | 'Europe_Samara'
+  | 'Europe_San_Marino'
+  | 'Europe_Sarajevo'
+  | 'Europe_Saratov'
+  | 'Europe_Simferopol'
+  | 'Europe_Skopje'
+  | 'Europe_Sofia'
+  | 'Europe_Stockholm'
+  | 'Europe_Tallinn'
+  | 'Europe_Tirane'
+  | 'Europe_Ulyanovsk'
+  | 'Europe_Vaduz'
+  | 'Europe_Vatican'
+  | 'Europe_Vienna'
+  | 'Europe_Vilnius'
+  | 'Europe_Volgograd'
+  | 'Europe_Warsaw'
+  | 'Europe_Zagreb'
+  | 'Europe_Zurich'
+  | 'Indian_Antananarivo'
+  | 'Indian_Chagos'
+  | 'Indian_Christmas'
+  | 'Indian_Cocos'
+  | 'Indian_Comoro'
+  | 'Indian_Kerguelen'
+  | 'Indian_Mahe'
+  | 'Indian_Maldives'
+  | 'Indian_Mauritius'
+  | 'Indian_Mayotte'
+  | 'Indian_Reunion'
+  | 'Pacific_Apia'
+  | 'Pacific_Auckland'
+  | 'Pacific_Bougainville'
+  | 'Pacific_Chatham'
+  | 'Pacific_Chuuk'
+  | 'Pacific_Easter'
+  | 'Pacific_Efate'
+  | 'Pacific_Fakaofo'
+  | 'Pacific_Fiji'
+  | 'Pacific_Funafuti'
+  | 'Pacific_Galapagos'
+  | 'Pacific_Gambier'
+  | 'Pacific_Guadalcanal'
+  | 'Pacific_Guam'
+  | 'Pacific_Honolulu'
+  | 'Pacific_Kanton'
+  | 'Pacific_Kiritimati'
+  | 'Pacific_Kosrae'
+  | 'Pacific_Kwajalein'
+  | 'Pacific_Majuro'
+  | 'Pacific_Marquesas'
+  | 'Pacific_Midway'
+  | 'Pacific_Nauru'
+  | 'Pacific_Niue'
+  | 'Pacific_Norfolk'
+  | 'Pacific_Noumea'
+  | 'Pacific_Pago_Pago'
+  | 'Pacific_Palau'
+  | 'Pacific_Pitcairn'
+  | 'Pacific_Pohnpei'
+  | 'Pacific_Port_Moresby'
+  | 'Pacific_Rarotonga'
+  | 'Pacific_Saipan'
+  | 'Pacific_Tahiti'
+  | 'Pacific_Tarawa'
+  | 'Pacific_Tongatapu'
+  | 'Pacific_Wake'
+  | 'Pacific_Wallis'
+  | 'UTC';
 
 export type InvoiceStatus =
   | 'CANCELLED'
@@ -695,7 +1141,7 @@ export type ParentAdminProfileUpdateInput = {
   nationality: string | null | undefined;
   paymentMethod: string | null | undefined;
   phone: string | null | undefined;
-  timezone: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
   twitter: string | null | undefined;
   whatsapp: string | null | undefined;
 };
@@ -714,7 +1160,7 @@ export type ParentOnboardingInput = {
   password: string;
   paymentMethod: PaymentMethod | null | undefined;
   phone: string | null | undefined;
-  timezone: string | null | undefined;
+  timezone: IanaTimezone;
   twitter: string | null | undefined;
   whatsapp: string | null | undefined;
 };
@@ -935,10 +1381,7 @@ export type TeacherOnboardingInput = {
   routingNumber: string | null | undefined;
   /** SWIFT/BIC code */
   swiftBic: string | null | undefined;
-  /** IANA timezone identifier */
-  timezone: string;
-  /** Timezone ID reference */
-  timezoneId: number | null | undefined;
+  timezone: IanaTimezone;
   /** Teacher Zoom meeting link */
   zoomLink: string | null | undefined;
   /** Teacher Zoom password (encrypted) */
@@ -963,7 +1406,7 @@ export type TeacherProfileUpdateInput = {
   qualifications: string | null | undefined;
   rateCurrency: string | null | undefined;
   status: AccountStatus | null | undefined;
-  timezone: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
   zoomLink: string | null | undefined;
   zoomPassword: string | null | undefined;
   zoomUsername: string | null | undefined;
@@ -1192,9 +1635,9 @@ export type EndPermissionGroupSimulationMutation = EndPermissionGroupSimulationM
 
 export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_pageInfo_PageInfo = { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
 
-export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: Types.DayOfWeek | null, calendarDate: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: Types.DayOfWeek | null, calendarDate: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: Types.IanaTimezone | null };
 
-export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: Types.Gender | null, timezone: string | null, availableDaysCount: number | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: Types.Gender | null, timezone: Types.IanaTimezone | null, availableDaysCount: number | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
 
 export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult = { id: string | null, totalGaps: number | null, totalCount: number | null, pageInfo: SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_pageInfo_PageInfo | null, teachers: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher> | null };
 
@@ -1342,7 +1785,7 @@ export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassIn
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance = { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null };
 
-export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: string | null, teacherTimezone: string | null, zoomMeetingUrl: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, avatarUrl: string | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: Types.IanaTimezone | null, teacherTimezone: Types.IanaTimezone | null, zoomMeetingUrl: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, avatarUrl: string | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
 
 export type ClassInstanceQuery_Query = { classInstance: ClassInstanceQuery_classInstance_ClassInstanceDetail | null };
 
@@ -2000,7 +2443,7 @@ export type ParentHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ParentHandbookUrlQuery = ParentHandbookUrlQuery_Query;
 
-export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
+export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
 
 export type ParentProfileQuery_Query = { parentProfile: ParentProfileQuery_parentProfile_ParentProfile | null };
 
@@ -2211,13 +2654,13 @@ export type UpdateUserOverridesMutationVariables = Exact<{
 
 export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null, totalClasses: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null, totalClasses: number | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent = { id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
 
@@ -2247,7 +2690,7 @@ export type ProfileByUserIdQueryVariables = Exact<{
 
 export type ProfileByUserIdQuery = ProfileByUserIdQuery_Query;
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null, totalClasses: number | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null, totalClasses: number | null };
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null };
 
@@ -2265,9 +2708,9 @@ export type UpdateOwnProfileMutationVariables = Exact<{
 
 export type UpdateOwnProfileMutation = UpdateOwnProfileMutation_Mutation;
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null };
 
@@ -2336,7 +2779,7 @@ export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardSch
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
-export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: Types.IanaTimezone | null, studentTimezone: Types.IanaTimezone | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2369,7 +2812,7 @@ export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_D
 
 export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null, avatarUrl: string | null };
 
-export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: Types.IanaTimezone | null, studentTimezone: Types.IanaTimezone | null, duration: number | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
 export type DailyScheduleListQuery_Query = { dailyScheduleList: Array<DailyScheduleListQuery_dailyScheduleList_DailyScheduleList> | null };
 
@@ -2420,7 +2863,7 @@ export type StatusTrackingScheduleQuery_Query = { statusTrackingSchedule: Array<
 export type StatusTrackingScheduleQueryVariables = Exact<{
   date: string;
   search: string | null | undefined;
-  viewerTimezone: string | null | undefined;
+  viewerTimezone: Types.IanaTimezone | null | undefined;
 }>;
 
 
@@ -2488,7 +2931,7 @@ export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OnboardingMetricsQuery = OnboardingMetricsQuery_Query;
 
-export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type TeacherProfileForEditQuery_Query = { teacherProfileForEdit: TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult | null };
 
@@ -2500,7 +2943,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 
@@ -2884,7 +3327,7 @@ export type TeacherAssignedStudentsQueryVariables = Exact<{ [key: string]: never
 
 export type TeacherAssignedStudentsQuery = TeacherAssignedStudentsQuery_Query;
 
-export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null };
+export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null };
 
 export type TeacherOwnProfileQuery_Query = { teacherOwnProfile: TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile | null };
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
-import { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
 import { TeacherProfileView } from "./TeacherProfileView";
 import type { TeacherProfileData } from "./types";
@@ -12,7 +12,7 @@ const INITIAL_PROFILE: TeacherProfileData = {
   email: "amina.hassan@example.com",
   phone: "+20 100 555 0123",
   gender: Gender.Female,
-  timezone: "Africa/Cairo",
+  timezone: IanaTimezone.AfricaCairo,
   address: "Nasr City, Cairo",
   baseSalary: 780,
   currency: "USD",

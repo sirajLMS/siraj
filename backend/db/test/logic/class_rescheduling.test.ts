@@ -31,7 +31,7 @@ async function setupTestData(
   const tUser = await createTestUser(tx, `${prefix} Teacher`, `${prefix}-t-${randomUUID()}@example.com`, now);
   const [teacher] = await tx
     .insert(teachers)
-    .values({ userId: tUser.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+    .values({ userId: tUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now })
     .returning();
 
   const [student] = await tx

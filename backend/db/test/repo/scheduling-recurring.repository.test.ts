@@ -6,6 +6,7 @@ import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {
   let errorCaught: unknown = null;
@@ -132,7 +133,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
       teacherId,
       durationMinutes: 60,
       defaultStartTime: "10:00:00",
-      timezone: "UTC",
+      timezone: IanaTimezone.UTC,
       effectiveFrom: new Date("2026-06-22T00:00:00Z"),
       effectiveUntil: new Date("2026-07-22T00:00:00Z"),
       days,
@@ -152,7 +153,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             teacherId: teacher.id,
             durationMinutes: 60,
             defaultStartTime: "10:00:00",
-            timezone: "UTC",
+            timezone: IanaTimezone.UTC,
             effectiveFrom: new Date("2026-06-22T00:00:00Z"),
             effectiveUntil: new Date("2026-07-22T00:00:00Z"),
             days: [
@@ -185,7 +186,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           .select()
           .from(classInstances)
           .where(eq(classInstances.id, result.classInstanceIds[0]));
-        expect(instance.bookingTimezone).toBe("UTC");
+        expect(instance.bookingTimezone).toBe(IanaTimezone.UTC);
         expect(instance.bookingUtcOffset).toBe(0);
       });
     });
@@ -204,7 +205,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             teacherId: teacher.id,
             durationMinutes: 60,
             defaultStartTime: "10:00:00",
-            timezone: "UTC",
+            timezone: IanaTimezone.UTC,
             effectiveFrom,
             effectiveUntil,
             days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
@@ -226,7 +227,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
               teacherId: teacher.id,
               durationMinutes: 60,
               defaultStartTime: "10:00:00",
-              timezone: "UTC",
+              timezone: IanaTimezone.UTC,
               effectiveFrom,
               effectiveUntil,
               days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
@@ -334,7 +335,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           teacherId: teacher.id,
           durationMinutes: 60,
           defaultStartTime: "10:00:00",
-          timezone: "UTC",
+          timezone: IanaTimezone.UTC,
           effectiveFrom: new Date("2026-06-22T00:00:00Z"),
           effectiveUntil: new Date("2026-07-22T00:00:00Z"),
           days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
@@ -390,7 +391,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             teacherId: teacher.id,
             durationMinutes: 60,
             defaultStartTime: "10:00:00",
-            timezone: "UTC",
+            timezone: IanaTimezone.UTC,
             effectiveFrom: new Date("2026-06-22T00:00:00Z"),
             effectiveUntil: new Date("2026-07-22T00:00:00Z"),
             days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
@@ -407,7 +408,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             teacherId: teacher.id,
             durationMinutes: 60,
             defaultStartTime: "14:00:00",
-            timezone: "UTC",
+            timezone: IanaTimezone.UTC,
             effectiveFrom: new Date("2026-06-22T00:00:00Z"),
             effectiveUntil: new Date("2026-07-22T00:00:00Z"),
             days: [{ dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true }],

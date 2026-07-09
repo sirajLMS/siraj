@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { OverrideStatePothosObject } from "@/backend/graphql/pothos/enum.pothos";
+import { IanaTimezonePothosObject, OverrideStatePothosObject } from "@/backend/graphql/pothos/enum.pothos";
 import {
   ParentAssignedStudentsResultPothosObject,
   ParentOwnProfilePothosObject,
@@ -160,7 +160,7 @@ export const ParentAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
       feeAmount: t.string({ required: false }),
       paymentMethod: t.string({ required: false }),
       currency: t.string({ required: false }),
-      timezone: t.string({ required: false }),
+      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),
   });
 

@@ -1,4 +1,4 @@
-import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
+import { DayOfWeek, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/stores/recurring-schedule-types";
 
 export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
@@ -23,6 +23,6 @@ export type ClassType = (typeof CLASS_TYPE_OPTIONS)[number];
 
 export const TIMEZONE_OPTIONS = [
   { value: "Africa/Cairo", label: "Africa/Cairo (Cairo)" },
-  { value: "Asia/Riyadh", label: "Asia/Riyadh (Riyadh)" },
+  { value: IanaTimezone.AsiaRiyadh, label: "Asia/Riyadh (Riyadh)" },
   { value: "UTC", label: "UTC" },
 ] as const;

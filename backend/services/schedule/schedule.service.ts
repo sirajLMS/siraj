@@ -56,6 +56,8 @@ export namespace ScheduleService {
       },
       courseName: item.courseName ?? null,
       avatarUrl: item.avatarUrl ?? null,
+      teacherTimezone: item.teacherTimezone ?? null,
+      studentTimezone: item.studentTimezone ?? null,
     };
   }
 

@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { IanaTimezone, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "../sharedDocuments/schedule.documents";
 import { changeStudentStatusMutationDocument } from "../sharedDocuments/student-lifecycle.documents";
 import {
@@ -19,12 +19,12 @@ async function fetchStatusTracking(
   token: string,
   date: string,
   search?: string | null,
-  viewerTimezone?: string | null
+  viewerTimezone?: IanaTimezone | null
 ) {
   return await authenticatedRequest(token, "query", statusTrackingScheduleQueryDocument, {
     date,
     search: search ?? null,
-    viewerTimezone: viewerTimezone ?? null,
+    viewerTimezone: viewerTimezone ?? IanaTimezone.Utc,
   });
 }
 
@@ -76,7 +76,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
     const teacherToken = await loginDemoUser("teacher_default");
     const result = await testClient.query({
       query: statusTrackingScheduleQueryDocument,
-      variables: { date: testDate, search: null, viewerTimezone: null },
+      variables: { date: testDate, search: null, viewerTimezone: IanaTimezone.Utc },
       context: { headers: { Authorization: `Bearer ${teacherToken}` } },
     });
 
@@ -88,7 +88,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
     const parentToken = await loginDemoUser("parent_default");
     const result = await testClient.query({
       query: statusTrackingScheduleQueryDocument,
-      variables: { date: testDate, search: null, viewerTimezone: null },
+      variables: { date: testDate, search: null, viewerTimezone: IanaTimezone.Utc },
       context: { headers: { Authorization: `Bearer ${parentToken}` } },
     });
 
@@ -169,7 +169,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   });
 
   test("viewerTimezone parameter is accepted without error", async () => {
-    const data = await fetchStatusTracking(adminToken, testDate, null, "Asia/Riyadh");
+    const data = await fetchStatusTracking(adminToken, testDate, null, IanaTimezone.AsiaRiyadh);
 
     expect(data.statusTrackingSchedule).toBeDefined();
     expect(Array.isArray(data.statusTrackingSchedule)).toBeTrue();
@@ -183,7 +183,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
 
       const result = await testClient.query({
         query: statusTrackingScheduleQueryDocument,
-        variables: { date: testDate, search: null, viewerTimezone: null },
+        variables: { date: testDate, search: null, viewerTimezone: IanaTimezone.Utc },
         context: {
           headers: {
             Authorization: `Bearer ${teacherToken}`,

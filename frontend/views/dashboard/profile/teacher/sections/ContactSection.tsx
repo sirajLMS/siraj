@@ -2,8 +2,12 @@
 
 import { Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
+import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherAdminEditFormData } from "../teacherProfileFormTypes";
 import { InfoField } from "./InfoField";
 import { isTeacherAdminData, type TeacherViewData, toDisplayValue } from "./teacherProfileTypes";
@@ -18,6 +22,7 @@ type ContactSectionProps =
       readonly mode: "edit";
       readonly isAdminScope: boolean;
       readonly register: UseFormRegister<TeacherAdminEditFormData>;
+      readonly control?: Control<TeacherAdminEditFormData>;
     };
 
 export function ContactSection(props: ContactSectionProps) {
@@ -29,7 +34,7 @@ export function ContactSection(props: ContactSectionProps) {
       <SectionPanel title={t("sections.contact")}>
         <Stack spacing={2}>
           <TextField label={t("fields.phone")} fullWidth size="small" {...props.register("phone")} />
-          {props.isAdminScope ? (
+          {props.isAdminScope && props.control ? (
             <>
               <TextField
                 label={t("fields.address")}
@@ -39,7 +44,21 @@ export function ContactSection(props: ContactSectionProps) {
                 rows={2}
                 {...props.register("address")}
               />
-              <TextField label={t("fields.timezone")} fullWidth size="small" {...props.register("timezone")} />
+              <Controller
+                name="timezone"
+                control={props.control}
+                render={({ field }) => (
+                  <TimezoneSelect
+                    value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+                    onChangeAction={value => {
+                      field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+                    }}
+                    onBlurAction={field.onBlur}
+                    label={t("fields.timezone")}
+                    fullWidth
+                  />
+                )}
+              />
             </>
           ) : null}
         </Stack>
@@ -53,7 +72,10 @@ export function ContactSection(props: ContactSectionProps) {
     <SectionPanel title={t("sections.contact")}>
       <Stack spacing={2}>
         <InfoField label={t("fields.phone")} value={toDisplayValue(props.teacherData.phone, tc("notSet"))} />
-        <InfoField label={t("fields.timezone")} value={toDisplayValue(props.teacherData.timezone, tc("notSet"))} />
+        <InfoField
+          label={t("fields.timezone")}
+          value={<TimezoneDisplay timezone={props.teacherData.timezone} fallback={tc("notSet")} />}
+        />
         {props.isAdminScope && adminData ? (
           <InfoField label={t("fields.address")} value={toDisplayValue(adminData.address, tc("notSet"))} />
         ) : null}

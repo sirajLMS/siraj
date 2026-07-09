@@ -5,11 +5,13 @@
 **Locked with Decision 1A:** user rows live in `user_payment_methods` (`type` + JSONB `details`).  
 **No credentials** — routing details only; payment completed externally.
 
+**Amendment (2026-07):** PayPal and Wise are **not** separate enum values — they are catalog rows under **`ONLINE_ACCOUNT`**.
+
 ---
 
 ## Core idea
 
-Do **not** hardcode Vodafone Cash, Etisalat Cash, STC Pay, InstaPay, etc. as separate `PaymentMethodType` enum values.
+Do **not** hardcode Vodafone Cash, Etisalat Cash, STC Pay, InstaPay, PayPal, Wise, Skrill, etc. as separate `PaymentMethodType` enum values.
 
 Instead:
 
@@ -17,21 +19,20 @@ Instead:
 |-------------------------|----------------------------------|
 | **MOBILE_WALLET** | Catalog table of wallets; each row = one brand in one country |
 | **PAYMENT_LINK** | Catalog table of link-based rails; each row = one brand (e.g. InstaPay) |
+| **ONLINE_ACCOUNT** | Catalog table of email/handle-based platforms; each row = one brand (e.g. PayPal, Wise) |
 | **BANK_TRANSFER** | Standard — IBAN / local bank routing in JSONB (no catalog required for v1) |
-| **PAYPAL** | Standard — email |
 | **CASH** | Standard — optional note |
-| *(optional globals)* | See § Suggested international additions |
 
-Admin **adds/updates** catalog rows (name, country, currency, image, validation rules). Users attach a method by picking a catalog entry + entering routing details (phone / URL).
+Admin **adds/updates** catalog rows (name, country, currency, image, validation rules). Users attach a method by picking a catalog entry + entering routing details (phone / URL / identifier).
 
 ```
-supported_mobile_wallets     supported_payment_links
-         │                            │
-         └──────────┬─────────────────┘
-                    ▼
-           user_payment_methods
-           type = MOBILE_WALLET | PAYMENT_LINK | …
-           details = { catalogId, phone | url, … }
+supported_mobile_wallets   supported_payment_links   supported_online_accounts
+         │                          │                          │
+         └──────────────────────────┼──────────────────────────┘
+                                    ▼
+                         user_payment_methods
+                         type = MOBILE_WALLET | PAYMENT_LINK | ONLINE_ACCOUNT | …
+                         details = { catalogId, phone | url | identifier, … }
 ```
 
 ---
@@ -126,6 +127,65 @@ supported_mobile_wallets     supported_payment_links
 
 ---
 
+## Type: `ONLINE_ACCOUNT`
+
+**User stores:** catalog reference + an **identifier** (email, handle, or either — per catalog).
+
+**Not stored as separate types:** PayPal, Wise, Skrill, Payoneer, Venmo (if email-based), … — those are **catalog rows**.
+
+Replaces the earlier standalone `PAYPAL` / optional `WISE` enum values. Add new platforms by seeding catalog rows, not migrations.
+
+### Catalog table: `supported_online_accounts` (suggested columns)
+
+| Column | Purpose |
+|--------|---------|
+| `id` | UUID PK |
+| `slug` | Stable key (`paypal`, `wise`, `skrill`, `payoneer`) — unique |
+| `name` | Display name / LocalizedString |
+| `description` | Optional LocalizedString |
+| `countryCode` | `CountryCode` — `null` or a sentinel for **global** platforms; set when rail is country-scoped |
+| `currencyCode` | `CurrencyCode` — primary settlement/display currency; `null` if multi-currency |
+| `logoUrl` / `imageFilePath` | Brand image for UI |
+| `identifierKind` | `EMAIL` \| `HANDLE` \| `EMAIL_OR_HANDLE` — what the user must provide |
+| `identifierLabel` | Localized field label e.g. “PayPal email”, “Wise tag” |
+| `identifierPlaceholder` | UI placeholder e.g. `name@email.com`, `@username` |
+| `identifierPattern` | Optional regex for handle/email shape beyond standard email validation |
+| `handlePrefix` | Optional fixed prefix shown in UI (e.g. `@` for Wise tags) |
+| `supportedDirections` | `PAYIN` \| `PAYOUT` \| `BOTH` |
+| `isActive` | Soft-disable without deleting user methods |
+| `sortOrder` | Admin UI / picker order |
+| `instructions` | Localized “how to pay/receive via this platform” |
+| `externalInfoUrl` | Provider help / signup link |
+| `createdAt` / `updatedAt` | Audit |
+
+### User `details` shape (JSONB)
+
+```ts
+{
+  onlineAccountId: string;  // FK → supported_online_accounts.id
+  identifier: string;       // email or handle — validated per catalog.identifierKind
+}
+```
+
+**Validation rules:**
+
+1. `onlineAccountId` must exist and `isActive`
+2. `EMAIL` → valid email (existing email validator)
+3. `HANDLE` → matches `identifierPattern` / `handlePrefix` rules from catalog
+4. `EMAIL_OR_HANDLE` → accept email **or** handle per catalog rules (Wise-style)
+5. Country/currency constraints come from catalog when set (not free-typed by user)
+
+### Seed examples (catalog rows, not enum values)
+
+| slug | name | identifierKind | supportedDirections |
+|------|------|----------------|---------------------|
+| `paypal` | PayPal | `EMAIL` | `BOTH` |
+| `wise` | Wise | `EMAIL_OR_HANDLE` | `PAYOUT` |
+| `skrill` | Skrill | `EMAIL` | `BOTH` |
+| `payoneer` | Payoneer | `EMAIL` | `PAYOUT` |
+
+---
+
 ## Standard global types (no country catalog)
 
 These stay as first-class `PaymentMethodType` values with JSONB details only:
@@ -133,19 +193,16 @@ These stay as first-class `PaymentMethodType` values with JSONB details only:
 | Type | `details` (routing only) | Why keep standard |
 |------|--------------------------|-------------------|
 | **BANK_TRANSFER** | IBAN / account / bank name / beneficiary / SWIFT / routing | Universal teacher PAYOUT; already in product |
-| **PAYPAL** | `{ email }` | Global email rail |
 | **CASH** | `{ note? }` | Offline ops |
 
-### Optional standards to consider (multi-country site)
-
-You asked for suggestions beyond Egypt. These fit **routing-details-only** and travel well:
+### Other candidates — prefer catalog, not new enums
 
 | Candidate | Pattern | Notes |
 |-----------|---------|--------|
-| **Wise** | `{ email }` or `{ handle }` | Strong for international **teacher PAYOUT**; same family as PayPal |
-| **Email transfer (generic)** | `{ email }` | Covers Interac-like / “send to email” ops without a PSP — or fold under PayPal/Wise only |
-| **UPI** (India) | Could be **PAYMENT_LINK** catalog or `{ upiId }` standard | Huge market if you expand to IN |
-| **Pix** (Brazil) | Catalog key type or payment-link style | If LATAM matters later |
+| **PayPal / Wise / Skrill / Payoneer** | **ONLINE_ACCOUNT** catalog rows | **Locked** — no per-brand enum |
+| **Email transfer (generic)** | **ONLINE_ACCOUNT** row with `identifierKind=EMAIL` | e.g. Interac-style “send to email” without a named PSP |
+| **UPI** (India) | **PAYMENT_LINK** catalog or dedicated **ONLINE_ACCOUNT** row with `identifierKind=HANDLE` | Huge market if you expand to IN |
+| **Pix** (Brazil) | **PAYMENT_LINK** or **ONLINE_ACCOUNT** catalog row | If LATAM matters later |
 | **M-Pesa / Orange Money / MTN MoMo** | **MOBILE_WALLET** catalog rows (KE, CI, GH, …) | No new enum — just seed wallets |
 | **STC Pay / urpay** (KSA) | **MOBILE_WALLET** catalog | Same |
 | **Fawry** | Often bill reference at pay time → prefer **transaction snapshot**, or a **PAYMENT_LINK** row if users have a reusable link | Don’t force as enum |
@@ -160,26 +217,19 @@ You asked for suggestions beyond Egypt. These fit **routing-details-only** and t
 |------|----------|-------|
 | `MOBILE_WALLET` | `supported_mobile_wallets` | **Yes** |
 | `PAYMENT_LINK` | `supported_payment_links` | **Yes** |
+| `ONLINE_ACCOUNT` | `supported_online_accounts` | **Yes** |
 | `BANK_TRANSFER` | — | **Yes** |
-| `PAYPAL` | — | **Yes** |
 | `CASH` | — | **Yes** |
-| `WISE` | — | **Suggested yes** for international teachers (confirm) |
+
+**Removed from enum** (now catalog rows): `PAYPAL`, `WISE`.
 
 Seed examples (not enum values):
 
 - Wallets: Vodafone Cash (EG), Etisalat Cash (EG), Orange Cash (EG), STC Pay (SA), …  
-- Links: InstaPay (EG), …
+- Links: InstaPay (EG), …  
+- Online accounts: PayPal, Wise, Skrill, Payoneer, …
 
----
-
-## Still confirm (narrow)
-
-Reply with whether to include **Wise** in v1:
-
-- `2: +wise` — add `WISE` type  
-- `2: -wise` — skip Wise for now (PayPal + bank cover email/bank payouts)
-
-Defaults for multiple methods remain [01b](./01b-payment-defaults.md).
+Defaults for multiple methods: [01b](./01b-payment-defaults.md) (**DECIDED 1bA**).
 
 ---
 
@@ -187,7 +237,7 @@ Defaults for multiple methods remain [01b](./01b-payment-defaults.md).
 
 Update conceptual `user_payment_methods.type` enum to:
 
-`MOBILE_WALLET | PAYMENT_LINK | BANK_TRANSFER | PAYPAL | CASH | WISE?`
+`MOBILE_WALLET | PAYMENT_LINK | ONLINE_ACCOUNT | BANK_TRANSFER | CASH`
 
-`details` discriminated by `type`; wallet/link details **must** include catalog FK.  
-Clean-slate (8C): drop old `PaymentMethod` `PAYPAL | BANK_ACCOUNT` on role tables; migrate teacher banking → `BANK_TRANSFER` rows.
+`details` discriminated by `type`; wallet / link / online-account details **must** include catalog FK.  
+Clean-slate (8C): drop old `PaymentMethod` `PAYPAL | BANK_ACCOUNT` on role tables; migrate teacher banking → `BANK_TRANSFER` rows; migrate legacy PayPal rows → `ONLINE_ACCOUNT` with `onlineAccountId` → PayPal catalog row.

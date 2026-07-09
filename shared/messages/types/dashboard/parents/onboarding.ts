@@ -22,6 +22,7 @@ export interface ParentOnboardingLabels {
     readonly feeAmount: string;
     readonly paymentMethod: string;
     readonly currency: string;
+    readonly timezone: string;
   };
   readonly placeholders: {
     readonly fullName: string;
@@ -37,6 +38,7 @@ export interface ParentOnboardingLabels {
     readonly feeAmount: string;
     readonly paymentMethod: string;
     readonly currency: string;
+    readonly timezone: string;
   };
   readonly options: {
     readonly invoiceType: {
@@ -75,5 +77,6 @@ export interface ParentOnboardingLabels {
     readonly currencyRequired: string;
     readonly invoiceTypeRequired: string;
     readonly paymentMethodRequired: string;
+    readonly timezoneRequired: string;
   };
 }

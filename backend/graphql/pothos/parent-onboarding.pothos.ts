@@ -1,6 +1,10 @@
 import type { InvoiceType, PaymentMethod } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { InvoiceTypePothosObject, PaymentMethodPothosObject } from "@/backend/graphql/pothos/enum.pothos";
+import {
+  IanaTimezonePothosObject,
+  InvoiceTypePothosObject,
+  PaymentMethodPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
 import type { Email } from "@/backend/lib/email";
 import type {
   ParentOnboardingInput,
@@ -33,7 +37,7 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       feeAmount: t.string({ directives: { constraint: { maxLength: 512 } } }),
       paymentMethod: t.field({ type: PaymentMethodPothosObject }),
       currency: t.string({ directives: { constraint: { maxLength: 512 } } }),
-      timezone: t.string({ directives: { constraint: { maxLength: 512 } } }),
+      timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
     }),
   });
 

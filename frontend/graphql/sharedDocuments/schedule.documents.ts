@@ -30,6 +30,8 @@ export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
         yourTime
         teacherTime
         studentTime
+        teacherTimezone
+        studentTimezone
         duration
         scheduledStartAt
         scheduledEndAt
@@ -95,6 +97,8 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
       yourTime
       teacherTime
       studentTime
+      teacherTimezone
+      studentTimezone
       duration
       outcome
       executionState

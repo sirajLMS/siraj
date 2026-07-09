@@ -2,6 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, TeacherBankingRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
 
@@ -39,7 +40,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
           name: "New Teacher",
           email: "newteacher@test.com",
           password: randomUUID(),
-          timezone: "America/New_York",
+          timezone: IanaTimezone.America_New_York,
           nationality: "US",
           phone: "+1234567890",
           gender: "MALE",

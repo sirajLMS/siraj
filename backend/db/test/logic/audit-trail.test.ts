@@ -18,6 +18,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo";
 import { auditLogs, users } from "@/backend/db/schema";
 import { type AccountStatus, StudentStatus, type UserRole } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/user.types";
 import { testLogger } from "@/shared/lib/testlogger";
@@ -61,6 +62,7 @@ describe("Audit Trail System", () => {
       // Construct UserReturnType with resolved fields
       testUser1 = {
         ...user1,
+        timezone: (user1.timezone ?? IanaTimezone.UTC) as IanaTimezone,
         role: "SUPER_ADMIN" as UserRole,
         status: "ACTIVATED" as AccountStatus,
         teacherId: null,
@@ -69,6 +71,7 @@ describe("Audit Trail System", () => {
 
       testUser2 = {
         ...user2,
+        timezone: (user2.timezone ?? IanaTimezone.UTC) as IanaTimezone,
         role: "SUPER_ADMIN" as UserRole,
         status: "ACTIVATED" as AccountStatus,
         teacherId: null,

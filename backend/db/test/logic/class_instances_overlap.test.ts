@@ -41,7 +41,6 @@ async function createTestTeachers(tx: DBTransaction, now: Date) {
       .values({
         userId: user.id,
         status: "ACTIVATED",
-        timezone: "UTC",
         createdAt: now,
         updatedAt: now,
       })

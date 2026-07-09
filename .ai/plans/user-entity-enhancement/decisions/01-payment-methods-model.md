@@ -27,7 +27,7 @@ import type { PaymentMethodDetails } from "@/backend/types/payment-method.types"
 export const userPaymentMethods = pgTable("user_payment_methods", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, …),
-  type: paymentMethodTypeEnum("type").notNull(), // MOBILE_WALLET | PAYMENT_LINK | BANK_TRANSFER | PAYPAL | CASH | …
+  type: paymentMethodTypeEnum("type").notNull(), // MOBILE_WALLET | PAYMENT_LINK | ONLINE_ACCOUNT | BANK_TRANSFER | CASH
   label: varchar("label", { length: 100 }),
   direction: paymentDirectionEnum("direction").notNull(), // PAYIN | PAYOUT | BOTH
   isDefault: boolean("is_default").notNull().default(false),
@@ -61,7 +61,7 @@ Example union (illustrative) — full type set in [02](./02-payment-methods-v1-s
 ```ts
 type MobileWalletDetails = { walletId: string; phone: string }; // E.164 + catalog FK
 type PaymentLinkDetails = { paymentLinkId: string; url: string }; // catalog FK + allowlisted URL
-type PaypalDetails = { email: string };
+type OnlineAccountDetails = { onlineAccountId: string; identifier: string }; // catalog FK + email/handle
 type BankTransferDetails = {
   iban?: string;
   bankName?: string;
@@ -70,15 +70,13 @@ type BankTransferDetails = {
   accountNumber?: string;
   routingNumber?: string;
 };
-type WiseDetails = { email?: string; handle?: string };
 type CashDetails = { note?: string };
 
 type PaymentMethodDetails =
   | MobileWalletDetails
   | PaymentLinkDetails
-  | PaypalDetails
+  | OnlineAccountDetails
   | BankTransferDetails
-  | WiseDetails
   | CashDetails;
 ```
 
@@ -89,8 +87,8 @@ Prefer validating **`type` + `details` together** (discriminated Zod). Wallet/li
 | User | type | direction | details (routing only) |
 |------|------|-----------|------------------------|
 | Teacher Omar | BANK_TRANSFER | PAYOUT | `{ iban, bankName, beneficiaryName, swiftBic }` |
-| Teacher Omar | PAYPAL | PAYOUT | `{ email: "omar@paypal.com" }` |
-| Parent Sara | PAYPAL | PAYIN | `{ email: "sara@mail.com" }` |
+| Teacher Omar | ONLINE_ACCOUNT | PAYOUT | `{ onlineAccountId: "<paypal-catalog-id>", identifier: "omar@paypal.com" }` |
+| Parent Sara | ONLINE_ACCOUNT | PAYIN | `{ onlineAccountId: "<paypal-catalog-id>", identifier: "sara@mail.com" }` |
 
 ### Why 1A (not B/C)
 
@@ -122,5 +120,5 @@ Because local/prod-like data can be dropped:
 2. Regenerate / clean-create Drizzle migrations rather than long expand–contract dual-write for banking
 3. Re-seed demo users with payment method rows as needed
 
-**Types + catalogs:** [02](./02-payment-methods-v1-set.md) (**DECIDED** — `MOBILE_WALLET` / `PAYMENT_LINK` catalogs + standard globals).  
+**Types + catalogs:** [02](./02-payment-methods-v1-set.md) (**DECIDED** — `MOBILE_WALLET` / `PAYMENT_LINK` / `ONLINE_ACCOUNT` catalogs + `BANK_TRANSFER` / `CASH` standards).  
 **Defaults:** still [01b](./01b-payment-defaults.md).

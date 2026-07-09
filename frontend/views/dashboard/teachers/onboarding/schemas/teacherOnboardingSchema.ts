@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import { CountryCode, Gender } from "../types";
 
 export type { TeacherOnboardingFormData } from "../types";
@@ -39,7 +40,10 @@ export const teacherOnboardingSchema = (validationLabels: {
     ),
     zoomUsername: z.string().optional(),
     zoomPassword: z.string().optional(),
-    timezone: z.string().min(1, validationLabels.timezoneRequired),
+    timezone: z
+      .string()
+      .min(1, validationLabels.timezoneRequired)
+      .refine(value => isValidIanaTimezoneId(value), { message: validationLabels.timezoneRequired }),
     hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
     rateCurrency: z.string().min(1, validationLabels.currencyRequired),
     beneficiaryName: z.string().min(1, validationLabels.beneficiaryNameRequired),

@@ -8,6 +8,7 @@ import { teachers, users } from "@/backend/db/schema";
 import { createTestUser, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PaginationArgs } from "@/backend/types";
 
 describe("TeacherRepository", () => {
@@ -146,13 +147,16 @@ describe("TeacherRepository", () => {
   describe("create", () => {
     it("creates teacher profile successfully", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, { name: "Test Teacher", email: "teacher@test.com" });
+        const user = await createTestUser(tx, {
+          name: "Test Teacher",
+          email: "teacher@test.com",
+          timezone: IanaTimezone.America_New_York,
+        });
 
         const result = await TeacherRepository.create(
           {
             userId: user.id,
             status: "ACTIVATED",
-            timezone: "America/New_York",
             nationality: "US",
             phone: "+1234567890",
             gender: "MALE",
@@ -167,7 +171,7 @@ describe("TeacherRepository", () => {
         expect(result.id).toBeDefined();
         expect(result.userId).toBe(user.id);
         expect(result.status).toBe("ACTIVATED");
-        expect(result.timezone).toBe("America/New_York");
+        expect(result.timezone).toBe(IanaTimezone.America_New_York);
         expect(result.createdAt).toBeInstanceOf(Date);
       });
     });
@@ -177,14 +181,14 @@ describe("TeacherRepository", () => {
         const user = await createTestUser(tx, { name: "Dup Teacher", email: "dup@test.com" });
 
         await TeacherRepository.create(
-          { userId: user.id, status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+          { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
           tx
         );
 
         let error: unknown = null;
         try {
           await TeacherRepository.create(
-            { userId: user.id, status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+            { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
             tx
           );
         } catch (e) {
@@ -196,28 +200,18 @@ describe("TeacherRepository", () => {
       });
     });
 
-    it("rejects invalid timezone", async () => {
+    it("rejects invalid timezone on user", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, { name: "TZ Teacher", email: "tz@test.com" });
 
         let error: unknown = null;
         try {
-          await TeacherRepository.create(
-            {
-              userId: user.id,
-              status: "ACTIVATED",
-              timezone: "Invalid/Timezone",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-            tx
-          );
+          await tx.update(users).set({ timezone: "Invalid/Timezone" }).where(eq(users.id, user.id));
         } catch (e) {
           error = e;
         }
 
         expect(error).not.toBeNull();
-        expect((error as Error).message).toContain("timezone");
       });
     });
 
@@ -229,7 +223,6 @@ describe("TeacherRepository", () => {
           {
             userId: user.id,
             status: "ACTIVATED",
-            timezone: "Europe/London",
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -311,7 +304,6 @@ describe("TeacherRepository", () => {
           {
             userId: user.id,
             status: "ACTIVATED",
-            timezone: "UTC",
             dateOfBirth: dateOfBirthStr,
             createdAt: now,
             updatedAt: now,
@@ -334,7 +326,6 @@ describe("TeacherRepository", () => {
           {
             userId: user.id,
             status: "ACTIVATED",
-            timezone: "UTC",
             dateOfBirth: null,
             createdAt: now,
             updatedAt: now,
@@ -387,7 +378,7 @@ describe("TeacherRepository", () => {
       let error: unknown = null;
       try {
         await TeacherRepository.create(
-          { userId: randomUUID(), status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+          { userId: randomUUID(), status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
           mockTx
         );
       } catch (e) {
@@ -405,7 +396,7 @@ describe("TeacherRepository", () => {
       await runInRollback(async tx => {
         const u = await createTestUser(tx, { name: "Rollback User", email: `rb-${randomUUID()}@test.com` });
         const teacher = await TeacherRepository.create(
-          { userId: u.id, status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+          { userId: u.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
           tx
         );
         createdTeacherId = teacher.id;

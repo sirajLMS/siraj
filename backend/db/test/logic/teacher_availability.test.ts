@@ -4,6 +4,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { runInRollback } from "../test-utils";
 
@@ -55,7 +56,6 @@ async function createBookingFixture(tx: DBTransaction): Promise<{
     .values({
       userId: teacherUser.id,
       status: "ACTIVATED",
-      timezone: "UTC",
       createdAt: now,
       updatedAt: now,
     })
@@ -147,7 +147,7 @@ async function submitTestVacation(args: {
     {
       startAt: new Date(args.start),
       endAt: new Date(args.end),
-      timezone: "UTC",
+      timezone: IanaTimezone.UTC,
       reason: args.reason,
     },
     args.userId,
@@ -174,7 +174,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
           dayOfWeek: DayOfWeek.WEDNESDAY,
           startTime: "09:00:00",
           endTime: "17:00:00",
-          timezone: "UTC",
+          timezone: IanaTimezone.UTC,
         },
         tx
       );
@@ -198,7 +198,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
           dayOfWeek: DayOfWeek.WEDNESDAY,
           startTime: "09:00:00",
           endTime: "12:00:00",
-          timezone: "UTC",
+          timezone: IanaTimezone.UTC,
         },
         tx
       );
@@ -221,7 +221,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
           dayOfWeek: DayOfWeek.FRIDAY,
           startTime: "12:00:00",
           endTime: "14:00:00",
-          timezone: "UTC",
+          timezone: IanaTimezone.UTC,
           reason: "Lunch break",
         },
         tx

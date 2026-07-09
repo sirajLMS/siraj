@@ -3,6 +3,7 @@ import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   ClassTypePothosObject,
+  IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/enum.pothos";
 import {
   SupportContactPothosObject,
@@ -93,8 +94,8 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     remarks: t.exposeString("remarks", { nullable: true }),
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
-    studentTimezone: t.exposeString("studentTimezone", { nullable: true }),
-    teacherTimezone: t.exposeString("teacherTimezone", { nullable: true }),
+    studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
+    teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
     isRescheduled: t.exposeBoolean("isRescheduled"),

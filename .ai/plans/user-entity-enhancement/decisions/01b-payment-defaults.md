@@ -1,14 +1,16 @@
 # Decision 1b: Default + direction rules for multiple payment methods
 
-**Question:** When a user has multiple payment options, how do defaults and pay-in vs pay-out work?
+## Status: **DECIDED — 1bA**
+
+**Locked with Decision 1A:** multiple methods per user in `user_payment_methods`; each row has `direction` + `isDefault`.
 
 Only relevant because we locked **multiple methods per user** (see Decision 1).
 
 ---
 
-## Option A — One default per direction
+## Decision: **1bA** — One default per direction
 
-**Idea:** At most one `isDefault` among methods with `direction` including PAYOUT; at most one for PAYIN.
+At most one default for **pay-in** flows and at most one for **pay-out** flows. Parents and teachers can therefore use different primary accounts for invoicing vs payroll.
 
 ### Example
 
@@ -19,60 +21,29 @@ Only relevant because we locked **multiple methods per user** (see Decision 1).
 | PayPal | PAYIN | ✓ |
 | STC Pay phone | PAYIN | |
 
-### Pros
+### Locked rules
 
-- Parents and teachers can have different defaults for paying vs getting paid  
-- Clear for payroll vs invoicing  
+1. **PAYIN default** — at most one row per user with `isDefault=true` and `direction IN (PAYIN, BOTH)`.
+2. **PAYOUT default** — at most one row per user with `isDefault=true` and `direction IN (PAYOUT, BOTH)`.
+3. **`direction=BOTH`** — a single row may satisfy **both** slots when `isDefault=true` (one account used for pay-in and pay-out). While that row is default, no other row on the user may be default.
+4. **Setting a new default** — service clears the previous default in the same direction slot(s) before setting the new one (same transaction).
+5. **UI** — show separate “default for receiving payments” vs “default for payouts” when the user has methods on both sides; hide or collapse when only one direction applies.
 
-### Cons
+### Enforcement
 
-- Two default flags to manage in UI  
-- `BOTH` direction rows need a rule (count for both sides vs forbidden)  
-
----
-
-## Option B — Single global default method
-
-**Idea:** Exactly one `isDefault=true` per user across all methods.
-
-### Example
-
-Omar’s default is Bank; PayPal exists but isn’t default. Parent invoicing and teacher payroll both use “the” default unless overridden.
-
-### Pros
-
-- Simplest UX  
-- One partial unique index  
-
-### Cons
-
-- Awkward if pay-in and pay-out should differ  
-- Staff/teachers who only care about PAYOUT still fine; parents who only PAYIN also fine — mixed roles suffer  
+| Layer | Approach |
+|-------|----------|
+| **Service** | On create/update, unset competing defaults in the affected slot(s) |
+| **DB** | Partial unique indexes scoped by direction eligibility (see Decision 1 schema notes) |
 
 ---
 
-## Option C — No default in DB; pick at payment time
+## Rejected options (for context)
 
-**Idea:** Store many methods; every payout/invoice UI requires choosing one. Optional `lastUsedMethodId` later.
+### Option B — Single global default method
 
-### Pros
+Exactly one `isDefault=true` per user across all methods. Rejected: awkward when pay-in and pay-out should differ; mixed-role users (parent + teacher) suffer.
 
-- No default-constraint complexity  
-- Explicit ops choice  
+### Option C — No default in DB; pick at payment time
 
-### Cons
-
-- Worse UX for recurring payroll  
-- Easy to pay the wrong account  
-
----
-
-## How to choose
-
-| Product | Pick |
-|---------|------|
-| Parents pay in AND teachers get paid out (possibly same user later) | **A** |
-| Simple academy, one “primary” account vibe | **B** |
-| Always manual selection | **C** |
-
-**Reply with:** `1bA`, `1bB`, or `1bC`
+Store many methods; every payout/invoice UI requires choosing one. Rejected: worse UX for recurring payroll; easy to pay the wrong account.

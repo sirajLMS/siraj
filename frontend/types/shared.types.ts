@@ -166,7 +166,7 @@ export type ManagerOnboardingFormData = CleanInput<ManagerOnboardingInput>;
 
 export type ParentOnboardingFormData = Omit<
   CleanInput<ParentOnboardingInput>,
-  "password" | "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "paymentMethod"
+  "password" | "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "paymentMethod" | "timezone"
 > & {
   phone: string;
   address: string;
@@ -174,6 +174,7 @@ export type ParentOnboardingFormData = Omit<
   currency: string;
   invoiceType: InvoiceType;
   paymentMethod: PaymentMethod;
+  timezone: string;
 };
 
 export type TeacherOnboardingFormData = Omit<

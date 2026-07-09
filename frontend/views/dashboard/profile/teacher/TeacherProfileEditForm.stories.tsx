@@ -2,6 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { TeacherAdminEditForm } from "./TeacherAdminEditForm";
 import { TeacherProfileEditForm } from "./TeacherProfileEditForm";
 
@@ -20,7 +21,7 @@ const adminTeacherData = {
   address: "123 King Fahd Rd, Riyadh",
   qualifications: "Bachelor of Islamic Studies",
   zoomUsername: "ahmed.teacher",
-  timezone: "Asia/Riyadh",
+  timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
   rateCurrency: "USD",
   paymentMethod: null,

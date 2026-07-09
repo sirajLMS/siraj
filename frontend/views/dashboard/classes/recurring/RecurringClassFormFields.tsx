@@ -4,9 +4,12 @@ import { useQuery } from "@apollo/client/react";
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
+import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { DaysScheduleSection } from "./DaysScheduleSection";
 import { DurationInput } from "./DurationInput";
@@ -14,7 +17,7 @@ import { EntitySelect } from "./EntitySelect";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 import { TimeInput } from "./TimeInput";
 import type { SimpleEntity } from "./types";
-import { CLASS_TYPE_OPTIONS, TIMEZONE_OPTIONS } from "./types";
+import { CLASS_TYPE_OPTIONS } from "./types";
 
 interface RecurringClassFormFieldsProps {
   readonly register: UseFormRegister<RecurringClassFormData>;
@@ -168,20 +171,16 @@ function StudentTeacherRow({
 }
 
 function TimeTimezoneRow({
-  timezone,
   control,
   isSubmitting,
   isMobile,
   labels,
-  setValue,
   errors,
 }: {
-  readonly timezone: string;
   readonly control: Control<RecurringClassFormData>;
   readonly isSubmitting: boolean;
   readonly isMobile: boolean;
   readonly labels: RecurringClassFormFieldsProps["labels"];
-  readonly setValue: UseFormSetValue<RecurringClassFormData>;
   readonly errors: FieldErrors<RecurringClassFormData>;
 }) {
   return (
@@ -196,19 +195,24 @@ function TimeTimezoneRow({
         />
       </Box>
       <Box sx={{ flex: 1 }}>
-        <OptionSelect
-          labelId="timezone-select-label"
-          value={timezone}
-          label={labels.timezone}
-          placeholder={labels.timezonePlaceholder}
-          isSubmitting={isSubmitting}
-          isMobile={isMobile}
-          error={errors.timezone?.message}
-          onChange={val => {
-            setValue("timezone", val, { shouldValidate: true });
-          }}
-          options={TIMEZONE_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+        <Controller
+          name="timezone"
+          control={control}
+          render={({ field }) => (
+            <TimezoneSelect
+              value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+              onChangeAction={value => {
+                field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+              }}
+              onBlurAction={field.onBlur}
+              label={labels.timezone}
+              required
+              fullWidth
+              disabled={isSubmitting}
+            />
+          )}
         />
+        {errors.timezone?.message ? <FormHelperText error>{errors.timezone.message}</FormHelperText> : null}
       </Box>
     </FormRow>
   );
@@ -278,7 +282,6 @@ export function RecurringClassFormFields({
 }: RecurringClassFormFieldsProps) {
   const studentId = watch("studentId");
   const teacherId = watch("teacherId");
-  const timezone = watch("timezone") || "";
   const classType = watch("classType") || "";
 
   const { data: studentsData, loading: studentsLoading } = useQuery(studentsQueryDocument, {
@@ -320,12 +323,10 @@ export function RecurringClassFormFields({
       />
 
       <TimeTimezoneRow
-        timezone={timezone}
         control={control}
         isSubmitting={isSubmitting}
         isMobile={isMobile}
         labels={labels}
-        setValue={setValue}
         errors={errors}
       />
 

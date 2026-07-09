@@ -1,4 +1,5 @@
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { SupportContactReturnType, TeacherImportantNoteReturnType } from "@/backend/types/teacher-notes.types";
 
 export type ClassSessionMetrics = {
@@ -114,6 +115,8 @@ export type DailyScheduleListReturnType = {
   teacher: DailyScheduleListUserItem;
   courseName?: string | null;
   avatarUrl?: string | null;
+  teacherTimezone?: IanaTimezone | null;
+  studentTimezone?: IanaTimezone | null;
 };
 
 export type AdminDashboardScheduleInputType = {

@@ -6,6 +6,7 @@ import { classInstances, recurringScheduleDays, recurringSchedules } from "@/bac
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
 import { getErrorMessage } from "@/shared/utils/error";
@@ -116,7 +117,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
           studentId: student.id,
           durationMinutes: 60,
           defaultStartTime: "10:00:00",
-          timezone: "UTC",
+          timezone: IanaTimezone.UTC,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -129,7 +130,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
           studentId: student.id,
           durationMinutes: 60,
           defaultStartTime: "14:00:00",
-          timezone: "UTC",
+          timezone: IanaTimezone.UTC,
           createdAt: new Date(),
           updatedAt: new Date(),
         })

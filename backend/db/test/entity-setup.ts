@@ -10,6 +10,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import type { AppPermission } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 /** LocalizedString helper for permission/group JSONB columns in tests. */
@@ -28,6 +29,7 @@ export async function createTestUser(
       name: "Test User",
       email: `test-${randomUUID()}@example.com`,
       password: "password",
+      timezone: IanaTimezone.UTC,
       createdAt: now,
       updatedAt: now,
       ...overrides,
@@ -67,7 +69,6 @@ export async function createTestTeacher(
     .values({
       userId,
       status: "ACTIVATED",
-      timezone: "UTC",
       createdAt: now,
       updatedAt: now,
       ...overrides,

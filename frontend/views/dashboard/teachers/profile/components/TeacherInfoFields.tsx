@@ -1,18 +1,9 @@
-import {
-  Box,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, FormControlLabel, FormHelperText, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
+import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherProfileFormData } from "../schemas/teacherProfileSchema";
 
 export function FullNameField() {
@@ -171,18 +162,23 @@ export function TimezoneField() {
         name="timezone"
         control={control}
         render={({ field }) => (
-          <FormControl fullWidth error={!!errors.timezone}>
-            <Select {...field} sx={outlinedInputSx}>
-              <MenuItem value="Africa/Cairo">Africa/Cairo (UTC +02:00)</MenuItem>
-              <MenuItem value="Asia/Riyadh">Asia/Riyadh (UTC +03:00)</MenuItem>
-              <MenuItem value="Asia/Dubai">Asia/Dubai (UTC +04:00)</MenuItem>
-            </Select>
+          <>
+            <TimezoneSelect
+              value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+              onChangeAction={value => {
+                field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+              }}
+              onBlurAction={field.onBlur}
+              label={t("fields.timezone")}
+              required
+              fullWidth
+            />
             {errors.timezone && (
               <FormHelperText sx={theme => ({ color: theme.palette.error.main })}>
                 {errors.timezone.message}
               </FormHelperText>
             )}
-          </FormControl>
+          </>
         )}
       />
     </Box>

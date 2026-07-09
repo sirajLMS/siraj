@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherDirectoryQueryDocument } from "../sharedDocuments/staff-directory.documents";
 import {
   teacherProfileForEditQueryDocument,
@@ -23,7 +23,7 @@ function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): Teacher
     qualifications: overrides.qualifications ?? null,
     rateCurrency: overrides.rateCurrency ?? null,
     status: overrides.status ?? null,
-    timezone: overrides.timezone ?? "UTC",
+    timezone: overrides.timezone ?? IanaTimezone.Utc,
     zoomLink: overrides.zoomLink ?? null,
     zoomPassword: overrides.zoomPassword ?? null,
     zoomUsername: overrides.zoomUsername ?? null,
@@ -213,7 +213,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           qualifications: "None",
           rateCurrency: "USD",
           status: null,
-          timezone: "UTC",
+          timezone: IanaTimezone.Utc,
           zoomLink: "https://zoom.us/j/123",
           zoomPassword: "password",
           zoomUsername: "username",
@@ -248,7 +248,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           qualifications: null,
           rateCurrency: null,
           status: null,
-          timezone: "America/New_York",
+          timezone: IanaTimezone.AmericaNewYork,
           zoomLink: null,
           zoomPassword: null,
           zoomUsername: null,
@@ -278,7 +278,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           qualifications: "Certified Instructor",
           rateCurrency: "USD",
           status: null,
-          timezone: "UTC",
+          timezone: IanaTimezone.Utc,
           zoomLink: null,
           zoomPassword: null,
           zoomUsername: null,

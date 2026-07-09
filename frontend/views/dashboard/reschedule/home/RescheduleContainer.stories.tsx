@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { RescheduleView } from "./RescheduleView";
 import { type RescheduleFormData, rescheduleSchema } from "./schemas/rescheduleSchema";
@@ -11,7 +12,7 @@ useRescheduleStore.setState({
     sessionId: "cls-001",
     teacherName: "Fatima Al-Rashid",
     studentName: "Ahmed Hassan",
-    teacherTimezone: "Asia/Riyadh",
+    teacherTimezone: IanaTimezone.AsiaRiyadh,
   },
 });
 

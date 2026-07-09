@@ -103,7 +103,7 @@ export function ParentProfileEditForm({
           {isAdminScope ? (
             <>
               <IdentitySection mode="edit" register={form.register} />
-              <BillingSection mode="edit" register={form.register} />
+              <BillingSection mode="edit" register={form.register} control={form.control} />
             </>
           ) : null}
         </Box>

@@ -5,12 +5,12 @@ import { SchedulingRepository } from "@/backend/db/repo";
 import {
   classInstances,
   classStatusEvents,
-  parents,
   students,
   systemSettings,
   teacherAssignments,
   users,
 } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 import { testRepoError } from "./scheduling-test-helpers";
@@ -338,7 +338,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           {
             date: testDate,
             teacherId: teacher.id,
-            viewerTimezone: "UTC",
+            viewerTimezone: IanaTimezone.UTC,
           },
           tx
         );
@@ -380,7 +380,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           {
             date: testDate,
             teacherId: teacher.id,
-            viewerTimezone: "UTC",
+            viewerTimezone: IanaTimezone.UTC,
           },
           tx
         );
@@ -389,7 +389,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
             date: testDate,
             teacherId: teacher.id,
             search: student.name,
-            viewerTimezone: "UTC",
+            viewerTimezone: IanaTimezone.UTC,
           },
           tx
         );
@@ -469,7 +469,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
             set: { value: "Europe/Paris" },
           });
 
-        await tx.update(parents).set({ timezone: "Africa/Cairo" }).where(eq(parents.id, parent.id));
+        await tx.update(users).set({ timezone: IanaTimezone.Africa_Cairo }).where(eq(users.id, parent.userId));
 
         let tz = await SchedulingRepository.resolveStudentTimezone(student.id, tx);
         expect(tz).toBe("Africa/Cairo");
@@ -606,7 +606,7 @@ describe("Scheduling Repository — CRUD & Queries", () => {
           date,
           {
             search: "XYZ",
-            viewerTimezone: "UTC",
+            viewerTimezone: IanaTimezone.UTC,
           },
           tx
         );

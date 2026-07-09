@@ -1,11 +1,12 @@
 "use client";
 
 import { HistoryOutlined } from "@mui/icons-material";
-import { Tooltip } from "@mui/material";
+import { Stack, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/components/ui";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
@@ -66,7 +67,12 @@ function buildTimeColumns(
       flex: 1,
       minWidth: 110,
       renderCell: ({ row }) => (
-        <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.teacherTime, locale)}</StyledMonospaceLabel>
+        <Stack spacing={0.25}>
+          <StyledMonospaceLabel variant="labelMd">
+            {formatScheduleTimeOnly(row.teacherTime, locale)}
+          </StyledMonospaceLabel>
+          {row.teacherTimezone ? <TimezoneDisplay timezone={row.teacherTimezone} typographyVariant="labelMd" /> : null}
+        </Stack>
       ),
     },
     {
@@ -76,7 +82,12 @@ function buildTimeColumns(
       flex: 1,
       minWidth: 110,
       renderCell: ({ row }) => (
-        <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.studentTime, locale)}</StyledMonospaceLabel>
+        <Stack spacing={0.25}>
+          <StyledMonospaceLabel variant="labelMd">
+            {formatScheduleTimeOnly(row.studentTime, locale)}
+          </StyledMonospaceLabel>
+          {row.studentTimezone ? <TimezoneDisplay timezone={row.studentTimezone} typographyVariant="labelMd" /> : null}
+        </Stack>
       ),
     },
   ];

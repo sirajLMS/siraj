@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { TeacherRepository } from "@/backend/db/repo";
 import { AccountStatus, AppPermission } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
@@ -19,7 +20,7 @@ const baseProfile: TeacherProfileReturnType = {
   qualifications: "BA",
   zoomLink: "https://zoom.us/j/1",
   zoomUsername: "ahmed",
-  timezone: "Asia/Riyadh",
+  timezone: IanaTimezone.Asia_Riyadh,
   hourlyRate: "50",
   rateCurrency: "USD",
   paymentMethod: null,

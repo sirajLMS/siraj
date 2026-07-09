@@ -7,6 +7,7 @@ import { classInstances, students, teacherAssignments, users } from "@/backend/d
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 
 const NON_EXISTENT_ID = "00000000-0000-0000-0000-000000000000";
 
@@ -59,7 +60,11 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       await runInRollback(async tx => {
         const { instance, student, teacherUser } = await setupStatusTrackingTest(tx, "STR1");
 
-        const rows = await SchedulingRepository.getStatusTrackingRows(FUTURE_DATE, { viewerTimezone: "UTC" }, tx);
+        const rows = await SchedulingRepository.getStatusTrackingRows(
+          FUTURE_DATE,
+          { viewerTimezone: IanaTimezone.UTC },
+          tx
+        );
         const found = rows.find(r => r.id === instance.id);
 
         expect(found).toBeDefined();
@@ -77,7 +82,11 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         const { instance, student } = await setupStatusTrackingTest(tx, "STR2");
         await tx.update(students).set({ name: "Alice Johnson Smith" }).where(eq(students.id, student.id));
 
-        const rows = await SchedulingRepository.getStatusTrackingRows(FUTURE_DATE, { viewerTimezone: "UTC" }, tx);
+        const rows = await SchedulingRepository.getStatusTrackingRows(
+          FUTURE_DATE,
+          { viewerTimezone: IanaTimezone.UTC },
+          tx
+        );
         const found = rows.find(r => r.id === instance.id);
         expect(found?.studentInitials).toBe("AJ");
       });
@@ -90,7 +99,7 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
 
         const rows = await SchedulingRepository.getStatusTrackingRows(
           FUTURE_DATE,
-          { search: "STRSA", viewerTimezone: "UTC" },
+          { search: "STRSA", viewerTimezone: IanaTimezone.UTC },
           tx
         );
         expect(rows.some(r => r.id === i1.id)).toBe(true);
@@ -106,7 +115,7 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
 
         const rows = await SchedulingRepository.getStatusTrackingRows(
           FUTURE_DATE,
-          { search: uniqueTag, viewerTimezone: "UTC" },
+          { search: uniqueTag, viewerTimezone: IanaTimezone.UTC },
           tx
         );
         expect(rows.some(r => r.id === instance.id)).toBe(true);
@@ -118,7 +127,11 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       await runInRollback(async tx => {
         const { instance } = await setupStatusTrackingTest(tx, "STRFZ", { isFrozen: true });
 
-        const rows = await SchedulingRepository.getStatusTrackingRows(FUTURE_DATE, { viewerTimezone: "UTC" }, tx);
+        const rows = await SchedulingRepository.getStatusTrackingRows(
+          FUTURE_DATE,
+          { viewerTimezone: IanaTimezone.UTC },
+          tx
+        );
         const found = rows.find(r => r.id === instance.id);
         expect(found?.isFrozen).toBe(true);
       });
@@ -128,7 +141,7 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       await runInRollback(async tx => {
         const rows = await SchedulingRepository.getStatusTrackingRows(
           new Date("2019-01-01T00:00:00.000Z"),
-          { viewerTimezone: "UTC" },
+          { viewerTimezone: IanaTimezone.UTC },
           tx
         );
         expect(rows).toEqual([]);
@@ -151,7 +164,11 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           outcome: ClassOutcome.PENDING,
         });
 
-        const rows = await SchedulingRepository.getStatusTrackingRows(FUTURE_DATE, { viewerTimezone: "UTC" }, tx);
+        const rows = await SchedulingRepository.getStatusTrackingRows(
+          FUTURE_DATE,
+          { viewerTimezone: IanaTimezone.UTC },
+          tx
+        );
         const earlyIdx = rows.findIndex(r => r.id === early.id);
         const lateIdx = rows.findIndex(r => r.id === late.id);
         expect(earlyIdx).toBeGreaterThanOrEqual(0);
@@ -161,7 +178,9 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
     });
 
     test("works without tx context", async () => {
-      const rows = await SchedulingRepository.getStatusTrackingRows(new Date("2019-01-01"), { viewerTimezone: "UTC" });
+      const rows = await SchedulingRepository.getStatusTrackingRows(new Date("2019-01-01"), {
+        viewerTimezone: IanaTimezone.UTC,
+      });
       expect(Array.isArray(rows)).toBe(true);
     });
   });

@@ -10,6 +10,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { CrossStaffSearchInput } from "@/backend/types";
 
 const TEST_MONDAY_RANGE = {
@@ -40,7 +41,7 @@ async function createAvailabilityWindow(
       dayOfWeek,
       startTime,
       endTime,
-      timezone: "UTC",
+      timezone: IanaTimezone.UTC,
       createdAt: now,
       updatedAt: now,
     })
@@ -63,7 +64,7 @@ async function createRecurringUnavailability(
       dayOfWeek,
       startTime,
       endTime,
-      timezone: "UTC",
+      timezone: IanaTimezone.UTC,
       createdAt: now,
       updatedAt: now,
     })
@@ -278,7 +279,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
         {
           startAt: new Date("2026-01-05T00:00:00.000Z"),
           endAt: new Date("2026-01-05T23:59:59.999Z"),
-          timezone: "UTC",
+          timezone: IanaTimezone.UTC,
         },
         user.id,
         teacher.id,

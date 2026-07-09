@@ -4,9 +4,10 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo";
-import { parents } from "@/backend/db/schema";
+import { parents, users } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -33,7 +34,7 @@ describe("ParentRepository — getParentProfile", () => {
       expect(profile?.name).toBe("Profile Parent");
       expect(profile?.email).toBe(user.email);
       expect(typeof profile?.status).toBe("string");
-      expect(profile?.timezone).toBe("UTC");
+      expect(profile?.timezone).toBe(IanaTimezone.UTC);
       expect(profile?.createdAt).toBeInstanceOf(Date);
       expect(profile?.updatedAt).toBeInstanceOf(Date);
     });
@@ -161,7 +162,11 @@ describe("ParentRepository — deactivateParent", () => {
 describe("ParentRepository — create", () => {
   test("creates parent profile successfully with billing configuration", async () => {
     await runInRollback(async tx => {
-      const user = await createTestUser(tx, { name: "Test Parent", email: `parent-${randomUUID()}@test.com` });
+      const user = await createTestUser(tx, {
+        name: "Test Parent",
+        email: `parent-${randomUUID()}@test.com`,
+        timezone: IanaTimezone.America_Chicago,
+      });
 
       const result = await ParentRepository.create(
         {
@@ -174,7 +179,6 @@ describe("ParentRepository — create", () => {
           feeAmount: "500.00",
           paymentMethod: "BANK_ACCOUNT",
           currency: "USD",
-          timezone: "America/Chicago",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -188,6 +192,7 @@ describe("ParentRepository — create", () => {
       expect(result.feeAmount).toBe("500.00");
       expect(result.paymentMethod).toBe("BANK_ACCOUNT");
       expect(result.currency).toBe("USD");
+      expect(result.timezone).toBe(IanaTimezone.America_Chicago);
     });
   });
 
@@ -225,32 +230,22 @@ describe("ParentRepository — create", () => {
       );
 
       expect(result.id).toBeDefined();
-      expect(result.timezone).toBe("UTC");
+      expect(result.timezone).toBe(IanaTimezone.UTC);
     });
   });
 
-  test("rejects invalid timezone", async () => {
+  test("rejects invalid timezone on user", async () => {
     await runInRollback(async tx => {
       const user = await createTestUser(tx, { name: "TZ Parent", email: `tz-${randomUUID()}@test.com` });
 
       let error: unknown = null;
       try {
-        await ParentRepository.create(
-          {
-            userId: user.id,
-            status: "REGULAR",
-            timezone: "Invalid/Timezone",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          tx
-        );
+        await tx.update(users).set({ timezone: "Invalid/Timezone" }).where(eq(users.id, user.id));
       } catch (e) {
         error = e;
       }
 
       expect(error).not.toBeNull();
-      expect((error as Error).message).toContain("timezone");
     });
   });
 

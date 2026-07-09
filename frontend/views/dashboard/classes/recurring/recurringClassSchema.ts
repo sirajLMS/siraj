@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
+import { IANA_TIMEZONE_IDS } from "@/shared/constants/iana-timezones";
 
 const dayScheduleSchema = z.object({
   day: z.enum(DayOfWeek),
@@ -32,7 +33,12 @@ export const createRecurringClassSchema = (messages: {
         .number({ error: messages.durationRequired })
         .min(0, messages.durationRequired)
         .max(59, messages.durationMinutesMax),
-      timezone: z.string().min(1, messages.timezoneRequired),
+      timezone: z
+        .string()
+        .min(1, messages.timezoneRequired)
+        .refine(value => (IANA_TIMEZONE_IDS as readonly string[]).includes(value), {
+          message: messages.timezoneRequired,
+        }),
       classType: z.enum(["REGULAR", "TRIAL", "ADVANCE"]).optional(),
       effectiveFrom: z.string().optional(),
       effectiveUntil: z.string().optional(),

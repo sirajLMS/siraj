@@ -2,6 +2,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { db } from "@/backend/db/drizzleDb";
 import { systemSettings } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
@@ -31,7 +32,13 @@ const SYSTEM_SETTINGS_DATA = [
     "Minutes before scheduled start time that a session can be activated",
     "scheduling"
   ),
-  createSetting("default_timezone", "UTC", "Default fallback timezone for the system", "scheduling", "string"),
+  createSetting(
+    "default_timezone",
+    IanaTimezone.UTC,
+    "Default fallback timezone for the system",
+    "scheduling",
+    "string"
+  ),
   createSetting(
     "session_absent_waiting_minutes",
     "30",

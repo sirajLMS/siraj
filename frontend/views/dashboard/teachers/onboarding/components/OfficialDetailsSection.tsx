@@ -1,14 +1,18 @@
 "use client";
 
 import { Box, Grid, Input, MenuItem, Select, Typography } from "@mui/material";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { labelSx, outlinedInputSx, standardInputSx } from "@/frontend/components/ui/form";
+import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
 
 import { CountryCode } from "../types";
 
 interface OfficialDetailsSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
+  readonly control: Control<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
   readonly labels: {
     readonly fields: {
@@ -26,7 +30,7 @@ interface OfficialDetailsSectionProps {
   };
 }
 
-export function OfficialDetailsSection({ register, errors, labels }: Readonly<OfficialDetailsSectionProps>) {
+export function OfficialDetailsSection({ register, control, errors, labels }: Readonly<OfficialDetailsSectionProps>) {
   return (
     <Grid container spacing={3} sx={{ p: 3 }}>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -85,18 +89,27 @@ export function OfficialDetailsSection({ register, errors, labels }: Readonly<Of
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.timezone}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Select {...register("timezone")} defaultValue="(GMT+02:00) Cairo" fullWidth sx={outlinedInputSx}>
-          <MenuItem value="(GMT+02:00) Cairo">(GMT+02:00) Cairo</MenuItem>
-          <MenuItem value="(GMT+04:00) Abu Dhabi">(GMT+04:00) Abu Dhabi</MenuItem>
-          <MenuItem value="(GMT+03:00) Riyadh">(GMT+03:00) Riyadh</MenuItem>
-          <MenuItem value="(GMT+00:00) London">(GMT+00:00) London</MenuItem>
-        </Select>
+        <Controller
+          name="timezone"
+          control={control}
+          render={({ field }) => (
+            <TimezoneSelect
+              value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+              onChangeAction={value => {
+                field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+              }}
+              onBlurAction={field.onBlur}
+              label={labels.fields.timezone}
+              required
+              fullWidth
+            />
+          )}
+        />
+        {errors.timezone ? (
+          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
+            {errors.timezone.message}
+          </Typography>
+        ) : null}
       </Grid>
     </Grid>
   );

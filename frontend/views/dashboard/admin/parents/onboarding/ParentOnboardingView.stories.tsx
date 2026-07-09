@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useForm } from "react-hook-form";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ParentOnboardingView } from "./ParentOnboardingView";
 import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethod } from "./types";
@@ -18,19 +19,22 @@ const defaultValues: ParentOnboardingFormData = {
   feeAmount: "",
   paymentMethod: PaymentMethod.Paypal,
   currency: "USD",
+  timezone: IanaTimezone.AfricaCairo,
 };
 
 function ParentOnboardingStoryWrapper({ isSubmitting }: Readonly<{ isSubmitting: boolean }>) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<ParentOnboardingFormData>({
-    defaultValues,
+    defaultValues: { ...defaultValues, timezone: IanaTimezone.AfricaCairo },
   });
   return (
     <ParentOnboardingView
       register={register}
+      control={control}
       errors={errors}
       handleSubmit={handleSubmit}
       isSubmitting={isSubmitting}

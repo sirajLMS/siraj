@@ -17,6 +17,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
@@ -48,12 +49,13 @@ describe("Timezone Handling & DST Adjustment", () => {
       .returning();
 
     // 2. Create Teacher with Africa/Cairo
+    await db.update(users).set({ timezone: IanaTimezone.Africa_Cairo }).where(eq(users.id, testUser.id));
+
     [testTeacher] = await db
       .insert(teachers)
       .values({
         userId: testUser.id,
         status: "ACTIVATED",
-        timezone: "Africa/Cairo",
         createdAt: new Date(),
         updatedAt: new Date(),
       })

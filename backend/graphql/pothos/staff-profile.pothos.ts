@@ -2,6 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AccountStatusPothosObject,
   GenderPothosObject,
+  IanaTimezonePothosObject,
   PaymentMethodPothosObject,
 } from "@/backend/graphql/pothos/enum.pothos";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teacher.types";
@@ -22,7 +23,7 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     qualifications: t.exposeString("qualifications", { nullable: true }),
     zoomLink: t.exposeString("zoomLink", { nullable: true }),
     zoomUsername: t.exposeString("zoomUsername", { nullable: true }),
-    timezone: t.exposeString("timezone"),
+    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     hourlyRate: t.exposeString("hourlyRate", { nullable: true, authScopes: { superAdmin: true } }),
     rateCurrency: t.exposeString("rateCurrency", { nullable: true, authScopes: { superAdmin: true } }),
     status: t.expose("status", { type: AccountStatusPothosObject }),
@@ -51,7 +52,7 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
       zoomLink: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
       zoomUsername: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       zoomPassword: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      timezone: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
       hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       rateCurrency: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       paymentMethod: t.field({ type: PaymentMethodPothosObject, required: false }),

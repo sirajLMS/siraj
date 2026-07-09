@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { isRedirect, toParentRepoInput } from "@/backend/services";
 
 describe("ProfileService helpers", () => {
@@ -31,7 +32,7 @@ describe("toParentRepoInput", () => {
       feeAmount: "500",
       paymentMethod: "bank_transfer",
       currency: "SAR",
-      timezone: "Asia/Riyadh",
+      timezone: IanaTimezone.Asia_Riyadh,
     };
 
     expect(toParentRepoInput(adminInput)).toEqual({
@@ -46,7 +47,7 @@ describe("toParentRepoInput", () => {
       feeAmount: "500",
       paymentMethod: "bank_transfer",
       currency: "SAR",
-      timezone: "Asia/Riyadh",
+      timezone: IanaTimezone.Asia_Riyadh,
     });
   });
 

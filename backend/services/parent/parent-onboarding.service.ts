@@ -2,6 +2,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository, PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -64,7 +65,7 @@ export namespace ParentOnboardingService {
         txObj
       );
 
-      await UserRepository.updateTimezone(user.id, input.timezone ?? "UTC", txObj, locale);
+      await UserRepository.updateTimezone(user.id, input.timezone ?? IanaTimezone.UTC, txObj, locale);
 
       // Step 2: Create parent profile
       const parent = await ParentRepository.create(

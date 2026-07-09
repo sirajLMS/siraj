@@ -1,3 +1,5 @@
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
 }));
@@ -85,7 +87,7 @@ const mockSearchResult = {
         id: "teacher-1",
         name: "Ahmed Hassan",
         gender: "MALE",
-        timezone: "Africa/Cairo",
+        timezone: IanaTimezone.AfricaCairo,
         availableDaysCount: 2,
         gaps: [
           {
@@ -97,7 +99,7 @@ const mockSearchResult = {
             calendarDate: fromDate,
             gapStartTime: "09:00",
             gapEndTime: "11:00",
-            timezone: "Africa/Cairo",
+            timezone: IanaTimezone.AfricaCairo,
           },
         ],
       },

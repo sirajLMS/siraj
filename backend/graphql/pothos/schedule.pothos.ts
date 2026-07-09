@@ -2,6 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
+  IanaTimezonePothosObject,
   LeaveRequestStatusPothosObject,
   RescheduleDateLabelPothosObject,
   StudentStatusPothosObject,
@@ -68,6 +69,8 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
     courseName: t.exposeString("courseName", { nullable: true }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
+    teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
+    studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
   }),
 });
 
@@ -189,7 +192,7 @@ gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
     args: {
       date: t.arg.string({ required: true }),
       search: t.arg.string({ required: false }),
-      viewerTimezone: t.arg.string({ required: false }),
+      viewerTimezone: t.arg({ type: IanaTimezonePothosObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
       const date = new Date(args.date);

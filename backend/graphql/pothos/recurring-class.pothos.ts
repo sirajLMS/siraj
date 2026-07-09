@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { IanaTimezonePothosObject } from "@/backend/graphql/pothos/enum.pothos";
 import type {
   CreateRecurringClassInput,
   CreateRecurringClassReturnType,
@@ -23,8 +24,7 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
       teacherId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       durationMinutes: t.int({ required: true }),
       defaultStartTime: t.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
-      timezone: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
-      timezoneId: t.int({ required: false }),
+      timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
       effectiveFrom: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
       effectiveUntil: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
       days: t.field({

@@ -13,6 +13,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
@@ -29,7 +30,7 @@ export const users = pgTable(
     avatarUrl: varchar("avatar_url", { length: 1024 }),
     isActive: boolean("is_active").notNull().default(true),
     isSuperAdmin: boolean("is_super_admin").notNull().default(false),
-    timezone: varchar("timezone", { length: 100 }).notNull().default("UTC"),
+    timezone: varchar("timezone", { length: 100 }).notNull().default(IanaTimezone.UTC),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),

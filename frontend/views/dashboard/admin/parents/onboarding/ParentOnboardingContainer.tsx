@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useCreateParentOnboarding } from "@/frontend/hooks/useCreateParentOnboarding";
 import { logger } from "@/frontend/utils/logger";
 import { ParentOnboardingView } from "./ParentOnboardingView";
@@ -28,6 +28,7 @@ const defaultValues: ParentOnboardingFormData = {
   feeAmount: "",
   paymentMethod: PaymentMethod.Paypal,
   currency: "USD",
+  timezone: IanaTimezone.AfricaCairo,
 };
 
 export function ParentOnboardingContainer() {
@@ -37,6 +38,7 @@ export function ParentOnboardingContainer() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     reset: resetForm,
@@ -61,6 +63,7 @@ export function ParentOnboardingContainer() {
     <RequirePermission permissions={[AppPermission.ParentsCreate]}>
       <ParentOnboardingView
         register={register}
+        control={control}
         errors={errors}
         handleSubmit={handleSubmit}
         isSubmitting={loading}

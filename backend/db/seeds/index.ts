@@ -154,8 +154,8 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   context.classCommunications = await seedOrGetClassCommunications(context.groupClasses, config);
 
   logger.log("Seeding scheduling extensions...");
-  await seedOrGetTeacherAvailabilityWindows(context.teachers, context.timezones, config);
-  await seedOrGetTeacherRecurringUnavailability(context.teachers, context.timezones, config);
+  await seedOrGetTeacherAvailabilityWindows(context.teachers, context.users, context.timezones, config);
+  await seedOrGetTeacherRecurringUnavailability(context.teachers, context.users, context.timezones, config);
   await seedOrGetTeacherVacationRequests(context.teachers, context.users, context.timezones, config);
 
   const leaveRequests = await seedOrGetLeaveRequests(

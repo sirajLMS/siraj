@@ -7,8 +7,8 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm } from "react-hook-form";
-import { mockLogin } from "../actions/mockLogin";
-import { createLoginSchema, type LoginFormData } from "../schemas/loginSchema";
+import { mockLogin } from "@/frontend/views/auth/login/actions/mockLogin";
+import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 
 // Person icon for email field with secondary color
 const StyledPersonIcon = styled(Person)(({ theme }) => ({

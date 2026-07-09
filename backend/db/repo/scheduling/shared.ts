@@ -1,6 +1,7 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 
 export type { DBTransaction };
 
@@ -215,6 +216,6 @@ export async function resolveStudentTimezone(studentId: string, tx?: DBTransacti
   return (
     row?.override ??
     row?.parentTimezone ??
-    (await SystemSettingsRepository.getStringValue("default_timezone", "UTC", tx))
+    (await SystemSettingsRepository.getStringValue("default_timezone", IanaTimezone.UTC, tx))
   );
 }

@@ -2,8 +2,12 @@
 
 import { Stack, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
+import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentAdminEditFormData } from "../parentProfileFormTypes";
 import { InfoField } from "./InfoField";
 import { type ParentAdminData, toDisplayValue } from "./parentProfileTypes";
@@ -16,6 +20,7 @@ type BillingSectionProps =
   | {
       readonly mode: "edit";
       readonly register: UseFormRegister<ParentAdminEditFormData>;
+      readonly control: Control<ParentAdminEditFormData>;
     };
 
 export function BillingSection(props: BillingSectionProps) {
@@ -30,7 +35,21 @@ export function BillingSection(props: BillingSectionProps) {
           <TextField label={t("fields.feeAmount")} fullWidth size="small" {...props.register("feeAmount")} />
           <TextField label={t("fields.paymentMethod")} fullWidth size="small" {...props.register("paymentMethod")} />
           <TextField label={t("fields.currency")} fullWidth size="small" {...props.register("currency")} />
-          <TextField label={t("fields.timezone")} fullWidth size="small" {...props.register("timezone")} />
+          <Controller
+            name="timezone"
+            control={props.control}
+            render={({ field }) => (
+              <TimezoneSelect
+                value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+                onChangeAction={value => {
+                  field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+                }}
+                onBlurAction={field.onBlur}
+                label={t("fields.timezone")}
+                fullWidth
+              />
+            )}
+          />
         </Stack>
       </SectionPanel>
     );
@@ -46,7 +65,10 @@ export function BillingSection(props: BillingSectionProps) {
           value={toDisplayValue(props.adminData.paymentMethod, tc("notSet"))}
         />
         <InfoField label={t("fields.currency")} value={toDisplayValue(props.adminData.currency, tc("notSet"))} />
-        <InfoField label={t("fields.timezone")} value={toDisplayValue(props.adminData.timezone, tc("notSet"))} />
+        <InfoField
+          label={t("fields.timezone")}
+          value={<TimezoneDisplay timezone={props.adminData.timezone} fallback={tc("notSet")} />}
+        />
         <Stack spacing={0.5}>
           <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
             {t("fields.status")}

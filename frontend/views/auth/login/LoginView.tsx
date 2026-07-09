@@ -1,10 +1,10 @@
 import { Box, Card, CardContent } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DemoFastLogin } from "./components/DemoFastLogin";
-import { LoginFooter } from "./components/LoginFooter";
-import { LoginForm, type LoginFormProps } from "./components/LoginForm";
-import { LoginHeader } from "./components/LoginHeader";
-import { ThemeLanguageControls } from "./components/ThemeLanguageControls";
+import { DemoFastLogin } from "@/frontend/views/auth/login/components/DemoFastLogin";
+import { LoginFooter } from "@/frontend/views/auth/login/components/LoginFooter";
+import { LoginForm, type LoginFormProps } from "@/frontend/views/auth/login/components/LoginForm";
+import { LoginHeader } from "@/frontend/views/auth/login/components/LoginHeader";
+import { ThemeLanguageControls } from "@/frontend/views/auth/login/components/ThemeLanguageControls";
 
 // Full viewport container with centered content and default background
 const StyledPageContainer = styled(Box)(({ theme }) => ({

@@ -23,6 +23,9 @@ import {
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
+import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";
+import { filterAdminInvoices } from "@/frontend/views/dashboard/admin/billing/utils/billingFilters";
+import { buildBillingLabels } from "@/frontend/views/dashboard/admin/billing/utils/buildBillingLabels";
 import type {
   AdminBillingSummary,
   AdminInvoiceRow,
@@ -30,9 +33,6 @@ import type {
   StudentCreditRow,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { AdminBillingView } from "./AdminBillingView";
-import { filterAdminInvoices } from "./utils/billingFilters";
-import { buildBillingLabels } from "./utils/buildBillingLabels";
 
 interface AdminBillingContainerProps {
   readonly parentId?: string;

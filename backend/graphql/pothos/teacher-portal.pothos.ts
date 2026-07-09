@@ -2,6 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
+  IanaTimezonePothosObject,
   PaymentMethodPothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/enum.pothos";
@@ -53,7 +54,7 @@ export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     phone: t.exposeString("phone", { nullable: true }),
-    timezone: t.exposeString("timezone"),
+    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
     rateCurrency: t.exposeString("rateCurrency", { nullable: true }),
     paymentMethod: t.expose("paymentMethod", { type: PaymentMethodPothosObject, nullable: true }),

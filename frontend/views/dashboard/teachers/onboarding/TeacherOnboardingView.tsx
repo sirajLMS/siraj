@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { BankingLedgerSection } from "./components/BankingLedgerSection";
 import { OfficialDetailsSection } from "./components/OfficialDetailsSection";
@@ -102,6 +103,7 @@ export function TeacherOnboardingView({
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<TeacherOnboardingFormData>({
@@ -109,7 +111,7 @@ export function TeacherOnboardingView({
     defaultValues: {
       gender: Gender.Male,
       countryCode: CountryCode.Eg,
-      timezone: "(GMT+02:00) Cairo",
+      timezone: IanaTimezone.AfricaCairo,
       rateCurrency: "USD",
     },
   });
@@ -150,7 +152,7 @@ export function TeacherOnboardingView({
           <TeacherInfoSection register={register} errors={errors} labels={labels} />
         </SectionPanel>
         <SectionPanel title={labels.sections.officialDetails}>
-          <OfficialDetailsSection register={register} errors={errors} labels={labels} />
+          <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
         </SectionPanel>
         <SectionPanel title={labels.sections.salaryDetails}>
           <SalaryDetailsSection register={register} errors={errors} labels={labels} />

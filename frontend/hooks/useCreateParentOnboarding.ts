@@ -1,6 +1,7 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import type { ParentOnboardingInput, ParentOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
@@ -28,7 +29,7 @@ export function useCreateParentOnboarding() {
         feeAmount: formData.feeAmount,
         paymentMethod: formData.paymentMethod,
         currency: formData.currency,
-        timezone: formData.timezone || null,
+        timezone: toGraphqlIanaTimezone(formData.timezone || null),
         password: "",
       };
 

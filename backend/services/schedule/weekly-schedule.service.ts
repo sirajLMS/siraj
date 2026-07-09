@@ -4,6 +4,7 @@ import {
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -70,7 +71,7 @@ export namespace WeeklyScheduleService {
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
-            timeZone: "UTC",
+            timeZone: IanaTimezone.UTC,
           }),
           day: row.dayOfWeek,
           executionState: row.executionState as ClassExecutionState,

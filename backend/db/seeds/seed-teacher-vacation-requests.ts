@@ -3,11 +3,13 @@ import { db } from "@/backend/db/drizzleDb";
 import { teacherVacationRequests } from "@/backend/db/schema/teacher-availability";
 import { addMonths, findAdminUser, loadSeedConfig, type SeedConfig, startOfDay } from "@/backend/db/seeds/lib";
 import { VacationRequestStatus } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
 
 async function upsertVacationRequest(
   teacher: TeacherEntity,
+  teacherTimezone: string,
   requestedByUserId: string,
   startAt: Date,
   endAt: Date,
@@ -34,7 +36,7 @@ async function upsertVacationRequest(
       requestedByUserId,
       startAt,
       endAt,
-      timezone: teacher.timezone,
+      timezone: teacherTimezone,
       timezoneId: tz?.id ?? null,
       reason: "Seed vacation request",
       status,
@@ -110,9 +112,10 @@ export async function seedOrGet(
     const startAt = addMonths(anchor, spec.startOffsetMonths);
     const endAt = new Date(startAt);
     endAt.setDate(endAt.getDate() + spec.durationDays);
-    const tz = timezones.find(t => t.ianaId === teacher.timezone) ?? timezones[0];
+    const teacherTimezone = usersList.find(u => u.id === teacher.userId)?.timezone ?? IanaTimezone.UTC;
+    const tz = timezones.find(t => t.ianaId === teacherTimezone) ?? timezones[0];
 
-    const inserted = await upsertVacationRequest(teacher, requestedByUserId, startAt, endAt, tz, {
+    const inserted = await upsertVacationRequest(teacher, teacherTimezone, requestedByUserId, startAt, endAt, tz, {
       status: spec.status,
       adminUserId: adminUser?.id,
       now,

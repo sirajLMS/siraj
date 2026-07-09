@@ -9,6 +9,7 @@ import {
 import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
 import { classInstances, recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;
@@ -65,7 +66,7 @@ function computeScheduledStartForDay(
 
   const getOffsetMs = (d: Date) => {
     try {
-      const utcDate = new Date(d.toLocaleString("en-US", { timeZone: "UTC" }));
+      const utcDate = new Date(d.toLocaleString("en-US", { timeZone: IanaTimezone.UTC }));
       const tzDate = new Date(d.toLocaleString("en-US", { timeZone: timezone }));
       return tzDate.getTime() - utcDate.getTime();
     } catch {
@@ -274,7 +275,7 @@ export const createRecurringScheduleWithInstances = async (
 
     const getOffsetMinutes = (ianaTimezone: string, d: Date) => {
       try {
-        const utcDate = new Date(d.toLocaleString("en-US", { timeZone: "UTC" }));
+        const utcDate = new Date(d.toLocaleString("en-US", { timeZone: IanaTimezone.UTC }));
         const tzDate = new Date(d.toLocaleString("en-US", { timeZone: ianaTimezone }));
         return Math.round((tzDate.getTime() - utcDate.getTime()) / 60000);
       } catch {

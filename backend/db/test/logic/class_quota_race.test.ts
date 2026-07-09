@@ -57,7 +57,6 @@ async function createBaseTestData(
     .values({
       userId: teacherUser.id,
       status: "ACTIVATED",
-      timezone: "UTC",
       createdAt: now,
       updatedAt: now,
     })

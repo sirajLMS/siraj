@@ -5,6 +5,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { StudentRepository } from "@/backend/db/repo";
 import { parents, students, users } from "@/backend/db/schema";
 import { AccountStatus, AppLanguage, Gender, OrderSortDirection, ParentStatus, UserRole } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { ParentEntity, StudentEntity, StudentFilterArgs } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/auth.types";
@@ -27,12 +28,6 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       })
       .returning();
     const user = userResult[0];
-    testUser = {
-      ...user,
-      role: UserRole.PARENT,
-      status: AccountStatus.ACTIVATED,
-      parentId: testParent.id,
-    };
 
     const [parent] = (await db
       .insert(parents)
@@ -44,6 +39,14 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       })
       .returning()) as [ParentEntity];
     testParent = parent;
+
+    testUser = {
+      ...user,
+      timezone: (user.timezone ?? IanaTimezone.UTC) as IanaTimezone,
+      role: UserRole.PARENT,
+      status: AccountStatus.ACTIVATED,
+      parentId: testParent.id,
+    };
   });
 
   afterEach(async () => {

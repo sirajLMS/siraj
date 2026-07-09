@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import { FeesContractSection } from "./FeesContractSection";
 import { ParentInfoSection } from "./ParentInfoSection";
@@ -12,13 +12,14 @@ import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema"
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
+  readonly control: Control<ParentOnboardingFormData>;
   readonly errors: FieldErrors<ParentOnboardingFormData>;
   readonly handleSubmit: UseFormHandleSubmit<ParentOnboardingFormData>;
   readonly isSubmitting: boolean;
   readonly onSubmit: (data: ParentOnboardingFormData) => void | Promise<void>;
 }
 
-export function ParentOnboardingView({ register, errors, handleSubmit, isSubmitting, onSubmit }: Props) {
+export function ParentOnboardingView({ register, control, errors, handleSubmit, isSubmitting, onSubmit }: Props) {
   const t = useTranslations("dashboard.parentOnboarding");
 
   return (
@@ -55,7 +56,7 @@ export function ParentOnboardingView({ register, errors, handleSubmit, isSubmitt
       >
         <ParentInfoSection register={register} errors={errors} />
         <SocialCommsSection register={register} />
-        <FeesContractSection register={register} errors={errors} />
+        <FeesContractSection register={register} control={control} errors={errors} />
 
         <Box
           sx={theme => ({

@@ -1,5 +1,8 @@
 import { useContext } from "react";
-import { NetworkConnectivityContext, type NetworkConnectivityContextType } from "../context/NetworkConnectivityContext";
+import {
+  NetworkConnectivityContext,
+  type NetworkConnectivityContextType,
+} from "@/frontend/context/NetworkConnectivityContext";
 
 export const useNetworkConnectivity = (): NetworkConnectivityContextType => {
   const context = useContext(NetworkConnectivityContext);

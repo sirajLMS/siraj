@@ -562,8 +562,7 @@ export type CreateRecurringClassInput = {
   generateInstancesForWeeks: number | null | undefined;
   studentId: string;
   teacherId: string;
-  timezone: string;
-  timezoneId: number | null | undefined;
+  timezone: IanaTimezone;
 };
 
 export type CreateTeacherNoteInput = {
@@ -599,6 +598,453 @@ export type GroupClassAttendanceStatus =
   | 'LATE'
   | 'PENDING'
   | 'PRESENT';
+
+export type IanaTimezone =
+  | 'Africa_Abidjan'
+  | 'Africa_Accra'
+  | 'Africa_Addis_Ababa'
+  | 'Africa_Algiers'
+  | 'Africa_Asmara'
+  | 'Africa_Bamako'
+  | 'Africa_Bangui'
+  | 'Africa_Banjul'
+  | 'Africa_Bissau'
+  | 'Africa_Blantyre'
+  | 'Africa_Brazzaville'
+  | 'Africa_Bujumbura'
+  | 'Africa_Cairo'
+  | 'Africa_Casablanca'
+  | 'Africa_Ceuta'
+  | 'Africa_Conakry'
+  | 'Africa_Dakar'
+  | 'Africa_Dar_es_Salaam'
+  | 'Africa_Djibouti'
+  | 'Africa_Douala'
+  | 'Africa_El_Aaiun'
+  | 'Africa_Freetown'
+  | 'Africa_Gaborone'
+  | 'Africa_Harare'
+  | 'Africa_Johannesburg'
+  | 'Africa_Juba'
+  | 'Africa_Kampala'
+  | 'Africa_Khartoum'
+  | 'Africa_Kigali'
+  | 'Africa_Kinshasa'
+  | 'Africa_Lagos'
+  | 'Africa_Libreville'
+  | 'Africa_Lome'
+  | 'Africa_Luanda'
+  | 'Africa_Lubumbashi'
+  | 'Africa_Lusaka'
+  | 'Africa_Malabo'
+  | 'Africa_Maputo'
+  | 'Africa_Maseru'
+  | 'Africa_Mbabane'
+  | 'Africa_Mogadishu'
+  | 'Africa_Monrovia'
+  | 'Africa_Nairobi'
+  | 'Africa_Ndjamena'
+  | 'Africa_Niamey'
+  | 'Africa_Nouakchott'
+  | 'Africa_Ouagadougou'
+  | 'Africa_Porto_Novo'
+  | 'Africa_Sao_Tome'
+  | 'Africa_Tripoli'
+  | 'Africa_Tunis'
+  | 'Africa_Windhoek'
+  | 'America_Adak'
+  | 'America_Anchorage'
+  | 'America_Anguilla'
+  | 'America_Antigua'
+  | 'America_Araguaina'
+  | 'America_Argentina_Buenos_Aires'
+  | 'America_Argentina_Catamarca'
+  | 'America_Argentina_Cordoba'
+  | 'America_Argentina_Jujuy'
+  | 'America_Argentina_La_Rioja'
+  | 'America_Argentina_Mendoza'
+  | 'America_Argentina_Rio_Gallegos'
+  | 'America_Argentina_Salta'
+  | 'America_Argentina_San_Juan'
+  | 'America_Argentina_San_Luis'
+  | 'America_Argentina_Tucuman'
+  | 'America_Argentina_Ushuaia'
+  | 'America_Aruba'
+  | 'America_Asuncion'
+  | 'America_Atikokan'
+  | 'America_Bahia'
+  | 'America_Bahia_Banderas'
+  | 'America_Barbados'
+  | 'America_Belem'
+  | 'America_Belize'
+  | 'America_Blanc_Sablon'
+  | 'America_Boa_Vista'
+  | 'America_Bogota'
+  | 'America_Boise'
+  | 'America_Cambridge_Bay'
+  | 'America_Campo_Grande'
+  | 'America_Cancun'
+  | 'America_Caracas'
+  | 'America_Cayenne'
+  | 'America_Cayman'
+  | 'America_Chicago'
+  | 'America_Chihuahua'
+  | 'America_Ciudad_Juarez'
+  | 'America_Costa_Rica'
+  | 'America_Creston'
+  | 'America_Cuiaba'
+  | 'America_Curacao'
+  | 'America_Danmarkshavn'
+  | 'America_Dawson'
+  | 'America_Dawson_Creek'
+  | 'America_Denver'
+  | 'America_Detroit'
+  | 'America_Dominica'
+  | 'America_Edmonton'
+  | 'America_Eirunepe'
+  | 'America_El_Salvador'
+  | 'America_Fort_Nelson'
+  | 'America_Fortaleza'
+  | 'America_Glace_Bay'
+  | 'America_Goose_Bay'
+  | 'America_Grand_Turk'
+  | 'America_Grenada'
+  | 'America_Guadeloupe'
+  | 'America_Guatemala'
+  | 'America_Guayaquil'
+  | 'America_Guyana'
+  | 'America_Halifax'
+  | 'America_Havana'
+  | 'America_Hermosillo'
+  | 'America_Indiana_Indianapolis'
+  | 'America_Indiana_Knox'
+  | 'America_Indiana_Marengo'
+  | 'America_Indiana_Petersburg'
+  | 'America_Indiana_Tell_City'
+  | 'America_Indiana_Vevay'
+  | 'America_Indiana_Vincennes'
+  | 'America_Indiana_Winamac'
+  | 'America_Inuvik'
+  | 'America_Iqaluit'
+  | 'America_Jamaica'
+  | 'America_Juneau'
+  | 'America_Kentucky_Louisville'
+  | 'America_Kentucky_Monticello'
+  | 'America_Kralendijk'
+  | 'America_La_Paz'
+  | 'America_Lima'
+  | 'America_Los_Angeles'
+  | 'America_Lower_Princes'
+  | 'America_Maceio'
+  | 'America_Managua'
+  | 'America_Manaus'
+  | 'America_Marigot'
+  | 'America_Martinique'
+  | 'America_Matamoros'
+  | 'America_Mazatlan'
+  | 'America_Menominee'
+  | 'America_Merida'
+  | 'America_Metlakatla'
+  | 'America_Mexico_City'
+  | 'America_Miquelon'
+  | 'America_Moncton'
+  | 'America_Monterrey'
+  | 'America_Montevideo'
+  | 'America_Montserrat'
+  | 'America_Nassau'
+  | 'America_New_York'
+  | 'America_Nome'
+  | 'America_Noronha'
+  | 'America_North_Dakota_Beulah'
+  | 'America_North_Dakota_Center'
+  | 'America_North_Dakota_New_Salem'
+  | 'America_Nuuk'
+  | 'America_Ojinaga'
+  | 'America_Panama'
+  | 'America_Paramaribo'
+  | 'America_Phoenix'
+  | 'America_Port_au_Prince'
+  | 'America_Port_of_Spain'
+  | 'America_Porto_Velho'
+  | 'America_Puerto_Rico'
+  | 'America_Punta_Arenas'
+  | 'America_Rankin_Inlet'
+  | 'America_Recife'
+  | 'America_Regina'
+  | 'America_Resolute'
+  | 'America_Rio_Branco'
+  | 'America_Santarem'
+  | 'America_Santiago'
+  | 'America_Santo_Domingo'
+  | 'America_Sao_Paulo'
+  | 'America_Scoresbysund'
+  | 'America_Sitka'
+  | 'America_St_Barthelemy'
+  | 'America_St_Johns'
+  | 'America_St_Kitts'
+  | 'America_St_Lucia'
+  | 'America_St_Thomas'
+  | 'America_St_Vincent'
+  | 'America_Swift_Current'
+  | 'America_Tegucigalpa'
+  | 'America_Thule'
+  | 'America_Tijuana'
+  | 'America_Toronto'
+  | 'America_Tortola'
+  | 'America_Vancouver'
+  | 'America_Whitehorse'
+  | 'America_Winnipeg'
+  | 'America_Yakutat'
+  | 'Antarctica_Casey'
+  | 'Antarctica_Davis'
+  | 'Antarctica_DumontDUrville'
+  | 'Antarctica_Macquarie'
+  | 'Antarctica_Mawson'
+  | 'Antarctica_McMurdo'
+  | 'Antarctica_Palmer'
+  | 'Antarctica_Rothera'
+  | 'Antarctica_Syowa'
+  | 'Antarctica_Troll'
+  | 'Antarctica_Vostok'
+  | 'Arctic_Longyearbyen'
+  | 'Asia_Aden'
+  | 'Asia_Almaty'
+  | 'Asia_Amman'
+  | 'Asia_Anadyr'
+  | 'Asia_Aqtau'
+  | 'Asia_Aqtobe'
+  | 'Asia_Ashgabat'
+  | 'Asia_Atyrau'
+  | 'Asia_Baghdad'
+  | 'Asia_Bahrain'
+  | 'Asia_Baku'
+  | 'Asia_Bangkok'
+  | 'Asia_Barnaul'
+  | 'Asia_Beirut'
+  | 'Asia_Bishkek'
+  | 'Asia_Brunei'
+  | 'Asia_Chita'
+  | 'Asia_Choibalsan'
+  | 'Asia_Colombo'
+  | 'Asia_Damascus'
+  | 'Asia_Dhaka'
+  | 'Asia_Dili'
+  | 'Asia_Dubai'
+  | 'Asia_Dushanbe'
+  | 'Asia_Famagusta'
+  | 'Asia_Gaza'
+  | 'Asia_Hebron'
+  | 'Asia_Ho_Chi_Minh'
+  | 'Asia_Hong_Kong'
+  | 'Asia_Hovd'
+  | 'Asia_Irkutsk'
+  | 'Asia_Jakarta'
+  | 'Asia_Jayapura'
+  | 'Asia_Jerusalem'
+  | 'Asia_Kabul'
+  | 'Asia_Kamchatka'
+  | 'Asia_Karachi'
+  | 'Asia_Kathmandu'
+  | 'Asia_Khandyga'
+  | 'Asia_Kolkata'
+  | 'Asia_Krasnoyarsk'
+  | 'Asia_Kuala_Lumpur'
+  | 'Asia_Kuching'
+  | 'Asia_Kuwait'
+  | 'Asia_Macau'
+  | 'Asia_Magadan'
+  | 'Asia_Makassar'
+  | 'Asia_Manila'
+  | 'Asia_Muscat'
+  | 'Asia_Nicosia'
+  | 'Asia_Novokuznetsk'
+  | 'Asia_Novosibirsk'
+  | 'Asia_Omsk'
+  | 'Asia_Oral'
+  | 'Asia_Phnom_Penh'
+  | 'Asia_Pontianak'
+  | 'Asia_Pyongyang'
+  | 'Asia_Qatar'
+  | 'Asia_Qostanay'
+  | 'Asia_Qyzylorda'
+  | 'Asia_Riyadh'
+  | 'Asia_Sakhalin'
+  | 'Asia_Samarkand'
+  | 'Asia_Seoul'
+  | 'Asia_Shanghai'
+  | 'Asia_Singapore'
+  | 'Asia_Srednekolymsk'
+  | 'Asia_Taipei'
+  | 'Asia_Tashkent'
+  | 'Asia_Tbilisi'
+  | 'Asia_Tehran'
+  | 'Asia_Thimphu'
+  | 'Asia_Tokyo'
+  | 'Asia_Tomsk'
+  | 'Asia_Ulaanbaatar'
+  | 'Asia_Urumqi'
+  | 'Asia_Ust_Nera'
+  | 'Asia_Vientiane'
+  | 'Asia_Vladivostok'
+  | 'Asia_Yakutsk'
+  | 'Asia_Yangon'
+  | 'Asia_Yekaterinburg'
+  | 'Asia_Yerevan'
+  | 'Atlantic_Azores'
+  | 'Atlantic_Bermuda'
+  | 'Atlantic_Canary'
+  | 'Atlantic_Cape_Verde'
+  | 'Atlantic_Faroe'
+  | 'Atlantic_Madeira'
+  | 'Atlantic_Reykjavik'
+  | 'Atlantic_South_Georgia'
+  | 'Atlantic_St_Helena'
+  | 'Atlantic_Stanley'
+  | 'Australia_Adelaide'
+  | 'Australia_Brisbane'
+  | 'Australia_Broken_Hill'
+  | 'Australia_Darwin'
+  | 'Australia_Eucla'
+  | 'Australia_Hobart'
+  | 'Australia_Lindeman'
+  | 'Australia_Lord_Howe'
+  | 'Australia_Melbourne'
+  | 'Australia_Perth'
+  | 'Australia_Sydney'
+  | 'Etc_GMT_1'
+  | 'Etc_GMT_2'
+  | 'Etc_GMT_3'
+  | 'Etc_GMT_4'
+  | 'Etc_GMT_5'
+  | 'Etc_GMT_6'
+  | 'Etc_GMT_7'
+  | 'Etc_GMT_8'
+  | 'Etc_GMT_9'
+  | 'Etc_GMT_10'
+  | 'Etc_GMT_11'
+  | 'Etc_GMT_12'
+  | 'Etc_GMT_13'
+  | 'Etc_GMT_14'
+  | 'Etc_GMT_plus_1'
+  | 'Etc_GMT_plus_2'
+  | 'Etc_GMT_plus_3'
+  | 'Etc_GMT_plus_4'
+  | 'Etc_GMT_plus_5'
+  | 'Etc_GMT_plus_6'
+  | 'Etc_GMT_plus_7'
+  | 'Etc_GMT_plus_8'
+  | 'Etc_GMT_plus_9'
+  | 'Etc_GMT_plus_10'
+  | 'Etc_GMT_plus_11'
+  | 'Etc_GMT_plus_12'
+  | 'Europe_Amsterdam'
+  | 'Europe_Andorra'
+  | 'Europe_Astrakhan'
+  | 'Europe_Athens'
+  | 'Europe_Belgrade'
+  | 'Europe_Berlin'
+  | 'Europe_Bratislava'
+  | 'Europe_Brussels'
+  | 'Europe_Bucharest'
+  | 'Europe_Budapest'
+  | 'Europe_Busingen'
+  | 'Europe_Chisinau'
+  | 'Europe_Copenhagen'
+  | 'Europe_Dublin'
+  | 'Europe_Gibraltar'
+  | 'Europe_Guernsey'
+  | 'Europe_Helsinki'
+  | 'Europe_Isle_of_Man'
+  | 'Europe_Istanbul'
+  | 'Europe_Jersey'
+  | 'Europe_Kaliningrad'
+  | 'Europe_Kirov'
+  | 'Europe_Kyiv'
+  | 'Europe_Lisbon'
+  | 'Europe_Ljubljana'
+  | 'Europe_London'
+  | 'Europe_Luxembourg'
+  | 'Europe_Madrid'
+  | 'Europe_Malta'
+  | 'Europe_Mariehamn'
+  | 'Europe_Minsk'
+  | 'Europe_Monaco'
+  | 'Europe_Moscow'
+  | 'Europe_Oslo'
+  | 'Europe_Paris'
+  | 'Europe_Podgorica'
+  | 'Europe_Prague'
+  | 'Europe_Riga'
+  | 'Europe_Rome'
+  | 'Europe_Samara'
+  | 'Europe_San_Marino'
+  | 'Europe_Sarajevo'
+  | 'Europe_Saratov'
+  | 'Europe_Simferopol'
+  | 'Europe_Skopje'
+  | 'Europe_Sofia'
+  | 'Europe_Stockholm'
+  | 'Europe_Tallinn'
+  | 'Europe_Tirane'
+  | 'Europe_Ulyanovsk'
+  | 'Europe_Vaduz'
+  | 'Europe_Vatican'
+  | 'Europe_Vienna'
+  | 'Europe_Vilnius'
+  | 'Europe_Volgograd'
+  | 'Europe_Warsaw'
+  | 'Europe_Zagreb'
+  | 'Europe_Zurich'
+  | 'Indian_Antananarivo'
+  | 'Indian_Chagos'
+  | 'Indian_Christmas'
+  | 'Indian_Cocos'
+  | 'Indian_Comoro'
+  | 'Indian_Kerguelen'
+  | 'Indian_Mahe'
+  | 'Indian_Maldives'
+  | 'Indian_Mauritius'
+  | 'Indian_Mayotte'
+  | 'Indian_Reunion'
+  | 'Pacific_Apia'
+  | 'Pacific_Auckland'
+  | 'Pacific_Bougainville'
+  | 'Pacific_Chatham'
+  | 'Pacific_Chuuk'
+  | 'Pacific_Easter'
+  | 'Pacific_Efate'
+  | 'Pacific_Fakaofo'
+  | 'Pacific_Fiji'
+  | 'Pacific_Funafuti'
+  | 'Pacific_Galapagos'
+  | 'Pacific_Gambier'
+  | 'Pacific_Guadalcanal'
+  | 'Pacific_Guam'
+  | 'Pacific_Honolulu'
+  | 'Pacific_Kanton'
+  | 'Pacific_Kiritimati'
+  | 'Pacific_Kosrae'
+  | 'Pacific_Kwajalein'
+  | 'Pacific_Majuro'
+  | 'Pacific_Marquesas'
+  | 'Pacific_Midway'
+  | 'Pacific_Nauru'
+  | 'Pacific_Niue'
+  | 'Pacific_Norfolk'
+  | 'Pacific_Noumea'
+  | 'Pacific_Pago_Pago'
+  | 'Pacific_Palau'
+  | 'Pacific_Pitcairn'
+  | 'Pacific_Pohnpei'
+  | 'Pacific_Port_Moresby'
+  | 'Pacific_Rarotonga'
+  | 'Pacific_Saipan'
+  | 'Pacific_Tahiti'
+  | 'Pacific_Tarawa'
+  | 'Pacific_Tongatapu'
+  | 'Pacific_Wake'
+  | 'Pacific_Wallis'
+  | 'UTC';
 
 export type InvoiceStatus =
   | 'CANCELLED'
@@ -695,7 +1141,7 @@ export type ParentAdminProfileUpdateInput = {
   nationality: string | null | undefined;
   paymentMethod: string | null | undefined;
   phone: string | null | undefined;
-  timezone: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
   twitter: string | null | undefined;
   whatsapp: string | null | undefined;
 };
@@ -714,7 +1160,7 @@ export type ParentOnboardingInput = {
   password: string;
   paymentMethod: PaymentMethod | null | undefined;
   phone: string | null | undefined;
-  timezone: string | null | undefined;
+  timezone: IanaTimezone;
   twitter: string | null | undefined;
   whatsapp: string | null | undefined;
 };
@@ -935,10 +1381,7 @@ export type TeacherOnboardingInput = {
   routingNumber: string | null | undefined;
   /** SWIFT/BIC code */
   swiftBic: string | null | undefined;
-  /** IANA timezone identifier */
-  timezone: string;
-  /** Timezone ID reference */
-  timezoneId: number | null | undefined;
+  timezone: IanaTimezone;
   /** Teacher Zoom meeting link */
   zoomLink: string | null | undefined;
   /** Teacher Zoom password (encrypted) */
@@ -963,7 +1406,7 @@ export type TeacherProfileUpdateInput = {
   qualifications: string | null | undefined;
   rateCurrency: string | null | undefined;
   status: AccountStatus | null | undefined;
-  timezone: string | null | undefined;
+  timezone: IanaTimezone | null | undefined;
   zoomLink: string | null | undefined;
   zoomPassword: string | null | undefined;
   zoomUsername: string | null | undefined;
@@ -1115,7 +1558,7 @@ export type SearchTeacherAvailabilityQueryVariables = Exact<{
 }>;
 
 
-export type SearchTeacherAvailabilityQuery = { searchTeacherAvailability: { id: string | null, totalGaps: number | null, totalCount: number | null, pageInfo: { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number } | null, teachers: Array<{ id: string | null, name: string | null, gender: Gender | null, timezone: string | null, availableDaysCount: number | null, gaps: Array<{ id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: DayOfWeek | null, calendarDate: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null }> | null }> | null } | null };
+export type SearchTeacherAvailabilityQuery = { searchTeacherAvailability: { id: string | null, totalGaps: number | null, totalCount: number | null, pageInfo: { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number } | null, teachers: Array<{ id: string | null, name: string | null, gender: Gender | null, timezone: IanaTimezone | null, availableDaysCount: number | null, gaps: Array<{ id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: DayOfWeek | null, calendarDate: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: IanaTimezone | null }> | null }> | null } | null };
 
 export type UnpaidInvoicesAlertQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1202,7 +1645,7 @@ export type ClassInstanceQueryVariables = Exact<{
 }>;
 
 
-export type ClassInstanceQuery = { classInstance: { id: string | null, courseName: string | null, classType: ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: string | null, teacherTimezone: string | null, zoomMeetingUrl: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, avatarUrl: string | null, student: { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, title: string | null, avatarUrl: string | null } | null, performance: { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null } | null } | null };
+export type ClassInstanceQuery = { classInstance: { id: string | null, courseName: string | null, classType: ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: IanaTimezone | null, teacherTimezone: IanaTimezone | null, zoomMeetingUrl: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, avatarUrl: string | null, student: { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, title: string | null, avatarUrl: string | null } | null, performance: { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null } | null } | null };
 
 export type ClassStatusEventsQueryVariables = Exact<{
   classInstanceId: string | number;
@@ -1551,7 +1994,7 @@ export type ParentProfileQueryVariables = Exact<{
 }>;
 
 
-export type ParentProfileQuery = { parentProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type ParentProfileQuery = { parentProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null } | null };
 
 export type ParentAssociatedStudentsQueryVariables = Exact<{
   parentId: string;
@@ -1686,14 +2129,14 @@ export type ProfileByUserIdQueryVariables = Exact<{
 }>;
 
 
-export type ProfileByUserIdQuery = { profileByUserId: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, zoomLink: string | null, totalClasses: number | null } | null, teacherAdminProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: AccountStatus | null, updatedAt: string | null, paymentMethod: PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null } | null, parentOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null } | null, parentAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null } | null, associatedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null, staffProfile: { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null } | null, staffPermissionGroups: Array<{ id: string | null, name: string | null, slug: string | null, description: string | null }> | null, staffPermissionOverrides: Array<{ id: string | null, permissionId: string | null, permissionKey: string | null, resource: string | null, action: string | null, state: OverrideState | null }> | null, bankingSummary: { id: string | null, beneficiaryName: string | null, bankName: string | null, accountNumber: string | null, routingNumber: string | null, swiftBic: string | null, iban: string | null, verifiedAt: string | null, verifiedByUserId: string | null, verifiedByName: string | null } | null, assignedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, studentAvatarUrl: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentAvatarUrl: string | null, className: string | null, status: StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null } | null };
+export type ProfileByUserIdQuery = { profileByUserId: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, zoomLink: string | null, totalClasses: number | null } | null, teacherAdminProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, status: AccountStatus | null, updatedAt: string | null, paymentMethod: PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null } | null, parentOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null } | null, parentAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null } | null, associatedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null, staffProfile: { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null } | null, staffPermissionGroups: Array<{ id: string | null, name: string | null, slug: string | null, description: string | null }> | null, staffPermissionOverrides: Array<{ id: string | null, permissionId: string | null, permissionKey: string | null, resource: string | null, action: string | null, state: OverrideState | null }> | null, bankingSummary: { id: string | null, beneficiaryName: string | null, bankName: string | null, accountNumber: string | null, routingNumber: string | null, swiftBic: string | null, iban: string | null, verifiedAt: string | null, verifiedByUserId: string | null, verifiedByName: string | null } | null, assignedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, studentAvatarUrl: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentAvatarUrl: string | null, className: string | null, status: StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null } | null };
 
 export type UpdateOwnProfileMutationVariables = Exact<{
   input: UpdateOwnProfileInput;
 }>;
 
 
-export type UpdateOwnProfileMutation = { updateOwnProfile: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, zoomLink: string | null, totalClasses: number | null } | null, parentOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null } | null, staffProfile: { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null } | null } | null };
+export type UpdateOwnProfileMutation = { updateOwnProfile: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, zoomLink: string | null, totalClasses: number | null } | null, parentOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null } | null, staffProfile: { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null } | null } | null };
 
 export type UpdateUserProfileMutationVariables = Exact<{
   userId: string;
@@ -1701,7 +2144,7 @@ export type UpdateUserProfileMutationVariables = Exact<{
 }>;
 
 
-export type UpdateUserProfileMutation = { updateUserProfile: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherAdminProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null } | null, parentAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null } | null, staffProfile: { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null } | null } | null };
+export type UpdateUserProfileMutation = { updateUserProfile: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherAdminProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, hasZoomPassword: boolean | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null } | null, parentAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null } | null, staffProfile: { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null } | null } | null };
 
 export type CreateRecurringClassMutationVariables = Exact<{
   input: CreateRecurringClassInput;
@@ -1736,7 +2179,7 @@ export type AdminDashboardScheduleQueryVariables = Exact<{
 }>;
 
 
-export type AdminDashboardScheduleQuery = { adminDashboardSchedule: { id: string | null, totalCount: number | null, metrics: { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null } | null, rows: Array<{ id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: { id: string | null, name: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, avatarUrl: string | null } | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type AdminDashboardScheduleQuery = { adminDashboardSchedule: { id: string | null, totalCount: number | null, metrics: { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null } | null, rows: Array<{ id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: IanaTimezone | null, studentTimezone: IanaTimezone | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: { id: string | null, name: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, avatarUrl: string | null } | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
 
 export type DailyScheduleMetricsQueryVariables = Exact<{
   date: string;
@@ -1754,7 +2197,7 @@ export type DailyScheduleListQueryVariables = Exact<{
 }>;
 
 
-export type DailyScheduleListQuery = { dailyScheduleList: Array<{ id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: { id: string | null, name: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, avatarUrl: string | null } | null }> | null };
+export type DailyScheduleListQuery = { dailyScheduleList: Array<{ id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: IanaTimezone | null, studentTimezone: IanaTimezone | null, duration: number | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, courseName: string | null, avatarUrl: string | null, student: { id: string | null, name: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, avatarUrl: string | null } | null }> | null };
 
 export type RescheduleTrackingRowsQueryVariables = Exact<{
   search: string | null | undefined;
@@ -1773,7 +2216,7 @@ export type RescheduleTrackingMetricsQuery = { rescheduleTrackingMetrics: { id: 
 export type StatusTrackingScheduleQueryVariables = Exact<{
   date: string;
   search: string | null | undefined;
-  viewerTimezone: string | null | undefined;
+  viewerTimezone: IanaTimezone | null | undefined;
 }>;
 
 
@@ -1814,7 +2257,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 }>;
 
 
-export type TeacherProfileForEditQuery = { teacherProfileForEdit: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: AccountStatus | null, updatedAt: string | null, paymentMethod: PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null } | null };
+export type TeacherProfileForEditQuery = { teacherProfileForEdit: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, status: AccountStatus | null, updatedAt: string | null, paymentMethod: PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null } | null };
 
 export type UpdateTeacherProfileMutationVariables = Exact<{
   teacherId: string | number;
@@ -1822,7 +2265,7 @@ export type UpdateTeacherProfileMutationVariables = Exact<{
 }>;
 
 
-export type UpdateTeacherProfileMutation = { updateTeacherProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: AccountStatus | null, updatedAt: string | null, paymentMethod: PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null } | null };
+export type UpdateTeacherProfileMutation = { updateTeacherProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, status: AccountStatus | null, updatedAt: string | null, paymentMethod: PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null } | null };
 
 export type StudentDirectoryRowFragmentFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
 
@@ -2031,7 +2474,7 @@ export type TeacherAssignedStudentsQuery = { teacherAssignedStudents: { id: stri
 export type TeacherOwnProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TeacherOwnProfileQuery = { teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, zoomLink: string | null } | null };
+export type TeacherOwnProfileQuery = { teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: PaymentMethod | null, zoomLink: string | null } | null };
 
 export type TeacherAssignedClassesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2258,12 +2701,12 @@ export const CreateRecurringClassDocument = {"kind":"Document","definitions":[{"
 export const GenerateAttendanceReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GenerateAttendanceReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AttendanceReportFiltersInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"generateAttendanceReport"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"rows"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"groupKey"}},{"kind":"Field","name":{"kind":"Name","value":"groupLabel"}},{"kind":"Field","name":{"kind":"Name","value":"takenClasses"}},{"kind":"Field","name":{"kind":"Name","value":"absentClasses"}},{"kind":"Field","name":{"kind":"Name","value":"leaveClasses"}},{"kind":"Field","name":{"kind":"Name","value":"pendingClasses"}},{"kind":"Field","name":{"kind":"Name","value":"totalHours"}},{"kind":"Field","name":{"kind":"Name","value":"paidEGP"}},{"kind":"Field","name":{"kind":"Name","value":"paidUSD"}},{"kind":"Field","name":{"kind":"Name","value":"engagementGrowth"}}]}},{"kind":"Field","name":{"kind":"Name","value":"engagementGrowth"}}]}}]}}]} as unknown as DocumentNode<GenerateAttendanceReportQuery, GenerateAttendanceReportQueryVariables>;
 export const DeleteRecurringClassDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"deleteRecurringClass"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"classInstanceId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteRecurringClass"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"classInstanceId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"classInstanceId"}}}]}]}}]} as unknown as DocumentNode<DeleteRecurringClassMutation, DeleteRecurringClassMutationVariables>;
 export const ClearWeeklyScheduleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"clearWeeklySchedule"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clearWeeklySchedule"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teacherId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}}}]}]}}]} as unknown as DocumentNode<ClearWeeklyScheduleMutation, ClearWeeklyScheduleMutationVariables>;
-export const AdminDashboardScheduleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"adminDashboardSchedule"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminDashboardScheduleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDashboardSchedule"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"metrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"regular"}},{"kind":"Field","name":{"kind":"Name","value":"trial"}},{"kind":"Field","name":{"kind":"Name","value":"advance"}},{"kind":"Field","name":{"kind":"Name","value":"rescheduled"}},{"kind":"Field","name":{"kind":"Name","value":"suspended"}},{"kind":"Field","name":{"kind":"Name","value":"taken"}},{"kind":"Field","name":{"kind":"Name","value":"pending"}},{"kind":"Field","name":{"kind":"Name","value":"activated"}},{"kind":"Field","name":{"kind":"Name","value":"running"}},{"kind":"Field","name":{"kind":"Name","value":"absent"}},{"kind":"Field","name":{"kind":"Name","value":"leave"}}]}},{"kind":"Field","name":{"kind":"Name","value":"rows"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"yourTime"}},{"kind":"Field","name":{"kind":"Name","value":"teacherTime"}},{"kind":"Field","name":{"kind":"Name","value":"studentTime"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledStartAt"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledEndAt"}},{"kind":"Field","name":{"kind":"Name","value":"outcome"}},{"kind":"Field","name":{"kind":"Name","value":"executionState"}},{"kind":"Field","name":{"kind":"Name","value":"student"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"teacher"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"courseName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"firstItem"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}},{"kind":"Field","name":{"kind":"Name","value":"lastItem"}},{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]}}]} as unknown as DocumentNode<AdminDashboardScheduleQuery, AdminDashboardScheduleQueryVariables>;
+export const AdminDashboardScheduleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"adminDashboardSchedule"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminDashboardScheduleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDashboardSchedule"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"metrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"regular"}},{"kind":"Field","name":{"kind":"Name","value":"trial"}},{"kind":"Field","name":{"kind":"Name","value":"advance"}},{"kind":"Field","name":{"kind":"Name","value":"rescheduled"}},{"kind":"Field","name":{"kind":"Name","value":"suspended"}},{"kind":"Field","name":{"kind":"Name","value":"taken"}},{"kind":"Field","name":{"kind":"Name","value":"pending"}},{"kind":"Field","name":{"kind":"Name","value":"activated"}},{"kind":"Field","name":{"kind":"Name","value":"running"}},{"kind":"Field","name":{"kind":"Name","value":"absent"}},{"kind":"Field","name":{"kind":"Name","value":"leave"}}]}},{"kind":"Field","name":{"kind":"Name","value":"rows"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"yourTime"}},{"kind":"Field","name":{"kind":"Name","value":"teacherTime"}},{"kind":"Field","name":{"kind":"Name","value":"studentTime"}},{"kind":"Field","name":{"kind":"Name","value":"teacherTimezone"}},{"kind":"Field","name":{"kind":"Name","value":"studentTimezone"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledStartAt"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledEndAt"}},{"kind":"Field","name":{"kind":"Name","value":"outcome"}},{"kind":"Field","name":{"kind":"Name","value":"executionState"}},{"kind":"Field","name":{"kind":"Name","value":"student"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"teacher"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"courseName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"firstItem"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}},{"kind":"Field","name":{"kind":"Name","value":"lastItem"}},{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]}}]} as unknown as DocumentNode<AdminDashboardScheduleQuery, AdminDashboardScheduleQueryVariables>;
 export const DailyScheduleMetricsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"dailyScheduleMetrics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"date"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dailyScheduleMetrics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"date"},"value":{"kind":"Variable","name":{"kind":"Name","value":"date"}}},{"kind":"Argument","name":{"kind":"Name","value":"teacherId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"regular"}},{"kind":"Field","name":{"kind":"Name","value":"trial"}},{"kind":"Field","name":{"kind":"Name","value":"advance"}},{"kind":"Field","name":{"kind":"Name","value":"rescheduled"}},{"kind":"Field","name":{"kind":"Name","value":"suspended"}},{"kind":"Field","name":{"kind":"Name","value":"taken"}},{"kind":"Field","name":{"kind":"Name","value":"pending"}},{"kind":"Field","name":{"kind":"Name","value":"activated"}},{"kind":"Field","name":{"kind":"Name","value":"running"}},{"kind":"Field","name":{"kind":"Name","value":"absent"}},{"kind":"Field","name":{"kind":"Name","value":"leave"}}]}}]}}]} as unknown as DocumentNode<DailyScheduleMetricsQuery, DailyScheduleMetricsQueryVariables>;
-export const DailyScheduleListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"dailyScheduleList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"date"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"metricFilter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dailyScheduleList"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"date"},"value":{"kind":"Variable","name":{"kind":"Name","value":"date"}}},{"kind":"Argument","name":{"kind":"Name","value":"teacherId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"metricFilter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"metricFilter"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"yourTime"}},{"kind":"Field","name":{"kind":"Name","value":"teacherTime"}},{"kind":"Field","name":{"kind":"Name","value":"studentTime"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"outcome"}},{"kind":"Field","name":{"kind":"Name","value":"executionState"}},{"kind":"Field","name":{"kind":"Name","value":"student"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"teacher"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"courseName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}}]}}]} as unknown as DocumentNode<DailyScheduleListQuery, DailyScheduleListQueryVariables>;
+export const DailyScheduleListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"dailyScheduleList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"date"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"metricFilter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dailyScheduleList"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"date"},"value":{"kind":"Variable","name":{"kind":"Name","value":"date"}}},{"kind":"Argument","name":{"kind":"Name","value":"teacherId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teacherId"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"metricFilter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"metricFilter"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"yourTime"}},{"kind":"Field","name":{"kind":"Name","value":"teacherTime"}},{"kind":"Field","name":{"kind":"Name","value":"studentTime"}},{"kind":"Field","name":{"kind":"Name","value":"teacherTimezone"}},{"kind":"Field","name":{"kind":"Name","value":"studentTimezone"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"outcome"}},{"kind":"Field","name":{"kind":"Name","value":"executionState"}},{"kind":"Field","name":{"kind":"Name","value":"student"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"teacher"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"courseName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}}]}}]} as unknown as DocumentNode<DailyScheduleListQuery, DailyScheduleListQueryVariables>;
 export const RescheduleTrackingRowsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"rescheduleTrackingRows"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"status"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"LeaveRequestStatus"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"paginationArgs"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationArgs"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"rescheduleTrackingRows"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"status"},"value":{"kind":"Variable","name":{"kind":"Name","value":"status"}}},{"kind":"Argument","name":{"kind":"Name","value":"paginationArgs"},"value":{"kind":"Variable","name":{"kind":"Name","value":"paginationArgs"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"rows"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"originalClassId"}},{"kind":"Field","name":{"kind":"Name","value":"teacherId"}},{"kind":"Field","name":{"kind":"Name","value":"teacherName"}},{"kind":"Field","name":{"kind":"Name","value":"teacherAvatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"studentId"}},{"kind":"Field","name":{"kind":"Name","value":"studentName"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledStartAt"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledEndAt"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"dateLabel"}},{"kind":"Field","name":{"kind":"Name","value":"remarks"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"firstItem"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}},{"kind":"Field","name":{"kind":"Name","value":"lastItem"}},{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]}}]} as unknown as DocumentNode<RescheduleTrackingRowsQuery, RescheduleTrackingRowsQueryVariables>;
 export const RescheduleTrackingMetricsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"rescheduleTrackingMetrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"rescheduleTrackingMetrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pending"}},{"kind":"Field","name":{"kind":"Name","value":"approved"}},{"kind":"Field","name":{"kind":"Name","value":"leave"}},{"kind":"Field","name":{"kind":"Name","value":"rescheduled"}},{"kind":"Field","name":{"kind":"Name","value":"cancelled"}}]}}]}}]} as unknown as DocumentNode<RescheduleTrackingMetricsQuery, RescheduleTrackingMetricsQueryVariables>;
-export const StatusTrackingScheduleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"statusTrackingSchedule"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"date"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"viewerTimezone"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"statusTrackingSchedule"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"date"},"value":{"kind":"Variable","name":{"kind":"Name","value":"date"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"viewerTimezone"},"value":{"kind":"Variable","name":{"kind":"Name","value":"viewerTimezone"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"studentId"}},{"kind":"Field","name":{"kind":"Name","value":"studentName"}},{"kind":"Field","name":{"kind":"Name","value":"studentInitials"}},{"kind":"Field","name":{"kind":"Name","value":"studentAvatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"studentStatus"}},{"kind":"Field","name":{"kind":"Name","value":"teacherId"}},{"kind":"Field","name":{"kind":"Name","value":"teacherName"}},{"kind":"Field","name":{"kind":"Name","value":"teacherAvatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"courseName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledStartAt"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledEndAt"}},{"kind":"Field","name":{"kind":"Name","value":"durationMinutes"}},{"kind":"Field","name":{"kind":"Name","value":"executionState"}},{"kind":"Field","name":{"kind":"Name","value":"outcome"}},{"kind":"Field","name":{"kind":"Name","value":"isFrozen"}}]}}]}}]} as unknown as DocumentNode<StatusTrackingScheduleQuery, StatusTrackingScheduleQueryVariables>;
+export const StatusTrackingScheduleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"statusTrackingSchedule"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"date"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"viewerTimezone"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"IanaTimezone"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"statusTrackingSchedule"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"date"},"value":{"kind":"Variable","name":{"kind":"Name","value":"date"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"viewerTimezone"},"value":{"kind":"Variable","name":{"kind":"Name","value":"viewerTimezone"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"studentId"}},{"kind":"Field","name":{"kind":"Name","value":"studentName"}},{"kind":"Field","name":{"kind":"Name","value":"studentInitials"}},{"kind":"Field","name":{"kind":"Name","value":"studentAvatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"studentStatus"}},{"kind":"Field","name":{"kind":"Name","value":"teacherId"}},{"kind":"Field","name":{"kind":"Name","value":"teacherName"}},{"kind":"Field","name":{"kind":"Name","value":"teacherAvatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"courseName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledStartAt"}},{"kind":"Field","name":{"kind":"Name","value":"scheduledEndAt"}},{"kind":"Field","name":{"kind":"Name","value":"durationMinutes"}},{"kind":"Field","name":{"kind":"Name","value":"executionState"}},{"kind":"Field","name":{"kind":"Name","value":"outcome"}},{"kind":"Field","name":{"kind":"Name","value":"isFrozen"}}]}}]}}]} as unknown as DocumentNode<StatusTrackingScheduleQuery, StatusTrackingScheduleQueryVariables>;
 export const TeacherDirectoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"teacherDirectory"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"paginationArgs"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationArgs"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teacherDirectory"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"paginationArgs"},"value":{"kind":"Variable","name":{"kind":"Name","value":"paginationArgs"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"metrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"activated"}},{"kind":"Field","name":{"kind":"Name","value":"deactivated"}}]}},{"kind":"Field","name":{"kind":"Name","value":"rows"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"index"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"zoomLink"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalTeachers"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"firstItem"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}},{"kind":"Field","name":{"kind":"Name","value":"lastItem"}},{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]}}]} as unknown as DocumentNode<TeacherDirectoryQuery, TeacherDirectoryQueryVariables>;
 export const ManagerDirectoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"managerDirectory"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"paginationArgs"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationArgs"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleFilter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"statusFilter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"managerDirectory"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"paginationArgs"},"value":{"kind":"Variable","name":{"kind":"Name","value":"paginationArgs"}}},{"kind":"Argument","name":{"kind":"Name","value":"roleFilter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleFilter"}}},{"kind":"Argument","name":{"kind":"Name","value":"statusFilter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"statusFilter"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"metrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"totalAdmin"}},{"kind":"Field","name":{"kind":"Name","value":"systemStaff"}},{"kind":"Field","name":{"kind":"Name","value":"activeNow"}},{"kind":"Field","name":{"kind":"Name","value":"alerts"}}]}},{"kind":"Field","name":{"kind":"Name","value":"rows"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"staffProfileId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"roleSlug"}},{"kind":"Field","name":{"kind":"Name","value":"roleName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"firstItem"}},{"kind":"Field","name":{"kind":"Name","value":"hasMorePages"}},{"kind":"Field","name":{"kind":"Name","value":"lastItem"}},{"kind":"Field","name":{"kind":"Name","value":"lastPage"}},{"kind":"Field","name":{"kind":"Name","value":"perPage"}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]}}]} as unknown as DocumentNode<ManagerDirectoryQuery, ManagerDirectoryQueryVariables>;
 export const UpdateManagerProfileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"updateManagerProfile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"staffProfileId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateManagerProfileInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateManagerProfile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"staffProfileId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"staffProfileId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"staffProfileId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"roleSlug"}},{"kind":"Field","name":{"kind":"Name","value":"roleName"}}]}}]}}]} as unknown as DocumentNode<UpdateManagerProfileMutation, UpdateManagerProfileMutationVariables>;

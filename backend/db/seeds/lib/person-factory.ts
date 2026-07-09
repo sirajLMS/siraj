@@ -1,3 +1,4 @@
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 // DEV ONLY: Never use these credentials in production
 
 import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
@@ -22,7 +23,7 @@ const SEED_TIMEZONES = [
   "Europe/London",
   "America/New_York",
   "Asia/Dubai",
-  "Asia/Riyadh",
+  IanaTimezone.Asia_Riyadh,
   "Asia/Singapore",
   "Australia/Sydney",
 ] as const;

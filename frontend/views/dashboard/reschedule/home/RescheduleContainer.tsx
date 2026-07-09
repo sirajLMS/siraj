@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { logger } from "@/frontend/utils/logger";
@@ -74,7 +74,7 @@ export function RescheduleContainer() {
         sessionId: classInstance.id ?? "",
         teacherName: classInstance.teacher?.name ?? "",
         studentName: classInstance.student?.name ?? "",
-        teacherTimezone: classInstance.teacherTimezone ?? "UTC",
+        teacherTimezone: classInstance.teacherTimezone ?? IanaTimezone.Utc,
       }
     : fallbackSession;
 

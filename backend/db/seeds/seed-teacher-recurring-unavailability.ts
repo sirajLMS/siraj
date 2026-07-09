@@ -8,10 +8,16 @@ import {
   type SeedConfig,
   shouldSeedLunchBlock,
 } from "@/backend/db/seeds/lib";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import logger from "@/backend/lib/logger";
-import type { TeacherEntity, TimezoneEntity } from "@/backend/types";
+import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
 
-export async function seedOrGet(teachersList: TeacherEntity[], timezones: TimezoneEntity[], config?: SeedConfig) {
+export async function seedOrGet(
+  teachersList: TeacherEntity[],
+  usersList: UserSelectType[],
+  timezones: TimezoneEntity[],
+  config?: SeedConfig
+) {
   logger.info("Seeding teacher recurring unavailability...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
@@ -24,11 +30,14 @@ export async function seedOrGet(teachersList: TeacherEntity[], timezones: Timezo
   const lunch = buildLunchUnavailability();
   const results = [];
 
+  const userTimezoneById = new Map(usersList.map(u => [u.id, u.timezone]));
+
   for (let i = 0; i < teachersList.length; i++) {
     if (!shouldSeedLunchBlock(i)) continue;
 
     const teacher = teachersList[i];
-    const tz = timezones.find(t => t.ianaId === teacher.timezone) ?? timezones[0];
+    const teacherTimezone = userTimezoneById.get(teacher.userId) ?? IanaTimezone.UTC;
+    const tz = timezones.find(t => t.ianaId === teacherTimezone) ?? timezones[0];
 
     const [existing] = await db
       .select()
@@ -53,7 +62,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], timezones: Timezo
         dayOfWeek: lunch.dayOfWeek,
         startTime: lunch.startTime,
         endTime: lunch.endTime,
-        timezone: teacher.timezone,
+        timezone: teacherTimezone,
         timezoneId: tz?.id ?? null,
         effectiveFrom: from,
         effectiveUntil: until,

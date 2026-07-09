@@ -2,6 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { ParentProfileView } from "./ParentProfileView";
 
@@ -39,7 +40,7 @@ const parentAdminProfile: ParentAdminData = {
   feeAmount: "500",
   paymentMethod: "Bank Transfer",
   currency: "SAR",
-  timezone: "Asia/Riyadh",
+  timezone: IanaTimezone.AsiaRiyadh,
   createdAt: "2024-01-15T00:00:00.000Z",
   updatedAt: "2024-06-01T00:00:00.000Z",
 };

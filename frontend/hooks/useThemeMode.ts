@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import { ThemeContext } from "../context/ThemeContext";
+import { ThemeContext } from "@/frontend/context/ThemeContext";
 
 /**
  * Read the application theme mode + toggler.

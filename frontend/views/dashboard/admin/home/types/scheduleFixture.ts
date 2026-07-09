@@ -1,4 +1,4 @@
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassExecutionState, ClassOutcome, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 
 export interface DailyScheduleRowOverrides {
@@ -16,6 +16,8 @@ export interface DailyScheduleRowOverrides {
   readonly status?: ClassExecutionState | null;
   readonly avatarUrl?: string | null;
   readonly courseName?: string | null;
+  readonly teacherTimezone?: IanaTimezone | null;
+  readonly studentTimezone?: IanaTimezone | null;
 }
 
 export function createDailyScheduleRow(overrides: DailyScheduleRowOverrides): DailyScheduleRow {
@@ -34,5 +36,7 @@ export function createDailyScheduleRow(overrides: DailyScheduleRowOverrides): Da
     courseName: overrides.courseName ?? null,
     student: overrides.student,
     teacher: overrides.teacher,
+    teacherTimezone: overrides.teacherTimezone ?? null,
+    studentTimezone: overrides.studentTimezone ?? null,
   };
 }

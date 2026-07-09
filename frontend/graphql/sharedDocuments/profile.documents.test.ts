@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { profileByUserIdQueryDocument, updateUserProfileMutationDocument } from "./profile.documents";
+import {
+  profileByUserIdQueryDocument,
+  updateUserProfileMutationDocument,
+} from "@/frontend/graphql/sharedDocuments/profile.documents";
 
 describe("profileByUserIdQueryDocument", () => {
   test("requests assignedStudents fields for teacher admin tab", () => {

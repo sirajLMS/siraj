@@ -25,6 +25,7 @@ import {
   RescheduleDateLabel,
   StudentStatus,
 } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
@@ -125,4 +126,8 @@ export const NotificationChannelPothosObject = gqlSchemaBuilder.enumType(Notific
 
 export const NotificationEventTypePothosObject = gqlSchemaBuilder.enumType(NotificationEventType, {
   name: "NotificationEventType",
+});
+
+export const IanaTimezonePothosObject = gqlSchemaBuilder.enumType(IanaTimezone, {
+  name: "IanaTimezone",
 });

@@ -6,6 +6,7 @@ import {
   SystemSettingsRepository,
 } from "@/backend/db/repo";
 import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PermissionsService } from "@/backend/services";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import type { ComplaintSelectType } from "@/backend/types";
@@ -29,7 +30,7 @@ const mockParent = {
   feeAmount: null,
   paymentMethod: null,
   currency: null,
-  timezone: "UTC",
+  timezone: IanaTimezone.UTC,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

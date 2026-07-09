@@ -6,6 +6,7 @@ import { addDays, differenceInCalendarDays, format, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { HorizontalScrollRow } from "@/frontend/components/ui";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
 import { edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import type { SearchScheduleResultItem } from "./SearchScheduleView";
@@ -79,9 +80,7 @@ export function TeacherAvailabilityGrid({ teacher, fromDate, toDate }: Readonly<
             color="primary"
             variant="outlined"
           />
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            ({teacher.timezone ?? ""})
-          </Typography>
+          {teacher.timezone ? <TimezoneDisplay timezone={teacher.timezone} typographyVariant="bodyMd" /> : null}
           <Box sx={{ flexGrow: 1 }} />
           <Tooltip title={t("viewMonthSchedule")}>
             <IconButton

@@ -314,7 +314,7 @@ export type AvailabilitySearchTeacher = {
   gender: Maybe<Gender>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
-  timezone: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
 };
 
 export enum AvailabilityStatus {
@@ -416,9 +416,9 @@ export type ClassInstanceDetail = {
   startTime: Maybe<Scalars['String']['output']>;
   status: Maybe<ClassExecutionState>;
   student: Maybe<ClassInstanceStudentInfo>;
-  studentTimezone: Maybe<Scalars['String']['output']>;
+  studentTimezone: Maybe<IanaTimezone>;
   teacher: Maybe<ClassInstanceTeacherInfo>;
-  teacherTimezone: Maybe<Scalars['String']['output']>;
+  teacherTimezone: Maybe<IanaTimezone>;
   zoomMeetingUrl: Maybe<Scalars['String']['output']>;
 };
 
@@ -903,8 +903,7 @@ export type CreateRecurringClassInput = {
   generateInstancesForWeeks: InputMaybe<Scalars['Int']['input']>;
   studentId: Scalars['String']['input'];
   teacherId: Scalars['String']['input'];
-  timezone: Scalars['String']['input'];
-  timezoneId: InputMaybe<Scalars['Int']['input']>;
+  timezone: IanaTimezone;
 };
 
 export type CreateRecurringClassResult = {
@@ -937,8 +936,10 @@ export type DailyScheduleList = {
   status: Maybe<ClassExecutionState>;
   student: Maybe<DailyScheduleListUserItem>;
   studentTime: Maybe<Scalars['String']['output']>;
+  studentTimezone: Maybe<IanaTimezone>;
   teacher: Maybe<DailyScheduleListUserItem>;
   teacherTime: Maybe<Scalars['String']['output']>;
+  teacherTimezone: Maybe<IanaTimezone>;
   yourTime: Maybe<Scalars['String']['output']>;
 };
 
@@ -1267,6 +1268,454 @@ export type GroupUser = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
 };
+
+export enum IanaTimezone {
+  AfricaAbidjan = 'Africa_Abidjan',
+  AfricaAccra = 'Africa_Accra',
+  AfricaAddisAbaba = 'Africa_Addis_Ababa',
+  AfricaAlgiers = 'Africa_Algiers',
+  AfricaAsmara = 'Africa_Asmara',
+  AfricaBamako = 'Africa_Bamako',
+  AfricaBangui = 'Africa_Bangui',
+  AfricaBanjul = 'Africa_Banjul',
+  AfricaBissau = 'Africa_Bissau',
+  AfricaBlantyre = 'Africa_Blantyre',
+  AfricaBrazzaville = 'Africa_Brazzaville',
+  AfricaBujumbura = 'Africa_Bujumbura',
+  AfricaCairo = 'Africa_Cairo',
+  AfricaCasablanca = 'Africa_Casablanca',
+  AfricaCeuta = 'Africa_Ceuta',
+  AfricaConakry = 'Africa_Conakry',
+  AfricaDakar = 'Africa_Dakar',
+  AfricaDarEsSalaam = 'Africa_Dar_es_Salaam',
+  AfricaDjibouti = 'Africa_Djibouti',
+  AfricaDouala = 'Africa_Douala',
+  AfricaElAaiun = 'Africa_El_Aaiun',
+  AfricaFreetown = 'Africa_Freetown',
+  AfricaGaborone = 'Africa_Gaborone',
+  AfricaHarare = 'Africa_Harare',
+  AfricaJohannesburg = 'Africa_Johannesburg',
+  AfricaJuba = 'Africa_Juba',
+  AfricaKampala = 'Africa_Kampala',
+  AfricaKhartoum = 'Africa_Khartoum',
+  AfricaKigali = 'Africa_Kigali',
+  AfricaKinshasa = 'Africa_Kinshasa',
+  AfricaLagos = 'Africa_Lagos',
+  AfricaLibreville = 'Africa_Libreville',
+  AfricaLome = 'Africa_Lome',
+  AfricaLuanda = 'Africa_Luanda',
+  AfricaLubumbashi = 'Africa_Lubumbashi',
+  AfricaLusaka = 'Africa_Lusaka',
+  AfricaMalabo = 'Africa_Malabo',
+  AfricaMaputo = 'Africa_Maputo',
+  AfricaMaseru = 'Africa_Maseru',
+  AfricaMbabane = 'Africa_Mbabane',
+  AfricaMogadishu = 'Africa_Mogadishu',
+  AfricaMonrovia = 'Africa_Monrovia',
+  AfricaNairobi = 'Africa_Nairobi',
+  AfricaNdjamena = 'Africa_Ndjamena',
+  AfricaNiamey = 'Africa_Niamey',
+  AfricaNouakchott = 'Africa_Nouakchott',
+  AfricaOuagadougou = 'Africa_Ouagadougou',
+  AfricaPortoNovo = 'Africa_Porto_Novo',
+  AfricaSaoTome = 'Africa_Sao_Tome',
+  AfricaTripoli = 'Africa_Tripoli',
+  AfricaTunis = 'Africa_Tunis',
+  AfricaWindhoek = 'Africa_Windhoek',
+  AmericaAdak = 'America_Adak',
+  AmericaAnchorage = 'America_Anchorage',
+  AmericaAnguilla = 'America_Anguilla',
+  AmericaAntigua = 'America_Antigua',
+  AmericaAraguaina = 'America_Araguaina',
+  AmericaArgentinaBuenosAires = 'America_Argentina_Buenos_Aires',
+  AmericaArgentinaCatamarca = 'America_Argentina_Catamarca',
+  AmericaArgentinaCordoba = 'America_Argentina_Cordoba',
+  AmericaArgentinaJujuy = 'America_Argentina_Jujuy',
+  AmericaArgentinaLaRioja = 'America_Argentina_La_Rioja',
+  AmericaArgentinaMendoza = 'America_Argentina_Mendoza',
+  AmericaArgentinaRioGallegos = 'America_Argentina_Rio_Gallegos',
+  AmericaArgentinaSalta = 'America_Argentina_Salta',
+  AmericaArgentinaSanJuan = 'America_Argentina_San_Juan',
+  AmericaArgentinaSanLuis = 'America_Argentina_San_Luis',
+  AmericaArgentinaTucuman = 'America_Argentina_Tucuman',
+  AmericaArgentinaUshuaia = 'America_Argentina_Ushuaia',
+  AmericaAruba = 'America_Aruba',
+  AmericaAsuncion = 'America_Asuncion',
+  AmericaAtikokan = 'America_Atikokan',
+  AmericaBahia = 'America_Bahia',
+  AmericaBahiaBanderas = 'America_Bahia_Banderas',
+  AmericaBarbados = 'America_Barbados',
+  AmericaBelem = 'America_Belem',
+  AmericaBelize = 'America_Belize',
+  AmericaBlancSablon = 'America_Blanc_Sablon',
+  AmericaBoaVista = 'America_Boa_Vista',
+  AmericaBogota = 'America_Bogota',
+  AmericaBoise = 'America_Boise',
+  AmericaCambridgeBay = 'America_Cambridge_Bay',
+  AmericaCampoGrande = 'America_Campo_Grande',
+  AmericaCancun = 'America_Cancun',
+  AmericaCaracas = 'America_Caracas',
+  AmericaCayenne = 'America_Cayenne',
+  AmericaCayman = 'America_Cayman',
+  AmericaChicago = 'America_Chicago',
+  AmericaChihuahua = 'America_Chihuahua',
+  AmericaCiudadJuarez = 'America_Ciudad_Juarez',
+  AmericaCostaRica = 'America_Costa_Rica',
+  AmericaCreston = 'America_Creston',
+  AmericaCuiaba = 'America_Cuiaba',
+  AmericaCuracao = 'America_Curacao',
+  AmericaDanmarkshavn = 'America_Danmarkshavn',
+  AmericaDawson = 'America_Dawson',
+  AmericaDawsonCreek = 'America_Dawson_Creek',
+  AmericaDenver = 'America_Denver',
+  AmericaDetroit = 'America_Detroit',
+  AmericaDominica = 'America_Dominica',
+  AmericaEdmonton = 'America_Edmonton',
+  AmericaEirunepe = 'America_Eirunepe',
+  AmericaElSalvador = 'America_El_Salvador',
+  AmericaFortNelson = 'America_Fort_Nelson',
+  AmericaFortaleza = 'America_Fortaleza',
+  AmericaGlaceBay = 'America_Glace_Bay',
+  AmericaGooseBay = 'America_Goose_Bay',
+  AmericaGrandTurk = 'America_Grand_Turk',
+  AmericaGrenada = 'America_Grenada',
+  AmericaGuadeloupe = 'America_Guadeloupe',
+  AmericaGuatemala = 'America_Guatemala',
+  AmericaGuayaquil = 'America_Guayaquil',
+  AmericaGuyana = 'America_Guyana',
+  AmericaHalifax = 'America_Halifax',
+  AmericaHavana = 'America_Havana',
+  AmericaHermosillo = 'America_Hermosillo',
+  AmericaIndianaIndianapolis = 'America_Indiana_Indianapolis',
+  AmericaIndianaKnox = 'America_Indiana_Knox',
+  AmericaIndianaMarengo = 'America_Indiana_Marengo',
+  AmericaIndianaPetersburg = 'America_Indiana_Petersburg',
+  AmericaIndianaTellCity = 'America_Indiana_Tell_City',
+  AmericaIndianaVevay = 'America_Indiana_Vevay',
+  AmericaIndianaVincennes = 'America_Indiana_Vincennes',
+  AmericaIndianaWinamac = 'America_Indiana_Winamac',
+  AmericaInuvik = 'America_Inuvik',
+  AmericaIqaluit = 'America_Iqaluit',
+  AmericaJamaica = 'America_Jamaica',
+  AmericaJuneau = 'America_Juneau',
+  AmericaKentuckyLouisville = 'America_Kentucky_Louisville',
+  AmericaKentuckyMonticello = 'America_Kentucky_Monticello',
+  AmericaKralendijk = 'America_Kralendijk',
+  AmericaLaPaz = 'America_La_Paz',
+  AmericaLima = 'America_Lima',
+  AmericaLosAngeles = 'America_Los_Angeles',
+  AmericaLowerPrinces = 'America_Lower_Princes',
+  AmericaMaceio = 'America_Maceio',
+  AmericaManagua = 'America_Managua',
+  AmericaManaus = 'America_Manaus',
+  AmericaMarigot = 'America_Marigot',
+  AmericaMartinique = 'America_Martinique',
+  AmericaMatamoros = 'America_Matamoros',
+  AmericaMazatlan = 'America_Mazatlan',
+  AmericaMenominee = 'America_Menominee',
+  AmericaMerida = 'America_Merida',
+  AmericaMetlakatla = 'America_Metlakatla',
+  AmericaMexicoCity = 'America_Mexico_City',
+  AmericaMiquelon = 'America_Miquelon',
+  AmericaMoncton = 'America_Moncton',
+  AmericaMonterrey = 'America_Monterrey',
+  AmericaMontevideo = 'America_Montevideo',
+  AmericaMontserrat = 'America_Montserrat',
+  AmericaNassau = 'America_Nassau',
+  AmericaNewYork = 'America_New_York',
+  AmericaNome = 'America_Nome',
+  AmericaNoronha = 'America_Noronha',
+  AmericaNorthDakotaBeulah = 'America_North_Dakota_Beulah',
+  AmericaNorthDakotaCenter = 'America_North_Dakota_Center',
+  AmericaNorthDakotaNewSalem = 'America_North_Dakota_New_Salem',
+  AmericaNuuk = 'America_Nuuk',
+  AmericaOjinaga = 'America_Ojinaga',
+  AmericaPanama = 'America_Panama',
+  AmericaParamaribo = 'America_Paramaribo',
+  AmericaPhoenix = 'America_Phoenix',
+  AmericaPortAuPrince = 'America_Port_au_Prince',
+  AmericaPortOfSpain = 'America_Port_of_Spain',
+  AmericaPortoVelho = 'America_Porto_Velho',
+  AmericaPuertoRico = 'America_Puerto_Rico',
+  AmericaPuntaArenas = 'America_Punta_Arenas',
+  AmericaRankinInlet = 'America_Rankin_Inlet',
+  AmericaRecife = 'America_Recife',
+  AmericaRegina = 'America_Regina',
+  AmericaResolute = 'America_Resolute',
+  AmericaRioBranco = 'America_Rio_Branco',
+  AmericaSantarem = 'America_Santarem',
+  AmericaSantiago = 'America_Santiago',
+  AmericaSantoDomingo = 'America_Santo_Domingo',
+  AmericaSaoPaulo = 'America_Sao_Paulo',
+  AmericaScoresbysund = 'America_Scoresbysund',
+  AmericaSitka = 'America_Sitka',
+  AmericaStBarthelemy = 'America_St_Barthelemy',
+  AmericaStJohns = 'America_St_Johns',
+  AmericaStKitts = 'America_St_Kitts',
+  AmericaStLucia = 'America_St_Lucia',
+  AmericaStThomas = 'America_St_Thomas',
+  AmericaStVincent = 'America_St_Vincent',
+  AmericaSwiftCurrent = 'America_Swift_Current',
+  AmericaTegucigalpa = 'America_Tegucigalpa',
+  AmericaThule = 'America_Thule',
+  AmericaTijuana = 'America_Tijuana',
+  AmericaToronto = 'America_Toronto',
+  AmericaTortola = 'America_Tortola',
+  AmericaVancouver = 'America_Vancouver',
+  AmericaWhitehorse = 'America_Whitehorse',
+  AmericaWinnipeg = 'America_Winnipeg',
+  AmericaYakutat = 'America_Yakutat',
+  AntarcticaCasey = 'Antarctica_Casey',
+  AntarcticaDavis = 'Antarctica_Davis',
+  AntarcticaDumontDUrville = 'Antarctica_DumontDUrville',
+  AntarcticaMacquarie = 'Antarctica_Macquarie',
+  AntarcticaMawson = 'Antarctica_Mawson',
+  AntarcticaMcMurdo = 'Antarctica_McMurdo',
+  AntarcticaPalmer = 'Antarctica_Palmer',
+  AntarcticaRothera = 'Antarctica_Rothera',
+  AntarcticaSyowa = 'Antarctica_Syowa',
+  AntarcticaTroll = 'Antarctica_Troll',
+  AntarcticaVostok = 'Antarctica_Vostok',
+  ArcticLongyearbyen = 'Arctic_Longyearbyen',
+  AsiaAden = 'Asia_Aden',
+  AsiaAlmaty = 'Asia_Almaty',
+  AsiaAmman = 'Asia_Amman',
+  AsiaAnadyr = 'Asia_Anadyr',
+  AsiaAqtau = 'Asia_Aqtau',
+  AsiaAqtobe = 'Asia_Aqtobe',
+  AsiaAshgabat = 'Asia_Ashgabat',
+  AsiaAtyrau = 'Asia_Atyrau',
+  AsiaBaghdad = 'Asia_Baghdad',
+  AsiaBahrain = 'Asia_Bahrain',
+  AsiaBaku = 'Asia_Baku',
+  AsiaBangkok = 'Asia_Bangkok',
+  AsiaBarnaul = 'Asia_Barnaul',
+  AsiaBeirut = 'Asia_Beirut',
+  AsiaBishkek = 'Asia_Bishkek',
+  AsiaBrunei = 'Asia_Brunei',
+  AsiaChita = 'Asia_Chita',
+  AsiaChoibalsan = 'Asia_Choibalsan',
+  AsiaColombo = 'Asia_Colombo',
+  AsiaDamascus = 'Asia_Damascus',
+  AsiaDhaka = 'Asia_Dhaka',
+  AsiaDili = 'Asia_Dili',
+  AsiaDubai = 'Asia_Dubai',
+  AsiaDushanbe = 'Asia_Dushanbe',
+  AsiaFamagusta = 'Asia_Famagusta',
+  AsiaGaza = 'Asia_Gaza',
+  AsiaHebron = 'Asia_Hebron',
+  AsiaHoChiMinh = 'Asia_Ho_Chi_Minh',
+  AsiaHongKong = 'Asia_Hong_Kong',
+  AsiaHovd = 'Asia_Hovd',
+  AsiaIrkutsk = 'Asia_Irkutsk',
+  AsiaJakarta = 'Asia_Jakarta',
+  AsiaJayapura = 'Asia_Jayapura',
+  AsiaJerusalem = 'Asia_Jerusalem',
+  AsiaKabul = 'Asia_Kabul',
+  AsiaKamchatka = 'Asia_Kamchatka',
+  AsiaKarachi = 'Asia_Karachi',
+  AsiaKathmandu = 'Asia_Kathmandu',
+  AsiaKhandyga = 'Asia_Khandyga',
+  AsiaKolkata = 'Asia_Kolkata',
+  AsiaKrasnoyarsk = 'Asia_Krasnoyarsk',
+  AsiaKualaLumpur = 'Asia_Kuala_Lumpur',
+  AsiaKuching = 'Asia_Kuching',
+  AsiaKuwait = 'Asia_Kuwait',
+  AsiaMacau = 'Asia_Macau',
+  AsiaMagadan = 'Asia_Magadan',
+  AsiaMakassar = 'Asia_Makassar',
+  AsiaManila = 'Asia_Manila',
+  AsiaMuscat = 'Asia_Muscat',
+  AsiaNicosia = 'Asia_Nicosia',
+  AsiaNovokuznetsk = 'Asia_Novokuznetsk',
+  AsiaNovosibirsk = 'Asia_Novosibirsk',
+  AsiaOmsk = 'Asia_Omsk',
+  AsiaOral = 'Asia_Oral',
+  AsiaPhnomPenh = 'Asia_Phnom_Penh',
+  AsiaPontianak = 'Asia_Pontianak',
+  AsiaPyongyang = 'Asia_Pyongyang',
+  AsiaQatar = 'Asia_Qatar',
+  AsiaQostanay = 'Asia_Qostanay',
+  AsiaQyzylorda = 'Asia_Qyzylorda',
+  AsiaRiyadh = 'Asia_Riyadh',
+  AsiaSakhalin = 'Asia_Sakhalin',
+  AsiaSamarkand = 'Asia_Samarkand',
+  AsiaSeoul = 'Asia_Seoul',
+  AsiaShanghai = 'Asia_Shanghai',
+  AsiaSingapore = 'Asia_Singapore',
+  AsiaSrednekolymsk = 'Asia_Srednekolymsk',
+  AsiaTaipei = 'Asia_Taipei',
+  AsiaTashkent = 'Asia_Tashkent',
+  AsiaTbilisi = 'Asia_Tbilisi',
+  AsiaTehran = 'Asia_Tehran',
+  AsiaThimphu = 'Asia_Thimphu',
+  AsiaTokyo = 'Asia_Tokyo',
+  AsiaTomsk = 'Asia_Tomsk',
+  AsiaUlaanbaatar = 'Asia_Ulaanbaatar',
+  AsiaUrumqi = 'Asia_Urumqi',
+  AsiaUstNera = 'Asia_Ust_Nera',
+  AsiaVientiane = 'Asia_Vientiane',
+  AsiaVladivostok = 'Asia_Vladivostok',
+  AsiaYakutsk = 'Asia_Yakutsk',
+  AsiaYangon = 'Asia_Yangon',
+  AsiaYekaterinburg = 'Asia_Yekaterinburg',
+  AsiaYerevan = 'Asia_Yerevan',
+  AtlanticAzores = 'Atlantic_Azores',
+  AtlanticBermuda = 'Atlantic_Bermuda',
+  AtlanticCanary = 'Atlantic_Canary',
+  AtlanticCapeVerde = 'Atlantic_Cape_Verde',
+  AtlanticFaroe = 'Atlantic_Faroe',
+  AtlanticMadeira = 'Atlantic_Madeira',
+  AtlanticReykjavik = 'Atlantic_Reykjavik',
+  AtlanticSouthGeorgia = 'Atlantic_South_Georgia',
+  AtlanticStHelena = 'Atlantic_St_Helena',
+  AtlanticStanley = 'Atlantic_Stanley',
+  AustraliaAdelaide = 'Australia_Adelaide',
+  AustraliaBrisbane = 'Australia_Brisbane',
+  AustraliaBrokenHill = 'Australia_Broken_Hill',
+  AustraliaDarwin = 'Australia_Darwin',
+  AustraliaEucla = 'Australia_Eucla',
+  AustraliaHobart = 'Australia_Hobart',
+  AustraliaLindeman = 'Australia_Lindeman',
+  AustraliaLordHowe = 'Australia_Lord_Howe',
+  AustraliaMelbourne = 'Australia_Melbourne',
+  AustraliaPerth = 'Australia_Perth',
+  AustraliaSydney = 'Australia_Sydney',
+  EtcGmt_1 = 'Etc_GMT_1',
+  EtcGmt_2 = 'Etc_GMT_2',
+  EtcGmt_3 = 'Etc_GMT_3',
+  EtcGmt_4 = 'Etc_GMT_4',
+  EtcGmt_5 = 'Etc_GMT_5',
+  EtcGmt_6 = 'Etc_GMT_6',
+  EtcGmt_7 = 'Etc_GMT_7',
+  EtcGmt_8 = 'Etc_GMT_8',
+  EtcGmt_9 = 'Etc_GMT_9',
+  EtcGmt_10 = 'Etc_GMT_10',
+  EtcGmt_11 = 'Etc_GMT_11',
+  EtcGmt_12 = 'Etc_GMT_12',
+  EtcGmt_13 = 'Etc_GMT_13',
+  EtcGmt_14 = 'Etc_GMT_14',
+  EtcGmtPlus_1 = 'Etc_GMT_plus_1',
+  EtcGmtPlus_2 = 'Etc_GMT_plus_2',
+  EtcGmtPlus_3 = 'Etc_GMT_plus_3',
+  EtcGmtPlus_4 = 'Etc_GMT_plus_4',
+  EtcGmtPlus_5 = 'Etc_GMT_plus_5',
+  EtcGmtPlus_6 = 'Etc_GMT_plus_6',
+  EtcGmtPlus_7 = 'Etc_GMT_plus_7',
+  EtcGmtPlus_8 = 'Etc_GMT_plus_8',
+  EtcGmtPlus_9 = 'Etc_GMT_plus_9',
+  EtcGmtPlus_10 = 'Etc_GMT_plus_10',
+  EtcGmtPlus_11 = 'Etc_GMT_plus_11',
+  EtcGmtPlus_12 = 'Etc_GMT_plus_12',
+  EuropeAmsterdam = 'Europe_Amsterdam',
+  EuropeAndorra = 'Europe_Andorra',
+  EuropeAstrakhan = 'Europe_Astrakhan',
+  EuropeAthens = 'Europe_Athens',
+  EuropeBelgrade = 'Europe_Belgrade',
+  EuropeBerlin = 'Europe_Berlin',
+  EuropeBratislava = 'Europe_Bratislava',
+  EuropeBrussels = 'Europe_Brussels',
+  EuropeBucharest = 'Europe_Bucharest',
+  EuropeBudapest = 'Europe_Budapest',
+  EuropeBusingen = 'Europe_Busingen',
+  EuropeChisinau = 'Europe_Chisinau',
+  EuropeCopenhagen = 'Europe_Copenhagen',
+  EuropeDublin = 'Europe_Dublin',
+  EuropeGibraltar = 'Europe_Gibraltar',
+  EuropeGuernsey = 'Europe_Guernsey',
+  EuropeHelsinki = 'Europe_Helsinki',
+  EuropeIsleOfMan = 'Europe_Isle_of_Man',
+  EuropeIstanbul = 'Europe_Istanbul',
+  EuropeJersey = 'Europe_Jersey',
+  EuropeKaliningrad = 'Europe_Kaliningrad',
+  EuropeKirov = 'Europe_Kirov',
+  EuropeKyiv = 'Europe_Kyiv',
+  EuropeLisbon = 'Europe_Lisbon',
+  EuropeLjubljana = 'Europe_Ljubljana',
+  EuropeLondon = 'Europe_London',
+  EuropeLuxembourg = 'Europe_Luxembourg',
+  EuropeMadrid = 'Europe_Madrid',
+  EuropeMalta = 'Europe_Malta',
+  EuropeMariehamn = 'Europe_Mariehamn',
+  EuropeMinsk = 'Europe_Minsk',
+  EuropeMonaco = 'Europe_Monaco',
+  EuropeMoscow = 'Europe_Moscow',
+  EuropeOslo = 'Europe_Oslo',
+  EuropeParis = 'Europe_Paris',
+  EuropePodgorica = 'Europe_Podgorica',
+  EuropePrague = 'Europe_Prague',
+  EuropeRiga = 'Europe_Riga',
+  EuropeRome = 'Europe_Rome',
+  EuropeSamara = 'Europe_Samara',
+  EuropeSanMarino = 'Europe_San_Marino',
+  EuropeSarajevo = 'Europe_Sarajevo',
+  EuropeSaratov = 'Europe_Saratov',
+  EuropeSimferopol = 'Europe_Simferopol',
+  EuropeSkopje = 'Europe_Skopje',
+  EuropeSofia = 'Europe_Sofia',
+  EuropeStockholm = 'Europe_Stockholm',
+  EuropeTallinn = 'Europe_Tallinn',
+  EuropeTirane = 'Europe_Tirane',
+  EuropeUlyanovsk = 'Europe_Ulyanovsk',
+  EuropeVaduz = 'Europe_Vaduz',
+  EuropeVatican = 'Europe_Vatican',
+  EuropeVienna = 'Europe_Vienna',
+  EuropeVilnius = 'Europe_Vilnius',
+  EuropeVolgograd = 'Europe_Volgograd',
+  EuropeWarsaw = 'Europe_Warsaw',
+  EuropeZagreb = 'Europe_Zagreb',
+  EuropeZurich = 'Europe_Zurich',
+  IndianAntananarivo = 'Indian_Antananarivo',
+  IndianChagos = 'Indian_Chagos',
+  IndianChristmas = 'Indian_Christmas',
+  IndianCocos = 'Indian_Cocos',
+  IndianComoro = 'Indian_Comoro',
+  IndianKerguelen = 'Indian_Kerguelen',
+  IndianMahe = 'Indian_Mahe',
+  IndianMaldives = 'Indian_Maldives',
+  IndianMauritius = 'Indian_Mauritius',
+  IndianMayotte = 'Indian_Mayotte',
+  IndianReunion = 'Indian_Reunion',
+  PacificApia = 'Pacific_Apia',
+  PacificAuckland = 'Pacific_Auckland',
+  PacificBougainville = 'Pacific_Bougainville',
+  PacificChatham = 'Pacific_Chatham',
+  PacificChuuk = 'Pacific_Chuuk',
+  PacificEaster = 'Pacific_Easter',
+  PacificEfate = 'Pacific_Efate',
+  PacificFakaofo = 'Pacific_Fakaofo',
+  PacificFiji = 'Pacific_Fiji',
+  PacificFunafuti = 'Pacific_Funafuti',
+  PacificGalapagos = 'Pacific_Galapagos',
+  PacificGambier = 'Pacific_Gambier',
+  PacificGuadalcanal = 'Pacific_Guadalcanal',
+  PacificGuam = 'Pacific_Guam',
+  PacificHonolulu = 'Pacific_Honolulu',
+  PacificKanton = 'Pacific_Kanton',
+  PacificKiritimati = 'Pacific_Kiritimati',
+  PacificKosrae = 'Pacific_Kosrae',
+  PacificKwajalein = 'Pacific_Kwajalein',
+  PacificMajuro = 'Pacific_Majuro',
+  PacificMarquesas = 'Pacific_Marquesas',
+  PacificMidway = 'Pacific_Midway',
+  PacificNauru = 'Pacific_Nauru',
+  PacificNiue = 'Pacific_Niue',
+  PacificNorfolk = 'Pacific_Norfolk',
+  PacificNoumea = 'Pacific_Noumea',
+  PacificPagoPago = 'Pacific_Pago_Pago',
+  PacificPalau = 'Pacific_Palau',
+  PacificPitcairn = 'Pacific_Pitcairn',
+  PacificPohnpei = 'Pacific_Pohnpei',
+  PacificPortMoresby = 'Pacific_Port_Moresby',
+  PacificRarotonga = 'Pacific_Rarotonga',
+  PacificSaipan = 'Pacific_Saipan',
+  PacificTahiti = 'Pacific_Tahiti',
+  PacificTarawa = 'Pacific_Tarawa',
+  PacificTongatapu = 'Pacific_Tongatapu',
+  PacificWake = 'Pacific_Wake',
+  PacificWallis = 'Pacific_Wallis',
+  Utc = 'UTC'
+}
 
 export type ImpersonationStatus = {
   __typename?: 'ImpersonationStatus';
@@ -2124,7 +2573,7 @@ export type ParentAdminProfileUpdateInput = {
   nationality: InputMaybe<Scalars['String']['input']>;
   paymentMethod: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
-  timezone: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<IanaTimezone>;
   twitter: InputMaybe<Scalars['String']['input']>;
   whatsapp: InputMaybe<Scalars['String']['input']>;
 };
@@ -2303,7 +2752,7 @@ export type ParentOnboardingInput = {
   password: Scalars['String']['input'];
   paymentMethod: InputMaybe<PaymentMethod>;
   phone: InputMaybe<Scalars['String']['input']>;
-  timezone: InputMaybe<Scalars['String']['input']>;
+  timezone: IanaTimezone;
   twitter: InputMaybe<Scalars['String']['input']>;
   whatsapp: InputMaybe<Scalars['String']['input']>;
 };
@@ -2357,7 +2806,7 @@ export type ParentProfile = {
   paymentMethod: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
-  timezone: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
   twitter: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
   userId: Maybe<Scalars['String']['output']>;
@@ -2750,7 +3199,7 @@ export type QuerySearchTeacherAvailabilityArgs = {
 export type QueryStatusTrackingScheduleArgs = {
   date: Scalars['String']['input'];
   search: InputMaybe<Scalars['String']['input']>;
-  viewerTimezone: InputMaybe<Scalars['String']['input']>;
+  viewerTimezone: InputMaybe<IanaTimezone>;
 };
 
 
@@ -3491,7 +3940,7 @@ export type TeacherAvailabilityGap = {
   teacherGender: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
-  timezone: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
 };
 
 export type TeacherBankingSummary = {
@@ -3664,10 +4113,7 @@ export type TeacherOnboardingInput = {
   routingNumber: InputMaybe<Scalars['String']['input']>;
   /** SWIFT/BIC code */
   swiftBic: InputMaybe<Scalars['String']['input']>;
-  /** IANA timezone identifier */
-  timezone: Scalars['String']['input'];
-  /** Timezone ID reference */
-  timezoneId: InputMaybe<Scalars['Int']['input']>;
+  timezone: IanaTimezone;
   /** Teacher Zoom meeting link */
   zoomLink: InputMaybe<Scalars['String']['input']>;
   /** Teacher Zoom password (encrypted) */
@@ -3685,7 +4131,7 @@ export type TeacherOwnProfile = {
   paymentMethod: Maybe<PaymentMethod>;
   phone: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<Scalars['String']['output']>;
-  timezone: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
   totalClasses: Maybe<Scalars['Int']['output']>;
   zoomLink: Maybe<Scalars['String']['output']>;
 };
@@ -3712,7 +4158,7 @@ export type TeacherProfileResult = {
   qualifications: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<Scalars['String']['output']>;
   status: Maybe<AccountStatus>;
-  timezone: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
   totalClasses: Maybe<Scalars['Int']['output']>;
   updatedAt: Maybe<Scalars['String']['output']>;
   userId: Maybe<Scalars['String']['output']>;
@@ -3731,7 +4177,7 @@ export type TeacherProfileUpdateInput = {
   qualifications: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<AccountStatus>;
-  timezone: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<IanaTimezone>;
   zoomLink: InputMaybe<Scalars['String']['input']>;
   zoomPassword: InputMaybe<Scalars['String']['input']>;
   zoomUsername: InputMaybe<Scalars['String']['input']>;

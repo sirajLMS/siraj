@@ -5,6 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { UserReturnType } from "@/backend/types/user.types";
 
 /**
@@ -79,6 +80,7 @@ export async function createTestUser(
 
   return {
     ...user,
+    timezone: (user.timezone ?? IanaTimezone.UTC) as IanaTimezone,
     role: UserRole.PARENT,
     status: AccountStatus.ACTIVATED,
     teacherId: null,

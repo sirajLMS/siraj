@@ -27,7 +27,6 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
           durationMinutes: args.input.durationMinutes,
           defaultStartTime: args.input.defaultStartTime,
           timezone: args.input.timezone,
-          timezoneId: args.input.timezoneId || undefined,
           effectiveFrom: args.input.effectiveFrom || undefined,
           effectiveUntil: args.input.effectiveUntil || undefined,
           days: args.input.days.map(d => ({

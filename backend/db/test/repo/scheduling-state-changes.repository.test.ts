@@ -13,6 +13,7 @@ import {
 import { expectRepositoryError } from "@/backend/db/test/repo/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { AppPermission } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PermissionsService } from "@/backend/services";
 
 describe("Scheduling Repository — State Changes & Leave Quota", () => {
@@ -239,13 +240,19 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const events = await SchedulingRepository.getClassStatusEvents(id, tx);
         expect(events.length).toBeGreaterThan(0);
 
-        const feed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), "UTC", undefined, tx);
+        const feed = await SchedulingRepository.getTeacherProgressFeed(
+          teacher.id,
+          new Date(),
+          IanaTimezone.UTC,
+          undefined,
+          tx
+        );
         expect(feed.length).toBeGreaterThan(0);
         expect(feed[0].id).toBe(events[0].id);
         expect(feed[0].studentName).toBeDefined();
         expect(feed[0].eventKind).toBe("activated");
 
-        const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), "UTC");
+        const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), IanaTimezone.UTC);
         expect(Array.isArray(feedNoTx)).toBe(true);
 
         const eventsNoTx = await SchedulingRepository.getClassStatusEvents(id, tx);

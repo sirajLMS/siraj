@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
 export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"]["teacherProfile"]["validation"]) => {
@@ -7,7 +8,10 @@ export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"][
     email: z.email({ message: messages.emailInvalid }),
     phone: z.string().optional(),
     gender: z.enum(["MALE", "FEMALE"]),
-    timezone: z.string().min(1, messages.timezoneRequired),
+    timezone: z
+      .string()
+      .min(1, messages.timezoneRequired)
+      .refine(value => isValidIanaTimezoneId(value), { message: messages.timezoneRequired }),
     address: z.string().optional(),
     baseSalary: z.coerce.number().min(0),
     currency: z.string(),

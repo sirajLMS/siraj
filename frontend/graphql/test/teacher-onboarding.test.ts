@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { CountryCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CountryCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-onboarding.documents";
 import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
@@ -14,8 +14,7 @@ const createMinimalTeacherInput = (
   name: overrides?.name ?? "Test Teacher",
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
   password: `Pwd_${randomUUID()}`,
-  timezone: "UTC",
-  timezoneId: null,
+  timezone: IanaTimezone.Utc,
   nationality: CountryCode.Us,
   countryCode: CountryCode.Us,
   phone: "+1234567890",

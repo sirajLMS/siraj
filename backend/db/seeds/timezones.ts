@@ -1,5 +1,6 @@
 import { db } from "@/backend/db/drizzleDb";
 import { timezones } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import logger from "@/backend/lib/logger";
 
 export async function seedOrGet() {
@@ -10,7 +11,7 @@ export async function seedOrGet() {
     { ianaId: "Europe/London", baseOffsetMinutes: 0 },
     { ianaId: "America/New_York", baseOffsetMinutes: -300 },
     { ianaId: "Asia/Dubai", baseOffsetMinutes: 240 },
-    { ianaId: "Asia/Riyadh", baseOffsetMinutes: 180 },
+    { ianaId: IanaTimezone.Asia_Riyadh, baseOffsetMinutes: 180 },
     { ianaId: "Asia/Singapore", baseOffsetMinutes: 480 },
     { ianaId: "Australia/Sydney", baseOffsetMinutes: 600 },
   ];

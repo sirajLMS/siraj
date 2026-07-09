@@ -14,6 +14,7 @@ import {
   userPermissionGroups,
   users,
 } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 
@@ -68,7 +69,7 @@ export namespace TestHelperService {
         name: `${prefix} Student User`,
         email: studentEmail,
         password: hashedPassword,
-        timezone: "UTC",
+        timezone: IanaTimezone.UTC,
         createdAt: now,
         updatedAt: now,
       })
@@ -80,7 +81,7 @@ export namespace TestHelperService {
         name: `${prefix} Parent User`,
         email: parentEmail,
         password: hashedPassword,
-        timezone: "UTC",
+        timezone: IanaTimezone.UTC,
         createdAt: now,
         updatedAt: now,
       })
@@ -92,7 +93,7 @@ export namespace TestHelperService {
         name: `${prefix} Teacher User`,
         email: teacherEmail,
         password: hashedPassword,
-        timezone: "UTC",
+        timezone: IanaTimezone.UTC,
         createdAt: now,
         updatedAt: now,
       })

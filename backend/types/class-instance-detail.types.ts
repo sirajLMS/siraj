@@ -1,5 +1,6 @@
 import type { classInstances } from "@/backend/db/schema/scheduling";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 // Foundation types from schema
 export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertType = typeof classInstances.$inferInsert;
@@ -48,8 +49,8 @@ export type ClassInstanceDetailReturnType = Omit<
   status: ClassExecutionState | null;
   remarks: string | null;
   hasTimezoneMismatch: boolean;
-  studentTimezone: string | null;
-  teacherTimezone: string | null;
+  studentTimezone: IanaTimezone | null;
+  teacherTimezone: IanaTimezone | null;
   zoomMeetingUrl: string | null;
   payrollCredited: boolean;
   isRescheduled: boolean;

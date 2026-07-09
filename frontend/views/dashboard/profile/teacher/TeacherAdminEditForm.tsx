@@ -94,7 +94,7 @@ export function TeacherAdminEditForm({
             avatarUrl={avatarUrl}
             register={form.register}
           />
-          <ContactSection mode="edit" isAdminScope register={form.register} />
+          <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
           <ZoomSection mode="edit" isAdminScope register={form.register} hasZoomPassword={hasZoomPassword} />
           <CompensationSection mode="edit" register={form.register} />
           <AdminOnlySection mode="edit" register={form.register} />

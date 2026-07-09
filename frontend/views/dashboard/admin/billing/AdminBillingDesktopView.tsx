@@ -4,13 +4,16 @@ import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import { BillingMetricsRow } from "../../billing/components/BillingMetricsRow";
-import { BillingSearchBar } from "../../billing/components/BillingSearchBar";
-import { StudentCreditDataGrid } from "../../billing/components/StudentCreditDataGrid";
-import type { AdminBillingViewProps } from "../../billing/types/billingViewTypes";
-import { buildAdminMetrics } from "../../billing/utils/billingMetrics";
-import { getAdminInvoiceGridLabels, getStudentCreditGridLabels } from "../../billing/utils/label-mappers";
-import { AdminInvoicesDataGrid } from "./components/AdminInvoicesDataGrid";
+import { AdminInvoicesDataGrid } from "@/frontend/views/dashboard/admin/billing/components/AdminInvoicesDataGrid";
+import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
+import { BillingSearchBar } from "@/frontend/views/dashboard/billing/components/BillingSearchBar";
+import { StudentCreditDataGrid } from "@/frontend/views/dashboard/billing/components/StudentCreditDataGrid";
+import type { AdminBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { buildAdminMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
+import {
+  getAdminInvoiceGridLabels,
+  getStudentCreditGridLabels,
+} from "@/frontend/views/dashboard/billing/utils/label-mappers";
 
 // Chip indicating items requiring attention, styled with error colors
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({

@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { IanaTimezone, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parent-onboarding.documents";
 import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
@@ -19,7 +19,7 @@ const createMinimalParentInput = (
   feeAmount: null,
   paymentMethod: null,
   currency: null,
-  timezone: null,
+  timezone: IanaTimezone.Utc,
   address: null,
   defaultZoomLink: null,
   facebook: null,
@@ -36,7 +36,7 @@ const createFullParentInput = (
     feeAmount: string | null;
     paymentMethod: PaymentMethod | null;
     currency: string | null;
-    timezone: string | null;
+    timezone: IanaTimezone | null;
     address: string | null;
     defaultZoomLink: string | null;
     facebook: string | null;
@@ -55,7 +55,7 @@ const createFullParentInput = (
   feeAmount: overrides?.feeAmount ?? "500.00",
   paymentMethod: overrides?.paymentMethod ?? PaymentMethod.BankAccount,
   currency: overrides?.currency ?? "USD",
-  timezone: overrides?.timezone ?? "America/Chicago",
+  timezone: overrides?.timezone ?? IanaTimezone.AmericaChicago,
   address: overrides?.address ?? "123 Main St",
   defaultZoomLink: overrides?.defaultZoomLink ?? "https://zoom.us/j/1234567890",
   facebook: overrides?.facebook ?? "facebook.com/testparent",

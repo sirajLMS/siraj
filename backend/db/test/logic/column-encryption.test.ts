@@ -33,7 +33,6 @@ async function insertTeacherDetails(args: {
   const teacherInput: TeacherEntityInput = {
     userId,
     status: "ACTIVATED",
-    timezone: "UTC",
     zoomPassword: plainZoomPassword,
     nationalId: plainNationalId,
     createdAt: now,

@@ -1,6 +1,7 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import type { TeacherOnboardingInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useTeacherOnboardingStore } from "@/frontend/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
 import type {
@@ -32,8 +33,7 @@ export function useCreateTeacherOnboarding() {
         countryCode: formData.countryCode,
         zoomUsername: formData.zoomUsername || null,
         zoomPassword: formData.zoomPassword || null,
-        timezone: formData.timezone,
-        timezoneId: null,
+        timezone: toGraphqlIanaTimezone(formData.timezone),
         hourlyRate: formData.hourlyRate,
         rateCurrency: formData.rateCurrency,
         beneficiaryName: formData.beneficiaryName,

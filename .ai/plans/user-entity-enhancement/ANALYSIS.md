@@ -244,10 +244,10 @@ Card/Mada/Apple Pay style methods that only work via PSP tokens are **out of sco
 
 - **DECIDED 1A:** unified `user_payment_methods` with `jsonb("details").$type<PaymentMethodDetails>()` + Zod discriminated validation; bank is a type in this table — [decisions/01-payment-methods-model.md](./decisions/01-payment-methods-model.md)
 - **DECIDED 8C:** early-dev clean-slate migrations (drop DB / regenerate) — [decisions/08-migration-strategy.md](./decisions/08-migration-strategy.md)
-- **DECIDED 2:** types = `MOBILE_WALLET` + `PAYMENT_LINK` (country catalogs) + `BANK_TRANSFER` / `PAYPAL` / `CASH` (+ optional `WISE`) — [02](./decisions/02-payment-methods-v1-set.md)
+- **DECIDED 2:** types = `MOBILE_WALLET` + `PAYMENT_LINK` + `ONLINE_ACCOUNT` (country/global catalogs) + `BANK_TRANSFER` / `CASH` — [02](./decisions/02-payment-methods-v1-set.md)
 - **Still open:** defaults — [01b](./decisions/01b-payment-defaults.md); confirm Wise in v1
 
-Today’s `PAYPAL | BANK_ACCOUNT` on role rows + `teacher_banking_details_history` are replaced under clean-slate (no dual-write required). New catalogs: `supported_mobile_wallets`, `supported_payment_links`.
+Today’s `PAYPAL | BANK_ACCOUNT` on role rows + `teacher_banking_details_history` are replaced under clean-slate (no dual-write required). New catalogs: `supported_mobile_wallets`, `supported_payment_links`, `supported_online_accounts`.
 
 ---
 

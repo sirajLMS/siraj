@@ -5,9 +5,9 @@ import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
-
 import { ProfileAdministrationPanel } from "@/frontend/components/auth/ProfileAdministrationPanel";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
 import { SystemConfigSection } from "./components/SystemConfigSection";
@@ -38,7 +38,7 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
       email: "",
       phone: "",
       gender: "FEMALE",
-      timezone: "Africa/Cairo",
+      timezone: IanaTimezone.AfricaCairo,
       address: "",
       baseSalary: 0,
       currency: "USD",

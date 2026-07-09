@@ -16,11 +16,11 @@ import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/staff-profile.documents";
+import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { logger } from "@/frontend/utils/logger";
 import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
 import { TeacherProfileView } from "./TeacherProfileView";
 import type { TeacherProfileData } from "./types";
-
 export function TeacherProfileContainer() {
   const params = useParams();
   const id = typeof params?.id === "string" ? params.id : "";
@@ -43,7 +43,7 @@ export function TeacherProfileContainer() {
           input: {
             phone: formData.phone || null,
             gender: formData.gender as Gender,
-            timezone: formData.timezone,
+            timezone: toGraphqlIanaTimezone(formData.timezone),
             address: formData.address || null,
             hourlyRate: String(formData.baseSalary),
             rateCurrency: formData.currency,

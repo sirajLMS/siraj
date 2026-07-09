@@ -1,5 +1,6 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ClassType, type CreateRecurringClassInput, type ManagerAccountType } from "../generated/gql/graphql-types";
 import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
 import { createManagerMutationDocument } from "../sharedDocuments/manager-onboarding.documents";
@@ -231,13 +232,12 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     teacherId: entities.teacherId,
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
-    timezone: "UTC",
+    timezone: IanaTimezone.Utc,
     days: [{ dayOfWeek, startTime: "10:00:00", isActive: true }],
     classType: "REGULAR",
     generateInstancesForWeeks: 2,
     effectiveFrom: date,
     effectiveUntil: null,
-    timezoneId: null,
   });
 
   const gridResult = await testClient.query({
@@ -447,13 +447,12 @@ export async function assertRecurringClassDenied(
     teacherId: "fake-teacher-id",
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
-    timezone: "UTC",
+    timezone: IanaTimezone.Utc,
     days,
     classType: "REGULAR",
     generateInstancesForWeeks: 4,
     effectiveFrom: null,
     effectiveUntil: null,
-    timezoneId: null,
   });
   expect(result.error).toBeDefined();
 }

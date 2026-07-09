@@ -1,5 +1,7 @@
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { parents } from "@/backend/db/schema/parents";
+import { users } from "@/backend/db/schema/users";
 import {
   ALL_PARENT_STATUSES,
   cycleAtIndex,
@@ -10,16 +12,18 @@ import {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
 
 async function upsertParent(userId: string, timezone: string, status: string, now: Date) {
+  await db.update(users).set({ timezone, updatedAt: now }).where(eq(users.id, userId));
+
   const [insertedParent] = await db
     .insert(parents)
     .values({
       userId,
       status,
-      timezone,
       createdAt: now,
       updatedAt: now,
     })
@@ -27,7 +31,6 @@ async function upsertParent(userId: string, timezone: string, status: string, no
       target: parents.userId,
       set: {
         status,
-        timezone,
         updatedAt: now,
       },
     })
@@ -52,7 +55,7 @@ export async function seedOrGet(users: UserSelectType[], config?: SeedConfig) {
   const results = [];
   for (let i = 0; i < parentUsers.length; i++) {
     const user = parentUsers[i];
-    const timezone = i === 0 ? "Africa/Cairo" : pickTimezoneForIndex(i);
+    const timezone = i === 0 ? IanaTimezone.Africa_Cairo : pickTimezoneForIndex(i);
     const status = cycleAtIndex(ALL_PARENT_STATUSES, i);
     const parent = await upsertParent(user.id, timezone, status, now);
 

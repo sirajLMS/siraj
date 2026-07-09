@@ -1,6 +1,6 @@
 "use server";
 
-import type { LoginFormData } from "../schemas/loginSchema";
+import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 
 export type LoginResponse =
   | {

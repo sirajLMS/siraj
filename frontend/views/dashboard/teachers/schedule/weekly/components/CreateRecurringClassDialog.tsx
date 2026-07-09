@@ -22,6 +22,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { TimezoneSelect } from "@/frontend/components/ui/input/TimezoneSelect";
 import {
   AppPermission,
   ClassType as ClassTypeEnum,
@@ -29,9 +30,10 @@ import {
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/recurring-class.documents";
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { logger } from "@/frontend/utils/logger";
-import { CLASS_TYPE_OPTIONS, TIMEZONE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
+import { CLASS_TYPE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassDialogProps } from "../types";
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
@@ -103,7 +105,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
         teacherId,
         durationMinutes: Number(duration),
         defaultStartTime,
-        timezone,
+        timezone: toGraphqlIanaTimezone(timezone),
         classType,
         days: activeDays.map(d => ({
           dayOfWeek: d.day,
@@ -113,7 +115,6 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
         generateInstancesForWeeks: 4,
         effectiveFrom: null,
         effectiveUntil: null,
-        timezoneId: null,
       };
 
       const { data } = await createClassMutation({
@@ -191,23 +192,17 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
             </Stack>
 
             <Stack direction="row" spacing={2}>
-              <FormControl fullWidth>
-                <InputLabel id="timezone-select-label">{t("fields.timezone")}</InputLabel>
-                <Select
-                  labelId="timezone-select-label"
-                  id="timezone-select"
-                  value={timezone}
+              <Box sx={{ flex: 1 }}>
+                <TimezoneSelect
+                  value={toGraphqlIanaTimezone(timezone)}
+                  onChangeAction={value => {
+                    setTimezone(value ? fromGraphqlIanaTimezone(value) : "");
+                  }}
                   label={t("fields.timezone")}
-                  onChange={e => setTimezone(e.target.value)}
+                  fullWidth
                   disabled={mutationLoading}
-                >
-                  {TIMEZONE_OPTIONS.map(opt => (
-                    <MenuItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                />
+              </Box>
 
               <FormControl fullWidth>
                 <InputLabel id="class-type-select-label">{t("fields.classType")}</InputLabel>

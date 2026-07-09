@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { AccountStatus, Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 import type { TeacherAdminData, TeacherOwnData } from "./sections/teacherProfileTypes";
 import { TeacherProfileView } from "./TeacherProfileView";
@@ -10,7 +10,7 @@ const teacherOwnProfile: TeacherOwnData = {
   name: "Ahmed Hassan",
   email: "ahmed.hassan@example.com",
   phone: "+966 50 123 4567",
-  timezone: "Asia/Riyadh",
+  timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
   rateCurrency: "USD",
   paymentMethod: PaymentMethod.Paypal,
@@ -31,7 +31,7 @@ const teacherAdminProfile: TeacherAdminData = {
   zoomLink: "https://zoom.us/j/teacher123",
   zoomUsername: "ahmed.teacher",
   hasZoomPassword: true,
-  timezone: "Asia/Riyadh",
+  timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
   rateCurrency: "USD",
   status: AccountStatus.Activated,

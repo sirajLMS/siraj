@@ -3,6 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { mapStatusTrackingQueryRow } from "@/backend/db/repo/scheduling/scheduling-queries.repository/status-tracking.utils";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { StatusTrackingRow } from "@/backend/types/scheduling.types";
 
 export const getStatusTrackingRows = async (
@@ -12,7 +13,7 @@ export const getStatusTrackingRows = async (
 ): Promise<StatusTrackingRow[]> => {
   const runner = async (t: DBTransaction): Promise<StatusTrackingRow[]> => {
     const { getDayBoundaries } = await import("@/backend/lib/timezone");
-    const viewerTimezone = options?.viewerTimezone ?? "UTC";
+    const viewerTimezone = options?.viewerTimezone ?? IanaTimezone.UTC;
     const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(date, viewerTimezone);
     const search = options?.search;
 

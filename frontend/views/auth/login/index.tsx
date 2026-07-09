@@ -9,8 +9,8 @@ import { useAuth } from "@/frontend/hooks/useAuth";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import logger from "@/frontend/lib/logger";
 import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/lib/safeRedirect";
-import { LoginView } from "./LoginView";
-import type { LoginFormData } from "./schemas/loginSchema";
+import { LoginView } from "@/frontend/views/auth/login/LoginView";
+import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 
 export interface LoginContainerProps {
   demoGroups?: { slug: string; name: string; description: string | null }[];

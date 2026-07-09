@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { recurringSchedules, teachers } from "@/backend/db/schema";
+import { randomUUID } from "node:crypto";
+import { recurringSchedules, users } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { RecurringScheduleEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
 
@@ -23,28 +25,27 @@ async function expectConstraintError(
 }
 
 describe("Timezone Validation Constraints", () => {
-  test("Allows valid timezones for teachers", async () => {
-    testLogger.info("Testing valid timezones for teachers...");
+  test("Allows valid timezones for users", async () => {
+    testLogger.info("Testing valid timezones for users...");
     await runInRollback(async tx => {
-      const { teacher } = await setupTeacher(tx, { name: "Valid Teacher User" }, { timezone: "America/New_York" });
+      const { user } = await setupTeacher(tx, { name: "Valid Teacher User", timezone: IanaTimezone.America_New_York });
 
-      expect(teacher).toBeDefined();
-      expect(teacher.timezone).toBe("America/New_York");
+      expect(user).toBeDefined();
+      expect(user.timezone).toBe(IanaTimezone.America_New_York);
     });
-    testLogger.info("Valid teacher timezone test passed.");
+    testLogger.info("Valid user timezone test passed.");
   });
 
-  test("Prevents invalid timezones for teachers", async () => {
-    testLogger.info("Testing invalid timezones for teachers...");
+  test("Prevents invalid timezones for users", async () => {
+    testLogger.info("Testing invalid timezones for users...");
     await runInRollback(async tx => {
-      const { user } = await setupTeacher(tx, { name: "Invalid Teacher User" });
-
       const error = await expectConstraintError(() =>
         tx
-          .insert(teachers)
+          .insert(users)
           .values({
-            userId: user.id,
-            status: "ACTIVATED",
+            name: "Invalid Timezone User",
+            email: `invalid-tz-${randomUUID()}@example.com`,
+            password: "password",
             timezone: "Invalid/Timezone_Name",
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -52,9 +53,9 @@ describe("Timezone Validation Constraints", () => {
           .execute()
       );
       const message = error.cause?.message || error.message || "";
-      expect(message).toMatch(/teachers_timezone_chk|time zone .* not recognized/);
+      expect(message).toMatch(/users_timezone_chk|time zone .* not recognized/);
     });
-    testLogger.info("Invalid teacher timezone test passed.");
+    testLogger.info("Invalid user timezone test passed.");
   });
 
   test("Allows valid timezones for recurring schedules", async () => {
@@ -70,14 +71,14 @@ describe("Timezone Validation Constraints", () => {
           teacherId: teacher.id,
           durationMinutes: 60,
           defaultStartTime: "09:00:00",
-          timezone: "Europe/London",
+          timezone: IanaTimezone.Europe_London,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
         .returning()) as [RecurringScheduleEntity];
 
       expect(schedule).toBeDefined();
-      expect(schedule.timezone).toBe("Europe/London");
+      expect(schedule.timezone).toBe(IanaTimezone.Europe_London);
     });
     testLogger.info("Valid recurring schedule timezone test passed.");
   });

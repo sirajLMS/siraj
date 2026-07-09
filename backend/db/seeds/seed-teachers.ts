@@ -1,5 +1,7 @@
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teachers } from "@/backend/db/schema/teachers";
+import { users } from "@/backend/db/schema/users";
 import {
   ALL_ACCOUNT_STATUSES,
   cycleAtIndex,
@@ -10,17 +12,18 @@ import {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import logger from "@/backend/lib/logger";
 import type { TimezoneEntity, UserSelectType } from "@/backend/types";
 
-async function upsertTeacher(userId: string, timezone: TimezoneEntity, status: string, now: Date) {
+async function upsertTeacher(userId: string, timezoneIana: string, status: string, now: Date) {
+  await db.update(users).set({ timezone: timezoneIana, updatedAt: now }).where(eq(users.id, userId));
+
   const [insertedTeacher] = await db
     .insert(teachers)
     .values({
       userId,
       status,
-      timezoneId: timezone.id,
-      timezone: timezone.ianaId,
       createdAt: now,
       updatedAt: now,
     })
@@ -28,8 +31,6 @@ async function upsertTeacher(userId: string, timezone: TimezoneEntity, status: s
       target: teachers.userId,
       set: {
         status,
-        timezoneId: timezone.id,
-        timezone: timezone.ianaId,
         updatedAt: now,
       },
     })
@@ -51,7 +52,7 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEnti
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
-  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") || timezones[0];
+  const defaultTimezone = timezones.find(t => t.ianaId === IanaTimezone.UTC) || timezones[0];
   if (!defaultTimezone) {
     throw new Error("No timezones found in seed data.");
   }
@@ -67,10 +68,10 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEnti
   const results = [];
   for (let i = 0; i < teacherUsers.length; i++) {
     const user = teacherUsers[i];
-    const tzIana = i === 0 ? "UTC" : pickTimezoneForIndex(i);
-    const timezone = resolveTimezone(timezones, tzIana);
+    const tzIana = i === 0 ? IanaTimezone.UTC : pickTimezoneForIndex(i);
+    resolveTimezone(timezones, tzIana);
     const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
-    const teacher = await upsertTeacher(user.id, timezone, status, now);
+    const teacher = await upsertTeacher(user.id, tzIana, status, now);
 
     if (shouldSeedExtendedFiles(seedConfig)) {
       try {

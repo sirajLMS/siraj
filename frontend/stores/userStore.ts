@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { AppPermission, User } from "../graphql/generated/gql/graphql-types";
+import type { AppPermission, User } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface UserState {
   user: User | null;

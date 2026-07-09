@@ -1,4 +1,5 @@
 import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
+import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { RecurringClassFormData } from "../recurringClassSchema";
 
 function buildActiveDays(data: RecurringClassFormData) {
@@ -23,13 +24,12 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
     teacherId: data.teacherId,
     durationMinutes: calculateDurationMinutes(data),
     defaultStartTime: data.defaultStartTime,
-    timezone: data.timezone,
+    timezone: toGraphqlIanaTimezone(data.timezone),
     classType: data.classType ?? null,
     days: activeDays,
     generateInstancesForWeeks: data.generateInstancesForWeeks ?? 4,
     effectiveFrom: data.effectiveFrom ?? null,
     effectiveUntil: data.effectiveUntil ?? null,
-    timezoneId: null,
   };
 }
 
@@ -47,6 +47,5 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     effectiveFrom: data.effectiveFrom || undefined,
     effectiveUntil: data.effectiveUntil || undefined,
     generateInstancesForWeeks: data.generateInstancesForWeeks,
-    timezoneId: undefined,
   };
 }

@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { FeesContractSection } from "../../../admin/parents/onboarding/FeesContractSection";
 import { ParentInfoSection } from "../../../admin/parents/onboarding/ParentInfoSection";
@@ -13,16 +13,18 @@ import type { ParentProfileEditFormData } from "./parentProfileEditSchema";
 
 interface Props {
   readonly register: UseFormRegister<ParentProfileEditFormData>;
+  readonly control: Control<ParentProfileEditFormData>;
   readonly errors: FieldErrors<ParentProfileEditFormData>;
   readonly handleSubmit: UseFormHandleSubmit<ParentProfileEditFormData>;
   readonly onSubmit: (data: ParentProfileEditFormData) => void | Promise<void>;
 }
 
-export default function ParentProfileEditView({ register, errors, handleSubmit, onSubmit }: Props) {
+export default function ParentProfileEditView({ register, control, errors, handleSubmit, onSubmit }: Props) {
   const t = useTranslations("dashboard.parentProfile");
   const tOnboarding = useTranslations("dashboard.parentOnboarding");
 
   const onboardingRegister = register as unknown as UseFormRegister<ParentOnboardingFormData>;
+  const onboardingControl = control as unknown as Control<ParentOnboardingFormData>;
   const onboardingErrors = errors as unknown as FieldErrors<ParentOnboardingFormData>;
 
   return (
@@ -58,7 +60,7 @@ export default function ParentProfileEditView({ register, errors, handleSubmit, 
       >
         <ParentInfoSection register={onboardingRegister} errors={onboardingErrors} />
         <SocialCommsSection register={onboardingRegister} />
-        <FeesContractSection register={onboardingRegister} errors={onboardingErrors} />
+        <FeesContractSection register={onboardingRegister} control={onboardingControl} errors={onboardingErrors} />
 
         <Box
           sx={theme => ({

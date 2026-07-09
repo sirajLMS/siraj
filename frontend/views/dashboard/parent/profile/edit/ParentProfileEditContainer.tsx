@@ -50,6 +50,7 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -103,5 +104,13 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
     return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
   }
 
-  return <ParentProfileEditView register={register} errors={errors} handleSubmit={handleSubmit} onSubmit={onSubmit} />;
+  return (
+    <ParentProfileEditView
+      register={register}
+      control={control}
+      errors={errors}
+      handleSubmit={handleSubmit}
+      onSubmit={onSubmit}
+    />
+  );
 }

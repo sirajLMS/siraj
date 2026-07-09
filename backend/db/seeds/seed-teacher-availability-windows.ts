@@ -7,10 +7,16 @@ import {
   loadSeedConfig,
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import logger from "@/backend/lib/logger";
-import type { TeacherEntity, TimezoneEntity } from "@/backend/types";
+import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
 
-export async function seedOrGet(teachersList: TeacherEntity[], timezones: TimezoneEntity[], config?: SeedConfig) {
+export async function seedOrGet(
+  teachersList: TeacherEntity[],
+  usersList: UserSelectType[],
+  timezones: TimezoneEntity[],
+  config?: SeedConfig
+) {
   logger.info("Seeding teacher availability windows...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
@@ -22,9 +28,12 @@ export async function seedOrGet(teachersList: TeacherEntity[], timezones: Timezo
   const { from, until } = getAvailabilityEffectiveRange(seedConfig);
   const results = [];
 
+  const userTimezoneById = new Map(usersList.map(u => [u.id, u.timezone]));
+
   for (let i = 0; i < teachersList.length; i++) {
     const teacher = teachersList[i];
-    const tz = timezones.find(t => t.ianaId === teacher.timezone) ?? timezones[0];
+    const teacherTimezone = userTimezoneById.get(teacher.userId) ?? IanaTimezone.UTC;
+    const tz = timezones.find(t => t.ianaId === teacherTimezone) ?? timezones[0];
     const windows = buildTeacherAvailabilityWindows(i);
 
     for (const window of windows) {
@@ -45,7 +54,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], timezones: Timezo
           .set({
             startTime: window.startTime,
             endTime: window.endTime,
-            timezone: teacher.timezone,
+            timezone: teacherTimezone,
             timezoneId: tz?.id ?? null,
             effectiveFrom: from,
             effectiveUntil: until,
@@ -64,7 +73,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], timezones: Timezo
           dayOfWeek: window.dayOfWeek,
           startTime: window.startTime,
           endTime: window.endTime,
-          timezone: teacher.timezone,
+          timezone: teacherTimezone,
           timezoneId: tz?.id ?? null,
           effectiveFrom: from,
           effectiveUntil: until,

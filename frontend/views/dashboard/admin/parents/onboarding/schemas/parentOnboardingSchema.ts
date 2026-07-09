@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import { InvoiceType, PaymentMethod } from "../types";
 
 export type { ParentOnboardingFormData } from "../types";
@@ -23,4 +24,8 @@ export const parentOnboardingSchema = z.object({
     { message: "paymentMethodRequired" }
   ),
   currency: z.string().min(1, "currencyRequired"),
+  timezone: z
+    .string()
+    .min(1, "timezoneRequired")
+    .refine(value => isValidIanaTimezoneId(value), { message: "timezoneRequired" }),
 });

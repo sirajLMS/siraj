@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { LoginView } from "./LoginView";
-import type { LoginFormData } from "./schemas/loginSchema";
+import { LoginView } from "@/frontend/views/auth/login/LoginView";
+import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 
 const meta: Meta<typeof LoginView> = {
   title: "Views /login/LoginView",

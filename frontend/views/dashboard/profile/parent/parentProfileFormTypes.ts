@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 
 const coreSchema = z.object({
   name: z.string().min(1),
@@ -20,7 +21,10 @@ const adminParentSchema = ownParentSchema.extend({
   feeAmount: z.string().optional(),
   paymentMethod: z.string().optional(),
   currency: z.string().optional(),
-  timezone: z.string().optional(),
+  timezone: z
+    .string()
+    .optional()
+    .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
 });
 
 export const parentOwnEditSchema = z.object({ ...coreSchema.shape, ...ownParentSchema.shape });

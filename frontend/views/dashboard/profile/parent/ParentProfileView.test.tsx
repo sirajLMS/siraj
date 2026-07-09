@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 import { ParentProfileView } from "./ParentProfileView";
 
@@ -32,7 +33,7 @@ const parentAdminProfile = {
   feeAmount: "500",
   paymentMethod: "Bank Transfer",
   currency: "SAR",
-  timezone: "Asia/Riyadh",
+  timezone: IanaTimezone.AsiaRiyadh,
   createdAt: "2024-01-15T00:00:00.000Z",
   updatedAt: "2024-06-01T00:00:00.000Z",
 };

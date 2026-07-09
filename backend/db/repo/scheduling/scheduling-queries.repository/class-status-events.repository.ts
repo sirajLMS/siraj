@@ -3,6 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { resolveTeacherProgressFeedEventKind } from "@/backend/db/repo/scheduling/scheduling-queries.repository/teacher-progress-feed.utils";
 import { classInstances, classStatusEvents, students } from "@/backend/db/schema";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type * as Types from "@/backend/types";
 
 export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTransaction) => {
@@ -17,7 +18,7 @@ export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTrans
 export const getTeacherProgressFeed = async (
   teacherId: string,
   date: Date,
-  viewerTimezone = "UTC",
+  viewerTimezone = IanaTimezone.UTC,
   locale?: string,
   tx?: DBTransaction
 ): Promise<Types.TeacherProgressFeedItem[]> => {

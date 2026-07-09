@@ -24,6 +24,7 @@ export const onboarding: ParentOnboardingLabels = {
     feeAmount: "مبلغ الرسوم",
     paymentMethod: "طريقة الدفع",
     currency: "العملة",
+    timezone: "المنطقة الزمنية",
   },
   placeholders: {
     fullName: "مثال: أحمد الفارس",
@@ -39,6 +40,7 @@ export const onboarding: ParentOnboardingLabels = {
     feeAmount: "0.00",
     paymentMethod: "اختر الطريقة",
     currency: "اختر العملة",
+    timezone: "اختر المنطقة الزمنية",
   },
   options: {
     invoiceType: {
@@ -77,5 +79,6 @@ export const onboarding: ParentOnboardingLabels = {
     currencyRequired: "العملة مطلوبة",
     invoiceTypeRequired: "نوع الفاتورة مطلوب",
     paymentMethodRequired: "طريقة الدفع مطلوبة",
+    timezoneRequired: "المنطقة الزمنية مطلوبة",
   },
 };
