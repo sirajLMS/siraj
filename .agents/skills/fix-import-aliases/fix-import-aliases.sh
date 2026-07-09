@@ -7,6 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+PERL_SCRIPT="$SCRIPT_DIR/fix-import-aliases.pl"
 
 echo "=== Fix Import Aliases (Parallel Subagents) ==="
 echo "Project root: $PROJECT_ROOT"
@@ -28,36 +29,28 @@ set -euo pipefail
 
 dir="$1"
 alias_prefix="$2"
-
-# Check sed
-if sed --version 2>/dev/null | head -1 | grep -q GNU; then
-    SED_INPLACE=(-i)
-else
-    SED_INPLACE=(-i '')
-fi
+PROJECT_ROOT="$3"
+PERL_SCRIPT="$4"
 
 # Find and fix files
 find "$dir" -type f \( -name "*.ts" -o -name "*.tsx" \) ! -name "index.ts" | while IFS= read -r file; do
-    if ! grep -qE "from ['\"]\.\.?/" "$file" && ! grep -qE "import\(['\"]\.\.?/" "$file"; then
+    # Skip if no relative imports
+    if ! grep -qE "from ['\"]\.\.?/" "$file" && ! grep -qE "import\(['\"]\.\.?/" "$file" && ! grep -qE "^\s*['\"]\.\.?/" "$file"; then
         continue
     fi
     
     echo "  Processing: ${file#$PROJECT_ROOT/}"
     
-    sed "${SED_INPLACE[@]}" \
-        -e "s|from ['\"]\./|from '${alias_prefix}/|g" \
-        -e "s|from ['\"]\.\./|from '${alias_prefix}/|g" \
-        -e "s|import(['\"])\./|import('${alias_prefix}/|g" \
-        -e "s|import(['\"])\.\./|import('${alias_prefix}/|g" \
-        "$file"
+    # Use perl script for multiline regex support
+    ALIAS_PREFIX="$alias_prefix" perl "$PERL_SCRIPT" < "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
 echo "Done: $name"
 SUBCRIPT
     chmod +x "$temp_script"
     
-    # Run in background
-    "$temp_script" "$dir" "$alias_prefix" &
+    # Run in background with PROJECT_ROOT exported
+    PROJECT_ROOT="$PROJECT_ROOT" PERL_SCRIPT="$PERL_SCRIPT" "$temp_script" "$dir" "$alias_prefix" "$PROJECT_ROOT" "$PERL_SCRIPT" &
     echo $!
 }
 

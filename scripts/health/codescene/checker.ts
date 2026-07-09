@@ -13,7 +13,14 @@ import {
   saveResult,
   updateCachedMtime,
 } from "@/scripts/health/codescene/cache";
-import { COLORS, logError, logInfo, logSuccess, PROJECT_ROOT, resolveCodesceneBin } from "@/scripts/health/codescene/config";
+import {
+  COLORS,
+  logError,
+  logInfo,
+  logSuccess,
+  PROJECT_ROOT,
+  resolveCodesceneBin,
+} from "@/scripts/health/codescene/config";
 
 const STATE_FILE = join(PROJECT_ROOT, ".quality-gate-state.json");
 

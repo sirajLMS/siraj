@@ -19,7 +19,7 @@ function getPushProvider(): PushProvider {
 
 async function createFcmAdapter(): Promise<IPushChannel> {
   logger.info("Initializing Push channel with FCM provider");
-  const { FcmPushAdapter } = await import("./fcm/FcmPushAdapter");
+  const { FcmPushAdapter } = await import("@/backend/services/communication/channels/push/fcm/FcmPushAdapter");
   return new FcmPushAdapter();
 }
 

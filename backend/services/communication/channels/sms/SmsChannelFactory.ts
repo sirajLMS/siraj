@@ -19,7 +19,7 @@ function getSmsProvider(): SmsProvider {
 
 async function createTwilioAdapter(): Promise<ISmsChannel> {
   logger.info("Initializing SMS channel with Twilio provider");
-  const { TwilioSmsAdapter } = await import("./twilio/TwilioSmsAdapter");
+  const { TwilioSmsAdapter } = await import("@/backend/services/communication/channels/sms/twilio/TwilioSmsAdapter");
   return new TwilioSmsAdapter();
 }
 

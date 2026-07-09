@@ -19,7 +19,9 @@ function getEmailProvider(): EmailProvider {
 
 async function createResendAdapter(): Promise<IEmailChannel> {
   logger.info("Initializing Email channel with Resend provider");
-  const { ResendEmailAdapter } = await import("./resend/ResendEmailAdapter");
+  const { ResendEmailAdapter } = await import(
+    "@/backend/services/communication/channels/email/resend/ResendEmailAdapter"
+  );
   return new ResendEmailAdapter();
 }
 

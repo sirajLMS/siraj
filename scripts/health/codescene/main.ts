@@ -15,7 +15,12 @@ import {
   resolveCodesceneBin,
   SCRIPT_DIR,
 } from "@/scripts/health/codescene/config";
-import { installCodeScene, isCsInstalled, promptAndSaveToken, showTokenInstructions } from "@/scripts/health/codescene/installer";
+import {
+  installCodeScene,
+  isCsInstalled,
+  promptAndSaveToken,
+  showTokenInstructions,
+} from "@/scripts/health/codescene/installer";
 
 function printHelp() {
   globalThis.console.log(`

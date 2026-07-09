@@ -36,8 +36,8 @@
     "sonar-scan": "bun run scripts/health/sonar/ts/main.ts --scan",
     "sonar-result": "bun run scripts/health/sonar/ts/main.ts --result",
     "sonar-full": "bun run scripts/health/sonar/ts/main.ts --full",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "storybook": "NODE_OPTIONS='--no-deprecation' storybook dev -p 6006",
+    "build-storybook": "NODE_OPTIONS='--no-deprecation' storybook build",
     "prepare": "husky",
     "postinstall": "rm -rf node_modules/*/node_modules/typescript && bun -e \"const fs = require('fs'); const file = 'node_modules/typescript/lib/version.cjs'; if (fs.existsSync(file)) fs.writeFileSync(file, 'module.exports = { ...require(\\\"@typescript/typescript6\\\"), version: \\\"7.0.2\\\", versionMajorMinor: \\\"7.0\\\" };');\"",
     "db": "bun run scripts/dbActions/index.ts"
@@ -172,7 +172,9 @@
     "@storybook/addon-onboarding": "^10.4.6",
     "@storybook/addon-themes": "^10.4.6",
     "@storybook/addon-vitest": "^10.4.6",
+    "@storybook/jest": "^0.2.3",
     "@storybook/nextjs-vite": "^10.4.6",
+    "@storybook/test": "^8.6.15",
     "@tailwindcss/postcss": "^4.3.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -238,5 +240,10 @@
   ],
   "overrides": {
     "eslint-import-resolver-typescript": "3.7.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

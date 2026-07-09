@@ -39,7 +39,7 @@ function createPostgresCache(): ICacheService {
 async function createRedisCache(): Promise<ICacheService> {
   logger.log("Connecting to Redis cache");
   // Use dynamic import to avoid importing Redis module when using PostgreSQL
-  const { RedisCacheAdapter } = await import("./RedisCacheAdapter");
+  const { RedisCacheAdapter } = await import("@/backend/services/cache/RedisCacheAdapter");
   return new RedisCacheAdapter();
 }
 
