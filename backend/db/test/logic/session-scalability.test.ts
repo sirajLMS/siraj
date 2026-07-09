@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
+import { db } from "@/backend/db/drizzleDb";
+import { SessionRepository } from "@/backend/db/repo";
+import { users } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
 import { testLogger } from "@/shared/lib/testlogger";
-import { db } from "../../drizzleDb";
-import { SessionRepository } from "../../repo";
-import { users } from "../../schema";
 import { IP_ADDRESS_1, IP_ADDRESS_2 } from "../const";
 
 config({ path: ".env.redis", override: true });

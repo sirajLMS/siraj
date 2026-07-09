@@ -1,10 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
+import { TeacherDirectoryPothosObject } from "@/backend/graphql/pothos/staff-directory.pothos";
+import { TeacherSimplePothosObject } from "@/backend/graphql/pothos/teacher.pothos";
 import { StaffDirectoryService } from "@/backend/services/teacher/staff-directory.service";
 import { TeacherService } from "@/backend/services/teacher/teacher.service";
 import { PaginationArgs } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { PaginationArgsObject } from "../pothos/pagination.objects";
-import { TeacherDirectoryPothosObject } from "../pothos/staff-directory.pothos";
-import { TeacherSimplePothosObject } from "../pothos/teacher.pothos";
 
 gqlSchemaBuilder.queryField("teachers", t =>
   t.field({

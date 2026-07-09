@@ -1,15 +1,15 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherRecurringUnavailability } from "@/backend/db/schema/teacher-availability";
-import logger from "@/backend/lib/logger";
-import type { TeacherEntity, TimezoneEntity } from "@/backend/types";
 import {
   buildLunchUnavailability,
   getAvailabilityEffectiveRange,
   loadSeedConfig,
   type SeedConfig,
   shouldSeedLunchBlock,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { TeacherEntity, TimezoneEntity } from "@/backend/types";
 
 export async function seedOrGet(teachersList: TeacherEntity[], timezones: TimezoneEntity[], config?: SeedConfig) {
   logger.info("Seeding teacher recurring unavailability...");

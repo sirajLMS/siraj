@@ -1,6 +1,6 @@
+import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
+import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { ComplaintCategory, ComplaintStatus, SuggestionStatus } from "@/backend/enum";
-import { getFakerForIndex } from "./faker-client";
-import type { SeedConfig } from "./seed-config";
 
 const COMPLAINT_STATUSES = [ComplaintStatus.UNANSWERED, ComplaintStatus.ANSWERED] as const;
 const COMPLAINT_CATEGORIES = [

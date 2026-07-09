@@ -1,5 +1,4 @@
 import type { classInstances } from "@/backend/db/schema/scheduling";
-import { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import {
   createTimestampOnDate,
   daysBetween,
@@ -8,11 +7,12 @@ import {
   getDayOfWeekEnum,
   iterateDatesInWindow,
   startOfDay,
-} from "./date-window";
-import { ALL_CLASS_TYPES, cycleAtIndex } from "./enum-coverage";
-import { getFakerForIndex } from "./faker-client";
-import { parseTimeToHoursMinutes, type ScheduleDaySpec } from "./schedule-factory";
-import type { SeedConfig } from "./seed-config";
+} from "@/backend/db/seeds/lib/date-window";
+import { ALL_CLASS_TYPES, cycleAtIndex } from "@/backend/db/seeds/lib/enum-coverage";
+import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
+import { parseTimeToHoursMinutes, type ScheduleDaySpec } from "@/backend/db/seeds/lib/schedule-factory";
+import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 
 type ClassInstanceInsert = typeof classInstances.$inferInsert;
 

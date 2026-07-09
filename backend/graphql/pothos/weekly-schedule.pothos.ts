@@ -1,10 +1,14 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
+  ClassTypePothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
 import type {
   WeeklyScheduleClassReturnType,
   WeeklyScheduleGridReturnType,
   WeeklyWorkloadMetricsReturnType,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
 
 const WeeklyScheduleClassRef = gqlSchemaBuilder.objectRef<WeeklyScheduleClassReturnType>("WeeklyScheduleClass");
 

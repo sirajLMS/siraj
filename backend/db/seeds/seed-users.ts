@@ -5,17 +5,17 @@ import {
   userPermissionGroups,
   users,
 } from "@/backend/db/schema";
-import { hashPassword } from "@/backend/lib/auth/password";
-import logger from "@/backend/lib/logger";
-import type { PermissionGroupEntity } from "@/backend/types";
-import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import {
   buildExtraParentUserSpecs,
   buildExtraTeacherUserSpecs,
   loadSeedConfig,
   type SeedConfig,
   type SeedUserSpec,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import { hashPassword } from "@/backend/lib/auth/password";
+import logger from "@/backend/lib/logger";
+import type { PermissionGroupEntity } from "@/backend/types";
+import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 
 async function seedUserFromSpec(
   spec: SeedUserSpec | (typeof INTERNAL_DEMO_USERS)[0],

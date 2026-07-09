@@ -1,9 +1,9 @@
 import { StudentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import * as Pothos from "@/backend/graphql/pothos";
 import * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import * as Pothos from "../pothos";
 
 gqlSchemaBuilder.queryFields(t => ({
   student: t.field({

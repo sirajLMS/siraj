@@ -1,7 +1,7 @@
 import { StorageDbRepository } from "@/backend/db/repo";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import * as Pothos from "@/backend/graphql/pothos";
 import { getStorageService } from "@/backend/storage/storage.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import * as Pothos from "../pothos";
 
 // IMPORTANT: Service layer must verify user has access to the requested storage path
 // These queries accept arbitrary path parameters — the service layer is responsible

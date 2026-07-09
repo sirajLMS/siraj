@@ -1,5 +1,5 @@
+import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { DayOfWeek } from "@/backend/enum";
-import type { SeedConfig } from "./seed-config";
 
 export interface ScheduleDaySpec {
   dayOfWeek: DayOfWeek;

@@ -12,10 +12,10 @@ import { getTableConfig } from "drizzle-orm/pg-core";
 import { GraphQLError } from "graphql";
 import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
 import type { AppPermission } from "@/backend/enum";
+import type { AuthContexts, BaseContext } from "@/backend/graphql/gqlContext";
+import type { Email, PhoneNumber } from "@/backend/lib";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { Email, PhoneNumber } from "../lib";
-import type { AuthContexts, BaseContext } from "./gqlContext";
 
 export interface PothosTypes {
   DrizzleRelations: DrizzleRelations;

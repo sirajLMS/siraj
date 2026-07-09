@@ -1,4 +1,5 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   permissionGroups,
@@ -23,7 +24,6 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
-import type { DBTransaction } from "../db.types";
 
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;

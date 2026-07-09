@@ -7,6 +7,7 @@ import {
   userPermissionOverrides,
   users,
 } from "@/backend/db";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import type {
@@ -18,7 +19,6 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-import type { DBTransaction } from "../db.types";
 
 export namespace PermissionManagementRepository {
   /**

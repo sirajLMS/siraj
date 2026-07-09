@@ -25,7 +25,7 @@ import {
   RescheduleDateLabel,
   StudentStatus,
 } from "@/backend/enum";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
   name: "AppPermission",

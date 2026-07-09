@@ -1,3 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  BookingStatusPothosObject,
+  ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject } from "@/backend/graphql/pothos/pagination.objects";
 import type {
   ParentDashboardMetricsReturnType,
   ParentDashboardMetricsType,
@@ -6,9 +13,6 @@ import type {
   StudentProgressReturnType,
   WorkshopPromoReturnType,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { BookingStatusPothosObject, ClassExecutionStatePothosObject, ClassOutcomePothosObject } from "./enum.pothos";
-import { PageInfoObject } from "./pagination.objects";
 
 const ParentDashboardScheduleRowRef =
   gqlSchemaBuilder.objectRef<ParentDashboardScheduleRow>("ParentDashboardScheduleRow");

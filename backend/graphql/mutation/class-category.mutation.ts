@@ -1,11 +1,11 @@
-import { ClassCategoryService } from "@/backend/services/subject/class-category.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassCategoryCreateInputPothos,
   ClassCategoryPothosObject,
   ClassCategoryUpdateInputPothos,
-} from "../pothos/class-category.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/class-category.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { ClassCategoryService } from "@/backend/services/subject/class-category.service";
 
 gqlSchemaBuilder.mutationField("createClassCategory", t =>
   t.field({

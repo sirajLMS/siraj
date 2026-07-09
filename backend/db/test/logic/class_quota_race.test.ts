@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { SchedulingRepository } from "@/backend/db/repo";
+import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { Gender } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import { db } from "../../drizzleDb";
-import { SchedulingRepository } from "../../repo";
-import { parents, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function createBaseTestData(

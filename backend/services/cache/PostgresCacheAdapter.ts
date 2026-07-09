@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { CacheDbRepository } from "@/backend/db/repo/cache.repository";
 import logger from "@/backend/lib/logger";
-import type { ICacheService } from "./ICacheService";
+import type { ICacheService } from "@/backend/services/cache/ICacheService";
 
 /**
  * PostgreSQL Cache Adapter

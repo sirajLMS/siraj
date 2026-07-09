@@ -1,6 +1,6 @@
+import { formatDateKey, getDateWindow } from "@/backend/db/seeds/lib/date-window";
+import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { DayOfWeek } from "@/backend/enum";
-import { formatDateKey, getDateWindow } from "./date-window";
-import type { SeedConfig } from "./seed-config";
 
 export interface AvailabilityWindowSpec {
   dayOfWeek: DayOfWeek;

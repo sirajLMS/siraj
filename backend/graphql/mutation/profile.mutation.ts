@@ -1,12 +1,12 @@
-import { ProfileService } from "@/backend/services";
-import type { UpdateOwnProfileInput, UpdateUserProfileInput } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   UnifiedProfilePothosObject,
   UpdateOwnProfileInputPothosObject,
   UpdateUserProfileInputPothosObject,
-} from "../pothos/profile.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/profile.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { ProfileService } from "@/backend/services";
+import type { UpdateOwnProfileInput, UpdateUserProfileInput } from "@/backend/types";
 
 gqlSchemaBuilder.mutationField("updateOwnProfile", t =>
   t.field({

@@ -1,19 +1,19 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
-import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import type * as Types from "@/backend/types";
 import {
   acquireLocks,
   checkOverlaps,
   type DBTransaction,
   getClassInstanceByIdOrThrow,
   validateTeacherAssignment,
-} from "./shared";
-import { adjustQuotaOnUpdate, updateInstanceState } from "./state-changes";
+} from "@/backend/db/repo/scheduling/shared";
+import { adjustQuotaOnUpdate, updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
+import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
+import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import type * as Types from "@/backend/types";
 
 export { resolveStudentTimezone } from "./shared";
 

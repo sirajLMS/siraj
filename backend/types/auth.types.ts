@@ -12,11 +12,11 @@ import type {
 } from "@/backend/db/schema";
 import type { AccountStatus, AppPermission, UserRole } from "@/backend/enum";
 import type { Email } from "@/backend/lib/email";
-import type { PageInfo } from "./pagination.types";
-import type { SafeUser, UserReturnType } from "./user.types";
+import type { PageInfo } from "@/backend/types/pagination.types";
+import type { SafeUser, UserReturnType } from "@/backend/types/user.types";
 
-export type { PermissionGroupReturnType } from "./permission-group.types";
-export type { SafeUser, UserReturnType, UserSelectType } from "./user.types";
+export type { PermissionGroupReturnType } from "@/backend/types/permission-group.types";
+export type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types/user.types";
 
 export type UserCreateInput = {
   name: string;

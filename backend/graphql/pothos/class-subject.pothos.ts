@@ -1,9 +1,9 @@
 import { ClassCategoryRepository } from "@/backend/db/repo/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ClassCategoryPothosObject } from "@/backend/graphql/pothos/class-category.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
 import type { ClassSubjectReturnType, SubjectResourceReturnType } from "@/backend/types";
-import { ClassCategoryPothosObject } from "./class-category.pothos";
 
 const SubjectResourceRef = gqlSchemaBuilder.objectRef<SubjectResourceReturnType>("SubjectResource");
 

@@ -1,6 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  AppLanguagePothosObject,
+  GenderPothosObject,
+  StudentStatusPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
 import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
-import { AppLanguagePothosObject, GenderPothosObject, StudentStatusPothosObject } from "./enum.pothos";
 
 export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
   .inputRef<StudentOnboardingInput>("StudentOnboardingInput")

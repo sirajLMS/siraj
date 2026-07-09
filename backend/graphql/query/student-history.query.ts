@@ -1,7 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  StudentClassHistoryPothosObject,
+  StudentSessionDetailPothosObject,
+} from "@/backend/graphql/pothos/student-history.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { StudentClassHistoryPothosObject, StudentSessionDetailPothosObject } from "../pothos/student-history.pothos";
 
 gqlSchemaBuilder.queryField("studentClassHistory", t =>
   t.field({

@@ -1,7 +1,7 @@
 import type { userPermissionOverrides } from "@/backend/db/schema";
 import type { OverrideState } from "@/backend/enum";
-import type { PermissionGroupReturnType } from "./permission-group.types";
-import type { UserReturnType } from "./user.types";
+import type { PermissionGroupReturnType } from "@/backend/types/permission-group.types";
+import type { UserReturnType } from "@/backend/types/user.types";
 
 export type UserOverrideEntity = typeof userPermissionOverrides.$inferSelect;
 export type UserPermissionOverrideEntityInput = typeof userPermissionOverrides.$inferInsert;

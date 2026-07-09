@@ -2,14 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { SchedulingRepository } from "@/backend/db/repo";
+import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { Gender } from "@/backend/enum";
 import type { ParentEntity } from "@/backend/types/parent.types";
 import type { StudentEntity } from "@/backend/types/student.types";
 import type { TeacherEntity } from "@/backend/types/teacher.types";
 import type { UserSelectType } from "@/backend/types/user.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { SchedulingRepository } from "../../repo";
-import { classInstances, parents, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, name: string, email: string) {

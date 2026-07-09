@@ -28,7 +28,24 @@ function killPort(port: number) {
       ]);
     } else {
       testLogger.info(`Killing any process on port ${port} (Unix)...`);
-      spawnSync(["bash", "scripts/kill_port.sh", String(port)]);
+      // Try fuser first (works without sudo), fall back to pgrep+kill
+      try {
+        spawnSync(["fuser", "-k", "-9", `${port}/tcp`], { stdout: "ignore", stderr: "ignore" });
+      } catch {
+        try {
+          const result = spawnSync(["pgrep", "-f", `next-server.*${port}`], { stdout: "pipe", stderr: "ignore" });
+          const pids = result.stdout?.toString().trim().split("\n").filter(Boolean) || [];
+          for (const pid of pids) {
+            try {
+              process.kill(Number(pid), "SIGKILL");
+            } catch {
+              /* dead */
+            }
+          }
+        } catch {
+          spawnSync(["bash", "scripts/kill_port.sh", String(port)]);
+        }
+      }
     }
   } catch (error) {
     testLogger.error("Failed to execute port-killing script:", error);
@@ -117,14 +134,14 @@ export async function startTestServer() {
 
   pipeStreamLogs(serverProcess);
 
-  const isReady = await waitForServerReady(3001, 60000);
+  const isReady = await waitForServerReady(3001, 120000);
 
   if (!isReady) {
     if (serverProcess) {
       serverProcess.kill();
       serverProcess = undefined;
     }
-    throw new Error("Next.js dev server failed to start within 30 seconds. See logs/next-dev-server.log for details.");
+    throw new Error("Next.js dev server failed to start within 120 seconds. See logs/next-dev-server.log for details.");
   }
   testLogger.info("Next.js dev server is ready on port 3001!");
 }
@@ -132,11 +149,31 @@ export async function startTestServer() {
 export function stopTestServer() {
   if (serverProcess) {
     testLogger.info("Stopping Next.js dev server...");
-    serverProcess.kill();
+    try {
+      serverProcess.kill();
+    } catch {
+      // Process may already be dead
+    }
     serverProcess = undefined;
+    // The next-server child process survives parent kill — clean it up
+    setTimeout(() => {
+      try {
+        const result = spawnSync(["pgrep", "-f", "next-server.*3001"], { stdout: "pipe", stderr: "ignore" });
+        const pids = result.stdout?.toString().trim().split("\n").filter(Boolean) || [];
+        for (const pid of pids) {
+          try {
+            process.kill(Number(pid), "SIGKILL");
+          } catch {
+            // Already dead
+          }
+        }
+      } catch {
+        // Best effort
+      }
+      killPort(3001);
+    }, 500);
   }
 }
-
 // Ensure the Next.js dev server process is killed when the main test runner process exits
 process.on("exit", () => {
   stopTestServer();

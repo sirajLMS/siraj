@@ -2,9 +2,9 @@ import { getEnvironmentConfig } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
-import type { IRedisService } from "./IRedisService";
-import { LocalRedisAdapter } from "./LocalRedisAdapter";
-import { UpstashRedisAdapter } from "./UpstashRedisAdapter";
+import type { IRedisService } from "@/backend/services/redis/IRedisService";
+import { LocalRedisAdapter } from "@/backend/services/redis/LocalRedisAdapter";
+import { UpstashRedisAdapter } from "@/backend/services/redis/UpstashRedisAdapter";
 
 const REDIS_KEY = Symbol.for("siraj.redis");
 

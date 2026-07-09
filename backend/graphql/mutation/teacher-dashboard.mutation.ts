@@ -1,12 +1,15 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
-import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassInstanceDetailPothosObject, SupportRequestResultPothosObject } from "../pothos/class-session.pothos";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  ClassInstanceDetailPothosObject,
+  SupportRequestResultPothosObject,
+} from "@/backend/graphql/pothos/class-session.pothos";
 import {
   CreateManualClassEntryInputPothosObject,
   LogSupportRequestInputPothosObject,
-} from "../pothos/teacher-dashboard.pothos";
+} from "@/backend/graphql/pothos/teacher-dashboard.pothos";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 

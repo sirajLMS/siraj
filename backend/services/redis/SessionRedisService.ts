@@ -1,7 +1,7 @@
 // cspell:ignore: SADD, SREM, smembers, SCARD
 import logger from "@/backend/lib/logger";
+import type { IRedisService } from "@/backend/services/redis/IRedisService";
 import type { RedisSessionData } from "@/backend/types/auth.types";
-import type { IRedisService } from "./IRedisService";
 
 /**
  * Options for storing a session in Redis

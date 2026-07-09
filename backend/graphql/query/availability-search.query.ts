@@ -1,9 +1,9 @@
-import { AvailabilitySearchService } from "@/backend/services/schedule/availability-search.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AvailabilitySearchInputPothosObject,
   AvailabilitySearchResultPothosObject,
-} from "../pothos/availability-search.pothos";
+} from "@/backend/graphql/pothos/availability-search.pothos";
+import { AvailabilitySearchService } from "@/backend/services/schedule/availability-search.service";
 
 gqlSchemaBuilder.queryFields(t => ({
   searchTeacherAvailability: t.field({

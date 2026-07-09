@@ -1,5 +1,9 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import {
+  applyViewerTimezoneFormatting,
+  fetchDailyScheduleBaseRows,
+} from "@/backend/db/repo/scheduling/scheduling-queries.repository/daily-schedule.utils";
 import type {
   AdminDashboardScheduleInput,
   AdminDashboardScheduleResult,
@@ -9,7 +13,6 @@ import {
   computeDailyScheduleMetricsFromRows,
   matchesDashboardMetricFilter,
 } from "@/shared/lib/schedule-instance-dashboard-status";
-import { applyViewerTimezoneFormatting, fetchDailyScheduleBaseRows } from "./daily-schedule.utils";
 
 export const getAdminDashboardSchedule = async (
   input: AdminDashboardScheduleInput,

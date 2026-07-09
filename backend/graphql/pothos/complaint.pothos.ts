@@ -1,5 +1,6 @@
 import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaintResponses.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
 import { ComplaintService } from "@/backend/services";
 import type {
@@ -14,7 +15,6 @@ import type {
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
-import { ComplaintResponsePothosObject } from "./complaintResponses.pothos";
 
 export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {
   name: "ComplaintCategory",

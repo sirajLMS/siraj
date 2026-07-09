@@ -1,5 +1,5 @@
-import { getFakerForIndex } from "./faker-client";
-import type { SeedConfig } from "./seed-config";
+import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
+import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 
 export function buildAdminAuditDescription(config: SeedConfig, index: number): string {
   const faker = getFakerForIndex(config.fakerSeed, 8000 + index);

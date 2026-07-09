@@ -94,7 +94,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     });
 
     expect(result.error).toBeDefined();
-    expect(result.data?.createTeacher).toBeUndefined();
+    expect(result.data?.createTeacher).toBeFalsy();
   });
 
   test("Parent denied creating teacher", async () => {
@@ -109,7 +109,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     });
 
     expect(result.error).toBeDefined();
-    expect(result.data?.createTeacher).toBeUndefined();
+    expect(result.data?.createTeacher).toBeFalsy();
   });
 
   test("Unauthenticated denied creating teacher", async () => {

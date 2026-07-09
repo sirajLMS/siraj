@@ -1,8 +1,8 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
-import type { ICacheService } from "./ICacheService";
-import { PostgresCacheAdapter } from "./PostgresCacheAdapter";
+import type { ICacheService } from "@/backend/services/cache/ICacheService";
+import { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
 
 const CACHE_STATE_KEY = Symbol.for("siraj.cacheState");
 

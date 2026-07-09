@@ -1,3 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
+  PaymentMethodPothosObject,
+  StudentStatusPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
 import type {
   TeacherAssignedClassesResult,
   TeacherAssignedClassReturnType,
@@ -5,13 +12,6 @@ import type {
   TeacherAssignedStudentsResult,
   TeacherOwnProfileReturnType,
 } from "@/backend/types/teacher.types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import {
-  ClassExecutionStatePothosObject,
-  ClassOutcomePothosObject,
-  PaymentMethodPothosObject,
-  StudentStatusPothosObject,
-} from "./enum.pothos";
 
 const TeacherAssignedStudentRef =
   gqlSchemaBuilder.objectRef<TeacherAssignedStudentReturnType>("TeacherAssignedStudent");

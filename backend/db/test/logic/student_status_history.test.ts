@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import { studentStatusHistory, students } from "@/backend/db/schema";
 import { StudentStatus } from "@/backend/enum";
+import type { StudentStatusHistorySelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { StudentStatusHistorySelectType } from "../../../types";
-import { studentStatusHistory, students } from "../../schema";
 import { createTestUser, setupStudent } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

@@ -1,7 +1,7 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { UnifiedProfilePothosObject } from "@/backend/graphql/pothos/profile.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ProfileService } from "@/backend/services";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { UnifiedProfilePothosObject } from "../pothos/profile.pothos";
-import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.queryField("profileByUserId", t =>
   t.field({

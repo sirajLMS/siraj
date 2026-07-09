@@ -1,6 +1,6 @@
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { EmailProvider, IEmailChannel } from "./IEmailChannel";
+import type { EmailProvider, IEmailChannel } from "@/backend/services/communication/channels/email/IEmailChannel";
 
 let instance: IEmailChannel | null = null;
 let initializationPromise: Promise<IEmailChannel> | null = null;

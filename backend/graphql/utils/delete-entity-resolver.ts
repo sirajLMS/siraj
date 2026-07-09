@@ -1,5 +1,5 @@
-import type { BaseContext } from "../gqlContext";
-import { requireAuth } from "../utils/requireAuth";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 
 /**
  * Shared resolver body for "delete entity by id" Boolean mutations.

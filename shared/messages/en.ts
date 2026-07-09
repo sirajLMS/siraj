@@ -238,6 +238,7 @@ const en: MessageSchema = {
       loading: "Loading profile...",
     },
     teacher: {
+      ownSubtitle: "View and update your teaching profile and contact details.",
       subtitle: "Manage institutional credentials and administrative details for faculty members.",
       adminBanner: "Administrative view: identity, zoom credentials, and status fields are visible.",
       sections: {
@@ -286,6 +287,7 @@ const en: MessageSchema = {
       },
     },
     parent: {
+      ownSubtitle: "View and update your contact and communication details.",
       subtitle: "Manage contact and communication details for the student's primary guardian.",
       adminBanner: "Administrative view: identity and billing fields are visible.",
       sections: {
@@ -332,6 +334,7 @@ const en: MessageSchema = {
       },
     },
     staff: {
+      ownSubtitle: "View and update your account details and contact information.",
       subtitle: "Manage system-wide roles and access controls for administrative staff.",
       adminBanner: "Administrative view: status and permissions are visible.",
       sections: {
@@ -344,7 +347,7 @@ const en: MessageSchema = {
         fullName: "Full Name",
         primaryEmail: "Email Address",
         phone: "Phone Number",
-        roleName: "Role Name",
+        roleName: "Role",
         roleSlug: "Role Slug",
         department: "Department",
         status: "Account Status",
@@ -352,12 +355,13 @@ const en: MessageSchema = {
         statusInactive: "Inactive",
       },
       permissions: {
-        inheritedGroups: "Inherited Permission Groups",
+        inheritedGroups: "Permission Groups",
         directOverrides: "Direct Overrides",
         empty: {
           title: "No permission groups assigned",
           description:
             "This staff member has no inherited permission groups. Assign groups from the permissions admin.",
+          ownDescription: "You do not have any permission groups assigned yet.",
         },
         columns: {
           resource: "Resource",
@@ -549,19 +553,19 @@ const en: MessageSchema = {
       studentOnboarding: "Student Onboarding",
       scheduleReschedule: "Reschedule Class",
       dstMigration: "DST Migration",
-      billingAdmin: "Billing Management",
+      billingAdmin: "Billing",
       billingParent: "Invoices & Billing",
       billingManual: "Create Manual Invoice",
       suggestionsSubmit: "Submit Suggestion",
-      suggestionsManage: "Manage Suggestions",
+      suggestionsManage: "Suggestions",
       complaintsSubmit: "Complaints & Records",
-      complaintsManage: "Complaints Resolution",
+      complaintsManage: "Complaints",
       teacherDashboard: "Teacher Dashboard",
       teacherDashboardActive: "Session Controls",
       todayClasses: "Today Classes",
       regularSchedule: "Regular Schedule",
       yourStudents: "Your Students",
-      yourProfile: "Your Profile",
+      yourProfile: "Profile",
       salaryDetails: "Salary Details",
       teacherRules: "Rules",
       suggest: "Suggest",

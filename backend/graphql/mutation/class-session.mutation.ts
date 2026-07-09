@@ -1,12 +1,12 @@
-import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
-import type { BaseContext } from "../gqlContext";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassInstanceDetailPothosObject,
   LeaveProcessResultPothosObject,
   RescheduleClassInputPothosObject,
-} from "../pothos/class-session.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/class-session.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
 
 async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
   const userId = await requireAuth(ctx);

@@ -1,6 +1,6 @@
 import Redis from "ioredis";
 import logger from "@/backend/lib/logger";
-import { BaseRedisAdapter } from "./BaseRedisAdapter";
+import { BaseRedisAdapter } from "@/backend/services/redis/BaseRedisAdapter";
 
 /**
  * Local Redis Adapter

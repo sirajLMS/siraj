@@ -273,12 +273,15 @@ export namespace ImpersonationService {
 
     const session = await SessionRepository.findSessionById(rawSessionId);
     if (!session?.userId) {
+      if (!payload.impersonation) {
+        return { effectiveUserId: payload.userId, isImpersonating: false };
+      }
       return null;
     }
 
     if (!payload.impersonation || !payload.actorUserId) {
       if (payload.userId !== session.userId) {
-        return null;
+        return { effectiveUserId: payload.userId, isImpersonating: false };
       }
       return { effectiveUserId: payload.userId, isImpersonating: false };
     }

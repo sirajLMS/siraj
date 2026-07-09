@@ -1,14 +1,14 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { StudentRepository } from "@/backend/db/repo";
+import { parents, students, users } from "@/backend/db/schema";
 import { AccountStatus, AppLanguage, Gender, OrderSortDirection, ParentStatus, UserRole } from "@/backend/enum";
+import type { ParentEntity, StudentEntity, StudentFilterArgs } from "@/backend/types";
+import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/auth.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, StudentFilterArgs } from "../../../types";
-import { PaginationArgs, StudentsOrderByColumn } from "../../../types";
-import { db } from "../../drizzleDb";
-import { StudentRepository } from "../../repo";
-import { parents, students, users } from "../../schema";
 
 describe("Issue #25: Student Pagination Cursor Stability", () => {
   let testParent: ParentEntity;

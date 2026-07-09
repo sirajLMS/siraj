@@ -1,7 +1,7 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { DstMigrationReportPothosObject } from "@/backend/graphql/pothos/dst-migration.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { DstMigrationReportPothosObject } from "../pothos/dst-migration.pothos";
-import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.mutationField("executeDstBulkUpdate", t =>
   t.field({

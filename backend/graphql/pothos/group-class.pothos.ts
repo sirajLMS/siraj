@@ -1,3 +1,9 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { SupportRequestResultPothosObject } from "@/backend/graphql/pothos/class-session.pothos";
+import {
+  ClassExecutionStatePothosObject,
+  GroupClassAttendanceStatusPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
 import { GroupClassService } from "@/backend/services/group-class/group-class.service";
 import type {
   AdminNoteReturnType,
@@ -6,9 +12,6 @@ import type {
   GroupClassStudentReturnType,
   OnlineMeetingInfoReturnType,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { SupportRequestResultPothosObject } from "./class-session.pothos";
-import { ClassExecutionStatePothosObject, GroupClassAttendanceStatusPothosObject } from "./enum.pothos";
 
 const GroupClassStudentRef = gqlSchemaBuilder.objectRef<GroupClassStudentReturnType>("GroupClassStudent");
 

@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { siteContent } from "@/backend/db/schema/site-content";
+import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
-import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "./lib";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding site content...");

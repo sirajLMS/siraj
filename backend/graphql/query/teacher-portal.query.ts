@@ -1,11 +1,11 @@
-import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   TeacherAssignedClassesResultPothosObject,
   TeacherAssignedStudentsResultPothosObject,
   TeacherOwnProfilePothosObject,
-} from "../pothos/teacher-portal.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/teacher-portal.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 
 gqlSchemaBuilder.queryField("teacherAssignedStudents", t =>
   t.field({

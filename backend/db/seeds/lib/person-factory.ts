@@ -1,7 +1,8 @@
 // DEV ONLY: Never use these credentials in production
+
+import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
+import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
-import { getFakerForIndex } from "./faker-client";
-import type { SeedConfig } from "./seed-config";
 
 export interface SeedUserSpec {
   name: string;

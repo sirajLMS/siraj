@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { loadSeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import { loadSeedConfig } from "./lib";
 
 type TableCategory = "seeded" | "migration" | "excluded";
 

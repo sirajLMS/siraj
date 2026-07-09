@@ -1,3 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
+  ClassTypePothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject } from "@/backend/graphql/pothos/pagination.objects";
 import type {
   ClassSessionMetrics,
   CreateManualClassEntryInput,
@@ -7,9 +14,6 @@ import type {
   TeacherHandbookUrl,
   TeacherProgressFeedItem,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { PageInfoObject } from "../pothos/pagination.objects";
-import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
 
 const TeacherProgressFeedEventKindRef = gqlSchemaBuilder.enumType("TeacherProgressFeedEventKind", {
   values: ["auto_missed", "marked_absent", "activated", "started", "completed", "leave", "other"] as const,

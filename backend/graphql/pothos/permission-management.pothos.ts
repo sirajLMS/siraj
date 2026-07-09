@@ -1,5 +1,7 @@
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { AppPermission, type OverrideState } from "@/backend/enum";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { OverrideStatePothosObject } from "@/backend/graphql/pothos/enum.pothos";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import type {
   GroupUserEntity,
@@ -7,8 +9,6 @@ import type {
   PermissionEntity,
   UserOverrideReturnType,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { OverrideStatePothosObject } from "./enum.pothos";
 
 let groupUsersCache: Map<string, GroupUserEntity[]> | null = null;
 

@@ -1,5 +1,5 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { TeacherSimple } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const TeacherSimpleObjectRef = gqlSchemaBuilder.objectRef<TeacherSimple>("TeacherSimple");
 

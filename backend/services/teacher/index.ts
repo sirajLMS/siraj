@@ -1,3 +1,4 @@
+export * from "./staff-directory.service";
 export * from "./teacher.service";
 export * from "./teacher-dashboard.service";
 export * from "./teacher-onboarding.service";

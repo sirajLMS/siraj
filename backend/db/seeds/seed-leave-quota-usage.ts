@@ -1,9 +1,9 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveQuotaUsage } from "@/backend/db/schema/scheduling";
+import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { StudentEntity } from "@/backend/types";
-import { loadSeedConfig, type SeedConfig } from "./lib";
 
 type LeaveRequestRow = {
   createdAt: Date;

@@ -1,11 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { parents, students, users } from "@/backend/db/schema";
 import type { ParentEntity, StudentEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { DBTransaction } from "../../db.types";
-import { db } from "../../drizzleDb";
-import { parents, students, users } from "../../schema";
 import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 /**

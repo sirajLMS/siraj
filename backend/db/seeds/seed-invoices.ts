@@ -1,7 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
 import { invoices } from "@/backend/db/schema/billing";
-import logger from "@/backend/lib/logger";
-import type { ParentEntity, StudentEntity, UserSelectType } from "@/backend/types";
 import {
   ALL_INVOICE_TYPES,
   buildInvoiceAmount,
@@ -12,7 +10,9 @@ import {
   type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { ParentEntity, StudentEntity, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(
   parentsList: ParentEntity[],

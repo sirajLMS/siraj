@@ -1,10 +1,10 @@
-import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   NotificationPreferenceInputPothosObject,
   NotificationPreferencePothosObject,
-} from "../pothos/notification-preferences.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/notification-preferences.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 
 gqlSchemaBuilder.mutationField("updateNotificationPreferences", t =>
   t.field({

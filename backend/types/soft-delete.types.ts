@@ -8,7 +8,7 @@ import type {
   suggestions,
   users,
 } from "@/backend/db/schema";
-import type { AuditEntityType } from "./audit.types";
+import type { AuditEntityType } from "@/backend/types/audit.types";
 
 export type SoftDeletableTableName =
   | "users"

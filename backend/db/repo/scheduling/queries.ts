@@ -1,13 +1,3 @@
-export type {
-  AdminDashboardScheduleInput,
-  AdminDashboardScheduleResult,
-  DailyScheduleResult,
-  FutureClassRow,
-  StatusTrackingRow,
-  TeacherAssignedClassRow,
-  UpcomingClassRow,
-  WeeklyScheduleGridRow,
-} from "@/backend/types/scheduling.types";
 export {
   bulkFreezeStudentClasses,
   bulkUnfreezeStudentClasses,
@@ -29,4 +19,14 @@ export {
   getWeeklyScheduleGrid,
   getWeeklyWorkloadMetrics,
   incrementTeacherLeaveQuota,
-} from "./scheduling-queries.repository";
+} from "@/backend/db/repo/scheduling/scheduling-queries.repository";
+export type {
+  AdminDashboardScheduleInput,
+  AdminDashboardScheduleResult,
+  DailyScheduleResult,
+  FutureClassRow,
+  StatusTrackingRow,
+  TeacherAssignedClassRow,
+  UpcomingClassRow,
+  WeeklyScheduleGridRow,
+} from "@/backend/types/scheduling.types";

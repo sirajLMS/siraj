@@ -2,11 +2,6 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { StorageDbRepository } from "@/backend/db/repo";
 import { students, teacherAssignments } from "@/backend/db/schema/students";
-import { StudentStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
-import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
-import { getStorageService } from "@/backend/storage/storage.service";
-import type { ParentEntity, TeacherEntity } from "@/backend/types";
 import {
   ALL_STUDENT_STATUSES,
   buildStudentName,
@@ -16,7 +11,12 @@ import {
   loadSeedConfig,
   resolveAssetPath,
   type SeedConfig,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import { StudentStatus } from "@/backend/enum";
+import logger from "@/backend/lib/logger";
+import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
+import { getStorageService } from "@/backend/storage/storage.service";
+import type { ParentEntity, TeacherEntity } from "@/backend/types";
 
 const DEMO_STUDENTS = [
   { name: "Demo Student", idempotencyKey: "demo_student_1", timezoneOverride: null as string | null, avatarIndex: 1 },

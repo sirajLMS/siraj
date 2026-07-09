@@ -73,7 +73,7 @@ describe("GraphQL: adminSuggestions query", () => {
       context: { headers: { Authorization: `Bearer ${token}` } },
     });
     expect(result.error).toBeDefined();
-    expect(result.data?.adminSuggestions).toBeUndefined();
+    expect(result.data?.adminSuggestions).toBeFalsy();
   });
 
   test("teacher role is denied access to adminSuggestions", async () => {
@@ -84,7 +84,7 @@ describe("GraphQL: adminSuggestions query", () => {
       context: { headers: { Authorization: `Bearer ${token}` } },
     });
     expect(result.error).toBeDefined();
-    expect(result.data?.adminSuggestions).toBeUndefined();
+    expect(result.data?.adminSuggestions).toBeFalsy();
   });
 
   test("super_admin can also access adminSuggestions", async () => {
@@ -134,7 +134,7 @@ describe("GraphQL: submitSuggestion mutation", () => {
       context: { headers: { Authorization: `Bearer ${token}` } },
     });
     expect(result.error).toBeDefined();
-    expect(result.data?.submitSuggestion).toBeUndefined();
+    expect(result.data?.submitSuggestion).toBeFalsy();
   });
 
   test("suggestion with empty body is accepted by GraphQL layer", async () => {
@@ -203,7 +203,7 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
       context: { headers: { Authorization: `Bearer ${token}` } },
     });
     expect(result.error).toBeDefined();
-    expect(result.data?.markSuggestionReviewed).toBeUndefined();
+    expect(result.data?.markSuggestionReviewed).toBeFalsy();
   });
 
   test("teacher role is denied markSuggestionReviewed", async () => {
@@ -214,7 +214,7 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
       context: { headers: { Authorization: `Bearer ${token}` } },
     });
     expect(result.error).toBeDefined();
-    expect(result.data?.markSuggestionReviewed).toBeUndefined();
+    expect(result.data?.markSuggestionReviewed).toBeFalsy();
   });
 
   test("marking non-existent suggestion returns error", async () => {
@@ -224,6 +224,6 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
       context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
     expect(result.error).toBeDefined();
-    expect(result.data?.markSuggestionReviewed).toBeUndefined();
+    expect(result.data?.markSuggestionReviewed).toBeFalsy();
   });
 });

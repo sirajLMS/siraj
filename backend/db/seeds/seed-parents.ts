@@ -1,7 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
 import { parents } from "@/backend/db/schema/parents";
-import logger from "@/backend/lib/logger";
-import type { UserSelectType } from "@/backend/types";
 import {
   ALL_PARENT_STATUSES,
   cycleAtIndex,
@@ -11,7 +9,9 @@ import {
   type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { UserSelectType } from "@/backend/types";
 
 async function upsertParent(userId: string, timezone: string, status: string, now: Date) {
   const [insertedParent] = await db

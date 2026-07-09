@@ -1,5 +1,5 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { PageInfo, PaginationInput } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const PageInfoRef = gqlSchemaBuilder.objectRef<PageInfo>("PageInfo");
 

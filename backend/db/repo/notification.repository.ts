@@ -1,4 +1,5 @@
 import { and, count, desc, eq, gt, gte, lte, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
@@ -17,7 +18,6 @@ import type {
   SetNotificationPreferenceInput,
   UserNotificationPreferenceSelectType,
 } from "@/backend/types/userNotificationPreferences.types";
-import type { DBTransaction } from "../db.types";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
   [NotificationDeliveryStatus.PENDING]: 0,

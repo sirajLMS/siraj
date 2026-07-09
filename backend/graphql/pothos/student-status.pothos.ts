@@ -1,6 +1,6 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ClassExecutionStatePothosObject, StudentStatusPothosObject } from "@/backend/graphql/pothos/enum.pothos";
 import type { StudentUpcomingClass, StudentUpcomingClassesResult } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassExecutionStatePothosObject, StudentStatusPothosObject } from "./enum.pothos";
 
 const StudentUpcomingClassRef = gqlSchemaBuilder.objectRef<StudentUpcomingClass>("StudentUpcomingClass");
 

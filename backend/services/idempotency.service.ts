@@ -1,4 +1,4 @@
-import { CacheDbRepository } from "../db/repo/cache.repository";
+import { CacheDbRepository } from "@/backend/db/repo/cache.repository";
 
 export namespace IdempotencyService {
   export const checkAndMark = async (key: string, userId: string): Promise<boolean> => {

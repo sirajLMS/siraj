@@ -1,9 +1,9 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type {
   ParentAssignedStudentReturnType,
   ParentAssignedStudentsResult,
   ParentOwnProfileReturnType,
 } from "@/backend/types/parent.types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const ParentAssignedStudentRef = gqlSchemaBuilder.objectRef<ParentAssignedStudentReturnType>("ParentAssignedStudent");
 

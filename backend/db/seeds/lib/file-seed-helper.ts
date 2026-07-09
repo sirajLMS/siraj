@@ -1,10 +1,10 @@
 import * as path from "node:path";
 import { StorageDbRepository } from "@/backend/db/repo";
+import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import logger from "@/backend/lib/logger";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ValidReferenceTable } from "@/backend/types";
-import type { SeedConfig } from "./seed-config";
 
 export type FileReferenceTable = ValidReferenceTable;
 

@@ -1,8 +1,13 @@
 import { db } from "@/backend/db/drizzleDb";
 import { recurringScheduleDays } from "@/backend/db/schema/scheduling";
+import {
+  buildScheduleDaysForStudent,
+  isScheduleDayActive,
+  loadSeedConfig,
+  type SeedConfig,
+} from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { RecurringScheduleEntity } from "@/backend/types";
-import { buildScheduleDaysForStudent, isScheduleDayActive, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(classesList: RecurringScheduleEntity[], config?: SeedConfig) {
   logger.info("Seeding recurring schedule days...");

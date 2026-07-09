@@ -1,8 +1,8 @@
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
-import type { DBTransaction } from "../db.types";
 
 /**
  * Helper to execute a function within a transaction if provided, or a new one otherwise

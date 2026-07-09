@@ -1,4 +1,4 @@
-import type { ICacheServiceBase } from "../shared/CacheInterface";
+import type { ICacheServiceBase } from "@/backend/services/shared/CacheInterface";
 
 /**
  * Cache Service Interface

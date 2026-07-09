@@ -1,10 +1,10 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { CacheDbRepository } from "@/backend/db/repo/cache.repository";
+import { rateLimitCache, sessionCache } from "@/backend/db/schema/cache";
 import { testLogger } from "@/shared/lib/testlogger";
-import { db } from "../../drizzleDb";
-import { CacheDbRepository } from "../../repo/cache.repository";
-import { rateLimitCache, sessionCache } from "../../schema/cache";
 import { runInRollback } from "../test-utils";
 
 describe("Cache Split Routing & Functionality", () => {

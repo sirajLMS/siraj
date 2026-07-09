@@ -1,8 +1,8 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
 import type { EditQuotaResult } from "@/backend/services/student/student-management.service";
 import { StudentManagementService } from "@/backend/services/student/student-management.service";
 import type { AssociatedStudentResult, DeactivateParentResult, ParentProfileResult } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── ParentProfile Object ───────────────────────────────────────────────────
 

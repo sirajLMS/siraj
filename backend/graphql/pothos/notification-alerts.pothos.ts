@@ -1,5 +1,5 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { NotificationAlertsResult, SystemAlert } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const SystemAlertRef = gqlSchemaBuilder.objectRef<SystemAlert>("SystemAlert");
 

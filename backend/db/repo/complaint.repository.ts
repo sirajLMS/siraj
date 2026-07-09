@@ -1,4 +1,5 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
@@ -17,7 +18,6 @@ import type {
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
 import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
-import type { DBTransaction } from "../db.types";
 
 function formatDuration(hours: number): string {
   if (hours < 1) {

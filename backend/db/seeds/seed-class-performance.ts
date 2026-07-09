@@ -1,8 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
 import { classInstancePerformance } from "@/backend/db/schema/scheduling";
-import { ClassOutcome } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
-import type { ClassInstanceEntity } from "@/backend/types";
 import {
   ALL_FOCUS_LEVELS,
   ALL_GRADES,
@@ -13,7 +10,10 @@ import {
   loadSeedConfig,
   type SeedConfig,
   startOfDay,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import { ClassOutcome } from "@/backend/enum";
+import logger from "@/backend/lib/logger";
+import type { ClassInstanceEntity } from "@/backend/types";
 
 function buildPerformanceRow(instance: ClassInstanceEntity, config: SeedConfig, rowIndex: number, now: Date) {
   const faker = getFakerForIndex(config.fakerSeed, instance.id.length);

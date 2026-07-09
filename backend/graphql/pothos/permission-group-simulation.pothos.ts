@@ -1,14 +1,14 @@
 import { GraphQLError } from "graphql";
-import { setAuthCookies } from "@/backend/lib/auth/cookies";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   EndPermissionGroupSimulationResponsePothosObject,
   PermissionGroupSimulationStatusPothosObject,
   SimulatablePermissionGroupPothosObject,
   StartPermissionGroupSimulationResponsePothosObject,
-} from "./permission-group-simulation.objects.pothos";
+} from "@/backend/graphql/pothos/permission-group-simulation.objects.pothos";
+import { setAuthCookies } from "@/backend/lib/auth/cookies";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 
 export {
   EndPermissionGroupSimulationResponsePothosObject,

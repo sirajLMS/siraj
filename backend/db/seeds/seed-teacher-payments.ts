@@ -1,9 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherPayments } from "@/backend/db/schema/teacher-banking";
+import { addMonths, loadSeedConfig, type SeedConfig, startOfDay } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types";
-import { addMonths, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
 
 export async function seedOrGet(bankingDetailsList: TeacherBankingDetailsHistorySelectType[], config?: SeedConfig) {
   logger.info("Seeding teacher payments...");

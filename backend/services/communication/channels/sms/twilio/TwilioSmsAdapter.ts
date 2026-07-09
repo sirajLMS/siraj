@@ -3,9 +3,12 @@ import { NotificationRepository } from "@/backend/db/repo/notification.repositor
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { deliveryFailedMessage } from "../../../utils";
-import type { ISmsChannel, SmsPayload, SmsSendResult } from "../ISmsChannel";
-import type { TwilioRateLimitConfig, TwilioSmsContext } from "./twilio.types";
+import type { ISmsChannel, SmsPayload, SmsSendResult } from "@/backend/services/communication/channels/sms/ISmsChannel";
+import type {
+  TwilioRateLimitConfig,
+  TwilioSmsContext,
+} from "@/backend/services/communication/channels/sms/twilio/twilio.types";
+import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 
 const DEFAULT_SMS_RATE_LIMIT_PER_HOUR = 3;
 

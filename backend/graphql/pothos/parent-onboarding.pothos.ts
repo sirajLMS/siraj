@@ -1,11 +1,11 @@
 import type { InvoiceType, PaymentMethod } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { InvoiceTypePothosObject, PaymentMethodPothosObject } from "@/backend/graphql/pothos/enum.pothos";
 import type { Email } from "@/backend/lib/email";
 import type {
   ParentOnboardingInput,
   ParentOnboardingResult,
 } from "@/backend/services/parent/parent-onboarding.service";
-import { InvoiceTypePothosObject, PaymentMethodPothosObject } from "./enum.pothos";
 
 export interface ParentOnboardingGqlInput
   extends Omit<ParentOnboardingInput, "email" | "invoiceType" | "paymentMethod"> {

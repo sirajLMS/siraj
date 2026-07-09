@@ -32,6 +32,7 @@ export interface ProfileLabels {
     readonly notFound: string;
   };
   readonly teacher: {
+    readonly ownSubtitle: string;
     readonly subtitle: string;
     readonly adminBanner: string;
     readonly sections: {
@@ -80,6 +81,7 @@ export interface ProfileLabels {
     };
   };
   readonly parent: {
+    readonly ownSubtitle: string;
     readonly subtitle: string;
     readonly adminBanner: string;
     readonly sections: {
@@ -126,6 +128,7 @@ export interface ProfileLabels {
     };
   };
   readonly staff: {
+    readonly ownSubtitle: string;
     readonly subtitle: string;
     readonly adminBanner: string;
     readonly sections: {
@@ -151,6 +154,7 @@ export interface ProfileLabels {
       readonly empty: {
         readonly title: string;
         readonly description: string;
+        readonly ownDescription: string;
       };
       readonly columns: {
         readonly resource: string;

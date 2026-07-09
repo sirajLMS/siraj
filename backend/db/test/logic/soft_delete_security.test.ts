@@ -2,10 +2,10 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { AuditRepository, SoftDeleteRepository } from "@/backend/db/repo";
+import { auditLogs, users } from "@/backend/db/schema";
 import { testLogger } from "@/shared/lib/testlogger";
-import { db } from "../../drizzleDb";
-import { AuditRepository, SoftDeleteRepository } from "../../repo";
-import { auditLogs, users } from "../../schema";
 import { setupRlsPolicies } from "../test-utils";
 
 describe("Soft Delete Security (Issue #2)", () => {

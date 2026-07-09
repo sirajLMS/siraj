@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { alias } from "drizzle-orm/pg-core";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
@@ -10,7 +11,6 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
-import type { DBTransaction } from "../db.types";
 
 const _processStudentQuery = async (
   query: PgSelect,

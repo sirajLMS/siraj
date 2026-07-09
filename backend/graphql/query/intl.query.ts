@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
 gqlSchemaBuilder.queryFields(t => ({
   welcomeMessage: t.field({

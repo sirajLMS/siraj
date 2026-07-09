@@ -228,7 +228,6 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
     await cleanupTestManager(superAdminToken, adminManagerUserId);
     await cleanupTestManager(superAdminToken, staffManagerUserId);
-    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
     await cleanupTestEntities(adminToken, {
       studentUserId,
       teacherUserId,
@@ -241,5 +240,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     const managerCountAfter = await getManagers(superAdminToken).then(r => r.rows?.length ?? 0);
     expect(managerCountAfter).toBeLessThan(managerCountBefore);
     expect(superAdminToken).toBeTruthy();
+
+    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
   });
 });

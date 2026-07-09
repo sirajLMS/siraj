@@ -1,11 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { SoftDeleteRepository, StorageDbRepository } from "@/backend/db/repo";
+import { storageFiles, userFiles, users } from "@/backend/db/schema";
 import type { UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { db } from "../../drizzleDb";
-import { SoftDeleteRepository, StorageDbRepository } from "../../repo";
-import { storageFiles, userFiles, users } from "../../schema";
 
 describe("Consolidated File Usage Integrity (Junction Tables)", () => {
   let testUser: UserSelectType | null = null;

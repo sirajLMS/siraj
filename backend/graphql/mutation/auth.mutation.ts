@@ -2,6 +2,14 @@ import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
 import { RateLimitRepository, SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/user.repository";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  DemoLoginInputPothosObject,
+  LoginInputPothosObject,
+  LoginResponsePothosObject,
+  RefreshTokenResponsePothosObject,
+} from "@/backend/graphql/pothos";
 import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { setAuthCookies as applyAuthCookies } from "@/backend/lib/auth/cookies";
 import { comparePassword } from "@/backend/lib/auth/password";
@@ -15,14 +23,6 @@ import { PermissionGroupSimulationService } from "@/backend/services/auth/permis
 import { SessionService } from "@/backend/services/auth/session.service";
 import type { SafeUser, SessionEntity, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
-import type { BaseContext } from "../gqlContext";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import {
-  DemoLoginInputPothosObject,
-  LoginInputPothosObject,
-  LoginResponsePothosObject,
-  RefreshTokenResponsePothosObject,
-} from "../pothos";
 
 function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string, accessToken?: string) {
   applyAuthCookies(ctx.cookies, sessionId, refreshToken, accessToken);

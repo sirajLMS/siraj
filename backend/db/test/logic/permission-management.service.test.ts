@@ -1,12 +1,12 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { permissionGroups, permissions, users } from "@/backend/db/schema";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
 import { getErrorMessage } from "@/shared/utils/error";
-import { db } from "../../drizzleDb";
-import { permissionGroups, permissions, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function assertThrows(fn: () => Promise<unknown>, message: string) {

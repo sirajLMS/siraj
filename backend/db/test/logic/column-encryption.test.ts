@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { teacherBankingDetailsHistory, teachers, users } from "@/backend/db/schema";
+import type { TeacherBankingDetailsHistoryInsertInput, TeacherEntityInput } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { TeacherBankingDetailsHistoryInsertInput, TeacherEntityInput } from "../../../types";
-import { teacherBankingDetailsHistory, teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date) {

@@ -1,15 +1,15 @@
-import "./pothos";
-import "./query";
-import "./mutation";
-import "./pothos/schema.types";
+import "@/backend/graphql/pothos";
+import "@/backend/graphql/query";
+import "@/backend/graphql/mutation";
+import "@/backend/graphql/pothos/schema.types";
 
 import { extendSchema, parse } from "graphql";
 import { DateResolver, DateTimeResolver } from "graphql-scalars";
-import { gqlSchemaBuilder } from "./gqlSchemaBuilder";
-import { EmailScalar } from "./scalars/emailScalar";
-import { JSONScalar } from "./scalars/jsonScalar";
-import { PhoneNumberScalar } from "./scalars/phoneNumberScalar";
-import { StringMapScalar } from "./scalars/stringMapScalar";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { EmailScalar } from "@/backend/graphql/scalars/emailScalar";
+import { JSONScalar } from "@/backend/graphql/scalars/jsonScalar";
+import { PhoneNumberScalar } from "@/backend/graphql/scalars/phoneNumberScalar";
+import { StringMapScalar } from "@/backend/graphql/scalars/stringMapScalar";
 
 // Inlined @constraint directive SDL to avoid importing the full
 // graphql-constraint-directive package here (which conditionally requires

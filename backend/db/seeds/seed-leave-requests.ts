@@ -1,9 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveRequests } from "@/backend/db/schema/scheduling";
-import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import {
   ALL_LEAVE_REQUESTER_TYPES,
   cycleAtIndex,
@@ -12,7 +9,10 @@ import {
   loadSeedConfig,
   type SeedConfig,
   startOfDay,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
+import logger from "@/backend/lib/logger";
+import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 function resolveRequesterUserId(
   requesterType: LeaveRequesterType,

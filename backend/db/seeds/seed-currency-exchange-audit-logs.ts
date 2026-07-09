@@ -1,8 +1,8 @@
 import { db } from "@/backend/db/drizzleDb";
 import { currencyExchangeAuditLogs } from "@/backend/db/schema/billing";
+import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
-import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 type ExchangeRateRow = { fromCurrency: string; toCurrency: string; rate: string; createdAt: Date };
 

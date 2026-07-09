@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classCommunications } from "@/backend/db/schema/group-class";
+import type { SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import type { SeedConfig } from "./lib";
 
 type GroupClassEntity = { id: string; classInstanceId: string; courseName: string };
 

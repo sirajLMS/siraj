@@ -1,5 +1,5 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { BaseContext } from "../gqlContext";
 
 export async function requireAuth(ctx: BaseContext): Promise<string> {
   if (!ctx.user?.id) {

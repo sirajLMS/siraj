@@ -1,8 +1,8 @@
 import { UserRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { UserPothosObject } from "@/backend/graphql/pothos";
 import { AuthUtils } from "@/backend/utils";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { UserPothosObject } from "../pothos";
 
 gqlSchemaBuilder.queryFields(t => ({
   me: t.field({

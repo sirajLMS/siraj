@@ -1,9 +1,12 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  NotificationChannelPothosObject,
+  NotificationEventTypePothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
 import type {
   NotificationPreferenceReturnType,
   NotificationPreferenceUpdateInput,
 } from "@/backend/types/notification-preferences.types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { NotificationChannelPothosObject, NotificationEventTypePothosObject } from "./enum.pothos";
 
 const NotificationPreferenceRef =
   gqlSchemaBuilder.objectRef<NotificationPreferenceReturnType>("NotificationPreference");

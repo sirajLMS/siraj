@@ -1,7 +1,7 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject } from "@/backend/graphql/pothos/pagination.objects";
 import type { ParentDirectoryMetrics, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ParentStatusPothosEnum } from "./enum.pothos";
-import { PageInfoObject } from "./pagination.objects";
 
 const ParentDirectoryMetricsRef = gqlSchemaBuilder.objectRef<ParentDirectoryMetrics>("ParentDirectoryMetrics");
 

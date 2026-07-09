@@ -1,12 +1,12 @@
-import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
-import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ParentAssignedStudentsResultPothosObject,
   ParentHandbookUrlPothosObject,
   ParentOwnProfilePothosObject,
-} from "../pothos/parent-portal.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/parent-portal.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
+import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 
 gqlSchemaBuilder.queryField("parentAssignedStudents", t =>
   t.field({

@@ -1,8 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries } from "@/backend/db/schema/communications";
-import { NotificationDeliveryStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
-import type { UserSelectType } from "@/backend/types";
 import {
   ALL_NOTIFICATION_CHANNELS,
   ALL_NOTIFICATION_DELIVERY_STATUSES,
@@ -11,7 +8,10 @@ import {
   getFakerForIndex,
   loadSeedConfig,
   type SeedConfig,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import { NotificationDeliveryStatus } from "@/backend/enum";
+import logger from "@/backend/lib/logger";
+import type { UserSelectType } from "@/backend/types";
 
 type DeviceTokenRow = { id: string; userId: string };
 

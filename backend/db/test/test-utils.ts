@@ -1,11 +1,11 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import type { UserReturnType } from "@/backend/types/user.types";
-import type { DBTransaction } from "../db.types";
-import { db } from "../drizzleDb";
-import { users } from "../schema";
 
 /**
  * Runs a function within a database transaction that is always rolled back.

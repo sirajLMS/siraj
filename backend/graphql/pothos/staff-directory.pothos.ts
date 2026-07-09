@@ -1,3 +1,7 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { AccountStatusPothosObject } from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
 import type {
   ManagerDirectoryMetrics,
@@ -10,10 +14,6 @@ import type {
   UpdateManagerProfileInput,
 } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { requireAuth } from "../utils/requireAuth";
-import { AccountStatusPothosObject } from "./enum.pothos";
-import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 

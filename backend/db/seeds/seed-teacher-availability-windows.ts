@@ -1,9 +1,14 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherAvailabilityWindows } from "@/backend/db/schema/teacher-availability";
+import {
+  buildTeacherAvailabilityWindows,
+  getAvailabilityEffectiveRange,
+  loadSeedConfig,
+  type SeedConfig,
+} from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, TimezoneEntity } from "@/backend/types";
-import { buildTeacherAvailabilityWindows, getAvailabilityEffectiveRange, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(teachersList: TeacherEntity[], timezones: TimezoneEntity[], config?: SeedConfig) {
   logger.info("Seeding teacher availability windows...");

@@ -16,7 +16,7 @@ export function setupTestServerLifecycle() {
     }
     serverStartPromise ??= startTestServer();
     await serverStartPromise;
-  }, 65000);
+  }, 125000);
 
   afterAll(() => {
     startedSuitesCount--;

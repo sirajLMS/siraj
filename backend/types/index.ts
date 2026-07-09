@@ -55,6 +55,8 @@ export type {
 } from "./billing.types";
 // Billing types
 export * from "./billing.types";
+// Book types
+export * from "./book.types";
 // Class-instance-detail types (already exported, but remove duplicate ClassInstancePerformanceReturnType)
 export * from "./class-category.types";
 export * from "./class-instance-detail.types";
@@ -122,6 +124,7 @@ export * from "./parent.types";
 export * from "./parentHandbook.types";
 export type { PermissionReturnType as PermissionEntity } from "./permission.types";
 export * from "./permission.types";
+export * from "./permission-group.types";
 export * from "./permission-group-simulation.types";
 // Permission management types
 export type {
@@ -134,6 +137,8 @@ export type {
 } from "./permission-management.types";
 export * from "./permission-management.types";
 export * from "./profile.types";
+// Report types
+export * from "./report.types";
 export * from "./schedule.types";
 export * from "./scheduling.types";
 export * from "./soft-delete.types";

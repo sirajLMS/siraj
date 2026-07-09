@@ -34,7 +34,8 @@ export const profile: ProfileLabels = {
     notFound: "Profile not found.",
   },
   teacher: {
-    subtitle: "View your official profile and compensation details.",
+    ownSubtitle: "عرض وتحديث ملفك التدريسي وبيانات الاتصال.",
+    subtitle: "إدارة بيانات الاعتماد المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",
     adminBanner: "عرض إداري: تظهر حقول الهوية وبيانات زووم والحالة.",
     sections: {
       account: "الحساب",
@@ -82,7 +83,8 @@ export const profile: ProfileLabels = {
     },
   },
   parent: {
-    subtitle: "Manage your contact and communication details.",
+    ownSubtitle: "عرض وتحديث بيانات الاتصال والتواصل الخاصة بك.",
+    subtitle: "إدارة بيانات الاتصال والتواصل لولي الأمر الأساسي للطالب.",
     adminBanner: "عرض إداري: تظهر حقول الهوية والفوترة.",
     sections: {
       account: "الحساب",
@@ -128,6 +130,7 @@ export const profile: ProfileLabels = {
     },
   },
   staff: {
+    ownSubtitle: "عرض وتحديث بيانات حسابك ومعلومات الاتصال.",
     subtitle: "إدارة الأدوار والصلاحيات على مستوى النظام للموظفين الإداريين.",
     adminBanner: "عرض إداري: الحالة والصلاحيات مرئية.",
     sections: {
@@ -140,7 +143,7 @@ export const profile: ProfileLabels = {
       fullName: "الاسم الكامل",
       primaryEmail: "البريد الإلكتروني",
       phone: "رقم الهاتف",
-      roleName: "اسم الدور",
+      roleName: "الدور",
       roleSlug: "معرّف الدور",
       department: "القسم",
       status: "حالة الحساب",
@@ -148,11 +151,12 @@ export const profile: ProfileLabels = {
       statusInactive: "غير نشط",
     },
     permissions: {
-      inheritedGroups: "مجموعات الصلاحيات الموروثة",
+      inheritedGroups: "مجموعات الصلاحيات",
       directOverrides: "التجاوزات المباشرة",
       empty: {
         title: "لا توجد مجموعات صلاحيات معيّنة",
         description: "لا يملك هذا الموظف مجموعات صلاحيات موروثة. عيّن المجموعات من إدارة الصلاحيات.",
+        ownDescription: "ليس لديك أي مجموعات صلاحيات معيّنة بعد.",
       },
       columns: {
         resource: "المورد",

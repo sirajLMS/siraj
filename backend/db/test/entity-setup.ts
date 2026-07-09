@@ -1,8 +1,16 @@
 import { randomUUID } from "node:crypto";
+import type { DBTransaction } from "@/backend/db/db.types";
+import {
+  classInstances,
+  parents,
+  permissions,
+  students,
+  teacherAssignments,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import type { AppPermission } from "@/backend/enum";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "../../types";
-import type { DBTransaction } from "../db.types";
-import { classInstances, parents, permissions, students, teacherAssignments, teachers, users } from "../schema";
+import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 export async function createTestUser(
   tx: DBTransaction,

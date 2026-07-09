@@ -1,3 +1,12 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
+  LeaveRequestStatusPothosObject,
+  RescheduleDateLabelPothosObject,
+  StudentStatusPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
 import type {
   AdminDashboardScheduleInputType,
@@ -11,15 +20,6 @@ import type {
   RescheduleTrackingRow,
   StatusTrackingScheduleRow,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import {
-  ClassExecutionStatePothosObject,
-  ClassOutcomePothosObject,
-  LeaveRequestStatusPothosObject,
-  RescheduleDateLabelPothosObject,
-  StudentStatusPothosObject,
-} from "./enum.pothos";
-import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 const DailyScheduleMetricsObjectRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("DailyScheduleMetrics");
 

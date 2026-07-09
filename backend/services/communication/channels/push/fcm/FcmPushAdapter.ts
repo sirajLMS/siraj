@@ -5,12 +5,19 @@ import { NotificationRepository } from "@/backend/db/repo/notification.repositor
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
+import type { FcmPushContext } from "@/backend/services/communication/channels/push/fcm/fcm.types";
+import {
+  FCM_INVALID_TOKEN_ERROR,
+  FCM_TOKEN_EXPIRED_ERROR,
+} from "@/backend/services/communication/channels/push/fcm/fcm.types";
+import type {
+  IPushChannel,
+  PushPayload,
+  PushSendResult,
+} from "@/backend/services/communication/channels/push/IPushChannel";
+import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import type { NotificationDeliverySelectType } from "@/backend/types/notificationDeliveries.types";
 import type { UserDeviceTokenSelectType } from "@/backend/types/userDeviceTokens.types";
-import { deliveryFailedMessage } from "../../../utils";
-import type { IPushChannel, PushPayload, PushSendResult } from "../IPushChannel";
-import type { FcmPushContext } from "./fcm.types";
-import { FCM_INVALID_TOKEN_ERROR, FCM_TOKEN_EXPIRED_ERROR } from "./fcm.types";
 
 export class FcmPushAdapter implements IPushChannel {
   private readonly context: FcmPushContext;

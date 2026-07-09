@@ -6,21 +6,10 @@ import {
 } from "../sharedDocuments/notification-preferences.documents";
 import { authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+import { clearCookies, testClient } from "./testClient";
 
 describe("GraphQL Notification Preferences Integration Tests", () => {
   setupTestServerLifecycle();
-
-  test("notificationPreferences — returns defaults for own user", async () => {
-    const token = await loginDemoUser("teacher_default");
-
-    const data = await authenticatedRequest(token, "query", notificationPreferencesQueryDocument);
-
-    expect(Array.isArray(data.notificationPreferences)).toBe(true);
-    expect(data.notificationPreferences?.length).toBe(32);
-    expect(data.notificationPreferences?.[0]?.id).toBeDefined();
-    expect(data.notificationPreferences?.every(pref => pref?.enabled)).toBe(true);
-  });
 
   test("updateNotificationPreferences — own user can update a preference", async () => {
     const token = await loginDemoUser("teacher_default");
@@ -42,7 +31,29 @@ describe("GraphQL Notification Preferences Integration Tests", () => {
     expect(updated?.enabled).toBe(false);
   });
 
+  test("notificationPreferences — returns defaults for own user", async () => {
+    // Re-enable the preference that was disabled in the previous test
+    const token = await loginDemoUser("teacher_default");
+    await authenticatedRequest(token, "mutate", updateNotificationPreferencesMutationDocument, {
+      input: [
+        {
+          channel: NotificationChannel.Email,
+          eventType: NotificationEventType.ClassReminder,
+          enabled: true,
+        },
+      ],
+    });
+
+    const data = await authenticatedRequest(token, "query", notificationPreferencesQueryDocument);
+
+    expect(Array.isArray(data.notificationPreferences)).toBe(true);
+    expect(data.notificationPreferences?.length).toBe(32);
+    expect(data.notificationPreferences?.[0]?.id).toBeDefined();
+    expect(data.notificationPreferences?.every(pref => pref?.enabled)).toBe(true);
+  });
+
   test("notificationPreferences — denied when unauthenticated", async () => {
+    clearCookies();
     const result = await testClient.query({
       query: notificationPreferencesQueryDocument,
     });

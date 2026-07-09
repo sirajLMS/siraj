@@ -2,15 +2,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
-import { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
-import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
-import type { UserSelectType } from "@/backend/types/user.types";
-import { testLogger } from "@/shared/lib/testlogger";
-import { getErrorMessage } from "@/shared/utils/error";
-import { db } from "../../drizzleDb";
-import { DstMigrationRepository, SchedulingRepository } from "../../repo";
+import { db } from "@/backend/db/drizzleDb";
+import { DstMigrationRepository, SchedulingRepository } from "@/backend/db/repo";
 import {
   classInstances,
   classStatusEvents,
@@ -22,7 +15,14 @@ import {
   students,
   teachers,
   users,
-} from "../../schema";
+} from "@/backend/db/schema";
+import { AppPermission } from "@/backend/enum";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
+import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
+import type { UserSelectType } from "@/backend/types/user.types";
+import { testLogger } from "@/shared/lib/testlogger";
+import { getErrorMessage } from "@/shared/utils/error";
 
 describe("Timezone Handling & DST Adjustment", () => {
   let testUser: UserSelectType | null = null;

@@ -1,9 +1,14 @@
 import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import {
+  acquireLocks,
+  checkOverlaps,
+  type DBTransaction,
+  validateTeacherAssignment,
+} from "@/backend/db/repo/scheduling/shared";
+import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
 import { classInstances, recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
-import { acquireLocks, checkOverlaps, type DBTransaction, validateTeacherAssignment } from "./shared";
-import { handleQuotaDeduction } from "./state-changes";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;

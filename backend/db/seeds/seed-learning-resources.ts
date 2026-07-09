@@ -1,8 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { learningResources } from "@/backend/db/schema/communications";
-import logger from "@/backend/lib/logger";
-import type { UserSelectType } from "@/backend/types";
 import {
   buildResourceDisplayName,
   LEARNING_RESOURCE_SPECS,
@@ -10,7 +8,9 @@ import {
   type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding learning resources...");

@@ -1,5 +1,7 @@
 import { GraphQLError } from "graphql";
 import { UserRepository } from "@/backend/db/repo";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { UserPothosObject } from "@/backend/graphql/pothos/user.pothos";
 import { setAuthCookies } from "@/backend/lib/auth/cookies";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
@@ -9,8 +11,6 @@ import type {
   StartImpersonationReturnType,
 } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { UserPothosObject } from "./user.pothos";
 
 const ImpersonationStatusPothosObjectRef =
   gqlSchemaBuilder.objectRef<ImpersonationStatusReturnType>("ImpersonationStatus");
@@ -95,6 +95,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const tErrors = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      if (ctx.isImpersonating) {
+        throw new GraphQLError(tErrors("auth.impersonationNotAllowedDuringSession"), {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
       const actorUserId = ctx.actorUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
         throw new GraphQLError(tErrors("auth.impersonationSessionInvalid"), {

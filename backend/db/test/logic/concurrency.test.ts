@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { BillingRepository, StudentRepository } from "@/backend/db/repo";
+import { invoices, parents, students, users } from "@/backend/db/schema";
 import { testLogger } from "@/shared/lib/testlogger";
-import { BillingRepository, StudentRepository } from "../../repo";
-import { invoices, parents, students, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 const getCommonDates = () => ({ createdAt: new Date(), updatedAt: new Date() });

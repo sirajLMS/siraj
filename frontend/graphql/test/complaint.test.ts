@@ -74,7 +74,7 @@ describe("GraphQL: parentComplaints query", () => {
     const denial = await assertOperationDenied("teacher_default", "query", parentComplaintsQueryDocument, {
       paginationArgs: null,
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("parent only sees own complaints — IDOR protection (Threat 1)", async () => {
@@ -134,7 +134,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("teacher role is denied access to adminComplaintQueue", async () => {
@@ -142,7 +142,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("status filter returns only matching complaints", async () => {
@@ -228,7 +228,7 @@ describe("GraphQL: submitComplaint mutation", () => {
         files: null,
       },
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("complaint with empty body is accepted by GraphQL layer", async () => {
@@ -314,7 +314,7 @@ describe("GraphQL: respondToComplaint mutation", () => {
         body: "Parent should not respond",
       },
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("teacher role is denied respondToComplaint (Threat 3)", async () => {
@@ -324,7 +324,7 @@ describe("GraphQL: respondToComplaint mutation", () => {
         body: "Teacher should not respond",
       },
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("responding to non-existent complaint returns error", async () => {
@@ -376,14 +376,14 @@ describe("GraphQL: deleteComplaint mutation", () => {
     const denial = await assertOperationDenied("parent_default", "mutate", deleteComplaintMutationDocument, {
       complaintId: complaintToDeleteId,
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("teacher role is denied deleteComplaint (Threat 4)", async () => {
     const denial = await assertOperationDenied("teacher_default", "mutate", deleteComplaintMutationDocument, {
       complaintId: complaintToDeleteId,
     });
-    expect(denial).toBeUndefined();
+    expect(denial).toBe(true);
   });
 
   test("deleting already-deleted complaint returns error (Threat 4)", async () => {

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { currencyExchangeRates } from "@/backend/db/schema";
+import type { CurrencyExchangeRateInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { CurrencyExchangeRateInsertType } from "../../../types";
-import { currencyExchangeRates } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 describe("Currency Exchange Rates", () => {

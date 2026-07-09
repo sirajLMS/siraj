@@ -1,6 +1,6 @@
+import { db } from "@/backend/db/drizzleDb";
+import { timezones } from "@/backend/db/schema";
 import logger from "@/backend/lib/logger";
-import { db } from "../drizzleDb";
-import { timezones } from "../schema";
 
 export async function seedOrGet() {
   logger.log("Seeding common timezones...");

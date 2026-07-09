@@ -2,11 +2,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import { NotificationRepository } from "@/backend/db/repo/notification.repository";
+import { notificationDeliveries, userDeviceTokens, users } from "@/backend/db/schema";
 import { DevicePlatform, NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import type { UserReturnType } from "@/backend/types/auth.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { NotificationRepository } from "../../repo/notification.repository";
-import { notificationDeliveries, userDeviceTokens, users } from "../../schema";
 import { createTestUser, runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Notification Delivery Tracking", () => {

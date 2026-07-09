@@ -1,4 +1,4 @@
-import type { PageInfo, PaginationArgs } from "../types";
+import type { PageInfo, PaginationArgs } from "@/backend/types";
 
 export namespace PaginationUtils {
   /**

@@ -1,9 +1,15 @@
 import { count } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { adminAuditLogs } from "@/backend/db/schema/audit";
+import {
+  ADMIN_AUDIT_ACTIONS,
+  buildAdminAuditDescription,
+  findAdminUser,
+  loadSeedConfig,
+  type SeedConfig,
+} from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
-import { ADMIN_AUDIT_ACTIONS, buildAdminAuditDescription, findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding admin audit logs...");

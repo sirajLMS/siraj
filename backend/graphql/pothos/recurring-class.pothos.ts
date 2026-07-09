@@ -1,9 +1,9 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type {
   CreateRecurringClassInput,
   CreateRecurringClassReturnType,
   RecurringClassDayInput,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 export const RecurringClassDayInputPothosObject = gqlSchemaBuilder
   .inputRef<RecurringClassDayInput>("RecurringClassDayInput")

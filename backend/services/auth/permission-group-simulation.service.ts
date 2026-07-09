@@ -312,8 +312,17 @@ export namespace PermissionGroupSimulationService {
     }
 
     const session = await SessionRepository.findSessionById(rawSessionId);
-    if (!session?.userId || session.userId !== payload.userId) {
-      return null;
+    if (!session?.userId) {
+      if (payload.groupSimulation && payload.groupSimulationSlug) {
+        return null;
+      }
+      return { realUserId: payload.userId, isSimulatingGroup: false };
+    }
+    if (session.userId !== payload.userId) {
+      if (payload.groupSimulation && payload.groupSimulationSlug) {
+        return null;
+      }
+      return { realUserId: payload.userId, isSimulatingGroup: false };
     }
 
     if (!payload.groupSimulation || !payload.groupSimulationSlug) {

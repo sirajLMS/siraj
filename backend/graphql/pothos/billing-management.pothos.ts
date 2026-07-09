@@ -1,3 +1,7 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { BillingMonthInputRef } from "@/backend/graphql/pothos/billing-history.pothos";
+import { InvoiceStatusPothosObject, InvoiceTypePothosObject } from "@/backend/graphql/pothos/enum.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
 import type {
   DeleteInvoiceReturnType,
@@ -5,10 +9,6 @@ import type {
   MarkInvoicePaidReturnType,
   SendPaymentReminderResult,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { requireAuth } from "../utils/requireAuth";
-import { BillingMonthInputRef } from "./billing-history.pothos";
-import { InvoiceStatusPothosObject, InvoiceTypePothosObject } from "./enum.pothos";
 
 // ─── ManualInvoiceResult Object ──────────────────────────────────────────────
 

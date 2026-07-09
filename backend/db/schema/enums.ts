@@ -27,7 +27,7 @@ import {
   SuggestionStatus,
   VacationRequestStatus,
 } from "@/backend/enum";
-import { createPgEnumFromEnum } from "../../utils/db.utils";
+import { createPgEnumFromEnum } from "@/backend/utils/db.utils";
 
 export const appLanguageEnum = createPgEnumFromEnum("app_language", AppLanguage);
 

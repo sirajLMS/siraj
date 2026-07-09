@@ -1,13 +1,13 @@
-import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AttachSubjectResourceInputPothos,
   ClassSubjectCreateInputPothos,
   ClassSubjectPothosObject,
   ClassSubjectUpdateInputPothos,
   SubjectResourcePothosObject,
-} from "../pothos/class-subject.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/class-subject.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
 
 gqlSchemaBuilder.mutationField("createClassSubject", t =>
   t.field({

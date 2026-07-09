@@ -1,5 +1,13 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
 import { OrderSortDirection } from "@/backend/enum";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  AppLanguagePothosObject,
+  GenderPothosObject,
+  OrderSortDirectionPothosObject,
+  StudentStatusPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject } from "@/backend/graphql/pothos/pagination.objects";
 import type {
   PartialStudentUpdateInput,
   Student,
@@ -9,14 +17,6 @@ import type {
   StudentsWithFiltersResponse,
 } from "@/backend/types";
 import { StudentsOrderByColumn } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import {
-  AppLanguagePothosObject,
-  GenderPothosObject,
-  OrderSortDirectionPothosObject,
-  PageInfoObject,
-  StudentStatusPothosObject,
-} from "../pothos";
 
 export const StudentPothosObject = gqlSchemaBuilder
   .loadableObjectRef<Student, string>("Student", {

@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { currencyExchangeRates } from "@/backend/db/schema/billing";
+import { EXCHANGE_PAIRS, iterateInvoiceMonths, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import { EXCHANGE_PAIRS, iterateInvoiceMonths, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(config?: SeedConfig) {
   logger.info("Seeding currency exchange rates...");

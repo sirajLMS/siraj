@@ -3,10 +3,9 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import type { UserSelectType } from "@/backend/types";
+import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
+import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity } from "../../../types";
-import { leaveQuotaUsage, systemSettings } from "../../schema";
 import { setupStudent, setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

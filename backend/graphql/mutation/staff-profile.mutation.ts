@@ -1,10 +1,10 @@
-import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   TeacherProfileResultPothosObject,
   TeacherProfileUpdateInputPothosObject,
-} from "../pothos/staff-profile.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/staff-profile.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 
 gqlSchemaBuilder.queryField("teacherProfileForEdit", t =>
   t.field({

@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { count, eq, inArray, type SQL } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { users } from "@/backend/db/schema";
@@ -11,7 +12,6 @@ import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth.type
 import type { PaginationInput } from "@/backend/types/pagination.types";
 import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/user.types";
 import { AuthUtils } from "@/backend/utils";
-import type { DBTransaction } from "../db.types";
 
 export async function findOne(condition: SQL | undefined): Promise<UserSelectType | null> {
   try {

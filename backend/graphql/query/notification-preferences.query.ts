@@ -1,7 +1,7 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { NotificationPreferencePothosObject } from "@/backend/graphql/pothos/notification-preferences.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { NotificationPreferencePothosObject } from "../pothos/notification-preferences.pothos";
-import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.queryFields(t => ({
   notificationPreferences: t.field({

@@ -1,5 +1,5 @@
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
-import type { SupportContactReturnType, TeacherImportantNoteReturnType } from "./teacher-notes.types";
+import type { SupportContactReturnType, TeacherImportantNoteReturnType } from "@/backend/types/teacher-notes.types";
 
 export type ClassSessionMetrics = {
   id?: string;
@@ -121,7 +121,7 @@ export type AdminDashboardScheduleInputType = {
   teacherId?: string | null;
   search?: string | null;
   metricFilter?: string | null;
-  paginationArgs?: import("./pagination.types").PaginationInput | null;
+  paginationArgs?: import("@/backend/types/pagination.types").PaginationInput | null;
 };
 
 export type AdminDashboardScheduleReturnType = {
@@ -129,7 +129,7 @@ export type AdminDashboardScheduleReturnType = {
   totalCount: number;
   metrics: ClassSessionMetrics;
   rows: DailyScheduleListReturnType[];
-  pageInfo: import("./pagination.types").PageInfo | null;
+  pageInfo: import("@/backend/types/pagination.types").PageInfo | null;
 };
 
 export type StatusTrackingScheduleRow = {

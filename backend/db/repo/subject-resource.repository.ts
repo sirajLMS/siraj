@@ -1,10 +1,10 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { learningResources, subjectResources } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { SubjectResourceAttachInput, SubjectResourceReturnType } from "@/backend/types";
-import type { DBTransaction } from "../db.types";
 
 export namespace SubjectResourceRepository {
   export async function listResourcesForSubject(

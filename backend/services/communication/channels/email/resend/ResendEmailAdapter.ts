@@ -3,9 +3,13 @@ import { NotificationRepository } from "@/backend/db/repo/notification.repositor
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { deliveryFailedMessage } from "../../../utils";
-import type { EmailPayload, EmailSendResult, IEmailChannel } from "../IEmailChannel";
-import type { ResendEmailContext } from "./resend.types";
+import type {
+  EmailPayload,
+  EmailSendResult,
+  IEmailChannel,
+} from "@/backend/services/communication/channels/email/IEmailChannel";
+import type { ResendEmailContext } from "@/backend/services/communication/channels/email/resend/resend.types";
+import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 
 export class ResendEmailAdapter implements IEmailChannel {
   private readonly context: ResendEmailContext;

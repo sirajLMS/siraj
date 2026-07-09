@@ -1,3 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
+import {
+  StudentFilterArgsPothosObject,
+  StudentsOrderByClausePothosObject,
+} from "@/backend/graphql/pothos/student.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { StudentDirectoryService } from "@/backend/services";
 import {
   PaginationArgs,
@@ -6,10 +13,6 @@ import {
   type StudentFilterArgs,
   type StudentsOrderByClause,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { requireAuth } from "../utils/requireAuth";
-import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
-import { StudentFilterArgsPothosObject, StudentsOrderByClausePothosObject } from "./student.pothos";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 

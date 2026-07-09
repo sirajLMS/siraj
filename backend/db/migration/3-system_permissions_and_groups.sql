@@ -1295,6 +1295,7 @@ WHERE
         'student.reassign_teacher',
         'student.manage_status',
         'students.list',
+        'students.create',
         'resources.list',
         'resources.upload',
         'resources.delete',

@@ -1,12 +1,12 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { ScheduleService } from "@/backend/services/schedule/schedule.service";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassInstanceDetailPothosObject,
   ClassStatusEventPothosObject,
   TeacherFutureSchedulePothosObject,
-} from "../pothos/class-session.pothos";
+} from "@/backend/graphql/pothos/class-session.pothos";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { ScheduleService } from "@/backend/services/schedule/schedule.service";
+import { ClassSessionService } from "@/backend/services/session/class-session.service";
 
 gqlSchemaBuilder.queryField("classInstance", t =>
   t.field({

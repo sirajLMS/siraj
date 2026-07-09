@@ -1,7 +1,7 @@
 import type { complaints } from "@/backend/db/schema";
 import type { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
-import type { ComplaintResponseReturnType } from "./complaintResponses.types";
-import type { PageInfo } from "./pagination.types";
+import type { ComplaintResponseReturnType } from "@/backend/types/complaintResponses.types";
+import type { PageInfo } from "@/backend/types/pagination.types";
 
 export type ComplaintSelectType = typeof complaints.$inferSelect;
 export type ComplaintInsertType = typeof complaints.$inferInsert;

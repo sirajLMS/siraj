@@ -1,5 +1,5 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { TestHelperService } from "@/backend/services/system/test-helper.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 if (process.env.NODE_ENV !== "production") {
   const TestEntitiesType = gqlSchemaBuilder.objectRef<{

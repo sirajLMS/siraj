@@ -1,4 +1,5 @@
 import { and, desc, eq, lte, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { getBackendTranslations, logger } from "@/backend/lib";
@@ -13,7 +14,6 @@ import type {
   SessionMetadataSelectType,
   SessionSelectType,
 } from "@/backend/types/auth.types";
-import type { DBTransaction } from "../db.types";
 
 // Default session configuration
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds

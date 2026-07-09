@@ -1,5 +1,5 @@
+import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import { getRedisService } from "@/backend/services/redis";
-import type { ICacheService } from "./ICacheService";
 
 /**
  * Redis Cache Adapter

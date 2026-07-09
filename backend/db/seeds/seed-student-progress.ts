@@ -1,9 +1,9 @@
 import { db } from "@/backend/db/drizzleDb";
 import { studentProgress } from "@/backend/db/schema/students";
+import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { ClassInstanceEntity } from "@/backend/types";
-import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
   logger.info("Seeding student progress...");

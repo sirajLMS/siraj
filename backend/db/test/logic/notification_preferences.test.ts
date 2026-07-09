@@ -2,10 +2,10 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
+import { userNotificationPreferences, users } from "@/backend/db/schema";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { userNotificationPreferences, users } from "../../schema";
 import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("User Notification Preferences", () => {

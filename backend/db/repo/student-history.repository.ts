@@ -1,8 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { classInstancePerformance, classInstances, teachers, users } from "@/backend/db/schema";
 import type { SessionSummary } from "@/backend/types";
-import type { DBTransaction } from "../db.types";
-import { db } from "../drizzleDb";
-import { classInstancePerformance, classInstances, teachers, users } from "../schema";
 
 export namespace StudentHistoryRepository {
   export async function getMonthlyCalendar(

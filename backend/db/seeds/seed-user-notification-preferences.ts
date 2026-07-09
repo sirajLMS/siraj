@@ -1,14 +1,14 @@
 import { db } from "@/backend/db/drizzleDb";
 import { userNotificationPreferences } from "@/backend/db/schema/communications";
-import logger from "@/backend/lib/logger";
-import type { UserSelectType } from "@/backend/types";
 import {
   ALL_NOTIFICATION_CHANNELS,
   ALL_NOTIFICATION_EVENT_TYPES,
   cycleAtIndex,
   loadSeedConfig,
   type SeedConfig,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding user notification preferences...");

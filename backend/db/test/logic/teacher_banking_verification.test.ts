@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { TeacherBankingRepository } from "@/backend/db/repo/teacher-banking.repository";
+import { teachers, users } from "@/backend/db/schema";
 import { NotificationEventType } from "@/backend/enum";
+import type { TeacherEntity, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { TeacherEntity, UserSelectType } from "../../../types";
-import { TeacherBankingRepository } from "../../repo/teacher-banking.repository";
-import { teachers, users } from "../../schema";
 import { runInRollback } from "../test-utils";
 
 async function createTeacherWithAdmin(tx: DBTransaction): Promise<{

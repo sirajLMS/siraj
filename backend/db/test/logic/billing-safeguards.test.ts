@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { desc, eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { BillingRepository } from "@/backend/db/repo";
+import { currencyExchangeAuditLogs, currencyExchangeRates, systemSettings } from "@/backend/db/schema";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { DBTransaction } from "../../db.types";
-import { BillingRepository } from "../../repo";
-import { currencyExchangeAuditLogs, currencyExchangeRates, systemSettings } from "../../schema";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 

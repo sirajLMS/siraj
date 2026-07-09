@@ -1,4 +1,5 @@
 import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
@@ -14,7 +15,6 @@ import type {
   TeacherProfileUpdateInputType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-import type { DBTransaction } from "../db.types";
 
 export namespace TeacherRepository {
   export async function create(

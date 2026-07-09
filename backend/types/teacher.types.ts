@@ -8,8 +8,8 @@ import type {
   PaymentMethod,
   StudentStatus,
 } from "@/backend/enum";
-import type { PageInfo } from "./pagination.types";
-import type { ClassSessionMetrics } from "./schedule.types";
+import type { PageInfo } from "@/backend/types/pagination.types";
+import type { ClassSessionMetrics } from "@/backend/types/schedule.types";
 
 export type TeacherEntity = typeof teachers.$inferSelect;
 export type TeacherEntityInput = typeof teachers.$inferInsert;

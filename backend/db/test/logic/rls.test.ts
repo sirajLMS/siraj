@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { db } from "../../drizzleDb";
-import { SoftDeleteRepository } from "../../repo";
-import { users } from "../../schema";
+import { db } from "@/backend/db/drizzleDb";
+import { SoftDeleteRepository } from "@/backend/db/repo";
+import { users } from "@/backend/db/schema";
 import { closeRlsClients, queryAsRlsRole, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Row Level Security and Soft Delete", () => {

@@ -1,10 +1,10 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classCategories } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { ClassCategorySelectType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
-import type { DBTransaction } from "../db.types";
 
 export namespace ClassCategoryRepository {
   /**

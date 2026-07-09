@@ -165,12 +165,21 @@ describe("GraphQL Impersonation Integration Tests", () => {
 
     const impersonationToken = await startImpersonation(superAdminToken, teacherUserId);
 
+    // The impersonationToken is sent via Authorization header. The cookie jar still
+    // has the super admin's session_id from the prior startImpersonation call.
+    // The server resolves: impersonation token + session mismatch (SA session vs
+    // teacher JWT) → unauthenticated → superAdmin scope = false → DENIED.
     await expectMutationDenied(impersonationToken, startImpersonationMutationDocument, {
       targetUserId: parentUserId,
       reason: null,
     });
 
-    await authenticatedRequest(impersonationToken, "mutate", endImpersonationMutationDocument);
+    // End impersonation — superAdminToken still has matching session cookies in the jar
+    try {
+      await authenticatedRequest(superAdminToken, "mutate", endImpersonationMutationDocument);
+    } catch {
+      // Best-effort cleanup
+    }
   });
 
   test("sensitive super-admin mutation is blocked while impersonating", async () => {

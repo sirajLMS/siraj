@@ -1,5 +1,5 @@
 import type { KeyValueCache, KeyValueCacheSetOptions } from "@apollo/utils.keyvaluecache";
-import { cacheService } from "./CacheServiceFactory";
+import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 
 /**
  * Apollo KeyValueCache Adapter

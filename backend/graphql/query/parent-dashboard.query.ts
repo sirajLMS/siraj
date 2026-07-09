@@ -1,12 +1,12 @@
-import { ParentDashboardService } from "@/backend/services/parent/parent-dashboard.service";
-import { PaginationArgs } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { PaginationArgsObject } from "../pothos/pagination.objects";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
 import {
   ParentDashboardMetricsResultPothosObject,
   ParentDashboardScheduleResultPothosObject,
-} from "../pothos/parent-dashboard.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/parent-dashboard.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { ParentDashboardService } from "@/backend/services/parent/parent-dashboard.service";
+import { PaginationArgs } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("parentDashboardSchedule", t =>
   t.field({

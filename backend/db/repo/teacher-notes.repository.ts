@@ -1,4 +1,5 @@
 import { and, desc, eq, gt, isNull, or, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherImportantNotes } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -8,7 +9,6 @@ import type {
   TeacherImportantNoteSubmitInput,
   TeacherImportantNoteUpdateInput,
 } from "@/backend/types";
-import type { DBTransaction } from "../db.types";
 
 export namespace TeacherNotesRepository {
   export async function getActiveNotes(

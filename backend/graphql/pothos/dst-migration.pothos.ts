@@ -1,3 +1,4 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type {
   DstCheckedEmptyItemReturnType,
   DstConflictGroupReturnType,
@@ -5,7 +6,6 @@ import type {
   DstMigrationReportReturnType,
   DstUpdatedSessionReturnType,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const DstUpdatedSessionRef = gqlSchemaBuilder.objectRef<DstUpdatedSessionReturnType>("DstUpdatedSession");
 

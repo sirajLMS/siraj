@@ -193,6 +193,29 @@ const eslintConfig = defineConfig([
   //       "local-rules/no-hardcoded-colors": "error",
   //     },
   //   },
+
+  // Enforce @/ path alias in backend code — relative ./ or ../ imports are banned
+  // except for barrel files (**/index.ts) which legitimately re-export siblings.
+  {
+    files: ["backend/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "ImportDeclaration[source.value=/^\\.\\.?\\//]",
+          message: "Backend imports must use @/ path alias, not relative ./ or ../ — see AGENTS.md",
+        },
+      ],
+    },
+  },
+
+  // **/index.ts barrel files keep relative ./sibling re-exports by design.
+  {
+    files: ["**/index.ts"],
+    rules: {
+      "no-restricted-syntax": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

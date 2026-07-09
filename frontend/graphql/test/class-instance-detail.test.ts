@@ -87,6 +87,6 @@ describe("GraphQL Class Instance Detail Query", () => {
     const denied = await assertOperationDenied("teacher_default", "query", classInstanceQueryDocument, {
       id: classInstanceId,
     });
-    expect(denied).toBeUndefined();
+    expect(denied).toBe(true);
   });
 });

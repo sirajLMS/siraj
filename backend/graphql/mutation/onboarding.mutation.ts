@@ -1,8 +1,4 @@
-import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
-import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
-import { StudentOnboardingService } from "@/backend/services/student/student-onboarding.service";
-import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ManagerOnboardingInputPothosObject,
   ManagerOnboardingResultPothosObject,
@@ -12,8 +8,12 @@ import {
   StudentOnboardingResultPothosObject,
   TeacherOnboardingInputPothosObject,
   TeacherOnboardingPothosObject,
-} from "../pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
+import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
+import { StudentOnboardingService } from "@/backend/services/student/student-onboarding.service";
+import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
 
 gqlSchemaBuilder.mutationFields(t => ({
   createTeacher: t.field({

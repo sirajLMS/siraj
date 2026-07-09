@@ -15,7 +15,7 @@ import { setupTestServerLifecycle } from "./lifecycle";
 const createMinimalParentInput = (overrides?: Partial<{ name: string; email: string }>) => ({
   name: overrides?.name ?? "Student Onboard Parent",
   email: overrides?.email ?? `student_parent_${Date.now()}@test.com`,
-  password: randomUUID(),
+  password: `Pwd_${randomUUID()}`,
   phone: null,
   invoiceType: null,
   feeAmount: null,

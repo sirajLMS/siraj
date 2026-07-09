@@ -1,6 +1,6 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { AttendanceReportRow } from "@/backend/services/report/report.service";
 import { ReportGroupingMode, ReportService } from "@/backend/services/report/report.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 export const ReportGroupingModeEnum = gqlSchemaBuilder.enumType(ReportGroupingMode, {
   name: "ReportGroupingMode",

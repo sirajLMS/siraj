@@ -1,10 +1,14 @@
 import type { AppPermission } from "@/backend/enum";
-import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType, ParentProfileResult } from "./parent.types";
+import type {
+  ParentAssignedStudentsResult,
+  ParentOwnProfileReturnType,
+  ParentProfileResult,
+} from "@/backend/types/parent.types";
 import type {
   ManagerDirectoryRow,
   StaffPermissionGroupReturnType,
   StaffPermissionOverrideReturnType,
-} from "./staff-profile.types";
+} from "@/backend/types/staff-profile.types";
 import type {
   TeacherAssignedStudentsResult,
   TeacherBankingSummaryReturnType,
@@ -12,7 +16,7 @@ import type {
   TeacherOwnProfileUpdateInput,
   TeacherProfileReturnType,
   TeacherProfileUpdateInputType,
-} from "./teacher.types";
+} from "@/backend/types/teacher.types";
 
 export type { TeacherOwnProfileUpdateInput };
 

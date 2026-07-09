@@ -1,5 +1,5 @@
-import type { IRedisService } from "./IRedisService";
-import { buildRedisPipeline } from "./redis-utils";
+import type { IRedisService } from "@/backend/services/redis/IRedisService";
+import { buildRedisPipeline } from "@/backend/services/redis/redis-utils";
 
 /**
  * Common interface for Redis clients (ioredis, upstash) to allow safe delegation

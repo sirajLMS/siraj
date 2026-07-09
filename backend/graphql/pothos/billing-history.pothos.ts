@@ -1,3 +1,11 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  InvoiceStatusPothosObject,
+  InvoiceTypePothosObject,
+  StudentStatusPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingHistoryService } from "@/backend/services/billing/billing-history.service";
 import type {
   AdminBillingSummaryResult,
@@ -8,10 +16,6 @@ import type {
   StudentCreditRow,
 } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { requireAuth } from "../utils/requireAuth";
-import { InvoiceStatusPothosObject, InvoiceTypePothosObject, StudentStatusPothosObject } from "./enum.pothos";
-import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
   if (!input) {

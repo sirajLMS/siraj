@@ -1,3 +1,13 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
+  ClassTypePothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
+import {
+  SupportContactPothosObject,
+  TeacherImportantNotePothosObject,
+} from "@/backend/graphql/pothos/teacher-notes.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type {
@@ -12,9 +22,6 @@ import type {
   SupportRequestResultReturnType,
   TeacherFutureScheduleReturnType,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
-import { SupportContactPothosObject, TeacherImportantNotePothosObject } from "./teacher-notes.pothos";
 
 // ─── Performance ─────────────────────────────────────────────────────────────
 

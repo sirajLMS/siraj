@@ -1,12 +1,20 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
+import {
+  classInstances,
+  parents,
+  studentProgress,
+  students,
+  teacherAssignments,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import { Gender } from "@/backend/enum";
+import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity } from "@/backend/types";
+import type { ClassInstanceEntity } from "@/backend/types/scheduling.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity } from "../../../types";
-import type { ClassInstanceEntity } from "../../../types/scheduling.types";
-import type { DBTransaction } from "../../db.types";
-import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function setupTestEnvironment(tx: DBTransaction, now: Date) {

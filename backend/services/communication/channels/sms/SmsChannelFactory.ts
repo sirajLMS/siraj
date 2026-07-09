@@ -1,6 +1,6 @@
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { ISmsChannel, SmsProvider } from "./ISmsChannel";
+import type { ISmsChannel, SmsProvider } from "@/backend/services/communication/channels/sms/ISmsChannel";
 
 let instance: ISmsChannel | null = null;
 let initializationPromise: Promise<ISmsChannel> | null = null;

@@ -4,7 +4,7 @@ import type {
   teacherVacationRequests,
 } from "@/backend/db/schema";
 import type { AvailabilitySearchSortBy, DayOfWeek, Gender } from "@/backend/enum";
-import type { PageInfo, PaginationInput } from "./pagination.types";
+import type { PageInfo, PaginationInput } from "@/backend/types/pagination.types";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;
 export type TeacherAvailabilityWindowInsertInput = typeof teacherAvailabilityWindows.$inferInsert;

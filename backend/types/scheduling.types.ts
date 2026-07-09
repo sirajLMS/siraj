@@ -12,12 +12,12 @@ import type {
   RescheduleDateLabel,
   StudentStatus,
 } from "@/backend/enum";
+import type { ClassInstancePerformanceReturnType } from "@/backend/types/class-instance-detail.types";
+import type { PageInfo, PaginationArgs } from "@/backend/types/pagination.types";
+import type { StudentEntity } from "@/backend/types/student.types";
+import type { TeacherEntity } from "@/backend/types/teacher.types";
+import type { UserSelectType } from "@/backend/types/user.types";
 import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule-instance-dashboard-status";
-import type { ClassInstancePerformanceReturnType } from "./class-instance-detail.types";
-import type { PageInfo, PaginationArgs } from "./pagination.types";
-import type { StudentEntity } from "./student.types";
-import type { TeacherEntity } from "./teacher.types";
-import type { UserSelectType } from "./user.types";
 
 export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
 export type RecurringScheduleInsertInput = typeof recurringSchedules.$inferInsert;

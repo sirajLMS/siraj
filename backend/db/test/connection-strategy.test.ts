@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { poolMax, resolveConnectionStrategy, resolvePoolMax } from "../connection-strategy";
+import { poolMax, resolveConnectionStrategy, resolvePoolMax } from "@/backend/db/connection-strategy";
 
 const ENV_KEYS = [
   "DB_CONNECTION_MODE",

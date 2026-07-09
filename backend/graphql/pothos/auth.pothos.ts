@@ -1,6 +1,6 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { UserPothosObject } from "@/backend/graphql/pothos/user.pothos";
 import type { DemoLoginInput, LoginInput, LoginResponse, RefreshTokenResponse } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { UserPothosObject } from "./user.pothos";
 
 export { UserPothosObject };
 

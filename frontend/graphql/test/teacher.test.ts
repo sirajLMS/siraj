@@ -9,7 +9,7 @@ import {
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
 import { authenticatedRequest, cleanupTestEntities, loginAndProvision, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+import { clearCookies, testClient } from "./testClient";
 
 function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): TeacherProfileUpdateInput {
   return {
@@ -90,6 +90,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("returns error on teachers query when unauthenticated", async () => {
+    clearCookies();
     const result = await testClient.query({
       query: teachersQueryDocument,
       variables: {

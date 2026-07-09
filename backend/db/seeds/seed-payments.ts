@@ -1,9 +1,15 @@
 import { db } from "@/backend/db/drizzleDb";
 import { payments } from "@/backend/db/schema/billing";
+import {
+  ALL_PAYMENT_METHODS,
+  cycleAtIndex,
+  DEFAULT_INVOICE_CURRENCY,
+  loadSeedConfig,
+  type SeedConfig,
+} from "@/backend/db/seeds/lib";
 import { InvoiceStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { InvoiceSelectType } from "@/backend/types";
-import { ALL_PAYMENT_METHODS, cycleAtIndex, DEFAULT_INVOICE_CURRENCY, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(invoicesList: InvoiceSelectType[], config?: SeedConfig) {
   logger.info("Seeding payments...");

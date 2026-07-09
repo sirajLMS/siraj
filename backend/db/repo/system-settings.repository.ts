@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { systemSettings } from "@/backend/db/schema/settings";
 import type { SystemSettingSelectType } from "@/backend/types";
-import type { DBTransaction } from "../db.types";
-import { db } from "../drizzleDb";
-import { systemSettings } from "../schema/settings";
 
 export namespace SystemSettingsRepository {
   /**

@@ -1,11 +1,11 @@
 import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-import type { DBTransaction } from "../db.types";
 
 export namespace SuggestionRepository {
   export const submitSuggestion = async (

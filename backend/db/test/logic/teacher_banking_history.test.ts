@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { TeacherBankingRepository } from "@/backend/db/repo/teacher-banking.repository";
+import { teacherBankingDetailsHistory } from "@/backend/db/schema";
+import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { TeacherBankingDetailsHistorySelectType } from "../../../types";
-import { TeacherBankingRepository } from "../../repo/teacher-banking.repository";
-import { teacherBankingDetailsHistory } from "../../schema";
 import { setupTeacher } from "../entity-setup";
 import { createTestUser, runInRollback } from "../test-utils";
 

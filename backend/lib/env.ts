@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { getGlobalSingleton } from "@/backend/lib/global-singleton";
 import logger from "@/backend/lib/logger";
-import { sanitizeUrlCredentials } from "./utils/url";
+import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 
 /**
  * Environment variable validation

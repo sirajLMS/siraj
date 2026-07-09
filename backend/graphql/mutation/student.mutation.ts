@@ -1,16 +1,16 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type * as Types from "@/backend/types";
-import { StudentUtils } from "@/backend/utils";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   PartialStudentUpdateInputPothosObject,
   // StudentCreateInputPothosObject,
   StudentPothosObject,
-} from "../pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type * as Types from "@/backend/types";
+import { StudentUtils } from "@/backend/utils";
 
 async function requireStudentManageStatus(userId: string, locale?: string): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STUDENT_MANAGE_STATUS);

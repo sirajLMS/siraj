@@ -1,6 +1,6 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { OrderSortDirectionPothosObject } from "@/backend/graphql/pothos/enum.pothos";
 import * as Types from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { OrderSortDirectionPothosObject } from "./enum.pothos";
 
 // File type enum
 export const FileTypePothosObject = gqlSchemaBuilder.enumType(Types.FileTypes, {

@@ -1,9 +1,12 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
+import {
+  TeacherDashboardPothosObject,
+  TeacherHandbookUrlPothosObject,
+} from "@/backend/graphql/pothos/teacher-dashboard.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 import { PaginationArgs } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { PaginationArgsObject } from "../pothos/pagination.objects";
-import { TeacherDashboardPothosObject, TeacherHandbookUrlPothosObject } from "../pothos/teacher-dashboard.pothos";
 
 async function resolveTeacherDashboard(
   ctx: { user?: { id: string } | null; locale?: string },

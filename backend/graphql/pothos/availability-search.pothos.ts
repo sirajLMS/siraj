@@ -1,12 +1,16 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  AvailabilitySearchSortByPothosObject,
+  DayOfWeekPothosObject,
+  GenderPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
+import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
 import type {
   AvailabilitySearchResult,
   AvailabilitySearchTeacher,
   CrossStaffSearchInput,
   TeacherAvailabilityGap,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { AvailabilitySearchSortByPothosObject, DayOfWeekPothosObject, GenderPothosObject } from "./enum.pothos";
-import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 const TeacherAvailabilityGapRef = gqlSchemaBuilder.objectRef<TeacherAvailabilityGap>("TeacherAvailabilityGap");
 

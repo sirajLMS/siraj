@@ -1,12 +1,12 @@
 import { SchedulingRepository } from "@/backend/db/repo";
-import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CreateTeacherNoteInputPothos,
   TeacherImportantNotePothosObject,
   UpdateTeacherNoteInputPothos,
-} from "../pothos/teacher-notes.pothos";
-import { requireAuth } from "../utils/requireAuth";
+} from "@/backend/graphql/pothos/teacher-notes.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 
 gqlSchemaBuilder.mutationField("createTeacherImportantNote", t =>
   t.field({

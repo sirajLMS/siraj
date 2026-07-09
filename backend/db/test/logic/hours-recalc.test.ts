@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { SoftDeleteRepository } from "@/backend/db/repo";
+import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import type { ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/user.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, TeacherEntity } from "../../../types";
-import { db } from "../../drizzleDb";
-import { SoftDeleteRepository } from "../../repo";
-import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "../../schema";
 
 describe("hoursPerWeek Recalculation Triggers", () => {
   let parentUser: Pick<UserReturnType, "id"> | null = null;

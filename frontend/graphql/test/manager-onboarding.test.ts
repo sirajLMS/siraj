@@ -14,7 +14,7 @@ const createMinimalManagerInput = (
 ) => ({
   name: overrides?.name ?? "Test Manager",
   email: overrides?.email ?? `test_manager_${Date.now()}@test.com`,
-  password: randomUUID(),
+  password: `Pwd_${randomUUID()}`,
   accountType: overrides?.accountType ?? ManagerAccountType.Manager,
   phone: null,
 });

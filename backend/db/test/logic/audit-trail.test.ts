@@ -14,13 +14,13 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { AuditRepository } from "@/backend/db/repo";
+import { auditLogs, users } from "@/backend/db/schema";
 import { type AccountStatus, StudentStatus, type UserRole } from "@/backend/enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/user.types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { db } from "../../drizzleDb";
-import { AuditRepository } from "../../repo";
-import { auditLogs, users } from "../../schema";
 import { IP_ADDRESS_1 } from "../const";
 
 describe("Audit Trail System", () => {

@@ -1,6 +1,6 @@
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { IPushChannel, PushProvider } from "./IPushChannel";
+import type { IPushChannel, PushProvider } from "@/backend/services/communication/channels/push/IPushChannel";
 
 let instance: IPushChannel | null = null;
 let initializationPromise: Promise<IPushChannel> | null = null;

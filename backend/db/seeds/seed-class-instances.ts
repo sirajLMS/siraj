@@ -1,7 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances } from "@/backend/db/schema/scheduling";
-import logger from "@/backend/lib/logger";
-import type { RecurringScheduleEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 import {
   buildScheduleDaysForStudent,
   buildShowcaseInstancesForToday,
@@ -9,7 +7,9 @@ import {
   loadSeedConfig,
   type ScheduleContext,
   type SeedConfig,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { RecurringScheduleEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 
 const CHUNK_SIZE = 100;
 

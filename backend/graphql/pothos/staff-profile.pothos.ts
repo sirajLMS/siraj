@@ -1,6 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  AccountStatusPothosObject,
+  GenderPothosObject,
+  PaymentMethodPothosObject,
+} from "@/backend/graphql/pothos/enum.pothos";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teacher.types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { AccountStatusPothosObject, GenderPothosObject, PaymentMethodPothosObject } from "./enum.pothos";
 
 const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
 

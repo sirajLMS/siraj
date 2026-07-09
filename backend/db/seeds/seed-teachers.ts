@@ -1,7 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
 import { teachers } from "@/backend/db/schema/teachers";
-import logger from "@/backend/lib/logger";
-import type { TimezoneEntity, UserSelectType } from "@/backend/types";
 import {
   ALL_ACCOUNT_STATUSES,
   cycleAtIndex,
@@ -11,7 +9,9 @@ import {
   type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-} from "./lib";
+} from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { TimezoneEntity, UserSelectType } from "@/backend/types";
 
 async function upsertTeacher(userId: string, timezone: TimezoneEntity, status: string, now: Date) {
   const [insertedTeacher] = await db

@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { BaseContext } from "../gqlContext";
 
 export async function requireNotImpersonating(ctx: BaseContext): Promise<void> {
   if (!ctx.isImpersonating) {

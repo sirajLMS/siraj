@@ -1,8 +1,8 @@
 import { OrderSortDirection } from "@/backend/enum";
+import logger from "@/backend/lib/logger";
+import { STORAGE_CONFIG } from "@/backend/storage/disk/storage.service.interface";
 import * as Types from "@/backend/types";
 import { isAllowedMimeType, validateFileName as sharedValidateFileName } from "@/shared/utils/storage.utils";
-import logger from "../lib/logger";
-import { STORAGE_CONFIG } from "../storage/disk/storage.service.interface";
 
 export namespace StorageUtils {
   const PATH_PATTERN = /^[a-zA-Z0-9._/\- ()]+$/;

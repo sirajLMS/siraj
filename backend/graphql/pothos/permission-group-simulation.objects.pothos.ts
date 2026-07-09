@@ -1,10 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type {
   EndPermissionGroupSimulationReturnType,
   PermissionGroupSimulationStatusReturnType,
   SimulatablePermissionGroupReturnType,
   StartPermissionGroupSimulationReturnType,
 } from "@/backend/types/permission-group-simulation.types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const SimulatablePermissionGroupPothosObjectRef =
   gqlSchemaBuilder.objectRef<SimulatablePermissionGroupReturnType>("SimulatablePermissionGroup");

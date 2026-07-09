@@ -1,3 +1,19 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { OverrideStatePothosObject } from "@/backend/graphql/pothos/enum.pothos";
+import {
+  ParentAssignedStudentsResultPothosObject,
+  ParentOwnProfilePothosObject,
+} from "@/backend/graphql/pothos/parent-portal.pothos";
+import { ParentProfilePothosObject } from "@/backend/graphql/pothos/parent-profile.pothos";
+import { ManagerDirectoryRowPothosObject } from "@/backend/graphql/pothos/staff-directory.pothos";
+import {
+  TeacherProfileResultPothosObject,
+  TeacherProfileUpdateInputPothosObject,
+} from "@/backend/graphql/pothos/staff-profile.pothos";
+import {
+  TeacherAssignedStudentsResultPothosObject,
+  TeacherOwnProfilePothosObject,
+} from "@/backend/graphql/pothos/teacher-portal.pothos";
 import type {
   CoreUserProfileFields,
   ParentAdminProfileUpdateInput,
@@ -12,13 +28,6 @@ import type {
   UpdateUserProfileInput,
 } from "@/backend/types";
 import type { TeacherBankingSummaryReturnType } from "@/backend/types/teacher.types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { OverrideStatePothosObject } from "./enum.pothos";
-import { ParentAssignedStudentsResultPothosObject, ParentOwnProfilePothosObject } from "./parent-portal.pothos";
-import { ParentProfilePothosObject } from "./parent-profile.pothos";
-import { ManagerDirectoryRowPothosObject } from "./staff-directory.pothos";
-import { TeacherProfileResultPothosObject, TeacherProfileUpdateInputPothosObject } from "./staff-profile.pothos";
-import { TeacherAssignedStudentsResultPothosObject, TeacherOwnProfilePothosObject } from "./teacher-portal.pothos";
 
 const StaffPermissionGroupRef = gqlSchemaBuilder.objectRef<StaffPermissionGroupReturnType>("StaffPermissionGroup");
 

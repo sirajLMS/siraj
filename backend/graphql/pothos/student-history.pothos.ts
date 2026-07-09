@@ -1,10 +1,10 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type {
   StudentClassHistory,
   StudentHistoryMetricsType,
   StudentHistorySession,
   StudentSessionDetail,
 } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── Metrics ──────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,5 @@
 import { and, eq, gte, ilike, inArray, isNull, lte, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   classInstances,
@@ -14,7 +15,6 @@ import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import type { DBTransaction } from "../db.types";
 
 type TeacherGender = string | null;
 

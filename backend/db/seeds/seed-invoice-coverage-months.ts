@@ -1,8 +1,8 @@
 import { db } from "@/backend/db/drizzleDb";
 import { invoiceCoverageMonths } from "@/backend/db/schema/billing";
+import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { InvoiceSelectType } from "@/backend/types";
-import { loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(invoicesList: InvoiceSelectType[], config?: SeedConfig) {
   logger.info("Seeding invoice coverage months...");

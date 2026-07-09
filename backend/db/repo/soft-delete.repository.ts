@@ -1,4 +1,5 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo/audit.repository";
 import {
@@ -14,7 +15,6 @@ import {
 import { NotFoundError } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
-import type { DBTransaction } from "../db.types";
 
 const SOFT_DELETE_TABLES = {
   users: {

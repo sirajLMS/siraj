@@ -4,9 +4,9 @@ import { PermissionManagementRepository } from "@/backend/db/repo";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { GroupWithPermissionIds, PermissionEntity, UserOverrideEntity, UserOverrideInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
-import { PermissionsService } from "./permissions.service";
 
 export namespace PermissionManagementService {
   // ─── Private Guards ───────────────────────────────────────────────────────

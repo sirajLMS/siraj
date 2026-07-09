@@ -1,6 +1,6 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ParentDocumentService } from "@/backend/services/parent/parent-document.service";
 import type { ParentDocument } from "@/backend/types";
-import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const ParentDocumentRef = gqlSchemaBuilder.objectRef<ParentDocument>("ParentDocument");
 
