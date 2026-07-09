@@ -1,7 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { AvailabilityStatusPothosObject } from "@/backend/graphql/pothos/enum.pothos";
 import { BookService } from "@/backend/services/resource/book.service";
-import type { BookReturnType } from "@/backend/types/book.types";
+import type { BookReturnType } from "@/backend/types/books/book.types";
 
 const BookRef = gqlSchemaBuilder.objectRef<BookReturnType>("Book");
 

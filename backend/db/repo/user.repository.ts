@@ -9,9 +9,9 @@ import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
-import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth.types";
-import type { PaginationInput } from "@/backend/types/pagination.types";
-import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/user.types";
+import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth/auth.types";
+import type { PaginationInput } from "@/backend/types/shared/pagination.types";
+import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/users/user.types";
 import { AuthUtils } from "@/backend/utils";
 
 export async function findOne(condition: SQL | undefined): Promise<UserSelectType | null> {

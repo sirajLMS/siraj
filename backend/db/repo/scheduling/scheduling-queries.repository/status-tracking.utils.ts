@@ -1,6 +1,6 @@
 import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { StatusTrackingRow } from "@/backend/types/scheduling.types";
+import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
 
 export function mapStatusTrackingQueryRow(r: {
   id: string;

@@ -923,6 +923,41 @@ export type CreateTeacherNoteInput = {
   title: Scalars['String']['input'];
 };
 
+export enum CurrencyCode {
+  Aed = 'AED',
+  Aud = 'AUD',
+  Bhd = 'BHD',
+  Cad = 'CAD',
+  Chf = 'CHF',
+  Cny = 'CNY',
+  Djf = 'DJF',
+  Dzd = 'DZD',
+  Egp = 'EGP',
+  Eur = 'EUR',
+  Gbp = 'GBP',
+  Ils = 'ILS',
+  Inr = 'INR',
+  Iqd = 'IQD',
+  Jod = 'JOD',
+  Jpy = 'JPY',
+  Kmf = 'KMF',
+  Kwd = 'KWD',
+  Lbp = 'LBP',
+  Lyd = 'LYD',
+  Mad = 'MAD',
+  Mru = 'MRU',
+  Omr = 'OMR',
+  Qar = 'QAR',
+  Sar = 'SAR',
+  Sdg = 'SDG',
+  Sos = 'SOS',
+  Syp = 'SYP',
+  Tnd = 'TND',
+  Try = 'TRY',
+  Usd = 'USD',
+  Yer = 'YER'
+}
+
 export type DailyScheduleList = {
   __typename?: 'DailyScheduleList';
   avatarUrl: Maybe<Scalars['String']['output']>;
@@ -2882,6 +2917,11 @@ export enum ProfileAudience {
   Parent = 'parent',
   Staff = 'staff',
   Teacher = 'teacher'
+}
+
+export enum ProfileMode {
+  Edit = 'edit',
+  View = 'view'
 }
 
 export enum ProfileScope {

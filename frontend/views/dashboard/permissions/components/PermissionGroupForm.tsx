@@ -20,9 +20,12 @@ import { useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type PermissionGroupFormData, permissionGroupSchema } from "../schemas/permissionGroupSchema";
-import { PermissionCategoryList } from "./PermissionCategoryList";
-import { PermissionFilterBar } from "./PermissionFilterBar";
+import { PermissionCategoryList } from "@/frontend/views/dashboard/permissions/components/PermissionCategoryList";
+import { PermissionFilterBar } from "@/frontend/views/dashboard/permissions/components/PermissionFilterBar";
+import {
+  type PermissionGroupFormData,
+  permissionGroupSchema,
+} from "@/frontend/views/dashboard/permissions/schemas/permissionGroupSchema";
 
 interface PermissionGroupFormProps {
   readonly open: boolean;

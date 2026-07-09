@@ -4,7 +4,7 @@ import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
-import type { ClassInstancePerformanceSelectType } from "@/backend/types/class-instance-performance.types";
+import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
 

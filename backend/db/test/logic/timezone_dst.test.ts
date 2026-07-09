@@ -21,7 +21,7 @@ import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";
-import type { UserSelectType } from "@/backend/types/user.types";
+import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { getErrorMessage } from "@/shared/utils/error";
 

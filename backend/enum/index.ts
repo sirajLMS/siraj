@@ -10,6 +10,7 @@ export * from "./book.enum";
 export * from "./class-instance-detail.enum";
 export * from "./complaint.enum";
 export * from "./country.enum";
+export * from "./currency.enum";
 export * from "./dst-migration.enum";
 export * from "./group-class.enum";
 export * from "./notificationDeliveries.enum";

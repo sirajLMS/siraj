@@ -2,7 +2,7 @@
 
 import { Button, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ProfileMode } from "@/backend/types/profile.types";
+import type { ProfileMode } from "@/backend/types/profile/profile.types";
 import { useRouter } from "@/shared/i18n/routing";
 
 type ProfileActionBarProps = {

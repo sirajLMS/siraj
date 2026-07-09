@@ -58,3 +58,4 @@ docs/
 .gitwandrc
 *.txt
 .playwright-cli
+.agent-canvas

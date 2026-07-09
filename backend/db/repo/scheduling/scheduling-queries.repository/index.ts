@@ -6,7 +6,7 @@ export type {
   UpcomingClassRow,
   WeeklyScheduleGridRow,
   WeeklyWorkloadMetrics,
-} from "@/backend/types/scheduling.types";
+} from "@/backend/types/scheduling/scheduling.types";
 
 export { getClassStatusEvents, getTeacherProgressFeed } from "./class-status-events.repository";
 export { getAdminDashboardSchedule, getDailyMetrics, getDailySchedule } from "./daily-schedule.repository";

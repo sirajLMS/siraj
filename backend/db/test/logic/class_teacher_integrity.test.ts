@@ -5,10 +5,10 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { Gender } from "@/backend/enum";
-import type { ParentEntity } from "@/backend/types/parent.types";
-import type { StudentEntity } from "@/backend/types/student.types";
-import type { TeacherEntity } from "@/backend/types/teacher.types";
-import type { UserSelectType } from "@/backend/types/user.types";
+import type { ParentEntity } from "@/backend/types/parents/parent.types";
+import type { StudentEntity } from "@/backend/types/students/student.types";
+import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
+import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 

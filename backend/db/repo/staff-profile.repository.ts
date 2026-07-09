@@ -26,7 +26,7 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
-import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/localized-string.types";
+import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;

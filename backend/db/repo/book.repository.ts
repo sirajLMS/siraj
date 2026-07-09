@@ -5,7 +5,7 @@ import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { books } from "@/backend/db/schema";
 import type { AvailabilityStatus } from "@/backend/enum";
 import type { PaginationArgs } from "@/backend/types";
-import type { BookReturnType } from "@/backend/types/book.types";
+import type { BookReturnType } from "@/backend/types/books/book.types";
 
 function mapRow(row: { id: string; name: string; availabilityStatus: string; createdAt: Date }): BookReturnType {
   return {

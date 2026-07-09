@@ -6,7 +6,7 @@ import { addDays, differenceInCalendarDays, format, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { HorizontalScrollRow } from "@/frontend/components/ui";
-import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import type { SearchScheduleResultItem } from "./SearchScheduleView";

@@ -6,7 +6,7 @@ import {
 import type {
   NotificationPreferenceReturnType,
   NotificationPreferenceUpdateInput,
-} from "@/backend/types/notification-preferences.types";
+} from "@/backend/types/notifications/notification-preferences.types";
 
 const NotificationPreferenceRef =
   gqlSchemaBuilder.objectRef<NotificationPreferenceReturnType>("NotificationPreference");

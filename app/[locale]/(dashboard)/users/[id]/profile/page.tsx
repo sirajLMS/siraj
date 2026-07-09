@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext, resolveProfilePageContext } from "@/backend/lib";
+import { type ProfileAudience, ProfileMode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n";
@@ -25,7 +26,7 @@ export default async function UserProfilePage({ params }: PageProps) {
 
   const resolution = await resolveProfilePageContext(userId, context, {
     targetUserId: id,
-    mode: "view",
+    mode: ProfileMode.View,
   });
   if ("redirect" in resolution) {
     redirect({ href: resolution.redirect, locale });
@@ -34,9 +35,9 @@ export default async function UserProfilePage({ params }: PageProps) {
 
   return (
     <ProfilePageClient
-      scope={resolution.scope}
-      mode={resolution.mode}
-      audience={resolution.audience}
+      scope={resolution.scope as ProfileScope}
+      mode={resolution.mode as ProfileMode}
+      audience={resolution.audience as ProfileAudience}
       targetUserId={resolution.targetUserId}
     />
   );

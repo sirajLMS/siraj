@@ -5,7 +5,7 @@
  */
 // ⚠️ WARNING: This barrel file re-exports all backend types, including sensitive types
 // (e.g., insert types with password fields, encryption key types). Only import what you
-// need via deep imports (e.g., `import type { ... } from "@/backend/types/auth.types"`)
+// need via deep imports (e.g., `import type { ... } from "@/backend/types/auth/auth.types"`)
 // rather than importing from this index file in frontend or public-facing code.
 
 export type {
@@ -17,9 +17,9 @@ export type {
   AuditLogReturnType as AuditLogEntity,
   AuditLogSubmitInput,
   CreateAuditLogInput,
-} from "./audit.types";
-export * from "./audit.types";
-
+} from "./audit/audit.types";
+export * from "./audit/audit.types";
+export * from "./audit/soft-delete.types";
 // Auth types (includes session, permission, and user-related types)
 export type {
   AuthRateLimitSelectType as AuthRateLimitEntityInput,
@@ -33,7 +33,18 @@ export type {
   SessionMetadataSelectType as SessionMetadataEntity,
   SessionSelectType as SessionEntity,
   SessionSubmitInput as SessionEntityInput,
-} from "./auth.types";
+} from "./auth/auth.types";
+export type {
+  EndImpersonationReturnType,
+  ImpersonationAuditAction,
+  ImpersonationSessionReturnType,
+  ImpersonationStatusReturnType,
+  RedisImpersonationData,
+  StartImpersonationInput,
+  StartImpersonationReturnType,
+} from "./auth/impersonation.types";
+// Impersonation types
+export * from "./auth/impersonation.types";
 export type {
   AdminBillingSummaryResult,
   CreateManualInvoiceInput,
@@ -52,37 +63,22 @@ export type {
   StudentCreditRow,
   UnpaidInvoiceSummaryItem,
   UnpaidInvoicesSummaryResult,
-} from "./billing.types";
+} from "./billing/billing.types";
 // Billing types
-export * from "./billing.types";
+export * from "./billing/billing.types";
 // Book types
-export * from "./book.types";
+export * from "./books/book.types";
+// Report types
+export * from "./books/report.types";
 // Class-instance-detail types (already exported, but remove duplicate ClassInstancePerformanceReturnType)
-export * from "./class-category.types";
-export * from "./class-instance-detail.types";
+export * from "./classes/class-category.types";
+export * from "./classes/class-instance-detail.types";
 // Class Instance Performance types
 export type {
   ClassInstancePerformanceInsertType,
   ClassInstancePerformanceSelectType as ClassInstancePerformanceEntity,
-} from "./class-instance-performance.types";
-export * from "./class-subject.types";
-// Communications types
-export * from "./communications.types";
-// Complaint types
-export * from "./complaint.types";
-export type {
-  ComplaintResponseReturnType,
-  ComplaintResponseSubmitInput,
-} from "./complaintResponses.types";
-export type {
-  DstCheckedEmptyItemReturnType,
-  DstConflictGroupReturnType,
-  DstConflictItemReturnType,
-  DstMigrationReportReturnType,
-  DstUpdatedSessionReturnType,
-} from "./dst-migration.types";
-// DST Migration types
-export * from "./dst-migration.types";
+} from "./classes/class-instance-performance.types";
+export * from "./classes/class-subject.types";
 export type {
   ClassCommunicationInsertType,
   ClassCommunicationSelectType,
@@ -95,38 +91,32 @@ export type {
   GroupClassOnlineMeetingInfoReturnType as OnlineMeetingInfoReturnType,
   GroupClassSelectType,
   GroupClassStudentReturnType,
-} from "./group-class.types";
+} from "./classes/group-class.types";
 // Group Class types
-export * from "./group-class.types";
+export * from "./classes/group-class.types";
+// Complaint types
+export * from "./complaints/complaint.types";
 export type {
-  EndImpersonationReturnType,
-  ImpersonationAuditAction,
-  ImpersonationSessionReturnType,
-  ImpersonationStatusReturnType,
-  RedisImpersonationData,
-  StartImpersonationInput,
-  StartImpersonationReturnType,
-} from "./impersonation.types";
-// Impersonation types
-export * from "./impersonation.types";
-export * from "./learning-resources.types";
-export * from "./localized-string.types";
-export * from "./manager-onboarding.types";
+  ComplaintResponseReturnType,
+  ComplaintResponseSubmitInput,
+} from "./complaints/complaintResponses.types";
+// Communications types
+export * from "./notifications/communications.types";
 export type {
   NotificationAlertReturnType as SystemAlert,
   NotificationAlertsPaginatedReturnType as NotificationAlertsResult,
-} from "./notification-alerts.types";
+} from "./notifications/notification-alerts.types";
 // Notification Alerts types
-export * from "./notification-alerts.types";
-export * from "./notification-preferences.types";
-export * from "./notificationDeliveries.types";
-export * from "./pagination.types";
-export * from "./parent.types";
-export * from "./parentHandbook.types";
-export type { PermissionReturnType as PermissionEntity } from "./permission.types";
-export * from "./permission.types";
-export * from "./permission-group.types";
-export * from "./permission-group-simulation.types";
+export * from "./notifications/notification-alerts.types";
+export * from "./notifications/notification-preferences.types";
+export * from "./notifications/notificationDeliveries.types";
+export * from "./parents/parent.types";
+export * from "./parents/parentHandbook.types";
+export * from "./parents/suggestions.types";
+export type { PermissionReturnType as PermissionEntity } from "./permissions/permission.types";
+export * from "./permissions/permission.types";
+export * from "./permissions/permission-group.types";
+export * from "./permissions/permission-group-simulation.types";
 // Permission management types
 export type {
   CreateGroupInput,
@@ -135,29 +125,36 @@ export type {
   UpdateGroupInput,
   UserOverrideInput,
   UserOverrideReturnType,
-} from "./permission-management.types";
-export * from "./permission-management.types";
-export * from "./profile.types";
-// Report types
-export * from "./report.types";
-export * from "./schedule.types";
-export * from "./scheduling.types";
-export * from "./soft-delete.types";
-export * from "./staff-profile.types";
-export * from "./storage.types";
-export * from "./student.types";
-export * from "./student-lifecycle.types";
-export * from "./student-status.types";
-export * from "./studentProgress.types";
-export * from "./studentStatusHistory.types";
-export * from "./suggestions.types";
-export * from "./system-settings.types";
-export * from "./teacher.types";
-export * from "./teacher-availability.types";
-export * from "./teacher-notes.types";
-export * from "./teacher-onboarding.types";
+} from "./permissions/permission-management.types";
+export * from "./permissions/permission-management.types";
+export * from "./profile/profile.types";
+export type {
+  DstCheckedEmptyItemReturnType,
+  DstConflictGroupReturnType,
+  DstConflictItemReturnType,
+  DstMigrationReportReturnType,
+  DstUpdatedSessionReturnType,
+} from "./scheduling/dst-migration.types";
+// DST Migration types
+export * from "./scheduling/dst-migration.types";
+export * from "./scheduling/schedule.types";
+export * from "./scheduling/scheduling.types";
+// Shared types (localized-string, pagination, system-settings, manager-onboarding)
+export * from "./shared";
+export * from "./staff/staff-profile.types";
+export * from "./storage/learning-resources.types";
+export * from "./storage/storage.types";
+export * from "./students/student.types";
+export * from "./students/student-lifecycle.types";
+export * from "./students/student-status.types";
+export * from "./students/studentProgress.types";
+export * from "./students/studentStatusHistory.types";
+export * from "./teachers/teacher.types";
+export * from "./teachers/teacher-availability.types";
+export * from "./teachers/teacher-notes.types";
+export * from "./teachers/teacher-onboarding.types";
 // User types
 // Re-export UserSelectType and UserReturnType
-export type { SafeUser, UserReturnType, UserSelectType } from "./user.types";
-export * from "./userDeviceTokens.types";
-export * from "./userNotificationPreferences.types";
+export type { SafeUser, UserReturnType, UserSelectType } from "./users/user.types";
+export * from "./users/userDeviceTokens.types";
+export * from "./users/userNotificationPreferences.types";

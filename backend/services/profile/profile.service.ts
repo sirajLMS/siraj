@@ -28,8 +28,8 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
-import type { ParentProfileUpdateInput } from "@/backend/types/parent.types";
-import type { TeacherProfileUpdateInputType } from "@/backend/types/teacher.types";
+import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
+import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 
 type ResolvedRoleIds = {
   readonly audience: ProfileAudience;

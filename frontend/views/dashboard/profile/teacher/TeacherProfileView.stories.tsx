@@ -3,8 +3,11 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AccountStatus, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherAdminData, TeacherOwnData } from "./sections/teacherProfileTypes";
-import { TeacherProfileView } from "./TeacherProfileView";
+import type {
+  TeacherAdminData,
+  TeacherOwnData,
+} from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { TeacherProfileView } from "@/frontend/views/dashboard/profile/teacher/TeacherProfileView";
 
 const teacherOwnProfile: TeacherOwnData = {
   id: "teacher-own-1",

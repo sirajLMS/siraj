@@ -8,7 +8,7 @@ import { AccountStatus, AppLanguage, Gender, OrderSortDirection, ParentStatus, U
 import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { ParentEntity, StudentEntity, StudentFilterArgs } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
-import type { UserReturnType } from "@/backend/types/auth.types";
+import type { UserReturnType } from "@/backend/types/auth/auth.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Issue #25: Student Pagination Cursor Stability", () => {

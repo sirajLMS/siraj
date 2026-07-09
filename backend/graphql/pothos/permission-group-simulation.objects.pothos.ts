@@ -4,7 +4,7 @@ import type {
   PermissionGroupSimulationStatusReturnType,
   SimulatablePermissionGroupReturnType,
   StartPermissionGroupSimulationReturnType,
-} from "@/backend/types/permission-group-simulation.types";
+} from "@/backend/types/permissions/permission-group-simulation.types";
 
 const SimulatablePermissionGroupPothosObjectRef =
   gqlSchemaBuilder.objectRef<SimulatablePermissionGroupReturnType>("SimulatablePermissionGroup");

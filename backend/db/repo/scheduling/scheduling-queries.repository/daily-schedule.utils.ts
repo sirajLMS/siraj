@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { DailyScheduleResult } from "@/backend/types/scheduling.types";
+import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
 
 export function buildDailyScheduleDayConditions(
   date: Date,

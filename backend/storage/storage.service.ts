@@ -110,7 +110,7 @@ export const resetStorageService = (): void => {
   initializationPromise = null;
 };
 
-export * from "../types/storage.types";
+export * from "../types/storage/storage.types";
 export * from "./disk/storage.service.interface";
 // Re-export types for convenience
 export type { StorageService };

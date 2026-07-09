@@ -18,7 +18,7 @@ Each database table/entity must have a single canonical type definition in the t
 
 ### Example:
 ```typescript
-// backend/types/<Entity>.types.ts
+// backend/types/<domain>/<entity>.types.ts (e.g. backend/types/users/user.types.ts)
 import type { {entityTable} } from "@/backend/db/schema";
 
 export type {Entity}SelectType = typeof {entityTable}.$inferSelect;

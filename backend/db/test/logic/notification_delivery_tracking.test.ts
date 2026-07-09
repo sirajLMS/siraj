@@ -12,7 +12,7 @@ import {
   teardownRlsRole,
 } from "@/backend/db/test/test-utils";
 import { DevicePlatform, NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
-import type { UserReturnType } from "@/backend/types/auth.types";
+import type { UserReturnType } from "@/backend/types/auth/auth.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Notification Delivery Tracking", () => {

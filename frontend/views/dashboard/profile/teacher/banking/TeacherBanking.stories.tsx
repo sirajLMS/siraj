@@ -3,8 +3,8 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import type { ProfileByUserIdQuery } from "@/frontend/graphql/generated/gql/operations";
-import { TeacherBankingEmptyState } from "./TeacherBankingEmptyState";
-import { TeacherBankingView } from "./TeacherBankingView";
+import { TeacherBankingEmptyState } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingEmptyState";
+import { TeacherBankingView } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingView";
 
 const mockBanking: NonNullable<NonNullable<ProfileByUserIdQuery["profileByUserId"]>["bankingSummary"]> = {
   id: "banking-1",

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import type { ProfileMode, ProfileScope } from "@/backend/types/profile.types";
+import type { ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
 import { ErrorState } from "@/frontend/components/ui";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {

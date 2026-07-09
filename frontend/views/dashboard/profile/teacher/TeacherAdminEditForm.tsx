@@ -7,12 +7,16 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AccountSection } from "./sections/AccountSection";
-import { AdminOnlySection } from "./sections/AdminOnlySection";
-import { CompensationSection } from "./sections/CompensationSection";
-import { ContactSection } from "./sections/ContactSection";
-import { ZoomSection } from "./sections/ZoomSection";
-import { type TeacherAdminEditFormData, type TeacherEditData, teacherAdminEditSchema } from "./teacherProfileFormTypes";
+import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
+import { AdminOnlySection } from "@/frontend/views/dashboard/profile/teacher/sections/AdminOnlySection";
+import { CompensationSection } from "@/frontend/views/dashboard/profile/teacher/sections/CompensationSection";
+import { ContactSection } from "@/frontend/views/dashboard/profile/teacher/sections/ContactSection";
+import { ZoomSection } from "@/frontend/views/dashboard/profile/teacher/sections/ZoomSection";
+import {
+  type TeacherAdminEditFormData,
+  type TeacherEditData,
+  teacherAdminEditSchema,
+} from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
 export function TeacherAdminEditForm({
   teacherData,

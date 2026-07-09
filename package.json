@@ -238,5 +238,10 @@
   ],
   "overrides": {
     "eslint-import-resolver-typescript": "3.7.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

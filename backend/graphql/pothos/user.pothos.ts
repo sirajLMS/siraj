@@ -2,7 +2,7 @@ import { UserRepository } from "@/backend/db/repo";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { AppPermissionPothosEnum } from "@/backend/graphql/pothos/enum.pothos";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { UserReturnType } from "@/backend/types/auth.types";
+import type { UserReturnType } from "@/backend/types/auth/auth.types";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");
 

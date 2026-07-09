@@ -2,7 +2,6 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ParentProfileEditForm } from "./ParentProfileEditForm";
 
 const ownParentData = {
@@ -23,7 +22,7 @@ const adminParentData = {
   feeAmount: "500",
   paymentMethod: "Bank Transfer",
   currency: "SAR",
-  timezone: IanaTimezone.AsiaRiyadh,
+  timezone: "Asia/Riyadh" as const,
 };
 
 const meta: Meta<typeof ParentProfileEditForm> = {

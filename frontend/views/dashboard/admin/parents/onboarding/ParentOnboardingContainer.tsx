@@ -9,10 +9,10 @@ import { FormSuccessSnackbar } from "@/frontend/components/ui";
 import { AppPermission, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useCreateParentOnboarding } from "@/frontend/hooks/useCreateParentOnboarding";
 import { logger } from "@/frontend/utils/logger";
-import { ParentOnboardingView } from "./ParentOnboardingView";
-import { type ParentOnboardingFormData, parentOnboardingSchema } from "./schemas/parentOnboardingSchema";
+import { ParentOnboardingView } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView";
+import { type ParentOnboardingFormData, parentOnboardingSchema } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
-import { InvoiceType, PaymentMethod } from "./types";
+import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
 const defaultValues: ParentOnboardingFormData = {
   name: "",

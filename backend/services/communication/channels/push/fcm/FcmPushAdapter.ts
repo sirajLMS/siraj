@@ -16,8 +16,8 @@ import type {
   PushSendResult,
 } from "@/backend/services/communication/channels/push/IPushChannel";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
-import type { NotificationDeliverySelectType } from "@/backend/types/notificationDeliveries.types";
-import type { UserDeviceTokenSelectType } from "@/backend/types/userDeviceTokens.types";
+import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
+import type { UserDeviceTokenSelectType } from "@/backend/types/users/userDeviceTokens.types";
 
 export class FcmPushAdapter implements IPushChannel {
   private readonly context: FcmPushContext;

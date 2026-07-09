@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import type { Control } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
-import type { ParentAdminEditFormData } from "../parentProfileFormTypes";
-import { InfoField } from "./InfoField";
-import type { ParentViewData } from "./parentProfileTypes";
+import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
+import type { ParentViewData } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 
 type ContactSectionProps =
   | {

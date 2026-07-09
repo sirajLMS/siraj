@@ -7,7 +7,7 @@ import type {
   TeacherAssignedClassRow,
   WeeklyScheduleGridRow,
   WeeklyWorkloadMetrics,
-} from "@/backend/types/scheduling.types";
+} from "@/backend/types/scheduling/scheduling.types";
 
 export async function getTeacherFutureClasses(
   teacherId: string,

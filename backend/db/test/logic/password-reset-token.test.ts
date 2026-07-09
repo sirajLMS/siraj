@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { passwordResetTokens } from "@/backend/db/schema";
-import type { PasswordResetTokenInsertType } from "@/backend/types/auth.types";
+import type { PasswordResetTokenInsertType } from "@/backend/types/auth/auth.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback } from "../test-utils";
 

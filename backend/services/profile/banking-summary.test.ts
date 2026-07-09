@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { buildMaskedBankingSummary } from "@/backend/services/profile/banking-summary";
-import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types/teacher.types";
+import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types/teachers/teacher.types";
 
 const baseRecord: TeacherBankingDetailsHistorySelectType = {
   id: "banking-record-1",

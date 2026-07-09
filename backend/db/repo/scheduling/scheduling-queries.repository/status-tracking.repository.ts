@@ -4,7 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { mapStatusTrackingQueryRow } from "@/backend/db/repo/scheduling/scheduling-queries.repository/status-tracking.utils";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/timezone.enum";
-import type { StatusTrackingRow } from "@/backend/types/scheduling.types";
+import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
 
 export const getStatusTrackingRows = async (
   date: Date,

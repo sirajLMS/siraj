@@ -7,7 +7,7 @@ import {
 } from "@/backend/graphql/pothos/enum.pothos";
 import type { Email } from "@/backend/lib/email";
 import type { TeacherOnboardingInput } from "@/backend/services/teacher/teacher-onboarding.service";
-import type { TeacherOnboardingReturnType } from "@/backend/types/teacher-onboarding.types";
+import type { TeacherOnboardingReturnType } from "@/backend/types/teachers/teacher-onboarding.types";
 
 export interface TeacherOnboardingGqlInput extends Omit<TeacherOnboardingInput, "email" | "gender" | "countryCode"> {
   email: Email;

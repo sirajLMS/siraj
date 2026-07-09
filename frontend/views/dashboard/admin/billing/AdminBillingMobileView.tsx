@@ -4,12 +4,12 @@ import { AddOutlined } from "@mui/icons-material";
 import { Fab } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { BillingMetricsRow } from "../../billing/components/BillingMetricsRow";
-import { BillingMobileSearchBar } from "../../billing/components/BillingMobileSearchBar";
-import { StudentCreditCardList } from "../../billing/components/StudentCreditCardList";
-import type { AdminBillingViewProps } from "../../billing/types/billingViewTypes";
-import { buildAdminMetrics } from "../../billing/utils/billingMetrics";
-import { AdminInvoicesCardList } from "./components/AdminInvoicesCardList";
+import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
+import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
+import { StudentCreditCardList } from "@/frontend/views/dashboard/billing/components/StudentCreditCardList";
+import type { AdminBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { buildAdminMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
+import { AdminInvoicesCardList } from "@/frontend/views/dashboard/admin/billing/components/AdminInvoicesCardList";
 
 // Floating action button for creating a manual invoice, fixed at bottom-right with primary colors
 const StyledManualInvoiceFab = styled(Fab)(({ theme }) => ({

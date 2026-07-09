@@ -5,8 +5,8 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type {
   NotificationPreferenceReturnType,
   NotificationPreferenceUpdateInput,
-} from "@/backend/types/notification-preferences.types";
-import type { UserNotificationPreferenceSelectType } from "@/backend/types/userNotificationPreferences.types";
+} from "@/backend/types/notifications/notification-preferences.types";
+import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
 
 const ALL_CHANNELS = Object.values(NotificationChannel);
 const ALL_EVENT_TYPES = Object.values(NotificationEventType);

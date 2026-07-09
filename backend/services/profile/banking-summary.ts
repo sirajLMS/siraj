@@ -1,11 +1,11 @@
 import { TeacherBankingRepository, UserRepository } from "@/backend/db";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { ProfileAudience, ProfileScope } from "@/backend/types/profile.types";
+import type { ProfileAudience, ProfileScope } from "@/backend/types/profile/profile.types";
 import type {
   TeacherBankingDetailsHistorySelectType,
   TeacherBankingSummaryReturnType,
-} from "@/backend/types/teacher.types";
+} from "@/backend/types/teachers/teacher.types";
 
 function maskNumericBankingField(value: string | null): string | null {
   if (!value) {

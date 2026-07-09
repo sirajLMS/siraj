@@ -13,7 +13,7 @@ import {
 } from "@/backend/db/schema";
 import { Gender } from "@/backend/enum";
 import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity } from "@/backend/types";
-import type { ClassInstanceEntity } from "@/backend/types/scheduling.types";
+import type { ClassInstanceEntity } from "@/backend/types/scheduling/scheduling.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 

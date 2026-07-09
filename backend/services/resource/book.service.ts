@@ -4,7 +4,7 @@ import { DomainError, UnauthorizedError } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { BookReturnType } from "@/backend/types/book.types";
+import type { BookReturnType } from "@/backend/types/books/book.types";
 
 export namespace BookService {
   export async function listBooks(actorUserId: string, locale?: string): Promise<BookReturnType[]> {

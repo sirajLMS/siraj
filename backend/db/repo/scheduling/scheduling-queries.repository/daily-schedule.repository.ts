@@ -9,7 +9,7 @@ import type {
   AdminDashboardScheduleInput,
   AdminDashboardScheduleResult,
   DailyScheduleResult,
-} from "@/backend/types/scheduling.types";
+} from "@/backend/types/scheduling/scheduling.types";
 import {
   computeDailyScheduleMetricsFromRows,
   matchesDashboardMetricFilter,

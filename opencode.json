@@ -16,6 +16,11 @@
       "type": "local",
       "command": ["bun", "x", "-y", "@playwright/mcp@0.0.38"],
       "enabled": true
+    },
+    "storybook": {
+      "type": "remote",
+      "url": "http://localhost:6006/mcp",
+      "enabled": true
     }
   }
 }

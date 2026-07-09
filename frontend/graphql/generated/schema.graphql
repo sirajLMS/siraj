@@ -878,6 +878,41 @@ input CreateTeacherNoteInput {
   title: String!
 }
 
+enum CurrencyCode {
+  AED
+  AUD
+  BHD
+  CAD
+  CHF
+  CNY
+  DJF
+  DZD
+  EGP
+  EUR
+  GBP
+  ILS
+  INR
+  IQD
+  JOD
+  JPY
+  KMF
+  KWD
+  LBP
+  LYD
+  MAD
+  MRU
+  OMR
+  QAR
+  SAR
+  SDG
+  SOS
+  SYP
+  TND
+  TRY
+  USD
+  YER
+}
+
 type DailyScheduleList {
   avatarUrl: String
   courseName: String
@@ -2345,6 +2380,11 @@ enum ProfileAudience {
   parent
   staff
   teacher
+}
+
+enum ProfileMode {
+  edit
+  view
 }
 
 enum ProfileScope {

@@ -17,7 +17,7 @@ import type {
   TeacherFutureScheduleReturnType,
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
-import type { DailyScheduleResult } from "@/backend/types/scheduling.types";
+import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace ScheduleService {

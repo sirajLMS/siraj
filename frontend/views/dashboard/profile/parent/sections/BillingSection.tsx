@@ -5,12 +5,15 @@ import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
-import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import type { ParentAdminEditFormData } from "../parentProfileFormTypes";
-import { InfoField } from "./InfoField";
-import { type ParentAdminData, toDisplayValue } from "./parentProfileTypes";
+import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
+import {
+  type ParentAdminData,
+  toDisplayValue,
+} from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 
 type BillingSectionProps =
   | {

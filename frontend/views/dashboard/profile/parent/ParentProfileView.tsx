@@ -2,13 +2,17 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { AccountSection } from "./sections/AccountSection";
-import { AssociatedStudentsSection } from "./sections/AssociatedStudentsSection";
-import { BillingSection } from "./sections/BillingSection";
-import { ContactSection } from "./sections/ContactSection";
-import { IdentitySection } from "./sections/IdentitySection";
-import type { AssociatedStudents, ParentAdminData, ParentViewData } from "./sections/parentProfileTypes";
-import { SocialSection } from "./sections/SocialSection";
+import { AccountSection } from "@/frontend/views/dashboard/profile/parent/sections/AccountSection";
+import { AssociatedStudentsSection } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsSection";
+import { BillingSection } from "@/frontend/views/dashboard/profile/parent/sections/BillingSection";
+import { ContactSection } from "@/frontend/views/dashboard/profile/parent/sections/ContactSection";
+import { IdentitySection } from "@/frontend/views/dashboard/profile/parent/sections/IdentitySection";
+import type {
+  AssociatedStudents,
+  ParentAdminData,
+  ParentViewData,
+} from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { SocialSection } from "@/frontend/views/dashboard/profile/parent/sections/SocialSection";
 
 export function ParentProfileView({
   parentData,

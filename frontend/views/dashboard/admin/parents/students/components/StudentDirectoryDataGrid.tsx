@@ -8,8 +8,8 @@ import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { studentHref } from "@/frontend/utils/profileHref";
-import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "../types";
-import { ClassesLeftProgress } from "./ClassesLeftProgress";
+import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
+import { ClassesLeftProgress } from "@/frontend/views/dashboard/admin/parents/students/components/ClassesLeftProgress";
 
 interface StudentDirectoryDataGridProps {
   readonly rows: readonly StudentDirectoryRowExtended[];

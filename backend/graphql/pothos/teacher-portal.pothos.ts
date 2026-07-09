@@ -12,7 +12,7 @@ import type {
   TeacherAssignedStudentReturnType,
   TeacherAssignedStudentsResult,
   TeacherOwnProfileReturnType,
-} from "@/backend/types/teacher.types";
+} from "@/backend/types/teachers/teacher.types";
 
 const TeacherAssignedStudentRef =
   gqlSchemaBuilder.objectRef<TeacherAssignedStudentReturnType>("TeacherAssignedStudent");

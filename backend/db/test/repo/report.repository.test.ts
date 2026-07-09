@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { AttendanceReportRow } from "@/backend/types/report.types";
+import type { AttendanceReportRow } from "@/backend/types/books/report.types";
 
 function reportRepoTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {

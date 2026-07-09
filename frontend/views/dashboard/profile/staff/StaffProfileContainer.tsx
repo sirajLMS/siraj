@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ProfileMode, ProfileScope } from "@/backend/types/profile.types";
+import type { ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,

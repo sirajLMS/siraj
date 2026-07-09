@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherAdminEditFormData } from "../teacherProfileFormTypes";
-import { InfoField } from "./InfoField";
-import type { TeacherViewData } from "./teacherProfileTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
+import type { TeacherViewData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import type { TeacherAdminEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
 type CompensationSectionProps =
   | {

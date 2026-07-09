@@ -1,4 +1,4 @@
-import type { ProfileAudience, ProfileScope } from "@/backend/types/profile.types";
+import type { ProfileAudience, ProfileScope } from "@/backend/types/profile/profile.types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type ProfileTabId = "profile" | "banking" | "students" | "notifications" | "permissions";
@@ -8,7 +8,7 @@ export type ProfileTabDefinition = {
   readonly i18nKey: `shell.tabs.${string}`;
 };
 
-type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
+type TabVisibilityKey = `${Lowercase<ProfileAudience>}-${Lowercase<ProfileScope>}`;
 
 const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
   profile: ["teacher-own", "teacher-other", "parent-own", "parent-other", "staff-own", "staff-other"],

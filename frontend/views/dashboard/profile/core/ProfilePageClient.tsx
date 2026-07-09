@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
-import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile.types";
+import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
 import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { ProfileActionBar } from "@/frontend/views/dashboard/profile/core/components/ProfileActionBar";

@@ -5,13 +5,19 @@ import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/components/ui";
-import { PhoneDisplay } from "@/frontend/components/ui/display";
-import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
+import { PhoneDisplay } from "@/frontend/components/ui/display/phoneDisplay/PhoneDisplay";
+import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import type { TeacherAdminEditFormData, TeacherOwnEditFormData } from "../teacherProfileFormTypes";
-import { InfoField } from "./InfoField";
-import { isTeacherAdminData, type TeacherViewData } from "./teacherProfileTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
+import {
+  isTeacherAdminData,
+  type TeacherViewData,
+} from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import type {
+  TeacherAdminEditFormData,
+  TeacherOwnEditFormData,
+} from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
 type ContactSectionViewProps = {
   readonly mode: "view";

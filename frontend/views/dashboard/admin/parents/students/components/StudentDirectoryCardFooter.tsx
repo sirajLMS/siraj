@@ -3,8 +3,8 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import type { StudentDirectoryRowExtended } from "../types";
-import { ClassesLeftProgress } from "./ClassesLeftProgress";
+import type { StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
+import { ClassesLeftProgress } from "@/frontend/views/dashboard/admin/parents/students/components/ClassesLeftProgress";
 
 interface StudentDirectoryCardFooterProps {
   readonly row: StudentDirectoryRowExtended;

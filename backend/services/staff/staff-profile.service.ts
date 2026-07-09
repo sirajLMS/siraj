@@ -2,7 +2,7 @@ import { TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teacher.types";
+import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 
 function maskNationalId(value: string | null): string | null {
   if (!value) {

@@ -5,10 +5,13 @@ import { InputAdornment, Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
+import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
+import {
+  type ParentViewData,
+  toDisplayValue,
+} from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ProfileFieldRow } from "@/frontend/views/dashboard/profile/shared/ProfileFieldRow";
 import { buildSocialLink } from "@/shared/lib/social/social-links";
-import type { ParentAdminEditFormData } from "../parentProfileFormTypes";
-import { type ParentViewData, toDisplayValue } from "./parentProfileTypes";
 
 type SocialSectionProps =
   | {

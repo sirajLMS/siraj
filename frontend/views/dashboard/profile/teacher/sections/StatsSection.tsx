@@ -3,8 +3,11 @@
 import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/components/ui";
-import { InfoField } from "./InfoField";
-import { isTeacherAdminData, type TeacherViewData } from "./teacherProfileTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
+import {
+  isTeacherAdminData,
+  type TeacherViewData,
+} from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
 type StatsSectionProps = {
   readonly teacherData: TeacherViewData;

@@ -3,7 +3,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile.types";
+import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
 import { PageContainer } from "@/frontend/components/ui";
 import { ProfileHeader } from "@/frontend/views/dashboard/profile/core/ProfileHeader";
 import { ProfileSkeleton } from "@/frontend/views/dashboard/profile/core/ProfileSkeleton";
@@ -86,7 +86,12 @@ export function ProfileShell({
           actions={actions}
         />
         {showTabs ? (
-          <ProfileTabNav audience={audience} scope={scope} currentTab={currentTab} onTabChange={onTabChange} />
+          <ProfileTabNav
+            audience={audience as ProfileAudience}
+            scope={scope as ProfileScope}
+            currentTab={currentTab}
+            onTabChange={onTabChange}
+          />
         ) : null}
         <Box
           key={currentTab ?? "content"}

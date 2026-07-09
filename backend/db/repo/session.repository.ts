@@ -13,7 +13,7 @@ import type {
   SessionInsertType,
   SessionMetadataSelectType,
   SessionSelectType,
-} from "@/backend/types/auth.types";
+} from "@/backend/types/auth/auth.types";
 
 // Default session configuration
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds

@@ -10,16 +10,17 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import type { ProfileMode } from "@/backend/types/profile/profile.types";
 import type { ProfileByUserIdQuery } from "@/frontend/graphql/generated/gql/operations";
 import { profileHrefForUser } from "@/frontend/utils/profileHref";
-import { Link } from "@/shared/i18n/routing";
+import { Link as NextIntlLink } from "@/shared/i18n/routing";
 
 type BankingSummary = NonNullable<NonNullable<ProfileByUserIdQuery["profileByUserId"]>["bankingSummary"]>;
 
 type TeacherBankingViewProps = {
   readonly banking: BankingSummary;
   readonly targetUserId: string;
-  readonly mode: "view" | "edit";
+  readonly mode: ProfileMode;
 };
 
 type BankingFieldProps = {
@@ -193,7 +194,7 @@ function BankingFieldsGrid({ banking }: { readonly banking: BankingSummary }) {
 
 type VerificationFooterProps = {
   readonly banking: BankingSummary;
-  readonly mode: "view" | "edit";
+  readonly mode: ProfileMode;
   readonly targetUserId: string;
 };
 
@@ -239,14 +240,14 @@ function EditAction({
   editHref,
   t,
 }: {
-  readonly mode: "view" | "edit";
+  readonly mode: ProfileMode;
   readonly editHref: string;
   readonly t: ReturnType<typeof useTranslations>;
 }) {
   if (mode === "view") {
     return (
       <Button
-        component={Link}
+        component={NextIntlLink}
         href={editHref}
         variant="contained"
         startIcon={<EditNoteOutlined />}

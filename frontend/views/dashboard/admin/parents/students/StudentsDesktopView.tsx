@@ -6,8 +6,8 @@ import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { StudentDirectoryDataGrid } from "./components/StudentDirectoryDataGrid";
-import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "./types";
+import { StudentDirectoryDataGrid } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryDataGrid";
+import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
 
 interface StudentsDesktopViewProps {
   readonly pageTitle: string;

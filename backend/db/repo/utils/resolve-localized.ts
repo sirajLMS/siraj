@@ -1,5 +1,9 @@
-import type { LocalizedString } from "@/backend/types/localized-string.types";
-import { DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale } from "@/backend/types/localized-string.types";
+import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import {
+  DEFAULT_CONTENT_LOCALE,
+  isAppLocale,
+  normalizeContentLocale,
+} from "@/backend/types/shared/localized-string.types";
 
 /**
  * Resolve a localized JSONB map to a single string for the request locale.

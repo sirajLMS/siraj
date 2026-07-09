@@ -3,7 +3,7 @@ import type {
   ParentAssignedStudentReturnType,
   ParentAssignedStudentsResult,
   ParentOwnProfileReturnType,
-} from "@/backend/types/parent.types";
+} from "@/backend/types/parents/parent.types";
 
 const ParentAssignedStudentRef = gqlSchemaBuilder.objectRef<ParentAssignedStudentReturnType>("ParentAssignedStudent");
 

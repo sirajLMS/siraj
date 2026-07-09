@@ -5,10 +5,10 @@ import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import { FeesContractSection } from "./FeesContractSection";
-import { ParentInfoSection } from "./ParentInfoSection";
-import { SocialCommsSection } from "./SocialCommsSection";
-import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
+import { FeesContractSection } from "@/frontend/views/dashboard/admin/parents/onboarding/FeesContractSection";
+import { ParentInfoSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentInfoSection";
+import { SocialCommsSection } from "@/frontend/views/dashboard/admin/parents/onboarding/SocialCommsSection";
+import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;

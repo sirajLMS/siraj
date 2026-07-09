@@ -11,14 +11,14 @@ import {
   type ParentEditData,
   parentAdminEditSchema,
   parentOwnEditSchema,
-} from "./parentProfileFormTypes";
-import { AccountSection } from "./sections/AccountSection";
-import { BillingSection } from "./sections/BillingSection";
-import { ContactSection } from "./sections/ContactSection";
-import { IdentitySection } from "./sections/IdentitySection";
-import { SocialSection } from "./sections/SocialSection";
+} from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
+import { AccountSection } from "@/frontend/views/dashboard/profile/parent/sections/AccountSection";
+import { BillingSection } from "@/frontend/views/dashboard/profile/parent/sections/BillingSection";
+import { ContactSection } from "@/frontend/views/dashboard/profile/parent/sections/ContactSection";
+import { IdentitySection } from "@/frontend/views/dashboard/profile/parent/sections/IdentitySection";
+import { SocialSection } from "@/frontend/views/dashboard/profile/parent/sections/SocialSection";
 
-export type { ParentAdminEditFormData, ParentOwnEditFormData } from "./parentProfileFormTypes";
+export type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 
 export function ParentProfileEditForm({
   parentData,

@@ -19,16 +19,16 @@ import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { ActivationPolicyPanel } from "./components/ActivationPolicyPanel";
-import { MissedClassAlertBanner } from "./components/MissedClassAlertBanner";
-import { StudentProgressFeed } from "./components/StudentProgressFeed";
-import { TeacherDailyScheduleSection } from "./components/TeacherDailyScheduleSection";
-import { TeacherScheduleCardList } from "./components/TeacherScheduleCardList";
-import type { TeacherDashboardViewLabels } from "./types/teacherDashboardLabels";
+import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
+import { MissedClassAlertBanner } from "@/frontend/views/dashboard/teachers/dashboard/components/MissedClassAlertBanner";
+import { StudentProgressFeed } from "@/frontend/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
+import { TeacherDailyScheduleSection } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherDailyScheduleSection";
+import { TeacherScheduleCardList } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleCardList";
+import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
-} from "./utils/teacherDashboardMobileLayout";
+} from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 
 interface TeacherDashboardViewProps {
   readonly userName: string;

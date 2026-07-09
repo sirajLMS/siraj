@@ -27,7 +27,7 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
-import type { TeacherBankingSummaryReturnType } from "@/backend/types/teacher.types";
+import type { TeacherBankingSummaryReturnType } from "@/backend/types/teachers/teacher.types";
 
 const StaffPermissionGroupRef = gqlSchemaBuilder.objectRef<StaffPermissionGroupReturnType>("StaffPermissionGroup");
 
@@ -60,6 +60,10 @@ export const ProfileAudiencePothosEnum = gqlSchemaBuilder.enumType("ProfileAudie
 
 export const ProfileScopePothosEnum = gqlSchemaBuilder.enumType("ProfileScope", {
   values: ["own", "other"] as const,
+});
+
+export const ProfileModePothosEnum = gqlSchemaBuilder.enumType("ProfileMode", {
+  values: ["view", "edit"] as const,
 });
 
 const TeacherBankingSummaryRef = gqlSchemaBuilder.objectRef<TeacherBankingSummaryReturnType>("TeacherBankingSummary");

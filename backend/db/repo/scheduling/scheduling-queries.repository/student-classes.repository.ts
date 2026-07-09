@@ -2,7 +2,7 @@ import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, teachers, users } from "@/backend/db/schema";
-import type { UpcomingClassRow } from "@/backend/types/scheduling.types";
+import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
 
 export const bulkFreezeStudentClasses = async (
   studentId: string,

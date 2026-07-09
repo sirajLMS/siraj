@@ -22,7 +22,7 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/localized-string.types";
+import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 
 function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
   return {

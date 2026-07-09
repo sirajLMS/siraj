@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { StudentsContainer } from "./StudentsContainer";
+import { StudentsContainer } from "@/frontend/views/dashboard/admin/parents/students/StudentsContainer";
 
 const MOCK_STUDENT_ROWS = [
   {

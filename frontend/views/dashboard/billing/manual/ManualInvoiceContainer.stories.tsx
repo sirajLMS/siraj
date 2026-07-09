@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ManualInvoiceContainer } from "./ManualInvoiceContainer";
+import { ManualInvoiceContainer } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceContainer";
 
 const meta: Meta<typeof ManualInvoiceContainer> = {
   title: "Views/dashboard/billing/manual/ManualInvoiceContainer",

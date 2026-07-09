@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { adminAuditLogs, sessions, users } from "@/backend/db/schema";
-import type { AdminAuditLogInsertType, SessionInsertType } from "@/backend/types/auth.types";
+import type { AdminAuditLogInsertType, SessionInsertType } from "@/backend/types/auth/auth.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { IP_ADDRESS_1 } from "../const";
 import { runInRollback } from "../test-utils";

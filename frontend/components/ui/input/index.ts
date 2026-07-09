@@ -1,4 +1,5 @@
 export * from "@/frontend/components/ui/input/countrySelect/CountrySelect";
+export * from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 export * from "@/frontend/components/ui/input/editableTypography/EditableTypography";
 export * from "@/frontend/components/ui/input/genderSelector/GenderSelector";
 export * from "@/frontend/components/ui/input/languageSelector/LanguageSelector";

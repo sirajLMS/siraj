@@ -2,7 +2,7 @@ import { HistoryEduOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Box, type Theme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/components/ui";
-import type { TeacherProfileStatsProps } from "../types";
+import type { TeacherProfileStatsProps } from "@/frontend/views/dashboard/teachers/profile/types";
 
 export function TeacherProfileStats({ totalClasses, avgEngagementScore }: Readonly<TeacherProfileStatsProps>) {
   const t = useTranslations("dashboard.teacherProfile.stats");

@@ -90,3 +90,4 @@ prompt/
 .playwright-cli
 
 skills-lock.json
+.agent-canvas

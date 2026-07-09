@@ -12,12 +12,12 @@ import type {
   NotificationDeliveryStatusCount,
   UpdateDeliveryStatusInput,
   UserDeliveryHistoryResult,
-} from "@/backend/types/notificationDeliveries.types";
-import type { RegisterDeviceTokenInput, UserDeviceTokenSelectType } from "@/backend/types/userDeviceTokens.types";
+} from "@/backend/types/notifications/notificationDeliveries.types";
+import type { RegisterDeviceTokenInput, UserDeviceTokenSelectType } from "@/backend/types/users/userDeviceTokens.types";
 import type {
   SetNotificationPreferenceInput,
   UserNotificationPreferenceSelectType,
-} from "@/backend/types/userNotificationPreferences.types";
+} from "@/backend/types/users/userNotificationPreferences.types";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
   [NotificationDeliveryStatus.PENDING]: 0,

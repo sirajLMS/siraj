@@ -6,7 +6,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/timezone.enum";
-import type { UserReturnType } from "@/backend/types/user.types";
+import type { UserReturnType } from "@/backend/types/users/user.types";
 
 /**
  * Runs a function within a database transaction that is always rolled back.

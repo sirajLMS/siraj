@@ -4,7 +4,10 @@ import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { ComplaintResponseInput, ComplaintResponseReturnType } from "@/backend/types/complaintResponses.types";
+import type {
+  ComplaintResponseInput,
+  ComplaintResponseReturnType,
+} from "@/backend/types/complaints/complaintResponses.types";
 
 type CreateComplaintResponseInput = ComplaintResponseInput & {
   responderUserId: string | null;

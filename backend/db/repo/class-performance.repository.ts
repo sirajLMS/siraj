@@ -5,7 +5,7 @@ import { classInstancePerformance } from "@/backend/db/schema/scheduling";
 import type {
   ClassInstancePerformanceInsertType,
   ClassInstancePerformanceSelectType,
-} from "@/backend/types/class-instance-performance.types";
+} from "@/backend/types/classes/class-instance-performance.types";
 
 export namespace ClassPerformanceRepository {
   export async function getByClassInstanceId(

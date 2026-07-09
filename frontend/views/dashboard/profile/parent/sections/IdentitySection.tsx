@@ -4,9 +4,12 @@ import { Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
-import type { ParentAdminEditFormData } from "../parentProfileFormTypes";
-import { InfoField } from "./InfoField";
-import { type ParentAdminData, toDisplayValue } from "./parentProfileTypes";
+import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
+import {
+  type ParentAdminData,
+  toDisplayValue,
+} from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 
 type IdentitySectionProps =
   | {

@@ -6,9 +6,12 @@ import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AccountStatus, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherAdminEditFormData } from "../teacherProfileFormTypes";
-import { InfoField } from "./InfoField";
-import { type TeacherAdminData, toDisplayValue } from "./teacherProfileTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
+import {
+  type TeacherAdminData,
+  toDisplayValue,
+} from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import type { TeacherAdminEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
 type AdminOnlySectionProps =
   | {

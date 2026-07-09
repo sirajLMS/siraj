@@ -4,7 +4,7 @@ import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { AttendanceReportResult } from "@/backend/types/report.types";
+import type { AttendanceReportResult } from "@/backend/types/books/report.types";
 
 export type { AttendanceReportFilters, AttendanceReportRow } from "@/backend/db/repo/report.repository";
 export { ReportGroupingMode } from "@/backend/db/repo/report.repository";

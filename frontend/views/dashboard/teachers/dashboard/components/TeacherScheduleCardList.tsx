@@ -3,7 +3,7 @@
 import { Box, CircularProgress } from "@mui/material";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
-import { TeacherScheduleMobileCardList } from "./TeacherScheduleMobileCard";
+import { TeacherScheduleMobileCardList } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleMobileCard";
 
 interface TeacherScheduleCardListProps {
   readonly rows: readonly TeacherScheduleRow[];
