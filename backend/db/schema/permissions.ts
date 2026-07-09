@@ -1,7 +1,7 @@
 import { boolean, index, jsonb, pgTable, primaryKey, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { appPermissionEnum } from "@/backend/db/schema/enums";
+import { users } from "@/backend/db/schema/users";
 import type { LocalizedString } from "@/backend/types/localized-string.types";
-import { appPermissionEnum } from "./enums";
-import { users } from "./users";
 
 /**
  * System and custom permissions.

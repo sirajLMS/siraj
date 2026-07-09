@@ -1,5 +1,5 @@
 import { boolean, index, integer, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
-import { classCategories } from "./class-category";
+import { classCategories } from "@/backend/db/schema/class-category";
 
 export const classSubjects = pgTable(
   "class_subjects",

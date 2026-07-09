@@ -26,11 +26,12 @@ Invoice `payments` records how a parent paid an invoice but is disconnected from
 | Provider variety | Catalog tables — not per-brand enum values (Decision **2**) |
 | Online platforms | PayPal, Wise, Skrill, etc. are `ONLINE_ACCOUNT` catalog rows |
 | Defaults | One default per direction — PAYIN slot + PAYOUT slot (Decision **1bA**) |
-| Migration | Clean-slate — drop role columns + banking history; regenerate migrations (**8C**) |
+| Migration | **8C clean-slate** — delete legacy tables/columns/enums; `drizzle-kit generate` fresh migration set (no backfill, no deprecations) |
 | Invoice payments | Add `payments.user_payment_method_id` FK; keep denormalized `payment_method_type` snapshot |
 | Catalog admin | Admin CRUD for all three catalog tables in v1 |
 | Credentials | **Never** store card PAN/CVV, PSP tokens, OAuth secrets, bank passwords |
 | Imports | `@/` alias only — no relative `../` or `./` |
+| Legacy code | **Delete/remove only** — no `@deprecated`, no GraphQL deprecation directives, no compatibility shims |
 
 ## Resolved design choices
 
@@ -113,13 +114,17 @@ type PaymentMethodDetails =
 
 Validate `type` + `details` together via discriminated Zod at service boundary. Encrypt sensitive bank fields in `details` at app layer (same spirit as current `encryptedText`).
 
-### Removed (8C)
+### Removed (8C — delete, do not deprecate)
 
-- `teachers.payment_method`
-- `parents.payment_method`
-- `teacher_banking_details_history` table
-- GraphQL `PaymentMethod` enum (`PAYPAL` \| `BANK_ACCOUNT`) on profile surfaces
-- GraphQL `TeacherBankingSummary` object
+- `teachers.payment_method` column
+- `parents.payment_method` column
+- `teacher_banking_details_history` table + `teacher-banking.ts` schema file
+- `teacher_banking_details_history` PG enum usage on role tables
+- `PaymentMethod` enum (`PAYPAL` \| `BANK_ACCOUNT`) — TS, PG, and GraphQL
+- `paymentMethodEnum` in `backend/db/schema/enums.ts`
+- GraphQL `TeacherBankingSummary` object + `PaymentMethodPothosObject`
+- `TeacherBankingRepository`, `banking-summary.ts`, teacher banking UI tab
+- `BANKING_DETAILS_CHANGED` notification event (replaced by `PAYMENT_METHOD_CHANGED`)
 
 ## GraphQL contract
 
@@ -128,7 +133,8 @@ Validate `type` + `details` together via discriminated Zod at service boundary. 
 - `PaymentMethodType` — `MOBILE_WALLET`, `PAYMENT_LINK`, `ONLINE_ACCOUNT`, `BANK_TRANSFER`, `CASH`
 - `PaymentDirection` — `PAYIN`, `PAYOUT`, `BOTH`
 - `IdentifierKind` — `EMAIL`, `HANDLE`, `EMAIL_OR_HANDLE` (catalog metadata)
-- `InvoicePaymentMethodType` — alias or reuse `PaymentMethodType` on `payments` snapshot field
+
+`payments.payment_method_type` uses `PaymentMethodType` (replaces old `payment_method` column).
 
 ### Objects
 
@@ -178,7 +184,7 @@ Replace scalar `paymentMethod` and inline banking fields:
 | `TeacherProfileResult` | `paymentMethod` | `paymentMethods`, `defaultPayoutMethod` |
 | `ParentProfile` | `paymentMethod: String` | `paymentMethods`, `defaultPayinMethod` |
 | `UnifiedProfile` | `bankingSummary` | `paymentMethods` (masked, scope-aware) |
-| `recordPayment` input | `paymentMethod` enum only | + `userPaymentMethodId` optional |
+| `recordPayment` input | `paymentMethod: PaymentMethod` | `paymentMethodType` + optional `userPaymentMethodId` |
 
 ## UI components
 
@@ -228,6 +234,7 @@ Port from `backend/services/profile/banking-summary.ts`:
 - i18n: `next-intl` for UI; `getBackendTranslations` for backend errors
 - Logging: `logger` only — never `console.*`
 - MUI v9: style props in `sx`; icons `*Outlined`
+- Migration: edit schema to final shape → drop local DB → `drizzle-kit generate` clean migration set — no incremental ALTER/backfill scripts
 
 ## Out of scope
 
@@ -246,6 +253,6 @@ Port from `backend/services/profile/banking-summary.ts`:
 5. `BANK_TRANSFER` verification workflow works for admin; masked display for non-admin scopes
 6. Invoice `recordPayment` accepts `userPaymentMethodId` and stores type snapshot
 7. `teacher_payments` references `user_payment_method_id`
-8. All profile/onboarding/banking views use shared `PaymentMethod*` components — no legacy `PaymentMethod.Paypal` selects
+8. All profile/onboarding views use shared `PaymentMethod*` components — old `PaymentMethod` enum references fully removed from codebase
 9. `bun tsgo`, `test:db`, `test:graphql` pass; Storybook stories for new UI components
 10. `bun quality-gate` passes on touched files

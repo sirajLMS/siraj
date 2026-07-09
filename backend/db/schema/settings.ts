@@ -1,5 +1,5 @@
 import { index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { users } from "./users";
+import { users } from "@/backend/db/schema/users";
 
 export const systemSettings = pgTable(
   "system_settings",

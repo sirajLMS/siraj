@@ -11,7 +11,7 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 ## Phase 1 — Enums + types + validation libs
 
 - [ ] Create `backend/enum/payment-method.enum.ts` (`PaymentMethodType`, `PaymentDirection`, `IdentifierKind`)
-- [ ] Update `backend/enum/billing.enum.ts` — deprecate old `PaymentMethod` enum
+- [ ] Update `backend/enum/billing.enum.ts` — **delete** `PaymentMethod` enum (keep `InvoiceStatus`, `InvoiceType`)
 - [ ] Update `backend/enum/permission.enum.ts` — `PAYMENT_METHODS_MANAGE_CATALOGS`, `PAYMENT_METHODS_VERIFY_BANK_TRANSFER`
 - [ ] Update `backend/enum/index.ts`
 - [ ] Create `backend/types/payment-method.types.ts` — Select/Insert/Return/Submit + details union
@@ -31,14 +31,14 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [ ] Create `backend/db/schema/supported-mobile-wallets.ts`
 - [ ] Create `backend/db/schema/supported-payment-links.ts`
 - [ ] Create `backend/db/schema/supported-online-accounts.ts`
-- [ ] Update `backend/db/schema/enums.ts` — `paymentMethodTypeEnum`, `paymentDirectionEnum`, `identifierKindEnum`
+- [ ] Update `backend/db/schema/enums.ts` — add `paymentMethodTypeEnum`, `paymentDirectionEnum`, `identifierKindEnum`; **delete** `paymentMethodEnum`
 - [ ] Update `backend/db/schema/teachers.ts` — drop `payment_method`
 - [ ] Update `backend/db/schema/parents.ts` — drop `payment_method`
 - [ ] Delete `backend/db/schema/teacher-banking.ts`
-- [ ] Update `backend/db/schema/billing.ts` — `user_payment_method_id` + `payment_method_type`
+- [ ] Update `backend/db/schema/billing.ts` — **delete** `payment_method` column; add `user_payment_method_id` + `payment_method_type`
 - [ ] Update `backend/db/schema/index.ts`
-- [ ] Update `backend/db/drizzleRelations.ts`
-- [ ] Regenerate Drizzle migrations (8C clean-slate)
+- [ ] Update `backend/db/drizzleRelations.ts` — remove teacher banking relations; add payment method relations
+- [ ] Drop local DB + `drizzle-kit generate` clean migration set (8C — no backfill)
 - [ ] Seed catalog rows (PayPal, Wise, Vodafone Cash, Etisalat Cash, STC Pay, InstaPay)
 - [ ] Seed demo user payment methods
 - [ ] Seed new permissions in permission groups
@@ -84,14 +84,14 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 ## Phase 5 — Pothos + GraphQL
 
 - [ ] Create `backend/graphql/pothos/payment-method.pothos.ts`
-- [ ] Update `backend/graphql/pothos/enum.pothos.ts`
-- [ ] Update `backend/graphql/pothos/profile.pothos.ts`
+- [ ] Update `backend/graphql/pothos/enum.pothos.ts` — add new enums; **delete** `PaymentMethodPothosObject`
+- [ ] Update `backend/graphql/pothos/profile.pothos.ts` — **delete** `TeacherBankingSummaryPothosObject`; add payment methods
 - [ ] Update `backend/graphql/pothos/staff-profile.pothos.ts`
 - [ ] Update `backend/graphql/pothos/parent-profile.pothos.ts`
 - [ ] Update `backend/graphql/pothos/parent-onboarding.pothos.ts`
 - [ ] Update `backend/graphql/pothos/teacher-portal.pothos.ts`
 - [ ] Update `backend/graphql/pothos/teacher-onboarding.pothos.ts`
-- [ ] Update `backend/enum/notificationDeliveries.enum.ts` — `PAYMENT_METHOD_CHANGED`
+- [ ] Update `backend/enum/notificationDeliveries.enum.ts` — **delete** `BANKING_DETAILS_CHANGED`; add `PAYMENT_METHOD_CHANGED`
 - [ ] Create `backend/graphql/mutation/payment-method.mutation.ts`
 - [ ] Update `backend/graphql/mutation/onboarding.mutation.ts`
 - [ ] Update `backend/graphql/mutation/staff-profile.mutation.ts`
@@ -136,7 +136,7 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [ ] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsTab.tsx`
 - [ ] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsView.tsx`
 - [ ] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethods.stories.tsx`
-- [ ] Update `frontend/views/dashboard/profile/core/profileTabs.ts`
+- [ ] Update `frontend/views/dashboard/profile/core/profileTabs.ts` — delete `banking` tab; add `paymentMethods`
 - [ ] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingTab.tsx`
 - [ ] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingView.tsx`
 - [ ] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingEmptyState.tsx`
@@ -155,7 +155,8 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ### Teacher onboarding + profile
 
-- [ ] Replace `frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection.tsx` → `PaymentMethodSection.tsx`
+- [ ] Delete `frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection.tsx`
+- [ ] Create `frontend/views/dashboard/teachers/onboarding/components/PaymentMethodSection.tsx`
 - [ ] Update `frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView.tsx`
 - [ ] Update `frontend/views/dashboard/teachers/profile/components/SalaryDetailsSection.tsx`
 - [ ] Update `frontend/views/dashboard/teachers/profile/TeacherProfileContainer.tsx`
@@ -187,7 +188,7 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog.tsx`
 - [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdmin.stories.tsx`
 
-### i18n cleanup
+- [ ] Update `frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes.ts` — replace `BANKING_DETAILS_CHANGED` with `PAYMENT_METHOD_CHANGED`
 
 - [ ] Update `shared/messages/types/profile.ts`
 - [ ] Update `shared/messages/profile.ts`

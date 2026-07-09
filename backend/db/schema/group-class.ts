@@ -1,7 +1,7 @@
 import { boolean, index, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
-import { notificationDeliveries } from "./communications";
-import { classInstances, classStatusEvents } from "./scheduling";
-import { students } from "./students";
+import { notificationDeliveries } from "@/backend/db/schema/communications";
+import { classInstances, classStatusEvents } from "@/backend/db/schema/scheduling";
+import { students } from "@/backend/db/schema/students";
 
 export const groupClasses = pgTable(
   "group_classes",

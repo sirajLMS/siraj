@@ -13,10 +13,10 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { invoiceStatusEnum, invoiceTypeEnum, paymentMethodEnum } from "./enums";
-import { parents } from "./parents";
-import { students } from "./students";
-import { users } from "./users";
+import { invoiceStatusEnum, invoiceTypeEnum, paymentMethodEnum } from "@/backend/db/schema/enums";
+import { parents } from "@/backend/db/schema/parents";
+import { students } from "@/backend/db/schema/students";
+import { users } from "@/backend/db/schema/users";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.

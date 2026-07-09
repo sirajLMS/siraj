@@ -1,26 +1,40 @@
-import type { StoryObj } from "@storybook/react";
-import { buildFlagDisplayMeta, buildFlagDisplayStories } from "./__shared__/flagDisplayStories";
+import { Box } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react";
 import { LanguageDisplay } from "./LanguageDisplay";
 
-const meta = buildFlagDisplayMeta({
+const meta: Meta<typeof LanguageDisplay> = {
   title: "UI/Display/LanguageDisplay",
   component: LanguageDisplay,
-  defaultCode: "ar",
-  unknownCode: "xx",
-  unknownFallback: "Unknown language",
-});
+  tags: ["ai-generated"],
+  decorators: [
+    Story => (
+      <Box sx={{ p: 2 }}>
+        <Story />
+      </Box>
+    ),
+  ],
+};
 
 export default meta;
 type Story = StoryObj<typeof LanguageDisplay>;
 
-const stories = buildFlagDisplayStories({
-  defaultCode: "ar",
-  unknownCode: "xx",
-  unknownFallback: "Unknown language",
-});
+export const Default: Story = {
+  args: { code: "ar" },
+};
 
-export const Default: Story = stories.Default;
-export const EmojiOnly: Story = stories.EmojiOnly;
-export const LabelOnly: Story = stories.LabelOnly;
-export const UnknownCode: Story = stories.UnknownCode;
-export const Arabic: Story = stories.Arabic;
+export const EmojiOnly: Story = {
+  args: { code: "ar", showLabel: false },
+};
+
+export const LabelOnly: Story = {
+  args: { code: "ar", showEmoji: false },
+};
+
+export const UnknownCode: Story = {
+  args: { code: "xx", fallback: "Unknown language" },
+};
+
+export const Arabic: Story = {
+  globals: { locale: "ar" },
+  args: { code: "ar" },
+};

@@ -1,5 +1,5 @@
 import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { availabilityStatusEnum } from "./enums";
+import { availabilityStatusEnum } from "@/backend/db/schema/enums";
 
 export const books = pgTable(
   "books",

@@ -50,17 +50,20 @@ flowchart TB
 | 8 | Replace view usages + admin catalog UI | manual + component tests |
 | 9 | `bun quality-gate` | full gate |
 
-## Migration (8C)
+## Migration (8C — clean generate, no deprecations)
+
+Early dev: **delete** legacy surfaces in schema files, then regenerate a fresh migration set. No `@deprecated`, no dual-read, no backfill scripts.
 
 1. Add schema files: `user-payment-methods.ts`, `supported-mobile-wallets.ts`, `supported-payment-links.ts`, `supported-online-accounts.ts`
-2. Add enums: `paymentMethodTypeEnum`, `paymentDirectionEnum`, `identifierKindEnum` in `backend/db/schema/enums.ts`
-3. Drop `teachers.payment_method`, `parents.payment_method`
-4. Drop `teacher_banking_details_history`; rename `teacher_payments.banking_details_history_id` → `user_payment_method_id`
-5. Add `payments.user_payment_method_id` (nullable FK) + `payments.payment_method_type` (rename from old `payment_method` enum column)
-6. Add partial unique indexes for default slots on `user_payment_methods`
-7. Drizzle MCP `generate` for fresh migration SQL
-8. Drop/recreate local DB, apply migrations, reseed catalogs + demo user methods
-9. No incremental backfill scripts
+2. Add PG enums: `paymentMethodTypeEnum`, `paymentDirectionEnum`, `identifierKindEnum` in `backend/db/schema/enums.ts`
+3. **Delete** `paymentMethodEnum` from `enums.ts` (old `PAYPAL` \| `BANK_ACCOUNT`)
+4. **Delete** `teachers.payment_method`, `parents.payment_method` columns
+5. **Delete** `teacher-banking.ts` schema file (`teacher_banking_details_history` table)
+6. Update `teacher_payments`: delete `banking_details_history_id` → add `user_payment_method_id`
+7. Update `payments`: delete `payment_method` column → add `user_payment_method_id` (nullable FK) + `payment_method_type` (`PaymentMethodType`)
+8. Add partial unique indexes for default slots on `user_payment_methods`
+9. Edit Drizzle schema to final shape → drop local DB → `drizzle-kit generate` (clean migration set)
+10. Apply migrations + reseed catalogs + demo user methods
 
 ## Masking and verification
 
@@ -70,7 +73,7 @@ Port `backend/services/profile/banking-summary.ts` → `backend/services/payment
 - `loadUserPaymentMethodsSummary(actorUserId, scope, userId)` — replaces `loadTeacherBankingSummary`
 - Verification: `PaymentMethodService.verifyBankTransfer(id, adminUserId)` — sets `verifiedAt` / `verifiedByUserId`
 
-Notification: rename or alias `BANKING_DETAILS_CHANGED` → `PAYMENT_METHOD_CHANGED` in `backend/enum/notificationDeliveries.enum.ts`.
+Notification: **delete** `BANKING_DETAILS_CHANGED`; add `PAYMENT_METHOD_CHANGED` in `backend/enum/notificationDeliveries.enum.ts`. Update all references (no alias).
 
 ## Default slot logic (1bA)
 
@@ -108,7 +111,7 @@ Seed permissions + assign to admin group. Admin UI at `frontend/views/dashboard/
 | ~90 files touch payment/banking | Shared UI components; phased replacement in tasks.md |
 | Encrypted bank field migration | Re-seed under 8C; encrypt on write in service |
 | Catalog deactivation with existing user methods | Allow read/display; block new creates referencing inactive catalog |
-| Old `PaymentMethod` enum in billing | Rename to `PaymentMethodType`; update `payments` column + Pothos |
+| Old `PaymentMethod` enum (`PAYPAL` \| `BANK_ACCOUNT`) | **Delete** from TS/PG/GraphQL; replace with `PaymentMethodType` everywhere |
 
 ## Layer compliance matrix
 
@@ -128,7 +131,7 @@ Read before editing each path prefix:
 | `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | `**/*.test.ts` | `.agents/instructions/tests.instructions.md` |
 
-**Cross-cutting:** `@/` imports only; no `console.*`; MUI `sx`; Apollo from `@apollo/client/react`.
+**Cross-cutting:** `@/` imports only; no `console.*`; MUI `sx`; Apollo from `@apollo/client/react`; **no deprecations** — delete legacy code outright.
 
 ## Rollback
 
@@ -151,12 +154,12 @@ Grouped by phase. Paths are relative to repo root.
 | File | Action |
 |------|--------|
 | `backend/enum/payment-method.enum.ts` | **Create** — `PaymentMethodType`, `PaymentDirection`, `IdentifierKind` |
-| `backend/enum/billing.enum.ts` | **Update** — deprecate old `PaymentMethod`; keep invoice enums |
+| `backend/enum/billing.enum.ts` | **Update** — **delete** `PaymentMethod` enum; keep `InvoiceStatus`, `InvoiceType` |
 | `backend/enum/permission.enum.ts` | **Update** — catalog + verify permissions |
 | `backend/enum/index.ts` | **Update** — export new enum file |
 | `backend/types/payment-method.types.ts` | **Create** — Select/Insert/Return/Submit types + details union |
 | `backend/types/billing.types.ts` | **Update** — `PaymentRecordInput` + snapshot type |
-| `backend/types/teacher.types.ts` | **Update** — remove banking history types; slim banking summary |
+| `backend/types/teacher.types.ts` | **Update** — **delete** banking history + summary types |
 | `backend/types/parent.types.ts` | **Update** — remove `paymentMethod` scalar |
 | `backend/types/profile.types.ts` | **Update** — replace `bankingSummary` with payment methods |
 | `backend/types/teacher-onboarding.types.ts` | **Update** — payment method input |
@@ -172,7 +175,7 @@ Grouped by phase. Paths are relative to repo root.
 | `backend/db/schema/supported-mobile-wallets.ts` | **Create** |
 | `backend/db/schema/supported-payment-links.ts` | **Create** |
 | `backend/db/schema/supported-online-accounts.ts` | **Create** |
-| `backend/db/schema/enums.ts` | **Update** — new PG enums |
+| `backend/db/schema/enums.ts` | **Update** — add new PG enums; **delete** `paymentMethodEnum` |
 | `backend/db/schema/teachers.ts` | **Update** — drop `payment_method` |
 | `backend/db/schema/parents.ts` | **Update** — drop `payment_method` |
 | `backend/db/schema/teacher-banking.ts` | **Delete** — replace with payment methods |
@@ -222,7 +225,7 @@ Grouped by phase. Paths are relative to repo root.
 | File | Action |
 |------|--------|
 | `backend/graphql/pothos/payment-method.pothos.ts` | **Create** |
-| `backend/graphql/pothos/enum.pothos.ts` | **Update** — new enums; deprecate old PaymentMethod |
+| `backend/graphql/pothos/enum.pothos.ts` | **Update** — add new enums; **delete** `PaymentMethodPothosObject` |
 | `backend/graphql/pothos/profile.pothos.ts` | **Update** — remove TeacherBankingSummary |
 | `backend/graphql/pothos/staff-profile.pothos.ts` | **Update** |
 | `backend/graphql/pothos/parent-profile.pothos.ts` | **Update** |
@@ -275,7 +278,7 @@ Grouped by phase. Paths are relative to repo root.
 - `frontend/views/dashboard/profile/teacher/banking/TeacherBankingView.tsx` — **Delete**
 - `frontend/views/dashboard/profile/teacher/banking/TeacherBankingEmptyState.tsx` — **Delete**
 - `frontend/views/dashboard/profile/teacher/banking/TeacherBanking.stories.tsx` — **Delete**
-- `frontend/views/dashboard/profile/core/profileTabs.ts` — rename tab `banking` → `paymentMethods`
+- `frontend/views/dashboard/profile/core/profileTabs.ts` — delete `banking` tab; add `paymentMethods` tab
 
 **Profile views:**
 
@@ -290,7 +293,7 @@ Grouped by phase. Paths are relative to repo root.
 
 **Teacher surfaces:**
 
-- `frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection.tsx` → payment method section
+- `frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection.tsx` — **delete**; create `PaymentMethodSection.tsx`
 - `frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView.tsx`
 - `frontend/views/dashboard/teachers/profile/components/SalaryDetailsSection.tsx`
 - `frontend/views/dashboard/teachers/profile/TeacherProfileContainer.tsx`
