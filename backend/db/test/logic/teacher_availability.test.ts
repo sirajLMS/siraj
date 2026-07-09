@@ -4,7 +4,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 import { runInRollback } from "../test-utils";
 

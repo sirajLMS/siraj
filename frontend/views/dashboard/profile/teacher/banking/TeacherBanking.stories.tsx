@@ -2,6 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import { ProfileMode } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ProfileByUserIdQuery } from "@/frontend/graphql/generated/gql/operations";
 import { TeacherBankingEmptyState } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingEmptyState";
 import { TeacherBankingView } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingView";
@@ -35,7 +36,7 @@ export default meta;
 type Story = StoryObj;
 
 export const BankingView: Story = {
-  render: () => <TeacherBankingView banking={mockBanking} targetUserId="teacher-user-1" mode="view" />,
+  render: () => <TeacherBankingView banking={mockBanking} targetUserId="teacher-user-1" mode={ProfileMode.View} />,
 };
 
 export const BankingViewVerified: Story = {
@@ -43,7 +44,7 @@ export const BankingViewVerified: Story = {
     <TeacherBankingView
       banking={{ ...mockBanking, verifiedAt: null, verifiedByName: null, verifiedByUserId: null }}
       targetUserId="teacher-user-1"
-      mode="view"
+      mode={ProfileMode.View}
     />
   ),
 };

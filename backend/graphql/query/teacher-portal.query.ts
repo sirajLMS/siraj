@@ -3,7 +3,7 @@ import {
   TeacherAssignedClassesResultPothosObject,
   TeacherAssignedStudentsResultPothosObject,
   TeacherOwnProfilePothosObject,
-} from "@/backend/graphql/pothos/teacher-portal.pothos";
+} from "@/backend/graphql/pothos/teachers/teacher-portal.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 

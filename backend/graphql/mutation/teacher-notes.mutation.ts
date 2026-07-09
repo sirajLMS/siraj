@@ -4,7 +4,7 @@ import {
   CreateTeacherNoteInputPothos,
   TeacherImportantNotePothosObject,
   UpdateTeacherNoteInputPothos,
-} from "@/backend/graphql/pothos/teacher-notes.pothos";
+} from "@/backend/graphql/pothos/teachers/teacher-notes.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 

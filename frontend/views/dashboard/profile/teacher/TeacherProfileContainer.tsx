@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import type { ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
 import { ErrorState } from "@/frontend/components/ui";
+import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   profileByUserIdQueryDocument,
@@ -74,7 +74,7 @@ function buildAdminTeacherInput(formData: TeacherAdminEditFormData) {
 }
 
 function buildEditSource(scope: ProfileScope, profile: ProfileData): TeacherOwnData | TeacherAdminData | null {
-  return scope === "own" ? profile.teacherOwnProfile : profile.teacherAdminProfile;
+  return scope === ProfileScope.Own ? profile.teacherOwnProfile : profile.teacherAdminProfile;
 }
 
 function buildEditData(teacherData: TeacherOwnData | TeacherAdminData) {
@@ -126,15 +126,15 @@ function renderActiveTabContent({
   error,
   refetch,
 }: TabContentProps) {
-  if (activeTab === "notifications" && scope === "own") {
+  if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
 
-  if (activeTab === "banking" && scope === "other") {
+  if (activeTab === "banking" && scope === ProfileScope.Other) {
     return <TeacherBankingTab targetUserId={targetUserId} mode={mode} />;
   }
 
-  if (activeTab === "students" && scope === "other") {
+  if (activeTab === "students" && scope === ProfileScope.Other) {
     return (
       <AssignedStudentsTab
         assignedStudents={profile?.assignedStudents}
@@ -161,7 +161,7 @@ export function TeacherProfileContainer({
   activeTab: _activeTab = "profile",
 }: TeacherProfileContainerProps) {
   const tc = useTranslations("profile");
-  const isAdminScope = scope === "other";
+  const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
 
@@ -231,11 +231,11 @@ export function TeacherProfileContainer({
   const avatarUrl = profile?.avatarUrl;
   const editData = buildEditData(teacherData);
 
-  if (mode === "view") {
+  if (mode === ProfileMode.View) {
     return <TeacherProfileView teacherData={teacherData} avatarUrl={avatarUrl} isAdminScope={isAdminScope} />;
   }
 
-  if (scope === "own") {
+  if (scope === ProfileScope.Own) {
     return (
       <TeacherProfileEditForm teacherData={editData} avatarUrl={avatarUrl} isSaving={isSaving} onSubmit={onSubmitOwn} />
     );

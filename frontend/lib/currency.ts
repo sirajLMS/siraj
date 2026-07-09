@@ -1,5 +1,5 @@
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { countryCodeToEmoji } from "@/frontend/lib/locale";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const GLOBE_EMOJI = "🌐";
 

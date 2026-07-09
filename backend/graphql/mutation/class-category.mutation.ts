@@ -3,7 +3,7 @@ import {
   ClassCategoryCreateInputPothos,
   ClassCategoryPothosObject,
   ClassCategoryUpdateInputPothos,
-} from "@/backend/graphql/pothos/class-category.pothos";
+} from "@/backend/graphql/pothos/classes/class-category.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ClassCategoryService } from "@/backend/services/subject/class-category.service";
 

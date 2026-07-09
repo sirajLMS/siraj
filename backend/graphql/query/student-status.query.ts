@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { StudentUpcomingClassesResultPothosObject } from "@/backend/graphql/pothos/student-status.pothos";
+import { StudentUpcomingClassesResultPothosObject } from "@/backend/graphql/pothos/students/student-status.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { StudentStatusService } from "@/backend/services";
 

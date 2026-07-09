@@ -1,8 +1,26 @@
 import type { AutocompleteProps } from "@mui/material/Autocomplete";
 import type { Theme } from "@mui/material/styles";
+import type { Modifier } from "@popperjs/core";
 import type { CountryType } from "@/frontend/lib/locale";
 
 type CountryAutocompleteSlotProps = NonNullable<AutocompleteProps<CountryType, false, false, false>["slotProps"]>;
+
+const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
+  name: "sameWidth",
+  enabled: true,
+  phase: "beforeWrite",
+  requires: ["computeStyles"],
+  fn: ({ state }) => {
+    const anchor = state.rects.reference;
+    if (anchor) {
+      state.styles.popper = {
+        ...state.styles.popper,
+        width: `${anchor.width}px`,
+        minWidth: `${anchor.width}px`,
+      };
+    }
+  },
+};
 
 export function getCountryAutocompletePopperSlotProps(options: {
   readonly matchAnchorWidth: boolean;
@@ -14,18 +32,28 @@ export function getCountryAutocompletePopperSlotProps(options: {
   return {
     disablePortal,
     placement: "bottom-start",
-    modifiers: [
-      {
-        name: "offset",
-        options: {
-          offset: [0, listAttached ? 0 : 4],
-        },
-      },
-    ],
+    modifiers: matchAnchorWidth
+      ? [
+          sameWidthModifier,
+          {
+            name: "offset",
+            options: {
+              offset: [0, listAttached ? 0 : 4],
+            },
+          },
+        ]
+      : [
+          {
+            name: "offset",
+            options: {
+              offset: [0, listAttached ? 0 : 4],
+            },
+          },
+        ],
     sx: matchAnchorWidth
       ? {
-          width: "100%",
-          minWidth: "100%",
+          width: "fit-content",
+          minWidth: "fit-content",
         }
       : undefined,
   };

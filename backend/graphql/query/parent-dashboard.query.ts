@@ -1,9 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
 import {
   ParentDashboardMetricsResultPothosObject,
   ParentDashboardScheduleResultPothosObject,
-} from "@/backend/graphql/pothos/parent-dashboard.pothos";
+} from "@/backend/graphql/pothos/parents/parent-dashboard.pothos";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ParentDashboardService } from "@/backend/services/parent/parent-dashboard.service";
 import { PaginationArgs } from "@/backend/types";

@@ -10,7 +10,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import type { AppPermission } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 /** LocalizedString helper for permission/group JSONB columns in tests. */

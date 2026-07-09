@@ -1,5 +1,5 @@
 import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type ParentEntity = typeof import("@/backend/db/schema").parents.$inferSelect;

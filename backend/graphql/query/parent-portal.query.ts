@@ -3,7 +3,7 @@ import {
   ParentAssignedStudentsResultPothosObject,
   ParentHandbookUrlPothosObject,
   ParentOwnProfilePothosObject,
-} from "@/backend/graphql/pothos/parent-portal.pothos";
+} from "@/backend/graphql/pothos/parents/parent-portal.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";

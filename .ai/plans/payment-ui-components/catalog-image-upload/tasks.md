@@ -8,21 +8,21 @@
 
 ## Phase 1 — Component
 
-- [ ] Create `frontend/components/ui/input/CatalogImageUpload.tsx`
-- [ ] Implement preview, file pick, type/size validation, remove
-- [ ] Optional `allowUrlFallback` URL TextField
-- [ ] Gate: `bun tsgo`
+- [x] Create `frontend/components/ui/input/CatalogImageUpload.tsx`
+- [x] Implement preview, file pick, type/size validation, remove
+- [x] Optional `allowUrlFallback` URL TextField
+- [x] Gate: `bun tsgo`
 
 ## Phase 2 — Storybook
 
-- [ ] Create `CatalogImageUpload.stories.tsx` — WithUrl, MockUpload, ValidationError, UrlFallback, Arabic
-- [ ] Update `frontend/components/ui/input/index.ts`
+- [x] Create `CatalogImageUpload.stories.tsx` — WithUrl, MockUpload, ValidationError, UrlFallback, Arabic
+- [x] Update `frontend/components/ui/input/index.ts`
 
 ## Phase 3 — i18n
 
-- [ ] Add `ui.catalogImageUpload` messages (en + ar + types)
+- [x] Add `ui.catalogImageUpload` messages (en + ar + types)
 
 ## Phase 4 — Verification
 
-- [ ] `bun biome:check`
-- [ ] Lint queue on touched files
+- [x] `bun biome:check`
+- [x] Lint queue on touched files

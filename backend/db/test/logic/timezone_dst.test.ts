@@ -17,7 +17,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 import type { ClassInstanceInsertInput, ParentEntity, StudentEntity, TeacherEntity } from "@/backend/types";

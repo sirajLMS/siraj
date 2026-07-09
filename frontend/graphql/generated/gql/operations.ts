@@ -1185,13 +1185,13 @@ export type PaymentMethod =
   | 'PAYPAL';
 
 export type ProfileAudience =
-  | 'parent'
-  | 'staff'
-  | 'teacher';
+  | 'PARENT'
+  | 'STAFF'
+  | 'TEACHER';
 
 export type ProfileScope =
-  | 'other'
-  | 'own';
+  | 'OTHER'
+  | 'OWN';
 
 export type RecurringClassDayInput = {
   dayOfWeek: string;

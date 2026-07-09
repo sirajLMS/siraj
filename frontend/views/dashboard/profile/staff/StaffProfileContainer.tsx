@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
+import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
@@ -51,7 +51,7 @@ export function StaffProfileContainer({
   activeTab: _activeTab = "profile",
 }: StaffProfileContainerProps) {
   const tc = useTranslations("profile");
-  const isAdminScope = scope === "other";
+  const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
 
@@ -65,7 +65,7 @@ export function StaffProfileContainer({
   const isSaving = savingOwn || savingOther;
   const profile = data?.profileByUserId;
 
-  if (activeTab === "notifications" && scope === "own") {
+  if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
 
@@ -77,7 +77,7 @@ export function StaffProfileContainer({
     const coreInput = buildCoreInput(formData);
     const staffInput = isAdminScope ? buildAdminStaffInput(formData) : buildOwnStaffInput(formData);
 
-    if (scope === "own") {
+    if (scope === ProfileScope.Own) {
       await updateOwnProfile({ variables: { input: { core: coreInput, staff: staffInput } } });
       router.push(ownProfileHref());
       return;
@@ -120,7 +120,7 @@ export function StaffProfileContainer({
 
   const staffData = profile.staffProfile;
 
-  if (mode === "view") {
+  if (mode === ProfileMode.View) {
     return <StaffProfileView staffData={staffData} isAdminScope={isAdminScope} />;
   }
 

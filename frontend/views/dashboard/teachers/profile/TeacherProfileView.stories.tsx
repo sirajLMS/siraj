@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
 import { Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
-import { TeacherProfileView } from "./TeacherProfileView";
-import type { TeacherProfileData } from "./types";
+import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
+import { TeacherProfileView } from "@/frontend/views/dashboard/teachers/profile/TeacherProfileView";
+import type { TeacherProfileData } from "@/frontend/views/dashboard/teachers/profile/types";
 
 const INITIAL_PROFILE: TeacherProfileData = {
   id: "teacher-42",

@@ -8,7 +8,7 @@ import type {
   PaymentMethod,
   StudentStatus,
 } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { ClassSessionMetrics } from "@/backend/types/scheduling/schedule.types";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 

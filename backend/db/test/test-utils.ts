@@ -5,7 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 
 /**

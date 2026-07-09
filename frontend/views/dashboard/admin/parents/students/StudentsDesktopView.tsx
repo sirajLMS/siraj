@@ -5,9 +5,12 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryDataGrid } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryDataGrid";
-import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
+import type {
+  StudentDirectoryDataGridLabels,
+  StudentDirectoryRowExtended,
+} from "@/frontend/views/dashboard/admin/parents/students/types";
+import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 interface StudentsDesktopViewProps {
   readonly pageTitle: string;

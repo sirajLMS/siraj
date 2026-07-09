@@ -1,7 +1,9 @@
+export { catalogImageUpload } from "./catalog-image-upload";
 export { countrySelect } from "./country-select";
 export { currencySelect } from "./currency-select";
 export { genderSelector } from "./gender-selector";
 export { languageSelector } from "./language-selector";
+export { localizedString } from "./localized-string";
 export { phoneInput } from "./phone-input";
 export { tagInput } from "./tag-input";
 export { timezoneSelect } from "./timezone-select";

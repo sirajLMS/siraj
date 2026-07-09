@@ -2,7 +2,7 @@
 
 import { Button, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ProfileMode } from "@/backend/types/profile/profile.types";
+import { ProfileMode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
 
 type ProfileActionBarProps = {
@@ -14,7 +14,7 @@ type ProfileActionBarProps = {
 };
 
 export function ProfileActionBar({
-  mode = "view",
+  mode = ProfileMode.View,
   editHref,
   cancelHref,
   onSave,
@@ -23,7 +23,7 @@ export function ProfileActionBar({
   const router = useRouter();
   const t = useTranslations("profile");
 
-  if (mode === "edit") {
+  if (mode === ProfileMode.Edit) {
     return (
       <Stack direction="row" spacing={1}>
         {cancelHref ? (

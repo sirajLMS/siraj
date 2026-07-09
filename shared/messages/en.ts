@@ -3115,6 +3115,18 @@ const en: MessageSchema = {
     },
   },
   ui: {
+    catalogImageUpload: {
+      upload: "Upload image",
+      uploading: "Uploading\u2026",
+      remove: "Remove",
+      optional: "optional",
+      logoUrlLabel: "Logo URL",
+      helperText: "PNG, JPG or WebP \u00b7 max {maxMb} MB",
+      previewAlt: "Logo preview",
+      invalidType: "Unsupported file type. Allowed: PNG, JPG, or WebP.",
+      fileTooLarge: "File exceeds {maxMb} MB. Max allowed size is {maxMb} MB.",
+      uploadFailed: "Failed to upload image. Please try again.",
+    },
     genderSelector: {
       title: "Gender",
       male: "Male",
@@ -3124,8 +3136,25 @@ const en: MessageSchema = {
     countrySelect: {
       selectCountry: "Select country",
     },
+    currencySelect: {
+      selectCurrency: "Select currency",
+      searchByCodeOrName: "Search by code or name",
+      required: "Currency is required",
+    },
     languageSelector: {
       selectLanguage: "Select language",
+    },
+    localizedString: {
+      editTranslations: "Edit translations",
+      cancel: "Cancel",
+      save: "Save",
+      selectLocale: "Select language",
+      drawerSubtitle: "Edit all translations",
+      switchLocale: "Switch language",
+      atLeastOneTranslationRequired: "At least one translation is required",
+      localeRequired: "{localeName} is required for this field",
+      localesRequired: "{localeNames} are required for this field",
+      localeRequiredEntry: "{localeName} is required",
     },
     tagInput: {
       label: "Add items",

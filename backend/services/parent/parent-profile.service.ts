@@ -1,6 +1,6 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
 import { AppPermission } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {

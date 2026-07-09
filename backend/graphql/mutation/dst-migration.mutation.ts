@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { DstMigrationReportPothosObject } from "@/backend/graphql/pothos/dst-migration.pothos";
+import { DstMigrationReportPothosObject } from "@/backend/graphql/pothos/classes/dst-migration.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 

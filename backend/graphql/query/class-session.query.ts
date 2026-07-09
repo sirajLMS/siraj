@@ -3,7 +3,7 @@ import {
   ClassInstanceDetailPothosObject,
   ClassStatusEventPothosObject,
   TeacherFutureSchedulePothosObject,
-} from "@/backend/graphql/pothos/class-session.pothos";
+} from "@/backend/graphql/pothos/classes/class-session.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";

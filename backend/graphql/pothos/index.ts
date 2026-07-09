@@ -1,45 +1,20 @@
-export * from "./auth.pothos";
-export * from "./availability-search.pothos";
-export * from "./billing-alerts.pothos";
-export * from "./billing-history.pothos";
-export * from "./billing-management.pothos";
-export * from "./book.pothos";
-export * from "./class-session.pothos";
-export * from "./complaint.pothos";
-export * from "./complaintResponses.pothos";
-export * from "./dst-migration.pothos";
-export * from "./enum.pothos";
-export * from "./group-class.pothos";
-export * from "./impersonation.pothos";
-export * from "./learning-resource.pothos";
-export * from "./manager-onboarding.pothos";
-export * from "./notification-alerts.pothos";
-export * from "./notification-preferences.pothos";
-export * from "./pagination.objects";
-export * from "./parent-dashboard.pothos";
-export * from "./parent-directory.pothos";
-export * from "./parent-document.pothos";
-export * from "./parent-onboarding.pothos";
-export * from "./parent-profile.pothos";
-export * from "./permission-group-simulation.objects.pothos";
-export * from "./permission-group-simulation.pothos";
-export * from "./permission-management.pothos";
-export * from "./profile.pothos";
-export * from "./recurring-class.pothos";
-export * from "./report.pothos";
-export * from "./schedule.pothos";
-export * from "./staff-directory.pothos";
-export * from "./staff-profile.pothos";
-export * from "./storage.pothos";
-export * from "./student.pothos";
-export * from "./student-directory.pothos";
-export * from "./student-history.pothos";
-export * from "./student-lifecycle.pothos";
-export * from "./student-onboarding.pothos";
-export * from "./student-status.pothos";
-export * from "./suggestion.pothos";
-export * from "./teacher.pothos";
-export * from "./teacher-dashboard.pothos";
-export * from "./teacher-onboarding.pothos";
-export * from "./user.pothos";
-export * from "./weekly-schedule.pothos";
+// Pothos GraphQL schema definitions — grouped by domain.
+// Each sub-directory has its own index.ts barrel; this file re-exports them all
+// so that `import "@/backend/graphql/pothos"` (from gqlSchema.ts) and
+// `import * as Pothos from "@/backend/graphql/pothos"` (from query/mutation)
+// continue to resolve every Pothos object.
+
+export * from "./auth";
+export * from "./billing";
+export * from "./books";
+export * from "./classes";
+export * from "./complaints";
+export * from "./notifications";
+export * from "./parents";
+export * from "./permissions";
+export * from "./profile";
+export * from "./scheduling";
+export * from "./shared";
+export * from "./storage";
+export * from "./students";
+export * from "./teachers";

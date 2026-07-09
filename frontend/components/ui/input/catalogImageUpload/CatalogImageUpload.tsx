@@ -1,7 +1,16 @@
 "use client";
 
 import { CloudUploadOutlined, DeleteOutlined, ErrorOutlined, LinkOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Divider, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -117,7 +126,16 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
         setUploadState("error");
       }
     },
-    [maxBytes, maxSizeMb, notifications, onFilePathChangeAction, onImageUrlChangeAction, onUploadAction, setLocalPreview, t],
+    [
+      maxBytes,
+      maxSizeMb,
+      notifications,
+      onFilePathChangeAction,
+      onImageUrlChangeAction,
+      onUploadAction,
+      setLocalPreview,
+      t,
+    ]
   );
 
   const handleRemove = useCallback(() => {
@@ -137,7 +155,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
       onImageUrlChangeAction(value === "" ? null : value);
       onFilePathChangeAction?.(null);
     },
-    [onFilePathChangeAction, onImageUrlChangeAction],
+    [onFilePathChangeAction, onImageUrlChangeAction]
   );
 
   const triggerFileInput = useCallback(() => {
@@ -221,7 +239,10 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
             {resolvedHelperText}
           </Typography>
           {showError && resolvedError ? (
-            <Typography variant="bodySm" sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}>
+            <Typography
+              variant="bodySm"
+              sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}
+            >
               <ErrorOutlined fontSize="small" />
               {resolvedError}
             </Typography>

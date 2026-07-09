@@ -5,7 +5,7 @@ import {
   ClassSubjectPothosObject,
   ClassSubjectUpdateInputPothos,
   SubjectResourcePothosObject,
-} from "@/backend/graphql/pothos/class-subject.pothos";
+} from "@/backend/graphql/pothos/classes/class-subject.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
 

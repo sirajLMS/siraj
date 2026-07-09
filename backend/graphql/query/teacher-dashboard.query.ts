@@ -1,9 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import {
   TeacherDashboardPothosObject,
   TeacherHandbookUrlPothosObject,
-} from "@/backend/graphql/pothos/teacher-dashboard.pothos";
+} from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 import { PaginationArgs } from "@/backend/types";

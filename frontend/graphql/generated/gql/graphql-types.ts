@@ -2914,19 +2914,19 @@ export type PermissionGroupSimulationStatus = {
 };
 
 export enum ProfileAudience {
-  Parent = 'parent',
-  Staff = 'staff',
-  Teacher = 'teacher'
+  Parent = 'PARENT',
+  Staff = 'STAFF',
+  Teacher = 'TEACHER'
 }
 
 export enum ProfileMode {
-  Edit = 'edit',
-  View = 'view'
+  Edit = 'EDIT',
+  View = 'VIEW'
 }
 
 export enum ProfileScope {
-  Other = 'other',
-  Own = 'own'
+  Other = 'OTHER',
+  Own = 'OWN'
 }
 
 export type Query = {

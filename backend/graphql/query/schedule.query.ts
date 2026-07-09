@@ -1,6 +1,4 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { LeaveRequestStatusPothosObject } from "@/backend/graphql/pothos/enum.pothos";
-import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
 import {
   AdminDashboardScheduleInputPothosObject,
   AdminDashboardScheduleResultPothosObject,
@@ -8,11 +6,13 @@ import {
   DailyScheduleMetricsPothosObject,
   RescheduleTrackingMetricsPothosObject,
   RescheduleTrackingResultPothosObject,
-} from "@/backend/graphql/pothos/schedule.pothos";
+} from "@/backend/graphql/pothos/scheduling/schedule.pothos";
 import {
   WeeklyScheduleGridPothosObject,
   WeeklyWorkloadMetricsPothosObject,
-} from "@/backend/graphql/pothos/weekly-schedule.pothos";
+} from "@/backend/graphql/pothos/scheduling/weekly-schedule.pothos";
+import { LeaveRequestStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";

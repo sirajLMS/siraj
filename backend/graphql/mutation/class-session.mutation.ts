@@ -4,7 +4,7 @@ import {
   ClassInstanceDetailPothosObject,
   LeaveProcessResultPothosObject,
   RescheduleClassInputPothosObject,
-} from "@/backend/graphql/pothos/class-session.pothos";
+} from "@/backend/graphql/pothos/classes/class-session.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
 

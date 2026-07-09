@@ -5,10 +5,13 @@ import { Box, Fab, IconButton, InputAdornment, TextField } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryCardList } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardList";
 import { StudentMobileMetricsScroll } from "@/frontend/views/dashboard/admin/parents/students/components/StudentMobileMetricsScroll";
-import type { StudentDirectoryCardListLabels, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
+import type {
+  StudentDirectoryCardListLabels,
+  StudentDirectoryRowExtended,
+} from "@/frontend/views/dashboard/admin/parents/students/types";
+import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 interface StudentsMobileViewProps {
   readonly pageTitle: string;

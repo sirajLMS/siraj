@@ -1,6 +1,6 @@
 "use server";
 
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";

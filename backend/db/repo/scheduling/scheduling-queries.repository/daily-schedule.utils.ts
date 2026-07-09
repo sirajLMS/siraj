@@ -1,7 +1,7 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
 

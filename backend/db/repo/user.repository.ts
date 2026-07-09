@@ -4,7 +4,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { users } from "@/backend/db/schema";
-import { PaginationArgsDefault } from "@/backend/graphql/pothos/pagination.objects";
+import { PaginationArgsDefault } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";

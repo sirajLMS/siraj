@@ -23,10 +23,13 @@ import {
   OverrideState,
   ParentStatus,
   PaymentMethod,
+  ProfileAudience,
+  ProfileMode,
+  ProfileScope,
   RescheduleDateLabel,
   StudentStatus,
 } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
@@ -135,4 +138,16 @@ export const IanaTimezonePothosObject = gqlSchemaBuilder.enumType(IanaTimezone, 
 
 export const CurrencyCodePothosObject = gqlSchemaBuilder.enumType(CurrencyCode, {
   name: "CurrencyCode",
+});
+
+export const ProfileAudiencePothosEnum = gqlSchemaBuilder.enumType(ProfileAudience, {
+  name: "ProfileAudience",
+});
+
+export const ProfileScopePothosEnum = gqlSchemaBuilder.enumType(ProfileScope, {
+  name: "ProfileScope",
+});
+
+export const ProfileModePothosEnum = gqlSchemaBuilder.enumType(ProfileMode, {
+  name: "ProfileMode",
 });

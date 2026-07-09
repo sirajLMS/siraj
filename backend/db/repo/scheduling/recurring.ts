@@ -9,7 +9,7 @@ import {
 import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
 import { classInstances, recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;

@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AvailabilitySearchInputPothosObject,
   AvailabilitySearchResultPothosObject,
-} from "@/backend/graphql/pothos/availability-search.pothos";
+} from "@/backend/graphql/pothos/scheduling/availability-search.pothos";
 import { AvailabilitySearchService } from "@/backend/services/schedule/availability-search.service";
 
 gqlSchemaBuilder.queryFields(t => ({

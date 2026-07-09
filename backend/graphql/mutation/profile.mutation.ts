@@ -3,7 +3,7 @@ import {
   UnifiedProfilePothosObject,
   UpdateOwnProfileInputPothosObject,
   UpdateUserProfileInputPothosObject,
-} from "@/backend/graphql/pothos/profile.pothos";
+} from "@/backend/graphql/pothos/profile/profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ProfileService } from "@/backend/services";
 import type { UpdateOwnProfileInput, UpdateUserProfileInput } from "@/backend/types";

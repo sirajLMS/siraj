@@ -1,4 +1,4 @@
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 // DEV ONLY: Never use these credentials in production
 
 import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";

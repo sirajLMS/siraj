@@ -7,6 +7,9 @@ import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/u
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
+import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
+import { TeacherActiveSessionControls } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherActiveSessionControls";
+import { TeacherScheduleStatusContent } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleStatusContent";
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
 import {
@@ -15,9 +18,6 @@ import {
 } from "@/frontend/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
 import { Link } from "@/shared/i18n/routing";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
-import { SessionActivateButton } from "./SessionActivateButton";
-import { TeacherActiveSessionControls } from "./TeacherActiveSessionControls";
-import { TeacherScheduleStatusContent } from "./TeacherScheduleStatusContent";
 
 const StyledScheduleCard = styled(Paper, {
   shouldForwardProp: prop => prop !== "isLive",

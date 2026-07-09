@@ -14,7 +14,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,

@@ -4,7 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import type { AccountStatus, Gender, PaymentMethod } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,

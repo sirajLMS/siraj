@@ -14,7 +14,7 @@ import {
   userPermissionGroups,
   users,
 } from "@/backend/db/schema";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 

@@ -1,6 +1,6 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";

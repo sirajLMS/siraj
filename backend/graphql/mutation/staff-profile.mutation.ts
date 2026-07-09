@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   TeacherProfileResultPothosObject,
   TeacherProfileUpdateInputPothosObject,
-} from "@/backend/graphql/pothos/staff-profile.pothos";
+} from "@/backend/graphql/pothos/teachers/staff-profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 

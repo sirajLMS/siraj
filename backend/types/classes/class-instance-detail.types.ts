@@ -1,6 +1,6 @@
 import type { classInstances } from "@/backend/db/schema/scheduling";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 // Foundation types from schema
 export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertType = typeof classInstances.$inferInsert;

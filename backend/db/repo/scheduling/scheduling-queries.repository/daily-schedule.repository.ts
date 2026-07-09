@@ -4,7 +4,7 @@ import {
   applyViewerTimezoneFormatting,
   fetchDailyScheduleBaseRows,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository/daily-schedule.utils";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   AdminDashboardScheduleInput,
   AdminDashboardScheduleResult,

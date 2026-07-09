@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyDisplayName } from "@/frontend/lib/currency";
 
 export type CurrencyOptionRowProps = {
@@ -13,11 +12,7 @@ export type CurrencyOptionRowProps = {
   readonly showSymbol?: boolean;
 };
 
-export function CurrencyOptionRow({
-  currency,
-  locale,
-  showSymbol = true,
-}: CurrencyOptionRowProps): React.ReactNode {
+export function CurrencyOptionRow({ currency, locale, showSymbol = true }: CurrencyOptionRowProps): React.ReactNode {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
       <LocaleEmoji emoji={currency.flagEmoji} />
@@ -25,19 +20,11 @@ export function CurrencyOptionRow({
         {getCurrencyDisplayName(currency.code, locale)}
       </Typography>
       {showSymbol ? (
-        <Typography
-          component="span"
-          dir="ltr"
-          sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
-        >
+        <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
           {currency.symbol}
         </Typography>
       ) : null}
-      <Typography
-        component="span"
-        dir="ltr"
-        sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
-      >
+      <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
         {currency.code as string}
       </Typography>
     </Box>

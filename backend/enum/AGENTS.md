@@ -2,7 +2,32 @@
 
 ## Purpose
 
-This directory contains all backend enum definitions, organized by domain. Each file follows the `{domain}.enum.ts` naming convention, mirroring the `backend/types/` layer.
+This directory contains all backend enum definitions, organized by domain. Each sub-directory groups related enum files and ships its own `index.ts` barrel. This mirrors the sub-directory layout of the `backend/types/` layer.
+
+## Layout
+
+```
+backend/enum/
+├── index.ts             (top-level barrel — re-exports every sub-directory)
+├── AGENTS.md            (this file)
+│
+├── shared/              cross-cutting reference data (country, currency, timezone, pagination)
+├── auth/                authentication enums
+├── users/               user + user-device-token enums
+├── permissions/         permission + permission-group enums
+├── billing/             billing enums
+├── books/               book enums
+├── classes/             class-instance-detail, group-class, dst-migration enums
+├── scheduling/          scheduling + schedule enums
+├── parents/             parent + suggestions enums
+├── profiles/            profile-audience / scope / mode enums
+├── students/            student-lifecycle enums
+├── teachers/            teacher-availability enums
+├── notifications/       notification-delivery enums
+└── complaints/          complaint enums
+```
+
+Each sub-directory contains its own `index.ts` barrel that re-exports every `*.enum.ts` file in that sub-directory. The top-level `backend/enum/index.ts` re-exports every sub-directory barrel.
 
 ## Rules
 
@@ -12,16 +37,18 @@ This directory contains all backend enum definitions, organized by domain. Each 
 - Shared layer code (`shared/`) must not import from `@/backend/enum` — shared code is used by both frontend and backend. Define cross-layer enums in `shared/constants/` instead; see `shared/AGENTS.md`.
 
 ### Import Convention
-- Prefer deep imports: `import { StudentStatus } from "@/backend/enum/student-lifecycle.enum"`.
+- Prefer deep imports: `import { StudentStatus } from "@/backend/enum/students/student-lifecycle.enum"`.
 - The barrel `index.ts` is available for convenience but deep imports are preferred (same pattern as `backend/types/`).
 
 ### File Organization
-- One file per domain, matching the corresponding `backend/types/{domain}.types.ts` file name.
-- Related enums in the same domain go in the same file (e.g., `InvoiceStatus`, `InvoiceType`, `PaymentMethod` in `billing.enum.ts`).
+- One file per logical domain, grouped under the matching sub-directory.
+- Related enums in the same domain go in the same file (e.g., `InvoiceStatus`, `InvoiceType`, `PaymentMethod` in `billing/billing.enum.ts`).
 - Const objects like `ALLOWED_STATUS_TRANSITIONS` live alongside their related enum in the domain file.
+- File naming follows the convention `backend/enum/<subdir>/<entity>.enum.ts` (e.g. `backend/enum/users/user.enum.ts`).
 
 ### Adding New Enums
-1. Identify the domain file (or create a new one following the naming convention).
-2. Add the enum to the appropriate `{domain}.enum.ts` file.
-3. Add the file to `index.ts` if it's a new file.
-4. If the enum should be exposed via GraphQL, register it in `backend/graphql/pothos/enum.pothos.ts` and run codegen.
+1. Identify the appropriate sub-directory (or create a new one following the sub-directory convention).
+2. Add the enum to the matching `<entity>.enum.ts` file in that sub-directory (create a new file if needed).
+3. If a new file was created, add `export * from "./<entity>.enum";` to the sub-directory's `index.ts`.
+4. If a new sub-directory was created, add `export * from "./<subdir>";` to the top-level `backend/enum/index.ts`.
+5. If the enum should be exposed via GraphQL, register it in `backend/graphql/pothos/shared/enum.pothos.ts` and run codegen.

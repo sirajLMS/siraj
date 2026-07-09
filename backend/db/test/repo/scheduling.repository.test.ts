@@ -10,7 +10,7 @@ import {
   teacherAssignments,
   users,
 } from "@/backend/db/schema";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 import { testRepoError } from "./scheduling-test-helpers";

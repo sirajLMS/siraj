@@ -2,8 +2,8 @@ import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
-import type { TeacherProfileFormData } from "../schemas/teacherProfileSchema";
-import { SectionHeader } from "./SectionHeader";
+import { SectionHeader } from "@/frontend/views/dashboard/teachers/profile/components/SectionHeader";
+import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 
 export function SalaryDetailsSection() {
   const t = useTranslations("dashboard.teacherProfile");

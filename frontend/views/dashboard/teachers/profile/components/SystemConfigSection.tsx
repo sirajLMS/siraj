@@ -7,8 +7,8 @@ import { Controller, useFormContext } from "react-hook-form";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { labelSx } from "@/frontend/components/ui/form";
-import type { TeacherProfileFormData } from "../schemas/teacherProfileSchema";
-import { SectionHeader } from "./SectionHeader";
+import { SectionHeader } from "@/frontend/views/dashboard/teachers/profile/components/SectionHeader";
+import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 
 export function SystemConfigSection() {
   const t = useTranslations("dashboard.teacherProfile");

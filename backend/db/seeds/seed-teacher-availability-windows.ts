@@ -7,7 +7,7 @@ import {
   loadSeedConfig,
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
 

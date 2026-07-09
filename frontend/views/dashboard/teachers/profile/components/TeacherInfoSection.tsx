@@ -1,8 +1,15 @@
 import { BadgeOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { SectionHeader } from "./SectionHeader";
-import { AddressField, EmailField, FullNameField, GenderField, PhoneField, TimezoneField } from "./TeacherInfoFields";
+import { SectionHeader } from "@/frontend/views/dashboard/teachers/profile/components/SectionHeader";
+import {
+  AddressField,
+  EmailField,
+  FullNameField,
+  GenderField,
+  PhoneField,
+  TimezoneField,
+} from "@/frontend/views/dashboard/teachers/profile/components/TeacherInfoFields";
 
 export function TeacherInfoSection() {
   const t = useTranslations("dashboard.teacherProfile");

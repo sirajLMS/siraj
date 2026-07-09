@@ -1,5 +1,5 @@
 import { AccountStatus, UserRole } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
 
 type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId">;

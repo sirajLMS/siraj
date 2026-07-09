@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   NotificationPreferenceInputPothosObject,
   NotificationPreferencePothosObject,
-} from "@/backend/graphql/pothos/notification-preferences.pothos";
+} from "@/backend/graphql/pothos/notifications/notification-preferences.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 

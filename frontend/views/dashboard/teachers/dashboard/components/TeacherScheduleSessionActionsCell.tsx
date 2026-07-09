@@ -5,11 +5,11 @@ import { Box, IconButton, Tooltip } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
+import { TeacherActiveSessionControls } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherActiveSessionControls";
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
-import { SessionActivateButton } from "./SessionActivateButton";
-import { TeacherActiveSessionControls } from "./TeacherActiveSessionControls";
 
 interface TeacherScheduleSessionActionsCellProps {
   readonly row: TeacherScheduleRow;

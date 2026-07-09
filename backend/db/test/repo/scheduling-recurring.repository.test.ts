@@ -6,7 +6,7 @@ import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {
   let errorCaught: unknown = null;

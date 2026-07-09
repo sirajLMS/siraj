@@ -18,12 +18,12 @@ See [plan.md](./plan.md) and [spec.md](./spec.md).
 
 ## Phase 2 — Display
 
-- [ ] Create `LocalizedStringDisplay.tsx` + stories (resolve + locale chip)
+- [ ] Create `LocalizedStringDisplay.tsx` + stories — resolve only, **no `ar`/`en` chip, no flag, no language label** (display-only)
 - [ ] Update `display/index.ts`
 
 ## Phase 3 — Locale adornment switch
 
-- [ ] Create `LocaleAdornmentSwitch.tsx` — `LocaleEmoji` + `Popover` switcher (mirror `frontend/views/dashboard/components/navbar/LanguageSwitcher.tsx`)
+- [ ] Create `LocaleAdornmentSwitch.tsx` — `LocaleEmoji` (flag) **+** `getLanguageDisplayName(activeLocale, uiLocale)` language name + `Popover` switcher (mirror `frontend/views/dashboard/components/navbar/LanguageSwitcher.tsx`). Updates flag + label when `activeLocale` changes.
   - Commit current text → switch active locale → load new locale’s value
   - Switch animation (fade/slide) + 500ms green tint on valid commit; tint skipped if error
 - [ ] Minimal story for the adornment component alone
@@ -54,6 +54,14 @@ See [plan.md](./plan.md) and [spec.md](./spec.md).
 ## Phase 7 — i18n
 
 - [ ] `ui.localizedString` — `editTranslations`, `cancel`, `save`, `selectLocale`, validation strings (en + ar); also `drawerTitle` override if needed
+
+## Phase 9 — Mobile layout
+
+- [ ] `LocaleAdornmentSwitch` — `compact` mode (flag + chevron only, hide language name); larger popover tap targets on mobile; centered anchor under button
+- [ ] `LocalizedStringDrawer` — `useMediaQuery(down("md"))`: bottom sheet, `85vh` max height, 16px top radius, sticky stacked full-width actions, safe-area footer padding
+- [ ] `LocalizedStringInput` — `useMediaQuery(down("sm"))`: pass `compact` to adornment; end adornment → `IconButton` + `EditOutlined` + `aria-label`
+- [ ] Storybook mobile viewport stories: `MobileInlineCompact`, `MobileDrawerBottomSheet`, `MobileArabicChrome`
+- [ ] Gate: Storybook + `bun tsgo`
 
 ## Phase 8 — Verification
 

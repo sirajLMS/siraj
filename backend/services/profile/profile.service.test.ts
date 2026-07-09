@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { isRedirect, toParentRepoInput } from "@/backend/services";
 
 describe("ProfileService helpers", () => {

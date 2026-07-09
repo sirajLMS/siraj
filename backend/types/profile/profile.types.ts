@@ -1,5 +1,5 @@
 import type { AppPermission } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   ParentAssignedStudentsResult,
   ParentOwnProfileReturnType,

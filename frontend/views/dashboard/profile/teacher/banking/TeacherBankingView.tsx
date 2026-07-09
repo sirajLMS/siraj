@@ -10,7 +10,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ProfileMode } from "@/backend/types/profile/profile.types";
+import { ProfileMode } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ProfileByUserIdQuery } from "@/frontend/graphql/generated/gql/operations";
 import { profileHrefForUser } from "@/frontend/utils/profileHref";
 import { Link as NextIntlLink } from "@/shared/i18n/routing";
@@ -244,7 +244,7 @@ function EditAction({
   readonly editHref: string;
   readonly t: ReturnType<typeof useTranslations>;
 }) {
-  if (mode === "view") {
+  if (mode === ProfileMode.View) {
     return (
       <Button
         component={NextIntlLink}

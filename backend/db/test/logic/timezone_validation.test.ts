@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { recurringSchedules, users } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { RecurringScheduleEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

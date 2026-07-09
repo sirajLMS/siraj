@@ -1,6 +1,6 @@
 import { db } from "@/backend/db/drizzleDb";
 import { timezones } from "@/backend/db/schema";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 
 export async function seedOrGet() {

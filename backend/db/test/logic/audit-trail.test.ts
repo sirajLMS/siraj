@@ -18,7 +18,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo";
 import { auditLogs, users } from "@/backend/db/schema";
 import { type AccountStatus, StudentStatus, type UserRole } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";

@@ -2377,19 +2377,19 @@ type PermissionGroupSimulationStatus {
 scalar PhoneNumber
 
 enum ProfileAudience {
-  parent
-  staff
-  teacher
+  PARENT
+  STAFF
+  TEACHER
 }
 
 enum ProfileMode {
-  edit
-  view
+  EDIT
+  VIEW
 }
 
 enum ProfileScope {
-  other
-  own
+  OTHER
+  OWN
 }
 
 type Query {

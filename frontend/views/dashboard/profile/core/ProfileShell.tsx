@@ -3,8 +3,8 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
 import { PageContainer } from "@/frontend/components/ui";
+import { type ProfileAudience, ProfileMode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ProfileHeader } from "@/frontend/views/dashboard/profile/core/ProfileHeader";
 import { ProfileSkeleton } from "@/frontend/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/views/dashboard/profile/core/ProfileTabNav";
@@ -33,7 +33,7 @@ export function ProfileShell({
   children,
   audience,
   scope,
-  mode = "view",
+  mode = ProfileMode.View,
   currentTab,
   onTabChange,
   onRetry,
@@ -43,7 +43,7 @@ export function ProfileShell({
   avatarUrl,
 }: ProfileShellProps) {
   const t = useTranslations("profile");
-  const showTabs = mode === "view" && currentTab && onTabChange;
+  const showTabs = mode === ProfileMode.View && currentTab && onTabChange;
 
   function renderBody() {
     if (loading) {

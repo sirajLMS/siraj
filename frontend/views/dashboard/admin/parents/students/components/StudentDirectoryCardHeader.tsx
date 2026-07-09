@@ -3,7 +3,10 @@
 import { Box, Typography } from "@mui/material";
 import { UserAvatar } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import type { StudentAccountStatus, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
+import type {
+  StudentAccountStatus,
+  StudentDirectoryRowExtended,
+} from "@/frontend/views/dashboard/admin/parents/students/types";
 
 interface StudentDirectoryCardHeaderProps {
   readonly row: StudentDirectoryRowExtended;

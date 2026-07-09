@@ -13,7 +13,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.

@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { UnpaidInvoicesSummaryPothosObject } from "@/backend/graphql/pothos/billing-alerts.pothos";
+import { UnpaidInvoicesSummaryPothosObject } from "@/backend/graphql/pothos/billing/billing-alerts.pothos";
 import { BillingAlertsService } from "@/backend/services/billing/billing-alerts.service";
 
 gqlSchemaBuilder.queryFields(t => ({

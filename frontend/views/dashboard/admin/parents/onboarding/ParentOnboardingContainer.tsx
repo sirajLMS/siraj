@@ -10,7 +10,10 @@ import { AppPermission, IanaTimezone } from "@/frontend/graphql/generated/gql/gr
 import { useCreateParentOnboarding } from "@/frontend/hooks/useCreateParentOnboarding";
 import { logger } from "@/frontend/utils/logger";
 import { ParentOnboardingView } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView";
-import { type ParentOnboardingFormData, parentOnboardingSchema } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import {
+  type ParentOnboardingFormData,
+  parentOnboardingSchema,
+} from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
 import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 

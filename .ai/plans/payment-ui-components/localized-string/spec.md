@@ -36,14 +36,89 @@ permissions.permission_groups
 | Type file | `frontend/types/localized-string.types.ts` (not `@/backend/types` in components) |
 | Locales | `AppLocale` from `@/shared/i18n/routing` (`["ar","en"]` today); default `routing.defaultLocale` (`ar`) |
 | Input UX | **Single inline `TextField` + Drawer** — not dynamic rows, not tabs |
-| Inline input | One MUI `TextField` showing the **currently-edited locale** only. Start adornment = `LocaleEmoji` (clickable, opens locale switcher `Popover`). End adornment = `TextButton` “Edit translations” (opens `Drawer`). |
+| Inline input | One MUI `TextField` showing the **currently-edited locale** only. Start adornment = `LocaleEmoji` **flag + language display name** in the UI locale (e.g. `🇸🇦 العربية` / `🇬🇧 English`), clickable — opens locale switcher `Popover`. End adornment = `TextButton` “Edit translations” (opens `Drawer`). |
 | Drawer | `Drawer` (anchor right) listing **one `TextField` per `ALLOWED_LOCALES`** (`ar`,`en` today) — no Add-row button. Disable Save until ≥1 non-empty. |
-| Locale switch | Clicking the start-adornment `LocaleEmoji` opens a small `Popover` (mirror `LanguageSwitcher` in `frontend/views/dashboard/components/navbar/LanguageSwitcher.tsx`): pick another `AppLocale`. Before switching: write the current text into the map under the current locale, then load the new locale’s value. Animate the input to indicate the locale changed. If the just-written value was valid and no error, briefly tint the input green (500ms) on switch. |
+| Locale switch | Clicking the start-adornment (flag + language name) opens a small `Popover` (mirror `LanguageSwitcher` in `frontend/views/dashboard/components/navbar/LanguageSwitcher.tsx`): pick another `AppLocale`. Before switching: write the current text into the map under the current locale, then load the new locale’s value. Update the start adornment to the selected locale’s flag + name. Animate the input to indicate the locale changed. If the just-written value was valid and no error, briefly tint the input green (500ms) on switch. |
 | Per-row `dir` | `slotProps.htmlInput.dir = row.locale === "ar" ? "rtl" : "ltr"` (matches `PhoneInput.tsx:199-205`). |
 | Default editing locale | `useLocale()` (the UI display locale) on mount. |
 | Required | At least **one** non-empty translation; default `requiredLocales: ["ar"]` for fields like `name` |
 | Display | `LocalizedStringDisplay` — `resolveLocalizedString(map, useLocale())` |
 | Fallback | Request locale → `ar` → first value → `""` (match backend) |
+| **Mobile** | Dedicated compact inline + bottom-sheet drawer — see [Mobile design](#mobile-design) |
+
+## Mobile design
+
+These components are used inside **admin catalog dialogs** (`SupportedMobileWalletEditDialog`, permission-group forms) that become full-screen or near full-screen on phones. Desktop wireframes above stay the default; below `theme.breakpoints.down("md")` the input and drawer switch to a touch-first layout.
+
+**Breakpoint policy** (match `SearchScheduleFilterDrawer.tsx`):
+
+| Concern | Breakpoint | Behavior |
+|---------|------------|----------|
+| Drawer shell | `down("md")` | Bottom sheet instead of right drawer |
+| Inline adornments | container width `< sm` (600px) **or** viewport `down("sm")` | Compact start adornment + icon-only end button |
+
+### Inline input — compact (`width < sm`, ~600px)
+
+Applies when the **component's own layout width** is below the theme `sm` breakpoint — including narrow columns on a wide desktop (dialogs, grids), not only phone viewports. Implemented via `ResizeObserver` on the root wrapper (`useNarrowContainer`).
+
+```
+Name *
+┌──────────────────────────────────────────┐
+│ 🇸🇦 ▼ │ فودافون كاش                    [✎] │
+└──────────────────────────────────────────┘
+helper: Arabic required for this field
+```
+
+- **Start adornment (`LocaleAdornmentSwitch` `compact`):** `LocaleEmoji` + `ArrowDropDown` only — **hide** the language display name to save horizontal space. `aria-label` stays `selectLocale` (screen readers still get the language list in the popover).
+- **End adornment:** `IconButton` with `EditOutlined` only (no “Edit translations” text). `aria-label={t("editTranslations")}`.
+- **Text field:** unchanged — still one locale at a time, `dir` per active locale, locale-switch animation + green tint unchanged.
+- **Helper / error:** remains **below** the `TextField` (not inside the adornment row) so it wraps on narrow screens.
+
+### Locale switch popover — mobile
+
+- Keep `Popover` (only two locales today); widen tap targets (`padding: theme.spacing(2)` per row, min height 48px).
+- `anchorOrigin`: `{ vertical: "bottom", horizontal: "center" }` on mobile (center under the flag button).
+- Paper: `minWidth: min(100vw - 32px, 320px)`.
+
+### Drawer — mobile bottom sheet (`down("md")`)
+
+Mirror `frontend/views/dashboard/search-schedule/SearchScheduleFilterDrawer.tsx`:
+
+```
+┌─────────────────────────────────────────┐  ← 16px top radius
+│  Edit translations — Name          [×]  │
+├─────────────────────────────────────────┤
+│  (scroll)                               │
+│  🇸🇦 العربية *  [……………………………]          │
+│  🇬🇧 English    [……………………………]          │
+│  helper text                            │
+├─────────────────────────────────────────┤
+│  [ Cancel ]              [ Save ]       │  ← single row, equal width
+└─────────────────────────────────────────┘
+     ↑ safe-area-inset-bottom padding
+```
+
+| Property | Desktop (`md+`) | Mobile (`<md`) |
+|----------|-----------------|----------------|
+| `anchor` | `right` | `bottom` |
+| Width | `480px` | `100%` |
+| Height | `100%` | `maxHeight: 85vh` |
+| Top corners | square | `borderTopLeftRadius/RightRadius: 16` |
+| Actions | inline end, text buttons | **single row**, equal `flex: 1`, `minHeight: 48` |
+| Footer | `DialogActions` | sticky at bottom + `paddingBottom: env(safe-area-inset-bottom)` |
+| Content | `DialogContent dividers` | scrollable `flex: 1; overflow: auto` |
+
+`Save` disabled rule unchanged. Per-locale `TextField` rows keep flag start adornment + `dir` — no layout change inside the sheet.
+
+### `LocalizedStringDisplay` — mobile
+
+No special variant — resolved `Typography` wraps naturally. Consumers may pass `sx` for truncation (`noWrap`, `textOverflow: "ellipsis"`) in data grids; that is **out of scope** for the base component.
+
+### Storybook / acceptance (mobile)
+
+- `LocalizedStringInput` stories: `parameters.viewport.defaultViewport: "mobile1"` for `MobileInlineCompact`, `MobileDrawerBottomSheet`.
+- `LocaleAdornmentSwitch` story: compact + popover open at 375px width.
+- Verify RTL UI chrome (`locale: ar`) on mobile viewport — adornment order must respect `marginInlineEnd`, not physical `marginRight`.
 
 ## Input wireframe
 
@@ -52,15 +127,16 @@ permissions.permission_groups
 ```
 Name *
 ┌─────────────────────────────────────────────────────────┐
-│ 🇸🇦 │ فودافون كاش                      [ Edit translations ] │
+│ 🇸🇦 العربية │ فودافون كاش                 [ Edit translations ] │
 └─────────────────────────────────────────────────────────┘
 helper: At least one translation required · Arabic required for this field
 ```
 
-- **Start adornment:** `LocaleEmoji` for the **currently-edited** `AppLocale`. Click → opens a small `Popover` listing `ALLOWED_LOCALES` (mirror `LanguageSwitcher`, `frontend/views/dashboard/components/navbar/LanguageSwitcher.tsx`). Selecting a different locale:
+- **Start adornment:** `LocaleEmoji` (flag) **+** the language display name via `getLanguageDisplayName(activeLocale, useLocale())` — e.g. `🇸🇦 العربية` when editing Arabic, `🇬🇧 English` when editing English. The whole adornment is clickable. Click → opens a small `Popover` listing `ALLOWED_LOCALES` (mirror `LanguageSwitcher`, `frontend/views/dashboard/components/navbar/LanguageSwitcher.tsx`). Selecting a different locale:
   1. Commit the current input value to the map under the current locale (`setLocalizedString(map, currentLocale, text)`).
-  2. Load the selected locale’s value from the map into the input.
-  3. Play a short switch animation (fade/slide of the `TextField` contents). If the committed value passed `hasRequiredLocalizedValue` and there is no validation error, tint the input border/fill **green for 500ms** before settling.
+  2. `activeLocale ← nextLocale`; update the start adornment to the selected locale’s flag + name.
+  3. Load the selected locale’s value from the map into the input.
+  4. Play a short switch animation (fade/slide of the `TextField` contents). If the committed value passed `hasRequiredLocalizedValue` and there is no validation error, tint the input border/fill **green for 500ms** before settling.
 - **End adornment:** `TextButton` (MUI `<Button variant="text" size="small">`) labelled “Edit translations”. Click → opens the `LocalizedStringDrawer`.
 - Default editing locale = `useLocale()` (the active UI display locale) on mount.
 
@@ -128,17 +204,23 @@ export type LocalizedStringInputProps = {
   readonly drawerTitle?: string;
   /** Disable the end-adornment TextButton + drawer (e.g. read-only mode) */
   readonly disableDrawer?: boolean;
+  /** Drawer: commit each field edit immediately; footer hidden unless `drawerShowActions` */
+  readonly drawerAutosave?: boolean;
+  /** Drawer: show Cancel/Save footer (defaults to `!drawerAutosave`) */
+  readonly drawerShowActions?: boolean;
+  /** Drawer dismiss: `save` (default) or `cancel` */
+  readonly drawerDismissAction?: "save" | "cancel";
 };
 ```
 
 Sub-components:
-- `LocalizedStringDrawer` — exported from the same module; renders one `TextField` per `ALLOWED_LOCALES`, Save disabled until valid.
-- `LocaleAdornmentSwitch` — the start-adornment `LocaleEmoji` + `Popover` piece, reusable. Animates the locale switch and the green-success tint.
+- `LocalizedStringDrawer` — one `TextField` per `ALLOWED_LOCALES`. Props: `autosave`, `showActions`, `dismissAction` (`save` default on ×/backdrop/Escape). Mobile: Cancel + Save on **one row** (equal width). Save disabled until valid. Footer Cancel always discards.
+- `LocaleAdornmentSwitch` — the start-adornment piece showing `LocaleEmoji` (flag) **+** `getLanguageDisplayName(activeLocale, uiLocale)` (language name), clickable to open the `Popover`. Animates the locale switch and the green-success tint. Updates its flag + label when `activeLocale` changes.
 - `LocalizedStringFormField<T>` (RH) — wrapper mirroring `PhoneFormField`; wires `Controller` so `react-hook-form` consumers don’t have to.
 
 ## `LocalizedStringDisplay` API
 
-Unchanged — read-only resolved string for lists, previews, user-facing pickers (when raw map is available).
+Read-only **resolved string only** — for lists, previews, user-facing pickers. Renders the resolved value via `resolveLocalizedString(map, useLocale())` in a MUI `Typography`. **No `ar`/`en` chip, no flag, no language label** — it is a pure text display, so the resolved text is not cluttered with metadata.
 
 ```ts
 export type LocalizedStringDisplayProps = {
@@ -258,15 +340,16 @@ The old `Select` + dynamic “Add translation” row pattern is intentionally **
 ## Acceptance criteria
 
 1. Inline input renders a single `TextField` for the **currently-edited locale** (default `useLocale()`).
-2. Start-adornment `LocaleEmoji` opens a `Popover` (mirror `LanguageSwitcher`); selecting a locale commits the current value, swaps the input content, and animates the switch + 500ms green tint on successful commit.
+2. Start adornment shows the **flag (`LocaleEmoji`) + language display name** (e.g. `🇸🇦 العربية` / `🇬🇧 English`) for the active editing locale; clicking it opens a `Popover` (mirror `LanguageSwitcher`). Selecting a locale commits the current value, updates the adornment to the new flag + name, swaps the input content, and animates the switch + 500ms green tint on successful commit.
 3. End-adornment `TextButton` “Edit translations” opens a right-anchored `Drawer`.
 4. The `Drawer` renders one `TextField` per `ALLOWED_LOCALES` (`ar`, `en` today) with correct per-row `dir`. **No Add-translation button.**
 5. `Save` in the Drawer is disabled until `hasRequiredLocalizedValue(draft, requiredLocales)` is true.
 6. `required` + `requiredLocales: ["ar"]` shows an error on the Arabic row (and on the inline input when `activeLocale === "ar"`) on blur/submit.
-7. `LocalizedStringDisplay` fallback matches backend (unit tests).
-8. Storybook: inline single-locale, inline with drawer open, drawer with required error, drawer with multiline, Arabic UI chrome, locale-switch animation.
-9. `LocalizedStringFormField<T>` RH wrapper works in `react-hook-form` forms.
-10. Exported from `input/index.ts` (Input, Drawer, FormField) and `display/index.ts`.
+7. `LocalizedStringDisplay` renders **only the resolved string** — no `ar`/`en` chip, no flag, no language label. Fallback matches backend (unit tests).
+8. Storybook: inline single-locale, inline with drawer open, drawer with required error, drawer with multiline, Arabic UI chrome, locale-switch animation, display with each-locale-only / empty fallback.
+9. **Mobile:** inline compact adornments at `sm`, drawer bottom sheet at `md`, sticky full-width actions, Storybook mobile viewport stories.
+10. `LocalizedStringFormField<T>` RH wrapper works in `react-hook-form` forms.
+11. Exported from `input/index.ts` (Input, Drawer, FormField, LocaleAdornmentSwitch) and `display/index.ts`.
 
 ## Out of scope
 

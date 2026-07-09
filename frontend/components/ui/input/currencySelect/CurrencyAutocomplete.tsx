@@ -1,17 +1,15 @@
 "use client";
 
-import Autocomplete from "@mui/material/Autocomplete";
-import { createFilterOptions } from "@mui/material/Autocomplete";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   CurrencyOptionRow,
   getCurrencyOptionRowLabel,
@@ -20,6 +18,7 @@ import {
   getCurrencyAutocompletePaperSlotProps,
   getCurrencyAutocompletePopperSlotProps,
 } from "@/frontend/components/ui/input/currencySelect/currencyAutocompletePopper";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencyOptions, getCurrencySymbol } from "@/frontend/lib/currency";
 
 export type CurrencyAutocompleteProps = {
@@ -48,8 +47,7 @@ export type CurrencyAutocompleteProps = {
 
 const filterOptions = createFilterOptions<CurrencyOption>({
   matchFrom: "any",
-  stringify: option =>
-    `${option.code as string} ${option.symbol} ${getCurrencyOptionRowLabel(option, "en")}`,
+  stringify: option => `${option.code as string} ${option.symbol} ${getCurrencyOptionRowLabel(option, "en")}`,
 });
 
 export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
@@ -85,10 +83,7 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
     return allOptions.filter(option => allowedCodes.includes(option.code));
   }, [allOptions, allowedCodes]);
 
-  const getOptionLabel = useCallback(
-    (option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale),
-    [locale]
-  );
+  const getOptionLabel = useCallback((option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale), [locale]);
 
   return (
     <Autocomplete<CurrencyOption, false, false, false>

@@ -2,7 +2,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { db } from "@/backend/db/drizzleDb";
 import { systemSettings } from "@/backend/db/schema";
-import { IanaTimezone } from "@/backend/enum/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";

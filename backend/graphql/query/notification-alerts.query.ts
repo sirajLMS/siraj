@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { NotificationAlertsResultPothosObject } from "@/backend/graphql/pothos/notification-alerts.pothos";
+import { NotificationAlertsResultPothosObject } from "@/backend/graphql/pothos/notifications/notification-alerts.pothos";
 import { NotificationAlertsService } from "@/backend/services/notification/notification-alerts.service";
 
 gqlSchemaBuilder.queryFields(t => ({

@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import type { ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
 import { ErrorState } from "@/frontend/components/ui";
+import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   profileByUserIdQueryDocument,
@@ -59,7 +59,7 @@ function buildAdminParentInput(formData: ParentAdminEditFormData) {
 }
 
 function buildEditSource(scope: ProfileScope, profile: ProfileData): ParentOwnData | ParentAdminData | null {
-  return scope === "own" ? profile.parentOwnProfile : profile.parentAdminProfile;
+  return scope === ProfileScope.Own ? profile.parentOwnProfile : profile.parentAdminProfile;
 }
 
 export function ParentProfileContainer({
@@ -69,7 +69,7 @@ export function ParentProfileContainer({
   activeTab: _activeTab = "profile",
 }: ParentProfileContainerProps) {
   const tc = useTranslations("profile");
-  const isAdminScope = scope === "other";
+  const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
@@ -82,7 +82,7 @@ export function ParentProfileContainer({
   const isSaving = savingOwn || savingOther;
   const profile = data?.profileByUserId;
 
-  if (activeTab === "notifications" && scope === "own") {
+  if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
 
@@ -94,7 +94,7 @@ export function ParentProfileContainer({
     const coreInput = buildCoreInput(formData);
     const parentInput = isAdminScope ? buildAdminParentInput(formData) : buildOwnParentInput(formData);
 
-    if (scope === "own") {
+    if (scope === ProfileScope.Own) {
       await updateOwnProfile({ variables: { input: { core: coreInput, parent: parentInput } } });
       router.push(ownProfileHref());
       return;
@@ -134,7 +134,7 @@ export function ParentProfileContainer({
 
   const avatarUrl = profile.avatarUrl ?? ("avatarUrl" in parentData ? parentData.avatarUrl : null);
 
-  if (mode === "view") {
+  if (mode === ProfileMode.View) {
     return (
       <ParentProfileView
         parentData={parentData}

@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
-import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile/profile.types";
+import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { ProfileActionBar } from "@/frontend/views/dashboard/profile/core/components/ProfileActionBar";
@@ -31,8 +31,8 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   const profile = data?.profileByUserId;
 
-  const editHref = scope === "own" ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
-  const cancelHref = scope === "own" ? ownProfileHref() : profileHrefForUser(targetUserId);
+  const editHref = scope === ProfileScope.Own ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
+  const cancelHref = scope === ProfileScope.Own ? ownProfileHref() : profileHrefForUser(targetUserId);
 
   const handleRetry = useCallback(() => {
     void refetch();
@@ -41,7 +41,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   const activeTab = currentTab || "profile";
 
   const roleLabel =
-    audience === "staff"
+    audience === ProfileAudience.Staff
       ? (profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined)
       : t(`role.${audience}`);
 
@@ -49,18 +49,18 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
     audience,
     scope,
     mode,
-    currentTab: mode === "view" ? activeTab : undefined,
-    onTabChange: mode === "view" ? setCurrentTab : undefined,
+    currentTab: mode === ProfileMode.View ? activeTab : undefined,
+    onTabChange: mode === ProfileMode.View ? setCurrentTab : undefined,
     onRetry: handleRetry,
     name: profile?.name ?? "",
     email: profile?.email ?? "",
     roleLabel,
     avatarUrl: profile?.avatarUrl,
     actions:
-      mode === "view" ? (
-        <ProfileActionBar mode="view" editHref={editHref} />
+      mode === ProfileMode.View ? (
+        <ProfileActionBar mode={ProfileMode.View} editHref={editHref} />
       ) : (
-        <ProfileActionBar mode="edit" cancelHref={cancelHref} />
+        <ProfileActionBar mode={ProfileMode.Edit} cancelHref={cancelHref} />
       ),
   };
 
@@ -89,10 +89,10 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   }
 
   function renderProfileContainer() {
-    if (audience === "teacher") {
+    if (audience === ProfileAudience.Teacher) {
       return <TeacherProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
     }
-    if (audience === "parent") {
+    if (audience === ProfileAudience.Parent) {
       return <ParentProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
     }
     return <StaffProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;

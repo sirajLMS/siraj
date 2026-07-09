@@ -1,5 +1,4 @@
-import type { ProfileAudience, ProfileScope } from "@/backend/types/profile/profile.types";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ProfileAudience, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type ProfileTabId = "profile" | "banking" | "students" | "notifications" | "permissions";
 

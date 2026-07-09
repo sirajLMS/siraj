@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CreateRecurringClassInputPothosObject,
   CreateRecurringClassResultPothosObject,
-} from "@/backend/graphql/pothos/recurring-class.pothos";
+} from "@/backend/graphql/pothos/classes/recurring-class.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 

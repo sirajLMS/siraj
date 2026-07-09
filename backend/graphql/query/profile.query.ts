@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { UnifiedProfilePothosObject } from "@/backend/graphql/pothos/profile.pothos";
+import { UnifiedProfilePothosObject } from "@/backend/graphql/pothos/profile/profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ProfileService } from "@/backend/services";
 

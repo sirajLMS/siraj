@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, Grid, Skeleton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ProfileMode } from "@/backend/types/profile/profile.types";
+import type { ProfileMode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { TeacherBankingEmptyState } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingEmptyState";
 import { TeacherBankingView } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingView";

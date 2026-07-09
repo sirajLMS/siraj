@@ -4,7 +4,7 @@ import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repo
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/user.repository";
 import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";

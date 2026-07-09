@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   StudentClassHistoryPothosObject,
   StudentSessionDetailPothosObject,
-} from "@/backend/graphql/pothos/student-history.pothos";
+} from "@/backend/graphql/pothos/students/student-history.pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 

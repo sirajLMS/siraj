@@ -18,7 +18,6 @@ import type {
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
 import { MissedClassAlertBanner } from "@/frontend/views/dashboard/teachers/dashboard/components/MissedClassAlertBanner";
 import { StudentProgressFeed } from "@/frontend/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
@@ -29,6 +28,7 @@ import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
 } from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 interface TeacherDashboardViewProps {
   readonly userName: string;

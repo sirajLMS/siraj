@@ -12,7 +12,7 @@ import type {
   RescheduleDateLabel,
   StudentStatus,
 } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { ClassInstancePerformanceReturnType } from "@/backend/types/classes/class-instance-detail.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";
 import type { StudentEntity } from "@/backend/types/students/student.types";
