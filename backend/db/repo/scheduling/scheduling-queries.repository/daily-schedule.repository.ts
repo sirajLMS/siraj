@@ -4,6 +4,7 @@ import {
   applyViewerTimezoneFormatting,
   fetchDailyScheduleBaseRows,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository/daily-schedule.utils";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type {
   AdminDashboardScheduleInput,
   AdminDashboardScheduleResult,
@@ -77,7 +78,12 @@ export const getAdminDashboardSchedule = async (
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
-export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction, viewerTimezone = "UTC") => {
+export const getDailyMetrics = async (
+  date: Date,
+  teacherId?: string,
+  tx?: DBTransaction,
+  viewerTimezone: IanaTimezone = IanaTimezone.UTC
+) => {
   const { metrics } = await getAdminDashboardSchedule({ date, teacherId, viewerTimezone }, tx);
   return metrics;
 };
@@ -97,7 +103,7 @@ export const getDailySchedule = async (
       date,
       teacherId,
       search,
-      viewerTimezone: viewerTimezone || "UTC",
+      viewerTimezone: (viewerTimezone || IanaTimezone.UTC) as IanaTimezone,
       metricFilter,
     },
     tx

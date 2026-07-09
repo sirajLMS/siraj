@@ -1,9 +1,10 @@
-import { ParentRepository } from "@/backend/db/repo/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { UserRepository } from "@/backend/db/repo/user.repository";
 import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
@@ -20,14 +21,13 @@ import type { DailyScheduleResult } from "@/backend/types/scheduling.types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace ScheduleService {
-  async function resolveViewerTimezone(userId: string): Promise<string> {
-    const teacher = await TeacherRepository.findByUserId(userId);
-    if (teacher?.timezone) return teacher.timezone;
+  async function resolveViewerTimezone(userId: string): Promise<IanaTimezone> {
+    const user = await UserRepository.findById(userId);
+    if (user?.timezone) {
+      return user.timezone as IanaTimezone;
+    }
 
-    const parent = await ParentRepository.findByUserId(userId);
-    if (parent?.timezone) return parent.timezone;
-
-    return await SystemSettingsRepository.getStringValue("default_timezone", "UTC");
+    return (await SystemSettingsRepository.getStringValue("default_timezone", "UTC")) as IanaTimezone;
   }
 
   async function mapDailyScheduleListItem(item: DailyScheduleResult, locale?: string) {

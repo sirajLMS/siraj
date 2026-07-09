@@ -4,6 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import type { AccountStatus, Gender, PaymentMethod } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
@@ -51,8 +52,6 @@ export namespace TeacherRepository {
         zoomUsername: input.zoomUsername ?? null,
         zoomPassword: input.zoomPassword ?? null,
         countryCode: input.countryCode ?? null,
-        timezoneId: input.timezoneId ?? null,
-        timezone: input.timezone,
         hourlyRate: input.hourlyRate ?? null,
         rateCurrency: input.rateCurrency ?? null,
         createdAt: new Date(),
@@ -65,11 +64,17 @@ export namespace TeacherRepository {
       throw new Error(t("teacher.createFailed"));
     }
 
+    const [userRow] = await queryDb
+      .select({ timezone: users.timezone })
+      .from(users)
+      .where(eq(users.id, input.userId))
+      .limit(1);
+
     return {
       id: created.id,
       userId: created.userId,
       status: created.status,
-      timezone: created.timezone,
+      timezone: (userRow?.timezone ?? "UTC") as IanaTimezone,
       createdAt: created.createdAt,
     };
   }
@@ -195,7 +200,7 @@ export namespace TeacherRepository {
     zoomLink: teachers.zoomLink,
     zoomUsername: teachers.zoomUsername,
     hasZoomPassword: sql<boolean>`(${teachers.zoomPassword} IS NOT NULL)`.mapWith(Boolean),
-    timezone: teachers.timezone,
+    timezone: users.timezone,
     hourlyRate: teachers.hourlyRate,
     rateCurrency: teachers.rateCurrency,
     paymentMethod: teachers.paymentMethod,
@@ -253,7 +258,7 @@ export namespace TeacherRepository {
     zoomLink: teacher.zoomLink,
     zoomUsername: teacher.zoomUsername,
     hasZoomPassword: teacher.hasZoomPassword,
-    timezone: teacher.timezone,
+    timezone: teacher.timezone as IanaTimezone,
     hourlyRate: teacher.hourlyRate,
     rateCurrency: teacher.rateCurrency,
     paymentMethod: teacher.paymentMethod,
@@ -293,10 +298,9 @@ export namespace TeacherRepository {
   ): Promise<boolean> => {
     const queryDb = tx ?? db;
     const now = new Date();
-    const { timezone: tzInput, status: statusInput, ...restInput } = input;
+    const { timezone: _tzInput, status: statusInput, ...restInput } = input;
     const setInput = {
       ...restInput,
-      ...(tzInput == null ? {} : { timezone: tzInput }),
       ...(statusInput == null ? {} : { status: statusInput }),
       updatedAt: now,
     };

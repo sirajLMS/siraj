@@ -1,6 +1,7 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { DailyScheduleResult } from "@/backend/types/scheduling.types";
 
@@ -79,7 +80,7 @@ export async function hydrateDailyScheduleRows(
       remarks: instance.remarks ?? null,
       hasTimezoneMismatch: false,
       studentTimezone: null,
-      teacherTimezone: teacher?.timezone ?? null,
+      teacherTimezone: (teacher?.user?.timezone as IanaTimezone | undefined) ?? null,
       performance: null,
       ...(student ? { student } : {}),
       ...(teacher ? { teacher } : {}),

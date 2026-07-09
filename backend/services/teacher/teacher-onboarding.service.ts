@@ -61,11 +61,12 @@ export namespace TeacherOnboardingService {
       txObj
     );
 
+    await UserRepository.updateTimezone(user.id, input.timezone, txObj, locale);
+
     const teacher = await TeacherRepository.create(
       {
         userId: user.id,
         status: "ACTIVATED",
-        timezone: input.timezone,
         nationality: input.nationality ?? null,
         nationalId: input.nationalId ?? null,
         phone: input.phone ?? null,
@@ -77,7 +78,6 @@ export namespace TeacherOnboardingService {
         zoomUsername: input.zoomUsername ?? null,
         zoomPassword: input.zoomPassword ?? null,
         countryCode: input.countryCode ?? null,
-        timezoneId: input.timezoneId ?? null,
         hourlyRate: input.hourlyRate ?? null,
         rateCurrency: input.rateCurrency ?? null,
         createdAt: new Date(),

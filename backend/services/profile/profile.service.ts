@@ -29,6 +29,7 @@ import type {
   UpdateUserProfileInput,
 } from "@/backend/types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parent.types";
+import type { TeacherProfileUpdateInputType } from "@/backend/types/teacher.types";
 
 type ResolvedRoleIds = {
   readonly audience: ProfileAudience;
@@ -75,7 +76,6 @@ export function toParentRepoInput(
     feeAmount: "feeAmount" in input ? input.feeAmount : undefined,
     paymentMethod: "paymentMethod" in input ? input.paymentMethod : undefined,
     currency: "currency" in input ? input.currency : undefined,
-    timezone: "timezone" in input ? input.timezone : undefined,
   };
 }
 
@@ -478,20 +478,37 @@ export namespace ProfileService {
   async function applyRoleSpecificUpdates(
     actorUserId: string,
     scope: ProfileScope,
-    _targetUserId: string,
+    targetUserId: string,
     roleIds: ResolvedRoleIds,
     input: RoleSpecificUpdateInput,
     locale?: string
   ): Promise<void> {
     if (roleIds.audience === "teacher" && input.teacher && roleIds.teacherId) {
+      if (scope === "other" && "timezone" in input.teacher) {
+        const teacherTimezone = (input.teacher as TeacherProfileUpdateInputType).timezone;
+        if (teacherTimezone != null) {
+          await UserRepository.updateTimezone(targetUserId, teacherTimezone, undefined, locale);
+        }
+      }
+
       if (scope === "own") {
         await TeacherPortalService.updateOwnProfile(actorUserId, roleIds.teacherId, input.teacher, locale);
       } else {
-        await StaffProfileService.updateTeacherProfile(actorUserId, roleIds.teacherId, input.teacher, locale);
+        const { timezone: _teacherTimezone, ...teacherInput } = input.teacher as TeacherProfileUpdateInputType;
+        if (Object.keys(teacherInput).length > 0) {
+          await StaffProfileService.updateTeacherProfile(actorUserId, roleIds.teacherId, teacherInput, locale);
+        }
       }
     }
 
     if (roleIds.audience === "parent" && input.parent && roleIds.parentId) {
+      if (scope === "other" && "timezone" in input.parent) {
+        const parentTimezone = (input.parent as ParentAdminProfileUpdateInput).timezone;
+        if (parentTimezone != null) {
+          await UserRepository.updateTimezone(targetUserId, parentTimezone, undefined, locale);
+        }
+      }
+
       if (scope === "own") {
         await ParentProfileService.updateOwnProfile(actorUserId, roleIds.parentId, input.parent, locale);
       } else {

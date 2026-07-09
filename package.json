@@ -15,6 +15,7 @@
     "biome:imports": "bunx @biomejs/biome check --write --formatter-enabled=false --linter-enabled=false .",
     "tsgo": "tsgo -b --noEmit",
     "generate:gqlSchema": "bun run backend/graphql/generateGqlSchema.ts",
+    "generate:iana-timezones": "bun run scripts/generate-iana-timezone-enum.ts",
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
     "test": "bun test --timeout=60000",

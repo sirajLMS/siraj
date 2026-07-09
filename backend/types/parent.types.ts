@@ -1,4 +1,5 @@
 import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { PageInfo } from "@/backend/types/pagination.types";
 
 export type ParentEntity = typeof import("@/backend/db/schema").parents.$inferSelect;
@@ -7,8 +8,10 @@ export type ParentEntityInput = typeof import("@/backend/db/schema").parents.$in
 
 export type ParentCreateResult = Pick<
   ParentEntity,
-  "id" | "userId" | "status" | "invoiceType" | "feeAmount" | "paymentMethod" | "currency" | "timezone" | "createdAt"
->;
+  "id" | "userId" | "status" | "invoiceType" | "feeAmount" | "paymentMethod" | "currency" | "createdAt"
+> & {
+  readonly timezone: IanaTimezone;
+};
 
 export type ParentDirectoryMetrics = {
   id: string;
@@ -166,7 +169,7 @@ export interface ParentProfileResult {
   readonly feeAmount: string | null;
   readonly paymentMethod: string | null;
   readonly currency: string | null;
-  readonly timezone: string;
+  readonly timezone: IanaTimezone;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -213,7 +216,7 @@ export type ParentProfileUpdateInput = {
   readonly feeAmount?: string | null;
   readonly paymentMethod?: string | null;
   readonly currency?: string | null;
-  readonly timezone?: string | null;
+  readonly timezone?: IanaTimezone | null;
 };
 
 export interface DeactivateParentResult {

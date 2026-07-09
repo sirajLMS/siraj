@@ -1,5 +1,5 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, type IanaTimezone } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -9,7 +9,7 @@ export interface CreateRecurringClassInput {
   teacherId: string;
   durationMinutes: number;
   defaultStartTime: string;
-  timezone: string;
+  timezone: IanaTimezone;
   timezoneId?: number | null;
   effectiveFrom?: string | null;
   effectiveUntil?: string | null;

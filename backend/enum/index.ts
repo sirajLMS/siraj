@@ -23,5 +23,6 @@ export * from "./scheduling.enum";
 export * from "./student-lifecycle.enum";
 export * from "./suggestions.enum";
 export * from "./teacher-availability.enum";
+export * from "./timezone.enum";
 export * from "./user.enum";
 export * from "./userDeviceTokens.enum";

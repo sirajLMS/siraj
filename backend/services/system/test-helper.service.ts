@@ -68,6 +68,7 @@ export namespace TestHelperService {
         name: `${prefix} Student User`,
         email: studentEmail,
         password: hashedPassword,
+        timezone: "UTC",
         createdAt: now,
         updatedAt: now,
       })
@@ -79,6 +80,7 @@ export namespace TestHelperService {
         name: `${prefix} Parent User`,
         email: parentEmail,
         password: hashedPassword,
+        timezone: "UTC",
         createdAt: now,
         updatedAt: now,
       })
@@ -90,6 +92,7 @@ export namespace TestHelperService {
         name: `${prefix} Teacher User`,
         email: teacherEmail,
         password: hashedPassword,
+        timezone: "UTC",
         createdAt: now,
         updatedAt: now,
       })
@@ -148,7 +151,6 @@ export namespace TestHelperService {
       .values({
         userId: parentUserRowId,
         status: "REGULAR",
-        timezone: "UTC",
         createdAt: now,
         updatedAt: now,
       })
@@ -175,7 +177,6 @@ export namespace TestHelperService {
       .values({
         userId: teacherUserRowId,
         status: "ACTIVATED",
-        timezone: "UTC",
         createdAt: now,
         updatedAt: now,
       })

@@ -1,7 +1,9 @@
 import { AuditRepository } from "@/backend/db/repo/audit.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { UserRepository } from "@/backend/db/repo/user.repository";
 import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
@@ -32,11 +34,14 @@ export namespace TeacherDashboardService {
       throw new Error(t("notFound"));
     }
 
+    const user = await UserRepository.findById(userId);
+    const viewerTimezone = (user?.timezone as IanaTimezone | undefined) ?? IanaTimezone.UTC;
+
     const targetDate = new Date(date);
     const result = await SchedulingRepository.getAdminDashboardSchedule({
       date: targetDate,
       teacherId: teacher.id,
-      viewerTimezone: teacher.timezone,
+      viewerTimezone,
       pagination: pagination ?? null,
       locale,
     });
@@ -46,7 +51,7 @@ export namespace TeacherDashboardService {
     const progressFeed = await SchedulingRepository.getTeacherProgressFeed(
       teacher.id,
       targetDate,
-      teacher.timezone,
+      viewerTimezone,
       locale
     );
 

@@ -40,8 +40,8 @@ import { users } from "./users";
  *   Administrators or teachers (whose user IDs do not exist in the `parents` table) bypass these policies.
  *
  * Student effective timezone for schedule display:
- *   COALESCE(students.timezone_override, parents.timezone, academy default)
- * When timezone_override IS NULL, inherit from parent record.
+ *   COALESCE(students.timezone_override, parent_user.timezone, academy default)
+ * When timezone_override IS NULL, inherit from parent user record.
  * booking_timezone on class_instances is a booking snapshot only — NOT used for UI localization.
  */
 export const students = pgTable(

@@ -1,5 +1,6 @@
-import { ParentRepository, SessionRepository } from "@/backend/db";
+import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
 import { AppPermission } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
@@ -56,7 +57,7 @@ export namespace ParentProfileService {
       feeAmount: profile.feeAmount,
       paymentMethod: profile.paymentMethod,
       currency: profile.currency,
-      timezone: profile.timezone,
+      timezone: profile.timezone as IanaTimezone,
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
     };
@@ -183,6 +184,16 @@ export namespace ParentProfileService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    return ParentRepository.updateParentProfile(parentId, input, locale);
+    const { timezone, ...repoInput } = input;
+    if (timezone != null) {
+      const existing = await ParentRepository.getParentProfile(parentId);
+      if (!existing) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("parentNotFound", { id: parentId }));
+      }
+      await UserRepository.updateTimezone(existing.userId, timezone, undefined, locale);
+    }
+
+    return ParentRepository.updateParentProfile(parentId, repoInput, locale);
   }
 }

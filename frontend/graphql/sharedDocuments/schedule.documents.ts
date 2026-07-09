@@ -182,7 +182,7 @@ export const statusTrackingScheduleQueryDocument: TypedDocumentNode<
   Operations.StatusTrackingScheduleQuery,
   Types.QueryStatusTrackingScheduleArgs
 > = gql`
-  query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: String) {
+  query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: IanaTimezone) {
     statusTrackingSchedule(date: $date, search: $search, viewerTimezone: $viewerTimezone) {
       id
       studentId

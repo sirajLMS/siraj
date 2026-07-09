@@ -4,6 +4,7 @@ import type {
   teacherVacationRequests,
 } from "@/backend/db/schema";
 import type { AvailabilitySearchSortBy, DayOfWeek, Gender } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { PageInfo, PaginationInput } from "@/backend/types/pagination.types";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;
@@ -19,8 +20,7 @@ export type AvailabilityWindowInput = {
   dayOfWeek: DayOfWeek;
   startTime: string;
   endTime: string;
-  timezone: string;
-  timezoneId?: number | null;
+  timezone: IanaTimezone;
   utcOffsetSnapshot?: number | null;
   effectiveFrom?: string | null;
   effectiveUntil?: string | null;
@@ -33,8 +33,7 @@ export type RecurringUnavailabilityInput = AvailabilityWindowInput & {
 export type SubmitVacationRequestInput = {
   startAt: Date;
   endAt: Date;
-  timezone: string;
-  timezoneId?: number | null;
+  timezone: IanaTimezone;
   utcOffsetSnapshot?: number | null;
   reason?: string | null;
 };
@@ -66,14 +65,14 @@ export interface TeacherAvailabilityGap {
   calendarDate: string;
   gapStartTime: string;
   gapEndTime: string;
-  timezone: string;
+  timezone: IanaTimezone;
 }
 
 export interface AvailabilitySearchTeacher {
   id: string;
   name: string;
   gender: Gender | null;
-  timezone: string;
+  timezone: IanaTimezone;
   availableDaysCount: number;
   gaps: TeacherAvailabilityGap[];
 }

@@ -8,6 +8,7 @@ import type {
   PaymentMethod,
   StudentStatus,
 } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { PageInfo } from "@/backend/types/pagination.types";
 import type { ClassSessionMetrics } from "@/backend/types/schedule.types";
 
@@ -52,7 +53,9 @@ export type CreateTeacherPaymentInput = {
   isTestPayment?: boolean;
 };
 
-export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "status" | "timezone" | "createdAt">;
+export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "status" | "createdAt"> & {
+  readonly timezone: IanaTimezone;
+};
 
 export type TeacherDashboardScheduleRow = {
   id: string;
@@ -103,6 +106,7 @@ export type TeacherProfileReturnType = Omit<
   | "nationality"
   | "countryCode"
   | "paymentMethod"
+  | "timezone"
   | "timezoneId"
   | "zoomPassword"
   | "createdAt"
@@ -117,6 +121,7 @@ export type TeacherProfileReturnType = Omit<
   paymentMethod: PaymentMethod | null;
   dateOfBirth: string | null;
   updatedAt: string;
+  timezone: IanaTimezone;
   totalClasses: number;
   avgEngagementScore: number;
   hasZoomPassword: boolean;
@@ -125,23 +130,13 @@ export type TeacherProfileReturnType = Omit<
 export type TeacherProfileUpdateInputType = Partial<
   Omit<
     TeacherEntityInput,
-    | "id"
-    | "userId"
-    | "createdAt"
-    | "updatedAt"
-    | "nationality"
-    | "countryCode"
-    | "timezoneId"
-    | "gender"
-    | "paymentMethod"
-    | "timezone"
-    | "status"
+    "id" | "userId" | "createdAt" | "updatedAt" | "nationality" | "countryCode" | "gender" | "paymentMethod" | "status"
   >
 > & {
   readonly status?: AccountStatus | null;
   readonly gender?: Gender | null;
   readonly paymentMethod?: PaymentMethod | null;
-  readonly timezone?: string | null;
+  readonly timezone?: IanaTimezone | null;
 };
 
 export type TeacherDirectoryRow = {
@@ -193,7 +188,7 @@ export type TeacherOwnProfileReturnType = {
   name: string;
   email: string;
   phone: string | null;
-  timezone: string;
+  timezone: IanaTimezone;
   hourlyRate: string | null;
   rateCurrency: string | null;
   paymentMethod: PaymentMethod | null;

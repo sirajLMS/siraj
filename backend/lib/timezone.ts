@@ -1,5 +1,12 @@
 import { logger } from "@/backend/lib/logger";
+import { IANA_TIMEZONE_IDS } from "@/shared/constants/iana-timezones";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+const IANA_TIMEZONE_SET = new Set<string>(IANA_TIMEZONE_IDS);
+
+export function isValidIanaTimezone(value: string): boolean {
+  return IANA_TIMEZONE_SET.has(value);
+}
 
 export function formatInstantInTimezone(date: Date, ianaTimezone: string, locale?: string): string {
   const localeTag = locale ? getLatnLocaleTag(locale) : "en-US";

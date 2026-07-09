@@ -64,6 +64,8 @@ export namespace ParentOnboardingService {
         txObj
       );
 
+      await UserRepository.updateTimezone(user.id, input.timezone ?? "UTC", txObj, locale);
+
       // Step 2: Create parent profile
       const parent = await ParentRepository.create(
         {
@@ -80,7 +82,6 @@ export namespace ParentOnboardingService {
           feeAmount: input.feeAmount ?? null,
           paymentMethod: input.paymentMethod ?? null,
           currency: input.currency ?? null,
-          timezone: input.timezone ?? "UTC",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

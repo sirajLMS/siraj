@@ -6,7 +6,7 @@ export type { DBTransaction };
 
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
-import { classInstances, parents, students, teacherAssignments } from "@/backend/db/schema";
+import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
@@ -204,10 +204,11 @@ export async function resolveStudentTimezone(studentId: string, tx?: DBTransacti
   const [row] = await queryDb
     .select({
       override: students.timezoneOverride,
-      parentTimezone: parents.timezone,
+      parentTimezone: users.timezone,
     })
     .from(students)
     .innerJoin(parents, eq(students.parentId, parents.id))
+    .innerJoin(users, eq(parents.userId, users.id))
     .where(eq(students.id, studentId))
     .limit(1);
 

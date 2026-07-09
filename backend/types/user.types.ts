@@ -1,5 +1,6 @@
 import type { users } from "@/backend/db/schema/users";
 import type { AccountStatus, UserRole } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 // Alias AccountStatus as UserStatus for canonical pattern compliance
 // This aligns with the existing DB schema and UserStatus usage in the codebase
 export type UserStatus = AccountStatus;
@@ -19,9 +20,11 @@ export type UserReturnType = Omit<
   | "internalNotes"
   | "role" // Re-apply enum
   | "status" // Re-apply enum
+  | "timezone" // Re-apply enum
 > & {
   role: UserRole; // Re-apply enum
   status: UserStatus; // Re-apply enum
+  timezone: IanaTimezone; // Re-apply enum
   teacherId?: string | null; // Resolved optional: teacherId if applies
   parentId?: string | null; // Resolved optional: parentId if applies
 };

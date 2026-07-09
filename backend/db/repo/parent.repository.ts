@@ -14,6 +14,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
@@ -49,15 +50,6 @@ export namespace ParentRepository {
       throw new Error(t("parent.alreadyExists"));
     }
 
-    // Validate timezone if provided
-    const timezone = input.timezone ?? "UTC";
-    try {
-      Intl.DateTimeFormat(undefined, { timeZone: timezone });
-    } catch {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("parent.invalidTimezone"));
-    }
-
     const [created] = await queryDb
       .insert(parents)
       .values({
@@ -74,7 +66,6 @@ export namespace ParentRepository {
         feeAmount: input.feeAmount ?? null,
         paymentMethod: input.paymentMethod ?? null,
         currency: input.currency ?? null,
-        timezone: timezone,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -85,6 +76,12 @@ export namespace ParentRepository {
       throw new Error(t("parent.createFailed"));
     }
 
+    const [userRow] = await queryDb
+      .select({ timezone: users.timezone })
+      .from(users)
+      .where(eq(users.id, input.userId))
+      .limit(1);
+
     return {
       id: created.id,
       userId: created.userId,
@@ -93,7 +90,7 @@ export namespace ParentRepository {
       feeAmount: created.feeAmount,
       paymentMethod: created.paymentMethod,
       currency: created.currency,
-      timezone: created.timezone,
+      timezone: (userRow?.timezone ?? "UTC") as IanaTimezone,
       createdAt: created.createdAt,
     };
   }
@@ -271,7 +268,7 @@ export namespace ParentRepository {
     feeAmount: string | null;
     paymentMethod: string | null;
     currency: string | null;
-    timezone: string;
+    timezone: IanaTimezone;
     createdAt: Date;
     updatedAt: Date;
   };
@@ -298,7 +295,7 @@ export namespace ParentRepository {
         feeAmount: parents.feeAmount,
         paymentMethod: parents.paymentMethod,
         currency: parents.currency,
-        timezone: parents.timezone,
+        timezone: users.timezone,
         createdAt: parents.createdAt,
         updatedAt: parents.updatedAt,
       })
@@ -307,7 +304,12 @@ export namespace ParentRepository {
       .where(eq(parents.id, parentId))
       .limit(1);
 
-    return results[0] ?? null;
+    return results[0]
+      ? {
+          ...results[0],
+          timezone: results[0].timezone as IanaTimezone,
+        }
+      : null;
   };
 
   export const updateParentProfile = async (
@@ -338,7 +340,6 @@ export namespace ParentRepository {
     if (input.feeAmount !== undefined) parentUpdate.feeAmount = input.feeAmount;
     if (input.paymentMethod !== undefined) parentUpdate.paymentMethod = input.paymentMethod;
     if (input.currency !== undefined) parentUpdate.currency = input.currency;
-    if (input.timezone !== undefined) parentUpdate.timezone = input.timezone;
 
     await queryDb.update(parents).set(parentUpdate).where(eq(parents.id, parentId));
 
@@ -514,8 +515,9 @@ export namespace ParentRepository {
 
   async function fetchParentTimezone(t: DBTransaction, parentId: string): Promise<string> {
     const parentRow = await t
-      .select({ timezone: parents.timezone })
+      .select({ timezone: users.timezone })
       .from(parents)
+      .innerJoin(users, eq(parents.userId, users.id))
       .where(eq(parents.id, parentId))
       .limit(1);
     return parentRow[0]?.timezone ?? "UTC";

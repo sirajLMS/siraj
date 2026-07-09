@@ -12,6 +12,7 @@ import type {
   RescheduleDateLabel,
   StudentStatus,
 } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type { ClassInstancePerformanceReturnType } from "@/backend/types/class-instance-detail.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/pagination.types";
 import type { StudentEntity } from "@/backend/types/student.types";
@@ -41,8 +42,8 @@ export type DailyScheduleResult = Omit<ClassInstanceEntity, "deletedAt" | "creat
   status: ClassInstanceEntity["executionState"];
   remarks: string | null;
   hasTimezoneMismatch: boolean;
-  studentTimezone: string | null;
-  teacherTimezone: string | null;
+  studentTimezone: IanaTimezone | null;
+  teacherTimezone: IanaTimezone | null;
   performance: ClassInstancePerformanceReturnType | null;
   student?: StudentEntity;
   teacher?: DailyScheduleTeacher;
@@ -53,7 +54,7 @@ export type AdminDashboardScheduleInput = {
   date: Date;
   teacherId?: string;
   search?: string;
-  viewerTimezone: string;
+  viewerTimezone: IanaTimezone;
   metricFilter?: string;
   pagination?: PaginationArgs | null;
   locale?: string;
@@ -119,8 +120,7 @@ export type CreateRecurringClassInput = {
   teacherId: string;
   durationMinutes: number;
   defaultStartTime: string;
-  timezone: string;
-  timezoneId?: number | null;
+  timezone: IanaTimezone;
   effectiveFrom?: string | null;
   effectiveUntil?: string | null;
   days: RecurringClassDayInput[];

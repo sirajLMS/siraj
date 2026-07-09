@@ -1,4 +1,4 @@
-import { TeacherRepository } from "@/backend/db/repo";
+import { TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -37,20 +37,17 @@ export namespace StaffProfileService {
     }
 
     const { timezone: timezoneInput, ...restInput } = input;
-    const timezone = timezoneInput ?? undefined;
 
-    if (timezone) {
-      try {
-        Intl.DateTimeFormat(undefined, { timeZone: timezone });
-      } catch {
+    if (timezoneInput != null) {
+      const teacher = await TeacherRepository.findById(teacherId);
+      if (!teacher) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("teacher.invalidTimezone"));
+        throw new Error(tFunc("teacherNotFound", { id: teacherId }));
       }
+      await UserRepository.updateTimezone(teacher.userId, timezoneInput, undefined, locale);
     }
 
-    const repoInput: TeacherProfileUpdateInputType = timezone ? { ...restInput, timezone } : restInput;
-
-    const success = await TeacherRepository.updateTeacherProfile(teacherId, repoInput);
+    const success = await TeacherRepository.updateTeacherProfile(teacherId, restInput);
 
     if (!success) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

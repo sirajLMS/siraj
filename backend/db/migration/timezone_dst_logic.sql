@@ -85,7 +85,10 @@ DECLARE
 BEGIN
     -- Only snapshot if not already provided (e.g., by app layer)
     IF NEW.booking_timezone IS NULL THEN
-        SELECT timezone INTO teacher_tz FROM teachers WHERE id = NEW.teacher_id;
+        SELECT u.timezone INTO teacher_tz
+        FROM teachers t
+        INNER JOIN users u ON u.id = t.user_id
+        WHERE t.id = NEW.teacher_id;
         NEW.booking_timezone := teacher_tz;
     END IF;
 
@@ -127,19 +130,3 @@ DROP TRIGGER IF EXISTS trg_recurring_schedules_timezone_snapshot ON recurring_sc
 CREATE TRIGGER trg_recurring_schedules_timezone_snapshot
 BEFORE INSERT OR UPDATE ON recurring_schedules
 FOR EACH ROW EXECUTE FUNCTION trg_snapshot_recurring_schedule_timezone();
-
--- 6. Trigger for teachers to link timezone_id
-CREATE OR REPLACE FUNCTION trg_teachers_timezone_id_sync()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.timezone IS NOT NULL AND (TG_OP = 'INSERT' OR OLD.timezone IS NULL OR NEW.timezone != OLD.timezone) THEN
-        SELECT id INTO NEW.timezone_id FROM timezones WHERE iana_id = NEW.timezone;
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trg_teachers_timezone_id_sync ON teachers;
-CREATE TRIGGER trg_teachers_timezone_id_sync
-BEFORE INSERT OR UPDATE ON teachers
-FOR EACH ROW EXECUTE FUNCTION trg_teachers_timezone_id_sync();

@@ -10,6 +10,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
@@ -22,7 +23,7 @@ interface TeacherShortInfo {
   teacherId: string;
   teacherName: string | null;
   teacherGender: TeacherGender;
-  teacherTimezone: string;
+  teacherTimezone: IanaTimezone;
 }
 
 const JS_DAY_TO_ENUM: Record<number, DayOfWeek> = {
@@ -332,7 +333,6 @@ export namespace TeacherAvailabilityRepository {
           dayOfWeek: input.dayOfWeek,
           startTime: input.startTime,
           endTime: input.endTime,
-          timezoneId: input.timezoneId ?? null,
           timezone: input.timezone,
           utcOffsetSnapshot: input.utcOffsetSnapshot ?? null,
           effectiveFrom: input.effectiveFrom ?? null,
@@ -366,7 +366,6 @@ export namespace TeacherAvailabilityRepository {
           dayOfWeek: input.dayOfWeek,
           startTime: input.startTime,
           endTime: input.endTime,
-          timezoneId: input.timezoneId ?? null,
           timezone: input.timezone,
           utcOffsetSnapshot: input.utcOffsetSnapshot ?? null,
           effectiveFrom: input.effectiveFrom ?? null,
@@ -406,7 +405,6 @@ export namespace TeacherAvailabilityRepository {
           requestedByUserId,
           startAt: input.startAt,
           endAt: input.endAt,
-          timezoneId: input.timezoneId ?? null,
           timezone: input.timezone,
           utcOffsetSnapshot: input.utcOffsetSnapshot ?? null,
           reason: input.reason ?? null,
@@ -698,12 +696,18 @@ export namespace TeacherAvailabilityRepository {
         teacherId: teachers.id,
         teacherName: users.name,
         teacherGender: teachers.gender,
-        teacherTimezone: teachers.timezone,
+        teacherTimezone: users.timezone,
       })
       .from(teachers)
-      .leftJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
       .where(and(...buildTeacherQueryConditions(gender, teacherNameSearch)))
-      .limit(100);
+      .limit(100)
+      .then(rows =>
+        rows.map(row => ({
+          ...row,
+          teacherTimezone: row.teacherTimezone as IanaTimezone,
+        }))
+      );
   }
 
   function groupByTeacherId<T extends { teacherId: string }>(rows: T[]): Map<string, T[]> {

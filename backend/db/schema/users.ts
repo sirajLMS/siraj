@@ -1,6 +1,8 @@
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
   index,
   inet,
   integer,
@@ -14,22 +16,27 @@ import {
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
-export const users = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true, precision: 3 }),
-  password: varchar("password", { length: 255 }).notNull(),
-  rememberTokenHash: varchar("remember_token_hash", { length: 255 }),
-  avatarFilePath: varchar("avatar_file_path", { length: 1024 }),
-  avatarUrl: varchar("avatar_url", { length: 1024 }),
-  isActive: boolean("is_active").notNull().default(true),
-  isSuperAdmin: boolean("is_super_admin").notNull().default(false),
-  lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),
-  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
-  deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
-});
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true, precision: 3 }),
+    password: varchar("password", { length: 255 }).notNull(),
+    rememberTokenHash: varchar("remember_token_hash", { length: 255 }),
+    avatarFilePath: varchar("avatar_file_path", { length: 1024 }),
+    avatarUrl: varchar("avatar_url", { length: 1024 }),
+    isActive: boolean("is_active").notNull().default(true),
+    isSuperAdmin: boolean("is_super_admin").notNull().default(false),
+    timezone: varchar("timezone", { length: 100 }).notNull().default("UTC"),
+    lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+  },
+  table => [check("users_timezone_chk", sql`is_valid_timezone(${table.timezone})`)]
+);
 
 // DEPRECATED: Legacy sessions table - sessions are now stored in Redis
 // This table is kept for backwards compatibility and stores minimal metadata

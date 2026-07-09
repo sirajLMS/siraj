@@ -1,4 +1,5 @@
 import type { AppPermission } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/timezone.enum";
 import type {
   ParentAssignedStudentsResult,
   ParentOwnProfileReturnType,
@@ -63,7 +64,7 @@ export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {
   readonly feeAmount?: string | null;
   readonly paymentMethod?: string | null;
   readonly currency?: string | null;
-  readonly timezone?: string | null;
+  readonly timezone?: IanaTimezone | null;
 };
 
 export type StaffOwnProfileUpdateInput = {

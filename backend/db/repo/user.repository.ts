@@ -8,6 +8,7 @@ import { PaginationArgsDefault } from "@/backend/graphql/pothos/pagination.objec
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
+import { isValidIanaTimezone } from "@/backend/lib/timezone";
 import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth.types";
 import type { PaginationInput } from "@/backend/types/pagination.types";
 import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/user.types";
@@ -56,6 +57,7 @@ export namespace UserRepository {
           avatarUrl: users.avatarUrl,
           isActive: users.isActive,
           isSuperAdmin: users.isSuperAdmin,
+          timezone: users.timezone,
           lastLoginAt: users.lastLoginAt,
           createdAt: users.createdAt,
           updatedAt: users.updatedAt,
@@ -242,6 +244,7 @@ export namespace UserRepository {
       avatarUrl: users.avatarUrl,
       isActive: users.isActive,
       isSuperAdmin: users.isSuperAdmin,
+      timezone: users.timezone,
       lastLoginAt: users.lastLoginAt,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
@@ -253,5 +256,31 @@ export namespace UserRepository {
     }
 
     return AuthUtils.toUserReturnType(updated);
+  };
+
+  export const updateTimezone = async (
+    userId: string,
+    timezone: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<UserSelectType> => {
+    const queryDb = tx ?? db;
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+    if (!isValidIanaTimezone(timezone)) {
+      throw new Error(t("parent.invalidTimezone"));
+    }
+
+    const [updated] = await queryDb
+      .update(users)
+      .set({ timezone, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!updated) {
+      throw new Error(t("userNotFound", { id: userId }));
+    }
+
+    return updated;
   };
 }
