@@ -1,4 +1,5 @@
 import { PhoneNumberFormat } from "google-libphonenumber";
+import { resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
 import { isCallingCodeComplete, matchCallingCodeFromDigits } from "@/shared/lib/phone/calling-code";
 import { PhoneNumber } from "@/shared/lib/phone/phone-number";
 import type { ParsePhoneResult } from "@/shared/lib/phone/types";
@@ -82,7 +83,7 @@ function splitPartialDigits(
         return {
           prefixDigits: prefixCandidate,
           nationalDigits: allDigits.slice(length),
-          region: match.region,
+          region: resolveUiCountryCode(match.region),
         };
       }
     }
@@ -92,7 +93,7 @@ function splitPartialDigits(
   return {
     prefixDigits: allDigits,
     nationalDigits: "",
-    region: partialMatch?.region ?? preferredRegion ?? null,
+    region: resolveUiCountryCode(partialMatch?.region ?? preferredRegion ?? null),
   };
 }
 
@@ -112,7 +113,7 @@ export function splitPhoneValueToParts(
     const prefixDigits = String(parsed.getCountryCode() ?? "");
     const rawNational = parsed.getNationalNumber();
     const nationalDigits = rawNational !== undefined && rawNational !== 0 ? String(rawNational) : "";
-    const region = PhoneNumber.util.getRegionCodeForNumber(parsed) ?? defaultRegion ?? null;
+    const region = resolveUiCountryCode(PhoneNumber.util.getRegionCodeForNumber(parsed) ?? defaultRegion ?? null);
     return { prefixDigits, nationalDigits, region };
   } catch {
     const allDigits = normalized.replace(/^\++/, "").replace(/\D/g, "");

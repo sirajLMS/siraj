@@ -1,8 +1,9 @@
 "use client";
 
 import { Grid, Input } from "@mui/material";
-import type { FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { PhoneFormField } from "@/frontend/components/ui/input";
 
 interface IdentityFieldShape {
   readonly fullName?: string;
@@ -13,6 +14,7 @@ interface IdentityFieldShape {
 
 interface Props<T extends IdentityFieldShape & FieldValues> {
   readonly register: UseFormRegister<T>;
+  readonly control: Control<T>;
   readonly errors: FieldErrors<T>;
   readonly translate: (key: string) => string;
   readonly phoneRequired?: boolean;
@@ -25,6 +27,7 @@ function validationMessage(translate: (key: string) => string, message: string |
 
 export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldValues>({
   register,
+  control,
   errors,
   translate,
   phoneRequired = false,
@@ -69,18 +72,15 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
         </FieldWrapper>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper
-          label={translate("fields.phone")}
-          required={phoneRequired}
-          error={validationMessage(translate, errors.phone?.message as string | undefined)}
-        >
-          <Input
-            {...register(phoneField)}
+        <FieldWrapper label={translate("fields.phone")} required={phoneRequired}>
+          <PhoneFormField
+            name={phoneField}
+            control={control}
+            hideLabel
+            required={phoneRequired}
             placeholder={translate("placeholders.phone")}
             error={!!errors.phone}
-            fullWidth
-            type="tel"
-            sx={standardInputSx}
+            helperText={validationMessage(translate, errors.phone?.message as string | undefined)}
           />
         </FieldWrapper>
       </Grid>

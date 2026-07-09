@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PersonProfileLinkCell, PhoneDisplay } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { profileHrefForStaff } from "@/frontend/utils/profileHref";
 import { ManagerRowActions } from "./ManagerRowActions";
@@ -105,6 +105,7 @@ export function ManagersDataGrid({
         headerName: t("table.phone"),
         flex: 1,
         minWidth: 150,
+        renderCell: params => <PhoneDisplay phone={params.row.phone} typographyVariant="bodyMd" />,
       },
       {
         field: "role",

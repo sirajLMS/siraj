@@ -1,5 +1,7 @@
 export {
+  canAppendCallingCodeDigit,
   getCallingCodeForRegion,
+  getMaxCallingCodeLength,
   isCallingCodeComplete,
   isCallingCodePrefixValid,
   matchCallingCodeFromDigits,

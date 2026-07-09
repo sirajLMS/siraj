@@ -83,13 +83,16 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
       value={country ?? null}
       sx={{
         ...style,
-        ...(listAttached &&
-          isOpen && {
-            "& .MuiOutlinedInput-root": {
+        ...(listAttached && {
+          "& .MuiOutlinedInput-root": {
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            ...(isOpen && {
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
-            },
-          }),
+            }),
+          },
+        }),
       }}
       onChange={(_, newValue) => {
         if (newValue) {
@@ -115,35 +118,41 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
           </Box>
         );
       }}
-      renderInput={params => (
-        <TextField
-          {...params}
-          label={label ?? t("selectCountry")}
-          required={required}
-          onBlur={onBlur}
-          autoFocus={autoFocus}
-          slotProps={{
-            ...params.slotProps,
-            input: {
-              ...params.slotProps.input,
-              startAdornment: country ? (
-                <>
-                  <InputAdornment position="start">
-                    <LocaleEmoji emoji={country.emoji} />
-                  </InputAdornment>
-                  {params.slotProps.input?.startAdornment}
-                </>
-              ) : (
-                params.slotProps.input?.startAdornment
-              ),
-            },
-            htmlInput: {
-              ...params.slotProps.htmlInput,
-              autoComplete,
-            },
-          }}
-        />
-      )}
+      renderInput={params => {
+        const resolvedLabel = listAttached ? undefined : (label ?? t("selectCountry"));
+        const resolvedPlaceholder = listAttached ? (label ?? t("selectCountry")) : undefined;
+
+        return (
+          <TextField
+            {...params}
+            label={resolvedLabel}
+            placeholder={resolvedPlaceholder}
+            required={required}
+            onBlur={onBlur}
+            autoFocus={autoFocus}
+            slotProps={{
+              ...params.slotProps,
+              input: {
+                ...params.slotProps.input,
+                startAdornment: country ? (
+                  <>
+                    <InputAdornment position="start">
+                      <LocaleEmoji emoji={country.emoji} />
+                    </InputAdornment>
+                    {params.slotProps.input?.startAdornment}
+                  </>
+                ) : (
+                  params.slotProps.input?.startAdornment
+                ),
+              },
+              htmlInput: {
+                ...params.slotProps.htmlInput,
+                autoComplete,
+              },
+            }}
+          />
+        );
+      }}
     />
   );
 };

@@ -2,16 +2,17 @@
 
 import Box from "@mui/material/Box";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
 import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
 import { PhoneCountryPicker } from "@/frontend/components/ui/input/phoneInput/PhoneCountryPicker";
 import { usePhoneInput } from "@/frontend/components/ui/input/phoneInput/usePhoneInput";
+import { LtrScope } from "@/frontend/providers/theme/LtrScope";
 
 export type PhoneInputProps = {
   readonly value: string | null;
@@ -25,6 +26,7 @@ export type PhoneInputProps = {
   readonly fullWidth?: boolean;
   readonly error?: boolean;
   readonly helperText?: string;
+  readonly hideLabel?: boolean;
 };
 
 const slotInputSx = {
@@ -50,9 +52,9 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   fullWidth = true,
   error,
   helperText,
+  hideLabel,
 }: PhoneInputProps): React.ReactNode => {
   const t = useTranslations("ui.phoneInput");
-  const fieldId = useId();
   const [countryPickerOpen, setCountryPickerOpen] = useState(false);
 
   const {
@@ -71,6 +73,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     resetNationalDisplay,
     prefixInputRef,
     nationalInputRef,
+    maxPrefixDisplayLength,
     setActiveSlot,
   } = usePhoneInput({ value, onChangeAction, defaultRegion });
 
@@ -110,95 +113,105 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const resolvedLabel = label ?? t("label");
 
   return (
-    <FormControl fullWidth={fullWidth} required={required} disabled={disabled} error={showError} variant="outlined">
-      <InputLabel htmlFor={fieldId} shrink>
-        {resolvedLabel}
-      </InputLabel>
-      <ClickAwayListener onClickAway={closeCountryPicker}>
-        <Box sx={{ position: "relative", mt: 1 }}>
-          <Box
-            id={fieldId}
-            role="group"
-            aria-label={resolvedLabel}
-            onBlur={onBlurAction}
-            dir="ltr"
-            sx={theme => ({
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              minHeight: 56,
-              px: 1.5,
-              py: 1,
-              borderWidth: 1,
-              borderStyle: "solid",
-              borderColor: showError ? theme.palette.error.main : theme.palette.outlineVariant,
-              borderRadius: 1,
-              opacity: disabled ? theme.palette.action.disabledOpacity : 1,
-              pointerEvents: disabled ? "none" : "auto",
-              transition: theme.transitions.create(["border-color"]),
-              "&:focus-within": {
-                borderColor: showError ? theme.palette.error.main : theme.palette.primary.main,
-                borderWidth: 2,
-                px: "11.5px",
-                py: "7px",
-              },
-            })}
-          >
-            <IconButton
-              aria-label={t("selectCountry")}
-              aria-expanded={countryPickerOpen}
-              onClick={openCountryPicker}
+    <ClickAwayListener onClickAway={closeCountryPicker}>
+      <Box sx={{ width: fullWidth ? "100%" : undefined }}>
+        <Box sx={{ position: "relative" }}>
+          <LtrScope>
+            <TextField
+              fullWidth={fullWidth}
+              required={required}
               disabled={disabled}
-              edge="start"
-              size="small"
-              sx={{ p: 0.25, flexShrink: 0 }}
-            >
-              <LocaleEmoji emoji={country?.emoji ?? "🌐"} />
-            </IconButton>
-            <Box
-              component="input"
-              ref={prefixInputRef}
-              value={`+${prefixDigits}`}
-              disabled={disabled}
-              onFocus={() => setActiveSlot("prefix")}
-              onKeyDown={handlePrefixKeyDown}
-              onInput={resetPrefixDisplay}
-              aria-label="Country calling code"
-              sx={{
-                ...slotInputSx,
-                width: `${Math.max(prefixDigits.length + 1, 2)}ch`,
-                flexShrink: 0,
-                color: prefixInvalid ? "error.main" : "inherit",
-                fontWeight: activeSlot === "prefix" ? 600 : 400,
-              }}
-            />
-            <Box
-              component="input"
-              ref={nationalInputRef}
-              value={nationalDisplay}
-              disabled={disabled}
+              error={showError}
+              label={hideLabel ? undefined : resolvedLabel}
               placeholder={placeholder}
+              value={nationalDisplay}
+              onChange={() => {}}
+              onBlur={onBlurAction}
+              onKeyDown={handleNationalKeyDown}
               onFocus={() => {
                 closeCountryPicker();
                 setActiveSlot("national");
               }}
-              onKeyDown={handleNationalKeyDown}
-              onSelect={handleNationalSelect}
-              onInput={resetNationalDisplay}
-              aria-label="Phone number"
-              autoComplete="tel"
-              inputMode="tel"
+              inputRef={nationalInputRef}
               sx={{
-                ...slotInputSx,
-                flex: 1,
-                fontWeight: activeSlot === "national" ? 600 : 400,
+                "& .MuiInputBase-input": {
+                  fontWeight: activeSlot === "national" ? 600 : 400,
+                  paddingInlineStart: 0,
+                },
+                ...(countryPickerOpen && {
+                  "& .MuiOutlinedInput-root": {
+                    borderBottomStartRadius: 0,
+                    borderBottomEndRadius: 0,
+                  },
+                }),
+              }}
+              slotProps={{
+                inputLabel: { shrink: true },
+                input: {
+                  startAdornment: (
+                    <InputAdornment
+                      position="start"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.25,
+                        marginInlineEnd: 0.5,
+                        maxHeight: "unset",
+                      }}
+                    >
+                      <IconButton
+                        aria-label={t("selectCountry")}
+                        aria-expanded={countryPickerOpen}
+                        onClick={openCountryPicker}
+                        disabled={disabled}
+                        size="small"
+                        sx={{
+                          p: 0.25,
+                          flexShrink: 0,
+                          paddingInlineEnd: 0.5,
+                          marginInlineEnd: 0,
+                        }}
+                      >
+                        <LocaleEmoji emoji={country?.emoji ?? "🌐"} />
+                      </IconButton>
+                      <Box
+                        component="input"
+                        ref={prefixInputRef}
+                        value={`+${prefixDigits}`}
+                        maxLength={maxPrefixDisplayLength}
+                        disabled={disabled}
+                        onFocus={() => setActiveSlot("prefix")}
+                        onKeyDown={handlePrefixKeyDown}
+                        onInput={resetPrefixDisplay}
+                        aria-label="Country calling code"
+                        sx={{
+                          ...slotInputSx,
+                          width: `${Math.max(prefixDigits.length + 1, 2)}ch`,
+                          flexShrink: 0,
+                          paddingInlineEnd: 0.25,
+                          color: prefixInvalid ? "error.main" : "inherit",
+                          fontWeight: activeSlot === "prefix" ? 600 : 400,
+                        }}
+                      />
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  onInput: resetNationalDisplay,
+                  onSelect: handleNationalSelect,
+                  autoComplete: "tel",
+                  inputMode: "tel",
+                  "aria-label": "Phone number",
+                },
               }}
             />
-          </Box>
+          </LtrScope>
           {countryPickerOpen ? <PhoneCountryPicker country={country} onSelectAction={handleCountrySelect} /> : null}
         </Box>
-      </ClickAwayListener>
-      {resolvedHelperText ? <FormHelperText>{resolvedHelperText}</FormHelperText> : null}
-    </FormControl>
+        {!countryPickerOpen && resolvedHelperText ? (
+          <FormHelperText error={showError}>{resolvedHelperText}</FormHelperText>
+        ) : null}
+      </Box>
+    </ClickAwayListener>
   );
 };

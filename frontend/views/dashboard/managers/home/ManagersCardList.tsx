@@ -4,7 +4,7 @@ import { MailOutlined, PhoneOutlined } from "@mui/icons-material";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { BaseCard, PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import { BaseCard, PaginationControls, PhoneDisplay, StatusBadge } from "@/frontend/components/ui";
 import { ManagerRowActions } from "./ManagerRowActions";
 import type { Manager } from "./types";
 
@@ -134,7 +134,7 @@ export function ManagersCardList({
               </StyledContactItemBox>
               <StyledContactItemBox direction="row" spacing={1.5}>
                 <PhoneOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
-                <Typography variant="bodyMd">{manager.phone}</Typography>
+                <PhoneDisplay phone={manager.phone} typographyVariant="bodyMd" />
               </StyledContactItemBox>
             </Stack>
           </StyledManagerCard>

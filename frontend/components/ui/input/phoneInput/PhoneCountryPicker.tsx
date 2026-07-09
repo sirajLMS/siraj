@@ -26,7 +26,7 @@ export const PhoneCountryPicker: React.FC<PhoneCountryPickerProps> = ({
       sx={{
         position: "absolute",
         top: "100%",
-        left: 0,
+        insetInlineStart: 0,
         width: "100%",
         zIndex: theme => theme.zIndex.modal,
       }}

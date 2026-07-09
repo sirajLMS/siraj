@@ -67,7 +67,7 @@ export function TeacherProfileEditForm({
             avatarUrl={avatarUrl}
             register={form.register}
           />
-          <ContactSection mode="edit" isAdminScope={false} register={form.register} />
+          <ContactSection mode="edit" isAdminScope={false} register={form.register} control={form.control} />
           <ZoomSection mode="edit" isAdminScope={false} register={form.register} />
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>

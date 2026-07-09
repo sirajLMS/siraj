@@ -1,4 +1,5 @@
 import { PhoneNumberUtil } from "google-libphonenumber";
+import { isExcludedUiCountryCode, resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
 import type { CallingCodeMatch } from "@/shared/lib/phone/types";
 
 type CallingCodeEntry = {
@@ -12,10 +13,13 @@ let callingCodeIndex: CallingCodeEntry[] | null = null;
 
 function getCallingCodeIndex(): readonly CallingCodeEntry[] {
   if (!callingCodeIndex) {
-    callingCodeIndex = util.getSupportedRegions().map(region => ({
-      region,
-      callingCode: String(util.getCountryCodeForRegion(region)),
-    }));
+    callingCodeIndex = util
+      .getSupportedRegions()
+      .filter(region => !isExcludedUiCountryCode(region))
+      .map(region => ({
+        region,
+        callingCode: String(util.getCountryCodeForRegion(region)),
+      }));
     callingCodeIndex.sort((left, right) => right.callingCode.length - left.callingCode.length);
   }
   return callingCodeIndex;
@@ -36,16 +40,19 @@ function pickPreferredMatch(
   }
 
   if (preferredRegion) {
-    const preferred = matches.find(entry => entry.region === preferredRegion);
-    if (preferred) {
-      return preferred;
+    const resolvedPreferredRegion = resolveUiCountryCode(preferredRegion);
+    if (resolvedPreferredRegion) {
+      const preferred = matches.find(entry => entry.region === resolvedPreferredRegion);
+      if (preferred) {
+        return preferred;
+      }
     }
   }
 
   if (callingCodeDigits) {
     const callingCode = Number(callingCodeDigits);
     if (!Number.isNaN(callingCode)) {
-      const defaultRegion = util.getRegionCodeForCountryCode(callingCode);
+      const defaultRegion = resolveUiCountryCode(util.getRegionCodeForCountryCode(callingCode) ?? undefined);
       if (defaultRegion) {
         const defaultMatch = matches.find(entry => entry.region === defaultRegion);
         if (defaultMatch) {
@@ -55,7 +62,9 @@ function pickPreferredMatch(
     }
   }
 
-  return matches[0];
+  return matches[0]
+    ? { ...matches[0], region: resolveUiCountryCode(matches[0].region) ?? matches[0].region }
+    : undefined;
 }
 
 /** Resolve region from partial or complete calling-code digits. */
@@ -99,4 +108,18 @@ export function isCallingCodeComplete(digits: string): boolean {
     return false;
   }
   return getCallingCodeIndex().some(entry => entry.callingCode === digits);
+}
+
+/** Longest calling-code digit length across all supported regions. */
+export function getMaxCallingCodeLength(): number {
+  return getCallingCodeIndex().reduce((max, entry) => Math.max(max, entry.callingCode.length), 0);
+}
+
+/** Whether another digit can be appended to the current calling-code prefix. */
+export function canAppendCallingCodeDigit(currentDigits: string, digit: string): boolean {
+  if (!/^\d$/.test(digit) || isCallingCodeComplete(currentDigits)) {
+    return false;
+  }
+  const nextDigits = `${currentDigits}${digit}`;
+  return nextDigits.length <= getMaxCallingCodeLength() && isCallingCodePrefixValid(nextDigits);
 }

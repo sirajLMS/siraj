@@ -1,11 +1,17 @@
 import { logger } from "@/backend/lib/logger";
 import { IANA_TIMEZONE_IDS } from "@/shared/constants/iana-timezones";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+import { isExcludedIanaTimezoneId, resolveExcludedIanaTimezoneId } from "@/shared/lib/timezone/excluded-iana-timezones";
 
 const IANA_TIMEZONE_SET = new Set<string>(IANA_TIMEZONE_IDS);
 
+export function normalizeIanaTimezone(value: string): string {
+  return resolveExcludedIanaTimezoneId(value);
+}
+
 export function isValidIanaTimezone(value: string): boolean {
-  return IANA_TIMEZONE_SET.has(value);
+  const normalized = normalizeIanaTimezone(value);
+  return !isExcludedIanaTimezoneId(normalized) && IANA_TIMEZONE_SET.has(normalized);
 }
 
 export function formatInstantInTimezone(date: Date, ianaTimezone: string, locale?: string): string {

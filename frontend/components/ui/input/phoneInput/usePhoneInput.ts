@@ -4,9 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type CountryType, getCountryByCode } from "@/frontend/lib/locale";
 import {
   buildE164FromParts,
+  canAppendCallingCodeDigit,
   clampSelectionToDigits,
   formatNationalDigits,
   getCallingCodeForRegion,
+  getMaxCallingCodeLength,
   getNextFormatChar,
   isCallingCodeComplete,
   isCallingCodePrefixValid,
@@ -41,6 +43,7 @@ export type UsePhoneInputResult = {
   readonly resetNationalDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
   readonly prefixInputRef: React.RefObject<HTMLInputElement | null>;
   readonly nationalInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly maxPrefixDisplayLength: number;
 };
 
 function resolveCountry(region: string | null | undefined): CountryType | undefined {
@@ -144,13 +147,9 @@ export function usePhoneInput({
       setRegion(nextCountry.code);
       setPrefixDigits(nextPrefix);
       emitChange(nextPrefix, nationalDigits);
-      if (isCallingCodeComplete(nextPrefix)) {
-        focusNational();
-      } else {
-        focusPrefix();
-      }
+      focusPrefix();
     },
-    [emitChange, focusNational, focusPrefix, nationalDigits]
+    [emitChange, focusPrefix, nationalDigits]
   );
 
   const handlePrefixKeyDown = useCallback(
@@ -172,30 +171,13 @@ export function usePhoneInput({
 
       if (/^\d$/.test(event.key)) {
         event.preventDefault();
-        if (isCallingCodeComplete(prefixDigits)) {
-          const nextNational = `${nationalDigits}${event.key}`;
-          setNationalDigits(nextNational);
-          emitChange(prefixDigits, nextNational);
-          focusNational();
+        if (!canAppendCallingCodeDigit(prefixDigits, event.key)) {
           return;
         }
-
-        const nextPrefix = `${prefixDigits}${event.key}`;
-        if (!isCallingCodePrefixValid(nextPrefix)) {
-          const nextNational = `${nationalDigits}${event.key}`;
-          setNationalDigits(nextNational);
-          emitChange(prefixDigits, nextNational);
-          focusNational();
-          return;
-        }
-
-        updateFromPrefix(nextPrefix);
-        if (isCallingCodeComplete(nextPrefix)) {
-          focusNational();
-        }
+        updateFromPrefix(`${prefixDigits}${event.key}`);
       }
     },
-    [emitChange, focusNational, nationalDigits, prefixDigits, updateFromPrefix]
+    [prefixDigits, updateFromPrefix, focusNational]
   );
 
   const handleNationalKeyDown = useCallback(
@@ -280,6 +262,7 @@ export function usePhoneInput({
     resetNationalDisplay,
     prefixInputRef,
     nationalInputRef,
+    maxPrefixDisplayLength: getMaxCallingCodeLength() + 1,
   };
 }
 

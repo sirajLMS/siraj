@@ -244,7 +244,6 @@ export const IANA_TIMEZONE_TERRITORY_CODES: Record<IanaTimezoneId, string | null
   "Asia/Irkutsk": "RU",
   "Asia/Jakarta": "ID",
   "Asia/Jayapura": "ID",
-  "Asia/Jerusalem": "IL",
   "Asia/Kabul": "AF",
   "Asia/Kamchatka": "RU",
   "Asia/Karachi": "PK",

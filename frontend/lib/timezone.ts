@@ -3,6 +3,8 @@ import { getCountryByCode } from "@/frontend/lib/locale";
 import { IANA_TIMEZONE_LABELS } from "@/shared/constants/iana-timezone-labels";
 import { IANA_TIMEZONE_TERRITORY_CODES } from "@/shared/constants/iana-timezone-territories";
 import { IANA_TIMEZONE_IDS, type IanaTimezoneId } from "@/shared/constants/iana-timezones";
+import { resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
+import { isExcludedIanaTimezoneId, resolveExcludedIanaTimezoneId } from "@/shared/lib/timezone/excluded-iana-timezones";
 
 const GLOBE_EMOJI = "🌐";
 
@@ -15,8 +17,9 @@ export type TimezoneOption = {
   readonly emoji: string;
 };
 
-function normalizeIanaTimezoneId(value: string): IanaTimezoneId {
-  return (value.includes("/") ? value : value.replace(/_/g, "/")) as IanaTimezoneId;
+function normalizeIanaTimezoneId(value: string): string {
+  const slashNormalized = value.includes("/") ? value : value.replace(/_/g, "/");
+  return resolveExcludedIanaTimezoneId(slashNormalized);
 }
 
 function resolveLocaleKey(locale?: string): "en" | "ar" {
@@ -24,28 +27,28 @@ function resolveLocaleKey(locale?: string): "en" | "ar" {
 }
 
 export function fromGraphqlIanaTimezone(value: IanaTimezone | string): IanaTimezoneId {
-  return value.replace(/_/g, "/") as IanaTimezoneId;
+  return normalizeIanaTimezoneId(value) as IanaTimezoneId;
 }
 
 export function toGraphqlIanaTimezone(value: IanaTimezoneId | string | null | undefined): IanaTimezone {
-  const normalized = (value ?? "UTC").includes("/") ? (value ?? "UTC") : (value ?? "UTC").replace(/_/g, "/");
+  const normalized = normalizeIanaTimezoneId(value ?? "UTC");
   return normalized.replace(/\//g, "_") as IanaTimezone;
 }
 
 export function resolveBrowserIanaTimezoneId(): IanaTimezoneId {
-  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  return isValidIanaTimezoneId(browserTimezone) ? browserTimezone : "Africa/Cairo";
+  const browserTimezone = normalizeIanaTimezoneId(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  return isValidIanaTimezoneId(browserTimezone) ? (browserTimezone as IanaTimezoneId) : "Africa/Cairo";
 }
 
 export function getTimezonePathLabel(ianaTimezone: string, locale?: string): string {
-  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
+  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone) as IanaTimezoneId;
   const localeKey = resolveLocaleKey(locale);
   return IANA_TIMEZONE_LABELS[normalizedTimezone]?.[localeKey] ?? normalizedTimezone;
 }
 
 export function getTimezoneTerritoryCode(ianaTimezone: string): string | null {
-  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
-  return IANA_TIMEZONE_TERRITORY_CODES[normalizedTimezone] ?? null;
+  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone) as IanaTimezoneId;
+  return resolveUiCountryCode(IANA_TIMEZONE_TERRITORY_CODES[normalizedTimezone] ?? null);
 }
 
 export function getTimezoneEmoji(ianaTimezone: string): string {
@@ -69,7 +72,7 @@ export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, d
 }
 
 export function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
-  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
+  const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone) as IanaTimezoneId;
   try {
     const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
     const tzDate = new Date(date.toLocaleString("en-US", { timeZone: normalizedTimezone }));
@@ -110,5 +113,6 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
 }
 
 export function isValidIanaTimezoneId(value: string): value is IanaTimezoneId {
-  return (IANA_TIMEZONE_IDS as readonly string[]).includes(value);
+  const normalized = normalizeIanaTimezoneId(value);
+  return !isExcludedIanaTimezoneId(normalized) && (IANA_TIMEZONE_IDS as readonly string[]).includes(normalized);
 }

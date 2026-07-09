@@ -242,7 +242,6 @@ export enum IanaTimezone {
   Asia_Irkutsk = "Asia/Irkutsk",
   Asia_Jakarta = "Asia/Jakarta",
   Asia_Jayapura = "Asia/Jayapura",
-  Asia_Jerusalem = "Asia/Jerusalem",
   Asia_Kabul = "Asia/Kabul",
   Asia_Kamchatka = "Asia/Kamchatka",
   Asia_Karachi = "Asia/Karachi",

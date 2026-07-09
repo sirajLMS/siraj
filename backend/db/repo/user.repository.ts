@@ -8,7 +8,7 @@ import { PaginationArgsDefault } from "@/backend/graphql/pothos/pagination.objec
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
-import { isValidIanaTimezone } from "@/backend/lib/timezone";
+import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
 import type { PaginatedUsersResponseSelectType } from "@/backend/types/auth.types";
 import type { PaginationInput } from "@/backend/types/pagination.types";
 import type { UserCreateInput, UserReturnType, UserSelectType } from "@/backend/types/user.types";
@@ -267,13 +267,15 @@ export namespace UserRepository {
     const queryDb = tx ?? db;
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
-    if (!isValidIanaTimezone(timezone)) {
+    const normalizedTimezone = normalizeIanaTimezone(timezone);
+
+    if (!isValidIanaTimezone(normalizedTimezone)) {
       throw new Error(t("parent.invalidTimezone"));
     }
 
     const [updated] = await queryDb
       .update(users)
-      .set({ timezone, updatedAt: new Date() })
+      .set({ timezone: normalizedTimezone, updatedAt: new Date() })
       .where(eq(users.id, userId))
       .returning();
 

@@ -252,7 +252,6 @@ export const IANA_TIMEZONE_LABELS: Record<IanaTimezoneId, IanaTimezoneLabels> = 
   "Asia/Irkutsk": { en: "Asia/Irkutsk", ar: "آسيا/ايركيتسك" },
   "Asia/Jakarta": { en: "Asia/Jakarta", ar: "آسيا/جاكرتا" },
   "Asia/Jayapura": { en: "Asia/Jayapura", ar: "آسيا/جايابيورا" },
-  "Asia/Jerusalem": { en: "Asia/Jerusalem", ar: "آسيا/القدس" },
   "Asia/Kabul": { en: "Asia/Kabul", ar: "آسيا/كابول" },
   "Asia/Kamchatka": { en: "Asia/Kamchatka", ar: "آسيا/كامتشاتكا" },
   "Asia/Karachi": { en: "Asia/Karachi", ar: "آسيا/كراتشي" },

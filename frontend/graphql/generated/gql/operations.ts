@@ -840,7 +840,6 @@ export type IanaTimezone =
   | 'Asia_Irkutsk'
   | 'Asia_Jakarta'
   | 'Asia_Jayapura'
-  | 'Asia_Jerusalem'
   | 'Asia_Kabul'
   | 'Asia_Kamchatka'
   | 'Asia_Karachi'

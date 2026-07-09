@@ -5,6 +5,7 @@ import { Box, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/mate
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/TimezoneDisplay";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher-portal.documents";
@@ -36,9 +37,12 @@ export function TeacherOwnProfileContainer() {
                   <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
                     {profile.email}
                   </Typography>
-                  <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                    {profile.phone ?? t("notSet")}
-                  </Typography>
+                  <PhoneDisplay
+                    phone={profile.phone}
+                    fallback={t("notSet")}
+                    typographyVariant="bodyMd"
+                    sx={theme => ({ color: theme.palette.text.secondary })}
+                  />
                   <TimezoneDisplay timezone={profile.timezone} fallback={t("notSet")} />
                 </Stack>
               </Paper>

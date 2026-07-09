@@ -54,7 +54,7 @@ export function ParentOnboardingView({ register, control, errors, handleSubmit, 
         }}
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
       >
-        <ParentInfoSection register={register} errors={errors} />
+        <ParentInfoSection register={register} control={control} errors={errors} />
         <SocialCommsSection register={register} />
         <FeesContractSection register={register} control={control} errors={errors} />
 

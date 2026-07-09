@@ -8,6 +8,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { isExcludedIanaTimezoneId } from "../shared/lib/timezone/excluded-iana-timezones.ts";
 
 const ROOT = join(import.meta.dir, "..");
 const SHARED_IDS_OUTPUT = join(ROOT, "shared/constants/iana-timezones.ts");
@@ -84,7 +85,7 @@ function getIanaTimezoneIds(): string[] {
   if (typeof Intl.supportedValuesOf !== "function") {
     throw new Error("Intl.supportedValuesOf is not available in this runtime");
   }
-  return [...Intl.supportedValuesOf("timeZone")].sort();
+  return [...Intl.supportedValuesOf("timeZone")].filter(id => !isExcludedIanaTimezoneId(id)).sort();
 }
 
 function loadCldrZoneTree(): CldrZoneTree {
@@ -203,6 +204,8 @@ function buildIanaTimezoneLabels(ids: string[]): Record<string, IanaTimezoneLabe
 }
 
 /** Manual ISO 3166-1 alpha-2 overrides for zones missing from CLDR windowsZones. */
+const EXCLUDED_TERRITORY_CODES = new Set(["IL"]);
+
 const TERRITORY_OVERRIDES: Record<string, string | null> = {
   "Africa/Asmara": "ER",
   "America/Argentina/Buenos_Aires": "AR",
@@ -259,7 +262,8 @@ function buildIanaTimezoneTerritories(ids: string[]): Record<string, string | nu
       territories[id] = null;
       continue;
     }
-    territories[id] = cldrTerritories[id] ?? null;
+    const territoryCode = cldrTerritories[id] ?? null;
+    territories[id] = territoryCode && EXCLUDED_TERRITORY_CODES.has(territoryCode) ? "PS" : territoryCode;
   }
   return territories;
 }

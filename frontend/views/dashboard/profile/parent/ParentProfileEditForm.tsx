@@ -97,7 +97,7 @@ export function ParentProfileEditForm({
             avatarUrl={avatarUrl}
             register={form.register}
           />
-          <ContactSection mode="edit" register={form.register} />
+          <ContactSection mode="edit" control={form.control} />
           <SocialSection mode="edit" register={form.register} />
 
           {isAdminScope ? (

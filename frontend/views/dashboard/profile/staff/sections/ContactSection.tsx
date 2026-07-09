@@ -1,12 +1,13 @@
 "use client";
 
-import { Stack, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui";
+import type { Control } from "react-hook-form";
+import { PhoneFormField, SectionPanel } from "@/frontend/components/ui";
+import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { InfoField } from "../../parent/sections/InfoField";
 import type { StaffAdminEditFormData } from "../staffProfileFormTypes";
-import { type StaffProfileData, toDisplayValue } from "./staffProfileTypes";
+import type { StaffProfileData } from "./staffProfileTypes";
 
 type ContactSectionProps =
   | {
@@ -15,7 +16,7 @@ type ContactSectionProps =
     }
   | {
       readonly mode: "edit";
-      readonly register: UseFormRegister<StaffAdminEditFormData>;
+      readonly control: Control<StaffAdminEditFormData>;
     };
 
 export function ContactSection(props: ContactSectionProps) {
@@ -26,7 +27,7 @@ export function ContactSection(props: ContactSectionProps) {
     return (
       <SectionPanel title={t("sections.contact")}>
         <Stack spacing={2}>
-          <TextField label={t("fields.phone")} fullWidth size="small" {...props.register("phone")} />
+          <PhoneFormField name="phone" control={props.control} label={t("fields.phone")} />
         </Stack>
       </SectionPanel>
     );
@@ -35,7 +36,10 @@ export function ContactSection(props: ContactSectionProps) {
   return (
     <SectionPanel title={t("sections.contact")}>
       <Stack spacing={1.5}>
-        <InfoField label={t("fields.phone")} value={toDisplayValue(props.staffData.phone, tc("notSet"))} />
+        <InfoField
+          label={t("fields.phone")}
+          value={<PhoneDisplay phone={props.staffData.phone} fallback={tc("notSet")} />}
+        />
       </Stack>
     </SectionPanel>
   );

@@ -2,6 +2,7 @@ import { Box, FormControlLabel, FormHelperText, Radio, RadioGroup, TextField, Ty
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
+import { PhoneFormField } from "@/frontend/components/ui/input";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherProfileFormData } from "../schemas/teacherProfileSchema";
@@ -84,11 +85,7 @@ export function PhoneField() {
   return (
     <Box>
       <Typography sx={labelSx}>{t("fields.phone")}</Typography>
-      <Controller
-        name="phone"
-        control={control}
-        render={({ field }) => <TextField {...field} fullWidth slotProps={{ input: { sx: outlinedInputSx } }} />}
-      />
+      <PhoneFormField name="phone" control={control} hideLabel fullWidth />
     </Box>
   );
 }

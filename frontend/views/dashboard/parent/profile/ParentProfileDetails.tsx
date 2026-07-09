@@ -1,7 +1,9 @@
 import { ContactPageOutlined, PaymentsOutlined, ShareOutlined } from "@mui/icons-material";
 import { Box, Grid, Link, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
+import type * as React from "react";
 import { SectionPanel } from "@/frontend/components/ui";
+import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
 import type { ParentProfileData } from "@/frontend/views/dashboard/parent/types/profile";
 
@@ -15,10 +17,11 @@ function DetailItem({
   isLink,
 }: {
   readonly label: string;
-  readonly value: string | number;
+  readonly value: React.ReactNode;
   readonly isLink?: boolean;
 }) {
-  const safeUrl = isSafeUrl(`https://${value}`);
+  const stringValue = typeof value === "string" ? value : null;
+  const safeUrl = stringValue ? isSafeUrl(`https://${stringValue}`) : null;
   return (
     <Stack spacing={0.5}>
       <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -38,10 +41,12 @@ function DetailItem({
         >
           {value}
         </Link>
-      ) : (
+      ) : typeof value === "string" || typeof value === "number" ? (
         <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.primary, fontWeight: 500 })}>
           {value}
         </Typography>
+      ) : (
+        value
       )}
     </Stack>
   );
@@ -76,7 +81,10 @@ function ParentProfileDetails({ parent }: ParentProfileDetailsProps) {
             <DetailItem label={t("fields.email")} value={parent.email} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <DetailItem label={t("fields.phone")} value={parent.phone} />
+            <DetailItem
+              label={t("fields.phone")}
+              value={<PhoneDisplay phone={parent.phone} typographyVariant="bodyLg" />}
+            />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DetailItem label={t("fields.address")} value={parent.address} />

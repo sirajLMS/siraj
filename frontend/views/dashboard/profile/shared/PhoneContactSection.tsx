@@ -1,30 +1,36 @@
-import { Stack, TextField } from "@mui/material";
-import type { UseFormRegisterReturn } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui";
+import { Stack } from "@mui/material";
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
+import { PhoneFormField, SectionPanel } from "@/frontend/components/ui";
+import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { InfoField } from "../parent/sections/InfoField";
 
-type PhoneContactSectionProps =
+type PhoneContactSectionProps<T extends FieldValues> =
   | {
       readonly mode: "view";
       readonly title: string;
       readonly phoneLabel: string;
-      readonly phoneValue: string;
+      readonly phoneValue: string | null | undefined;
+      readonly notSetLabel?: string;
     }
   | {
       readonly mode: "edit";
       readonly title: string;
       readonly phoneLabel: string;
-      readonly phoneRegister: UseFormRegisterReturn;
+      readonly control: Control<T>;
+      readonly name: FieldPath<T>;
     };
 
-export function PhoneContactSection(props: PhoneContactSectionProps) {
+export function PhoneContactSection<T extends FieldValues>(props: PhoneContactSectionProps<T>) {
   return (
     <SectionPanel title={props.title}>
       <Stack spacing={2}>
         {props.mode === "edit" ? (
-          <TextField label={props.phoneLabel} fullWidth size="small" {...props.phoneRegister} />
+          <PhoneFormField name={props.name} control={props.control} label={props.phoneLabel} />
         ) : (
-          <InfoField label={props.phoneLabel} value={props.phoneValue} />
+          <InfoField
+            label={props.phoneLabel}
+            value={<PhoneDisplay phone={props.phoneValue} fallback={props.notSetLabel} />}
+          />
         )}
       </Stack>
     </SectionPanel>

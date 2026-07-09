@@ -6,6 +6,9 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE OR REPLACE FUNCTION is_valid_timezone(tz TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
+    IF tz = 'Asia/Jerusalem' THEN
+        RETURN FALSE;
+    END IF;
     RETURN EXISTS (SELECT 1 FROM pg_timezone_names WHERE name = tz);
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;

@@ -61,7 +61,7 @@ export function StaffProfileEditForm({
           }}
         >
           <AccountSection mode="edit" staffData={staffData} isAdminScope={isAdminScope} register={form.register} />
-          <ContactSection mode="edit" register={form.register} />
+          <ContactSection mode="edit" control={form.control} />
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {tc("actions.save")}

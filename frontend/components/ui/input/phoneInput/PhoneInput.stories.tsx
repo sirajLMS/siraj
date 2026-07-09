@@ -48,8 +48,7 @@ export const Empty: Story = {
 export const InvalidPrefix: Story = {
   args: {
     defaultRegion: "EG",
-    initialValue: "+999123456",
-    helperText: "Check the calling code",
+    initialValue: "+999",
   },
 };
 

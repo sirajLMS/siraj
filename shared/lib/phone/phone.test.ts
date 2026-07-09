@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
   buildE164FromParts,
+  canAppendCallingCodeDigit,
   formatNationalDigits,
   formatPhoneDisplay,
   getCallingCodeForRegion,
+  getMaxCallingCodeLength,
   isCallingCodeComplete,
   isCallingCodePrefixValid,
   isCompletePhoneValid,
@@ -59,6 +61,26 @@ describe("phone utilities", () => {
     test("resolves +1 to US when default region is unrelated", () => {
       const match = matchCallingCodeFromDigits("1", "EG");
       expect(match).toEqual({ region: "US", callingCode: "1", isComplete: true });
+    });
+
+    test("reports max calling code length", () => {
+      expect(getMaxCallingCodeLength()).toBeGreaterThanOrEqual(3);
+    });
+
+    test("blocks digits once calling code is complete", () => {
+      expect(canAppendCallingCodeDigit("966", "5")).toBe(false);
+    });
+
+    test("blocks digits that exceed max calling code length", () => {
+      const maxLength = getMaxCallingCodeLength();
+      const tooLong = "1".repeat(maxLength + 1);
+      expect(isCallingCodePrefixValid(tooLong)).toBe(false);
+      expect(canAppendCallingCodeDigit("1".repeat(maxLength), "2")).toBe(false);
+    });
+
+    test("allows valid partial calling code digits", () => {
+      expect(canAppendCallingCodeDigit("9", "6")).toBe(true);
+      expect(canAppendCallingCodeDigit("96", "6")).toBe(true);
     });
   });
 

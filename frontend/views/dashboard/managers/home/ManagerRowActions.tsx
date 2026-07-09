@@ -9,7 +9,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Input,
   Menu,
   MenuItem,
   Stack,
@@ -19,6 +18,7 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
+import { PhoneInput } from "@/frontend/components/ui/input";
 import type { UpdateManagerProfileInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { updateManagerProfileMutationDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import { logger } from "@/frontend/utils/logger";
@@ -86,10 +86,10 @@ function EditProfileDialog({
           {manager.name}
         </Typography>
         <StyledEditField>
-          <Input
-            value={editPhone}
-            onChange={e => onPhoneChange(e.target.value)}
-            placeholder={t("fields.phone")}
+          <PhoneInput
+            value={editPhone || null}
+            onChangeAction={value => onPhoneChange(value ?? "")}
+            label={t("fields.phone")}
             fullWidth
           />
         </StyledEditField>

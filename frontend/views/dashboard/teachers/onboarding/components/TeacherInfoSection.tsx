@@ -1,13 +1,14 @@
 "use client";
 
 import { Box, FormControl, FormControlLabel, Grid, Input, Radio, RadioGroup, Typography } from "@mui/material";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
+import { PhoneFormField } from "@/frontend/components/ui/input";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
 
 import { Gender } from "../types";
 
-interface SectionProps {
+interface BaseSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
   readonly labels: {
@@ -37,7 +38,11 @@ interface SectionProps {
   };
 }
 
-export function BasicInfoFields({ register, errors, labels }: Readonly<SectionProps>) {
+interface SectionProps extends BaseSectionProps {
+  readonly control: Control<TeacherOnboardingFormData>;
+}
+
+export function BasicInfoFields({ register, errors, labels }: Readonly<BaseSectionProps>) {
   return (
     <>
       <Grid size={{ xs: 12, md: 4 }}>
@@ -95,7 +100,7 @@ export function BasicInfoFields({ register, errors, labels }: Readonly<SectionPr
   );
 }
 
-export function IdentityFields({ register, errors, labels }: Readonly<SectionProps>) {
+export function IdentityFields({ register, control, errors, labels }: Readonly<SectionProps>) {
   return (
     <>
       <Grid size={{ xs: 12, md: 4 }}>
@@ -125,18 +130,16 @@ export function IdentityFields({ register, errors, labels }: Readonly<SectionPro
             *
           </Box>
         </Box>
-        <Input
-          {...register("phone")}
+        <PhoneFormField
+          name="phone"
+          control={control}
+          hideLabel
+          required
           placeholder={labels.placeholders.phone}
           error={!!errors.phone}
+          helperText={errors.phone?.message}
           fullWidth
-          sx={standardInputSx}
         />
-        {errors.phone ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.phone.message}
-          </Typography>
-        ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <Grid container spacing={2}>
@@ -184,7 +187,7 @@ export function IdentityFields({ register, errors, labels }: Readonly<SectionPro
   );
 }
 
-export function AddressFields({ register, labels }: Readonly<SectionProps>) {
+export function AddressFields({ register, labels }: Readonly<BaseSectionProps>) {
   return (
     <>
       <Grid size={{ xs: 12, md: 8 }}>
@@ -208,11 +211,11 @@ export function AddressFields({ register, labels }: Readonly<SectionProps>) {
   );
 }
 
-export function TeacherInfoSection({ register, errors, labels }: Readonly<SectionProps>) {
+export function TeacherInfoSection({ register, control, errors, labels }: Readonly<SectionProps>) {
   return (
     <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
       <BasicInfoFields register={register} errors={errors} labels={labels} />
-      <IdentityFields register={register} errors={errors} labels={labels} />
+      <IdentityFields register={register} control={control} errors={errors} labels={labels} />
       <AddressFields register={register} errors={errors} labels={labels} />
     </Grid>
   );

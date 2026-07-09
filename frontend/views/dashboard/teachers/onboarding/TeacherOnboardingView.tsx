@@ -149,7 +149,7 @@ export function TeacherOnboardingView({
       >
         <OnboardingBanner />
         <SectionPanel title={labels.sections.teacherInfo}>
-          <TeacherInfoSection register={register} errors={errors} labels={labels} />
+          <TeacherInfoSection register={register} control={control} errors={errors} labels={labels} />
         </SectionPanel>
         <SectionPanel title={labels.sections.officialDetails}>
           <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />

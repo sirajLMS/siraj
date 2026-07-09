@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Grid, Link, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PhoneDisplay, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
@@ -63,7 +63,12 @@ export function ParentSocialContainer() {
             <Grid size={{ xs: 12, md: 6 }}>
               <SectionPanel title={t("sections.contact")}>
                 <Stack spacing={2}>
-                  <SocialLink label={t("fields.phone")} value={profile.phone} />
+                  <Stack spacing={0.5}>
+                    <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
+                      {t("fields.phone")}
+                    </Typography>
+                    <PhoneDisplay phone={profile.phone} typographyVariant="bodyLg" />
+                  </Stack>
                   <SocialLink label={t("fields.zoom")} value={profile.defaultZoomLink} />
                 </Stack>
               </SectionPanel>

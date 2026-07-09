@@ -234,6 +234,42 @@ const eslintConfig = defineConfig([
     },
   },
 
+  // Frontend code must not depend on the backend layer (use GraphQL or shared/ instead).
+  {
+    files: ["frontend/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/backend/**"],
+              message: "Frontend code must not import from the backend layer — use GraphQL, shared/, or app/ server entry points instead",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Backend code must not depend on the frontend layer.
+  {
+    files: ["backend/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/frontend/**"],
+              message: "Backend code must not import from the frontend layer — move shared logic to shared/ or backend/",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // **/index.ts barrel files keep relative ./sibling re-exports by design.
   {
     files: ["**/index.ts"],

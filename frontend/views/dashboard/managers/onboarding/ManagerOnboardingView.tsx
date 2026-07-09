@@ -124,7 +124,7 @@ export function ManagerOnboardingView({
       >
         <StyledFormWrapper>
           {/* Staff personal information fields */}
-          <StaffInfoSection register={register} errors={errors} />
+          <StaffInfoSection register={register} control={control} errors={errors} />
 
           {/* System access configuration (account type + department) */}
           <SystemAccessSection register={register} control={control} errors={errors} />

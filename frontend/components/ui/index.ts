@@ -9,5 +9,6 @@ export * from "@/frontend/components/ui/dialog";
 export * from "@/frontend/components/ui/display";
 export * from "@/frontend/components/ui/filter";
 export * from "@/frontend/components/ui/form";
+export * from "@/frontend/components/ui/input";
 export * from "@/frontend/components/ui/state";
 export * from "@/frontend/components/ui/story/StoryBookPageContainer";

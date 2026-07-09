@@ -242,7 +242,6 @@ export const IANA_TIMEZONE_IDS = [
   "Asia/Irkutsk",
   "Asia/Jakarta",
   "Asia/Jayapura",
-  "Asia/Jerusalem",
   "Asia/Kabul",
   "Asia/Kamchatka",
   "Asia/Karachi",

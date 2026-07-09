@@ -1,3 +1,4 @@
+import { isExcludedUiCountryCode, resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
 import countries from "./countries";
 
 const REGIONAL_INDICATOR_BASE = 0x1f1e6;
@@ -12,7 +13,10 @@ export function countryCodeToEmoji(countryCode: string): string {
 
 /** Look up the flag emoji for a known country, falling back to code derivation. */
 export function getCountryEmoji(countryCode: string): string {
-  const normalizedCode = countryCode.toUpperCase();
+  const normalizedCode = resolveUiCountryCode(countryCode);
+  if (!normalizedCode) {
+    return "🌐";
+  }
   const match = countries.find(country => country.code === normalizedCode);
-  return match?.emoji ?? countryCodeToEmoji(normalizedCode);
+  return match?.emoji ?? (isExcludedUiCountryCode(countryCode) ? "🌐" : countryCodeToEmoji(normalizedCode));
 }
