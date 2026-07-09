@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import { StorageDbRepository } from "@/backend/db/repo";
-import type * as Types from "@/backend/types";
+import { fileInfoByPath } from "@/backend/storage/disk/local/operations/file.operations";
+import { directoryInfoByPath } from "@/backend/storage/disk/local/operations/folder.operations";
+import type { LocalContext } from "@/backend/storage/disk/local/types";
+import { getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import {
   type DeleteFnParams,
   executeBulkDelete,
   executeDeleteFile,
   validateDeletePermissions,
-} from "../../shared/delete-operations.helper";
-import type { LocalContext } from "../types";
-import { getAbsolutePath } from "../utils";
-import { fileInfoByPath } from "./file.operations";
-import { directoryInfoByPath } from "./folder.operations";
+} from "@/backend/storage/disk/shared/delete-operations.helper";
+import type * as Types from "@/backend/types";
 
 export async function deleteFile(ctx: LocalContext, filePath: string): Promise<Types.FileOperationResult> {
   return executeDeleteFile(filePath, async () => {

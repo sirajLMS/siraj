@@ -7,13 +7,13 @@ import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/typ
 import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { DashboardView } from "../../dashboard/DashboardView";
-import { buildAdminDashboardMetrics } from "../home/utils/adminDashboardMetrics";
+import { DashboardView } from "@/frontend/views/dashboard/DashboardView";
+import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
-} from "../home/utils/dailyScheduleMetricFilter";
-import { useAdminDashboardLabels } from "./utils";
+} from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
+import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [
   { id: "teacher-ahmed", name: "Ahmed Mohammed" },

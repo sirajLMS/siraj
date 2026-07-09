@@ -28,9 +28,9 @@ import {
 } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
-import { ParentCardList, type ParentCardListLabels } from "./ParentCardList";
-import { ParentsDataGrid, type ParentsDataGridLabels } from "./ParentsDataGrid";
-import { ParentsMetricGrid } from "./ParentsMetricGrid";
+import { ParentCardList, type ParentCardListLabels } from "@/frontend/views/dashboard/admin/parents/home/ParentCardList";
+import { ParentsDataGrid, type ParentsDataGridLabels } from "@/frontend/views/dashboard/admin/parents/home/ParentsDataGrid";
+import { ParentsMetricGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsMetricGrid";
 
 interface ParentsViewLabels {
   readonly pageTitle: string;

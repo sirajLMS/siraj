@@ -1,8 +1,8 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import type { GcpContext } from "../types";
 
 export async function fileExists(ctx: GcpContext, path: string): Promise<boolean> {
   try {

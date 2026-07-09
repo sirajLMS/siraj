@@ -34,7 +34,7 @@ import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/t
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { logger } from "@/frontend/utils/logger";
 import { CLASS_TYPE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
-import type { CreateRecurringClassDialogProps } from "../types";
+import type { CreateRecurringClassDialogProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
   const t = useTranslations("dashboard.teacherCreateRecurringClass");

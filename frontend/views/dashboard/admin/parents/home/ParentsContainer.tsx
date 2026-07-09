@@ -19,8 +19,8 @@ import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-dire
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 import { useRouter } from "@/shared/i18n/routing";
-import { toParentAccountStatus } from "./directory";
-import { ParentsView } from "./ParentsView";
+import { toParentAccountStatus } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import { ParentsView } from "@/frontend/views/dashboard/admin/parents/home/ParentsView";
 
 function useDirectoryMetrics(
   directory: {

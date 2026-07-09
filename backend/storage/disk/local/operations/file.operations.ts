@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import { processFile } from "@/backend/storage/disk/local/shared";
+import type { LocalContext } from "@/backend/storage/disk/local/types";
+import { calculateFileHash, ensureDirectory, getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/shared/utils/storage.utils";
-import { processFile } from "../shared";
-import type { LocalContext } from "../types";
-import { calculateFileHash, ensureDirectory, getAbsolutePath } from "../utils";
 
 /**
  * Ensures a database record exists for a file on disk

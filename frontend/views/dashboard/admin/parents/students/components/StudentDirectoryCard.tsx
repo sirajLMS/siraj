@@ -1,10 +1,10 @@
 "use client";
 
 import { Card } from "@mui/material";
-import type { StudentDirectoryCardLabels, StudentDirectoryRowExtended } from "../types";
-import { StudentDirectoryCardFooter } from "./StudentDirectoryCardFooter";
-import { StudentDirectoryCardHeader } from "./StudentDirectoryCardHeader";
-import { StudentDirectoryCardStats } from "./StudentDirectoryCardStats";
+import type { StudentDirectoryCardLabels, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
+import { StudentDirectoryCardFooter } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardFooter";
+import { StudentDirectoryCardHeader } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardHeader";
+import { StudentDirectoryCardStats } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardStats";
 
 interface StudentDirectoryCardProps {
   readonly row: StudentDirectoryRowExtended;

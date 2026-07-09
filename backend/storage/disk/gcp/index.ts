@@ -1,7 +1,7 @@
 import type { Storage } from "@google-cloud/storage";
-import { getGcpStorageClient } from "../gcp-auth";
-import type { StorageService } from "../storage.service.interface";
-import { GcpAdapter } from "./adapter";
+import { GcpAdapter } from "@/backend/storage/disk/gcp/adapter";
+import { getGcpStorageClient } from "@/backend/storage/disk/gcp-auth";
+import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
 
 export async function createGcpStorage(): Promise<Storage> {
   const storage = await getGcpStorageClient();

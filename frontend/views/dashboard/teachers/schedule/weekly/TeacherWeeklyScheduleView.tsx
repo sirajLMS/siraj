@@ -20,9 +20,9 @@ import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { MetricCard, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import MobileScheduleList from "./MobileScheduleList";
-import type { TeacherWeeklyScheduleViewProps } from "./types";
-import WeeklyScheduleGrid from "./WeeklyScheduleGrid";
+import MobileScheduleList from "@/frontend/views/dashboard/teachers/schedule/weekly/MobileScheduleList";
+import type { TeacherWeeklyScheduleViewProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
+import WeeklyScheduleGrid from "@/frontend/views/dashboard/teachers/schedule/weekly/WeeklyScheduleGrid";
 
 interface ScheduleFooterLegendProps {
   readonly bookedClassLabel: string;

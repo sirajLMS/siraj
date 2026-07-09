@@ -1,10 +1,10 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import { fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
+import { directoryInfoByPath } from "@/backend/storage/disk/gcp/operations/folder.operations";
+import type { GcpContext, GenericOperationResult } from "@/backend/storage/disk/gcp/types";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import type { GcpContext, GenericOperationResult } from "../types";
-import { fileInfoByPath } from "./file.operations";
-import { directoryInfoByPath } from "./folder.operations";
 
 export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.FileOperationResult> {
   try {

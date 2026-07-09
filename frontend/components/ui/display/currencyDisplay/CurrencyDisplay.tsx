@@ -10,40 +10,56 @@ import { LocaleEmoji } from "@/frontend/components/ui/display/LocaleEmoji";
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/lib/currency";
 
+export const CurrencyDisplayPart = {
+  Flag: "flag",
+  Label: "label",
+  Symbol: "symbol",
+  Code: "code",
+} as const;
+
+export type CurrencyDisplayPart = (typeof CurrencyDisplayPart)[keyof typeof CurrencyDisplayPart];
+
+/** Fixed render order regardless of the order in `parts`. */
+export const CURRENCY_DISPLAY_PART_ORDER: readonly CurrencyDisplayPart[] = [
+  CurrencyDisplayPart.Flag,
+  CurrencyDisplayPart.Label,
+  CurrencyDisplayPart.Symbol,
+  CurrencyDisplayPart.Code,
+];
+
+export const DEFAULT_CURRENCY_DISPLAY_PARTS: readonly CurrencyDisplayPart[] = [
+  CurrencyDisplayPart.Flag,
+  CurrencyDisplayPart.Symbol,
+];
+
 export type CurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;
   /**
-   * Render the flag emoji of a representative country for the currency.
+   * Which currency ingredients to render. Order in the array is ignored;
+   * parts always render as flag → label → symbol → code.
+   *
+   * When omitted or empty, defaults to flag + symbol.
    */
-  readonly showFlag?: boolean;
-  /**
-   * Render the long localized currency name (e.g. "Saudi Riyal").
-   */
-  readonly showLabel?: boolean;
-  /**
-   * Render the short ISO 4217 code (e.g. "SAR").
-   */
-  readonly showCode?: boolean;
-  /**
-   * Render the currency symbol glyph (e.g. "ر.س").
-   */
-  readonly showSymbol?: boolean;
+  readonly parts?: readonly CurrencyDisplayPart[];
   readonly fallback?: string;
   readonly typographyVariant?: TypographyProps["variant"];
   readonly sx?: SxProps<Theme>;
 };
 
+function resolveCurrencyDisplayParts(parts?: readonly CurrencyDisplayPart[]): Set<CurrencyDisplayPart> {
+  const resolved = parts && parts.length > 0 ? parts : DEFAULT_CURRENCY_DISPLAY_PARTS;
+  return new Set(resolved);
+}
+
 export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   code,
-  showFlag = true,
-  showLabel = true,
-  showCode = false,
-  showSymbol = false,
+  parts,
   fallback,
   typographyVariant,
   sx,
 }): React.ReactNode => {
   const locale = useLocale();
+  const visibleParts = resolveCurrencyDisplayParts(parts);
 
   if (!code) {
     return (fallback ?? null) as React.ReactNode;
@@ -56,22 +72,41 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
 
   return (
     <Stack direction="row" spacing={1} sx={{ alignItems: "center", ...sx }}>
-      {showFlag ? <LocaleEmoji emoji={flag} /> : null}
-      {showLabel ? (
-        <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
-          {longLabel}
-        </Typography>
-      ) : null}
-      {showSymbol ? (
-        <Typography component="span" sx={theme => ({ color: theme.palette.text.secondary, whiteSpace: "nowrap" })}>
-          {symbol}
-        </Typography>
-      ) : null}
-      {showCode ? (
-        <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
-          {shortCode}
-        </Typography>
-      ) : null}
+      {CURRENCY_DISPLAY_PART_ORDER.map(part => {
+        switch (part) {
+          case CurrencyDisplayPart.Flag:
+            return visibleParts.has(part) ? <LocaleEmoji key={part} emoji={flag} /> : null;
+          case CurrencyDisplayPart.Label:
+            return visibleParts.has(part) ? (
+              <Typography key={part} variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
+                {longLabel}
+              </Typography>
+            ) : null;
+          case CurrencyDisplayPart.Symbol:
+            return visibleParts.has(part) ? (
+              <Typography
+                key={part}
+                component="span"
+                sx={theme => ({ color: theme.palette.text.secondary, whiteSpace: "nowrap" })}
+              >
+                {symbol}
+              </Typography>
+            ) : null;
+          case CurrencyDisplayPart.Code:
+            return visibleParts.has(part) ? (
+              <Typography
+                key={part}
+                component="span"
+                dir="ltr"
+                sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
+              >
+                {shortCode}
+              </Typography>
+            ) : null;
+          default:
+            return null;
+        }
+      })}
     </Stack>
   );
 };

@@ -6,7 +6,7 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { OnboardingIdentityFields } from "@/frontend/views/dashboard/components/onboarding/OnboardingIdentityFields";
-import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
+import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;

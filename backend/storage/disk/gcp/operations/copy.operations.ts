@@ -1,8 +1,8 @@
+import { fileExists, fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
+import type { GcpContext } from "@/backend/storage/disk/gcp/types";
+import { executeBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { executeBulkOperation } from "../../shared/bulk-operations.helper";
-import type { GcpContext } from "../types";
-import { fileExists, fileInfoByPath } from "./file.operations";
 
 export async function copyItems(
   ctx: GcpContext,

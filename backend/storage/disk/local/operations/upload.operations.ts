@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import logger from "@/backend/lib/logger";
+import type { LocalContext } from "@/backend/storage/disk/local/types";
+import { calculateFileHash, ensureDirectory, getAbsolutePath } from "@/backend/storage/disk/local/utils";
+import { prepareUploadHelper, uploadFileHelper } from "@/backend/storage/disk/shared/upload-operations.helper";
 import * as Types from "@/backend/types";
-import { prepareUploadHelper, uploadFileHelper } from "../../shared/upload-operations.helper";
-import type { LocalContext } from "../types";
-import { calculateFileHash, ensureDirectory, getAbsolutePath } from "../utils";
 
 export async function prepareUpload(
   ctx: LocalContext,

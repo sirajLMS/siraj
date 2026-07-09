@@ -5,8 +5,11 @@ import { Box, Grid, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { BaseCard, UserAvatar } from "@/frontend/components/ui";
+import type {
+  BentoCardProps,
+  ReassignmentBentoGridProps,
+} from "@/frontend/views/dashboard/teachers/reassignment/types";
 import { useRouter } from "@/shared/i18n/routing";
-import type { BentoCardProps, ReassignmentBentoGridProps } from "../types";
 
 function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
   return (

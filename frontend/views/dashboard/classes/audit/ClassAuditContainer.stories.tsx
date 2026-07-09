@@ -5,7 +5,7 @@ import {
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import { ClassAuditContainer } from "./ClassAuditContainer";
+import { ClassAuditContainer } from "@/frontend/views/dashboard/classes/audit/ClassAuditContainer";
 
 const mockAuditData = {
   groupClassAudit: {

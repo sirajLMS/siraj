@@ -2,12 +2,12 @@ import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import { processDirectory, processFile } from "@/backend/storage/disk/local/shared";
+import type { LocalContext } from "@/backend/storage/disk/local/types";
+import { cleanLocalPath, getAbsolutePath } from "@/backend/storage/disk/local/utils";
+import { loadListEntities, paginateStorageItems } from "@/backend/storage/disk/shared/list-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { loadListEntities, paginateStorageItems } from "../../shared/list-operations.helper";
-import { processDirectory, processFile } from "../shared";
-import type { LocalContext } from "../types";
-import { cleanLocalPath, getAbsolutePath } from "../utils";
 
 /**
  * List files and directories in a local path

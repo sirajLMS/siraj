@@ -2,9 +2,9 @@
 
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { StudentsDesktopView } from "./StudentsDesktopView";
-import { StudentsMobileView } from "./StudentsMobileView";
-import type { StudentDirectoryRowExtended, StudentsViewLabels } from "./types";
+import { StudentsDesktopView } from "@/frontend/views/dashboard/admin/parents/students/StudentsDesktopView";
+import { StudentsMobileView } from "@/frontend/views/dashboard/admin/parents/students/StudentsMobileView";
+import type { StudentDirectoryRowExtended, StudentsViewLabels } from "@/frontend/views/dashboard/admin/parents/students/types";
 
 interface StudentsViewProps {
   readonly metrics: readonly MetricItem[];

@@ -1,7 +1,7 @@
 import type { Storage } from "@google-cloud/storage";
-import { BaseAdapter } from "../base.adapter";
-import * as ops from "./operations";
-import type { GcpContext } from "./types";
+import { BaseAdapter } from "@/backend/storage/disk/base.adapter";
+import * as ops from "@/backend/storage/disk/gcp/operations";
+import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 
 export class GcpAdapter extends BaseAdapter<GcpContext> {
   constructor(storage: Storage) {

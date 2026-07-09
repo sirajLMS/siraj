@@ -21,8 +21,8 @@ import {
   updateClassAdminNoteMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { ClassAuditView } from "@/frontend/views/dashboard/classes/audit/ClassAuditView";
 import { useRouter } from "@/shared/i18n/routing";
-import { ClassAuditView } from "./ClassAuditView";
 
 function exportToCsv(
   students: readonly {

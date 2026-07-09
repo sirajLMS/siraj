@@ -15,7 +15,10 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MobileScheduleListProps, ScheduledClass } from "./types";
+import type {
+  MobileScheduleListProps,
+  ScheduledClass,
+} from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;

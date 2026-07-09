@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { fileExists, fileInfoByPath } from "@/backend/storage/disk/local/operations/file.operations";
+import type { LocalContext } from "@/backend/storage/disk/local/types";
+import { ensureDirectory, getAbsolutePath } from "@/backend/storage/disk/local/utils";
+import { executeBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { executeBulkOperation } from "../../shared/bulk-operations.helper";
-import type { LocalContext } from "../types";
-import { ensureDirectory, getAbsolutePath } from "../utils";
-import { fileExists, fileInfoByPath } from "./file.operations";
 
 export async function copyItems(
   ctx: LocalContext,

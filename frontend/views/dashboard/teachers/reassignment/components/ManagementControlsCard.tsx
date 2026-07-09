@@ -9,8 +9,12 @@ import { BaseCard, StatusBadge } from "@/frontend/components/ui";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
 import type { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/utils/student-status-transitions";
-import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "../../../admin/parents/students/types";
-import type { ManagementControlsCardProps, ReassignmentSubmitInput, StatusChangeInput } from "../types";
+import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/admin/parents/students/types";
+import type {
+  ManagementControlsCardProps,
+  ReassignmentSubmitInput,
+  StatusChangeInput,
+} from "@/frontend/views/dashboard/teachers/reassignment/types";
 
 function TeacherSelection({
   teachers,

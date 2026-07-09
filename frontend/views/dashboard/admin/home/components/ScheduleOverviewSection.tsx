@@ -6,10 +6,10 @@ import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PaginationControls, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ScheduleFilters } from "@/frontend/views/dashboard/admin/home/components/ScheduleFilters";
+import { ScheduleOverviewCardList } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+import { ScheduleOverviewDataGrid } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
-import { ScheduleFilters } from "./ScheduleFilters";
-import { ScheduleOverviewCardList } from "./ScheduleOverviewCardList";
-import { ScheduleOverviewDataGrid } from "./ScheduleOverviewDataGrid";
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 2,

@@ -4,7 +4,7 @@ import { AssignmentIndOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
-import type { CurrentTeacherCardProps } from "../types";
+import type { CurrentTeacherCardProps } from "@/frontend/views/dashboard/teachers/reassignment/types";
 
 export function CurrentTeacherCard({ currentTeacherName, teacherId }: Readonly<CurrentTeacherCardProps>) {
   const t = useTranslations("dashboard.teacherReassignment.currentTeacher");

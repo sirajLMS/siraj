@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
-import { InvoiceType, PaymentMethod } from "../types";
+import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
-export type { ParentOnboardingFormData } from "../types";
+export type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
 export const parentOnboardingSchema = z.object({
   name: z.string().min(1, "fullNameRequired"),

@@ -1,10 +1,10 @@
 import { StorageDbRepository } from "@/backend/db/repo";
+import { fileExists, fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
+import { directoryInfoByPath } from "@/backend/storage/disk/gcp/operations/folder.operations";
+import type { GcpContext, GenericOperationResult } from "@/backend/storage/disk/gcp/types";
+import { formatBulkOperationResult, validateBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { formatBulkOperationResult, validateBulkOperation } from "../../shared/bulk-operations.helper";
-import type { GcpContext, GenericOperationResult } from "../types";
-import { fileExists, fileInfoByPath } from "./file.operations";
-import { directoryInfoByPath } from "./folder.operations";
 
 /**
  * Move multiple items in GCP storage

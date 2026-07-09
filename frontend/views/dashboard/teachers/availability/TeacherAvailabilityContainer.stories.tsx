@@ -2,7 +2,7 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
-import { TeacherAvailabilityContainer } from "./TeacherAvailabilityContainer";
+import { TeacherAvailabilityContainer } from "@/frontend/views/dashboard/teachers/availability/TeacherAvailabilityContainer";
 
 const MOCK_RESULT = {
   __typename: "AvailabilitySearchResult" as const,

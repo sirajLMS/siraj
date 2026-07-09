@@ -1,8 +1,8 @@
 import { StorageDbRepository } from "@/backend/db/repo";
+import type { GcpContext } from "@/backend/storage/disk/gcp/types";
+import { createFolderHelper } from "@/backend/storage/disk/shared/folder-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { createFolderHelper } from "../../shared/folder-operations.helper";
-import type { GcpContext } from "../types";
 
 export async function createFolder(
   ctx: GcpContext,

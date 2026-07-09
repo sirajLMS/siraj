@@ -4,11 +4,11 @@ import { Box, Chip, Grid, Typography, useMediaQuery, useTheme } from "@mui/mater
 import { styled } from "@mui/material/styles";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import type { GroupClassAudit } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AdminNoteCard } from "./AdminNoteCard";
-import { ClassAuditDetailsCard } from "./ClassAuditDetailsCard";
-import { CommunicationLogCard } from "./CommunicationLogCard";
-import { OnlineMeetingCard } from "./OnlineMeetingCard";
-import { RegisteredStudentsSection } from "./RegisteredStudentsSection";
+import { AdminNoteCard } from "@/frontend/views/dashboard/classes/audit/AdminNoteCard";
+import { ClassAuditDetailsCard } from "@/frontend/views/dashboard/classes/audit/ClassAuditDetailsCard";
+import { CommunicationLogCard } from "@/frontend/views/dashboard/classes/audit/CommunicationLogCard";
+import { OnlineMeetingCard } from "@/frontend/views/dashboard/classes/audit/OnlineMeetingCard";
+import { RegisteredStudentsSection } from "@/frontend/views/dashboard/classes/audit/RegisteredStudentsSection";
 
 export interface ClassAuditLabels {
   readonly breadcrumbs: {

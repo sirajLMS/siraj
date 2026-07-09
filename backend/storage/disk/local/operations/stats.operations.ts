@@ -1,12 +1,16 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import logger from "@/backend/lib/logger";
+import type { LocalContext } from "@/backend/storage/disk/local/types";
+import { getAbsolutePath } from "@/backend/storage/disk/local/utils";
+import {
+  calculateTotalFiles,
+  formatFileTypeBreakdown,
+  updateFileTypeMap,
+} from "@/backend/storage/disk/shared/stats-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/shared/utils/storage.utils";
-import { calculateTotalFiles, formatFileTypeBreakdown, updateFileTypeMap } from "../../shared/stats-operations.helper";
-import type { LocalContext } from "../types";
-import { getAbsolutePath } from "../utils";
 
 interface StatsState {
   totalSize: bigint;

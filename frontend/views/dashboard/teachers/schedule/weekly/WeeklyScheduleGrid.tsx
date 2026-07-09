@@ -14,7 +14,10 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ScheduledClass, WeeklyScheduleGridProps } from "./types";
+import type {
+  ScheduledClass,
+  WeeklyScheduleGridProps,
+} from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
 const TIMES = [

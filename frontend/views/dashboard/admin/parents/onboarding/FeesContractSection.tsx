@@ -8,8 +8,8 @@ import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
-import { InvoiceType, PaymentMethod } from "./types";
+import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;

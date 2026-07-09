@@ -1,4 +1,4 @@
-import type { GcpContext } from "./types";
+import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 
 export async function getFolderFileCounts(
   ctx: GcpContext,

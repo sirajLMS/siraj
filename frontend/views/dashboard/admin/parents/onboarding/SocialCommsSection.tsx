@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
-import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
+import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;

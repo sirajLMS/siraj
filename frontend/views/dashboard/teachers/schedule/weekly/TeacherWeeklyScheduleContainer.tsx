@@ -18,9 +18,9 @@ import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringC
 import { useUserStore } from "@/frontend/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";
 import { logger } from "@/frontend/utils/logger";
-import { CreateRecurringClassDialog } from "./components/CreateRecurringClassDialog";
-import TeacherWeeklyScheduleView from "./TeacherWeeklyScheduleView";
-import type { TeacherWeeklyScheduleContainerProps } from "./types";
+import { CreateRecurringClassDialog } from "@/frontend/views/dashboard/teachers/schedule/weekly/components/CreateRecurringClassDialog";
+import TeacherWeeklyScheduleView from "@/frontend/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
+import type { TeacherWeeklyScheduleContainerProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<TeacherWeeklyScheduleContainerProps>) {
   const t = useTranslations("dashboard.teacherWeeklySchedule");

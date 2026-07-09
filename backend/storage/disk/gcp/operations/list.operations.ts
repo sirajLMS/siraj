@@ -1,10 +1,10 @@
 import type { File, GetFilesResponse } from "@google-cloud/storage";
+import { getFolderFileCounts } from "@/backend/storage/disk/gcp/shared";
+import type { GcpContext, GcsApiResponse } from "@/backend/storage/disk/gcp/types";
+import { cleanGcsPath } from "@/backend/storage/disk/gcp/utils";
+import { loadListEntities, paginateStorageItems } from "@/backend/storage/disk/shared/list-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { loadListEntities, paginateStorageItems } from "../../shared/list-operations.helper";
-import { getFolderFileCounts } from "../shared";
-import type { GcpContext, GcsApiResponse } from "../types";
-import { cleanGcsPath } from "../utils";
 
 /**
  * List files and directories in a GCP bucket path
