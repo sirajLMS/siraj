@@ -1,4 +1,4 @@
-import type { TeacherReassignmentLabels } from "../../../types/dashboard/teachers";
+import type { TeacherReassignmentLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const reassignment: TeacherReassignmentLabels = {
   pageTitle: "إعادة تعيين المعلم",

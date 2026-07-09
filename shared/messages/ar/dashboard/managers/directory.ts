@@ -1,4 +1,4 @@
-import type { ManagersDirectoryLabels } from "../../../types/dashboard/managers";
+import type { ManagersDirectoryLabels } from "@/shared/messages/types/dashboard/managers";
 
 export const managersDirectory: ManagersDirectoryLabels = {
   pageTitle: "دليل المديرين",

@@ -1,4 +1,4 @@
-import type { CountrySelectLabels } from "../../types/ui/country-select";
+import type { CountrySelectLabels } from "@/shared/messages/types/ui/country-select";
 
 export const countrySelect: CountrySelectLabels = {
   selectCountry: "اختر البلد",

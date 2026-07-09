@@ -1,4 +1,4 @@
-import type { DashboardNavigationLabels } from "../../../types/dashboard/core";
+import type { DashboardNavigationLabels } from "@/shared/messages/types/dashboard/core";
 
 export const nav: DashboardNavigationLabels = {
   home: "الرئيسية",

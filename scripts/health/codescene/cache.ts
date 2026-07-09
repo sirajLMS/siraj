@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
-import { CONFIG } from "./config";
+import { CONFIG } from "@/scripts/health/codescene/config";
 
 export interface CachedResult {
   file: string;

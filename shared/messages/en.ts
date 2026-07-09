@@ -1,5 +1,5 @@
 // cspell:disable
-import type { MessageSchema } from "./types/message";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 const en: MessageSchema = {
   common: {

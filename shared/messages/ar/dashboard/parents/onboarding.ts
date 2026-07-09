@@ -1,4 +1,4 @@
-import type { ParentOnboardingLabels } from "../../../types/dashboard/parents";
+import type { ParentOnboardingLabels } from "@/shared/messages/types/dashboard/parents";
 
 export const onboarding: ParentOnboardingLabels = {
   pageTitle: "تسجيل ولي أمر جديد",

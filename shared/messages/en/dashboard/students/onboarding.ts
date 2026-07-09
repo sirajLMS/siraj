@@ -1,4 +1,4 @@
-import type { StudentOnboardingLabels } from "../../../types/dashboard/students";
+import type { StudentOnboardingLabels } from "@/shared/messages/types/dashboard/students";
 
 export const onboarding: StudentOnboardingLabels = {
   pageTitle: "New Student Registration",

@@ -1,4 +1,4 @@
-import type { TeacherWeeklyScheduleLabels } from "../../../types/dashboard/teachers";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const weeklySchedule: TeacherWeeklyScheduleLabels = {
   pageTitle: "جدول {name}",

@@ -1,20 +1,20 @@
-import type { AuthLabels } from "./auth";
-import type { CommonLabels } from "./common";
+import type { AuthLabels } from "@/shared/messages/types/auth";
+import type { CommonLabels } from "@/shared/messages/types/common";
 import type {
   AdminDashboardLabels,
   AdminViewLabels,
   ClassDetailsPerformanceLabels,
   DstMigrationLabels,
-} from "./dashboard/admin";
-import type { BillingLabels } from "./dashboard/billing";
+} from "@/shared/messages/types/dashboard/admin";
+import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type {
   ClassAuditLabels,
   ClassDetailsLabels,
   CreateRecurringClassLabels,
   RescheduleFormLabels,
   RescheduleTrackingLabels,
-} from "./dashboard/classes";
-import type { ComplaintsLabels } from "./dashboard/complaints";
+} from "@/shared/messages/types/dashboard/classes";
+import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints";
 import type {
   DashboardLayoutLabels,
   DashboardNavigationLabels,
@@ -23,22 +23,22 @@ import type {
   ScheduleAlertsLabels,
   SearchScheduleLabels,
   StatusTrackingLabels,
-} from "./dashboard/core";
+} from "@/shared/messages/types/dashboard/core";
 
-import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "./dashboard/managers";
-import type { ParentOnboardingLabels, ParentProfileLabels, ParentsDirectoryLabels } from "./dashboard/parents";
-import type { PermissionsLabels } from "./dashboard/permissions";
-import type { ReportsLabels } from "./dashboard/reports";
-import type { BooksAndBagsLabels, ResourcesLabels } from "./dashboard/resources";
+import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "@/shared/messages/types/dashboard/managers";
+import type { ParentOnboardingLabels, ParentProfileLabels, ParentsDirectoryLabels } from "@/shared/messages/types/dashboard/parents";
+import type { PermissionsLabels } from "@/shared/messages/types/dashboard/permissions";
+import type { ReportsLabels } from "@/shared/messages/types/dashboard/reports";
+import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/messages/types/dashboard/resources";
 import type {
   StudentDirectoryLabels,
   StudentHistoryLabels,
   StudentOnboardingLabels,
   StudentQuotaLabels,
   StudentStatusLabels,
-} from "./dashboard/students";
-import type { SubjectsLabels } from "./dashboard/subjects";
-import type { SuggestionsLabels } from "./dashboard/suggestions";
+} from "@/shared/messages/types/dashboard/students";
+import type { SubjectsLabels } from "@/shared/messages/types/dashboard/subjects";
+import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions";
 import type {
   TeacherAvailabilityLabels,
   TeacherCreateRecurringClassLabels,
@@ -49,11 +49,11 @@ import type {
   TeacherReassignmentLabels,
   TeachersDirectoryLabels,
   TeacherWeeklyScheduleLabels,
-} from "./dashboard/teachers";
-import type { ErrorsLabels } from "./errors";
-import type { ProfileLabels } from "./profile";
-import type { SessionLabels } from "./session";
-import type { UiLabels } from "./ui";
+} from "@/shared/messages/types/dashboard/teachers";
+import type { ErrorsLabels } from "@/shared/messages/types/errors";
+import type { ProfileLabels } from "@/shared/messages/types/profile";
+import type { SessionLabels } from "@/shared/messages/types/session";
+import type { UiLabels } from "@/shared/messages/types/ui";
 
 export type {
   AdminDashboardLabels,
@@ -127,12 +127,12 @@ export type MessageSchema = {
     readonly teacherReassignment: TeacherReassignmentLabels;
     readonly teacherOnboarding: TeacherOnboardingLabels;
     readonly teacherDashboard: TeacherDashboardLabels;
-    readonly teacherStudents: import("./dashboard/teachers/students").TeacherStudentsLabels;
-    readonly parentStudents: import("./dashboard/parents/students").ParentStudentsLabels;
-    readonly parentSocial: import("./dashboard/parents/social").ParentSocialLabels;
-    readonly parentRules: import("./dashboard/parents/rules").ParentRulesLabels;
-    readonly teacherOwnProfile: import("./dashboard/teachers/own-profile").TeacherOwnProfileLabels;
-    readonly teacherClassList: import("./dashboard/teachers/class-list").TeacherClassListLabels;
+    readonly teacherStudents: import("@/shared/messages/types/dashboard/teachers/students").TeacherStudentsLabels;
+    readonly parentStudents: import("@/shared/messages/types/dashboard/parents/students").ParentStudentsLabels;
+    readonly parentSocial: import("@/shared/messages/types/dashboard/parents/social").ParentSocialLabels;
+    readonly parentRules: import("@/shared/messages/types/dashboard/parents/rules").ParentRulesLabels;
+    readonly teacherOwnProfile: import("@/shared/messages/types/dashboard/teachers/own-profile").TeacherOwnProfileLabels;
+    readonly teacherClassList: import("@/shared/messages/types/dashboard/teachers/class-list").TeacherClassListLabels;
     readonly parentsDirectory: ParentsDirectoryLabels;
     readonly parentProfile: ParentProfileLabels;
     readonly managersDirectory: ManagersDirectoryLabels;

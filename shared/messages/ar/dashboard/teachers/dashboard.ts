@@ -1,4 +1,4 @@
-import type { TeacherDashboardLabels } from "../../../types/dashboard/teachers";
+import type { TeacherDashboardLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const dashboard: TeacherDashboardLabels = {
   pageTitle: "حصص اليوم",

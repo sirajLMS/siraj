@@ -1,4 +1,4 @@
-import type { DstMigrationLabels } from "../../../types/dashboard/admin";
+import type { DstMigrationLabels } from "@/shared/messages/types/dashboard/admin";
 
 export const dstMigration: DstMigrationLabels = {
   pageTitle: "التوقيت الصيفي",

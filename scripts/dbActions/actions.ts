@@ -1,7 +1,7 @@
 import type { Interface } from "node:readline";
-import { cleanGenerate } from "./cleanGenerate";
-import { isDestructiveActionBlocked, printDestructiveActionBlock } from "./destructive";
-import { runBunCommand } from "./runCommand";
+import { cleanGenerate } from "@/scripts/dbActions/cleanGenerate";
+import { isDestructiveActionBlocked, printDestructiveActionBlock } from "@/scripts/dbActions/destructive";
+import { runBunCommand } from "@/scripts/dbActions/runCommand";
 
 export const ACTIONS: Record<string, { label: string; name: string }> = {
   "1": { label: "Reset Database", name: "reset" },

@@ -1,7 +1,8 @@
 import type { AdminInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
-import type { BillingManualLabels } from "./manual";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
+import type { PaymentComponentLabels } from "@/shared/messages/types/dashboard/billing/payment";
 
-export interface BillingLabels {
+export interface BillingLabels extends PaymentComponentLabels {
   readonly adminPageTitle: string;
   readonly adminPageSubtitle: string;
   readonly parentPageTitle: string;

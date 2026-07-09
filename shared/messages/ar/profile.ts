@@ -1,4 +1,4 @@
-import type { ProfileLabels } from "../types/profile";
+import type { ProfileLabels } from "@/shared/messages/types/profile";
 
 export const profile: ProfileLabels = {
   shell: {

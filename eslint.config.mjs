@@ -244,7 +244,8 @@ const eslintConfig = defineConfig([
           patterns: [
             {
               group: ["@/backend/**"],
-              message: "Frontend code must not import from the backend layer — use GraphQL, shared/, or app/ server entry points instead",
+              message:
+                "Frontend code must not import from the backend layer — use GraphQL, shared/, or app/ server entry points instead",
             },
           ],
         },
@@ -262,7 +263,8 @@ const eslintConfig = defineConfig([
           patterns: [
             {
               group: ["@/frontend/**"],
-              message: "Backend code must not import from the frontend layer — move shared logic to shared/ or backend/",
+              message:
+                "Backend code must not import from the frontend layer — move shared logic to shared/ or backend/",
             },
           ],
         },

@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
-import { logError, logInfo, logSuccess, SONAR_DIR } from "./config";
+import { logError, logInfo, logSuccess, SONAR_DIR } from "@/scripts/health/sonar/ts/config";
 
 let resolvedDockerBin: string | null = null;
 

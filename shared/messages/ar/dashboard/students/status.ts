@@ -1,4 +1,4 @@
-import type { StudentStatusLabels } from "../../../types/dashboard/students";
+import type { StudentStatusLabels } from "@/shared/messages/types/dashboard/students";
 
 export const status: StudentStatusLabels = {
   pageTitle: "حالة الطالب وتجميد الجدول",

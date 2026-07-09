@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { CONFIG, logError, logInfo, logSuccess, logWarning } from "./config";
-import { isStepCompleted, markStepCompleted } from "./state";
+import { CONFIG, logError, logInfo, logSuccess, logWarning } from "@/scripts/health/sonar/ts/config";
+import { isStepCompleted, markStepCompleted } from "@/scripts/health/sonar/ts/state";
 
 export async function waitForSonarQube(): Promise<void> {
   logInfo("Waiting for SonarQube to be ready...");

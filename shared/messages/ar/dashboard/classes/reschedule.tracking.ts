@@ -1,4 +1,4 @@
-import type { RescheduleTrackingLabels } from "../../../types/dashboard/classes";
+import type { RescheduleTrackingLabels } from "@/shared/messages/types/dashboard/classes";
 
 export const rescheduleTracking: RescheduleTrackingLabels = {
   pageTitle: "نظرة عامة على لوحة التحكم",

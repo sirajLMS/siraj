@@ -1,13 +1,13 @@
-import type { AuthErrorLabels } from "./auth";
-import type { ComplaintErrorLabels } from "./complaint";
-import type { ComplaintResponseErrorLabels } from "./complaintResponse";
-import type { ManagerErrorLabels } from "./manager";
-import type { ParentErrorLabels } from "./parent";
-import type { PermissionErrorLabels } from "./permission";
-import type { StaffErrorLabels } from "./staff";
-import type { SuggestionErrorLabels } from "./suggestion";
-import type { TeacherErrorLabels } from "./teacher";
-import type { UserErrorLabels } from "./user";
+import type { AuthErrorLabels } from "@/shared/messages/types/errors/auth";
+import type { ComplaintErrorLabels } from "@/shared/messages/types/errors/complaint";
+import type { ComplaintResponseErrorLabels } from "@/shared/messages/types/errors/complaintResponse";
+import type { ManagerErrorLabels } from "@/shared/messages/types/errors/manager";
+import type { ParentErrorLabels } from "@/shared/messages/types/errors/parent";
+import type { PermissionErrorLabels } from "@/shared/messages/types/errors/permission";
+import type { StaffErrorLabels } from "@/shared/messages/types/errors/staff";
+import type { SuggestionErrorLabels } from "@/shared/messages/types/errors/suggestion";
+import type { TeacherErrorLabels } from "@/shared/messages/types/errors/teacher";
+import type { UserErrorLabels } from "@/shared/messages/types/errors/user";
 
 export interface ErrorsLabels {
   readonly unauthorizedViewMetrics: string;

@@ -9,7 +9,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import type { UserBillingProfileViewProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/UserBillingProfileView";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
-import { renderWithWrapper } from "./TestWrapper";
+import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();

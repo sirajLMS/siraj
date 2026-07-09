@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { assessDestructiveDbCommandSafety } from "./destructiveDbGuard";
+import { assessDestructiveDbCommandSafety } from "@/scripts/lib/destructiveDbGuard";
 
 const LOCAL_ENV: Record<string, string | undefined> = {
   NODE_ENV: "development",

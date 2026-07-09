@@ -1,4 +1,4 @@
-import type { StudentDirectoryLabels } from "../../../types/dashboard/students";
+import type { StudentDirectoryLabels } from "@/shared/messages/types/dashboard/students";
 
 export const directory: StudentDirectoryLabels = {
   pageTitle: "دليل الطلاب الرئيسي",

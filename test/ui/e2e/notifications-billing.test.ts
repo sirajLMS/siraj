@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
-import { DEMO_USERS, loginAsDemoUser } from "./helpers";
-import { createContext, createMobileContext, setupBrowserLifecycle } from "./lifecycle";
+import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
 

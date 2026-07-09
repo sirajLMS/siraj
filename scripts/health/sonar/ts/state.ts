@@ -1,5 +1,5 @@
 import { appendFileSync, existsSync, readFileSync, unlinkSync } from "node:fs";
-import { CONFIG, logSuccess, logWarning } from "./config";
+import { CONFIG, logSuccess, logWarning } from "@/scripts/health/sonar/ts/config";
 
 export function isStepCompleted(step: string): boolean {
   if (!existsSync(CONFIG.SONAR_STATE_FILE)) return false;

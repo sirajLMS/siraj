@@ -1,4 +1,4 @@
-import type { BooksAndBagsLabels, ResourcesLabels } from "../../../types/dashboard/resources";
+import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/messages/types/dashboard/resources";
 
 export const booksAndBags: BooksAndBagsLabels = {
   pageTitle: "الكتب والحقائب",

@@ -1,6 +1,6 @@
 import { createInterface } from "node:readline";
-import { ACTIONS, askQuestion, executeAction, findActionKey } from "./actions";
-import { DISABLED_ACTION_SUFFIX, isDestructiveActionBlocked } from "./destructive";
+import { ACTIONS, askQuestion, executeAction, findActionKey } from "@/scripts/dbActions/actions";
+import { DISABLED_ACTION_SUFFIX, isDestructiveActionBlocked } from "@/scripts/dbActions/destructive";
 
 /**
  * Displays the interactive menu.

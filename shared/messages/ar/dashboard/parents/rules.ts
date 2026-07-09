@@ -1,4 +1,4 @@
-import type { ParentRulesLabels } from "../../../types/dashboard/parents/rules";
+import type { ParentRulesLabels } from "@/shared/messages/types/dashboard/parents/rules";
 
 export const parentRules: ParentRulesLabels = {
   pageTitle: "القواعد والسياسات",

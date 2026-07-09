@@ -1,4 +1,4 @@
-import type { AdminViewLabels, ClassDetailsPerformanceLabels } from "../admin";
+import type { AdminViewLabels, ClassDetailsPerformanceLabels } from "@/shared/messages/types/dashboard/admin";
 
 export interface ClassDetailsLabels {
   readonly pageSubtitleAdmin: string;

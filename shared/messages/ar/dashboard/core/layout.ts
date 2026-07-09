@@ -1,4 +1,4 @@
-import type { DashboardLayoutLabels } from "../../../types/dashboard/core";
+import type { DashboardLayoutLabels } from "@/shared/messages/types/dashboard/core";
 
 export const layout: DashboardLayoutLabels = {
   appTitle: "سراج LMS",

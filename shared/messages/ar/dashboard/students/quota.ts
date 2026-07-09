@@ -1,4 +1,4 @@
-import type { StudentQuotaLabels } from "../../../types/dashboard/students";
+import type { StudentQuotaLabels } from "@/shared/messages/types/dashboard/students";
 
 export const quota: StudentQuotaLabels = {
   pageTitle: "تعديل الملف الشخصي للطالب",

@@ -1,4 +1,4 @@
-import type { ScheduleAlertsLabels } from "../../../types/dashboard/core";
+import type { ScheduleAlertsLabels } from "@/shared/messages/types/dashboard/core";
 
 export const scheduleAlerts: ScheduleAlertsLabels = {
   pageTitle: "التنبيهات والحصص",

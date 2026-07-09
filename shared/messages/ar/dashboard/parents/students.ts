@@ -1,4 +1,4 @@
-import type { ParentStudentsLabels } from "../../../types/dashboard/parents/students";
+import type { ParentStudentsLabels } from "@/shared/messages/types/dashboard/parents/students";
 
 export const parentStudents: ParentStudentsLabels = {
   pageTitle: "طلابك",

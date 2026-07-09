@@ -1,4 +1,4 @@
-import type { ManagerOnboardingLabels } from "../../../types/dashboard/managers";
+import type { ManagerOnboardingLabels } from "@/shared/messages/types/dashboard/managers";
 
 export const managerOnboarding: ManagerOnboardingLabels = {
   pageTitle: "انضمام المدير",

@@ -1,4 +1,4 @@
-import type { PhoneInputLabels } from "../../types/ui/phone-input";
+import type { PhoneInputLabels } from "@/shared/messages/types/ui/phone-input";
 
 export const phoneInput: PhoneInputLabels = {
   label: "رقم الهاتف",

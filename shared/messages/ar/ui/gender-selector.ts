@@ -1,4 +1,4 @@
-import type { GenderSelectorLabels } from "../../types/ui/gender-selector";
+import type { GenderSelectorLabels } from "@/shared/messages/types/ui/gender-selector";
 
 export const genderSelector: GenderSelectorLabels = {
   title: "الجنس",

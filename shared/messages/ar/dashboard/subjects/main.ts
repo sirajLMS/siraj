@@ -1,4 +1,4 @@
-import type { SubjectsLabels } from "../../../types/dashboard/subjects";
+import type { SubjectsLabels } from "@/shared/messages/types/dashboard/subjects";
 
 export const subjects: SubjectsLabels = {
   pageTitle: "المواد",

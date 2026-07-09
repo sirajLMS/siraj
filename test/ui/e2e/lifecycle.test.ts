@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createContext, setupBrowserLifecycle } from "./lifecycle";
+import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 describe("E2E Lifecycle", () => {
   setupBrowserLifecycle();

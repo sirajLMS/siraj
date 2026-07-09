@@ -1,4 +1,4 @@
-import type { TeacherFutureScheduleLabels } from "../../../types/dashboard/teachers";
+import type { TeacherFutureScheduleLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const futureSchedule: TeacherFutureScheduleLabels = {
   pageTitle: "جدول المعلم القادم",

@@ -1,16 +1,16 @@
-import { clearSonarCache, isProjectChanged, saveProjectFingerprint } from "./cache";
-import { COLORS, logError, logInfo, logSuccess } from "./config";
-import { checkDocker, checkDockerCompose, startSonarQube } from "./docker";
-import { fetchAndDisplayResults, waitForAnalysisProcessing } from "./results";
-import { installScanner, runAnalysis } from "./scanner";
+import { clearSonarCache, isProjectChanged, saveProjectFingerprint } from "@/scripts/health/sonar/ts/cache";
+import { COLORS, logError, logInfo, logSuccess } from "@/scripts/health/sonar/ts/config";
+import { checkDocker, checkDockerCompose, startSonarQube } from "@/scripts/health/sonar/ts/docker";
+import { fetchAndDisplayResults, waitForAnalysisProcessing } from "@/scripts/health/sonar/ts/results";
+import { installScanner, runAnalysis } from "@/scripts/health/sonar/ts/scanner";
 import {
   changeAdminPassword,
   createProject,
   generateToken,
   waitForSonarQube,
   writeConnectionInfo,
-} from "./sonarqube-api";
-import { resetSetup } from "./state";
+} from "@/scripts/health/sonar/ts/sonarqube-api";
+import { resetSetup } from "@/scripts/health/sonar/ts/state";
 
 function printHelp() {
   globalThis.console.log(`

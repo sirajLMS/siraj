@@ -1,7 +1,9 @@
-import type { BillingLabels } from "../../../types/dashboard/billing";
-import { billingManual } from "./manual";
+import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import { billingManual } from "@/shared/messages/ar/dashboard/billing/manual";
+import { payment } from "@/shared/messages/ar/dashboard/billing/payment";
 
 export const billing: BillingLabels = {
+  ...payment,
   adminPageTitle: "إدارة الفواتير",
   adminPageSubtitle: "نظرة عامة مالية وسجلات المعاملات",
   parentPageTitle: "الفواتير والمدفوعات",

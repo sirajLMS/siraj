@@ -7,7 +7,7 @@ expect.extend(matchers);
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { renderWithWrapper } from "./TestWrapper";
+import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();

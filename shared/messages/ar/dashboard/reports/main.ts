@@ -1,4 +1,4 @@
-import type { ReportsLabels } from "../../../types/dashboard/reports";
+import type { ReportsLabels } from "@/shared/messages/types/dashboard/reports";
 
 export const reports: ReportsLabels = {
   pageTitle: "محرك التقارير الرئيسي",

@@ -23,7 +23,7 @@ import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/gra
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ScheduleOverviewSectionProps } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewSection";
 import { ScheduleOverviewSection } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewSection";
-import { renderWithWrapper } from "./TestWrapper";
+import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();

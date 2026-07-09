@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
-import { COLORS, CONFIG, logError, logInfo, logSuccess } from "./config";
+import { COLORS, CONFIG, logError, logInfo, logSuccess } from "@/scripts/health/codescene/config";
 
 export function isCsInstalled(): boolean {
   const platform = os.platform();

@@ -30,6 +30,7 @@
     "test:ui:components:coverage": "bun test --coverage test/ui/components/ --timeout=30000",
     "test:ui:e2e": "bun test test/ui/e2e/ --timeout=120000",
     "codescene": "bun run scripts/health/codescene/main.ts --scan",
+    "lint": "bun run scripts/lint-queue-client.ts",
     "quality-gate": "bun run scripts/quality-gate.ts",
     "quality-gate:fresh": "bun run scripts/quality-gate.ts --fresh",
     "sonar-scan": "bun run scripts/health/sonar/ts/main.ts --scan",

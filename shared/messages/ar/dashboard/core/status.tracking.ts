@@ -1,4 +1,4 @@
-import type { StatusTrackingLabels } from "../../../types/dashboard/core";
+import type { StatusTrackingLabels } from "@/shared/messages/types/dashboard/core";
 
 export const statusTracking: StatusTrackingLabels = {
   pageTitle: "نظرة عامة على الحالة",

@@ -1,4 +1,4 @@
-import type { NotificationsLabels } from "../../../types/dashboard/core";
+import type { NotificationsLabels } from "@/shared/messages/types/dashboard/core";
 
 export const notifications: NotificationsLabels = {
   title: "الإشعارات",

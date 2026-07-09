@@ -1,4 +1,4 @@
-import type { SearchScheduleLabels } from "../../../types/dashboard/core";
+import type { SearchScheduleLabels } from "@/shared/messages/types/dashboard/core";
 
 export const searchSchedule: SearchScheduleLabels = {
   pageTitle: "البحث عن توفر الجدول",

@@ -1,4 +1,4 @@
-import type { TagInputLabels } from "../../types/ui/tag-input";
+import type { TagInputLabels } from "@/shared/messages/types/ui/tag-input";
 
 export const tagInput: TagInputLabels = {
   label: "إضافة عناصر",

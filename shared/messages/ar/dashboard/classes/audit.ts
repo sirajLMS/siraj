@@ -1,4 +1,4 @@
-import type { ClassAuditLabels } from "../../../types/dashboard/classes";
+import type { ClassAuditLabels } from "@/shared/messages/types/dashboard/classes";
 
 export const classAudit: ClassAuditLabels = {
   invalidClassId: "معرف الحصة غير صالح",

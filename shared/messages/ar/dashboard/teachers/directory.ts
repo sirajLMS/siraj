@@ -1,4 +1,4 @@
-import type { TeachersDirectoryLabels } from "../../../types/dashboard/teachers";
+import type { TeachersDirectoryLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const directory: TeachersDirectoryLabels = {
   pageTitle: "دليل المعلمين",

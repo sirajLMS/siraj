@@ -1,4 +1,4 @@
-import type { SuggestionsLabels } from "../../../types/dashboard/suggestions";
+import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions";
 
 export const suggestions: SuggestionsLabels = {
   parent: {

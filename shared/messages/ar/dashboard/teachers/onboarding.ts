@@ -1,4 +1,4 @@
-import type { TeacherOnboardingLabels } from "../../../types/dashboard/teachers";
+import type { TeacherOnboardingLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const onboarding: TeacherOnboardingLabels = {
   pageTitle: "انضمام المعلم",

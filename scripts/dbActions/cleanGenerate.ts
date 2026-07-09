@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, rmSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { runBunCommand } from "./runCommand";
-import { withStatementBreakpoints } from "./sqlBreakpoints";
+import { runBunCommand } from "@/scripts/dbActions/runCommand";
+import { withStatementBreakpoints } from "@/scripts/dbActions/sqlBreakpoints";
 
 /**
  * Generates a custom migration and populates it with SQL content.

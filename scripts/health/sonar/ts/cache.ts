@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { glob } from "glob";
-import { PROJECT_ROOT, SONAR_DIR } from "./config";
+import { PROJECT_ROOT, SONAR_DIR } from "@/scripts/health/sonar/ts/config";
 
 const CACHE_FILE = join(SONAR_DIR, ".sonar-cache");
 

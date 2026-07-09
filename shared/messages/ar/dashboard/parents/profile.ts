@@ -1,4 +1,4 @@
-import type { ParentProfileLabels } from "../../../types/dashboard/parents";
+import type { ParentProfileLabels } from "@/shared/messages/types/dashboard/parents";
 
 export const profile: ParentProfileLabels = {
   pageTitle: "الملف الشخصي لولي الأمر",

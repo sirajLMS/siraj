@@ -1,4 +1,4 @@
-import type { AdminViewLabels, ClassDetailsPerformanceLabels } from "../../../types/dashboard/admin";
+import type { AdminViewLabels, ClassDetailsPerformanceLabels } from "@/shared/messages/types/dashboard/admin";
 
 const performanceLabels: ClassDetailsPerformanceLabels = {
   livePerformanceOverview: "نظرة عامة على الأداء المباشر",

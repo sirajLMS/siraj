@@ -1,4 +1,4 @@
-import type { TeacherProfileLabels } from "../../../types/dashboard/teachers";
+import type { TeacherProfileLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const profile: TeacherProfileLabels = {
   pageTitle: "تعديل الملف الشخصي للمعلم",

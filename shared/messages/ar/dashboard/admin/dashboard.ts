@@ -1,4 +1,4 @@
-import type { AdminDashboardLabels } from "../../../types/dashboard/admin";
+import type { AdminDashboardLabels } from "@/shared/messages/types/dashboard/admin";
 
 export const admin: AdminDashboardLabels = {
   roleLabel: "لوحة تحكم المدير",

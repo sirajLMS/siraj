@@ -1,4 +1,4 @@
-import type { ParentDashboardLabels } from "../../../types/dashboard/core";
+import type { ParentDashboardLabels } from "@/shared/messages/types/dashboard/core";
 
 export const parentDashboard: ParentDashboardLabels = {
   welcome: "مرحباً، {name}",

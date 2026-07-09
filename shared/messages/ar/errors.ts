@@ -1,4 +1,4 @@
-import type { ErrorsLabels } from "../types/errors";
+import type { ErrorsLabels } from "@/shared/messages/types/errors";
 
 export const errors: ErrorsLabels = {
   unauthorizedViewMetrics: "غير مصرح: مطلوب إذن dashboard.view_metrics",

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { COLORS, CONFIG, logInfo, logSuccess, logWarning } from "./config";
+import { COLORS, CONFIG, logInfo, logSuccess, logWarning } from "@/scripts/health/sonar/ts/config";
 
 interface SonarIssue {
   key: string;

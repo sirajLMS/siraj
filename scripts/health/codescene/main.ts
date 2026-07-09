@@ -1,8 +1,8 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { join, relative } from "node:path";
-import { clearCache } from "./cache";
-import { checkSingleFile, runHealthCheck } from "./checker";
+import { clearCache } from "@/scripts/health/codescene/cache";
+import { checkSingleFile, runHealthCheck } from "@/scripts/health/codescene/checker";
 import {
   COLORS,
   CONFIG,
@@ -14,8 +14,8 @@ import {
   PROJECT_ROOT,
   resolveCodesceneBin,
   SCRIPT_DIR,
-} from "./config";
-import { installCodeScene, isCsInstalled, promptAndSaveToken, showTokenInstructions } from "./installer";
+} from "@/scripts/health/codescene/config";
+import { installCodeScene, isCsInstalled, promptAndSaveToken, showTokenInstructions } from "@/scripts/health/codescene/installer";
 
 function printHelp() {
   globalThis.console.log(`

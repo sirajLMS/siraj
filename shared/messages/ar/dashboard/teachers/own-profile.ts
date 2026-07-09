@@ -1,4 +1,4 @@
-import type { TeacherOwnProfileLabels } from "../../../types/dashboard/teachers/own-profile";
+import type { TeacherOwnProfileLabels } from "@/shared/messages/types/dashboard/teachers/own-profile";
 
 export const ownProfile: TeacherOwnProfileLabels = {
   pageTitle: "تفاصيل الراتب",

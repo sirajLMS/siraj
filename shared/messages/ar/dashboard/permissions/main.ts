@@ -1,4 +1,4 @@
-import type { PermissionsLabels } from "../../../types/dashboard/permissions";
+import type { PermissionsLabels } from "@/shared/messages/types/dashboard/permissions";
 
 export const permissions: PermissionsLabels = {
   title: "إدارة الصلاحيات",

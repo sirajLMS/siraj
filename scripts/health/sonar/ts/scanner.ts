@@ -2,8 +2,8 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import { join } from "node:path";
-import { CONFIG, logInfo, logSuccess, logWarning, PROJECT_ROOT } from "./config";
-import { isStepCompleted, markStepCompleted } from "./state";
+import { CONFIG, logInfo, logSuccess, logWarning, PROJECT_ROOT } from "@/scripts/health/sonar/ts/config";
+import { isStepCompleted, markStepCompleted } from "@/scripts/health/sonar/ts/state";
 
 function getSearchCmd(): string {
   return os.platform() === "win32" ? String.raw`C:\Windows\System32\where.exe` : "/usr/bin/which";

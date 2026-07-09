@@ -28,7 +28,7 @@ import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/share
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { SearchScheduleContainer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleContainer";
-import { renderWithWrapper } from "./TestWrapper";
+import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const fromDate = format(new Date(), "yyyy-MM-dd");
 const toDate = format(addDays(new Date(), 7), "yyyy-MM-dd");

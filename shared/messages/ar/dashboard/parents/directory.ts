@@ -1,4 +1,4 @@
-import type { ParentsDirectoryLabels } from "../../../types/dashboard/parents";
+import type { ParentsDirectoryLabels } from "@/shared/messages/types/dashboard/parents";
 
 export const directory: ParentsDirectoryLabels = {
   pageTitle: "دليل أولياء الأمور",

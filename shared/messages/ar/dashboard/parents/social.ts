@@ -1,4 +1,4 @@
-import type { ParentSocialLabels } from "../../../types/dashboard/parents/social";
+import type { ParentSocialLabels } from "@/shared/messages/types/dashboard/parents/social";
 
 export const parentSocial: ParentSocialLabels = {
   pageTitle: "وسائل التواصل الاجتماعي",

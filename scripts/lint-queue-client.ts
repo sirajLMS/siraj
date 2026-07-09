@@ -13,7 +13,7 @@
  *   Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
  *
  * Usage from TypeScript:
- *   import { requestLint } from "./lint-queue-client";
+ *   import { requestLint } from "@/scripts/lint-queue-client";
  *   const result = await requestLint("phase8", ["src/foo.ts", "src/bar.ts"]);
  *   console.log(result.success, result.exitCode);
  */

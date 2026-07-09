@@ -8,7 +8,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { isExcludedIanaTimezoneId } from "../shared/lib/timezone/excluded-iana-timezones.ts";
+import { isExcludedIanaTimezoneId } from "@/shared/lib/timezone/excluded-iana-timezones";
 
 const ROOT = join(import.meta.dir, "..");
 const SHARED_IDS_OUTPUT = join(ROOT, "shared/constants/iana-timezones.ts");

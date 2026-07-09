@@ -1,4 +1,4 @@
-import type { TeacherAvailabilityLabels } from "../../../types/dashboard/teachers";
+import type { TeacherAvailabilityLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const availability: TeacherAvailabilityLabels = {
   pageTitle: "أداة توفر المعلمين",

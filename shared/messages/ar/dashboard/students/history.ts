@@ -1,4 +1,4 @@
-import type { StudentHistoryLabels } from "../../../types/dashboard/students";
+import type { StudentHistoryLabels } from "@/shared/messages/types/dashboard/students";
 
 export const history: StudentHistoryLabels = {
   breadcrumbs: {

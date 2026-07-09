@@ -1,4 +1,4 @@
-import type { ClassDetailsLabels } from "../../../types/dashboard/classes";
+import type { ClassDetailsLabels } from "@/shared/messages/types/dashboard/classes";
 
 export const classDetails: ClassDetailsLabels = {
   pageSubtitleAdmin: "مراقبة مقاييس الحصة المباشرة والضوابط الإدارية",

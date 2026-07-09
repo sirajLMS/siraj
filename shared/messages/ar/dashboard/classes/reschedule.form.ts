@@ -1,4 +1,4 @@
-import type { RescheduleFormLabels } from "../../../types/dashboard/classes";
+import type { RescheduleFormLabels } from "@/shared/messages/types/dashboard/classes";
 
 export const rescheduleForm: RescheduleFormLabels = {
   pageTitle: "إعادة جدولة حصة",

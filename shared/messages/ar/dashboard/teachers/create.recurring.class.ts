@@ -1,4 +1,4 @@
-import type { TeacherCreateRecurringClassLabels } from "../../../types/dashboard/teachers";
+import type { TeacherCreateRecurringClassLabels } from "@/shared/messages/types/dashboard/teachers";
 
 export const teacherCreateRecurringClass: TeacherCreateRecurringClassLabels = {
   dialogTitle: "إضافة حصة",

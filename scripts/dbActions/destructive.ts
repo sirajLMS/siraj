@@ -1,4 +1,4 @@
-import { assessDestructiveDbCommandSafety, formatDestructiveDbBlockMessage } from "../lib/destructiveDbGuard";
+import { assessDestructiveDbCommandSafety, formatDestructiveDbBlockMessage } from "@/scripts/lib/destructiveDbGuard";
 
 export const DESTRUCTIVE_ACTION_KEYS = new Set(["1", "4", "8"]);
 export const DISABLED_ACTION_SUFFIX = " (disabled — cloud/production env)";

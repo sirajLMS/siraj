@@ -26,7 +26,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing-alerts.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { UnpaidInvoicesSection } from "@/frontend/views/dashboard/components/navbar/UnpaidInvoicesSection";
-import { renderWithWrapper } from "./TestWrapper";
+import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();
