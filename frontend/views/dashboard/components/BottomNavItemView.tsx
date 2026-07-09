@@ -5,7 +5,7 @@ import { Box, Typography } from "@mui/material";
 import { Link } from "@/shared/i18n/routing";
 
 export const BOTTOM_NAV_SCROLL_THRESHOLD = 5;
-export const BOTTOM_NAV_ITEM_MIN_WIDTH = 72;
+export const BOTTOM_NAV_ITEM_MIN_WIDTH = 88;
 
 interface BottomNavItemViewProps {
   readonly itemKey: string;
@@ -29,13 +29,13 @@ export function BottomNavItemView({ itemKey, href, label, icon, isActive, isScro
       sx={theme => ({
         flex: isScrollable ? `0 0 ${BOTTOM_NAV_ITEM_MIN_WIDTH}px` : 1,
         minWidth: isScrollable ? BOTTOM_NAV_ITEM_MIN_WIDTH : 0,
-        maxWidth: isScrollable ? 80 : "none",
+        maxWidth: isScrollable ? 104 : "none",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         gap: 0.25,
-        px: 0.5,
+        px: 0.75,
         py: 0.75,
         textDecoration: "none",
         color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,

@@ -66,24 +66,40 @@ export function PreferencesMatrix({
         borderColor: theme.palette.divider,
       })}
     >
-      <Table size="small" aria-label={t("title")}>
+      <Table
+        aria-label={t("title")}
+        sx={{
+          "& .MuiTableCell-root": {
+            py: 1.75,
+            px: 2,
+          },
+          "& .MuiTableCell-head": {
+            py: 1.5,
+          },
+        }}
+      >
         <TableHead>
           <TableRow>
-            <TableCell sx={{ fontWeight: 600, minWidth: 160 }} />
-            {NOTIFICATION_EVENT_TYPES.map(eventType => (
-              <TableCell key={eventType} align="center" sx={{ fontWeight: 600, minWidth: 120 }}>
-                <Typography sx={{ typography: "labelSm" }}>{t(`events.${eventType}`)}</Typography>
+            <TableCell sx={{ fontWeight: 600, minWidth: 200 }} />
+            {NOTIFICATION_CHANNELS.map(channel => (
+              <TableCell key={channel} align="center" sx={{ fontWeight: 600, minWidth: 100 }}>
+                <Typography sx={{ typography: "labelSm" }}>{t(`channels.${channel}`)}</Typography>
               </TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {NOTIFICATION_CHANNELS.map(channel => (
-            <TableRow key={channel}>
+          {NOTIFICATION_EVENT_TYPES.map((eventType, index) => (
+            <TableRow
+              key={eventType}
+              sx={theme => ({
+                backgroundColor: index % 2 === 1 ? theme.palette.action.hover : "transparent",
+              })}
+            >
               <TableCell component="th" scope="row" sx={{ fontWeight: 600 }}>
-                <Typography sx={{ typography: "bodyMd" }}>{t(`channels.${channel}`)}</Typography>
+                <Typography sx={{ typography: "bodyMd" }}>{t(`events.${eventType}`)}</Typography>
               </TableCell>
-              {NOTIFICATION_EVENT_TYPES.map(eventType => {
+              {NOTIFICATION_CHANNELS.map(channel => {
                 const pref = preferenceMap.get(`${channel}:${eventType}`);
                 const enabled = pref?.enabled ?? true;
                 const channelLabel = t(`channels.${channel}`);

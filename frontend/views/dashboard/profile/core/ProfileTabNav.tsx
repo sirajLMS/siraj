@@ -3,7 +3,7 @@
 import { Box, Chip, Stack, Tab, Tabs } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ProfileAudience, ProfileScope } from "@/backend/types/profile.types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { getVisibleProfileTabs } from "./profileTabs";
@@ -21,22 +21,26 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const hasPermission = useUserStore(state => state.hasPermission);
+  const currentTabRef = useRef(currentTab);
+  currentTabRef.current = currentTab;
 
-  const availableTabs = getVisibleProfileTabs({ audience, scope, hasPermission });
+  const availableTabs = useMemo(
+    () => getVisibleProfileTabs({ audience, scope, hasPermission }),
+    [audience, scope, hasPermission]
+  );
 
+  // URL → state: only react to external URL changes (back/forward, deep links).
+  // Do not depend on currentTab — that caused a redirect loop with the state → URL effect.
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && availableTabs.some(tab => tab.id === tabParam)) {
-      onTabChange(tabParam);
-      return;
-    }
+    const nextTab = tabParam && availableTabs.some(tab => tab.id === tabParam) ? tabParam : availableTabs[0]?.id;
 
-    const fallbackTab = availableTabs[0]?.id;
-    if (fallbackTab && fallbackTab !== currentTab) {
-      onTabChange(fallbackTab);
+    if (nextTab && nextTab !== currentTabRef.current) {
+      onTabChange(nextTab);
     }
-  }, [searchParams, availableTabs, currentTab, onTabChange]);
+  }, [searchParams, availableTabs, onTabChange]);
 
+  // State → URL: keep the query param in sync after tab clicks.
   useEffect(() => {
     if (!currentTab) {
       return;

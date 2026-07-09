@@ -4,14 +4,12 @@ import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/types/profile.types";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer } from "@/frontend/components/ui";
 import { ProfileHeader } from "./ProfileHeader";
 import { ProfileSkeleton } from "./ProfileSkeleton";
 import { ProfileTabNav } from "./ProfileTabNav";
 
 export type ProfileShellProps = {
-  readonly title: string;
-  readonly subtitle?: string;
   readonly loading?: boolean;
   readonly error?: string | null;
   readonly actions?: ReactNode;
@@ -24,13 +22,11 @@ export type ProfileShellProps = {
   readonly onRetry?: () => void;
   readonly name?: string;
   readonly email?: string;
-  readonly role?: string;
+  readonly roleLabel?: string;
   readonly avatarUrl?: string | null;
 };
 
 export function ProfileShell({
-  title,
-  subtitle,
   loading,
   error,
   actions,
@@ -43,7 +39,7 @@ export function ProfileShell({
   onRetry,
   name,
   email,
-  role,
+  roleLabel,
   avatarUrl,
 }: ProfileShellProps) {
   const t = useTranslations("profile");
@@ -82,7 +78,13 @@ export function ProfileShell({
           },
         })}
       >
-        <ProfileHeader name={name ?? ""} email={email ?? ""} role={role ?? ""} avatarUrl={avatarUrl} />
+        <ProfileHeader
+          name={name ?? ""}
+          email={email ?? ""}
+          roleLabel={roleLabel}
+          avatarUrl={avatarUrl}
+          actions={actions}
+        />
         {showTabs ? (
           <ProfileTabNav audience={audience} scope={scope} currentTab={currentTab} onTabChange={onTabChange} />
         ) : null}
@@ -112,7 +114,6 @@ export function ProfileShell({
           width: "100%",
         })}
       >
-        <PageHeader title={title} subtitle={subtitle} actions={actions} />
         {renderBody()}
       </Box>
     </PageContainer>

@@ -119,27 +119,12 @@ export function StaffProfileContainer({
   }
 
   const staffData = profile.staffProfile;
-  const avatarUrl = profile.avatarUrl ?? staffData.avatarUrl;
 
   if (mode === "view") {
-    return (
-      <StaffProfileView
-        staffData={staffData}
-        avatarUrl={avatarUrl}
-        isAdminScope={isAdminScope}
-        permissionGroups={profile.staffPermissionGroups}
-        permissionOverrides={profile.staffPermissionOverrides}
-      />
-    );
+    return <StaffProfileView staffData={staffData} isAdminScope={isAdminScope} />;
   }
 
   return (
-    <StaffProfileEditForm
-      staffData={staffData}
-      avatarUrl={avatarUrl}
-      isAdminScope={isAdminScope}
-      isSaving={isSaving}
-      onSubmit={onSubmit}
-    />
+    <StaffProfileEditForm staffData={staffData} isAdminScope={isAdminScope} isSaving={isSaving} onSubmit={onSubmit} />
   );
 }

@@ -34,7 +34,7 @@ export function ContactSection(props: ContactSectionProps) {
 
   return (
     <SectionPanel title={t("sections.contact")}>
-      <Stack spacing={2}>
+      <Stack spacing={1.5}>
         <InfoField label={t("fields.phone")} value={toDisplayValue(props.staffData.phone, tc("notSet"))} />
       </Stack>
     </SectionPanel>

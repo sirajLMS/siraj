@@ -2,6 +2,7 @@
 
 import { alpha, Box, Typography } from "@mui/material";
 import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
+import { formatUserRoleLabel } from "@/frontend/utils/formatUserRoleLabel";
 import { LanguageSwitcher, NavbarChrome, NotificationButton, ThemeSwitcher, UserMenuButton } from "./navbar";
 
 interface TopNavbarProps {
@@ -24,7 +25,8 @@ export function TopNavbar({
   const { isSimulatingGroup, status: simulationStatus } = usePermissionGroupSimulation();
 
   const simulatedRoleName = simulationStatus?.groupName;
-  const secondaryHeaderLine = isSimulatingGroup && simulatedRoleName ? simulatedRoleName : userRole;
+  const secondaryHeaderLine =
+    isSimulatingGroup && simulatedRoleName ? simulatedRoleName : formatUserRoleLabel(userRole);
 
   return (
     <NavbarChrome

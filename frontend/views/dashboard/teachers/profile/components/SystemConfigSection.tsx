@@ -90,18 +90,7 @@ export function SystemConfigSection() {
             control={control}
             render={({ field }) => (
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Switch
-                  {...field}
-                  checked={field.value}
-                  sx={theme => ({
-                    "&.MuiSwitch-root .MuiSwitch-switchBase.Mui-checked": {
-                      color: theme.palette.primary.main,
-                    },
-                    "&.MuiSwitch-root .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                      backgroundColor: theme.palette.primary.main,
-                    },
-                  })}
-                />
+                <Switch {...field} checked={field.value} />
                 <StatusBadge
                   category="staffAccount"
                   status={field.value ? "activated" : "deactivated"}

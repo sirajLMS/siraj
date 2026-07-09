@@ -22,7 +22,6 @@ export type ProfilePageClientProps = {
 
 export function ProfilePageClient({ scope, mode, audience, targetUserId }: ProfilePageClientProps) {
   const t = useTranslations("profile");
-  const tAudience = useTranslations(`profile.${audience}`);
   const searchParams = useSearchParams();
   const [currentTab, setCurrentTab] = useState(searchParams.get("tab") ?? "");
 
@@ -31,8 +30,6 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   });
 
   const profile = data?.profileByUserId;
-  const title = mode === "edit" ? t("editTitle") : t("pageTitle");
-  const subtitle = tAudience("subtitle");
 
   const editHref = scope === "own" ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
   const cancelHref = scope === "own" ? ownProfileHref() : profileHrefForUser(targetUserId);
@@ -43,9 +40,12 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
 
   const activeTab = currentTab || "profile";
 
+  const roleLabel =
+    audience === "staff"
+      ? (profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined)
+      : t(`role.${audience}`);
+
   const shellProps = {
-    title,
-    subtitle,
     audience,
     scope,
     mode,
@@ -54,7 +54,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
     onRetry: handleRetry,
     name: profile?.name ?? "",
     email: profile?.email ?? "",
-    role: audience,
+    roleLabel,
     avatarUrl: profile?.avatarUrl,
     actions:
       mode === "view" ? (

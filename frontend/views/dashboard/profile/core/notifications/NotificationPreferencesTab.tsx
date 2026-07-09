@@ -17,7 +17,7 @@ import {
   type NotificationPrefRow,
   preferenceKey,
 } from "./notificationPreferenceTypes";
-import { PreferencesAccordion } from "./PreferencesAccordion";
+import { PreferencesChannelTabs } from "./PreferencesChannelTabs";
 import { PreferencesMatrix } from "./PreferencesMatrix";
 
 type NotificationPreferencesTabProps = {
@@ -117,7 +117,7 @@ export function NotificationPreferencesTab({ isActive }: NotificationPreferences
       </Box>
 
       {isMobile ? (
-        <PreferencesAccordion
+        <PreferencesChannelTabs
           preferences={localPreferences}
           onToggle={handleToggle}
           disabled={saving}

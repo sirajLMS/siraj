@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import type { ComponentProps } from "react";
-import { AccountStatus, OverrideState } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "./StaffProfileView";
 
 const staffProfile = {
@@ -18,32 +18,6 @@ const staffProfile = {
   roleSlug: "senior-admin",
   roleName: "Senior Administrator",
 };
-
-const permissionGroups = [
-  {
-    id: "group-1",
-    name: "User Management",
-    slug: "user-management",
-    description: "Manage users and profiles",
-  },
-  {
-    id: "group-2",
-    name: "Finance Access",
-    slug: "finance-access",
-    description: "View financial records",
-  },
-];
-
-const permissionOverrides = [
-  {
-    id: "perm-1",
-    permissionId: "perm-1",
-    permissionKey: "billing.view",
-    resource: "billing",
-    action: "view",
-    state: OverrideState.Granted,
-  },
-];
 
 type StaffProfileViewStoryProps = ComponentProps<typeof StaffProfileView> & {
   readonly loading?: boolean;
@@ -88,8 +62,6 @@ export const Default: Story = {
   args: {
     staffData: staffProfile,
     isAdminScope: false,
-    permissionGroups: null,
-    permissionOverrides: null,
     loading: false,
     hasError: false,
   },
@@ -99,19 +71,6 @@ export const AdminView: Story = {
   args: {
     staffData: staffProfile,
     isAdminScope: true,
-    permissionGroups,
-    permissionOverrides,
-    loading: false,
-    hasError: false,
-  },
-};
-
-export const EmptyPermissions: Story = {
-  args: {
-    staffData: staffProfile,
-    isAdminScope: true,
-    permissionGroups: [],
-    permissionOverrides: [],
     loading: false,
     hasError: false,
   },
@@ -121,8 +80,6 @@ export const Loading: Story = {
   args: {
     staffData: staffProfile,
     isAdminScope: false,
-    permissionGroups: null,
-    permissionOverrides: null,
     loading: true,
     hasError: false,
   },
@@ -132,8 +89,6 @@ export const ErrorState: Story = {
   args: {
     staffData: staffProfile,
     isAdminScope: false,
-    permissionGroups: null,
-    permissionOverrides: null,
     loading: false,
     hasError: true,
   },

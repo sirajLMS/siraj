@@ -16,47 +16,25 @@ const staffProfile = {
   roleName: "Senior Administrator",
 };
 
-const permissionGroups = [
-  {
-    id: "group-1",
-    name: "User Management",
-    slug: "user-management",
-    description: null,
-  },
-];
-
 afterEach(() => {
   cleanup();
 });
 
-describe("StaffProfileView permissions", () => {
-  test("hides permissions section for own scope", () => {
-    renderWithWrapper(
-      <StaffProfileView
-        staffData={staffProfile}
-        isAdminScope={false}
-        permissionGroups={permissionGroups}
-        permissionOverrides={[]}
-      />,
-      { locale: "en" }
-    );
+describe("StaffProfileView", () => {
+  test("shows contact information for own scope", () => {
+    renderWithWrapper(<StaffProfileView staffData={staffProfile} isAdminScope={false} />, { locale: "en" });
 
-    expect(screen.queryByText("Inherited Permission Groups")).toBeNull();
-    expect(screen.queryByText("No permission groups assigned")).toBeNull();
+    expect(screen.getByText("Contact Information")).toBeTruthy();
+    expect(screen.getByText("+1 (555) 123-4567")).toBeTruthy();
+    expect(screen.queryByText("Role Information")).toBeNull();
+    expect(screen.queryByText("Effective Permissions")).toBeNull();
   });
 
-  test("shows permissions section for admin scope", () => {
-    renderWithWrapper(
-      <StaffProfileView
-        staffData={staffProfile}
-        isAdminScope={true}
-        permissionGroups={permissionGroups}
-        permissionOverrides={[]}
-      />,
-      { locale: "en" }
-    );
+  test("shows admin banner and account status for admin scope", () => {
+    renderWithWrapper(<StaffProfileView staffData={staffProfile} isAdminScope={true} />, { locale: "en" });
 
-    expect(screen.getByText("Inherited Permission Groups")).toBeTruthy();
-    expect(screen.getByText("User Management")).toBeTruthy();
+    expect(screen.getByText("Administrative view: status and permissions are visible.")).toBeTruthy();
+    expect(screen.getByText("Account Information")).toBeTruthy();
+    expect(screen.getByText("Active")).toBeTruthy();
   });
 });

@@ -14,13 +14,11 @@ import { type StaffAdminEditFormData, staffAdminEditSchema, staffOwnEditSchema }
 
 export function StaffProfileEditForm({
   staffData,
-  avatarUrl,
   isAdminScope,
   isSaving,
   onSubmit,
 }: {
   readonly staffData: StaffProfileData;
-  readonly avatarUrl?: string | null;
   readonly isAdminScope: boolean;
   readonly isSaving: boolean;
   readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
@@ -62,13 +60,7 @@ export function StaffProfileEditForm({
             },
           }}
         >
-          <AccountSection
-            mode="edit"
-            staffData={staffData}
-            avatarUrl={avatarUrl}
-            isAdminScope={isAdminScope}
-            register={form.register}
-          />
+          <AccountSection mode="edit" staffData={staffData} isAdminScope={isAdminScope} register={form.register} />
           <ContactSection mode="edit" register={form.register} />
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>

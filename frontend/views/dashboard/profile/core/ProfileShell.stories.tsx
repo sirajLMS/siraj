@@ -84,11 +84,9 @@ function TabbedShellStory(args: ComponentProps<typeof ProfileShell>) {
 export const Default: Story = {
   render: args => <TabbedShellStory {...args} />,
   args: {
-    title: "User Profile",
-    subtitle: "Manage your account details",
     name: "John Doe",
     email: "john.doe@example.com",
-    role: "teacher",
+    roleLabel: "Teacher",
     audience: "teacher",
     scope: "own",
     mode: "view",
@@ -101,11 +99,9 @@ export const Default: Story = {
 export const ParentProfile: Story = {
   render: args => <TabbedShellStory {...args} />,
   args: {
-    title: "Parent Profile",
-    subtitle: "View and manage child accounts",
     name: "Jane Smith",
     email: "jane.smith@example.com",
-    role: "parent",
+    roleLabel: "Parent",
     audience: "parent",
     scope: "own",
     mode: "view",
@@ -124,11 +120,9 @@ export const ParentProfile: Story = {
 export const StaffProfile: Story = {
   render: args => <TabbedShellStory {...args} />,
   args: {
-    title: "Staff Profile",
-    subtitle: "Administrative view",
     name: "Admin User",
     email: "admin@example.com",
-    role: "staff",
+    roleLabel: "Academy Admin",
     audience: "staff",
     scope: "own",
     mode: "view",
@@ -146,8 +140,6 @@ export const StaffProfile: Story = {
 
 export const LoadingState: Story = {
   args: {
-    title: "User Profile",
-    subtitle: "Loading...",
     loading: true,
     audience: "teacher",
     scope: "own",
@@ -156,7 +148,6 @@ export const LoadingState: Story = {
 
 export const ErrorState: Story = {
   args: {
-    title: "User Profile",
     error: "Failed to load profile. Please try again later.",
     audience: "teacher",
     scope: "own",
@@ -167,11 +158,9 @@ export const ErrorState: Story = {
 export const OtherUserProfile: Story = {
   render: args => <TabbedShellStory {...args} />,
   args: {
-    title: "Viewing User",
-    subtitle: "Profile of another user",
     name: "Alice Johnson",
     email: "alice.johnson@example.com",
-    role: "teacher",
+    roleLabel: "Teacher",
     audience: "teacher",
     scope: "other",
     mode: "view",
