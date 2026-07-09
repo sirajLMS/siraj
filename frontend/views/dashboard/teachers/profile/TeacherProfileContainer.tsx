@@ -18,9 +18,9 @@ import {
 } from "@/frontend/graphql/sharedDocuments/staff-profile.documents";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { logger } from "@/frontend/utils/logger";
-import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
-import { TeacherProfileView } from "./TeacherProfileView";
-import type { TeacherProfileData } from "./types";
+import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
+import { TeacherProfileView } from "@/frontend/views/dashboard/teachers/profile/TeacherProfileView";
+import type { TeacherProfileData } from "@/frontend/views/dashboard/teachers/profile/types";
 export function TeacherProfileContainer() {
   const params = useParams();
   const id = typeof params?.id === "string" ? params.id : "";

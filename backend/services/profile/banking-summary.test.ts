@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ProfileAudience, ProfileScope } from "@/backend/enum";
 import { buildMaskedBankingSummary } from "@/backend/services/profile/banking-summary";
 import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types/teachers/teacher.types";
 
@@ -37,7 +38,7 @@ describe("buildMaskedBankingSummary", () => {
 describe("ProfileService banking scope rules", () => {
   test("own scope must not expose banking summary via service helper contract", async () => {
     const { loadTeacherBankingSummary } = await import("@/backend/services/profile/banking-summary");
-    const summary = await loadTeacherBankingSummary("actor-1", "own", "teacher", "teacher-1");
+    const summary = await loadTeacherBankingSummary("actor-1", ProfileScope.OWN, ProfileAudience.TEACHER, "teacher-1");
     expect(summary).toBeNull();
   });
 });

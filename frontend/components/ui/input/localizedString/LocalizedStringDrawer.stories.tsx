@@ -98,12 +98,7 @@ export const MobileBottomSheet: Story = {
 };
 
 export const DismissCancels: Story = {
-  render: () => (
-    <DrawerPlayground
-      initialValue={{ ar: "فودافون كاش", en: "Vodafone Cash" }}
-      dismissAction="cancel"
-    />
-  ),
+  render: () => <DrawerPlayground initialValue={{ ar: "فودافون كاش", en: "Vodafone Cash" }} dismissAction="cancel" />,
 };
 
 export const AutosaveNoFooter: Story = {

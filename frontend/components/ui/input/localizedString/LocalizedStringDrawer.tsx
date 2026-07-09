@@ -205,12 +205,21 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
             const isRtl = locale === "ar";
             const languageName = getLanguageDisplayName(locale, uiLocale);
             const emoji = getLanguageEmoji(locale);
-            const label = `${languageName}${isLocaleRequired ? " *" : ""}`;
             const showError = isLocaleRequired && !(typeof fieldValue === "string" && fieldValue.trim() !== "");
             return (
               <TextField
                 key={locale}
-                label={label}
+                label={
+                  multiline ? (
+                    <>
+                      <LocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
+                      {languageName}
+                      {isLocaleRequired ? " *" : ""}
+                    </>
+                  ) : (
+                    `${languageName}${isLocaleRequired ? " *" : ""}`
+                  )
+                }
                 value={fieldValue}
                 onChange={event => handleFieldChange(locale, event.target.value)}
                 multiline={multiline}
@@ -221,13 +230,15 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
                 dir={isRtl ? "rtl" : "ltr"}
                 slotProps={{
                   inputLabel: { shrink: true },
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocaleEmoji emoji={emoji} />
-                      </InputAdornment>
-                    ),
-                  },
+                  input: multiline
+                    ? undefined
+                    : {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LocaleEmoji emoji={emoji} />
+                          </InputAdornment>
+                        ),
+                      },
                   htmlInput: { dir: isRtl ? "rtl" : "ltr" },
                 }}
               />

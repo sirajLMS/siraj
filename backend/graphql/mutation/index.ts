@@ -1,16 +1,14 @@
-import "./auth.mutation";
-import "./storage.mutation";
-import "./student.mutation";
-import "./class-session.mutation";
-import "./teacher-dashboard.mutation";
-import "./test-helper.mutation";
-import "./schedule.mutation";
-import "./schedule-deletion.mutation";
-import "./staff-profile.mutation";
-import "./dst-migration.mutation";
-import "./onboarding.mutation";
-import "./class-category.mutation";
-import "./class-subject.mutation";
-import "./teacher-notes.mutation";
-import "./profile.mutation";
-import "./notification-preferences.mutation";
+// GraphQL Mutation root field definitions — grouped by domain.
+// Each sub-directory has its own index.ts barrel that side-effect-imports
+// every mutation file. This top-level barrel imports every sub-directory so
+// `import "@/backend/graphql/mutation"` (from gqlSchema.ts) registers all mutations.
+
+import "./auth";
+import "./classes";
+import "./notifications";
+import "./profile";
+import "./scheduling";
+import "./shared";
+import "./storage";
+import "./students";
+import "./teachers";

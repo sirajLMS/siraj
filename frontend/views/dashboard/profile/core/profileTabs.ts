@@ -7,14 +7,14 @@ export type ProfileTabDefinition = {
   readonly i18nKey: `shell.tabs.${string}`;
 };
 
-type TabVisibilityKey = `${Lowercase<ProfileAudience>}-${Lowercase<ProfileScope>}`;
+type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
 
 const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
-  profile: ["teacher-own", "teacher-other", "parent-own", "parent-other", "staff-own", "staff-other"],
-  banking: ["teacher-other"],
-  students: ["teacher-other"],
-  notifications: ["teacher-own", "parent-own", "staff-own"],
-  permissions: ["teacher-other", "parent-other", "staff-other"],
+  profile: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER", "STAFF-OWN", "STAFF-OTHER"],
+  banking: ["TEACHER-OTHER"],
+  students: ["TEACHER-OTHER"],
+  notifications: ["TEACHER-OWN", "PARENT-OWN", "STAFF-OWN"],
+  permissions: ["TEACHER-OTHER", "PARENT-OTHER", "STAFF-OTHER"],
 };
 
 export const profileTabs: readonly ProfileTabDefinition[] = [

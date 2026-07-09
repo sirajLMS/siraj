@@ -5,7 +5,7 @@ import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
 import { PhoneFormField } from "@/frontend/components/ui/input";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import type { TeacherProfileFormData } from "../schemas/teacherProfileSchema";
+import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 
 export function FullNameField() {
   const t = useTranslations("dashboard.teacherProfile");

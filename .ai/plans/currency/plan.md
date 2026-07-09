@@ -159,6 +159,9 @@ _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop,
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/services/AGENTS.md` (**domain-driven**, no monolithic services; business-logic hub; SSR-compatible — must NOT rely on GraphQL context unless passed explicitly; import types from `@/backend/types`, never ad-hoc; i18n: all user-facing errors via `getBackendTranslations` + `locale?` param; never hardcode error strings) · `backend/AGENTS.md` (Service Layer section — data transformations `SubmitInput → InsertType`, `SelectType → ReturnType`) · `.agents/instructions/backend.instructions.md` ("Service Layer" — never call services outside your domain boundary)
 
+---
+
+## Phase 7 — Pothos GraphQL
 
 **Goal:** swap the 12 `t.string`/`t.exposeString`/`t.arg.string` currency sites to `CurrencyCodePothosObject`.
 
@@ -181,6 +184,10 @@ _Rules (read before editing):_ `AGENTS.md` (root) · `backend/services/AGENTS.md
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/graphql/AGENTS.md` (**Single Canonical Object Type (CRITICAL)** — Pothos objectRef uses `{Entity}ReturnType` from `backend/types/`; never create `{Entity}Definition` / local types in Pothos; `nullable: true` REQUIRED for `CurrencyCode | null` fields — Pothos defaults non-nullable; resolvers delegate to SERVICES not repos; propagate `ctx.locale` to service/repo calls; errors in resolvers via `getBackendTranslations`; `id` field on all objects; exception: input + collection wrapper types allowed) · `backend/AGENTS.md` (GraphQL Layer section) · `.agents/instructions/backend.instructions.md` ("Pothos/GraphQL" — import types from `@/backend/types`; exceptions: input types and collection wrappers allowed; complex computed types may need custom defs but still import base from `backend/types/`)
 
+---
+
+## Phase 8 — Codegen + Schema
+
 **Order matters:**
 
 ```bash
@@ -196,6 +203,9 @@ bun codegen                  # FE types from SDL
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `frontend/AGENTS.md` (Code Quality section + Apollo/GraphQL Codegen rule) · `frontend/graphql/sharedDocuments/AGENTS.md` ("Codegen" — `~/.bun/bin/bun run generate:gqlSchema` THEN `~/.bun/bin/bun codegen` after any schema or document change; types always available post-codegen — never inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL → codegen after schema/document changes — both steps required) · `.agents/instructions/backend.instructions.md` ("GraphQL Schema Generation" — both `generate:gqlSchema` AND `codegen` are required)
 
+---
+
+## Phase 9 — Seeds
 
 | File | Line | Edit |
 |------|------|------|
@@ -214,6 +224,10 @@ bun db seed  # action "2"
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/AGENTS.md` (Seeds section) · `.agents/instructions/backend.instructions.md` ("Seeds (CRITICAL)" — one `seedOrGet` function per table in a dedicated file; idempotent via `onConflictDoUpdate`/`onConflictDoNothing`; match PG enum values EXACTLY from `backend/db/schema/enums.ts` — `CurrencyCode.USD === "USD"` so the PG coin stays aligned; check constraints before seeding by reading `backend/db/schema/*.ts`; run schema push/cleanGenerate BEFORE `bun db seed` after any schema change; return seeded entities downstream so other seeders don't re-query; helpers over ~70-80 lines extracted; never `any`/inline types)
 
+---
+
+## Phase 10 — Frontend GraphQL documents
+
 | File | Lines | Edit |
 |------|-------|------|
 | `frontend/graphql/sharedDocuments/billing-management.documents.ts` | `13` | `$currency: String!` → `$currency: CurrencyCode!` (and the field selection `currency: $currency` is unchanged — type now matches) |
@@ -229,7 +243,11 @@ _Rules (read before editing):_ `AGENTS.md` (root) · `backend/AGENTS.md` (Seeds 
 
 **Verify:** `bun codegen` regenerates `frontend/graphql/gql/` ops; re-run after Phase 8 if needed.
 
-_Rules (read before editing):_ `AGENTS.md` (root) · `frontend/graphql/sharedDocuments/AGENTS.md` (one file per domain `<domain>.documents.ts`; import `gql` + `TypedDocumentNode` from `"@apollo/client"` NEVER `"@apollo/client/core"`; naming `{entityName}QueryDocument` / `{entityName}MutationDocument` → `TypedDocumentNode<Operations.X, Types.Y>`; **`id` field on EVERY object type in selection sets** for Apollo cache normalization; NO `useLazyQuery`; codegen after any document change) · `frontend/graphql/AGENTS.md` (Type Safety + Document Organization — all ops strongly typed via codegen; never custom inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — import `gql`+`TypedDocumentNode` from `"@apollo/client"` and hooks from `"@apollo/client/react"`; import generated TYPES from `graphql-types.ts` NOT `operations.ts`) · `frontend/AGENTS.md` (Apollo hooks rule)
+_Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop) · `frontend/graphql/sharedDocuments/AGENTS.md` (one file per domain `<domain>.documents.ts`; import `gql` + `TypedDocumentNode` from `"@apollo/client"` NEVER `"@apollo/client/core"`; naming `{entityName}QueryDocument` / `{entityName}MutationDocument` → `TypedDocumentNode<Operations.X, Types.Y>`; **`id` field on EVERY object type in selection sets** for Apollo cache normalization; NO `useLazyQuery`; codegen after any document change) · `frontend/graphql/AGENTS.md` (Type Safety + Document Organization — all ops strongly typed via codegen; never custom inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — import `gql`+`TypedDocumentNode` from `"@apollo/client"` and hooks from `"@apollo/client/react"`; import generated TYPES from `graphql-types.ts` NOT `operations.ts`) · `frontend/AGENTS.md` (Apollo hooks rule)
+
+---
+
+## Phase 11 — Frontend Zod schemas
 
 | File | Line | Edit |
 |------|------|------|
@@ -368,6 +386,8 @@ _Rules (read before editing):_ `frontend/views/AGENTS.md` (Storybook Best Practi
 - §7.1 Currency: replace the bullet pointing at Decision 3A with a "✅ Landed" status + link to `.ai/plans/currency/spec.md`.
 - §12 Phases row **1** (`Schema: users person fields + CurrencyCode enum + phone custom type`): strike "CurrencyCode enum" — moved to the landed currency slice.
 - Add a new entry under §13 Out of scope or a new §15 "Landed slices" listing `.ai/plans/currency/` so future waves know not to re-do typing.
+
+_Rules (read before editing):_ `AGENTS.md` (root — AI Agent Communication: "NEVER create summary markdown files" but **exception**: documentation files that are part of the project structure — `ANALYSIS.md` qualifies as it's part of the existing `.ai/plans/user-entity-enhancement/` plan; do NOT create NEW summary files like SUMMARY.md / CHANGES.md) — this phase only edits an existing plan doc, not a generated summary
 
 ---
 

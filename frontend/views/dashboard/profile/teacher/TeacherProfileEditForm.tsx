@@ -6,12 +6,16 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { AccountSection } from "./sections/AccountSection";
-import { ContactSection } from "./sections/ContactSection";
-import { ZoomSection } from "./sections/ZoomSection";
-import { type TeacherEditData, type TeacherOwnEditFormData, teacherOwnEditSchema } from "./teacherProfileFormTypes";
+import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
+import { ContactSection } from "@/frontend/views/dashboard/profile/teacher/sections/ContactSection";
+import { ZoomSection } from "@/frontend/views/dashboard/profile/teacher/sections/ZoomSection";
+import {
+  type TeacherEditData,
+  type TeacherOwnEditFormData,
+  teacherOwnEditSchema,
+} from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
-export type { TeacherOwnEditFormData } from "./teacherProfileFormTypes";
+export type { TeacherOwnEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
 export function TeacherProfileEditForm({
   teacherData,

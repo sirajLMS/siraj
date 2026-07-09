@@ -1,4 +1,4 @@
-import type { AppPermission } from "@/backend/enum";
+import type { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   ParentAssignedStudentsResult,
@@ -19,11 +19,7 @@ import type {
   TeacherProfileUpdateInputType,
 } from "@/backend/types/teachers/teacher.types";
 
-export type { TeacherOwnProfileUpdateInput };
-
-export type ProfileMode = "view" | "edit";
-export type ProfileAudience = "teacher" | "parent" | "staff";
-export type ProfileScope = "own" | "other";
+export type { ProfileAudience, ProfileMode, ProfileScope, TeacherOwnProfileUpdateInput };
 
 export type ProfilePageContext = {
   readonly scope: ProfileScope;

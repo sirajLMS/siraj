@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { isRedirect, toParentRepoInput } from "@/backend/services";
 
@@ -7,9 +8,9 @@ describe("ProfileService helpers", () => {
     expect(isRedirect({ redirect: "/dashboard" })).toBe(true);
     expect(
       isRedirect({
-        scope: "own",
-        mode: "view",
-        audience: "teacher",
+        scope: ProfileScope.OWN,
+        mode: ProfileMode.VIEW,
+        audience: ProfileAudience.TEACHER,
         actorUserId: "user-1",
         targetUserId: "user-1",
         allowedPermissions: [],

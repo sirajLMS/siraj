@@ -108,7 +108,7 @@ Mirror `frontend/views/dashboard/search-schedule/SearchScheduleFilterDrawer.tsx`
 | Footer | `DialogActions` | sticky at bottom + `paddingBottom: env(safe-area-inset-bottom)` |
 | Content | `DialogContent dividers` | scrollable `flex: 1; overflow: auto` |
 
-`Save` disabled rule unchanged. Per-locale `TextField` rows keep flag start adornment + `dir` — no layout change inside the sheet.
+`Save` disabled rule unchanged. Drawer **multiline** rows: flag emoji inline in the `InputLabel` (not `startAdornment`). Drawer single-line rows keep flag start adornment. Inline input always uses start/end adornments; multiline aligns adornments to the **top** of the field.
 
 ### `LocalizedStringDisplay` — mobile
 

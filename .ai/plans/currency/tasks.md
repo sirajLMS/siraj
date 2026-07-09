@@ -8,6 +8,24 @@
 ~/.bun/bin/bun run scripts/lint-queue-server.ts &
 ```
 
+**Rule files per phase (read EVERY listed file before editing that layer — enforced per spec.md §8):**
+
+| Phase | Layer | Mandatory rule files |
+|---|---|---|
+| 1, 2, 3 | Backend DB schema / Drizzle / DB tooling | `AGENTS.md` · `backend/AGENTS.md` · `backend/db/repo/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Seeds + Database Access Patterns sections) · drizzle skills (`drizzle-migrations`, `drizzle-responses-and-errors`, `drizzle-generate`) |
+| 4 | Backend types | `AGENTS.md` · `backend/types/AGENTS.md` · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Type Definition Pattern CRITICAL) |
+| 5 | Repositories | `AGENTS.md` · `backend/db/repo/AGENTS.md` · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Repository Layer) |
+| 6 | Services | `AGENTS.md` · `backend/services/AGENTS.md` · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Service Layer) |
+| 7 | Pothos | `AGENTS.md` · `backend/graphql/AGENTS.md` · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Pothos/GraphQL) |
+| 8 | Codegen | `AGENTS.md` · `frontend/AGENTS.md` · `frontend/graphql/sharedDocuments/AGENTS.md` · `frontend/graphql/AGENTS.md` · `.agents/instructions/{frontend,backend}.instructions.md` (Apollo & GraphQL sections) |
+| 9 | Seeds | `AGENTS.md` · `backend/AGENTS.md` (Seeds section) · `.agents/instructions/backend.instructions.md` (Seeds CRITICAL) |
+| 10 | Frontend documents | `AGENTS.md` · `frontend/graphql/sharedDocuments/AGENTS.md` · `frontend/graphql/AGENTS.md` · `frontend/AGENTS.md` · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL) |
+| 11–13 | Frontend Zod / types / UI | `AGENTS.md` · `frontend/views/AGENTS.md` · `frontend/AGENTS.md` · `.agents/instructions/frontend.instructions.md` (MUI v9, React 19, Apollo, Theme & Styling) |
+| 14–15 | Backend tests | `AGENTS.md` · `tests.instructions.md` (DB + GraphQL test rules) · `backend/db/repo/AGENTS.md` (for repo tests) | `.agents/instructions/backend.instructions.md` |
+| 16 | Storybook | `AGENTS.md` · `frontend/views/AGENTS.md` (Storybook Best Practices) · `frontend/AGENTS.md` · `.agents/instructions/frontend.instructions.md` (Storybook section) |
+| 17 | Plan doc edit | `AGENTS.md` (AI Agent Communication — never create new SUMMARY.md/CHANGES.md; editing existing `ANALYSIS.md` is the documented exception) |
+| 18–19 | Quality gate | `AGENTS.md` (Quality Gate Workflow, Sonar-Scan Prohibition, Lint Queue Server) |
+
 ---
 
 ## Phase 1 — Backend DB enum registration
@@ -15,6 +33,8 @@
 - [ ] **T1.1** Add `currencyCodeEnum = createPgEnumFromEnum("currency_code", CurrencyCode)` to `backend/db/schema/enums.ts` (next to `countryCodeEnum`, line 36). Add `CurrencyCode` import from `@/backend/enum`.
 - [ ] **T1.2** Re-export `currencyCodeEnum` from `backend/db/schema/index.ts` (verify pattern vs how `countryCodeEnum` is surfaced).
 - [ ] **T1.3** Per-file verify: `tsgo` on `enums.ts` + `schema/index.ts` → biome → lint-queue.
+
+_Rules (read before editing):_ `AGENTS.md` (root — lint queue + verification loop) · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Seeds + Database Access Patterns — `createPgEnumFromEnum` derives PG enum values from the TS enum so values stay synced)
 
 ## Phase 2 — Backend DB schema — column types
 
@@ -32,12 +52,16 @@
 - [ ] **T2.12** `backend/db/schema/scheduling.ts:152` — `class_instances.rateCurrency` → `currencyCodeEnum("rate_currency").$type<CurrencyCode>()` (nullable) + imports
 - [ ] **T2.13** Per-file `tsgo` on all 7 schema files → biome → lint-queue.
 
+_Rules (read before editing):_ `AGENTS.md` (root) · `backend/AGENTS.md` (6-layer data flow — schema layer) · `.agents/instructions/backend.instructions.md` (Database schema relations; match PG enums EXACTLY from `backend/db/schema/enums.ts` — `CurrencyCode.EGP === "EGP"`)
+
 ## Phase 3 — `bun db cleanGenerate`
 
 - [ ] **T3.1** Run `bun db cleanGenerate` (select action `8` if interactive; or pipe-arg).
 - [ ] **T3.2** Verify the regenerated `backend/drizzle/` contains a migration with `CREATE TYPE currency_code AS ENUM (...)` + the column-type changes on the 11 columns.
 - [ ] **T3.3** If one of the hand-written `backend/db/migration/*.sql` files references currency columns, fix it to enum-compatible (clean slate usually wipes+regenerates, but verify).
 - ⚠️ Phase 3 seeds may fail until Phase 9 lands — re-run `bun db seed` after Phase 9.
+
+_Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop) · `.agents/instructions/backend.instructions.md` ("Seeds (CRITICAL)" — schema changes require `push`/`cleanGenerate` BEFORE `bun db seed`) · drizzle skills (`drizzle-migrations`, `drizzle-responses-and-errors`, `drizzle-generate`, `drizzle-hints` if `generate` returns `missing_hints`)
 
 ## Phase 4 — Backend types
 
@@ -53,6 +77,8 @@
 - [ ] **T4.10** `backend/types/profile/profile.types.ts:66` — `ParentAdminProfileUpdateInput.currency` → `CurrencyCode | null`
 - [ ] **T4.11** `backend/types/index.ts` — re-export `CurrencyCode` from `@/backend/enum` if not already present
 - [ ] **T4.12** Per-file `tsgo` on each touched `backend/types/**.ts` → biome → lint-queue.
+
+_Rules (read before editing):_ `AGENTS.md` (root) · `backend/types/AGENTS.md` (**Single Canonical Object Type Pattern** — `CurrencyCode` is the re-applied enum on `{Entity}ReturnType`; `Omit<>` then re-apply `currency: CurrencyCode`; never create local types in Pothos) · `backend/AGENTS.md` (Type Definition Pattern — `{Entity}SelectType` = `typeof table.$inferSelect`) · `.agents/instructions/backend.instructions.md` (Type Definition Pattern CRITICAL: ALWAYS import from `@/backend/types` alias, never relative; update `backend/types/index.ts` barrel)
 
 ## Phase 5 — Repositories
 
@@ -72,6 +98,8 @@
 - [ ] **T5.14** `backend/db/repo/report.repository.ts:92-93, 115-116` — DECISION: keep `'EGP'`/`'USD'` raw SQL string literals inside the `sql<T>` template (drizzle-safe) OR interpolate `${CurrencyCode.Egp}`. Choose option A unless a tsgo/type-assertion requires B. Record choice in this task note.
 - [ ] **T5.15** Per-file `tsgo` on every touched repo file → biome → lint-queue.
 
+_Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop, fix-or-report cross-file rule) · `backend/db/repo/AGENTS.md` (**data access ONLY**: no business logic, no permission checks, no hardcoded user-facing error strings — use `getBackendTranslations` + `locale?` param; repos must use `{Entity}SelectType`/`{Entity}InsertType` from `backend/types/`, NOT raw schema types; conditional aggregation via `sql<number>` template + `.mapWith(Number)` — never raw `CAST(...)`) · `backend/AGENTS.md` (Repository Layer) · `.agents/instructions/backend.instructions.md` ("Repository Layer" — when `findMany` complex relations give `SQL<unknown>` errors, revert to `.select().from().leftJoin()` or manual ID-based mapping)
+
 ## Phase 6 — Services
 
 - [ ] **T6.1** `backend/services/billing/billing-management.service.ts:12, 15, 40-55, 57-72` — type flow for `currency`, `buildInvoiceInsertPayload`, `mapToManualInvoiceResult`.
@@ -82,6 +110,8 @@
 - [ ] **T6.6** `backend/services/teacher/teacher-portal.service.ts:52` — `rateCurrency: CurrencyCode | null`.
 - [ ] **T6.7** `backend/services/session/class-session.service.ts:234-235` — pass-through typing (verify).
 - [ ] **T6.8** Per-file `tsgo` on every touched service → biome → lint-queue.
+
+_Rules (read before editing):_ `AGENTS.md` (root) · `backend/services/AGENTS.md` (**domain-driven**, no monolithic services; business-logic hub; SSR-compatible — must NOT rely on GraphQL context unless passed explicitly; import types from `@/backend/types`, never ad-hoc; i18n: all user-facing errors via `getBackendTranslations` + `locale?` param; never hardcode error strings) · `backend/AGENTS.md` (Service Layer — data transformations `SubmitInput → InsertType`, `SelectType → ReturnType`) · `.agents/instructions/backend.instructions.md` ("Service Layer" — never call services outside your domain boundary)
 
 ## Phase 7 — Pothos GraphQL
 
@@ -99,6 +129,8 @@
 - [ ] **T7.12** `backend/graphql/pothos/teachers/staff-profile.pothos.ts:57` — `TeacherProfileUpdateInput.rateCurrency` → `t.field({ type: CurrencyCodePothosObject, required: false })`, drop `maxLength: 255`.
 - [ ] **T7.13** Per-file `tsgo` on touched Pothos files → biome → lint-queue.
 
+_Rules (read before editing):_ `AGENTS.md` (root) · `backend/graphql/AGENTS.md` (**Single Canonical Object Type (CRITICAL)** — objectRef uses `{Entity}ReturnType` from `backend/types/`; never local `{Entity}Definition`; `nullable: true` REQUIRED for `CurrencyCode | null` — Pothos defaults non-nullable; resolvers delegate to SERVICES not repos; propagate `ctx.locale`; errors via `getBackendTranslations`; `id` on all objects; input + collection wrapper types allowed) · `backend/AGENTS.md` (GraphQL Layer) · `.agents/instructions/backend.instructions.md` ("Pothos/GraphQL" — import types from `@/backend/types`; input + collection wrapper exceptions allowed)
+
 ## Phase 8 — Codegen + Schema
 
 - [ ] **T8.1** Run `bun run generate:gqlSchema`.
@@ -106,6 +138,8 @@
 - [ ] **T8.3** Verify in `frontend/graphql/generated/schema.graphql` that the 12 currency fields now read `CurrencyCode!`/`CurrencyCode` instead of `String!`/`String`.
 - [ ] **T8.4** Verify in `frontend/graphql/generated/gql/graphql-types.ts` that the 12 fields now read `Maybe<CurrencyCode>`/`CurrencyCode`.
 - [ ] Do NOT hand-edit generated files.
+
+_Rules (read before editing):_ `AGENTS.md` (root) · `frontend/AGENTS.md` (Code Quality + Apollo/GraphQL Codegen rule) · `frontend/graphql/sharedDocuments/AGENTS.md` ("Codegen" — `~/.bun/bin/bun run generate:gqlSchema` THEN `~/.bun/bin/bun codegen` after any schema or document change; never inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL → codegen after schema/document changes — both steps required) · `.agents/instructions/backend.instructions.md` ("GraphQL Schema Generation" — both `generate:gqlSchema` AND `codegen` required)
 
 ## Phase 9 — Seeds
 
@@ -116,11 +150,15 @@
 - [ ] **T9.5** `backend/db/seeds/seed-currency-exchange-audit-logs.ts` — verify still compiles (no literal changes).
 - [ ] **T9.6** Re-run `bun db seed` after Phase 3 if it failed before — now it should pass.
 
+_Rules (read before editing):_ `AGENTS.md` (root) · `backend/AGENTS.md` (Seeds section) · `.agents/instructions/backend.instructions.md` ("Seeds (CRITICAL)" — one `seedOrGet` per table in a dedicated file; idempotent via `onConflictDoUpdate`/`onConflictDoNothing`; match PG enum values EXACTLY (`CurrencyCode.USD === "USD"`); check constraints by reading `backend/db/schema/*.ts`; run schema push/cleanGenerate BEFORE `bun db seed` after schema change; return seeded entities downstream; helpers over ~70-80 lines extracted; never `any`/inline types)
+
 ## Phase 10 — Frontend GraphQL documents
 
 - [ ] **T10.1** `frontend/graphql/sharedDocuments/billing-management.documents.ts:13` — `$currency: String!` → `$currency: CurrencyCode!`.
 - [ ] **T10.2** Verify (no edit) `parent-onboarding.documents.ts`, `billing-alerts.documents.ts`, `parent-billing-history.documents.ts`, `parent-profile.documents.ts`, `user-billing-profile.documents.ts`, `staff-profile.documents.ts`, `profile.documents.ts`, `teacher-portal.documents.ts` — all unchanged; field selections auto-typed via codegen.
 - [ ] **T10.3** Verify `frontend/graphql/sharedDocuments/profile.documents.test.ts:55` (`expect(mutationSource).toContain("currency")`) still passes — no edit.
+
+_Rules (read before editing):_ `AGENTS.md` (root) · `frontend/graphql/sharedDocuments/AGENTS.md` (one file per domain; import `gql` + `TypedDocumentNode` from `"@apollo/client"` NEVER `"@apollo/client/core"`; naming `{entityName}QueryDocument`/`{entityName}MutationDocument` → `TypedDocumentNode<Operations.X, Types.Y>`; **`id` field on EVERY object type in selection sets** for Apollo cache normalization; NO `useLazyQuery`; codegen after any document change) · `frontend/graphql/AGENTS.md` (Type Safety + Document Organization — all ops strongly typed via codegen; never custom inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — import `gql`+`TypedDocumentNode` from `"@apollo/client"`, hooks from `"@apollo/client/react"`; import TYPES from `graphql-types.ts` NOT `operations.ts`) · `frontend/AGENTS.md` (Apollo hooks rule)
 
 ## Phase 11 — Frontend Zod schemas
 
@@ -132,11 +170,15 @@
 - [ ] **T11.6** `frontend/views/dashboard/profile/parent/parentProfileFormTypes.ts:23, 49` — `z.nativeEnum(CurrencyCode).optional()` + `readonly currency?: CurrencyCode | null`.
 - [ ] **T11.7** Per-file `tsgo` → biome → lint-queue on touched schemas.
 
+_Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop) · `frontend/views/AGENTS.md` (form/view types follow domain structure) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — `graphql-types.ts` is canonical for entity types, NOT `operations.ts`; NEVER inline type literals — always use codegen types; `CurrencyCode` from `@/frontend/graphql/generated/gql/graphql-types`) · `frontend/AGENTS.md` (Zustand-stores + type-consumers rule — if schema/FE misalign, fix the schema or query, never redefine types locally)
+
 ## Phase 12 — Frontend form/view types
 
 - [ ] **T12.1** `frontend/views/dashboard/teachers/profile/types.ts:14` — `readonly currency: CurrencyCode;`.
 - [ ] **T12.2** `frontend/views/dashboard/parent/types/profile.ts:37` — `readonly currency: CurrencyCode;`.
 - [ ] **T12.3** Per-file verification.
+
+_Rules (read before editing):_ same as Phase 11 — `frontend/views/AGENTS.md` + `.agents/instructions/frontend.instructions.md` (`graphql-types.ts` canonical) + `frontend/AGENTS.md` (no manual type redefinitions).
 
 ## Phase 13 — Frontend UI wiring
 
@@ -169,6 +211,8 @@
 - [ ] **T13.27** `frontend/views/dashboard/components/navbar/UnpaidInvoicesSection.tsx:73` — `item.currency` now a `CurrencyCode`; `${...} ${item.currency}`-interpolation still works (TS converts enum member to its string value in template literals). Optional upgrade to `<CurrencyDisplay code showLabel={false} showCode />`.
 - [ ] **T13.28** CLEANUP: drop any dead `getCurrencyOptionLabel` re-export from `CurrencyAutocomplete.tsx` / `CurrencyOptionRow.tsx` that was left over from the foundation step (linter flagged "fast refresh only works when a file only exports components").
 
+_Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop, fix-or-report cross-file rule) · `frontend/views/AGENTS.md` (**functional components only**; client data via Apollo `useQuery` with TypedDocumentNodes; no `useLazyQuery`; domain structure; `<RequirePermission>` for permission-gated) · `frontend/AGENTS.md` (MUI v9 — **all style props in `sx`**; React 19 — no `FormEvent`; Theme & Styling — no hardcoded colors, theme callback; Apollo hooks from `"@apollo/client/react"` not `"@apollo/client"`; NO `useLazyQuery`; `id` on all selection sets; i18n via `useTranslations`; logging via `@/frontend/utils/logger` NEVER `console.*`) · `.agents/instructions/frontend.instructions.md` (**MUI v9 breaking changes** — `AutocompleteRenderInputParams.inputProps` removed → `params.slotProps.htmlInput`; `Typography component` prop invalid; icons `*Outline` → `*Outlined`; Apollo & GraphQL — `gql`+`TypedDocumentNode` from `"@apollo/client"`, hooks from `"@apollo/client/react"`, ENTITY types from `graphql-types.ts`; Context/Provider/hook in separate files for Fast Refresh; no nested ternaries)
+
 ## Phase 14 — Backend repo + logic tests
 
 - [ ] **T14.1** `backend/db/test/repo/billing.repository.test.ts` — `currency: "USD"` literals → `CurrencyCode.USD` (or rely on factory constant).
@@ -188,11 +232,15 @@
 - ⚠️ Use `bun run scripts/run-test/run-test.ts <test-path>` — never raw `bun test` for db tests.
 - ⚠️ Preserve `runInRollback`; no `expect(...).rejects.toThrow()` inside rollback.
 
+_Rules (read before editing):_ `AGENTS.md` (root — DB test rules: `runInRollback` ALWAYS; pass `tx` to ALL repo calls; NEVER `expect(...).rejects.toThrow()` inside rollback — use try/catch `expectRepoError` pattern; run via `bun run scripts/run-test/run-test.ts` NOT raw `bun test`; never query seed data — create via `entity-setup.ts` helpers) · `tests.instructions.md` (**Database Tests - Transaction Safety CRITICAL** — mixing `tx` and `db` causes deadlocks; **tx Parameter Position varies per method** — read repo signature before calling; **Entity Setup Helpers signatures VARY** — read `entity-setup.ts` first e.g. `setupStudent(tx, userOverrides, parentOverrides, studentOverrides)` 4 args; never assume table columns; assert `.toContain()` on translated message substring NOT raw key; `bun:test` imports not Jest/Vitest; no `any` use `Partial<...>`; `testLogger` not `console.*`; repo tests = 100% coverage; GraphQL integration tests use `testClient.query()` NEVER raw `fetch`; NEVER import backend repos/Drizzle/services in GraphQL tests; `setupTestServerLifecycle()` at root of `describe`; Apollo `errorPolicy: "all"` so assert `result.error` not throw; `authenticatedRequest` helper; optional chaining `?.`) · `backend/db/repo/AGENTS.md` + `.agents/instructions/backend.instructions.md` (Repository Layer — applies since these tests exercise repos)
+
 ## Phase 15 — Backend service tests
 
 - [ ] **T15.1** `backend/services/profile/profile.service.test.ts:34, 49, 74` — `currency: "SAR"` → `CurrencyCode.SAR`; `currency: undefined` unchanged.
 - [ ] **T15.2** `backend/services/profile/parent-profile.service.test.ts:15, 29, 47, 62` — `CurrencyCode.SAR`; verify `formData.currency || null` branch.
 - [ ] **T15.3** `backend/services/profile/teacher-profile.service.test.ts:25` — `rateCurrency: CurrencyCode.USD`.
+
+_Rules (read before editing):_ `tests.instructions.md` (Coverage & Structure — `bun:test` imports not Jest/Vitest; no `any`; `@/backend/types` types; `testLogger` not `console.*`; Quality section — `bun tsgo` + lint via queue client after test changes, NEVER raw `bun lint`) · `.agents/instructions/backend.instructions.md` (Service Layer + Type Definition Pattern — services import from `@/backend/types`) · `backend/services/AGENTS.md`
 
 ## Phase 16 — Story fixtures
 
@@ -203,6 +251,8 @@
 - [ ] **T16.5** `frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView.stories.tsx:21` — `currency: CurrencyCode.USD`.
 - [ ] **T16.6** `frontend/views/dashboard/teachers/profile/TeacherProfileView.stories.tsx:18` — `currency: CurrencyCode.USD`.
 
+_Rules (read before editing):_ `frontend/views/AGENTS.md` (Storybook Best Practices — `<RequirePermission>` defaults to admin via global `StoryWrapper`; ALL stories auto-wrapped in `NextIntlClientProvider` → component MUST use `useTranslations` for locale-toggle compatibility; real `userStore` aliased to `mockUserStore` — prefer mock stores; decorators in metadata `decorators` array, NOT wrapping component in story function) · `frontend/AGENTS.md` (Storybook section — same rules, repeated) · `.agents/instructions/frontend.instructions.md` (Storybook — `useUserStore.setState()` for specific perms e.g. Parent vs Teacher; auto `NextIntlClientProvider`; `mockUserStore`; decorators in metadata)
+
 ## Phase 17 — Update parent plan
 
 - [ ] **T17.1** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §2.3 Currency — append "**Status: ENUM + TYPING LANDED** in `.ai/plans/currency/`. FX ingestion + `users.displayCurrency` still pending."
@@ -210,12 +260,16 @@
 - [ ] **T17.3** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §12 Phases row 1 — strike "CurrencyCode enum" (moved to landed slice).
 - [ ] **T17.4** Add a "Landed slices" section pointing at `.ai/plans/currency/`.
 
+_Rules (read before editing):_ `AGENTS.md` (AI Agent Communication — "NEVER create summary markdown files" but **exception**: documentation files that are part of the project structure; `ANALYSIS.md` qualifies as it's part of existing `.ai/plans/user-entity-enhancement/` plan; do NOT create NEW summary files like SUMMARY.md / CHANGES.md) — this phase only edits an existing plan doc, not a generated summary
+
 ## Phase 18 — Quality gate
 
 - [ ] **T18.1** Confirm the lint queue server is running on `http://localhost:4777`.
 - [ ] **T18.2** Final per-file verification via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for every touched file (or batch via orchestrator).
 - [ ] **T18.3** Run `bun quality-gate` (tsgo → biome → lint → codescene → sonar-results using existing `.scannerwork/sonar-result.json`).
 - [ ] **T18.4** If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts list-duplicates` / `delete --file <path>` — **never trigger a new scan.**
+
+_Rules (read before editing):_ `AGENTS.md` (root — **Lint Queue Server**, **Quality Gate Workflow**, **SonarQube Issue Management**, **Sonar-Scan Prohibition**: sub-agents NEVER run `bun sonar-scan` or `bun scripts/sonar-manager.ts` scan-trigger; only orchestrator handles SONAR stages against existing `.scannerwork/sonar-result.json`; read-only `list-duplicates` / `list-files` allowed for orchestrator only; Resolve DUPLICATIONS first; mandatory priority) · `.agents/skills/quality-gate/SKILL.md` + `.agents/skills/quality-loop/SKILL.md` (run quality gate loop until clean)
 
 ## Phase 19 — Final verification checklist
 

@@ -1,7 +1,6 @@
 import { TeacherBankingRepository, UserRepository } from "@/backend/db";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { ProfileAudience, ProfileScope } from "@/backend/types/profile/profile.types";
 import type {
   TeacherBankingDetailsHistorySelectType,
   TeacherBankingSummaryReturnType,
@@ -74,7 +73,7 @@ export async function loadTeacherBankingSummary(
   audience: ProfileAudience,
   teacherId: string | null
 ): Promise<TeacherBankingSummaryReturnType | null> {
-  if (scope === "own" || audience !== "teacher" || !teacherId) {
+  if (scope === ProfileScope.OWN || audience !== ProfileAudience.TEACHER || !teacherId) {
     return null;
   }
 

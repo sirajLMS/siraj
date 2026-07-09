@@ -1,8 +1,18 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
+import {
+  toGqlProfileAudience,
+  toGqlProfileMode,
+  toGqlProfileScope,
+} from "@/app/[locale]/(dashboard)/lib/profile-enum-bridge";
+import { ProfileMode } from "@/backend/enum";
 import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { type ProfileAudience, ProfileMode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import type {
+  ProfileMode as GqlProfileMode,
+  ProfileScope as GqlProfileScope,
+  ProfileAudience,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
@@ -25,7 +35,7 @@ export default async function ProfileEditPage({ params }: PageProps) {
     return;
   }
 
-  const resolution = await resolveProfilePageContext(userId, context, { mode: ProfileMode.Edit });
+  const resolution = await resolveProfilePageContext(userId, context, { mode: ProfileMode.EDIT });
   if ("redirect" in resolution) {
     redirect({ href: resolution.redirect, locale });
     return;
@@ -33,9 +43,9 @@ export default async function ProfileEditPage({ params }: PageProps) {
 
   return (
     <ProfilePageClient
-      scope={resolution.scope as ProfileScope}
-      mode={resolution.mode as ProfileMode}
-      audience={resolution.audience as ProfileAudience}
+      scope={toGqlProfileScope(resolution.scope) satisfies GqlProfileScope}
+      mode={toGqlProfileMode(resolution.mode) satisfies GqlProfileMode}
+      audience={toGqlProfileAudience(resolution.audience) satisfies ProfileAudience}
       targetUserId={resolution.targetUserId}
     />
   );

@@ -1,15 +1,7 @@
 "use client";
 
 import { EditOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  FormHelperText,
-  IconButton,
-  type SxProps,
-  TextField,
-  type Theme,
-} from "@mui/material";
+import { Box, Button, FormHelperText, IconButton, type SxProps, TextField, type Theme } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -180,6 +172,42 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
 
   const drawerResolvedTitle = drawerTitle ?? label ?? t("editTranslations");
 
+  const textFieldSuccessSx =
+    successSwitch && !showInlineError
+      ? {
+          "& .MuiOutlinedInput-root": {
+            borderColor: (theme: Theme) => theme.palette.success.main,
+          },
+          transition: (theme: Theme) => theme.transitions.create("border-color", { duration: 500 }),
+        }
+      : undefined;
+
+  /** Multiline inputs align adornments to the top edge instead of vertically centered. */
+  const adornmentTopSx = multiline ? { alignSelf: "flex-start", height: "auto", marginTop: 1.75 } : undefined;
+
+  const editDrawerControl = disableDrawer ? null : isCompact ? (
+    <IconButton
+      aria-label={t("editTranslations")}
+      onClick={() => setDrawerOpen(true)}
+      disabled={disabled}
+      size="small"
+      sx={{ flexShrink: 0 }}
+    >
+      <EditOutlined fontSize="small" />
+    </IconButton>
+  ) : (
+    <Button
+      variant="text"
+      size="small"
+      onClick={() => setDrawerOpen(true)}
+      disabled={disabled}
+      startIcon={<EditOutlined fontSize="small" />}
+      sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
+    >
+      {t("editTranslations")}
+    </Button>
+  );
+
   return (
     <Box ref={containerRef} sx={{ width: fullWidth ? "100%" : undefined, ...sx }}>
       <TextField
@@ -195,21 +223,12 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
         fullWidth={fullWidth}
         dir={isRtl ? "rtl" : "ltr"}
         key={activeLocale}
-        sx={
-          successSwitch && !showInlineError
-            ? {
-                "& .MuiOutlinedInput-root": {
-                  borderColor: theme => theme.palette.success.main,
-                },
-                transition: theme => theme.transitions.create("border-color", { duration: 500 }),
-              }
-            : undefined
-        }
+        sx={textFieldSuccessSx}
         slotProps={{
           inputLabel: { shrink: true },
           input: {
             startAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment position="start" sx={adornmentTopSx}>
                 <LocaleAdornmentSwitch
                   activeLocale={activeLocale}
                   onChangeAction={handleLocaleSwitch}
@@ -219,32 +238,11 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
                 />
               </InputAdornment>
             ),
-            endAdornment: disableDrawer ? undefined : (
-              <InputAdornment position="end">
-                {isCompact ? (
-                  <IconButton
-                    aria-label={t("editTranslations")}
-                    onClick={() => setDrawerOpen(true)}
-                    disabled={disabled}
-                    size="small"
-                    sx={{ flexShrink: 0 }}
-                  >
-                    <EditOutlined fontSize="small" />
-                  </IconButton>
-                ) : (
-                  <Button
-                    variant="text"
-                    size="small"
-                    onClick={() => setDrawerOpen(true)}
-                    disabled={disabled}
-                    startIcon={<EditOutlined fontSize="small" />}
-                    sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
-                  >
-                    {t("editTranslations")}
-                  </Button>
-                )}
+            endAdornment: editDrawerControl ? (
+              <InputAdornment position="end" sx={adornmentTopSx}>
+                {editDrawerControl}
               </InputAdornment>
-            ),
+            ) : undefined,
           },
           htmlInput: { dir: isRtl ? "rtl" : "ltr" },
         }}

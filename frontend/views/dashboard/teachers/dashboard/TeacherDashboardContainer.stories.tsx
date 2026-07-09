@@ -9,9 +9,9 @@ import type {
 } from "@/frontend/stores/teacherDashboardTypes";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { getTodayScheduleFilterDate } from "@/frontend/utils/scheduleFilterDate";
-import { TeacherDashboardView } from "./TeacherDashboardView";
-import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
-import { buildTeacherActiveMetricItems } from "./utils/buildTeacherDashboardMetrics";
+import { TeacherDashboardView } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardView";
+import { buildTeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
+import { buildTeacherActiveMetricItems } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
 
 const INITIAL_ROWS: TeacherScheduleRow[] = [
   {

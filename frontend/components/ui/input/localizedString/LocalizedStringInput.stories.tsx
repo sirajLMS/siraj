@@ -8,7 +8,7 @@ const meta: Meta<typeof LocalizedStringInput> = {
   tags: ["ai-generated"],
   decorators: [
     Story => (
-      <Box sx={{ p: 2, maxWidth: 560 }}>
+      <Box sx={{ p: 2, maxWidth: 640 }}>
         <Story />
       </Box>
     ),
@@ -89,6 +89,28 @@ export const InlineReadOnly: Story = {
     required: true,
     disabled: true,
     disableDrawer: true,
+    value: { ar: "فودافون كاش", en: "Vodafone Cash" },
+  },
+};
+
+export const NarrowDesktopPanel: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "Desktop viewport but 320px-wide panel: compact adornments (flag+chevron, icon-only edit).",
+      },
+    },
+  },
+  decorators: [
+    Story => (
+      <Box sx={{ p: 2, maxWidth: 320 }}>
+        <Story />
+      </Box>
+    ),
+  ],
+  args: {
+    label: "Name",
+    required: true,
     value: { ar: "فودافون كاش", en: "Vodafone Cash" },
   },
 };

@@ -1,0 +1,1 @@
+import "./notification-preferences.mutation";

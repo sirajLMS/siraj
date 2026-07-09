@@ -8,7 +8,6 @@ import {
   IanaTimezonePothosObject,
   OverrideStatePothosObject,
   ProfileAudiencePothosEnum,
-  ProfileModePothosEnum,
   ProfileScopePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ManagerDirectoryRowPothosObject } from "@/backend/graphql/pothos/teachers/staff-directory.pothos";

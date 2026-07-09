@@ -13,4 +13,3 @@ export enum ProfileMode {
   VIEW = "view",
   EDIT = "edit",
 }
-

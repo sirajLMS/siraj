@@ -8,18 +8,18 @@ import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import { ProfileAdministrationPanel } from "@/frontend/components/auth/ProfileAdministrationPanel";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MessageSchema } from "@/shared/messages/types/message";
-import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
-import { SystemConfigSection } from "./components/SystemConfigSection";
-import { TeacherInfoSection } from "./components/TeacherInfoSection";
-import { TeacherProfileFormActions } from "./components/TeacherProfileFormActions";
-import { TeacherProfileStats } from "./components/TeacherProfileStats";
+import { SalaryDetailsSection } from "@/frontend/views/dashboard/teachers/profile/components/SalaryDetailsSection";
+import { SystemConfigSection } from "@/frontend/views/dashboard/teachers/profile/components/SystemConfigSection";
+import { TeacherInfoSection } from "@/frontend/views/dashboard/teachers/profile/components/TeacherInfoSection";
+import { TeacherProfileFormActions } from "@/frontend/views/dashboard/teachers/profile/components/TeacherProfileFormActions";
+import { TeacherProfileStats } from "@/frontend/views/dashboard/teachers/profile/components/TeacherProfileStats";
 import {
   createTeacherProfileSchema,
   type TeacherProfileFormData,
   type TeacherProfileFormInput,
-} from "./schemas/teacherProfileSchema";
-import type { TeacherProfileViewProps } from "./types";
+} from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
+import type { TeacherProfileViewProps } from "@/frontend/views/dashboard/teachers/profile/types";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Readonly<TeacherProfileViewProps>) {
   const t = useTranslations("dashboard.teacherProfile");

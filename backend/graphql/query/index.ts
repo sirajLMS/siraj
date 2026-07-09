@@ -1,20 +1,16 @@
-import "./auth.query";
-import "./storage.query";
-import "./student.query";
-import "./intl.query";
-import "./schedule.query";
-import "./teacher.query";
-import "./class-session.query";
-import "./student-history.query";
-import "./student-status.query";
-import "./teacher-dashboard.query";
-import "./teacher-portal.query";
-import "./notification-alerts.query";
-import "./notification-preferences.query";
-import "./billing-alerts.query";
-import "./availability-search.query";
-import "./parent-directory.query";
-import "./parent-dashboard.query";
-import "./parent-portal.query";
-import "./profile.query";
-import "./class-category.query";
+// GraphQL Query root field definitions — grouped by domain.
+// Each sub-directory has its own index.ts barrel that side-effect-imports
+// every query file. This top-level barrel imports every sub-directory so
+// `import "@/backend/graphql/query"` (from gqlSchema.ts) registers all queries.
+
+import "./auth";
+import "./billing";
+import "./classes";
+import "./notifications";
+import "./parents";
+import "./profile";
+import "./scheduling";
+import "./shared";
+import "./storage";
+import "./students";
+import "./teachers";

@@ -2,13 +2,16 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { AccountSection } from "./sections/AccountSection";
-import { AdminOnlySection } from "./sections/AdminOnlySection";
-import { CompensationSection } from "./sections/CompensationSection";
-import { ContactSection } from "./sections/ContactSection";
-import { StatsSection } from "./sections/StatsSection";
-import { isTeacherAdminData, type TeacherViewData } from "./sections/teacherProfileTypes";
-import { ZoomSection } from "./sections/ZoomSection";
+import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
+import { AdminOnlySection } from "@/frontend/views/dashboard/profile/teacher/sections/AdminOnlySection";
+import { CompensationSection } from "@/frontend/views/dashboard/profile/teacher/sections/CompensationSection";
+import { ContactSection } from "@/frontend/views/dashboard/profile/teacher/sections/ContactSection";
+import { StatsSection } from "@/frontend/views/dashboard/profile/teacher/sections/StatsSection";
+import {
+  isTeacherAdminData,
+  type TeacherViewData,
+} from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { ZoomSection } from "@/frontend/views/dashboard/profile/teacher/sections/ZoomSection";
 
 export function TeacherProfileView({
   teacherData,
