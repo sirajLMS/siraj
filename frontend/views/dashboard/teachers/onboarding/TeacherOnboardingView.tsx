@@ -46,7 +46,7 @@ function OnboardingBanner() {
           background: `linear-gradient(to top, ${theme.palette.scrim} 0%, transparent 100%)`,
         })}
       />
-      <Box sx={theme => ({ position: "absolute", bottom: 16, left: 16, color: theme.palette.common.white })}>
+      <Box sx={theme => ({ position: "absolute", bottom: 16, left: 16, color: theme.palette.onSurface })}>
         <Typography variant="labelUppercase" sx={{ opacity: 0.9 }}>
           {t("bannerJoinFaculty")}
         </Typography>

@@ -7,6 +7,8 @@ import { AppThemeProvider } from "./ThemeProvider";
 
 interface MuiProviderProps {
   readonly children: ReactNode;
+  // Server-read theme cookie value; threaded to the AppThemeProvider as
+  // `defaultMode` for the cssVars-aware ThemeProvider (prevents SSR flash).
   readonly initialTheme?: PaletteMode;
   readonly nonce?: string;
 }

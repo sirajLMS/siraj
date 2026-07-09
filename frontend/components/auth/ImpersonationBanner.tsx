@@ -28,7 +28,7 @@ export function ImpersonationBanner() {
         px: theme.spacing(2),
         py: theme.spacing(1.25),
         backgroundColor: theme.palette.warningContainer ?? theme.palette.warning.main,
-        color: theme.palette.onWarningContainer ?? theme.palette.warning.contrastText,
+        color: theme.palette.onWarningContainer ?? theme.palette.onWarning,
         borderBottom: `1px solid ${theme.palette.divider}`,
         typography: "bodyMd",
       })}
@@ -44,7 +44,7 @@ export function ImpersonationBanner() {
         onClick={() => void endImpersonation()}
         sx={theme => ({
           fontWeight: 700,
-          color: theme.palette.onWarningContainer ?? theme.palette.warning.contrastText,
+          color: theme.palette.onWarningContainer ?? theme.palette.onWarning,
           cursor: loading ? "wait" : "pointer",
           border: "none",
           background: "none",

@@ -66,8 +66,6 @@ docs/
 .gitattributes
 .mcp.json
 .vercelignore
-.prettierignore
-.prettierrc
 biome.json
 .gitwandrc
 *.txt

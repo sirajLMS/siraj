@@ -1,3 +1,4 @@
+import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
@@ -37,8 +38,17 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={direction}>
+    <html lang={locale} dir={direction} suppressHydrationWarning>
       <body style={{ overflow: "hidden" }}>
+        {/* Must come before the main content. Sets the initial color-scheme
+            attribute on <html> from localStorage/cookie before hydration so the
+            cssVars-aware ThemeProvider paints the user's preferred mode on the
+            very first render — no dark-mode hydration flash. `defaultMode`
+            matches the cookie value read above and passed to MuiProvider. */}
+        <InitColorSchemeScript
+          defaultMode={initialTheme}
+          modeStorageKey="theme" // match the existing localStorage key from `theme-detection.ts`
+        />
         <NextIntlClientProvider messages={messages} locale={locale}>
           <MuiProvider initialTheme={initialTheme}>
             <AppApolloProvider>

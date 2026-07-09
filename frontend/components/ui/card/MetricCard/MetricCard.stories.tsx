@@ -46,8 +46,8 @@ export const CssCheck: Story = {
   },
   play: async ({ canvas }) => {
     const label = canvas.getByText(/css test/i);
-    // In dark mode (default), primary.main is #98D1D0 -> rgb(152, 209, 208)
-    await expect(getComputedStyle(label).color).toBe("rgb(152, 209, 208)");
+    // In dark mode (default), primary.main is #2DD4BF -> rgb(45, 212, 191)
+    await expect(getComputedStyle(label).color).toBe("rgb(45, 212, 191)");
   },
 };
 

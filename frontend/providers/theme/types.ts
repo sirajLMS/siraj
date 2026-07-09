@@ -110,7 +110,18 @@ export type MuiThemeLayoutSettings = {
   };
 };
 
+// Enable MUI v9 CSS theme variables type narrowing.
+//
+// `cssVariables: true` produces a `CssVarsTheme` (with `colorSchemes`, `vars`,
+// `applyStyles`, ...) and unlocks the `defaultMode` / `forceThemeRerender` /
+// `disableTransitionOnChange` props on `<ThemeProvider>`. The TypeScript types
+// only expose these when the `CssThemeVariables` interface is augmented with
+// `{ enabled: true; }` (see `createThemeNoVars.d.ts` and `ThemeProvider.d.ts`).
 declare module "@mui/material/styles" {
+  interface CssThemeVariables {
+    enabled: true;
+  }
+
   interface Theme {
     layout: MuiThemeLayoutSettings;
   }

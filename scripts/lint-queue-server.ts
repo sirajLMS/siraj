@@ -44,7 +44,12 @@ let running = false;
 type LintResult = { success: boolean; output: string; exitCode: number };
 
 /**
- * Executes `bun run lint --fix` scoped to the given files.
+ * Executes `eslint --fix` scoped to the given files via the local eslint binary.
+ *
+ * NOTE: The `lint` package.json script was removed (per AGENTS.md lint-queue mandate —
+ * `bun run lint` must NEVER be invoked directly by sub-agents). This lint-queue server
+ * is the SINGLE legitimate caller of eslint in the repo, so it invokes eslint directly
+ * with the same flags the legacy `lint` script used.
  *
  * @param files - List of file paths to lint (passed as trailing CLI args)
  * @returns LintResult with success flag, combined stdout+stderr, and exit code
@@ -52,7 +57,7 @@ type LintResult = { success: boolean; output: string; exitCode: number };
 async function runLint(files: string[]): Promise<LintResult> {
   const { exec } = await import("node:child_process");
   const fileArgs = files.map(f => `"${f}"`).join(" ");
-  const cmd = `~/.bun/bin/bun run lint --fix ${fileArgs}`;
+  const cmd = `~/.bun/bin/bun x eslint --fix --cache --cache-location .eslintcache --concurrency=auto ${fileArgs}`;
   return new Promise<LintResult>(resolve => {
     exec(
       cmd,

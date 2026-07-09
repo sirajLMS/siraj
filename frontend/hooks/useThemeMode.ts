@@ -1,14 +1,24 @@
 "use client";
+
 import { useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 
+/**
+ * Read the application theme mode + toggler.
+ *
+ * The mode source of truth has migrated from the legacy custom `useState` (in
+ * the old `AppThemeProvider`) to MUI v9's stable `useColorScheme()` hook,
+ * bridged into `ThemeContext` by `ColorSchemeStateBridge` inside the new
+ * `AppThemeProvider`. Consumers keep the same `{ mode, toggleTheme,
+ * isThemeChanging, setIsThemeChanging }` shape — no call sites change.
+ */
 export const useThemeMode = () => {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error("useThemeMode must be used within an AppThemeProvider");
   }
 
-  // Provide default values for new properties if they don't exist (for backward compatibility)
+  // Provide default values for properties if they don't exist (backward compat).
   const defaultIsThemeChanging = false;
   const defaultSetIsThemeChanging = () => {};
 
