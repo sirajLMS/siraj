@@ -210,4 +210,75 @@ export namespace SubjectResourceRepository {
       throw error;
     }
   }
+
+  export async function createMany(
+    inputs: readonly SubjectResourceAttachInput[],
+    tx?: DBTransaction
+  ): Promise<SubjectResourceReturnType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<SubjectResourceReturnType[]> => {
+      const results: SubjectResourceReturnType[] = [];
+
+      for (const input of inputs) {
+        const [existing] = await t
+          .select()
+          .from(subjectResources)
+          .where(
+            and(
+              eq(subjectResources.subjectId, input.subjectId),
+              eq(subjectResources.learningResourceId, input.learningResourceId)
+            )
+          )
+          .limit(1);
+
+        if (existing) {
+          results.push({
+            id: existing.id,
+            subjectId: existing.subjectId,
+            learningResourceId: existing.learningResourceId,
+            resourceType: existing.resourceType,
+            sortOrder: existing.sortOrder,
+            displayName: null,
+            filePath: null,
+          });
+          continue;
+        }
+
+        const [created] = await t
+          .insert(subjectResources)
+          .values({
+            subjectId: input.subjectId,
+            learningResourceId: input.learningResourceId,
+            resourceType: input.resourceType ?? null,
+            sortOrder: input.sortOrder ?? 0,
+          })
+          .returning();
+
+        if (created) {
+          results.push({
+            id: created.id,
+            subjectId: created.subjectId,
+            learningResourceId: created.learningResourceId,
+            resourceType: created.resourceType,
+            sortOrder: created.sortOrder,
+            displayName: null,
+            filePath: null,
+          });
+        }
+      }
+
+      return results;
+    };
+
+    try {
+      if (tx) {
+        return await run(tx);
+      }
+      return await db.transaction(run);
+    } catch (error) {
+      logger.error("Error creating subject resources:", error);
+      throw error;
+    }
+  }
 }

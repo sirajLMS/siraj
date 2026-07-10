@@ -204,7 +204,7 @@ export default function TeacherWeeklyScheduleView({
         <DialogActions>
           <Button onClick={handleCancelClear}>{t("dialogs.cancel")}</Button>
           <Button onClick={handleConfirmClear} color="error" variant="contained" autoFocus>
-            {t("dialogs.confirmYes")}
+            {t("actions.clear")}
           </Button>
         </DialogActions>
       </Dialog>

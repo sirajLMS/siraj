@@ -14,7 +14,14 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import { AccountStatus, BookingStatus, ClassOutcome, type CurrencyCode, type ParentStatus } from "@/backend/enum";
+import {
+  AccountStatus,
+  BookingStatus,
+  ClassOutcome,
+  type CurrencyCode,
+  type ParentStatus,
+  StudentStatus,
+} from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import {
   parseAccountStatus,
@@ -22,6 +29,8 @@ import {
   parseClassOutcome,
   parseCurrencyCode,
   parseIanaTimezone,
+  parseParentStatus,
+  parseStudentStatus,
 } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
@@ -414,11 +423,93 @@ export namespace ParentRepository {
     };
   };
 
+  export type ReactivatedParentResult = DeactivatedParentResult;
+
+  export const reactivateParent = async (
+    parentId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<ReactivatedParentResult> => {
+    const queryDb = tx ?? db;
+
+    const existing = await queryDb
+      .select({ id: parents.id, userId: parents.userId, accountStatus: users.status })
+      .from(parents)
+      .innerJoin(users, eq(parents.userId, users.id))
+      .where(eq(parents.id, parentId))
+      .limit(1);
+
+    if (existing.length === 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentNotFound", { id: parentId }));
+    }
+
+    const current = existing[0];
+    if (parseAccountStatus(current.accountStatus) !== AccountStatus.DEACTIVATED) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentAlreadyActivated", { id: parentId }));
+    }
+
+    const updatedUser = await UserRepository.updateStatus(current.userId, AccountStatus.ACTIVATED, tx, locale);
+
+    const [updatedParent] = await queryDb
+      .update(parents)
+      .set({ updatedAt: new Date() })
+      .where(eq(parents.id, parentId))
+      .returning({
+        id: parents.id,
+        userId: parents.userId,
+        updatedAt: parents.updatedAt,
+      });
+
+    return {
+      id: updatedParent.id,
+      userId: updatedParent.userId,
+      accountStatus: parseAccountStatus(updatedUser.status),
+      updatedAt: updatedParent.updatedAt,
+    };
+  };
+
+  export type ChangeParentLifecycleResult = {
+    id: string;
+    lifecycleStatus: ParentStatus;
+  };
+
+  export const changeLifecycleStatus = async (
+    parentId: string,
+    newStatus: ParentStatus,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<ChangeParentLifecycleResult> => {
+    const queryDb = tx ?? db;
+
+    const existing = await queryDb.select({ id: parents.id }).from(parents).where(eq(parents.id, parentId)).limit(1);
+
+    if (existing.length === 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentNotFound", { id: parentId }));
+    }
+
+    const [updated] = await queryDb
+      .update(parents)
+      .set({ status: newStatus, updatedAt: new Date() })
+      .where(eq(parents.id, parentId))
+      .returning({
+        id: parents.id,
+        status: parents.status,
+      });
+
+    return {
+      id: updated.id,
+      lifecycleStatus: parseParentStatus(updated.status) ?? newStatus,
+    };
+  };
+
   export type AssociatedStudentRow = {
     id: string;
     name: string;
     studentAvatarUrl: string | null;
-    status: string;
+    status: StudentStatus;
     primaryTeacherId: string | null;
     teacherUserId: string | null;
     teacherName: string | null;
@@ -476,7 +567,7 @@ export namespace ParentRepository {
     id: r.id,
     name: r.name,
     studentAvatarUrl: r.studentAvatarUrl,
-    status: r.status,
+    status: parseStudentStatus(r.status) ?? StudentStatus.REGULAR,
     primaryTeacherId: r.primaryTeacherId,
     teacherUserId: r.teacherUserId,
     teacherName: r.teacherName ?? null,

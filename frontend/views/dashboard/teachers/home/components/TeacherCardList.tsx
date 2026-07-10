@@ -181,7 +181,7 @@ export function TeacherCardList({
       <TeacherSearchField
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
-        placeholder={t("table.linkPending").replace("Link Pending", "Search teachers...")}
+        placeholder={t("placeholders.searchTeachers")}
       />
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

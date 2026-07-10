@@ -59,6 +59,7 @@ export const userBillingProfileInvoiceHistoryQueryDocument: TypedDocumentNode<
         studentId
         studentName
         hasPaymentProof
+        hasRejectedSubmission
         displayAmount {
           id
           amount

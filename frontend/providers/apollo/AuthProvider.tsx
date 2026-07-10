@@ -13,6 +13,7 @@ import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import { dedupedRefreshToken } from "@/frontend/lib/dedupedRefreshToken";
 import logger from "@/frontend/lib/logger";
 import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/lib/safeRedirect";
+import { getGraphQLErrorMessage } from "@/frontend/utils/errorUtils";
 
 // A simple UI for the initial loading state
 function LoadingUI({
@@ -167,8 +168,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         }
       } catch (mutationError) {
         logger.error({ caller: "AuthProvider.login" }, "Login mutation error", mutationError);
-        // Log error for debugging without using console
-        setError(t("invalidLoginResponse"));
+        setError(getGraphQLErrorMessage(mutationError, t("invalidLoginResponse")));
         return false;
       }
     },

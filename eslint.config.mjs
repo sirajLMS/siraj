@@ -298,6 +298,8 @@ const eslintConfig = defineConfig([
                 "@/backend/db/repo/**",
                 "@/backend/db/migration",
                 "@/backend/db/migration/**",
+                "@/backend/db/scripts/**",
+                "@/backend/drizzle/**",
               ],
               message:
                 "Seeders must not import from the database layer — call backend services (bootstrap methods) instead. See backend/db/seeds/AGENTS.md",

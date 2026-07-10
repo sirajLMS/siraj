@@ -223,11 +223,13 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       totalOutstanding: outstandingTotals.primary,
       totalOutstandingSubLabel: outstandingTotals.breakdown,
       pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
-      negativeBalanceCount: `${summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0} Students`,
+      negativeBalanceCount: t("adminMetrics.negativeBalance", {
+        count: summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0,
+      }),
       mtdRevenue: mtdRevenueTotals.primary,
       mtdRevenueSubLabel: mtdRevenueTotals.breakdown,
     };
-  }, [summaryData?.adminBillingSummary, locale, tProfile, tErrors]);
+  }, [summaryData?.adminBillingSummary, locale, tProfile, tErrors, t]);
 
   const creditRows: StudentCreditRow[] = useMemo(
     () =>

@@ -91,6 +91,7 @@ export interface ErrorsLabels {
   readonly invalidInput: string;
   readonly parentNotFound: string;
   readonly parentAlreadyDeactivated: string;
+  readonly parentAlreadyActivated: string;
   readonly quotaMustBeNonNegative: string;
   readonly quotaExceedsTotal: string;
   readonly invalidFileId: string;

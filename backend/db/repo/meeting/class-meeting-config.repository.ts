@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classMeetingConfigs } from "@/backend/db/schema";
@@ -228,5 +228,67 @@ export namespace ClassMeetingConfigRepository {
       return;
     }
     await db.transaction(run);
+  }
+
+  function labelCondition(label: string | null | undefined) {
+    return label ? eq(classMeetingConfigs.label, label) : isNull(classMeetingConfigs.label);
+  }
+
+  export async function findByScopeProviderLabel(
+    scope: ClassMeetingConfigScopeFilter,
+    providerId: string,
+    label: string | null | undefined,
+    tx?: DBTransaction
+  ): Promise<ClassMeetingConfigSelectType | null> {
+    const client = tx ?? db;
+    const [row] = await client
+      .select()
+      .from(classMeetingConfigs)
+      .where(and(scopeCondition(scope), eq(classMeetingConfigs.providerId, providerId), labelCondition(label)))
+      .limit(1);
+    return row ?? null;
+  }
+
+  export async function upsertMany(
+    inputs: readonly ClassMeetingConfigInsertType[],
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<ClassMeetingConfigSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType[]> => {
+      const results: ClassMeetingConfigSelectType[] = [];
+
+      for (const input of inputs) {
+        const scope = resolveScope(input);
+        const existing = await findByScopeProviderLabel(scope, input.providerId, input.label, t);
+
+        if (existing) {
+          const updated = await update(
+            existing.id,
+            {
+              label: input.label,
+              isDefault: input.isDefault,
+              details: input.details,
+              encryptedSecret: input.encryptedSecret,
+              providerId: input.providerId,
+            },
+            t,
+            locale
+          );
+          results.push(updated);
+          continue;
+        }
+
+        results.push(await create(input, t, locale));
+      }
+
+      return results;
+    };
+
+    if (tx) {
+      return run(tx);
+    }
+    return db.transaction(run);
   }
 }

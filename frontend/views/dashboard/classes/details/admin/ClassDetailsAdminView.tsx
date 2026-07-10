@@ -121,8 +121,11 @@ export function ClassDetailsAdminView({
       <ClassMeetingConfigsSection
         classInstanceId={instance.id ?? undefined}
         effectiveMeeting={
-          (instance as { effectiveMeeting?: import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment })
-            .effectiveMeeting
+          (
+            instance as {
+              effectiveMeeting?: import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment;
+            }
+          ).effectiveMeeting
         }
       />
 

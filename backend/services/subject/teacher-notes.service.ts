@@ -62,4 +62,16 @@ export namespace TeacherNotesService {
 
     return await TeacherNotesRepository.deleteNote(id, locale);
   }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function findNotesByTitles(titles: readonly string[]): Promise<TeacherImportantNoteReturnType[]> {
+    return TeacherNotesRepository.findByTitles(titles);
+  }
+
+  export async function createManyImportantNotes(
+    inputs: readonly (TeacherImportantNoteSubmitInput & { createdByUserId: string; teacherId: string | null })[]
+  ): Promise<TeacherImportantNoteReturnType[]> {
+    return TeacherNotesRepository.createMany(inputs);
+  }
 }

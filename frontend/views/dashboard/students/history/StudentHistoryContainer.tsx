@@ -39,7 +39,7 @@ export function StudentHistoryContainer() {
     }
   }, [error, notifications, t]);
 
-  const studentName = data?.studentClassHistory?.studentName ?? "Student";
+  const studentName = data?.studentClassHistory?.studentName ?? t("common.student");
 
   const metrics: StudentHistoryMetrics = useMemo(
     () => ({
@@ -59,7 +59,7 @@ export function StudentHistoryContainer() {
           result[session.dayOfMonth] = {
             id: session.id ?? "",
             dayOfMonth: session.dayOfMonth,
-            title: session.title ?? "Class Session",
+            title: session.title ?? t("classDetails.classSession"),
             time: session.time ?? "",
             duration: session.duration ?? 0,
             status: mapStatusToAttendance(session.status ?? "present"),
@@ -72,7 +72,7 @@ export function StudentHistoryContainer() {
       }
     }
     return result;
-  }, [data]);
+  }, [data, t]);
 
   const handlePrevMonth = useCallback(() => {
     const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);

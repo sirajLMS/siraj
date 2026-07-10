@@ -216,6 +216,7 @@ export type InvoiceHistoryRow = {
   readonly parentId: string;
   readonly parentUserId: string | null;
   readonly hasPaymentProof: boolean;
+  readonly hasRejectedSubmission: boolean;
 };
 
 export type BillingCurrencyTotal = {

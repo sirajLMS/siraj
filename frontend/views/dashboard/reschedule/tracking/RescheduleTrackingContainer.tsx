@@ -169,7 +169,7 @@ function useTrackingHandlers(
         await approveLeave({
           variables: {
             classInstanceId: row.originalClassId,
-            leaveReason: "Admin approved leave request",
+            leaveReason: t("actions.approveLeave"),
           },
         });
         notifications.show(t("actions.approveSuccess"), { severity: "success", autoHideDuration: 4000 });

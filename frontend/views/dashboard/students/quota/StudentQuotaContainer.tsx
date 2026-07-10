@@ -79,7 +79,7 @@ export function StudentQuotaContainer() {
     s && typeof s.id === "string" && s.id.length > 0 && typeof s.name === "string" && s.name.length > 0
       ? {
           id: s.id,
-          studentName: s.name,
+          studentName: s.name ?? tc("notSet"),
           dateOfBirth: "",
           language: s.language === "en" ? "en" : "ar",
           gender: s.gender?.toUpperCase() === "FEMALE" ? "FEMALE" : "MALE",
@@ -87,8 +87,8 @@ export function StudentQuotaContainer() {
           totalClasses: s.classesTotal ?? 0,
           classesLeft: s.classesRemaining ?? 0,
           profileImage: "",
-          lastEditedBy: "system",
-          lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
+          lastEditedBy: t("common.system"),
+          lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : tc("notSet"),
           primaryTeacherId: s.primaryTeacherId ?? null,
         }
       : null;

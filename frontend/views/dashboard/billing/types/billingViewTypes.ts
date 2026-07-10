@@ -86,9 +86,11 @@ export interface ParentBillingViewProps extends BillingCapabilityProps {
   readonly summary: ParentBillingSummary;
   readonly invoices: readonly ParentInvoiceRow[];
   readonly loading?: boolean;
+  readonly billingActionsDisabled?: boolean;
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly onQuickPay: () => void;

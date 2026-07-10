@@ -207,7 +207,7 @@ type AssociatedStudent {
   language: String
   name: String
   primaryTeacherId: String
-  status: String
+  status: StudentStatus
   teacherName: String
   teacherUserId: String
   updatedAt: DateTime
@@ -353,6 +353,11 @@ type BulkOperationResult {
   success: Boolean
   successCount: Int
   successfulItems: [StorageObject!]
+}
+
+type ChangeParentLifecycleResult {
+  id: String
+  lifecycleStatus: ParentStatus
 }
 
 type ChangeStudentStatusResult {
@@ -2135,6 +2140,7 @@ type Mutation {
   attachSubjectResource(input: AttachSubjectResourceInput!): SubjectResource
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
+  changeParentLifecycleStatus(newStatus: ParentStatus!, parentId: String!): ChangeParentLifecycleResult
   changeStudentStatus(expectedVersion: Int, newStatus: StudentStatus!, studentId: String!): ChangeStudentStatusResult
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   cleanupTestGroupClass(groupClassId: String!): Boolean
@@ -2236,6 +2242,7 @@ type Mutation {
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
+  reactivateParent(parentId: String!): ReactivateParentResult
   reassignStudentTeacher(expectedVersion: Int, newTeacherId: String!, studentId: String!): ReassignStudentTeacherResult
   recordPayment(amount: String!, currency: CurrencyCode!, invoiceId: ID!, transactionId: String, userPaymentMethodId: ID!): Payment
   refreshExchangeRates(force: Boolean = false): RefreshExchangeRatesResult
@@ -2539,6 +2546,7 @@ type ParentInvoiceRow {
   displayAmount: DisplayAmount
   dueDate: String
   hasPaymentProof: Boolean
+  hasRejectedSubmission: Boolean
   id: String
   invoiceType: InvoiceType
   issueDate: String
@@ -2950,6 +2958,12 @@ type Query {
     offset: Int = 0
   ): [User!]
   welcomeMessage: String
+}
+
+type ReactivateParentResult {
+  accountStatus: AccountStatus
+  id: String
+  userId: String
 }
 
 type ReassignStudentTeacherResult {

@@ -87,10 +87,7 @@ export function RescheduleView({
             <>
               <Divider />
               <Stack spacing={1}>
-                <MeetingConfigDisplay
-                  config={effectiveMeetingToDisplayData(session.effectiveMeeting)}
-                  showSource
-                />
+                <MeetingConfigDisplay config={effectiveMeetingToDisplayData(session.effectiveMeeting)} showSource />
                 <MuiLink
                   component={Link}
                   href={`/classes/${session.sessionId}#meeting-configs`}

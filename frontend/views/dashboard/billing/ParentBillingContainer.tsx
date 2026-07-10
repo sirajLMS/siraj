@@ -140,7 +140,7 @@ export function ParentBillingContainer() {
         month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
         issueDate: formatDate(inv.issueDate),
         dueDate: formatDate(inv.dueDate),
-        paidDate: inv.paidDate ? formatDate(inv.paidDate) : "—",
+        paidDate: inv.paidDate ? formatDate(inv.paidDate) : t("parentTable.paidDate"),
         hasPaymentProof: inv.hasPaymentProof ?? false,
         fee: formatCurrencyForDisplay(
           inv.amount ?? "0",
@@ -160,7 +160,7 @@ export function ParentBillingContainer() {
         ),
         status: mapParentInvoiceStatus(inv.status),
       })),
-    [invoices, tProfile, tErrors, locale]
+    [invoices, tProfile, tErrors, locale, t]
   );
 
   const handleQuickPay = () => {

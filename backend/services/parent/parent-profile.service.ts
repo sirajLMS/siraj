@@ -1,7 +1,7 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
-import { AccountStatus, AppPermission } from "@/backend/enum";
+import { AppPermission, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
-import { parseAccountStatus } from "@/backend/lib/enum";
+import { parseStudentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services";
 import type {
   AssociatedStudentResult,
@@ -9,12 +9,14 @@ import type {
   ParentOwnProfileUpdateInput,
   ParentProfileResult,
   ParentProfileUpdateInput,
+  ReactivateParentResult,
 } from "@/backend/types";
 
 export type {
   AssociatedStudentResult,
   DeactivateParentResult,
   ParentProfileResult,
+  ReactivateParentResult,
 } from "@/backend/types";
 
 type ParentProfileRepoResult = NonNullable<Awaited<ReturnType<typeof ParentRepository.getParentProfile>>>;
@@ -63,7 +65,11 @@ export namespace ParentProfileService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    return ParentRepository.getAssociatedStudents(parentId);
+    const students = await ParentRepository.getAssociatedStudents(parentId);
+    return students.map(student => ({
+      ...student,
+      status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
+    }));
   }
 
   /**
@@ -87,7 +93,10 @@ export namespace ParentProfileService {
       throw new Error(tFunc("studentNotFound", { id: studentId }));
     }
 
-    return student;
+    return {
+      ...student,
+      status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
+    };
   }
 
   /**
@@ -107,7 +116,6 @@ export namespace ParentProfileService {
     }
 
     const result = await ParentRepository.deactivateParent(parentId, undefined, locale);
-    const updatedUser = await UserRepository.updateStatus(result.userId, AccountStatus.DEACTIVATED, undefined, locale);
 
     // Invalidate all active Redis sessions for this parent's user account.
     // Session invalidation failure is logged but does NOT roll back the deactivation —
@@ -125,7 +133,31 @@ export namespace ParentProfileService {
     return {
       id: result.id,
       userId: result.userId,
-      accountStatus: parseAccountStatus(updatedUser.status),
+      accountStatus: result.accountStatus,
+    };
+  }
+
+  /**
+   * Reactivates a parent account by setting status to ACTIVATED.
+   * Requires: parent.manage_status permission.
+   */
+  export async function reactivateAccount(
+    actorUserId: string,
+    parentId: string,
+    locale?: string
+  ): Promise<ReactivateParentResult> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_MANAGE_STATUS);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const result = await ParentRepository.reactivateParent(parentId, undefined, locale);
+
+    return {
+      id: result.id,
+      userId: result.userId,
+      accountStatus: result.accountStatus,
     };
   }
 

@@ -36,7 +36,7 @@ function exportToCsv(
   try {
     const filtered = students.filter((s): s is NonNullable<typeof s> => s != null);
     const csvRows = [
-      ["Name", "Student ID", "Attendance Status"].join(","),
+      [t("students.studentName"), t("students.idNumber"), t("students.attendanceStatus")].join(","),
       ...filtered.map(s => [s.name ?? "", s.studentId ?? "", s.attendanceStatus ?? ""].join(",")),
     ];
     const csvContent = csvRows.join("\n");

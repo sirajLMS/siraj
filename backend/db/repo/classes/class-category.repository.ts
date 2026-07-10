@@ -186,4 +186,64 @@ export namespace ClassCategoryRepository {
       throw error;
     }
   }
+
+  export async function findBySlugs(slugs: readonly string[], tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
+    if (slugs.length === 0) return [];
+    return executeQuery(tx, "Error finding class categories by slugs:", client =>
+      selectActiveCategories(client, inArray(classCategories.slug, [...slugs]))
+    );
+  }
+
+  export async function upsertMany(
+    inputs: readonly ClassCategorySubmitInput[],
+    tx?: DBTransaction
+  ): Promise<ClassCategorySelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<ClassCategorySelectType[]> => {
+      const now = new Date();
+      const results: ClassCategorySelectType[] = [];
+
+      for (const input of inputs) {
+        const [row] = await t
+          .insert(classCategories)
+          .values({
+            name: input.name,
+            slug: input.slug,
+            description: input.description ?? null,
+            isActive: input.isActive ?? true,
+            sortOrder: input.sortOrder ?? 0,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: classCategories.slug,
+            set: {
+              name: input.name,
+              description: input.description ?? null,
+              isActive: input.isActive ?? true,
+              sortOrder: input.sortOrder ?? 0,
+              updatedAt: now,
+            },
+          })
+          .returning();
+
+        if (row) {
+          results.push(row);
+        }
+      }
+
+      return results;
+    };
+
+    try {
+      if (tx) {
+        return await run(tx);
+      }
+      return await db.transaction(run);
+    } catch (error) {
+      logger.error("Error upserting class categories:", error);
+      throw error;
+    }
+  }
 }

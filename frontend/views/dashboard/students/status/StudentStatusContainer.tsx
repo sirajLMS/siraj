@@ -82,7 +82,7 @@ export function StudentStatusContainer() {
     return {
       id: s.id,
       name: s.name,
-      status: (uc?.status ?? s.status ?? StudentStatus.Regular) as StudentStatus,
+      status: uc?.status ?? s.status ?? StudentStatus.Regular,
       avatarUrl: null,
       primaryTeacherId: s.primaryTeacherId ?? null,
       teacherName: s.teacherName ?? null,

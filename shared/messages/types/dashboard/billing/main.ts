@@ -80,6 +80,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly downloadPdf: string;
     readonly payNow: string;
     readonly viewSubmission: string;
+    readonly viewFeedback: string;
     readonly noEntries: string;
     readonly emptyTitle: string;
     readonly emptySubtitle: string;
@@ -97,10 +98,12 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly titleSubmit: string;
     readonly titleMarkPaid: string;
     readonly confirm: string;
+    readonly confirmMarkPaid: string;
     readonly confirming: string;
     readonly selectFile: string;
     readonly fileHint: string;
     readonly invalidFileType: string;
+    readonly fileTooLarge: string;
     readonly cancel: string;
     readonly errorGeneric: string;
     readonly invoiceNumber: string;
@@ -117,9 +120,12 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly approve: string;
     readonly reject: string;
     readonly rejecting: string;
+    readonly approving: string;
+    readonly rejected: string;
     readonly rejectionReason: string;
     readonly rejectionReasonPlaceholder: string;
     readonly viewProof: string;
+    readonly viewProofFailed: string;
     readonly noProof: string;
     readonly loadFailed: string;
     readonly close: string;
@@ -130,6 +136,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   };
   readonly notifications: {
     readonly popupBlocked: string;
+    readonly paymentPendingReview: string;
   };
   readonly hasPaymentProofHint: string;
   readonly errors: {

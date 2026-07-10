@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classSubjects } from "@/backend/db/schema";
@@ -176,6 +176,77 @@ export namespace ClassSubjectRepository {
       return await db.transaction(run);
     } catch (error) {
       logger.error(`Error deleting class subject with ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  export async function findBySlugs(slugs: readonly string[], tx?: DBTransaction): Promise<ClassSubjectSelectType[]> {
+    if (slugs.length === 0) return [];
+    try {
+      const client = tx ?? db;
+      return await client
+        .select()
+        .from(classSubjects)
+        .where(and(inArray(classSubjects.slug, [...slugs]), isNull(classSubjects.deletedAt)));
+    } catch (error) {
+      logger.error("Error finding class subjects by slugs:", error);
+      throw error;
+    }
+  }
+
+  export async function upsertMany(
+    inputs: readonly ClassSubjectSubmitInput[],
+    tx?: DBTransaction
+  ): Promise<ClassSubjectSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<ClassSubjectSelectType[]> => {
+      const now = new Date();
+      const results: ClassSubjectSelectType[] = [];
+
+      for (const input of inputs) {
+        const [row] = await t
+          .insert(classSubjects)
+          .values({
+            name: input.name,
+            slug: input.slug,
+            categoryId: input.categoryId,
+            description: input.description ?? null,
+            avatarUrl: input.avatarUrl ?? null,
+            isActive: input.isActive ?? true,
+            sortOrder: input.sortOrder ?? 0,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: classSubjects.slug,
+            set: {
+              name: input.name,
+              categoryId: input.categoryId,
+              description: input.description ?? null,
+              avatarUrl: input.avatarUrl ?? null,
+              isActive: input.isActive ?? true,
+              sortOrder: input.sortOrder ?? 0,
+              updatedAt: now,
+            },
+          })
+          .returning();
+
+        if (row) {
+          results.push(row);
+        }
+      }
+
+      return results;
+    };
+
+    try {
+      if (tx) {
+        return await run(tx);
+      }
+      return await db.transaction(run);
+    } catch (error) {
+      logger.error("Error upserting class subjects:", error);
       throw error;
     }
   }

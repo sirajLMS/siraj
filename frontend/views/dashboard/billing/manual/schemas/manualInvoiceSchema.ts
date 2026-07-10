@@ -25,4 +25,12 @@ export const manualInvoiceSchema = (labels: BillingManualValidationLabels) =>
       path: ["dueDate"],
     });
 
-export type ManualInvoiceFormData = z.infer<ReturnType<typeof manualInvoiceSchema>>;
+export type ManualInvoiceFormData = {
+  parentId: string;
+  studentId?: string;
+  feeAmount: string;
+  currency: CurrencyCode;
+  issueDate: string;
+  dueDate: string;
+  billingMonths: Array<(typeof BILLING_MONTH_IDS)[number]>;
+};

@@ -656,6 +656,17 @@ export namespace BillingRepository {
       WHERE inf.invoice_id = ${invoices.id}
         AND inf.usage_type = 'payment_proof'
     )`.as("has_payment_proof"),
+    hasRejectedSubmission: sql<boolean>`EXISTS (
+      SELECT 1
+      FROM (
+        SELECT ips.status
+        FROM invoice_payment_submissions ips
+        WHERE ips.invoice_id = ${invoices.id}
+        ORDER BY ips.submitted_at DESC
+        LIMIT 1
+      ) latest_submission
+      WHERE latest_submission.status = 'rejected'
+    )`.as("has_rejected_submission"),
   };
 
   function mapInvoiceRow(r: {
@@ -672,6 +683,7 @@ export namespace BillingRepository {
     parentId: string;
     parentUserId: string | null;
     hasPaymentProof: boolean;
+    hasRejectedSubmission: boolean;
   }): Types.InvoiceHistoryRow {
     return {
       id: r.id,
@@ -687,6 +699,7 @@ export namespace BillingRepository {
       parentId: r.parentId,
       parentUserId: r.parentUserId ?? null,
       hasPaymentProof: r.hasPaymentProof,
+      hasRejectedSubmission: r.hasRejectedSubmission,
     };
   }
 

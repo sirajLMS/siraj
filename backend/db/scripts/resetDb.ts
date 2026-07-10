@@ -77,6 +77,12 @@ async function resetDatabase() {
   }
   await adminPool.end();
 
+  const skipMigrate = process.argv.includes("--skip-migrate");
+  if (skipMigrate) {
+    logger.log("Skipping migrations after reset (--skip-migrate).");
+    return;
+  }
+
   // Run migrations
   try {
     await runMigrations(true);

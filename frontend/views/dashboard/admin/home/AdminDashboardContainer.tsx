@@ -169,7 +169,7 @@ export function AdminDashboardContainer() {
       headers={headers}
       statusLabels={statusLabels}
       detailsLabel={t("admin.details")}
-      emptyMessage={loading ? "Loading..." : t("admin.noClasses")}
+      emptyMessage={loading ? t("admin.loading") : t("admin.noClasses")}
       page={page}
       pageSize={pageSize}
       totalCount={totalCount}

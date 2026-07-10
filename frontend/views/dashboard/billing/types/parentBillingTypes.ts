@@ -19,6 +19,7 @@ export interface ParentInvoiceRow {
   readonly dueDate: string;
   readonly paidDate: string;
   readonly hasPaymentProof: boolean;
+  readonly hasRejectedSubmission: boolean;
   readonly fee: string;
   readonly status: InvoiceStatus;
 }

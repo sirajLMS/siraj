@@ -97,7 +97,7 @@ export function ManualInvoiceContainer() {
   const handleSubmit = (data: ManualInvoiceFormData, sendEmail: boolean) => {
     void createInvoice({
       variables: {
-        parentId: data.parentId,
+        parentId: data.parentId ?? null,
         studentId: ("studentId" in data ? data.studentId : null) ?? null,
         amount: data.feeAmount,
         currency: data.currency,
@@ -126,9 +126,9 @@ export function ManualInvoiceContainer() {
         .filter((s): s is { id: string; name: string } & typeof s => s.id != null)
         .map(s => ({
           id: s.id,
-          name: s.name ?? "Unknown",
+          name: s.name ?? t("unknown"),
         })),
-    [studentData?.studentDirectory?.rows]
+    [studentData?.studentDirectory?.rows, t]
   );
 
   return (

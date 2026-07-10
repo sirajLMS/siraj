@@ -58,6 +58,7 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     parentId: t.exposeString("parentId"),
     parentUserId: t.exposeString("parentUserId", { nullable: true }),
     hasPaymentProof: t.exposeBoolean("hasPaymentProof"),
+    hasRejectedSubmission: t.exposeBoolean("hasRejectedSubmission"),
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,

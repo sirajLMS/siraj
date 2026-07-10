@@ -1,5 +1,5 @@
 import { BookRepository } from "@/backend/db/repo/books/book.repository";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, type AvailabilityStatus } from "@/backend/enum";
 import { DomainError, UnauthorizedError } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
@@ -40,5 +40,17 @@ export namespace BookService {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("bookDeleteFailed"), { cause: error });
     }
+  }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function findBooksByNames(names: readonly string[]): Promise<BookReturnType[]> {
+    return BookRepository.findByNames(names);
+  }
+
+  export async function upsertManyBooks(
+    inputs: readonly { name: string; availabilityStatus: AvailabilityStatus }[]
+  ): Promise<BookReturnType[]> {
+    return BookRepository.upsertMany(inputs);
   }
 }

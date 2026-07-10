@@ -79,6 +79,19 @@ export const deactivateParentMutationDocument: TypedDocumentNode<
   }
 `;
 
+export const reactivateParentMutationDocument: TypedDocumentNode<
+  Operations.ReactivateParentMutation,
+  Types.MutationReactivateParentArgs
+> = gql`
+  mutation ReactivateParent($parentId: String!) {
+    reactivateParent(parentId: $parentId) {
+      id
+      userId
+      accountStatus
+    }
+  }
+`;
+
 // ─── Mutation: updateStudentQuota ─────────────────────────────────────────────
 
 export const updateStudentQuotaMutationDocument: TypedDocumentNode<

@@ -1,12 +1,12 @@
 "use client";
 
-import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ParentInvoiceRowActions } from "@/frontend/views/dashboard/billing/components/ParentInvoiceRowActions";
 import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
@@ -24,10 +24,14 @@ export interface ParentInvoicesDataGridLabels {
   readonly options: string;
   readonly viewDetails: string;
   readonly viewSubmission: string;
+  readonly viewFeedback: string;
   readonly downloadPdf: string;
   readonly payNow: string;
+  readonly markAsPaid: string;
   readonly hasPaymentProofHint: string;
   readonly noEntries: string;
+  readonly emptyTitle?: string;
+  readonly emptySubtitle?: string;
   readonly statusLabels: Record<string, string>;
 }
 
@@ -36,7 +40,10 @@ interface ParentInvoicesDataGridProps {
   readonly labels: ParentInvoicesDataGridLabels;
   readonly canView: boolean;
   readonly canSubmitProof: boolean;
+  readonly canManage?: boolean;
+  readonly billingActionsDisabled?: boolean;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly page?: number;
@@ -56,7 +63,10 @@ export function ParentInvoicesDataGrid({
   labels,
   canView,
   canSubmitProof,
+  canManage = false,
+  billingActionsDisabled = false,
   onPayNow,
+  onMarkAsPaid,
   onViewPaymentDetails,
   onDownloadPdf,
   page = 0,
@@ -65,6 +75,21 @@ export function ParentInvoicesDataGrid({
   onPageChange,
   loading = false,
 }: Readonly<ParentInvoicesDataGridProps>) {
+  const actionLabels = useMemo(
+    () => ({
+      payNow: labels.payNow,
+      viewSubmission: labels.viewSubmission,
+      viewFeedback: labels.viewFeedback,
+      viewDetails: labels.viewDetails,
+      downloadPdf: labels.downloadPdf,
+      markAsPaid: labels.markAsPaid,
+    }),
+    [labels]
+  );
+
+  const emptyMessage =
+    labels.emptyTitle && labels.emptySubtitle ? `${labels.emptyTitle} ${labels.emptySubtitle}` : labels.noEntries;
+
   const columns = useMemo<GridColDef<ParentInvoiceRow>[]>(
     () => [
       {
@@ -136,81 +161,40 @@ export function ParentInvoicesDataGrid({
       {
         field: "options",
         headerName: labels.options,
-        flex: 1,
-        minWidth: 160,
+        flex: 1.2,
+        minWidth: 180,
         sortable: false,
         align: "right",
         headerAlign: "right",
-        renderCell: ({ row }) => {
-          if (!canView) {
-            return null;
-          }
-
-          if (row.status === InvoiceStatus.Unpaid && canSubmitProof) {
-            return (
-              <PrimaryPageAction
-                size="small"
-                onClick={() => {
-                  onPayNow({
-                    id: row.id,
-                    amount: row.fee,
-                    dueDate: row.dueDate,
-                    invoiceNumber: row.invoiceNumber,
-                  });
-                }}
-              >
-                {labels.payNow}
-              </PrimaryPageAction>
-            );
-          }
-
-          if (row.status === InvoiceStatus.PaymentPending) {
-            return (
-              <PrimaryPageAction
-                size="small"
-                onClick={() => {
-                  onViewPaymentDetails?.({ invoiceId: row.id });
-                }}
-              >
-                {labels.viewSubmission}
-              </PrimaryPageAction>
-            );
-          }
-
-          if (row.status === InvoiceStatus.Paid) {
-            return (
-              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-                <Tooltip title={labels.viewDetails}>
-                  <IconButton
-                    size="small"
-                    aria-label={labels.viewDetails}
-                    onClick={() => {
-                      onViewPaymentDetails?.({ invoiceId: row.id });
-                    }}
-                  >
-                    <VisibilityOutlined fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={labels.downloadPdf}>
-                  <IconButton
-                    size="small"
-                    aria-label={labels.downloadPdf}
-                    onClick={() => {
-                      onDownloadPdf(row.id);
-                    }}
-                  >
-                    <DownloadOutlined fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            );
-          }
-
-          return null;
-        },
+        renderCell: ({ row }) => (
+          <ParentInvoiceRowActions
+            row={row}
+            labels={actionLabels}
+            canView={canView}
+            canSubmitProof={canSubmitProof}
+            canManage={canManage}
+            billingActionsDisabled={billingActionsDisabled}
+            layout="inline"
+            onPayNow={onPayNow}
+            onMarkAsPaid={onMarkAsPaid}
+            onViewPaymentDetails={onViewPaymentDetails}
+            onDownloadPdf={onDownloadPdf}
+          />
+        ),
       },
     ],
-    [canSubmitProof, canView, labels, onDownloadPdf, onPayNow, onViewPaymentDetails]
+    [
+      actionLabels,
+      billingActionsDisabled,
+      canManage,
+      canSubmitProof,
+      canView,
+      labels,
+      onDownloadPdf,
+      onMarkAsPaid,
+      onPayNow,
+      onViewPaymentDetails,
+    ]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
@@ -221,7 +205,7 @@ export function ParentInvoicesDataGrid({
       columns={columns}
       loading={loading}
       getRowId={row => row.id}
-      emptyMessage={labels.noEntries}
+      emptyMessage={emptyMessage}
       {...(isServerPagination
         ? {
             paginationMode: "server" as const,

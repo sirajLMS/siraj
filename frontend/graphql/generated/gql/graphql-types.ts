@@ -236,7 +236,7 @@ export type AssociatedStudent = {
   language: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   primaryTeacherId: Maybe<Scalars['String']['output']>;
-  status: Maybe<Scalars['String']['output']>;
+  status: Maybe<StudentStatus>;
   teacherName: Maybe<Scalars['String']['output']>;
   teacherUserId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
@@ -386,6 +386,12 @@ export type BulkOperationResult = {
   success: Maybe<Scalars['Boolean']['output']>;
   successCount: Maybe<Scalars['Int']['output']>;
   successfulItems: Maybe<Array<StorageObject>>;
+};
+
+export type ChangeParentLifecycleResult = {
+  __typename?: 'ChangeParentLifecycleResult';
+  id: Maybe<Scalars['String']['output']>;
+  lifecycleStatus: Maybe<ParentStatus>;
 };
 
 export type ChangeStudentStatusResult = {
@@ -2215,6 +2221,7 @@ export type Mutation = {
   attachSubjectResource: Maybe<SubjectResource>;
   bulkAssignUsersToGroup: Maybe<Scalars['Boolean']['output']>;
   bulkRevokeUsersFromGroup: Maybe<Scalars['Boolean']['output']>;
+  changeParentLifecycleStatus: Maybe<ChangeParentLifecycleResult>;
   changeStudentStatus: Maybe<ChangeStudentStatusResult>;
   cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
   cleanupTestGroupClass: Maybe<Scalars['Boolean']['output']>;
@@ -2295,6 +2302,7 @@ export type Mutation = {
   moveStorageItems: Maybe<BulkOperationResult>;
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
+  reactivateParent: Maybe<ReactivateParentResult>;
   reassignStudentTeacher: Maybe<ReassignStudentTeacherResult>;
   recordPayment: Maybe<Payment>;
   refreshExchangeRates: Maybe<RefreshExchangeRatesResult>;
@@ -2390,6 +2398,12 @@ export type MutationBulkAssignUsersToGroupArgs = {
 export type MutationBulkRevokeUsersFromGroupArgs = {
   groupId: Scalars['String']['input'];
   userIds: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationChangeParentLifecycleStatusArgs = {
+  newStatus: ParentStatus;
+  parentId: Scalars['String']['input'];
 };
 
 
@@ -2753,6 +2767,11 @@ export type MutationPartiallyUpdateStudentArgs = {
 
 export type MutationPrepareUploadArgs = {
   input: UploadPreparationInput;
+};
+
+
+export type MutationReactivateParentArgs = {
+  parentId: Scalars['String']['input'];
 };
 
 
@@ -3301,6 +3320,7 @@ export type ParentInvoiceRow = {
   displayAmount: Maybe<DisplayAmount>;
   dueDate: Maybe<Scalars['String']['output']>;
   hasPaymentProof: Maybe<Scalars['Boolean']['output']>;
+  hasRejectedSubmission: Maybe<Scalars['Boolean']['output']>;
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<InvoiceType>;
   issueDate: Maybe<Scalars['String']['output']>;
@@ -4076,6 +4096,13 @@ export type QueryUserPermissionGroupsArgs = {
 export type QueryUsersArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ReactivateParentResult = {
+  __typename?: 'ReactivateParentResult';
+  accountStatus: Maybe<AccountStatus>;
+  id: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
 };
 
 export type ReassignStudentTeacherResult = {

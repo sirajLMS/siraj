@@ -1,0 +1,61 @@
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.messages = {
+  breadcrumbs: {
+    archive: "Archive",
+    history: "Student History",
+  },
+  pageTitle: "{name}'s History",
+  pageSubtitle: "Classes for {month}",
+  exportPdf: "Export as PDF",
+  changeMonth: "Change Month",
+  metrics: {
+    totalClasses: "Total Classes: {count}",
+    attendanceRate: "Attendance Rate: {rate}%",
+    hoursStudied: "Hours Studied: {hours}",
+    performance: "Performance: {score}%",
+  },
+  calendar: {
+    weeklyAttendance: "Weekly Attendance",
+    week: "Week {number}",
+    days: {
+      sun: "Sun",
+      mon: "Mon",
+      tue: "Tue",
+      wed: "Wed",
+      thu: "Thu",
+      fri: "Fri",
+      sat: "Sat",
+    },
+  },
+  classDetails: {
+    title: "Class Details",
+    classDetails: "Details for {date}",
+    instructor: "Instructor: {name}",
+    timeSlot: "Time Slot",
+    roomNo: "Room",
+    contentNotes: "Content & Notes",
+    viewAssignments: "View Assignments",
+    downloadLogs: "Download Session Logs",
+    status: {
+      present: "Present",
+      absent: "Absent",
+      late: "Late",
+      PENDING: "Pending",
+      TAKEN: "Taken",
+      ABSENT: "Absent",
+      LEAVE: "Leave",
+      NOT_ACTIVATED: "Not Activated",
+      ACTIVATED: "Activated",
+      RUNNING: "Running",
+      COMPLETED: "Completed",
+    },
+    noSessions: "No class sessions found for this date.",
+  },
+  performanceStreak: {
+    title: "Performance Streak",
+    description: "Student's performance trend over the last {count} classes.",
+  },
+  errors: {
+    loadFailed: "Failed to load student history.",
+  },
+};

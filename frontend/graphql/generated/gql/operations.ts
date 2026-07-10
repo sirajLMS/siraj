@@ -2503,7 +2503,7 @@ export type UserBillingProfileSummaryQuery = UserBillingProfileSummaryQuery_Quer
 
 export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, hasPaymentProof: boolean | null, displayAmount: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -3041,7 +3041,7 @@ export type UpdateNotificationPreferencesMutation = UpdateNotificationPreference
 
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, displayAmount: ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -3061,7 +3061,7 @@ export type ParentInvoiceHistoryQuery = ParentInvoiceHistoryQuery_Query;
 
 export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, displayAmount: AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
+export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -3208,6 +3208,19 @@ export type LinkDocumentToParentMutationVariables = Exact<{
 
 export type LinkDocumentToParentMutation = LinkDocumentToParentMutation_Mutation;
 
+export type ChangeParentLifecycleStatusMutation_changeParentLifecycleStatus_ChangeParentLifecycleResult = { id: string | null, lifecycleStatus: Types.ParentStatus | null };
+
+export type ChangeParentLifecycleStatusMutation_Mutation = { changeParentLifecycleStatus: ChangeParentLifecycleStatusMutation_changeParentLifecycleStatus_ChangeParentLifecycleResult | null };
+
+
+export type ChangeParentLifecycleStatusMutationVariables = Exact<{
+  parentId: string;
+  newStatus: Types.ParentStatus;
+}>;
+
+
+export type ChangeParentLifecycleStatusMutation = ChangeParentLifecycleStatusMutation_Mutation;
+
 export type CreateParentMutation_createParent_ParentOnboardingResult = { userId: string | null, parentId: string | null, name: string | null, email: string | null, status: string | null, invoiceType: string | null, currency: Types.CurrencyCode | null };
 
 export type CreateParentMutation_Mutation = { createParent: CreateParentMutation_createParent_ParentOnboardingResult | null };
@@ -3266,7 +3279,7 @@ export type ParentProfileQueryVariables = Exact<{
 
 export type ParentProfileQuery = ParentProfileQuery_Query;
 
-export type ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
+export type ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent = { id: string | null, name: string | null, status: Types.StudentStatus | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
 
 export type ParentAssociatedStudentsQuery_Query = { parentAssociatedStudents: Array<ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent> | null };
 
@@ -3289,6 +3302,18 @@ export type DeactivateParentMutationVariables = Exact<{
 
 
 export type DeactivateParentMutation = DeactivateParentMutation_Mutation;
+
+export type ReactivateParentMutation_reactivateParent_ReactivateParentResult = { id: string | null, userId: string | null, accountStatus: Types.AccountStatus | null };
+
+export type ReactivateParentMutation_Mutation = { reactivateParent: ReactivateParentMutation_reactivateParent_ReactivateParentResult | null };
+
+
+export type ReactivateParentMutationVariables = Exact<{
+  parentId: string;
+}>;
+
+
+export type ReactivateParentMutation = ReactivateParentMutation_Mutation;
 
 export type UpdateStudentQuotaMutation_updateStudentQuota_EditQuotaResult = { id: string | null, classesRemaining: number | null, classesTotal: number | null, version: number | null };
 
@@ -4197,7 +4222,7 @@ export type StudentsQueryVariables = Exact<{
 
 export type StudentsQuery = StudentsQuery_Query;
 
-export type StudentByIdQuery_studentById_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, version: number | null, updatedAt: string | null };
+export type StudentByIdQuery_studentById_AssociatedStudent = { id: string | null, name: string | null, status: Types.StudentStatus | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, version: number | null, updatedAt: string | null };
 
 export type StudentByIdQuery_Query = { studentById: StudentByIdQuery_studentById_AssociatedStudent | null };
 

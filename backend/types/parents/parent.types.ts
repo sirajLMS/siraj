@@ -5,6 +5,7 @@ import type {
   ClassOutcome,
   CurrencyCode,
   ParentStatus,
+  StudentStatus,
 } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
@@ -143,7 +144,7 @@ export type ParentDashboardMetricsReturnType = {
 export interface AssociatedStudentResult {
   readonly id: string;
   readonly name: string;
-  readonly status: string;
+  readonly status: StudentStatus;
   readonly primaryTeacherId: string | null;
   readonly teacherUserId: string | null;
   readonly teacherName: string | null;
@@ -183,7 +184,7 @@ export type ParentAssignedStudentReturnType = {
   id: string;
   name: string;
   studentAvatarUrl: string | null;
-  status: string;
+  status: StudentStatus;
   primaryTeacherId: string | null;
   teacherUserId: string | null;
   teacherName: string | null;
@@ -225,6 +226,17 @@ export interface DeactivateParentResult {
   readonly id: string;
   readonly userId: string;
   readonly accountStatus: AccountStatus;
+}
+
+export interface ReactivateParentResult {
+  readonly id: string;
+  readonly userId: string;
+  readonly accountStatus: AccountStatus;
+}
+
+export interface ChangeParentLifecycleResult {
+  readonly id: string;
+  readonly lifecycleStatus: ParentStatus;
 }
 
 export type ParentDocument = {

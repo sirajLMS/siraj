@@ -84,6 +84,7 @@ export const errors: ErrorsLabels = {
   invalidInput: "Invalid input data",
   parentNotFound: "Parent with ID {id} not found.",
   parentAlreadyDeactivated: "Parent account with ID {id} is already deactivated.",
+  parentAlreadyActivated: "Parent account with ID {id} is already activated.",
   quotaMustBeNonNegative: "Remaining classes must be a non-negative integer.",
   quotaExceedsTotal: "Cannot set remaining classes ({requested}) higher than total purchased classes ({total}).",
   invalidFileId: "Valid file ID is required.",

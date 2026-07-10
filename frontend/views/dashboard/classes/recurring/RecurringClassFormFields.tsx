@@ -14,11 +14,11 @@ import { DaysScheduleSection } from "@/frontend/views/dashboard/classes/recurrin
 import { DurationInput } from "@/frontend/views/dashboard/classes/recurring/DurationInput";
 import { EntitySelect } from "@/frontend/views/dashboard/classes/recurring/EntitySelect";
 import { RecurringMeetingConfigSection } from "@/frontend/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
-import type { RecurringMeetingConfigFormState } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import { TimeInput } from "@/frontend/views/dashboard/classes/recurring/TimeInput";
 import type { SimpleEntity } from "@/frontend/views/dashboard/classes/recurring/types";
 import { CLASS_TYPE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
+import type { RecurringMeetingConfigFormState } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 
 interface RecurringClassFormFieldsProps {

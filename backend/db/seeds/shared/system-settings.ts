@@ -1,5 +1,5 @@
 import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import { resolveAssetPath } from "@/backend/db/seeds/lib/file-seed-helper";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
@@ -104,7 +104,7 @@ export async function seedOrGet() {
 
   logger.info("Seeding teacher handbook...");
   const handbookFileName = "teacher-handbook.pdf";
-  const handbookPath = path.join(__dirname, "assets", "teacher_handbook", handbookFileName);
+  const handbookPath = resolveAssetPath(`teacher_handbook/${handbookFileName}`);
   try {
     const fileBuffer = await fs.readFile(handbookPath);
     await SystemSettingsService.uploadHandbook(null, handbookFileName, fileBuffer);
@@ -115,7 +115,7 @@ export async function seedOrGet() {
 
   logger.info("Seeding parent handbook...");
   const parentHandbookFileName = "parent-handbook.pdf";
-  const parentHandbookPath = path.join(__dirname, "assets", "documents", "sample-resource.pdf");
+  const parentHandbookPath = resolveAssetPath("documents/sample-resource.pdf");
   try {
     const parentFileBuffer = await fs.readFile(parentHandbookPath);
     await SystemSettingsService.uploadParentHandbook(null, parentHandbookFileName, parentFileBuffer);

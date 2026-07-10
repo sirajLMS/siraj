@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   DisplayAmountPothosObject,
@@ -7,11 +8,12 @@ import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
   IanaTimezonePothosObject,
+  StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
 import type { EditQuotaResult } from "@/backend/services/student/student-management.service";
 import { StudentManagementService } from "@/backend/services/student/student-management.service";
-import type { AssociatedStudentResult, DeactivateParentResult } from "@/backend/types";
+import type { AssociatedStudentResult, DeactivateParentResult, ReactivateParentResult } from "@/backend/types";
 import type { ParentProfileResult } from "@/backend/types/parents/parent.types";
 
 /** Pothos object shape (decoupled from barrel re-exports). */
@@ -58,7 +60,7 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: StudentStatusPothosObject }),
     primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
     teacherUserId: t.exposeString("teacherUserId", { nullable: true }),
     teacherName: t.exposeString("teacherName", { nullable: true }),
@@ -77,6 +79,16 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
 const DeactivateParentResultRef = gqlSchemaBuilder.objectRef<DeactivateParentResult>("DeactivateParentResult");
 
 export const DeactivateParentResultPothosObject = DeactivateParentResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    userId: t.exposeString("userId"),
+    accountStatus: t.expose("accountStatus", { type: AccountStatusPothosObject }),
+  }),
+});
+
+const ReactivateParentResultRef = gqlSchemaBuilder.objectRef<ReactivateParentResult>("ReactivateParentResult");
+
+export const ReactivateParentResultPothosObject = ReactivateParentResultRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     userId: t.exposeString("userId"),
@@ -148,12 +160,25 @@ gqlSchemaBuilder.queryField("studentById", t =>
 gqlSchemaBuilder.mutationField("deactivateParent", t =>
   t.field({
     type: DeactivateParentResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.PARENT_MANAGE_STATUS },
     args: {
       parentId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
       return ParentProfileService.deactivateAccount(ctx.user?.id || "", args.parentId, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("reactivateParent", t =>
+  t.field({
+    type: ReactivateParentResultRef,
+    authScopes: { permission: AppPermission.PARENT_MANAGE_STATUS },
+    args: {
+      parentId: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      return ParentProfileService.reactivateAccount(ctx.user?.id || "", args.parentId, ctx.locale);
     },
   })
 );

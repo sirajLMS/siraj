@@ -38,11 +38,10 @@ export async function cleanGenerate(): Promise<number> {
     rmSync(drizzleDir, { recursive: true, force: true });
   }
 
-  // 1. Reset Database (Attempted)
-  globalThis.console.log("Attempting to reset database (ignoring connection errors)...");
-  // We run resetDb.ts but don't check the exit code yet.
-  // The user specifically wants to proceed even if it cannot connect.
-  await runBunCommand(["run", "backend/db/scripts/resetDb.ts"]);
+  // 1. Reset Database (drop/create only — migrations are regenerated and applied below)
+  globalThis.console.log("Resetting database (drop/create only)...");
+  const resetCode = await runBunCommand(["run", "backend/db/scripts/resetDb.ts", "--skip-migrate"]);
+  if (resetCode !== 0) return resetCode;
 
   // 2. Extensions
   globalThis.console.log("\nGenerating extensions migration...");

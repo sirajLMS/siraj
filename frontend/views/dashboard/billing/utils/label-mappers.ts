@@ -47,7 +47,11 @@ export function getParentInvoiceGridLabels(labels: BillingLabels) {
     downloadPdf: labels.parentTable.downloadPdf,
     payNow: labels.parentTable.payNow,
     viewSubmission: labels.parentTable.viewSubmission,
+    viewFeedback: labels.parentTable.viewFeedback,
+    markAsPaid: labels.adminTable.markAsPaid,
     noEntries: labels.parentTable.noEntries,
+    emptyTitle: labels.parentTable.emptyTitle,
+    emptySubtitle: labels.parentTable.emptySubtitle,
     statusLabels: labels.invoiceStatus,
   };
 }

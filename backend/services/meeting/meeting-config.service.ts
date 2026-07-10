@@ -1,3 +1,5 @@
+import type { DBTransaction } from "@/backend/db/db.types";
+import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { AppPermission } from "@/backend/enum";
@@ -5,7 +7,9 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
+import type { ClassMeetingConfigSelectType } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
+  ClassMeetingConfigInsertType,
   UpdateUserMeetingConfigInput,
   UserMeetingConfigReturnType,
   UserMeetingConfigSubmitInput,
@@ -162,5 +166,55 @@ export namespace MeetingConfigService {
     const { isAdminScope } = await loadConfigForActor(actorUserId, id, locale);
     const updated = await UserMeetingConfigRepository.setDefault(id, undefined, locale);
     return buildMaskedMeetingConfig(updated, isAdminScope);
+  }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function upsertManyUserMeetingConfigs(
+    inputs: readonly UserMeetingConfigSubmitInput[],
+    tx?: DBTransaction
+  ): Promise<UserMeetingConfigReturnType[]> {
+    if (inputs.length === 0) return [];
+
+    const results: UserMeetingConfigSelectType[] = [];
+    for (const input of inputs) {
+      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tx);
+      const details = parseMeetingConfigDetails(provider, input.details);
+      const upserted = await UserMeetingConfigRepository.upsertMany(
+        [
+          {
+            userId: input.userId,
+            providerId: input.providerId,
+            label: input.label ?? null,
+            isDefault: input.isDefault,
+            details,
+            encryptedSecret: input.password ?? null,
+          },
+        ],
+        tx
+      );
+      results.push(...upserted);
+    }
+
+    return buildMaskedMeetingConfigs(results, true);
+  }
+
+  export async function upsertManyClassMeetingConfigs(
+    inputs: readonly ClassMeetingConfigInsertType[],
+    tx?: DBTransaction
+  ): Promise<ClassMeetingConfigSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const prepared: ClassMeetingConfigInsertType[] = [];
+    for (const input of inputs) {
+      const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, tx);
+      prepared.push({
+        ...input,
+        details: parseMeetingConfigDetails(provider, input.details),
+        encryptedSecret: input.encryptedSecret ?? null,
+      });
+    }
+
+    return ClassMeetingConfigRepository.upsertMany(prepared, tx);
   }
 }

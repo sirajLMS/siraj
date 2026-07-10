@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  BlockOutlined,
-  EventBusyOutlined,
-  PersonOutlined,
-  ScheduleOutlined,
-} from "@mui/icons-material";
+import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";

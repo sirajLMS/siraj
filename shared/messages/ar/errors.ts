@@ -84,6 +84,7 @@ export const errors: ErrorsLabels = {
   invalidInput: "بيانات إدخال غير صالحة",
   parentNotFound: "لم يتم العثور على ولي الأمر ذو المعرف {id}.",
   parentAlreadyDeactivated: "حساب ولي الأمر ذو المعرف {id} معطل بالفعل.",
+  parentAlreadyActivated: "حساب ولي الأمر ذو المعرف {id} مفعّل بالفعل.",
   quotaMustBeNonNegative: "يجب أن يكون عدد الحصص المتبقية عددًا صحيحًا غير سالب.",
   quotaExceedsTotal: "لا يمكن تعيين الحصص المتبقية ({requested}) أعلى من إجمالي الحصص المشتراة ({total}).",
   invalidFileId: "مطلوب معرف ملف صالح.",

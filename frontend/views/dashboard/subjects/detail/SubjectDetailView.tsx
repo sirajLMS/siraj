@@ -29,7 +29,7 @@ function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) 
       disablePadding
       secondaryAction={
         resource.filePath ? (
-          <IconButton edge="end" onClick={handleDownload} aria-label="download">
+          <IconButton edge="end" onClick={handleDownload} aria-label={t("detail.detail.download")}>
             <DownloadOutlined />
           </IconButton>
         ) : undefined

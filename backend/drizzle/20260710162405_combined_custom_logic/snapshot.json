@@ -1,8 +1,8 @@
 {
+  "id": "712df2dc-3b11-4a1c-b052-1a734cfa98de",
+  "prevIds": ["fb0e5354-dea8-450b-a3b1-82b0a24fa881"],
   "version": "8",
   "dialect": "postgres",
-  "id": "c342a30d-70ca-4eab-92b9-d494c80374ba",
-  "prevIds": ["859f4c7f-6895-4f25-b6e8-f27a2226aee9"],
   "ddl": [
     {
       "values": ["pending", "approved", "rejected"],

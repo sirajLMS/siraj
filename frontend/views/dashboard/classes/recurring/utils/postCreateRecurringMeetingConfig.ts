@@ -1,4 +1,4 @@
-import { useApolloClient } from "@apollo/client/react";
+import type { useApolloClient } from "@apollo/client/react";
 import type {
   MeetingProviderFieldsFragment,
   UserMeetingConfigFieldsFragment,

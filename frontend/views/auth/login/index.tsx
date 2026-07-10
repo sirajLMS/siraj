@@ -59,7 +59,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
       if (success) {
         setLoginResult({ type: "success", message: t("loginSuccess") });
       } else {
-        setLoginResult({ type: "error", message: t("invalidCredentials") });
+        setLoginResult({ type: "error", message: authError ?? t("invalidCredentials") });
       }
     } catch (e) {
       setLoginResult({ type: "error", message: t("loginError") });

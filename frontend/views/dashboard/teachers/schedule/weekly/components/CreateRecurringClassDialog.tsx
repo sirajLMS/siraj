@@ -33,13 +33,13 @@ import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/studen
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { logger } from "@/frontend/utils/logger";
+import { RecurringMeetingConfigSection } from "@/frontend/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
+import { CLASS_TYPE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
 import {
   emptyRecurringMeetingConfigState,
   postCreateRecurringMeetingConfig,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import { RecurringMeetingConfigSection } from "@/frontend/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
-import { CLASS_TYPE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassDialogProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {

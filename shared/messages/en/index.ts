@@ -1,3 +1,4 @@
+import { reports } from "@/shared/messages/en/dashboard/reports";
 import { errors } from "@/shared/messages/en/errors";
 import type { SessionLabels } from "@/shared/messages/types/session";
 
@@ -26,6 +27,9 @@ export const session: SessionLabels = {
 export const enTranslations = {
   errors,
   session,
+  dashboard: {
+    reports,
+  },
 };
 
 export default enTranslations;

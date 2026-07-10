@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, type StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   changeStudentStatusMutationDocument,
@@ -32,7 +32,7 @@ type TeachersQueryData = Operations.TeachersQuery;
 function mapStudentData(studentData: StudentQueryData | undefined): ReassignmentStudentData | null {
   const s = studentData?.studentById;
   if (!s?.id || !s.name || !s.status) return null;
-  const status = s.status as StudentStatus;
+  const status = s.status;
   return {
     id: s.id,
     name: s.name,

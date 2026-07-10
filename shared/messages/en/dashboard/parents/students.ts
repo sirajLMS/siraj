@@ -1,0 +1,13 @@
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.messages = {
+  pageTitle: "Associated Students",
+  pageSubtitle: "View and manage your associated students",
+  noStudents: "No students associated with this account.",
+  statusLabel: "Status: {status}",
+  teacherLabel: "Teacher: {teacher}",
+  quotaLabel: "Remaining: {remaining}/{total} classes",
+  hoursLabel: "{hours} Hours/Week",
+  errors: {
+    failedToLoad: "Failed to load students. Please try again later.",
+  },
+};

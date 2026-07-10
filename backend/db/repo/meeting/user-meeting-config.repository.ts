@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { userMeetingConfigs } from "@/backend/db/schema";
@@ -174,5 +174,68 @@ export namespace UserMeetingConfigRepository {
       return;
     }
     await db.transaction(run);
+  }
+
+  function labelCondition(label: string | null | undefined) {
+    return label ? eq(userMeetingConfigs.label, label) : isNull(userMeetingConfigs.label);
+  }
+
+  export async function findByUserProviderLabel(
+    userId: string,
+    providerId: string,
+    label: string | null | undefined,
+    tx?: DBTransaction
+  ): Promise<UserMeetingConfigSelectType | null> {
+    const client = tx ?? db;
+    const [row] = await client
+      .select()
+      .from(userMeetingConfigs)
+      .where(
+        and(eq(userMeetingConfigs.userId, userId), eq(userMeetingConfigs.providerId, providerId), labelCondition(label))
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
+  export async function upsertMany(
+    inputs: readonly UserMeetingConfigInsertType[],
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<UserMeetingConfigSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<UserMeetingConfigSelectType[]> => {
+      const results: UserMeetingConfigSelectType[] = [];
+
+      for (const input of inputs) {
+        const existing = await findByUserProviderLabel(input.userId, input.providerId, input.label, t);
+
+        if (existing) {
+          const updated = await update(
+            existing.id,
+            {
+              label: input.label,
+              isDefault: input.isDefault,
+              details: input.details,
+              encryptedSecret: input.encryptedSecret,
+              providerId: input.providerId,
+            },
+            t,
+            locale
+          );
+          results.push(updated);
+          continue;
+        }
+
+        results.push(await create(input, t, locale));
+      }
+
+      return results;
+    };
+
+    if (tx) {
+      return run(tx);
+    }
+    return db.transaction(run);
   }
 }

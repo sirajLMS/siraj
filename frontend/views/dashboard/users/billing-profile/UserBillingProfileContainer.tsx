@@ -96,7 +96,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
         issueDate: formatDate(inv.issueDate),
         dueDate: formatDate(inv.dueDate),
-        paidDate: inv.paidDate ? formatDate(inv.paidDate) : "—",
+        paidDate: inv.paidDate ? formatDate(inv.paidDate) : t("parentTable.paidDate"),
         hasPaymentProof: inv.hasPaymentProof ?? false,
         fee: formatCurrencyForDisplay(
           inv.amount ?? "0",
@@ -116,7 +116,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         ),
         status: mapParentInvoiceStatus(inv.status),
       })),
-    [data?.parentInvoiceHistory, tProfile, tErrors, locale]
+    [data?.parentInvoiceHistory, tProfile, tErrors, locale, t]
   );
 
   const summary = useMemo(() => {

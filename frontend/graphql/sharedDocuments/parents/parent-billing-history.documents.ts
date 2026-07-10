@@ -24,6 +24,7 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
         parentId
         parentUserId
         hasPaymentProof
+        hasRejectedSubmission
         displayAmount {
           id
           amount
@@ -67,6 +68,7 @@ export const adminInvoicesQueryDocument: TypedDocumentNode<
         parentId
         parentUserId
         hasPaymentProof
+        hasRejectedSubmission
         displayAmount {
           id
           amount

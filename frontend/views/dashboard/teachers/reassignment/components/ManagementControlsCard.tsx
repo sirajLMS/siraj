@@ -68,8 +68,8 @@ function StatusUpdate({
   onStatusChange,
 }: Readonly<{
   currentStatus: StudentStatus;
-  selectedStatus: string;
-  onStatusChange: (status: string) => void;
+  selectedStatus: StudentStatus | "";
+  onStatusChange: (status: StudentStatus | "") => void;
 }>) {
   const t = useTranslations("dashboard.teacherReassignment.controls");
 
@@ -212,7 +212,7 @@ export function ManagementControlsCard({
   const t = useTranslations("dashboard.teacherReassignment");
   const notifications = useNotifications();
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
-  const [selectedNewStatus, setSelectedNewStatus] = useState("");
+  const [selectedNewStatus, setSelectedNewStatus] = useState<StudentStatus | "">("");
   const [saved, setSaved] = useState(false);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
