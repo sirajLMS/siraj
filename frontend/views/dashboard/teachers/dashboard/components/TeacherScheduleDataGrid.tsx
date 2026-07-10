@@ -103,8 +103,8 @@ export function TeacherScheduleDataGrid({
         sortable: false,
         renderCell: ({ row }) => (
           <ScheduleInstanceStatusBadge
-outcome={row.outcome}
-executionState={row.executionState}
+            outcome={row.outcome}
+            executionState={row.executionState}
             scheduledEndAt={row.scheduledEndAt}
             scheduledStartAt={row.scheduledStartAt}
             durationMinutes={row.durationMinutes}

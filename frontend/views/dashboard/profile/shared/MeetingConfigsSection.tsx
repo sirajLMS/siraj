@@ -26,7 +26,26 @@ export function MeetingConfigsSection({ userId, canEdit = true }: MeetingConfigs
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
   const [provider, setProvider] = useState<MeetingProviderFieldsFragment | null>(null);
-  const [details, setDetails] = useState({ meetingUrl: "", username: "", password: "", tenantId: "" });
+  const [details, setDetails] = useState({
+    meetingUrl: "",
+    username: "",
+    password: "",
+    tenantId: "",
+  });
+
+  const handleDetailsChange = (value: {
+    meetingUrl: string;
+    username?: string;
+    password?: string;
+    tenantId?: string;
+  }) => {
+    setDetails({
+      meetingUrl: value.meetingUrl,
+      username: value.username ?? "",
+      password: value.password ?? "",
+      tenantId: value.tenantId ?? "",
+    });
+  };
 
   const { data, loading, refetch } = useQuery(userMeetingConfigsQueryDocument, {
     variables: { userId },
@@ -39,7 +58,7 @@ export function MeetingConfigsSection({ userId, canEdit = true }: MeetingConfigs
   const configs = data?.userMeetingConfigs ?? [];
 
   const handleCreate = async () => {
-    if (!provider) return;
+    if (!provider?.id) return;
     await createConfig({
       variables: {
         input: {
@@ -101,7 +120,7 @@ export function MeetingConfigsSection({ userId, canEdit = true }: MeetingConfigs
           <Stack spacing={2} sx={{ pt: 1 }}>
             <TextField label={t("label")} value={label} onChange={e => setLabel(e.target.value)} fullWidth />
             <MeetingProviderSelect value={provider} onChangeAction={setProvider} label={t("provider")} />
-            <MeetingConfigTypeFields provider={provider} value={details} onChangeAction={setDetails} />
+            <MeetingConfigTypeFields provider={provider} value={details} onChangeAction={handleDetailsChange} />
           </Stack>
         </DialogContent>
         <DialogActions>

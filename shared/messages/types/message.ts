@@ -24,7 +24,7 @@ import type {
   SearchScheduleLabels,
   StatusTrackingLabels,
 } from "@/shared/messages/types/dashboard/core";
-
+import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "@/shared/messages/types/dashboard/managers";
 import type { MeetingProvidersLabels } from "@/shared/messages/types/dashboard/meeting-providers";
 import type {
   ParentOnboardingLabels,
@@ -73,6 +73,7 @@ export type {
   DashboardNavigationLabels,
   DstMigrationLabels,
   ManagerOnboardingLabels,
+  ManagersDirectoryLabels,
   MeetingProvidersLabels,
   ParentDashboardLabels,
   ParentOnboardingLabels,

@@ -50,7 +50,6 @@ export namespace TeacherPortalService {
       timezone: profile.timezone,
       hourlyRate: profile.hourlyRate,
       rateCurrency: profile.rateCurrency,
-      paymentMethod: profile.paymentMethod,
       totalClasses: profile.totalClasses,
     };
   }

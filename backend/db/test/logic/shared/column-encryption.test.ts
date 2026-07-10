@@ -2,9 +2,10 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { teacherBankingDetailsHistory, teachers, users } from "@/backend/db/schema";
+import { teachers, userMeetingConfigs, users } from "@/backend/db/schema";
+import { createTestMeetingConfig, createTestMeetingProvider } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { TeacherBankingDetailsHistoryInsertInput, TeacherEntityInput } from "@/backend/types";
+import type { TeacherEntityInput } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date) {
@@ -22,14 +23,8 @@ async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date
   return user;
 }
 
-async function insertTeacherDetails(args: {
-  tx: DBTransaction;
-  userId: string;
-  plainZoomPassword: string;
-  plainNationalId: string;
-  now: Date;
-}) {
-  const { tx, userId, plainZoomPassword, plainNationalId, now } = args;
+async function insertTeacherDetails(args: { tx: DBTransaction; userId: string; plainNationalId: string; now: Date }) {
+  const { tx, userId, plainNationalId, now } = args;
   const teacherInput: TeacherEntityInput = {
     userId,
     status: "ACTIVATED",
@@ -43,107 +38,45 @@ async function insertTeacherDetails(args: {
   return teacher;
 }
 
-async function insertBankingDetails(args: {
-  tx: DBTransaction;
-  teacherId: string;
-  plainBeneficiaryName: string;
-  plainIban: string;
-  now: Date;
-}) {
-  const { tx, teacherId, plainBeneficiaryName, plainIban, now } = args;
-  const bankingInput: TeacherBankingDetailsHistoryInsertInput = {
-    teacherId,
-    beneficiaryName: plainBeneficiaryName,
-    iban: plainIban,
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  const [banking] = await tx.insert(teacherBankingDetailsHistory).values(bankingInput).returning();
-  expect(banking).toBeDefined();
-  return banking;
-}
-
 function verifyCiphertext(value: unknown, plaintext: string) {
   const valStr = String(value);
   expect(valStr).not.toBe(plaintext);
   expect(valStr.split(":")).toHaveLength(3);
 }
 
-async function verifyRawEncryption(tx: DBTransaction, teacherId: string, bankingId: string) {
-  // Verify teacher encryption
-  const rawTeacherResult = await tx.execute(
-    sql`SELECT zoom_password, national_id FROM teachers WHERE id = ${teacherId}`
-  );
-  const teacherRows =
-    "rows" in rawTeacherResult ? rawTeacherResult.rows : (rawTeacherResult as unknown as Record<string, unknown>[]);
-  const rawTeacherRow = teacherRows[0];
-  expect(rawTeacherRow).toBeDefined();
-
-  verifyCiphertext(rawTeacherRow.national_id, plainValues.nationalId);
-
-  // Verify banking encryption
-  const rawBankingResult = await tx.execute(
-    sql`SELECT beneficiary_name, iban FROM teacher_banking_details_history WHERE id = ${bankingId}`
-  );
-  const bankingRows =
-    "rows" in rawBankingResult ? rawBankingResult.rows : (rawBankingResult as unknown as Record<string, unknown>[]);
-  const rawBankingRow = bankingRows[0];
-  expect(rawBankingRow).toBeDefined();
-
-  verifyCiphertext(rawBankingRow.beneficiary_name, plainValues.beneficiaryName);
-  verifyCiphertext(rawBankingRow.iban, plainValues.iban);
-}
-
-async function verifyDrizzleDecryption(tx: DBTransaction, teacherId: string, bankingId: string) {
-  const [drizzleTeacher] = await tx.select().from(teachers).where(sql`id = ${teacherId}`);
-  expect(drizzleTeacher).toBeDefined();
-  expect(drizzleTeacher.nationalId).toBe(plainValues.nationalId);
-
-  const [drizzleBanking] = await tx.select().from(teacherBankingDetailsHistory).where(sql`id = ${bankingId}`);
-  expect(drizzleBanking).toBeDefined();
-  expect(drizzleBanking.beneficiaryName).toBe(plainValues.beneficiaryName);
-  expect(drizzleBanking.iban).toBe(plainValues.iban);
-}
-
 describe("Column-Level Encryption", () => {
-  test("Sensitive teacher and banking fields are encrypted in the DB but decrypted on select", async () => {
+  test("Sensitive teacher national ID and meeting config secrets are encrypted in the DB but decrypted on select", async () => {
     testLogger.info("Starting column-level encryption test...");
     await runInRollback(async tx => {
       const now = new Date();
       const uniqueSuffix = randomUUID();
+      const plainNationalId = "NID-999-888-777";
+      const plainPassword = "zoom-secret-password";
 
-      const plainValues = {
-        nationalId: "NID-999-888-777",
-        beneficiaryName: "Teacher Beneficiary Name",
-        iban: "US12345678901234567890",
-      };
-
-      // 1. Create a user
       const user = await createTestUser(tx, uniqueSuffix, now);
-
-      // 2. Insert teacher details
-      const teacher = await insertTeacherDetails({
-        tx,
-        userId: user.id,
-        plainNationalId: plainValues.nationalId,
-        now,
+      const teacher = await insertTeacherDetails({ tx, userId: user.id, plainNationalId, now });
+      const provider = await createTestMeetingProvider(tx);
+      const config = await createTestMeetingConfig(tx, user.id, provider.id, {
+        encryptedSecret: plainPassword,
       });
 
-      // 3. Insert teacher banking details
-      const banking = await insertBankingDetails({
-        tx,
-        teacherId: teacher.id,
-        plainBeneficiaryName: plainValues.beneficiaryName,
-        plainIban: plainValues.iban,
-        now,
-      });
+      const rawTeacherResult = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher.id}`);
+      const teacherRows =
+        "rows" in rawTeacherResult ? rawTeacherResult.rows : (rawTeacherResult as unknown as Record<string, unknown>[]);
+      verifyCiphertext(teacherRows[0]?.national_id, plainNationalId);
 
-      // 4. Query raw values directly from database via SQL to verify ciphertext format (iv:ciphertext:tag)
-      await verifyRawEncryption(tx, teacher.id, banking.id, plainValues);
+      const rawConfigResult = await tx.execute(
+        sql`SELECT encrypted_secret FROM user_meeting_configs WHERE id = ${config.id}`
+      );
+      const configRows =
+        "rows" in rawConfigResult ? rawConfigResult.rows : (rawConfigResult as unknown as Record<string, unknown>[]);
+      verifyCiphertext(configRows[0]?.encrypted_secret, plainPassword);
 
-      // 5. Query values via Drizzle select to verify automatic decryption
-      await verifyDrizzleDecryption(tx, teacher.id, banking.id, plainValues);
+      const [drizzleTeacher] = await tx.select().from(teachers).where(sql`id = ${teacher.id}`);
+      expect(drizzleTeacher?.nationalId).toBe(plainNationalId);
+
+      const [drizzleConfig] = await tx.select().from(userMeetingConfigs).where(sql`id = ${config.id}`);
+      expect(drizzleConfig?.encryptedSecret).toBe(plainPassword);
 
       testLogger.info("Successfully verified column-level encryption and decryption.");
     });

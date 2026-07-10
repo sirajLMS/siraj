@@ -9,7 +9,6 @@ import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDispla
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
@@ -45,9 +44,7 @@ export function BillingSection(props: BillingSectionProps) {
             name="currency"
             control={props.control}
             render={({ field, fieldState }) => {
-const option: CurrencyOption | null = field.value
- ? (getCurrencyByCode(field.value) ?? null)
- : null;
+              const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
               return (
                 <CurrencySelect
                   currency={option}

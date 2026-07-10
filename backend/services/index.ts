@@ -3,6 +3,7 @@ export * from "@/backend/services/billing";
 export * from "@/backend/services/communication";
 export * from "@/backend/services/fx";
 export * from "@/backend/services/parent";
+export * from "@/backend/services/payment-method";
 export * from "@/backend/services/profile";
 export * from "@/backend/services/redis";
 export * from "@/backend/services/staff";

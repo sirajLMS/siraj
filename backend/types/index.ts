@@ -69,7 +69,6 @@ export type {
 // Billing types
 export * from "@/backend/types/billing/billing.types";
 export * from "@/backend/types/billing/payment-method.types";
-export * from "@/backend/types/meeting";
 // Book types
 export * from "@/backend/types/books/book.types";
 // Report types
@@ -104,6 +103,7 @@ export type {
   ComplaintResponseReturnType,
   ComplaintResponseSubmitInput,
 } from "@/backend/types/complaints/complaintResponses.types";
+export * from "@/backend/types/meeting";
 // Communications types
 export * from "@/backend/types/notifications/communications.types";
 export type {

@@ -21,7 +21,6 @@ const baseProfile: TeacherProfileReturnType = {
   timezone: IanaTimezone.Asia_Riyadh,
   hourlyRate: "50",
   rateCurrency: CurrencyCode.USD,
-  paymentMethod: null,
   status: AccountStatus.ACTIVATED,
   updatedAt: "2024-01-01T00:00:00.000Z",
   totalClasses: 10,

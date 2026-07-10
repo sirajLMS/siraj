@@ -36,18 +36,22 @@ describe("SupportedOnlineAccountRepository", () => {
     const active = await SupportedOnlineAccountRepository.listActive({ direction: PaymentDirection.PAYIN }, tx);
     expect(active.some(row => row.id === created.id)).toBe(true);
 
-    const updated = await SupportedOnlineAccountRepository.update(created.id, { logoUrl: "https://example.com/logo.png" }, tx);
+    const updated = await SupportedOnlineAccountRepository.update(
+      created.id,
+      { logoUrl: "https://example.com/logo.png" },
+      tx
+    );
     expect(updated.logoUrl).toBe("https://example.com/logo.png");
   });
 
   testRepo("deactivate throws when online account is missing", async tx => {
     let errorThrown: unknown = null;
     try {
-      await SupportedOnlineAccountRepository.deactivate("recordNotFound", tx);
+      await SupportedOnlineAccountRepository.deactivate("00000000-0000-0000-0000-000000000000", tx);
     } catch (error) {
       errorThrown = error;
     }
     expect(errorThrown).not.toBeNull();
-    expect(getErrorMessage(errorThrown)).toContain("recordNotFound");
+    expect(getErrorMessage(errorThrown)).toContain("00000000-0000-0000-0000-000000000000");
   });
 });

@@ -31,40 +31,40 @@ export interface ParentStudentOption {
  * Keys for admin dashboard metrics, used for type-safe translation keys.
  */
 export type AdminMetricKey =
- | "total"
- | "regular"
- | "trial"
- | "advance"
- | "rescheduled"
- | "suspended"
- | "taken"
- | "pending"
- | "activated"
- | "running"
- | "absent"
- | "leave";
+  | "total"
+  | "regular"
+  | "trial"
+  | "advance"
+  | "rescheduled"
+  | "suspended"
+  | "taken"
+  | "pending"
+  | "activated"
+  | "running"
+  | "absent"
+  | "leave";
 
 export interface MetricItem {
- readonly key: string;
- readonly count: number | string;
- readonly labelKey: string;
- readonly label?: string;
- readonly icon: SvgIconComponent;
- readonly subLabel?: string;
- readonly variant?: "default" | "error" | "highlight" | "danger" | "compact";
+  readonly key: string;
+  readonly count: number | string;
+  readonly labelKey: string;
+  readonly label?: string;
+  readonly icon: SvgIconComponent;
+  readonly subLabel?: string;
+  readonly variant?: "default" | "error" | "highlight" | "danger" | "compact";
 }
 
 export interface TeacherFilterItem {
- readonly id: string;
- readonly name: string;
+  readonly id: string;
+  readonly name: string;
 }
 
 export interface DashboardFilters {
- readonly date: string;
- readonly teacherId: string;
- readonly searchQuery: string;
- readonly debouncedSearchQuery: string;
- readonly selectedStatus: AdminMetricKey | null;
+  readonly date: string;
+  readonly teacherId: string;
+  readonly searchQuery: string;
+  readonly debouncedSearchQuery: string;
+  readonly selectedStatus: AdminMetricKey | null;
 }
 
 export interface Pagination {

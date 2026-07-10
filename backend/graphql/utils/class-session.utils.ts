@@ -95,7 +95,11 @@ export async function buildClassInstanceDetail(
   const start = instance.scheduledStartAt;
   const end = instance.scheduledEndAt;
   const studentTimezone = (await SchedulingRepository.resolveStudentTimezone(instance.studentId)) as IanaTimezone;
-  const teacherTimezone = (instance.teacher?.user?.timezone as IanaTimezone | undefined) ?? null;
+  const teacherTimezone =
+    instance.teacher?.user?.timezone &&
+    Object.values(IanaTimezone).includes(instance.teacher.user.timezone as IanaTimezone)
+      ? (instance.teacher.user.timezone as IanaTimezone)
+      : null;
   const hasTimezoneMismatch =
     teacherTimezone !== null && studentTimezone !== null && teacherTimezone !== studentTimezone;
 

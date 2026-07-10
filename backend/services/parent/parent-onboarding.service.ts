@@ -5,7 +5,9 @@ import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/b
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
 
 export interface ParentOnboardingInput {
   readonly name: string;
@@ -19,7 +21,7 @@ export interface ParentOnboardingInput {
   readonly twitter?: string | null;
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
-  readonly paymentMethod?: string | null;
+  readonly initialPayinMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
   readonly currency?: CurrencyCode | null;
   readonly timezone?: string | null;
   readonly status?: string | null;
@@ -79,7 +81,6 @@ export namespace ParentOnboardingService {
           twitter: input.twitter ?? null,
           invoiceType: input.invoiceType ?? null,
           feeAmount: input.feeAmount ?? null,
-          paymentMethod: input.paymentMethod ?? null,
           currency: input.currency ?? null,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -96,6 +97,14 @@ export namespace ParentOnboardingService {
       }
 
       await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
+
+      if (input.initialPayinMethod) {
+        await PaymentMethodService.createUserPaymentMethodInternal(
+          { ...input.initialPayinMethod, userId: user.id },
+          txObj,
+          locale
+        );
+      }
 
       logger.info("Parent onboarded successfully", { parentId: parent.id, userId: user.id });
 

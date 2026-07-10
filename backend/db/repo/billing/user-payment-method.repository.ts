@@ -4,7 +4,10 @@ import { db } from "@/backend/db/drizzleDb";
 import { userPaymentMethods } from "@/backend/db/schema";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { UserPaymentMethodInsertType, UserPaymentMethodSelectType } from "@/backend/types/billing/payment-method.types";
+import type {
+  UserPaymentMethodInsertType,
+  UserPaymentMethodSelectType,
+} from "@/backend/types/billing/payment-method.types";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";
 
@@ -25,10 +28,7 @@ function slotDirections(slot: DefaultSlot): PaymentDirection[] {
 }
 
 export namespace UserPaymentMethodRepository {
-  export async function listByUserId(
-    userId: string,
-    tx?: DBTransaction
-  ): Promise<UserPaymentMethodSelectType[]> {
+  export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserPaymentMethodSelectType[]> {
     const client = tx ?? db;
     return client
       .select()

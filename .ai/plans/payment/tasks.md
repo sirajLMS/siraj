@@ -30,40 +30,40 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ## Phase 2 — Schema + migration + seeds
 
-- [ ] Create `backend/db/schema/user-payment-methods.ts` — `details` jsonb `.$type<PaymentMethodDetails>()`
-- [ ] Create `backend/db/schema/supported-mobile-wallets.ts` — `name`/`description`/`instructions` `.$type<LocalizedString>()`
-- [ ] Create `backend/db/schema/supported-payment-links.ts` — `LocalizedString` columns + `url_allowlist` `.$type<readonly string[]>()`
-- [ ] Create `backend/db/schema/supported-online-accounts.ts` — `LocalizedString` columns incl. `identifier_label`
-- [ ] Update `backend/db/schema/enums.ts` — add `paymentMethodTypeEnum`, `paymentDirectionEnum`, `identifierKindEnum`; **delete** `paymentMethodEnum`
-- [ ] Update `backend/db/schema/teachers.ts` — drop `payment_method`
-- [ ] Update `backend/db/schema/parents.ts` — drop `payment_method`
-- [ ] Delete `backend/db/schema/teacher-banking.ts`
-- [ ] Create `backend/db/schema/teacher-payments.ts` — FK + `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()`
-- [ ] Update `backend/db/schema/billing.ts` — delete `payment_method`; add FK + `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()`
-- [ ] Update `backend/db/schema/index.ts`
-- [ ] Update `backend/db/drizzleRelations.ts` — remove teacher banking relations; add payment method relations
-- [ ] JSONB gate: every new schema file uses `jsonb(...).$type<T>()` — no bare `jsonb()` columns
-- [ ] Drizzle MCP `check` → drop local DB → `generate` (8C — no backfill); resolve `missing_hints` via drizzle-hints skill
-- [ ] Seed catalog rows (PayPal, Wise, Vodafone Cash, Etisalat Cash, STC Pay, InstaPay)
-- [ ] Seed demo user payment methods
-- [ ] Seed new permissions in permission groups
-- [ ] Gate: db tests
+- [x] Create `backend/db/schema/user-payment-methods.ts` — `details` jsonb `.$type<PaymentMethodDetails>()`
+- [x] Create `backend/db/schema/supported-mobile-wallets.ts` — `name`/`description`/`instructions` `.$type<LocalizedString>()`
+- [x] Create `backend/db/schema/supported-payment-links.ts` — `LocalizedString` columns + `url_allowlist` `.$type<readonly string[]>()`
+- [x] Create `backend/db/schema/supported-online-accounts.ts` — `LocalizedString` columns incl. `identifier_label`
+- [x] Update `backend/db/schema/enums.ts` — add `paymentMethodTypeEnum`, `paymentDirectionEnum`, `identifierKindEnum`; **delete** `paymentMethodEnum`
+- [x] Update `backend/db/schema/teachers.ts` — drop `payment_method`
+- [x] Update `backend/db/schema/parents.ts` — drop `payment_method`
+- [x] Delete `backend/db/schema/teacher-banking.ts`
+- [x] Create `backend/db/schema/teacher-payments.ts` — FK + `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()`
+- [x] Update `backend/db/schema/billing.ts` — delete `payment_method`; add FK + `payment_method_snapshot` `.$type<PaymentMethodTransactionSnapshot>()`
+- [x] Update `backend/db/schema/index.ts`
+- [x] Update `backend/db/drizzleRelations.ts` — remove teacher banking relations; add payment method relations
+- [x] JSONB gate: every new schema file uses `jsonb(...).$type<T>()` — no bare `jsonb()` columns
+- [x] Drizzle MCP `check` → drop local DB → `generate` (8C — no backfill); resolve `missing_hints` via drizzle-hints skill
+- [x] Seed catalog rows (PayPal, Wise, Vodafone Cash, Etisalat Cash, STC Pay, InstaPay)
+- [x] Seed demo user payment methods
+- [x] Seed new permissions in permission groups
+- [ ] Gate: db tests (full seed blocked by unrelated `parents.display_currency` column mismatch — catalog + permission seeds pass)
 
 ## Phase 3 — Repositories
 
-- [ ] Create `backend/db/repo/user-payment-method.repository.ts`
-- [ ] Create `backend/db/repo/supported-mobile-wallet.repository.ts`
-- [ ] Create `backend/db/repo/supported-payment-link.repository.ts`
-- [ ] Create `backend/db/repo/supported-online-account.repository.ts`
-- [ ] Delete `backend/db/repo/teacher-banking.repository.ts`
-- [ ] Update `backend/db/repo/teacher.repository.ts`
-- [ ] Update `backend/db/repo/parent.repository.ts`
-- [ ] Update `backend/db/repo/billing.repository.ts`
-- [ ] Update `backend/db/repo/index.ts`
-- [ ] Create `backend/db/test/repo/user-payment-method.repository.test.ts`
-- [ ] Create `backend/db/test/repo/supported-mobile-wallet.repository.test.ts`
-- [ ] Create `backend/db/test/repo/supported-payment-link.repository.test.ts`
-- [ ] Create `backend/db/test/repo/supported-online-account.repository.test.ts`
+- [x] Create `backend/db/repo/user-payment-method.repository.ts`
+- [x] Create `backend/db/repo/supported-mobile-wallet.repository.ts`
+- [x] Create `backend/db/repo/supported-payment-link.repository.ts`
+- [x] Create `backend/db/repo/supported-online-account.repository.ts`
+- [x] Delete `backend/db/repo/teacher-banking.repository.ts`
+- [x] Update `backend/db/repo/teacher.repository.ts`
+- [x] Update `backend/db/repo/parent.repository.ts`
+- [x] Update `backend/db/repo/billing.repository.ts`
+- [x] Update `backend/db/repo/index.ts`
+- [x] Create `backend/db/test/repo/user-payment-method.repository.test.ts`
+- [x] Create `backend/db/test/repo/supported-mobile-wallet.repository.test.ts`
+- [x] Create `backend/db/test/repo/supported-payment-link.repository.test.ts`
+- [x] Create `backend/db/test/repo/supported-online-account.repository.test.ts`
 - [ ] Gate: `bun run test:db`
 
 ## Phase 4 — Services

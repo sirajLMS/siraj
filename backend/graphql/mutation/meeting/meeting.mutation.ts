@@ -1,5 +1,3 @@
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   MeetingProviderCreateInputPothos,
@@ -12,6 +10,8 @@ import {
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
+import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
 
 function normalizeFieldSchema(input: {
   readonly requiresMeetingUrl: boolean;

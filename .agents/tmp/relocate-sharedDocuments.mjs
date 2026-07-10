@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const ROOT = "/home/ahmed/Projects/siraj";
 const OLD_PREFIX = "@/frontend/graphql/sharedDocuments/";
@@ -56,7 +56,7 @@ const DIRMAP = {
   "translation.documents": "shared",
 };
 
-const skip = (p) => {
+const skip = p => {
   if (p.endsWith(".mjs")) return true;
   if (p.startsWith(`${ROOT}/.git`)) return true;
   if (p.startsWith(`${ROOT}/node_modules`)) return true;
@@ -66,7 +66,7 @@ const skip = (p) => {
 
 const files = execSync(
   "cd /home/ahmed/Projects/siraj && git grep -l -I --full-name -e '@/frontend/graphql/sharedDocuments/' -- ':!/.git' ':!/node_modules' ':!/frontend/graphql/sharedDocuments'",
-  { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 },
+  { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 }
 )
   .split("\n")
   .filter(Boolean);
@@ -86,9 +86,9 @@ for (const rel of files) {
   }
   if (src !== before) {
     writeFileSync(abs, src, "utf8");
-    const edits = [...before.matchAll(/@\/frontend\/graphql\/sharedDocuments\/[a-z-]+\.documents/g)]
-      .filter((m) => DIRMAP[m[0].split("/").slice(-1)[0]])
-      .length;
+    const edits = [...before.matchAll(/@\/frontend\/graphql\/sharedDocuments\/[a-z-]+\.documents/g)].filter(
+      m => DIRMAP[m[0].split("/").slice(-1)[0]]
+    ).length;
     totalEdits += edits;
     editedFiles.push(rel);
   }

@@ -74,12 +74,12 @@ export function TeacherAvailabilityMonthDrawer({
     return buildTeacherMonthAvailabilityInput(draft, { id: teacher.id, name: teacher.name }, currentMonth);
   }, [currentMonth, draft, teacher?.id, teacher?.name]);
 
-      const emptyInput: AvailabilitySearchInput = {};
-      const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {
-        variables: monthInput ? { input: monthInput } : { input: emptyInput },
-        skip: !open || monthInput === null,
-        fetchPolicy: "cache-and-network",
-      });
+  const emptyInput: AvailabilitySearchInput = {};
+  const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {
+    variables: monthInput ? { input: monthInput } : { input: emptyInput },
+    skip: !open || monthInput === null,
+    fetchPolicy: "cache-and-network",
+  });
 
   const monthTeacher = useMemo(() => {
     const teachers = data?.searchTeacherAvailability?.teachers ?? [];

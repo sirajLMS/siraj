@@ -54,7 +54,6 @@ export namespace ParentProfileService {
       twitter: profile.twitter,
       invoiceType: profile.invoiceType,
       feeAmount: profile.feeAmount,
-      paymentMethod: profile.paymentMethod,
       currency: profile.currency,
       displayCurrency: profile.displayCurrency,
       timezone: profile.timezone as IanaTimezone,

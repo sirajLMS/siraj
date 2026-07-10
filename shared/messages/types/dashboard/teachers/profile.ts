@@ -22,8 +22,6 @@ export interface TeacherProfileLabels {
     readonly baseSalary: string;
     readonly currency: string;
     readonly paymentMethod: string;
-    readonly zoomLink: string;
-    readonly zoomLinkTooltip: string;
     readonly accountStatus: string;
     readonly accountStatusDesc: string;
     readonly active: string;

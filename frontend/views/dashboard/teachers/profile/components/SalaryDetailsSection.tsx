@@ -49,9 +49,7 @@ export function SalaryDetailsSection() {
             name="currency"
             control={control}
             render={({ field, fieldState }) => {
-          const option: CurrencyOption | null = field.value
-            ? (getCurrencyByCode(field.value) ?? null)
-            : null;
+              const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
               return (
                 <CurrencySelect
                   currency={option}

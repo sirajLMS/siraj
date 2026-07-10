@@ -24,8 +24,6 @@ export const profile: TeacherProfileLabels = {
     baseSalary: "الراتب الأساسي",
     currency: "العملة",
     paymentMethod: "طريقة الدفع",
-    zoomLink: "رابط زووم الشخصي",
-    zoomLinkTooltip: "رابط الاجتماع القياسي للفصول الافتراضية",
     accountStatus: "حالة الحساب",
     accountStatusDesc: "منح حق الوصول إلى الأنظمة الداخلية",
     active: "نشط",

@@ -105,7 +105,9 @@ export type UnifiedProfileReturnType = {
   readonly staffPermissionOverrides: StaffPermissionOverrideReturnType[] | null;
   readonly paymentMethods: readonly UserPaymentMethodReturnType[] | null;
   readonly paymentMethodDefaults: PaymentMethodDefaults | null;
-  readonly meetingConfigs: readonly import("@/backend/types/meeting/meeting-config.types").UserMeetingConfigReturnType[] | null;
+  readonly meetingConfigs:
+    | readonly import("@/backend/types/meeting/meeting-config.types").UserMeetingConfigReturnType[]
+    | null;
   readonly assignedStudents: TeacherAssignedStudentsResult | null;
   readonly displayCurrency: CurrencyCode | null;
 };

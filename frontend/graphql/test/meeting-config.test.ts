@@ -17,11 +17,15 @@ function buildProviderInput(slug: string) {
     slug,
     name: { en: "Zoom", ar: "زووم" },
     description: { en: "Zoom video conferencing", ar: "مؤتمرات زووم" },
+    instructions: null,
+    logoUrl: null,
     urlAllowlist: ["zoom.us", "*.zoom.us"],
     urlExample: "https://zoom.us/j/123456789",
     fieldSchema: {
       requiresMeetingUrl: true,
       supportsPassword: true,
+      supportsUsername: null,
+      supportsTenantId: null,
     },
     isActive: true,
   };
@@ -99,8 +103,11 @@ describe("GraphQL Meeting Config Integration Tests", () => {
         providerId,
         label: "Teacher Zoom",
         isDefault: true,
+        password: null,
         details: {
           meetingUrl: "https://zoom.us/j/555666777",
+          username: null,
+          tenantId: null,
         },
       },
     });
@@ -118,17 +125,21 @@ describe("GraphQL Meeting Config Integration Tests", () => {
   });
 
   test("setDefaultMeetingConfig switches the default config for the user", async () => {
-    const secondConfigData = await authenticatedRequest(superAdminToken, "mutate", createUserMeetingConfigMutationDocument, {
-      input: {
-        userId: teacherUserId,
-        providerId,
-        label: "Teacher Backup Zoom",
-        isDefault: false,
-        details: {
-          meetingUrl: "https://zoom.us/j/888999000",
+    const secondConfigData = await authenticatedRequest(
+      superAdminToken,
+      "mutate",
+      createUserMeetingConfigMutationDocument,
+      {
+        input: {
+          userId: teacherUserId,
+          providerId,
+          label: "Teacher Backup Zoom",
+          isDefault: false,
+          password: null,
+          details: { meetingUrl: "https://zoom.us/j/888999000", username: null, tenantId: null },
         },
-      },
-    });
+      }
+    );
 
     const secondConfigId = secondConfigData.createUserMeetingConfig?.id;
     expect(secondConfigId).toBeDefined();
@@ -152,17 +163,21 @@ describe("GraphQL Meeting Config Integration Tests", () => {
   });
 
   test("teacher cannot read another user's meeting config (IDOR)", async () => {
-    const parentConfigData = await authenticatedRequest(superAdminToken, "mutate", createUserMeetingConfigMutationDocument, {
-      input: {
-        userId: parentUserId,
-        providerId,
-        label: "Parent Zoom",
-        isDefault: true,
-        details: {
-          meetingUrl: "https://zoom.us/j/444555666",
+    const parentConfigData = await authenticatedRequest(
+      superAdminToken,
+      "mutate",
+      createUserMeetingConfigMutationDocument,
+      {
+        input: {
+          userId: parentUserId,
+          providerId,
+          label: "Parent Zoom",
+          isDefault: true,
+          password: null,
+          details: { meetingUrl: "https://zoom.us/j/444555666", username: null, tenantId: null },
         },
-      },
-    });
+      }
+    );
 
     const parentConfigId = parentConfigData.createUserMeetingConfig?.id;
     expect(parentConfigId).toBeDefined();

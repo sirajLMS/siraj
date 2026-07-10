@@ -2,18 +2,18 @@ import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ClassType, type CreateRecurringClassInput, type ManagerAccountType } from "../generated/gql/graphql-types";
-import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
-import { createManagerMutationDocument } from "../sharedDocuments/manager-onboarding.documents";
-import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
-import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teacher-dashboard.documents";
+import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth/auth.documents";
+import { createRecurringClassMutationDocument } from "../sharedDocuments/scheduling/recurring-class.documents";
+import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/scheduling/weekly-schedule.documents";
 import {
   cleanupTestEntitiesMutationDocument,
   cleanupTestManagerMutationDocument,
   cleanupTestSuperAdminMutationDocument,
   createTestEntitiesMutationDocument,
   createTestSuperAdminMutationDocument,
-} from "../sharedDocuments/test-helper.documents";
-import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/weekly-schedule.documents";
+} from "../sharedDocuments/shared/test-helper.documents";
+import { createManagerMutationDocument } from "../sharedDocuments/teachers/manager-onboarding.documents";
+import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teachers/teacher-dashboard.documents";
 import { testClient } from "./testClient";
 
 /** Shared test password — all provisioned test users use this value. */

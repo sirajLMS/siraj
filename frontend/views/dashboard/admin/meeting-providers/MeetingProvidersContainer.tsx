@@ -1,10 +1,10 @@
 "use client";
 
+import { useMutation, useQuery } from "@apollo/client/react";
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useMutation, useQuery } from "@apollo/client/react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
@@ -21,7 +21,6 @@ import { EditMeetingProviderDialog } from "@/frontend/views/dashboard/admin/meet
 
 export function MeetingProvidersContainer() {
   const t = useTranslations("dashboard.meetingProviders");
-  const locale = useLocale();
   const [createOpen, setCreateOpen] = useState(false);
   const [editProvider, setEditProvider] = useState<MeetingProviderFieldsFragment | null>(null);
   const [deleteProvider, setDeleteProvider] = useState<MeetingProviderFieldsFragment | null>(null);
@@ -74,7 +73,7 @@ export function MeetingProvidersContainer() {
         ),
       },
     ],
-    [locale, t]
+    [t]
   );
 
   return (

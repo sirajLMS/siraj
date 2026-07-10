@@ -16,7 +16,7 @@ import {
   TeacherPortalService,
 } from "@/backend/services";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
-import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type {
   ParentAdminProfileUpdateInput,
   ParentOwnProfileUpdateInput,
@@ -26,6 +26,7 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
+import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 
@@ -71,7 +72,6 @@ export function toParentRepoInput(
     twitter: input.twitter,
     invoiceType: "invoiceType" in input ? input.invoiceType : undefined,
     feeAmount: "feeAmount" in input ? input.feeAmount : undefined,
-    paymentMethod: "paymentMethod" in input ? input.paymentMethod : undefined,
     currency: "currency" in input ? input.currency : undefined,
   };
 }
@@ -424,6 +424,14 @@ export namespace ProfileService {
       meetingConfigs = null;
     }
 
+    const paymentMethods = await PaymentMethodService.listForProfile(actorUserId, targetUserId, scope, locale);
+    const paymentMethodDefaults = await PaymentMethodService.getDefaultsForProfile(
+      actorUserId,
+      targetUserId,
+      scope,
+      locale
+    );
+
     return {
       id: targetUserId,
       userId: targetUserId,
@@ -444,8 +452,8 @@ export namespace ProfileService {
       staffPermissionGroups,
       staffPermissionOverrides,
       meetingConfigs,
-      paymentMethods: null,
-      paymentMethodDefaults: null,
+      paymentMethods,
+      paymentMethodDefaults,
       assignedStudents,
       displayCurrency: user.displayCurrency,
     };

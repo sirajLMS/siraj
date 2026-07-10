@@ -20,6 +20,7 @@ import {
   statusTracking,
 } from "@/shared/messages/ar/dashboard/core";
 import { managerOnboarding, managersDirectory } from "@/shared/messages/ar/dashboard/managers";
+import { meetingProviders as meetingProvidersLabels } from "@/shared/messages/ar/dashboard/meeting-providers/main";
 import {
   directory,
   onboarding,
@@ -66,6 +67,7 @@ import {
   genderSelector,
   languageSelector,
   localizedString,
+  meetingConfig,
   phoneInput,
   tagInput,
   timezoneSelect,
@@ -110,6 +112,7 @@ export const arTranslations = {
     phoneInput,
     tagInput,
     timezoneSelect,
+    meetingConfig,
   },
   dashboard: {
     nav,
@@ -156,6 +159,7 @@ export const arTranslations = {
     complaints: complaintsLabels,
     resources: resourcesLabels,
     subjects: subjectsLabels,
+    meetingProviders: meetingProvidersLabels,
     booksAndBags: booksAndBagsLabels,
     permissions: permissionsLabels,
     searchSchedule,

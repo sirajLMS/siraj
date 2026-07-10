@@ -1,10 +1,10 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { useQuery } from "@apollo/client/react";
 import { useLocale } from "next-intl";
-import type { MeetingProviderFieldsFragment, UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { meetingProvidersQueryDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 
@@ -41,9 +41,7 @@ export function MeetingProviderSelect({
       onChange={(_event, next) => onChangeAction(next)}
       getOptionLabel={option => resolveLocalizedString(option.name, locale)}
       isOptionEqualToValue={(a, b) => a.id === b.id}
-      renderInput={params => (
-        <TextField {...params} label={label} error={error} helperText={helperText} fullWidth />
-      )}
+      renderInput={params => <TextField {...params} label={label} error={error} helperText={helperText} fullWidth />}
     />
   );
 }

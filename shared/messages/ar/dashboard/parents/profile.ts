@@ -43,7 +43,6 @@ export const profile: ParentProfileLabels = {
     address: "العنوان",
     facebook: "فيسبوك",
     whatsapp: "واتساب",
-    zoomLink: "رابط زووم",
     invoiceType: "نوع الفاتورة",
     feeAmount: "مبلغ الرسوم",
     paymentMethod: "طريقة الدفع",

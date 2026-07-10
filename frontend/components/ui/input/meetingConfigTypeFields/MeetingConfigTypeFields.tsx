@@ -19,12 +19,7 @@ export type MeetingConfigTypeFieldsProps = {
   readonly disabled?: boolean;
 };
 
-export function MeetingConfigTypeFields({
-  provider,
-  value,
-  onChangeAction,
-  disabled,
-}: MeetingConfigTypeFieldsProps) {
+export function MeetingConfigTypeFields({ provider, value, onChangeAction, disabled }: MeetingConfigTypeFieldsProps) {
   if (!provider) {
     return null;
   }

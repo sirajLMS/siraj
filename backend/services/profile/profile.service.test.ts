@@ -30,7 +30,6 @@ describe("toParentRepoInput", () => {
       twitter: "@parent",
       invoiceType: "monthly",
       feeAmount: "500",
-      paymentMethod: "bank_transfer",
       currency: CurrencyCode.SAR,
       timezone: IanaTimezone.Asia_Riyadh,
     };
@@ -44,9 +43,7 @@ describe("toParentRepoInput", () => {
       twitter: "@parent",
       invoiceType: "monthly",
       feeAmount: "500",
-      paymentMethod: "bank_transfer",
       currency: CurrencyCode.SAR,
-      timezone: IanaTimezone.Asia_Riyadh,
     });
   });
 
@@ -67,7 +64,6 @@ describe("toParentRepoInput", () => {
       twitter: "@parent",
       invoiceType: undefined,
       feeAmount: undefined,
-      paymentMethod: undefined,
       currency: undefined,
       timezone: undefined,
     });

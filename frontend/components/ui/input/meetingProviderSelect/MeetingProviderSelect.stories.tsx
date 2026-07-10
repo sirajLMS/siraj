@@ -31,7 +31,5 @@ export default meta;
 type Story = StoryObj<typeof MeetingProviderSelect>;
 
 export const WithValue: Story = {
-  render: () => (
-    <MeetingProviderSelect value={mockProvider} onChangeAction={() => {}} label="Meeting provider" />
-  ),
+  render: () => <MeetingProviderSelect value={mockProvider} onChangeAction={() => {}} label="Meeting provider" />,
 };

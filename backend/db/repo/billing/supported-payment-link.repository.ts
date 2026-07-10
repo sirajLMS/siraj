@@ -10,6 +10,12 @@ import type {
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types/billing/payment-method.types";
 
+type LinkRow = typeof supportedPaymentLinks.$inferSelect;
+
+function toSelectType(row: LinkRow): SupportedPaymentLinkSelectType {
+  return row as SupportedPaymentLinkSelectType;
+}
+
 type ListActiveFilters = {
   readonly direction?: PaymentDirection;
 };
@@ -25,7 +31,11 @@ function directionFilter(direction?: PaymentDirection) {
 export namespace SupportedPaymentLinkRepository {
   export async function listAll(tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType[]> {
     const client = tx ?? db;
-    return client.select().from(supportedPaymentLinks).orderBy(supportedPaymentLinks.slug);
+    return client
+      .select()
+      .from(supportedPaymentLinks)
+      .orderBy(supportedPaymentLinks.slug)
+      .then(rows => rows.map(toSelectType));
   }
 
   export async function listActive(
@@ -39,13 +49,14 @@ export namespace SupportedPaymentLinkRepository {
       .select()
       .from(supportedPaymentLinks)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(supportedPaymentLinks.slug);
+      .orderBy(supportedPaymentLinks.slug)
+      .then(rows => rows.map(toSelectType));
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType | null> {
     const client = tx ?? db;
     const [row] = await client.select().from(supportedPaymentLinks).where(eq(supportedPaymentLinks.id, id)).limit(1);
-    return row ?? null;
+    return row ? toSelectType(row) : null;
   }
 
   export async function getBySlug(slug: string, tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType | null> {
@@ -55,7 +66,7 @@ export namespace SupportedPaymentLinkRepository {
       .from(supportedPaymentLinks)
       .where(eq(supportedPaymentLinks.slug, slug))
       .limit(1);
-    return row ?? null;
+    return row ? toSelectType(row) : null;
   }
 
   export async function create(
@@ -77,7 +88,7 @@ export namespace SupportedPaymentLinkRepository {
       throw new Error("Failed to create supported payment link");
     }
 
-    return created;
+    return toSelectType(created);
   }
 
   export async function update(
@@ -98,16 +109,27 @@ export namespace SupportedPaymentLinkRepository {
       throw new Error(tFunc("recordNotFound", { tableName: "supported_payment_links", entityId: id }));
     }
 
-    return updated;
+    return toSelectType(updated);
   }
 
-  export async function deactivate(id: string, tx?: DBTransaction, locale?: string): Promise<SupportedPaymentLinkSelectType> {
+  export async function deactivate(
+    id: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<SupportedPaymentLinkSelectType> {
     return update(id, { isActive: false }, tx, locale);
   }
 
-  export async function listByIds(ids: readonly string[], tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType[]> {
+  export async function listByIds(
+    ids: readonly string[],
+    tx?: DBTransaction
+  ): Promise<SupportedPaymentLinkSelectType[]> {
     if (ids.length === 0) return [];
     const client = tx ?? db;
-    return client.select().from(supportedPaymentLinks).where(inArray(supportedPaymentLinks.id, [...ids]));
+    return client
+      .select()
+      .from(supportedPaymentLinks)
+      .where(inArray(supportedPaymentLinks.id, [...ids]))
+      .then(rows => rows.map(toSelectType));
   }
 }

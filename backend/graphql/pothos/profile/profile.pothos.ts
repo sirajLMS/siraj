@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { UserMeetingConfigPothosObject } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 import {
   ParentAssignedStudentsResultPothosObject,
   ParentOwnProfilePothosObject,
@@ -33,7 +34,6 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
-import { UserMeetingConfigPothosObject } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 
 const StaffPermissionGroupRef = gqlSchemaBuilder.objectRef<StaffPermissionGroupReturnType>("StaffPermissionGroup");
 

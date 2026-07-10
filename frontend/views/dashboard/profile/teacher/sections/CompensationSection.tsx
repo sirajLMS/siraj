@@ -65,21 +65,19 @@ function CompensationEditSection({
           name="rateCurrency"
           control={control}
           render={({ field, fieldState }) => {
-      const option: CurrencyOption | null = field.value
-      ? (getCurrencyByCode(field.value) ?? null)
-      : null;
+            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
             return (
-      <CurrencySelect
-        currency={option}
-        setCurrencyAction={selected => {
-          field.onChange(selected.code);
-        }}
-        onBlurAction={field.onBlur}
-        label={t("fields.currency")}
-        error={Boolean(fieldState.error)}
-        helperText={fieldState.error?.message}
-        fullWidth
-      />
+              <CurrencySelect
+                currency={option}
+                setCurrencyAction={selected => {
+                  field.onChange(selected.code);
+                }}
+                onBlurAction={field.onBlur}
+                label={t("fields.currency")}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                fullWidth
+              />
             );
           }}
         />

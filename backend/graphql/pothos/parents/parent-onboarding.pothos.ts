@@ -6,6 +6,7 @@ import {
   InvoiceTypePothosObject,
   PaymentMethodPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { safeParseCurrencyCode } from "@/backend/lib/currency.validation";
 import type { Email } from "@/backend/lib/email";
 import type {
   ParentOnboardingInput,
@@ -56,7 +57,7 @@ export const ParentOnboardingResultPothosObject = gqlSchemaBuilder
       currency: t.field({
         type: CurrencyCodePothosObject,
         nullable: true,
-        resolve: parent => parent.currency as CurrencyCode | null,
+        resolve: parent => safeParseCurrencyCode(parent.currency),
       }),
     }),
   });

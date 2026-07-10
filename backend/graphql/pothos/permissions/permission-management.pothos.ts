@@ -1,5 +1,5 @@
 import { PermissionManagementRepository } from "@/backend/db/repo";
-import { AppPermission, type OverrideState } from "@/backend/enum";
+import { AppPermission, OverrideState } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { OverrideStatePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
@@ -9,6 +9,30 @@ import type {
   PermissionEntity,
   UserOverrideReturnType,
 } from "@/backend/types";
+
+/**
+ * Type guard to validate if a string is a valid OverrideState.
+ * @param state The state value to validate.
+ * @returns True if the state is a valid OverrideState, false otherwise.
+ */
+function isOverrideState(state: string): state is OverrideState {
+  return Object.values(OverrideState).includes(state as OverrideState);
+}
+
+/**
+ * Safely maps user overrides to include only valid OverrideState values.
+ * @param overrides Array of user override objects.
+ * @returns Array of user overrides with validated OverrideState values.
+ * @throws Error if any state is not a valid OverrideState.
+ */
+function mapUserOverridesSafely(overrides: UserOverrideReturnType[]): UserOverrideReturnType[] {
+  return overrides.map(o => {
+    if (!isOverrideState(o.state)) {
+      throw new Error(`Invalid OverrideState value: ${o.state}`);
+    }
+    return { ...o, state: o.state };
+  });
+}
 
 let groupUsersCache: Map<string, GroupUserEntity[]> | null = null;
 
@@ -150,7 +174,7 @@ gqlSchemaBuilder.queryFields(t => ({
     description: "List overrides for a user.",
     resolve: async (_root, args, ctx) =>
       PermissionManagementService.listUserOverrides(ctx.user?.id || "", args.userId, ctx.locale).then(overrides =>
-        overrides.map(o => ({ ...o, state: o.state as OverrideState }))
+        mapUserOverridesSafely(overrides)
       ),
   }),
   effectiveUserPermissions: t.stringList({

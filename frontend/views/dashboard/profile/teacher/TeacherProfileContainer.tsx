@@ -109,13 +109,12 @@ type TabContentProps = {
 function renderActiveTabContent({
   activeTab,
   scope,
-  mode,
   targetUserId,
   profile,
   loading,
   error,
   refetch,
-}: TabContentProps) {
+}: Omit<TabContentProps, "mode">) {
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
@@ -168,7 +167,6 @@ export function TeacherProfileContainer({
   const tabContent = renderActiveTabContent({
     activeTab,
     scope,
-    mode,
     targetUserId,
     profile,
     loading,

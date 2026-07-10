@@ -2,12 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import {
-  AppPermission,
-  ComplaintCategory,
-  ComplaintStatus,
-  type CurrencyCode,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/ParentComplaintsDesktopView";

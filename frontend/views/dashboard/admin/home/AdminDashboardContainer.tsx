@@ -10,7 +10,10 @@ import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
-import { buildAdminDashboardMetrics, ADMIN_METRIC_DEFINITIONS } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
+import {
+  ADMIN_METRIC_DEFINITIONS,
+  buildAdminDashboardMetrics,
+} from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import { resolveDailyScheduleMetricFilter } from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
 import { DashboardView } from "@/frontend/views/dashboard/dashboard/DashboardView";
 
@@ -131,17 +134,18 @@ export function AdminDashboardContainer() {
   const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
-// Type-safe keys for admin metrics
-type AdminMetricKey = typeof ADMIN_METRIC_DEFINITIONS[number]["key"];
+  // Type-safe keys for admin metrics
+  type AdminMetricKey = (typeof ADMIN_METRIC_DEFINITIONS)[number]["key"];
 
-// Type guard to ensure a value is a valid AdminMetricKey
-const isAdminMetricKey = (key: string | null): key is AdminMetricKey => {
-  return ADMIN_METRIC_DEFINITIONS.some(def => def.key === key);
-};
+  // Type guard to ensure a value is a valid AdminMetricKey
+  const isAdminMetricKey = (key: string | null): key is AdminMetricKey => {
+    return ADMIN_METRIC_DEFINITIONS.some(def => def.key === key);
+  };
 
-const selectedMetricLabel = filters.selectedStatus && isAdminMetricKey(filters.selectedStatus)
-? t(`admin.metrics.${filters.selectedStatus}`)
-: null;
+  const selectedMetricLabel =
+    filters.selectedStatus && isAdminMetricKey(filters.selectedStatus)
+      ? t(`admin.metrics.${filters.selectedStatus}`)
+      : null;
 
   return (
     <DashboardView

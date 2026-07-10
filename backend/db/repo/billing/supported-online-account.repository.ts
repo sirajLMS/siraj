@@ -10,6 +10,12 @@ import type {
   UpdateSupportedOnlineAccountInput,
 } from "@/backend/types/billing/payment-method.types";
 
+type AccountRow = typeof supportedOnlineAccounts.$inferSelect;
+
+function toSelectType(row: AccountRow): SupportedOnlineAccountSelectType {
+  return row as SupportedOnlineAccountSelectType;
+}
+
 type ListActiveFilters = {
   readonly direction?: PaymentDirection;
 };
@@ -25,7 +31,11 @@ function directionFilter(direction?: PaymentDirection) {
 export namespace SupportedOnlineAccountRepository {
   export async function listAll(tx?: DBTransaction): Promise<SupportedOnlineAccountSelectType[]> {
     const client = tx ?? db;
-    return client.select().from(supportedOnlineAccounts).orderBy(supportedOnlineAccounts.slug);
+    return client
+      .select()
+      .from(supportedOnlineAccounts)
+      .orderBy(supportedOnlineAccounts.slug)
+      .then(rows => rows.map(toSelectType));
   }
 
   export async function listActive(
@@ -39,7 +49,8 @@ export namespace SupportedOnlineAccountRepository {
       .select()
       .from(supportedOnlineAccounts)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(supportedOnlineAccounts.slug);
+      .orderBy(supportedOnlineAccounts.slug)
+      .then(rows => rows.map(toSelectType));
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<SupportedOnlineAccountSelectType | null> {
@@ -49,7 +60,7 @@ export namespace SupportedOnlineAccountRepository {
       .from(supportedOnlineAccounts)
       .where(eq(supportedOnlineAccounts.id, id))
       .limit(1);
-    return row ?? null;
+    return row ? toSelectType(row) : null;
   }
 
   export async function getBySlug(slug: string, tx?: DBTransaction): Promise<SupportedOnlineAccountSelectType | null> {
@@ -59,7 +70,7 @@ export namespace SupportedOnlineAccountRepository {
       .from(supportedOnlineAccounts)
       .where(eq(supportedOnlineAccounts.slug, slug))
       .limit(1);
-    return row ?? null;
+    return row ? toSelectType(row) : null;
   }
 
   export async function create(
@@ -72,6 +83,7 @@ export namespace SupportedOnlineAccountRepository {
       .insert(supportedOnlineAccounts)
       .values({
         ...input,
+        identifierLabel: input.identifierLabel ?? input.name,
         createdAt: input.createdAt ?? now,
         updatedAt: input.updatedAt ?? now,
       })
@@ -81,7 +93,7 @@ export namespace SupportedOnlineAccountRepository {
       throw new Error("Failed to create supported online account");
     }
 
-    return created;
+    return toSelectType(created);
   }
 
   export async function update(
@@ -102,7 +114,7 @@ export namespace SupportedOnlineAccountRepository {
       throw new Error(tFunc("recordNotFound", { tableName: "supported_online_accounts", entityId: id }));
     }
 
-    return updated;
+    return toSelectType(updated);
   }
 
   export async function deactivate(
@@ -119,6 +131,10 @@ export namespace SupportedOnlineAccountRepository {
   ): Promise<SupportedOnlineAccountSelectType[]> {
     if (ids.length === 0) return [];
     const client = tx ?? db;
-    return client.select().from(supportedOnlineAccounts).where(inArray(supportedOnlineAccounts.id, [...ids]));
+    return client
+      .select()
+      .from(supportedOnlineAccounts)
+      .where(inArray(supportedOnlineAccounts.id, [...ids]))
+      .then(rows => rows.map(toSelectType));
   }
 }

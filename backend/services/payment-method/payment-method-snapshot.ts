@@ -1,0 +1,118 @@
+import type { DBTransaction } from "@/backend/db/db.types";
+import {
+  SupportedMobileWalletRepository,
+  SupportedOnlineAccountRepository,
+  SupportedPaymentLinkRepository,
+  UserPaymentMethodRepository,
+} from "@/backend/db/repo";
+import { type PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { parsePaymentMethodDetails } from "@/backend/lib/payment-method.validation";
+import { encryptBankTransferDetails } from "@/backend/lib/payment-method-jsonb";
+import type {
+  PaymentMethodCatalogSnapshot,
+  PaymentMethodDetails,
+  PaymentMethodTransactionSnapshot,
+  UserPaymentMethodSelectType,
+  UserPaymentMethodSubmitInput,
+} from "@/backend/types/billing/payment-method.types";
+
+type TransactionDirection = PaymentDirection.PAYIN | PaymentDirection.PAYOUT;
+
+async function resolveCatalogSnapshot(
+  type: PaymentMethodType,
+  details: PaymentMethodDetails,
+  tx?: DBTransaction
+): Promise<PaymentMethodCatalogSnapshot | null> {
+  switch (type) {
+    case PaymentMethodType.MOBILE_WALLET: {
+      const wallet = await SupportedMobileWalletRepository.getById((details as { walletId: string }).walletId, tx);
+      if (!wallet) return null;
+      return { catalogId: wallet.id, catalogSlug: wallet.slug, catalogName: wallet.name };
+    }
+    case PaymentMethodType.PAYMENT_LINK: {
+      const link = await SupportedPaymentLinkRepository.getById(
+        (details as { paymentLinkId: string }).paymentLinkId,
+        tx
+      );
+      if (!link) return null;
+      return { catalogId: link.id, catalogSlug: link.slug, catalogName: link.name };
+    }
+    case PaymentMethodType.ONLINE_ACCOUNT: {
+      const account = await SupportedOnlineAccountRepository.getById(
+        (details as { onlineAccountId: string }).onlineAccountId,
+        tx
+      );
+      if (!account) return null;
+      return { catalogId: account.id, catalogSlug: account.slug, catalogName: account.name };
+    }
+    default:
+      return null;
+  }
+}
+
+function encryptDetailsForSnapshot(type: PaymentMethodType, details: PaymentMethodDetails): PaymentMethodDetails {
+  if (type === PaymentMethodType.BANK_TRANSFER) {
+    return encryptBankTransferDetails(
+      details as import("@/backend/types/billing/payment-method.types").BankTransferDetails
+    );
+  }
+  return details;
+}
+
+export function buildTransactionSnapshotFromMethod(
+  method: UserPaymentMethodSelectType,
+  catalog: PaymentMethodCatalogSnapshot | null,
+  transactionDirection: TransactionDirection
+): PaymentMethodTransactionSnapshot {
+  const validatedDetails = parsePaymentMethodDetails(method.type as PaymentMethodType, method.details);
+
+  return {
+    userPaymentMethodId: method.id,
+    type: method.type as PaymentMethodType,
+    direction: transactionDirection,
+    label: method.label,
+    details: encryptDetailsForSnapshot(method.type as PaymentMethodType, validatedDetails),
+    catalog,
+    snapshottedAt: new Date().toISOString(),
+  };
+}
+
+export function buildTransactionSnapshotFromInline(
+  input: Pick<UserPaymentMethodSubmitInput, "type" | "label" | "details">,
+  catalog: PaymentMethodCatalogSnapshot | null,
+  transactionDirection: TransactionDirection
+): PaymentMethodTransactionSnapshot {
+  const validatedDetails = parsePaymentMethodDetails(input.type, input.details);
+
+  return {
+    userPaymentMethodId: null,
+    type: input.type,
+    direction: transactionDirection,
+    label: input.label ?? null,
+    details: encryptDetailsForSnapshot(input.type, validatedDetails),
+    catalog,
+    snapshottedAt: new Date().toISOString(),
+  };
+}
+
+export namespace PaymentMethodSnapshotService {
+  export async function buildTransactionSnapshot(
+    source:
+      | { readonly userPaymentMethodId: string }
+      | { readonly inline: Pick<UserPaymentMethodSubmitInput, "type" | "label" | "details"> },
+    transactionDirection: TransactionDirection,
+    tx?: DBTransaction
+  ): Promise<PaymentMethodTransactionSnapshot> {
+    if ("userPaymentMethodId" in source) {
+      const method = await UserPaymentMethodRepository.getById(source.userPaymentMethodId, tx);
+      if (!method) {
+        throw new Error(`User payment method not found: ${source.userPaymentMethodId}`);
+      }
+      const catalog = await resolveCatalogSnapshot(method.type as PaymentMethodType, method.details, tx);
+      return buildTransactionSnapshotFromMethod(method, catalog, transactionDirection);
+    }
+
+    const catalog = await resolveCatalogSnapshot(source.inline.type, source.inline.details, tx);
+    return buildTransactionSnapshotFromInline(source.inline, catalog, transactionDirection);
+  }
+}

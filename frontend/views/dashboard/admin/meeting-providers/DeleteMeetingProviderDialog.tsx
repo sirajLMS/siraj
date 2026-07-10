@@ -2,8 +2,8 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 
 type DeleteMeetingProviderDialogProps = {
   readonly open: boolean;
@@ -20,8 +20,7 @@ export function DeleteMeetingProviderDialog({ open, provider, onClose, onConfirm
       <DialogTitle>{t("deleteTitle")}</DialogTitle>
       <DialogContent>
         <Typography sx={{ typography: "bodyMd" }}>
-          {t("deleteConfirm")}{" "}
-          <LocalizedStringDisplay value={provider?.name} typographyVariant="bodyMd" />
+          {t("deleteConfirm")} <LocalizedStringDisplay value={provider?.name} typographyVariant="bodyMd" />
         </Typography>
       </DialogContent>
       <DialogActions>

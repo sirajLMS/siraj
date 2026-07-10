@@ -1,15 +1,13 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  PermissionManagementRepository,
-  TeacherRepository,
-  UserRepository,
-} from "@/backend/db/repo";
+import { PermissionManagementRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type { TeacherCreateResult } from "@/backend/types/teachers/teacher.types";
+import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
 
@@ -29,12 +27,7 @@ export interface TeacherOnboardingInput {
   readonly timezone: string;
   readonly hourlyRate?: string | null;
   readonly rateCurrency?: CurrencyCode | null;
-  readonly beneficiaryName?: string | null;
-  readonly bankName?: string | null;
-  readonly accountNumber?: string | null;
-  readonly routingNumber?: string | null;
-  readonly swiftBic?: string | null;
-  readonly iban?: string | null;
+  readonly initialPayoutMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
 }
 
 export interface TeacherOnboardingResult {
@@ -97,23 +90,21 @@ export namespace TeacherOnboardingService {
     await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
   }
 
-  async function createBankingDetailsIfProvided(
+  async function createInitialPayoutMethodIfProvided(
     input: TeacherOnboardingInput,
-    teacherId: string,
+    userId: string,
     txObj: DBTransaction,
     locale: string | undefined
   ): Promise<void> {
-    const hasBankingDetails =
-      input.beneficiaryName ||
-      input.bankName ||
-      input.accountNumber ||
-      input.routingNumber ||
-      input.swiftBic ||
-      input.iban;
-
-    if (hasBankingDetails) {
-      // Banking details are created via user payment methods (BANK_TRANSFER), not teacher_banking_details_history.
+    if (!input.initialPayoutMethod) {
+      return;
     }
+
+    await PaymentMethodService.createUserPaymentMethodInternal(
+      { ...input.initialPayoutMethod, userId },
+      txObj,
+      locale
+    );
   }
 
   export async function createTeacher(
@@ -137,7 +128,7 @@ export namespace TeacherOnboardingService {
     const run = async (txObj: DBTransaction) => {
       const { user, teacher } = await createUserAndTeacher(input, locale, txObj);
       await assignTeacherPermissionGroup(user, actorUserId, t, txObj);
-      await createBankingDetailsIfProvided(input, teacher.id, txObj, locale);
+      await createInitialPayoutMethodIfProvided(input, user.id, txObj, locale);
 
       logger.info("Teacher onboarded successfully", { teacherId: teacher.id, userId: user.id });
 

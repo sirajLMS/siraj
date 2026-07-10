@@ -42,11 +42,11 @@ describe("SupportedPaymentLinkRepository", () => {
   testRepo("update throws when payment link is missing", async tx => {
     let errorThrown: unknown = null;
     try {
-      await SupportedPaymentLinkRepository.update("recordNotFound", { isActive: false }, tx);
+      await SupportedPaymentLinkRepository.update("00000000-0000-0000-0000-000000000000", { isActive: false }, tx);
     } catch (error) {
       errorThrown = error;
     }
     expect(errorThrown).not.toBeNull();
-    expect(getErrorMessage(errorThrown)).toContain("recordNotFound");
+    expect(getErrorMessage(errorThrown)).toContain("00000000-0000-0000-0000-000000000000");
   });
 });

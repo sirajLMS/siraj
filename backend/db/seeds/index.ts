@@ -14,7 +14,6 @@ import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds
 import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
 import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";
 import { seedOrGet as seedOrGetUserPaymentMethods } from "@/backend/db/seeds/billing/seed-user-payment-methods";
-import { seedOrGet as seedOrGetMeetingProviders } from "@/backend/db/seeds/meeting/seed-meeting-providers";
 import { seedOrGet as seedOrGetClassCommunications } from "@/backend/db/seeds/classes/seed-class-communications";
 import { seedOrGet as seedOrGetClassInstances } from "@/backend/db/seeds/classes/seed-class-instances";
 import { seedOrGet as seedOrGetClassPerformance } from "@/backend/db/seeds/classes/seed-class-performance";
@@ -28,6 +27,7 @@ import { seedOrGet as seedOrGetRecurringScheduleDays } from "@/backend/db/seeds/
 import { seedOrGet as seedOrGetComplaintResponses } from "@/backend/db/seeds/complaints/seed-complaint-responses";
 import { seedOrGet as seedOrGetComplaints } from "@/backend/db/seeds/complaints/seed-complaints";
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
+import { seedOrGet as seedOrGetMeetingProviders } from "@/backend/db/seeds/meeting/seed-meeting-providers";
 import { seedOrGet as seedOrGetNotificationDeliveries } from "@/backend/db/seeds/notifications/seed-notification-deliveries";
 import { seedOrGet as seedOrGetUserNotificationPreferences } from "@/backend/db/seeds/notifications/seed-user-notification-preferences";
 import { seedOrGet as seedOrGetParents } from "@/backend/db/seeds/parents/seed-parents";

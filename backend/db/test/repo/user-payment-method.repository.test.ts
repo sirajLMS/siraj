@@ -115,22 +115,18 @@ describe("UserPaymentMethodRepository", () => {
   testRepo("update throws when payment method is missing", async tx => {
     let errorThrown: unknown = null;
     try {
-      await UserPaymentMethodRepository.update(
-        "recordNotFound",
-        { label: "missing" },
-        tx
-      );
+      await UserPaymentMethodRepository.update("00000000-0000-0000-0000-000000000000", { label: "missing" }, tx);
     } catch (error) {
       errorThrown = error;
     }
     expect(errorThrown).not.toBeNull();
-    expect(getErrorMessage(errorThrown)).toContain("recordNotFound");
+    expect(getErrorMessage(errorThrown)).toContain("00000000-0000-0000-0000-000000000000");
   });
 
   test("listByUserId throws on database error", async () => {
     let errorThrown: unknown = null;
     try {
-      await UserPaymentMethodRepository.listByUserId("recordNotFound", badTx);
+      await UserPaymentMethodRepository.listByUserId("00000000-0000-0000-0000-000000000000", badTx);
     } catch (error) {
       errorThrown = error;
     }

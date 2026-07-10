@@ -7,7 +7,10 @@ import logger from "@/backend/lib/logger";
 import type { InvoiceSelectType } from "@/backend/types";
 import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 
-function buildPaymentSnapshot(index: number, snapshottedAt: string): {
+function buildPaymentSnapshot(
+  index: number,
+  snapshottedAt: string
+): {
   paymentMethodType: PaymentMethodType;
   paymentMethodSnapshot: PaymentMethodTransactionSnapshot;
 } {

@@ -23,17 +23,17 @@ export function MeetingConfigList({
   const locale = useLocale();
 
   if (configs.length === 0) {
-    return (
-      <Typography sx={{ color: "text.secondary", typography: "bodyMd" }}>{emptyLabel}</Typography>
-    );
+    return <Typography sx={{ color: "text.secondary", typography: "bodyMd" }}>{emptyLabel}</Typography>;
   }
 
   return (
-    <Stack spacing={1.5}>
+    <Stack sx={{ gap: 1.5 }}>
       {configs.map(config => {
+        if (!config.id) return null;
         const providerName = config.provider
           ? resolveLocalizedString(config.provider.name, locale)
-          : config.providerId;
+          : (config.providerId ?? "");
+        const meetingUrl = config.details?.meetingUrl ?? "";
 
         return (
           <Box
@@ -44,9 +44,9 @@ export function MeetingConfigList({
               p: 2,
             })}
           >
-            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
-              <Stack spacing={0.5}>
-                <Stack direction="row" spacing={1} alignItems="center">
+            <Stack sx={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
+              <Stack sx={{ gap: 0.5 }}>
+                <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center" }}>
                   <Typography sx={{ typography: "titleMd" }}>{providerName}</Typography>
                   {config.isDefault ? <Chip size="small" label="Default" color="primary" /> : null}
                   {config.label ? (
@@ -54,21 +54,21 @@ export function MeetingConfigList({
                   ) : null}
                 </Stack>
                 <Typography sx={{ typography: "bodySm", color: "text.secondary" }} dir="ltr">
-                  {config.details.meetingUrl}
+                  {meetingUrl}
                 </Typography>
               </Stack>
-              <Stack direction="row" spacing={0.5}>
+              <Stack sx={{ flexDirection: "row", gap: 0.5 }}>
                 {!config.isDefault && onSetDefaultAction ? (
                   <IconButton
                     aria-label="Set default"
                     size="small"
-                    onClick={() => onSetDefaultAction(config.id)}
+                    onClick={() => onSetDefaultAction(config.id as string)}
                   >
                     <StarOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}
                 {onDeleteAction ? (
-                  <IconButton aria-label="Delete" size="small" onClick={() => onDeleteAction(config.id)}>
+                  <IconButton aria-label="Delete" size="small" onClick={() => onDeleteAction(config.id as string)}>
                     <DeleteOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}

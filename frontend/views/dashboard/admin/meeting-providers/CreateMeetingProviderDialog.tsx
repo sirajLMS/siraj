@@ -14,9 +14,9 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
 import { createMeetingProviderMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 
 type CreateMeetingProviderDialogProps = {
   readonly open: boolean;
@@ -46,7 +46,10 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved }: CreateMe
           description: null,
           instructions: null,
           logoUrl: null,
-          urlAllowlist: urlAllowlist.split(",").map(s => s.trim()).filter(Boolean),
+          urlAllowlist: urlAllowlist
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean),
           urlExample: urlExample || null,
           fieldSchema: {
             requiresMeetingUrl: true,
@@ -75,7 +78,12 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved }: CreateMe
             onChange={e => setUrlAllowlist(e.target.value)}
             fullWidth
           />
-          <TextField label={t("fields.urlExample")} value={urlExample} onChange={e => setUrlExample(e.target.value)} fullWidth />
+          <TextField
+            label={t("fields.urlExample")}
+            value={urlExample}
+            onChange={e => setUrlExample(e.target.value)}
+            fullWidth
+          />
           <FormControlLabel
             control={<Checkbox checked={supportsUsername} onChange={e => setSupportsUsername(e.target.checked)} />}
             label={t("fields.supportsUsername")}

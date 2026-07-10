@@ -9,11 +9,11 @@ import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/scheduling/schedule-deletion.documents";
-import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
 import {
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
+import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";

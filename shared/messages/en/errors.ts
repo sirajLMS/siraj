@@ -32,6 +32,8 @@ export const errors: ErrorsLabels = {
   meetingProviderCreateFailed: "Failed to create meeting provider",
   meetingConfigNotFound: "Meeting config {id} not found",
   meetingConfigCreateFailed: "Failed to create meeting config",
+  meetingProviderUpdateFailed: "Failed to update meeting provider",
+  meetingConfigUpdateFailed: "Failed to update meeting config",
   classInstanceNotFound: "Class {id} not found",
   originalClassNotFound: "Original class not found",
   cannotRescheduleToSelf: "Cannot reschedule class to itself",

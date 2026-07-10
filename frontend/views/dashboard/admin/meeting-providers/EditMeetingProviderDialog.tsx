@@ -12,12 +12,12 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
-import { updateMeetingProviderMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+import { useEffect, useState } from "react";
 import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
+import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
+import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import { updateMeetingProviderMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 
 type EditMeetingProviderDialogProps = {
   readonly open: boolean;
@@ -61,7 +61,10 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
           description: provider.description ?? null,
           instructions: provider.instructions ?? null,
           logoUrl: provider.logoUrl ?? null,
-          urlAllowlist: urlAllowlist.split(",").map(s => s.trim()).filter(Boolean),
+          urlAllowlist: urlAllowlist
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean),
           urlExample: urlExample || null,
           isActive,
           fieldSchema: {
@@ -83,12 +86,34 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
         <Stack spacing={2} sx={{ pt: 1 }}>
           <TextField label={t("fields.slug")} value={slug} onChange={e => setSlug(e.target.value)} fullWidth />
           <LocalizedStringInput label={t("fields.name")} value={name} onChangeAction={setName} />
-          <TextField label={t("fields.urlAllowlist")} value={urlAllowlist} onChange={e => setUrlAllowlist(e.target.value)} fullWidth />
-          <TextField label={t("fields.urlExample")} value={urlExample} onChange={e => setUrlExample(e.target.value)} fullWidth />
-          <FormControlLabel control={<Checkbox checked={isActive} onChange={e => setIsActive(e.target.checked)} />} label={t("fields.isActive")} />
-          <FormControlLabel control={<Checkbox checked={supportsUsername} onChange={e => setSupportsUsername(e.target.checked)} />} label={t("fields.supportsUsername")} />
-          <FormControlLabel control={<Checkbox checked={supportsPassword} onChange={e => setSupportsPassword(e.target.checked)} />} label={t("fields.supportsPassword")} />
-          <FormControlLabel control={<Checkbox checked={supportsTenantId} onChange={e => setSupportsTenantId(e.target.checked)} />} label={t("fields.supportsTenantId")} />
+          <TextField
+            label={t("fields.urlAllowlist")}
+            value={urlAllowlist}
+            onChange={e => setUrlAllowlist(e.target.value)}
+            fullWidth
+          />
+          <TextField
+            label={t("fields.urlExample")}
+            value={urlExample}
+            onChange={e => setUrlExample(e.target.value)}
+            fullWidth
+          />
+          <FormControlLabel
+            control={<Checkbox checked={isActive} onChange={e => setIsActive(e.target.checked)} />}
+            label={t("fields.isActive")}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={supportsUsername} onChange={e => setSupportsUsername(e.target.checked)} />}
+            label={t("fields.supportsUsername")}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={supportsPassword} onChange={e => setSupportsPassword(e.target.checked)} />}
+            label={t("fields.supportsPassword")}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={supportsTenantId} onChange={e => setSupportsTenantId(e.target.checked)} />}
+            label={t("fields.supportsTenantId")}
+          />
         </Stack>
       </DialogContent>
       <DialogActions>

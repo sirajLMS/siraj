@@ -58,11 +58,6 @@ export interface ProfileLabels {
       readonly phone: string;
       readonly address: string;
       readonly timezone: string;
-      readonly zoomLink: string;
-      readonly zoomUsername: string;
-      readonly zoomPassword: string;
-      readonly zoomPasswordSet: string;
-      readonly zoomPasswordPlaceholder: string;
       readonly nationalId: string;
       readonly dateOfBirth: string;
       readonly gender: string;
@@ -101,13 +96,13 @@ export interface ProfileLabels {
       readonly whatsapp: string;
       readonly facebook: string;
       readonly twitter: string;
-      readonly defaultZoomLink: string;
       readonly nationality: string;
       readonly address: string;
       readonly invoiceType: string;
       readonly feeAmount: string;
       readonly paymentMethod: string;
       readonly currency: string;
+      readonly displayCurrency: string;
       readonly timezone: string;
       readonly status: string;
     };

@@ -1,6 +1,6 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { PermissionManagementRepository, TeacherBankingRepository, UserRepository } from "@/backend/db/repo";
+import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -120,46 +120,5 @@ describe("TeacherOnboardingService.createTeacher", () => {
     hasPermissionSpy.mockRestore();
     existsByEmailSpy.mockRestore();
     listAllGroupsSpy.mockRestore();
-  });
-
-  test("teacher onboarding rolls back on banking failure", async () => {
-    await runInRollback(async txContext => {
-      const actor = await createTestUser(txContext);
-      const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
-      const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
-
-      // Mock banking repository to throw an error
-      const bankingSpy = spyOn(TeacherBankingRepository, "submitBankingDetails").mockRejectedValue(
-        new Error("Banking service unavailable")
-      );
-
-      let error: unknown = null;
-      try {
-        await TeacherOnboardingService.createTeacher(
-          actor.id,
-          {
-            name: "Rollback Teacher",
-            email: "rollback@test.com",
-            password: randomUUID(),
-            timezone: "UTC",
-            beneficiaryName: "John Doe",
-            bankName: "Test Bank",
-            accountNumber: "123456789",
-            iban: "US123456789",
-          },
-          "en",
-          txContext
-        );
-      } catch (e) {
-        error = e;
-      }
-
-      expect(error).not.toBeNull();
-      expect((error as Error).message).toContain("Banking");
-
-      hasPermissionSpy.mockRestore();
-      existsByEmailSpy.mockRestore();
-      bankingSpy.mockRestore();
-    });
   });
 });

@@ -31,6 +31,8 @@ export const errors: ErrorsLabels = {
   meetingProviderInUse: "لا يمكن حذف مزود الاجتماع بينما توجد إعدادات مستخدم مرتبطة به",
   meetingProviderCreateFailed: "فشل إنشاء مزود الاجتماع",
   meetingConfigNotFound: "إعداد الاجتماع {id} غير موجود",
+  meetingProviderUpdateFailed: "فشل تحديث مزود الاجتماع",
+  meetingConfigUpdateFailed: "فشل تحديث إعداد الاجتماع",
   meetingConfigCreateFailed: "فشل إنشاء إعداد الاجتماع",
   classInstanceNotFound: "الحصة {id} غير موجودة",
   originalClassNotFound: "الحصة الأصلية غير موجودة",

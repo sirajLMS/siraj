@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { ManualInvoiceDateField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceDateField";
 import { ManualInvoiceFeeField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceFeeField";
@@ -43,9 +43,7 @@ function CurrencyField({
       name="currency"
       control={control}
       render={({ field, fieldState }) => {
- const option: CurrencyOption | null = field.value
-      ? (getCurrencyByCode(field.value) ?? null)
-      : null;
+        const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
         return (
           <CurrencySelect
             currency={option}

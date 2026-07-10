@@ -3,11 +3,11 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
+import type { AdminMetricKey } from "@/frontend/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
 import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
-import type { AdminMetricKey } from "@/frontend/types/shared.types";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
@@ -128,9 +128,9 @@ export function MockAdminDashboardContainer() {
 
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
-const selectedMetricLabel = filters.selectedStatus
- ? t(`admin.metrics.${filters.selectedStatus}` as `admin.metrics.${AdminMetricKey}`)
- : null;
+  const selectedMetricLabel = filters.selectedStatus
+    ? t(`admin.metrics.${filters.selectedStatus}` as `admin.metrics.${AdminMetricKey}`)
+    : null;
 
   const handleMetricClick = (key: string) => {
     setPage(0);

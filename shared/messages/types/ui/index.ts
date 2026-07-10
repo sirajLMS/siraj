@@ -1,20 +1,22 @@
-import type { MeetingConfigLabels } from "./meeting-config";
+import type { CatalogImageUploadLabels } from "./catalog-image-upload";
 import type { CountrySelectLabels } from "./country-select";
 import type { CurrencySelectLabels } from "./currency-select";
 import type { GenderSelectorLabels } from "./gender-selector";
 import type { LanguageSelectorLabels } from "./language-selector";
 import type { LocalizedStringLabels } from "./localized-string";
+import type { MeetingConfigLabels } from "./meeting-config";
 import type { PhoneInputLabels } from "./phone-input";
 import type { TagInputLabels } from "./tag-input";
 import type { TimezoneSelectLabels } from "./timezone-select";
 
 export type {
-  MeetingConfigLabels,
+  CatalogImageUploadLabels,
   CountrySelectLabels,
   CurrencySelectLabels,
   GenderSelectorLabels,
   LanguageSelectorLabels,
   LocalizedStringLabels,
+  MeetingConfigLabels,
   PhoneInputLabels,
   TagInputLabels,
   TimezoneSelectLabels,

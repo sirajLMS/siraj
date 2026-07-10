@@ -10,7 +10,6 @@ function buildAdminParentInput(formData: {
   address?: string;
   invoiceType?: string;
   feeAmount?: string;
-  paymentMethod?: string;
   currency?: string;
   timezone?: string;
 }) {
@@ -23,14 +22,13 @@ function buildAdminParentInput(formData: {
     address: formData.address || null,
     invoiceType: formData.invoiceType || null,
     feeAmount: formData.feeAmount || null,
-    paymentMethod: formData.paymentMethod || null,
     currency: formData.currency || null,
     timezone: formData.timezone || null,
   };
 }
 
 describe("parent profile admin input builder", () => {
-  test("includes all billing fields for admin update", () => {
+  test("includes billing fields for admin update", () => {
     const input = buildAdminParentInput({
       phone: "+966500000000",
       facebook: "fb.com/parent",
@@ -40,7 +38,6 @@ describe("parent profile admin input builder", () => {
       address: "Riyadh",
       invoiceType: "monthly",
       feeAmount: "500",
-      paymentMethod: "bank_transfer",
       currency: "SAR",
       timezone: IanaTimezone.Asia_Riyadh,
     });
@@ -54,7 +51,6 @@ describe("parent profile admin input builder", () => {
       address: "Riyadh",
       invoiceType: "monthly",
       feeAmount: "500",
-      paymentMethod: "bank_transfer",
       currency: "SAR",
       timezone: IanaTimezone.Asia_Riyadh,
     });
