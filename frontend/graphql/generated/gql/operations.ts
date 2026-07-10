@@ -3193,7 +3193,11 @@ export type UpdateUserProfileMutationVariables = Exact<{
 
 export type UpdateUserProfileMutation = UpdateUserProfileMutation_Mutation;
 
-export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow = { id: string | null, groupKey: string | null, groupLabel: string | null, takenClasses: number | null, absentClasses: number | null, leaveClasses: number | null, pendingClasses: number | null, totalHours: number | null, paidEGP: number | null, paidUSD: number | null, engagementGrowth: number | null };
+export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow_paidAmounts_AttendanceReportPaidAmount_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow_paidAmounts_AttendanceReportPaidAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, displayAmount: GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow_paidAmounts_AttendanceReportPaidAmount_displayAmount_DisplayAmount | null };
+
+export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow = { id: string | null, groupKey: string | null, groupLabel: string | null, takenClasses: number | null, absentClasses: number | null, leaveClasses: number | null, pendingClasses: number | null, totalHours: number | null, engagementGrowth: number | null, paidAmounts: Array<GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow_paidAmounts_AttendanceReportPaidAmount> | null };
 
 export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload = { engagementGrowth: number | null, rows: Array<GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow> | null };
 

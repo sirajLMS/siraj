@@ -13,7 +13,7 @@ import {
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
-import { PaymentMethodsTab } from "@/frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsTab";
+import { PaymentMethodsTab } from "@/frontend/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { TeacherProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/teacher/sections/TeacherProfileLoadingSkeleton";
 import { isTeacherAdminData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import { AssignedStudentsTab } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsTab";
@@ -124,7 +124,7 @@ function renderActiveTabContent({
   }
 
   if (activeTab === "paymentMethods") {
-    return <PaymentMethodsTab targetUserId={targetUserId} />;
+    return <PaymentMethodsTab targetUserId={targetUserId} scope={scope} slot="payout" />;
   }
 
   if (activeTab === "meeting") {

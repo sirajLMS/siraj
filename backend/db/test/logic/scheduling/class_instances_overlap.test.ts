@@ -211,7 +211,7 @@ async function testZoomUrlOverlap(args: {
     )
   );
   expect(zoomError).toBeTruthy();
-  expect(zoomError.message).toContain("Zoom meeting URL is already in use for this time period");
+  expect(zoomError.message).toContain("Meeting URL is already in use for this time period");
 }
 
 describe("Class Instances Overlap Prevention", () => {

@@ -1,4 +1,4 @@
-import { useApolloClient, useMutation } from "@apollo/client/react";
+import { useMutation, useApolloClient } from "@apollo/client/react";
 import {
   PaymentDirection,
   type PaymentMethodDetailsInput,
@@ -10,28 +10,11 @@ import { createUserMeetingConfigMutationDocument } from "@/frontend/graphql/shar
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useTeacherOnboardingStore } from "@/frontend/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
+import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 import type {
   TeacherOnboardingCreateResult,
   TeacherOnboardingFormData,
 } from "@/frontend/views/dashboard/teachers/onboarding/types";
-
-function buildBankTransferDetails(formData: TeacherOnboardingFormData): PaymentMethodDetailsInput {
-  return {
-    beneficiaryName: formData.beneficiaryName,
-    bankName: formData.bankName,
-    accountNumber: formData.accountNumber,
-    routingNumber: formData.routingNumber || null,
-    swiftBic: formData.swiftBic || null,
-    iban: formData.iban,
-    identifier: null,
-    note: null,
-    onlineAccountId: null,
-    paymentLinkId: null,
-    phone: null,
-    url: null,
-    walletId: null,
-  };
-}
 
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);
@@ -43,6 +26,8 @@ export function useCreateTeacherOnboarding() {
     useTeacherOnboardingStore.setState({ isSubmitting: true });
 
     try {
+      const details: PaymentMethodDetailsInput = formDetailsToInput(formData.payoutMethod.details);
+
       const input: TeacherOnboardingInput = {
         name: formData.name,
         email: formData.email,
@@ -59,11 +44,11 @@ export function useCreateTeacherOnboarding() {
         hourlyRate: formData.hourlyRate,
         rateCurrency: formData.rateCurrency,
         initialPayoutMethod: {
-          type: PaymentMethodType.BankTransfer,
+          type: formData.payoutMethod.type as PaymentMethodType,
           direction: PaymentDirection.Payout,
           isDefault: true,
-          label: null,
-          details: buildBankTransferDetails(formData),
+          label: formData.payoutMethod.label?.trim() || null,
+          details,
         },
       };
 

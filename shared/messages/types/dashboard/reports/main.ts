@@ -22,18 +22,16 @@ export interface ReportsLabels {
     readonly leave: string;
     readonly pending: string;
     readonly hours: string;
-    readonly paidEgp: string;
-    readonly paidUsd: string;
+    readonly paid: string;
     readonly totals: string;
   };
+  readonly convertedAmount: string;
   readonly summary: {
     readonly engagementRate: string;
     readonly engagementGrowth: string;
     readonly increase: string;
     readonly financialDistribution: string;
     readonly financialSubtitle: string;
-    readonly egpLabel: string;
-    readonly usdLabel: string;
   };
   readonly ledger: {
     readonly title: string;

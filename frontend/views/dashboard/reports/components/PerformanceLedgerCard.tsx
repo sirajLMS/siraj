@@ -2,11 +2,13 @@
 
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { useLocale, useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import { formatReportPaidAmounts } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 
 interface PerformanceLedgerCardLabels {
   readonly studentLabel: string;
@@ -23,15 +25,6 @@ interface PerformanceLedgerCardProps {
   readonly row: ReportLedgerRow;
   readonly labels: PerformanceLedgerCardLabels;
   readonly onClick?: (row: ReportLedgerRow) => void;
-}
-
-function formatMoney(value: number, currency: CurrencyCode): string {
-  return value.toLocaleString("en-US", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 function getStatusBadgeStatus(status: LedgerStatus): string {
@@ -73,6 +66,14 @@ export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<Perform
   const studentText = labels.studentLabel.replace("{name}", row.studentName);
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
+  const locale = useLocale();
+  const t = useTranslations("dashboard.reports");
+  const tErrors = useTranslations("errors");
+
+  const paidLabel = formatReportPaidAmounts(row.paidAmounts, locale, {
+    convertedAmount: values => t("convertedAmount", values),
+    displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+  });
 
   return (
     <BaseCard
@@ -158,10 +159,7 @@ export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<Perform
               {labels.paid}
             </Typography>
             <Typography variant="bodyMd" sx={{ color: theme => theme.palette.primary.main, fontWeight: 700 }}>
-              {formatMoney(row.paidEgp, CurrencyCode.Egp)}
-            </Typography>
-            <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.secondary }}>
-              {formatMoney(row.paidUsd, CurrencyCode.Usd)}
+              {paidLabel}
             </Typography>
           </Box>
         )}

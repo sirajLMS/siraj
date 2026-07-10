@@ -109,6 +109,23 @@ export namespace PermissionManagementService {
     return user;
   }
 
+  function trimLocalizedString(value: LocalizedString | null | undefined): LocalizedString | null | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+    if (value === null) {
+      return null;
+    }
+
+    const trimmed: LocalizedString = {};
+    for (const [locale, text] of Object.entries(value)) {
+      if (typeof text === "string") {
+        trimmed[locale as keyof LocalizedString] = text.trim();
+      }
+    }
+    return trimmed;
+  }
+
   function generateSlug(name: string): string {
     // 1. Truncate early and sanitize non-alphanumerics into underscores
     const slug = name
@@ -222,7 +239,7 @@ export namespace PermissionManagementService {
         id: input.groupId,
         name: input.name,
         slug,
-        description: input.description,
+        description: trimLocalizedString(input.description),
         permissionIds: input.permissionIds,
       },
       locale

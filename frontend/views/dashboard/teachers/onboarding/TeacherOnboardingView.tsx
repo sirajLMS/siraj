@@ -5,9 +5,9 @@ import { CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Snackbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { MeetingConfigOnboardingSection } from "@/frontend/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { PaymentMethodSection } from "@/frontend/views/dashboard/teachers/onboarding/components/PaymentMethodSection";
@@ -102,20 +102,27 @@ export function TeacherOnboardingView({
 }: Readonly<TeacherOnboardingViewProps>) {
   const schema = teacherOnboardingSchema(labels.validation);
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<TeacherOnboardingFormData>({
+  const form = useForm<TeacherOnboardingFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       gender: Gender.Male,
       countryCode: CountryCode.Eg,
       timezone: IanaTimezone.AfricaCairo,
       rateCurrency: CurrencyCode.Usd,
+      payoutMethod: {
+        type: PaymentMethodType.BankTransfer,
+        label: "",
+        details: {},
+      },
     },
   });
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = form;
 
   useEffect(() => {
     if (!showSuccess) return undefined;
@@ -159,7 +166,7 @@ export function TeacherOnboardingView({
           <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
         </SectionPanel>
         <SectionPanel title={labels.sections.paymentMethod}>
-          <PaymentMethodSection register={register} errors={errors} labels={labels} />
+          <PaymentMethodSection control={control} errors={errors} />
         </SectionPanel>
         <SectionPanel title={labels.sections.meetingConfig}>
           <MeetingConfigOnboardingSection

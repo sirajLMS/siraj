@@ -31,8 +31,7 @@ const mockLabels = {
     leave: "Leave",
     pending: "Pending",
     hours: "Hours",
-    paidEgp: `Paid (${CurrencyCode.Egp})`,
-    paidUsd: `Paid (${CurrencyCode.Usd})`,
+    paid: "Paid",
     noEntries: "No report data found.",
   },
   summaryLabels: {
@@ -41,8 +40,6 @@ const mockLabels = {
     increase: "Increase",
     financialDistribution: "Currency Split",
     financialSubtitle: "Distribution of payouts",
-    egpLabel: CurrencyCode.Egp,
-    usdLabel: CurrencyCode.Usd,
   },
   totalsLabel: "Totals",
   ledgerTitle: "Attendance Ledger",
@@ -79,8 +76,7 @@ const mockRows = [
     leave: 1,
     pending: 0,
     hours: "12:30",
-    paidEgp: 1500,
-    paidUsd: 0,
+    paidAmounts: [{ id: "paid-1", amount: "1500", currency: CurrencyCode.Egp, displayAmount: null }],
   },
   {
     id: "2024-05-02",
@@ -94,19 +90,15 @@ const mockRows = [
     leave: 0,
     pending: 1,
     hours: "10:00",
-    paidEgp: 1000,
-    paidUsd: 0,
+    paidAmounts: [{ id: "paid-2", amount: "1000", currency: CurrencyCode.Egp, displayAmount: null }],
   },
 ];
 
 const mockSummary = {
   engagementRate: 89.3,
   engagementGrowth: 12.4,
-  egpPercent: 100,
-  usdPercent: 0,
+  currencyDistribution: [{ currency: CurrencyCode.Egp, amount: 2500, percent: 100, label: "Egyptian Pound" }],
   totalHours: "22:30",
-  totalEgp: 2500,
-  totalUsd: 0,
 } as const;
 
 const baseArgs = {
@@ -221,11 +213,8 @@ export const EmptyData: Story = {
     summary: {
       engagementRate: 0,
       engagementGrowth: 0,
-      egpPercent: 100,
-      usdPercent: 0,
+      currencyDistribution: [],
       totalHours: "0:00",
-      totalEgp: 0,
-      totalUsd: 0,
     },
   },
   decorators: [
@@ -263,11 +252,8 @@ export const ApiError: Story = {
     summary: {
       engagementRate: 0,
       engagementGrowth: 0,
-      egpPercent: 100,
-      usdPercent: 0,
+      currencyDistribution: [],
       totalHours: "0:00",
-      totalEgp: 0,
-      totalUsd: 0,
     },
   },
   decorators: [

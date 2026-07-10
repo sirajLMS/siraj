@@ -28,7 +28,11 @@ const defaultValues: ParentOnboardingFormData = {
   twitter: "",
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",
-  paymentMethodType: PaymentMethodType.BankTransfer,
+  payinMethod: {
+    type: PaymentMethodType.BankTransfer,
+    label: "",
+    details: {},
+  },
   currency: CurrencyCode.Usd,
   timezone: IanaTimezone.AfricaCairo,
 };

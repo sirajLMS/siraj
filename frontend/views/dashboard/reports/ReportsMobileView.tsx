@@ -23,8 +23,6 @@ interface ReportsMobileViewProps {
     readonly engagementRate: string;
     readonly engagementGrowth: string;
     readonly financialDistribution: string;
-    readonly egpLabel: string;
-    readonly usdLabel: string;
   };
   readonly ledgerTitle: string;
   readonly ledgerLabels: {
@@ -106,12 +104,9 @@ export function ReportsMobileView({
       />
 
       <FinancialDistributionCard
-        egpPercent={summary.egpPercent}
-        usdPercent={summary.usdPercent}
+        currencyDistribution={summary.currencyDistribution}
         title={summaryLabels.financialDistribution}
         subtitle=""
-        egpLabel={summaryLabels.egpLabel}
-        usdLabel={summaryLabels.usdLabel}
         compact
       />
 

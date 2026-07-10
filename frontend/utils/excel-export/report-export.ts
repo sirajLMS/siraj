@@ -9,15 +9,12 @@ interface ReportExportLabels {
     readonly leave: string;
     readonly pending: string;
     readonly hours: string;
-    readonly paidEgp: string;
-    readonly paidUsd: string;
+    readonly paid: string;
   };
   readonly totalsLabel: string;
   readonly summaryLabels: {
     readonly engagementRate: string;
     readonly financialDistribution: string;
-    readonly egpLabel: string;
-    readonly usdLabel: string;
   };
 }
 
@@ -153,7 +150,7 @@ function buildHeaders(labels: ReportExportLabels, showFinancials: boolean): stri
   ];
 
   if (showFinancials) {
-    headers.push(labels.tableLabels.paidEgp, labels.tableLabels.paidUsd);
+    headers.push(labels.tableLabels.paid);
   }
 
   return headers;
@@ -204,10 +201,14 @@ function writeDataRows(
   });
 }
 
+function formatPaidCell(row: ReportLedgerRow): string {
+  return row.paidAmounts.map(paid => `${paid.amount} ${paid.currency}`).join(" | ") || "—";
+}
+
 function buildRowValues(row: ReportLedgerRow, showFinancials: boolean): (string | number)[] {
   const values: (string | number)[] = [row.name, row.taken, row.absent, row.leave, row.pending, row.hours];
   if (showFinancials) {
-    values.push(row.paidEgp, row.paidUsd);
+    values.push(formatPaidCell(row));
   }
   return values;
 }
@@ -259,7 +260,9 @@ function writeTotalsRow(
   ];
 
   if (showFinancials) {
-    totalsValues.push(summary.totalEgp, summary.totalUsd);
+    totalsValues.push(
+      summary.currencyDistribution.map(slice => `${slice.amount} ${slice.currency}`).join(" | ") || "—"
+    );
   }
 
   totalsValues.forEach((val, col) => {
@@ -288,7 +291,7 @@ function applyColumnWidths(
         row.leave,
         row.pending,
         row.hours,
-        ...(showFinancials ? [row.paidEgp, row.paidUsd] : []),
+        ...(showFinancials ? [formatPaidCell(row)] : []),
       ];
       return Math.max(max, String(vals[i] ?? "").length);
     }, 0);

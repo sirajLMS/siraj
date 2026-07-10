@@ -31,6 +31,7 @@ export interface ParentProfileLabels {
     readonly parentInfo: string;
     readonly socialMedia: string;
     readonly feesDetails: string;
+    readonly paymentMethods: string;
     readonly parentStudents: string;
   };
   readonly fields: {

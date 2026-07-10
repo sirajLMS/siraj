@@ -302,6 +302,15 @@ export namespace ScheduleService {
           hour12: true,
         });
 
+      const validClassTypes = Object.values(ClassType);
+      let resolvedClassType: ClassType | null | undefined = cls.classType;
+
+      if (cls.classType !== null && cls.classType !== undefined) {
+        if (!validClassTypes.includes(cls.classType as ClassType)) {
+          resolvedClassType = null;
+        }
+      }
+
       return {
         id: cls.id,
         courseName: cls.subjectName || cls.studentName,
@@ -316,7 +325,7 @@ export namespace ScheduleService {
         location: cls.meetingJoinUrl || "Virtual",
         subjectId: cls.subjectId,
         subjectName: cls.subjectName,
-        classType: cls.classType as ClassType | null | undefined,
+        classType: resolvedClassType,
         meetingJoinUrl: cls.meetingJoinUrl ?? null,
         avatarUrl: resolveClassAvatarUrl(cls.recurringAvatarUrl, cls.subjectAvatarUrl),
       };

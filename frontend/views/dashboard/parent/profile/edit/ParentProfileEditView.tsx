@@ -4,7 +4,8 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";
 import { FeesContractSection } from "@/frontend/views/dashboard/admin/parents/onboarding/FeesContractSection";
 import { ParentInfoSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentInfoSection";
 import { SocialCommsSection } from "@/frontend/views/dashboard/admin/parents/onboarding/SocialCommsSection";
@@ -12,6 +13,7 @@ import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/
 import type { ParentProfileEditFormData } from "@/frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema";
 
 interface Props {
+  readonly userId: string;
   readonly register: UseFormRegister<ParentProfileEditFormData>;
   readonly control: Control<ParentProfileEditFormData>;
   readonly errors: FieldErrors<ParentProfileEditFormData>;
@@ -19,7 +21,7 @@ interface Props {
   readonly onSubmit: (data: ParentProfileEditFormData) => void | Promise<void>;
 }
 
-export default function ParentProfileEditView({ register, control, errors, handleSubmit, onSubmit }: Props) {
+export default function ParentProfileEditView({ userId, register, control, errors, handleSubmit, onSubmit }: Props) {
   const t = useTranslations("dashboard.parentProfile");
   const tOnboarding = useTranslations("dashboard.parentOnboarding");
 
@@ -61,6 +63,12 @@ export default function ParentProfileEditView({ register, control, errors, handl
         <ParentInfoSection register={onboardingRegister} control={onboardingControl} errors={onboardingErrors} />
         <SocialCommsSection register={onboardingRegister} control={onboardingControl} />
         <FeesContractSection register={onboardingRegister} control={onboardingControl} errors={onboardingErrors} />
+
+        <SectionPanel title={t("sections.paymentMethods")}>
+          <Box sx={{ p: 3 }}>
+            <PaymentMethodsManager targetUserId={userId} slot="payin" canManage />
+          </Box>
+        </SectionPanel>
 
         <Box
           sx={theme => ({

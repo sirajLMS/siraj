@@ -11,8 +11,6 @@ export interface ReportsSummaryLabels {
   readonly increase: string;
   readonly financialDistribution: string;
   readonly financialSubtitle: string;
-  readonly egpLabel: string;
-  readonly usdLabel: string;
 }
 
 export interface ReportsSharedState {

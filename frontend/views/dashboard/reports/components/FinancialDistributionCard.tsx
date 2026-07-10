@@ -2,60 +2,56 @@
 
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import type { CurrencyDistributionSlice } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 interface FinancialDistributionCardProps {
-  readonly egpPercent: number;
-  readonly usdPercent: number;
+  readonly currencyDistribution: readonly CurrencyDistributionSlice[];
   readonly title: string;
   readonly subtitle: string;
-  readonly egpLabel: string;
-  readonly usdLabel: string;
   readonly compact?: boolean;
 }
 
+const SEGMENT_COLORS: readonly ((theme: Theme) => string)[] = [
+  theme => theme.palette.primary.main,
+  theme => theme.palette.secondaryContainer,
+  theme => theme.palette.tertiary ?? theme.palette.info.main,
+  theme => theme.palette.warning.main,
+];
+
 function DistributionLegend({
-  egpPercent,
-  usdPercent,
-  egpLabel,
-  usdLabel,
-}: Readonly<Pick<FinancialDistributionCardProps, "egpPercent" | "usdPercent" | "egpLabel" | "usdLabel">>) {
+  currencyDistribution,
+}: Readonly<{ currencyDistribution: readonly CurrencyDistributionSlice[] }>) {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box
-          sx={theme => ({ width: 8, height: 8, borderRadius: "50%", backgroundColor: theme.palette.primary.main })}
-        />
-        <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.primary }}>
-          {egpPercent}% {egpLabel}
-        </Typography>
-      </Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box
-          sx={theme => ({
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            backgroundColor: theme.palette.secondaryContainer,
-          })}
-        />
-        <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.primary }}>
-          {usdPercent}% {usdLabel}
-        </Typography>
-      </Box>
+      {currencyDistribution.map((slice, index) => (
+        <Box key={slice.currency} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={theme => ({
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              backgroundColor: SEGMENT_COLORS[index % SEGMENT_COLORS.length](theme),
+            })}
+          />
+          <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.primary }}>
+            {slice.percent}% {slice.label}
+          </Typography>
+        </Box>
+      ))}
     </Box>
   );
 }
 
 export function FinancialDistributionCard({
-  egpPercent,
-  usdPercent,
+  currencyDistribution,
   title,
   subtitle,
-  egpLabel,
-  usdLabel,
   compact = false,
 }: Readonly<FinancialDistributionCardProps>) {
+  const hasDistribution = currencyDistribution.length > 0;
+
   return (
     <BaseCard>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, mb: 2 }}>
@@ -82,14 +78,30 @@ export function FinancialDistributionCard({
           display: "flex",
         })}
       >
-        <Box sx={theme => ({ width: `${egpPercent}%`, backgroundColor: theme.palette.primary.main, height: "100%" })} />
-        <Box
-          sx={theme => ({ width: `${usdPercent}%`, backgroundColor: theme.palette.secondaryContainer, height: "100%" })}
-        />
+        {hasDistribution ? (
+          currencyDistribution.map((slice, index) => (
+            <Box
+              key={slice.currency}
+              sx={theme => ({
+                width: `${slice.percent}%`,
+                backgroundColor: SEGMENT_COLORS[index % SEGMENT_COLORS.length](theme),
+                height: "100%",
+              })}
+            />
+          ))
+        ) : (
+          <Box sx={theme => ({ width: "100%", backgroundColor: theme.palette.surfaceContainerHighest, height: "100%" })} />
+        )}
       </Box>
 
       <Box sx={{ mt: compact ? 1.5 : 2 }}>
-        <DistributionLegend egpPercent={egpPercent} usdPercent={usdPercent} egpLabel={egpLabel} usdLabel={usdLabel} />
+        {hasDistribution ? (
+          <DistributionLegend currencyDistribution={currencyDistribution} />
+        ) : (
+          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+            —
+          </Typography>
+        )}
       </Box>
     </BaseCard>
   );

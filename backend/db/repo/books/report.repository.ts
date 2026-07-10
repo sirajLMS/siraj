@@ -1,8 +1,10 @@
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
+import type { CurrencyCode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
+import type { AttendanceReportPaidAmountReturnType, AttendanceReportRowReturnType } from "@/backend/types/books/report.types";
 
 export enum ReportGroupingMode {
   DATE = "DATE",
@@ -17,17 +19,71 @@ export interface AttendanceReportFilters {
   groupBy: ReportGroupingMode;
 }
 
-export interface AttendanceReportRow {
-  groupKey: string;
-  groupLabel: string;
-  takenClasses: number;
-  absentClasses: number;
-  leaveClasses: number;
-  pendingClasses: number;
-  totalHours: number;
-  paidEGP: number;
-  paidUSD: number;
-  engagementGrowth: number | null;
+export interface AttendanceReportRow extends AttendanceReportRowReturnType {}
+
+function buildPaidAmountId(groupKey: string, currency: CurrencyCode): string {
+  return `${groupKey}:${currency}`;
+}
+
+async function fetchPaidAmountsByGroup(
+  filters: AttendanceReportFilters,
+  groupKeyExpr: ReturnType<typeof buildGroupingExpressions>["groupKeyExpr"],
+  tx: DBTransaction | undefined,
+  studentJoin: boolean
+): Promise<Map<string, AttendanceReportPaidAmountReturnType[]>> {
+  const queryDb = tx ?? db;
+  const conditions = [
+    gte(classInstances.scheduledStartAt, filters.fromDate),
+    lte(classInstances.scheduledStartAt, filters.toDate),
+    isNotNull(classInstances.rateCurrency),
+    isNotNull(classInstances.rateAmount),
+  ];
+
+  if (filters.teacherId) {
+    conditions.push(eq(classInstances.teacherId, filters.teacherId));
+  }
+
+  const paidRows = studentJoin
+    ? await queryDb
+        .select({
+          groupKey: sql<string>`${groupKeyExpr}::text`,
+          currency: classInstances.rateCurrency,
+          amount: sql<string>`SUM(${classInstances.rateAmount}::numeric)::text`,
+        })
+        .from(classInstances)
+        .leftJoin(students, eq(students.id, classInstances.studentId))
+        .leftJoin(teachers, eq(teachers.id, classInstances.teacherId))
+        .leftJoin(users, eq(users.id, teachers.userId))
+        .where(and(...conditions))
+        .groupBy(groupKeyExpr, classInstances.rateCurrency)
+    : await queryDb
+        .select({
+          groupKey: sql<string>`${groupKeyExpr}::text`,
+          currency: classInstances.rateCurrency,
+          amount: sql<string>`SUM(${classInstances.rateAmount}::numeric)::text`,
+        })
+        .from(classInstances)
+        .leftJoin(teachers, eq(teachers.id, classInstances.teacherId))
+        .leftJoin(users, eq(users.id, teachers.userId))
+        .where(and(...conditions))
+        .groupBy(groupKeyExpr, classInstances.rateCurrency);
+
+  const paidByGroup = new Map<string, AttendanceReportPaidAmountReturnType[]>();
+  for (const row of paidRows) {
+    if (!row.groupKey || !row.currency || !row.amount) {
+      continue;
+    }
+    const entry: AttendanceReportPaidAmountReturnType = {
+      id: buildPaidAmountId(row.groupKey, row.currency as CurrencyCode),
+      amount: row.amount,
+      currency: row.currency as CurrencyCode,
+    };
+    const existing = paidByGroup.get(row.groupKey) ?? [];
+    existing.push(entry);
+    paidByGroup.set(row.groupKey, existing);
+  }
+
+  return paidByGroup;
 }
 
 function buildGroupingExpressions(groupBy: ReportGroupingMode) {
@@ -89,8 +145,6 @@ export namespace ReportRepository {
             leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
             pendingClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END)::int`,
             totalHours: sql<number>`SUM(${classInstances.durationMinutes}::float / 60.0)::float`,
-            paidEGP: sql<number>`SUM(CASE WHEN ${classInstances.rateCurrency} = 'EGP' THEN ${classInstances.rateAmount} ELSE 0 END)::float`,
-            paidUSD: sql<number>`SUM(CASE WHEN ${classInstances.rateCurrency} = 'USD' THEN ${classInstances.rateAmount} ELSE 0 END)::float`,
           })
           .from(classInstances)
           .leftJoin(students, eq(students.id, classInstances.studentId))
@@ -99,8 +153,14 @@ export namespace ReportRepository {
           .where(and(...conditions))
           .groupBy(groupKeyExpr);
 
+        const paidByGroup = await fetchPaidAmountsByGroup(filters, groupKeyExpr, tx, true);
+
         logger.debug(`[ReportRepository.generateAttendanceReport] Generated ${results.length} rows.`);
-        return results.map(row => ({ ...row, engagementGrowth: null }));
+        return results.map(row => ({
+          ...row,
+          paidAmounts: paidByGroup.get(row.groupKey) ?? [],
+          engagementGrowth: null,
+        }));
       }
 
       const results = await queryDb
@@ -112,8 +172,6 @@ export namespace ReportRepository {
           leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
           pendingClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END)::int`,
           totalHours: sql<number>`SUM(${classInstances.durationMinutes}::float / 60.0)::float`,
-          paidEGP: sql<number>`SUM(CASE WHEN ${classInstances.rateCurrency} = 'EGP' THEN ${classInstances.rateAmount} ELSE 0 END)::float`,
-          paidUSD: sql<number>`SUM(CASE WHEN ${classInstances.rateCurrency} = 'USD' THEN ${classInstances.rateAmount} ELSE 0 END)::float`,
         })
         .from(classInstances)
         .leftJoin(teachers, eq(teachers.id, classInstances.teacherId))
@@ -121,8 +179,14 @@ export namespace ReportRepository {
         .where(and(...conditions))
         .groupBy(groupKeyExpr);
 
+      const paidByGroup = await fetchPaidAmountsByGroup(filters, groupKeyExpr, tx, false);
+
       logger.debug(`[ReportRepository.generateAttendanceReport] Generated ${results.length} rows.`);
-      return results.map(row => ({ ...row, engagementGrowth: null }));
+      return results.map(row => ({
+        ...row,
+        paidAmounts: paidByGroup.get(row.groupKey) ?? [],
+        engagementGrowth: null,
+      }));
     } catch (error) {
       logger.error("[ReportRepository.generateAttendanceReport] Fatal query execution error:", error);
       throw error;

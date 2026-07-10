@@ -43,6 +43,26 @@ export interface PaymentMethodListLabels {
   readonly setDefault: string;
 }
 
+export interface PaymentMethodManagerLabels {
+  readonly add: string;
+  readonly addTitle: string;
+  readonly editTitle: string;
+  readonly listTitle: string;
+  readonly empty: string;
+  readonly direction: string;
+  readonly label: string;
+  readonly defaultPayin: string;
+  readonly defaultPayout: string;
+  readonly cancel: string;
+  readonly save: string;
+  readonly deleteTitle: string;
+  readonly deleteBody: string;
+  readonly deleteConfirm: string;
+  readonly loadError: string;
+  readonly retry: string;
+  readonly verify: string;
+}
+
 export interface PaymentMethodDefaultsEditorLabels {
   readonly payinDefault: string;
   readonly payoutDefault: string;
@@ -97,6 +117,7 @@ export interface PaymentMethodLabels {
   readonly select: PaymentMethodSelectLabels;
   readonly display: PaymentMethodDisplayLabels;
   readonly list: PaymentMethodListLabels;
+  readonly manager: PaymentMethodManagerLabels;
   readonly defaultsEditor: PaymentMethodDefaultsEditorLabels;
   readonly typeFields: PaymentMethodTypeFieldsLabels;
 }

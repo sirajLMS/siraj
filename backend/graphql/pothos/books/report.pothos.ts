@@ -1,6 +1,14 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type { AttendanceReportRow } from "@/backend/services/report/report.service";
+import {
+  DisplayAmountPothosObject,
+  resolveDisplayAmountField,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ReportGroupingMode, ReportService } from "@/backend/services/report/report.service";
+import type {
+  AttendanceReportPaidAmountReturnType,
+  AttendanceReportRowReturnType,
+} from "@/backend/types/books/report.types";
 
 export const ReportGroupingModeEnum = gqlSchemaBuilder.enumType(ReportGroupingMode, {
   name: "ReportGroupingMode",
@@ -17,7 +25,24 @@ export const AttendanceReportFiltersInput = gqlSchemaBuilder.inputType("Attendan
   }),
 });
 
-const AttendanceReportRowRef = gqlSchemaBuilder.objectRef<AttendanceReportRow>("AttendanceReportRow");
+const AttendanceReportPaidAmountRef =
+  gqlSchemaBuilder.objectRef<AttendanceReportPaidAmountReturnType>("AttendanceReportPaidAmount");
+
+export const AttendanceReportPaidAmountObj = AttendanceReportPaidAmountRef.implement({
+  description: "Locked paid amount for a report row in a specific currency.",
+  fields: t => ({
+    id: t.exposeID("id"),
+    amount: t.exposeString("amount"),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject }),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "amount", "currency"),
+    }),
+  }),
+});
+
+const AttendanceReportRowRef = gqlSchemaBuilder.objectRef<AttendanceReportRowReturnType>("AttendanceReportRow");
 
 export const AttendanceReportRowObj = AttendanceReportRowRef.implement({
   description: "A single row of the aggregated attendance report.",
@@ -30,14 +55,16 @@ export const AttendanceReportRowObj = AttendanceReportRowRef.implement({
     leaveClasses: t.exposeInt("leaveClasses"),
     pendingClasses: t.exposeInt("pendingClasses"),
     totalHours: t.exposeFloat("totalHours", { nullable: true }),
-    paidEGP: t.exposeFloat("paidEGP", { nullable: true }),
-    paidUSD: t.exposeFloat("paidUSD", { nullable: true }),
+    paidAmounts: t.field({
+      type: [AttendanceReportPaidAmountObj],
+      resolve: parent => parent.paidAmounts,
+    }),
     engagementGrowth: t.exposeFloat("engagementGrowth", { nullable: true }),
   }),
 });
 
 const AttendanceReportPayloadRef = gqlSchemaBuilder.objectRef<{
-  rows: AttendanceReportRow[];
+  rows: AttendanceReportRowReturnType[];
   engagementGrowth: number | null;
 }>("AttendanceReportPayload");
 

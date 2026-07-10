@@ -8,26 +8,29 @@ import type { ReportsSummary } from "@/frontend/views/dashboard/reports/types/re
 interface ReportsTotalsRowProps {
   readonly summary: ReportsSummary;
   readonly totalsLabel: string;
-  readonly egpLabel: string;
-  readonly usdLabel: string;
 }
 
-function formatCurrency(value: number): string {
+function formatCurrencyAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function ReportsTotalsRow({ summary, totalsLabel, egpLabel, usdLabel }: Readonly<ReportsTotalsRowProps>) {
+export function ReportsTotalsRow({ summary, totalsLabel }: Readonly<ReportsTotalsRowProps>) {
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
-  const totalsText = `${formatCurrency(summary.totalEgp)} ${egpLabel}, ${formatCurrency(summary.totalUsd)} ${usdLabel}`;
+  const totalsText =
+    summary.currencyDistribution.length > 0
+      ? summary.currencyDistribution
+          .map(slice => `${formatCurrencyAmount(slice.amount)} ${slice.currency}`)
+          .join(", ")
+      : "—";
 
   return (
     <Box
       sx={theme => ({
         display: "grid",
         gridTemplateColumns: showFinancials
-          ? "minmax(0, 1.4fr) repeat(4, 90px) 100px 130px 130px"
+          ? "minmax(0, 1.4fr) repeat(4, 90px) 100px minmax(180px, 1fr)"
           : "minmax(0, 1.4fr) repeat(4, 90px)",
         alignItems: "center",
         px: 3,
@@ -46,10 +49,7 @@ export function ReportsTotalsRow({ summary, totalsLabel, egpLabel, usdLabel }: R
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, textAlign: "center" })}>
             {summary.totalHours}
           </Typography>
-          <Typography
-            variant="titleLg"
-            sx={theme => ({ color: theme.palette.primary.main, gridColumn: "span 2", textAlign: "end" })}
-          >
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
             {totalsText}
           </Typography>
         </>

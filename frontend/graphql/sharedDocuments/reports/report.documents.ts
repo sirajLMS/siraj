@@ -16,8 +16,17 @@ export const generateAttendanceReportQueryDocument: TypedDocumentNode<
         leaveClasses
         pendingClasses
         totalHours
-        paidEGP
-        paidUSD
+        paidAmounts {
+          id
+          amount
+          currency
+          displayAmount {
+            id
+            amount
+            currency
+            stale
+          }
+        }
         engagementGrowth
       }
       engagementGrowth

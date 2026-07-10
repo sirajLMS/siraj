@@ -46,8 +46,7 @@ export namespace ReportService {
           rows: rawResults.map(row => ({
             ...row,
             totalHours: 0,
-            paidEGP: 0,
-            paidUSD: 0,
+            paidAmounts: [],
           })),
           engagementGrowth,
         };

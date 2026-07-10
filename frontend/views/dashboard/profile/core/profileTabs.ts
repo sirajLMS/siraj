@@ -11,7 +11,7 @@ type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
 
 const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
   profile: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER", "STAFF-OWN", "STAFF-OTHER"],
-  paymentMethods: ["TEACHER-OWN", "TEACHER-OTHER"],
+  paymentMethods: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER"],
   meeting: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER"],
   students: ["TEACHER-OTHER"],
   notifications: ["TEACHER-OWN", "PARENT-OWN", "STAFF-OWN"],

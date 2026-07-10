@@ -38,12 +38,26 @@ export async function incrementTeacherLeaveQuota(
   const queryDb = tx ?? db;
 
   try {
-    await queryDb.execute(sql`
-      INSERT INTO leave_quota_usage (teacher_id, period_year, period_month, used_count)
-      VALUES (${teacherId}, ${periodYear}, ${periodMonth}, 1)
-      ON CONFLICT (teacher_id, period_year, period_month) WHERE teacher_id IS NOT NULL
-      DO UPDATE SET used_count = leave_quota_usage.used_count + 1
-    `);
+    const [updated] = await queryDb
+      .update(leaveQuotaUsage)
+      .set({ usedCount: sql`${leaveQuotaUsage.usedCount} + 1` })
+      .where(
+        and(
+          eq(leaveQuotaUsage.teacherId, teacherId),
+          eq(leaveQuotaUsage.periodYear, periodYear),
+          eq(leaveQuotaUsage.periodMonth, periodMonth)
+        )
+      )
+      .returning({ id: leaveQuotaUsage.id });
+
+    if (!updated) {
+      await queryDb.insert(leaveQuotaUsage).values({
+        teacherId,
+        periodYear,
+        periodMonth,
+        usedCount: 1,
+      });
+    }
   } catch (error) {
     if (error instanceof Error && (error as { code?: string }).code === "P0001") {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

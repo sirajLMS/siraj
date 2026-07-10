@@ -227,6 +227,14 @@ input AttendanceReportFiltersInput {
   toDate: String!
 }
 
+"""Locked paid amount for a report row in a specific currency."""
+type AttendanceReportPaidAmount {
+  amount: String
+  currency: CurrencyCode
+  displayAmount: DisplayAmount
+  id: ID
+}
+
 """The full attendance report result including rows and growth metric."""
 type AttendanceReportPayload {
   """
@@ -246,8 +254,7 @@ type AttendanceReportRow {
   groupLabel: String
   id: String
   leaveClasses: Int
-  paidEGP: Float
-  paidUSD: Float
+  paidAmounts: [AttendanceReportPaidAmount!]
   pendingClasses: Int
   takenClasses: Int
   totalHours: Float

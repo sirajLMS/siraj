@@ -20,6 +20,7 @@ import type {
   TeacherOnboardingInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import type { OnboardingPaymentMethodFormValues } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 // --- Parent Complaints ---
 
@@ -194,7 +195,7 @@ export type ParentOnboardingFormData = Omit<
   feeAmount: string;
   currency: CurrencyCode;
   invoiceType: InvoiceType;
-  paymentMethodType: PaymentMethodType;
+  payinMethod: OnboardingPaymentMethodFormValues;
   timezone: string;
 };
 
@@ -217,12 +218,7 @@ export type TeacherOnboardingFormData = Omit<
   timezone: string;
   hourlyRate: string;
   rateCurrency: CurrencyCode;
-  beneficiaryName: string;
-  bankName: string;
-  accountNumber: string;
-  routingNumber?: string;
-  swiftBic?: string;
-  iban: string;
+  payoutMethod: OnboardingPaymentMethodFormValues;
   gender: Gender;
   meetingProvider?: MeetingProviderFieldsFragment | null;
   meetingUrl?: string;

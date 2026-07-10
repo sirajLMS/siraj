@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
+import { onboardingPaymentMethodSchema } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
+import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { CountryCode, Gender } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
 export type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/types";
@@ -17,10 +18,6 @@ export const teacherOnboardingSchema = (validationLabels: {
   readonly timezoneRequired: string;
   readonly salaryAmountRequired: string;
   readonly currencyRequired: string;
-  readonly beneficiaryNameRequired: string;
-  readonly bankNameRequired: string;
-  readonly accountNumberRequired: string;
-  readonly ibanRequired: string;
   readonly urlInvalid: string;
 }) =>
   z
@@ -46,12 +43,7 @@ export const teacherOnboardingSchema = (validationLabels: {
         .refine(value => isValidIanaTimezoneId(value), { message: validationLabels.timezoneRequired }),
       hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
       rateCurrency: z.enum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired }),
-      beneficiaryName: z.string().min(1, validationLabels.beneficiaryNameRequired),
-      bankName: z.string().min(1, validationLabels.bankNameRequired),
-      accountNumber: z.string().min(1, validationLabels.accountNumberRequired),
-      routingNumber: z.string().optional(),
-      swiftBic: z.string().optional(),
-      iban: z.string().min(1, validationLabels.ibanRequired),
+      payoutMethod: onboardingPaymentMethodSchema,
       meetingProvider: z.custom<MeetingProviderFieldsFragment | null>().nullable().optional(),
       meetingUrl: z.string().optional(),
       meetingLabel: z.string().optional(),

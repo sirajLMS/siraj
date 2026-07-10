@@ -1,4 +1,6 @@
 // cspell:disable
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+
 export type ReportType = "by_teacher" | "by_student" | "by_date";
 
 export type LedgerStatus = "active" | "on_break";
@@ -6,6 +8,18 @@ export type LedgerStatus = "active" | "on_break";
 export interface ReportTeacherOption {
   readonly id: string;
   readonly name: string;
+}
+
+export interface ReportPaidAmount {
+  readonly id: string;
+  readonly amount: string;
+  readonly currency: CurrencyCode;
+  readonly displayAmount?: {
+    readonly id: string;
+    readonly amount?: string | null;
+    readonly currency?: CurrencyCode | null;
+    readonly stale?: boolean | null;
+  } | null;
 }
 
 export interface ReportLedgerRow {
@@ -20,18 +34,21 @@ export interface ReportLedgerRow {
   readonly leave: number;
   readonly pending: number;
   readonly hours: string;
-  readonly paidEgp: number;
-  readonly paidUsd: number;
+  readonly paidAmounts: readonly ReportPaidAmount[];
+}
+
+export interface CurrencyDistributionSlice {
+  readonly currency: CurrencyCode;
+  readonly percent: number;
+  readonly label: string;
+  readonly amount: number;
 }
 
 export interface ReportsSummary {
   readonly engagementRate: number;
   readonly engagementGrowth: number | null;
-  readonly egpPercent: number;
-  readonly usdPercent: number;
+  readonly currencyDistribution: readonly CurrencyDistributionSlice[];
   readonly totalHours: string;
-  readonly totalEgp: number;
-  readonly totalUsd: number;
 }
 
 export interface ReportFilters {

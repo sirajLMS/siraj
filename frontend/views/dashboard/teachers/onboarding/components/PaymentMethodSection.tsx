@@ -1,133 +1,75 @@
 "use client";
 
-import { Box, Grid, Input, Typography } from "@mui/material";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
+import { Stack } from "@mui/material";
+import { useState } from "react";
+import type { Control, FieldErrors } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { PaymentMethodTypeFields } from "@/frontend/components/ui/input/paymentMethodTypeFields";
+import { PaymentMethodTypeSelector } from "@/frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
+import { PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
+import { usePaymentMethodCatalogs } from "@/frontend/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 interface PaymentMethodSectionProps {
-  readonly register: UseFormRegister<TeacherOnboardingFormData>;
+  readonly control: Control<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
-  readonly labels: {
-    readonly fields: {
-      readonly beneficiaryName: string;
-      readonly bankName: string;
-      readonly accountNumber: string;
-      readonly routingNumber: string;
-      readonly swiftBic: string;
-      readonly iban: string;
-    };
-    readonly placeholders: {
-      readonly beneficiaryName: string;
-      readonly bankName: string;
-      readonly accountNumber: string;
-      readonly routingNumber: string;
-      readonly swiftBic: string;
-      readonly iban: string;
-    };
-  };
 }
 
-export function PaymentMethodSection({ register, errors, labels }: Readonly<PaymentMethodSectionProps>) {
+export function PaymentMethodSection({ control, errors }: Readonly<PaymentMethodSectionProps>) {
+  const { setValue } = useFormContext<TeacherOnboardingFormData>();
+  const methodType = useWatch({ control, name: "payoutMethod.type" }) ?? PaymentMethodType.BankTransfer;
+
+  const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(
+    PaymentDirection.Payout
+  );
+
+  const [selectedWallet, setSelectedWallet] = useState<PaymentMethodCatalogOption | null>(null);
+  const [selectedPaymentLink, setSelectedPaymentLink] = useState<PaymentMethodCatalogOption | null>(null);
+  const [selectedOnlineAccount, setSelectedOnlineAccount] = useState<PaymentMethodCatalogOption | null>(null);
+
   return (
-    <Grid container spacing={3} sx={theme => ({ p: theme.spacing(3) })}>
-      <Grid size={{ xs: 12, md: 8 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.beneficiaryName}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
-          {...register("beneficiaryName")}
-          placeholder={labels.placeholders.beneficiaryName}
-          error={!!errors.beneficiaryName}
-          fullWidth
-          sx={standardInputSx}
-        />
-        {errors.beneficiaryName ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.beneficiaryName.message}
-          </Typography>
-        ) : null}
-      </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.bankName}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
-          {...register("bankName")}
-          placeholder={labels.placeholders.bankName}
-          error={!!errors.bankName}
-          fullWidth
-          sx={standardInputSx}
-        />
-        {errors.bankName ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.bankName.message}
-          </Typography>
-        ) : null}
-      </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.accountNumber}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
-          {...register("accountNumber")}
-          placeholder={labels.placeholders.accountNumber}
-          error={!!errors.accountNumber}
-          fullWidth
-          sx={standardInputSx}
-        />
-        {errors.accountNumber ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.accountNumber.message}
-          </Typography>
-        ) : null}
-      </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.routingNumber}
-        </Box>
-        <Input
-          {...register("routingNumber")}
-          placeholder={labels.placeholders.routingNumber}
-          fullWidth
-          sx={standardInputSx}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.swiftBic}
-        </Box>
-        <Input {...register("swiftBic")} placeholder={labels.placeholders.swiftBic} fullWidth sx={standardInputSx} />
-      </Grid>
-      <Grid size={{ xs: 12 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.iban}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Input
-          {...register("iban")}
-          placeholder={labels.placeholders.iban}
-          error={!!errors.iban}
-          fullWidth
-          sx={standardInputSx}
-        />
-        {errors.iban ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.iban.message}
-          </Typography>
-        ) : null}
-      </Grid>
-    </Grid>
+    <Stack spacing={3}>
+      <Controller
+        name="payoutMethod.type"
+        control={control}
+        render={({ field }) => (
+          <PaymentMethodTypeSelector
+            type={field.value}
+            setTypeAction={value => {
+              if (value) field.onChange(value);
+            }}
+            required
+            fullWidth
+          />
+        )}
+      />
+      <PaymentMethodTypeFields
+        type={methodType}
+        control={control}
+        detailsPrefix="payoutMethod.details"
+        walletOptions={walletOptions}
+        paymentLinkOptions={paymentLinkOptions}
+        onlineAccountOptions={onlineAccountOptions}
+        selectedWallet={selectedWallet}
+        selectedPaymentLink={selectedPaymentLink}
+        selectedOnlineAccount={selectedOnlineAccount}
+        onWalletChangeAction={option => {
+          setSelectedWallet(option);
+          setValue("payoutMethod.details.walletId", option.id);
+        }}
+        onPaymentLinkChangeAction={option => {
+          setSelectedPaymentLink(option);
+          setValue("payoutMethod.details.paymentLinkId", option.id);
+        }}
+        onOnlineAccountChangeAction={option => {
+          setSelectedOnlineAccount(option);
+          setValue("payoutMethod.details.onlineAccountId", option.id);
+        }}
+      />
+      {errors.payoutMethod?.type?.message ? (
+        <span style={{ color: "var(--mui-palette-error-main)", fontSize: 12 }}>{errors.payoutMethod.type.message}</span>
+      ) : null}
+    </Stack>
   );
 }

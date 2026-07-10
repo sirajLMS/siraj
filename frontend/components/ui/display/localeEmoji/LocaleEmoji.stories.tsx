@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { LocaleEmoji } from "@/frontend/components/ui/display/LocaleEmoji";
+import { LocaleEmoji } from "@/frontend/components/ui/display/localeEmoji/LocaleEmoji";
 
 const meta: Meta<typeof LocaleEmoji> = {
   title: "UI/Display/LocaleEmoji",

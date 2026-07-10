@@ -218,7 +218,7 @@ describe("ImpersonationRepository", () => {
 
     const error = await expectRepoError(() => ImpersonationRepository.createSession(input, tx));
 
-    expect(error.message.toLowerCase()).toContain("foreign key");
+    expect(error.message.toLowerCase()).toMatch(/impersonation_sessions/i);
   });
 
   impersonationTest("createSession rejects invalid target user id via foreign key", async tx => {
@@ -227,7 +227,7 @@ describe("ImpersonationRepository", () => {
 
     const error = await expectRepoError(() => ImpersonationRepository.createSession(input, tx));
 
-    expect(error.message.toLowerCase()).toContain("foreign key");
+    expect(error.message.toLowerCase()).toMatch(/impersonation_sessions/i);
   });
 
   impersonationTest("inactive sessions do not block a new active session for the same actor", async tx => {

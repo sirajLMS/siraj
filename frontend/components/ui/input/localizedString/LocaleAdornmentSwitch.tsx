@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
-import { LocaleEmoji } from "@/frontend/components/ui/display/LocaleEmoji";
+import { LocaleEmoji } from "@/frontend/components/ui/display/localeEmoji/LocaleEmoji";
 import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/lib/locale";
 import type { AppLocale } from "@/shared/i18n/routing";
 

@@ -4,9 +4,10 @@ import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { AttendanceReportRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AttendanceReportRow, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission, ReportGroupingMode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { generateAttendanceReportQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { getCurrencyDisplayName } from "@/frontend/lib/currency";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
@@ -14,15 +15,37 @@ import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref
 import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
 import type {
   ReportLedgerRow,
+  ReportPaidAmount,
   ReportsSummary,
   ReportType,
 } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import { aggregateCurrencyTotals } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 import { useRouter } from "@/shared/i18n/routing";
 
 function formatHours(hours: number): string {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
   return `${h}:${m.toString().padStart(2, "0")}`;
+}
+
+function mapPaidAmounts(
+  paidAmounts: AttendanceReportRow["paidAmounts"] | null | undefined
+): readonly ReportPaidAmount[] {
+  return (paidAmounts ?? [])
+    .filter((paid): paid is NonNullable<typeof paid> => paid != null && paid.id != null && paid.currency != null)
+    .map(paid => ({
+      id: paid.id ?? `${paid.currency}`,
+      amount: paid.amount ?? "0",
+      currency: paid.currency as CurrencyCode,
+      displayAmount: paid.displayAmount
+        ? {
+            id: paid.displayAmount.id ?? `display:${paid.id}`,
+            amount: paid.displayAmount.amount,
+            currency: paid.displayAmount.currency,
+            stale: paid.displayAmount.stale,
+          }
+        : null,
+    }));
 }
 
 function mapReportRows(reportRows: readonly AttendanceReportRow[] | null | undefined): readonly ReportLedgerRow[] {
@@ -49,8 +72,7 @@ function mapReportRows(reportRows: readonly AttendanceReportRow[] | null | undef
     leave: row.leaveClasses ?? 0,
     pending: row.pendingClasses ?? 0,
     hours: formatHours(row.totalHours ?? 0),
-    paidEgp: row.paidEGP ?? 0,
-    paidUsd: row.paidUSD ?? 0,
+    paidAmounts: mapPaidAmounts(row.paidAmounts),
   }));
 }
 
@@ -130,8 +152,7 @@ function ReportsMainContent({
       leave: t("table.leave"),
       pending: t("table.pending"),
       hours: t("table.hours"),
-      paidEgp: t("table.paidEgp"),
-      paidUsd: t("table.paidUsd"),
+      paid: t("table.paid"),
       noEntries: t("noEntries"),
     },
     summaryLabels: {
@@ -140,8 +161,6 @@ function ReportsMainContent({
       increase: t("summary.increase"),
       financialDistribution: t("summary.financialDistribution"),
       financialSubtitle: t("summary.financialSubtitle"),
-      egpLabel: t("summary.egpLabel"),
-      usdLabel: t("summary.usdLabel"),
     },
     totalsLabel: t("table.totals"),
     ledgerTitle: t("ledger.title"),
@@ -249,15 +268,14 @@ function useReportData(activeFilters: {
   const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport?.rows), [reportData]);
 
   const summary = useMemo<ReportsSummary>(() => {
+    const reportRows = reportData?.generateAttendanceReport?.rows ?? [];
+
     if (rows.length === 0) {
       return {
         engagementRate: 0,
         engagementGrowth: null,
-        egpPercent: 100,
-        usdPercent: 0,
+        currencyDistribution: [],
         totalHours: "0:00",
-        totalEgp: 0,
-        totalUsd: 0,
       };
     }
 
@@ -269,27 +287,23 @@ function useReportData(activeFilters: {
     const engagementRate = totalAttempted > 0 ? Math.round((totalTaken / totalAttempted) * 1000) / 10 : 0;
     const engagementGrowth = reportData?.generateAttendanceReport?.engagementGrowth ?? null;
 
-    const totalHoursFloat =
-      reportData?.generateAttendanceReport?.rows?.reduce(
-        (sum: number, r: AttendanceReportRow) => sum + (r.totalHours ?? 0),
-        0
-      ) ?? 0;
+    const totalHoursFloat = reportRows.reduce((sum: number, r: AttendanceReportRow) => sum + (r.totalHours ?? 0), 0);
 
-    const totalEgp = rows.reduce((sum, r) => sum + r.paidEgp, 0);
-    const totalUsd = rows.reduce((sum, r) => sum + r.paidUsd, 0);
-    const totalPaid = totalEgp + totalUsd;
-
-    const egpPercent = totalPaid > 0 ? Math.round((totalEgp / totalPaid) * 100) : 100;
-    const usdPercent = totalPaid > 0 ? 100 - egpPercent : 0;
+    const currencyTotals = aggregateCurrencyTotals(
+      reportRows.map(row => ({ paidAmounts: mapPaidAmounts(row.paidAmounts) }))
+    );
+    const currencyDistribution = currencyTotals.map(slice => ({
+      currency: slice.currency,
+      amount: slice.amount,
+      percent: slice.percent,
+      label: getCurrencyDisplayName(slice.currency),
+    }));
 
     return {
       engagementRate,
       engagementGrowth,
-      egpPercent,
-      usdPercent,
+      currencyDistribution,
       totalHours: formatHours(totalHoursFloat),
-      totalEgp,
-      totalUsd,
     };
   }, [rows, reportData]);
 
@@ -349,15 +363,12 @@ function useReportHandlers({
           leave: "Leave",
           pending: "Pending",
           hours: "Hours",
-          paidEgp: "Paid (EGP)",
-          paidUsd: "Paid (USD)",
+          paid: "Paid",
         },
         totalsLabel: "Totals",
         summaryLabels: {
           engagementRate: "Engagement Rate",
           financialDistribution: "Currency Split",
-          egpLabel: "EGP",
-          usdLabel: "USD",
         },
       },
       fromDate,

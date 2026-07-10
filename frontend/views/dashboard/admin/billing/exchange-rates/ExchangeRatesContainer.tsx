@@ -1,18 +1,30 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Alert, Box, Button, Chip, CircularProgress, Snackbar, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   latestExchangeRatesQueryDocument,
   latestFxSyncRunQueryDocument,
   refreshExchangeRatesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+
+type ExchangeRateRow = {
+  readonly id: string;
+  readonly fromCurrency: CurrencyCode;
+  readonly toCurrency: CurrencyCode;
+  readonly rate: string;
+  readonly source: string | null;
+  readonly effectiveDate: string;
+};
 
 function formatTimestamp(dateStr: string | null | undefined): string {
   if (!dateStr) return "—";
@@ -25,39 +37,22 @@ function formatTimestamp(dateStr: string | null | undefined): string {
   });
 }
 
-function SyncStatusChip({
+function SyncStatusBadge({
   status,
   labels,
 }: {
   readonly status: string | null | undefined;
   readonly labels: { success: string; running: string; partial: string; failed: string; unknown: string };
 }) {
-  const labelKey = (status ?? "unknown").toLowerCase() as keyof typeof labels;
-  const color: "success" | "warning" | "error" | "default" =
-    status === "success" ? "success" : status === "running" ? "warning" : status === "failed" ? "error" : "default";
-  return <Chip label={labels[labelKey] ?? labels.unknown} color={color} size="small" />;
-}
-
-function ExchangeRateSyncStatusCard({
-  labels,
-  children,
-}: {
-  readonly labels: {
-    title: string;
-    refresh: string;
-    lastSync: string;
-    provider: string;
-    pairsWritten: string;
-    pairsFailed: string;
-    errorMessage: string;
-    statusLabels: { success: string; running: string; partial: string; failed: string; unknown: string };
-  };
-  readonly children: React.ReactNode;
-}) {
+  const normalized = (status ?? "unknown").toLowerCase();
+  const labelKey = normalized as keyof typeof labels;
   return (
-    <SectionPanel title={labels.title}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>{children}</Box>
-    </SectionPanel>
+    <StatusBadge
+      category="syncStatus"
+      status={normalized}
+      label={labels[labelKey] ?? labels.unknown}
+      size="small"
+    />
   );
 }
 
@@ -147,21 +142,57 @@ export function ExchangeRatesContainer() {
   };
 
   const syncRun = syncData?.latestFxSyncRun ?? null;
-  const rates: readonly {
-    readonly id: string;
-    readonly fromCurrency: string;
-    readonly toCurrency: string;
-    readonly rate: string;
-    readonly source: string | null;
-    readonly effectiveDate: string;
-  }[] = (ratesData?.latestExchangeRates ?? []).map(rate => ({
-    id: rate?.id ?? "",
-    fromCurrency: (rate?.fromCurrency as string) ?? "",
-    toCurrency: (rate?.toCurrency as string) ?? "",
-    rate: (rate?.rate as string) ?? "0",
-    source: rate?.source ?? null,
-    effectiveDate: (rate?.effectiveDate as string) ?? "",
-  }));
+  const rates: ExchangeRateRow[] = (ratesData?.latestExchangeRates ?? [])
+    .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
+    .map(rate => ({
+      id: rate.id ?? "",
+      fromCurrency: (rate.fromCurrency ?? CurrencyCode.Usd) as CurrencyCode,
+      toCurrency: (rate.toCurrency ?? CurrencyCode.Sar) as CurrencyCode,
+      rate: rate.rate ?? "0",
+      source: rate.source ?? null,
+      effectiveDate: rate.effectiveDate ?? "",
+    }));
+
+  const columns = useMemo<GridColDef<ExchangeRateRow>[]>(
+    () => [
+      {
+        field: "fromCurrency",
+        headerName: labels.rateTable.fromCurrency,
+        flex: 1,
+        minWidth: 140,
+        renderCell: ({ row }) => <CurrencyDisplay code={row.fromCurrency} showLabel showSymbol />,
+      },
+      {
+        field: "toCurrency",
+        headerName: labels.rateTable.toCurrency,
+        flex: 1,
+        minWidth: 140,
+        renderCell: ({ row }) => <CurrencyDisplay code={row.toCurrency} showLabel showSymbol />,
+      },
+      {
+        field: "rate",
+        headerName: labels.rateTable.rate,
+        width: 120,
+        align: "right",
+        headerAlign: "right",
+      },
+      {
+        field: "source",
+        headerName: labels.rateTable.source,
+        flex: 1,
+        minWidth: 140,
+        valueFormatter: value => value || "—",
+      },
+      {
+        field: "effectiveDate",
+        headerName: labels.rateTable.effectiveDate,
+        flex: 1.2,
+        minWidth: 180,
+        valueFormatter: value => formatTimestamp(String(value ?? "")),
+      },
+    ],
+    [labels.rateTable]
+  );
 
   return (
     <PageContainer>
@@ -170,20 +201,15 @@ export function ExchangeRatesContainer() {
         subtitle={labels.pageSubtitle}
         actions={
           <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
-            <Button
-              variant="contained"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              startIcon={refreshing ? <CircularProgress size={16} color="inherit" /> : undefined}
-            >
-              {labels.syncStatus.refresh}
-            </Button>
+            <PrimaryPageAction onClick={handleRefresh} disabled={refreshing}>
+              {refreshing ? labels.common.refreshing : labels.syncStatus.refresh}
+            </PrimaryPageAction>
           </RequirePermission>
         }
       />
 
       <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
-        <ExchangeRateSyncStatusCard labels={labels.syncStatus}>
+        <SectionPanel title={labels.syncStatus.title}>
           {syncLoading ? (
             <CircularProgress size={24} />
           ) : syncRun ? (
@@ -216,7 +242,7 @@ export function ExchangeRatesContainer() {
                 <Typography variant="bodyMd" color="textSecondary">
                   {t("status", { defaultValue: "Status" })}
                 </Typography>
-                <SyncStatusChip status={syncRun.status} labels={labels.syncStatus.statusLabels} />
+                <SyncStatusBadge status={syncRun.status} labels={labels.syncStatus.statusLabels} />
               </Box>
               {syncRun.errorMessage ? (
                 <Box sx={{ gridColumn: { sm: "span 2" } }}>
@@ -234,41 +260,17 @@ export function ExchangeRatesContainer() {
               {labels.common.noSyncRuns}
             </Typography>
           )}
-        </ExchangeRateSyncStatusCard>
+        </SectionPanel>
 
         <SectionPanel title={labels.rateTable.title}>
-          {ratesLoading ? (
-            <CircularProgress size={24} />
-          ) : rates.length === 0 ? (
-            <Typography variant="bodyMd" color="textSecondary">
-              {labels.common.noRates}
-            </Typography>
-          ) : (
-            <Box sx={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: "left", padding: "8px 12px" }}>{labels.rateTable.fromCurrency}</th>
-                    <th style={{ textAlign: "left", padding: "8px 12px" }}>{labels.rateTable.toCurrency}</th>
-                    <th style={{ textAlign: "right", padding: "8px 12px" }}>{labels.rateTable.rate}</th>
-                    <th style={{ textAlign: "left", padding: "8px 12px" }}>{labels.rateTable.source}</th>
-                    <th style={{ textAlign: "left", padding: "8px 12px" }}>{labels.rateTable.effectiveDate}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rates.map(rate => (
-                    <tr key={rate.id} style={{ borderTop: "1px solid", borderColor: "divider" }}>
-                      <td style={{ padding: "8px 12px" }}>{rate.fromCurrency}</td>
-                      <td style={{ padding: "8px 12px" }}>{rate.toCurrency}</td>
-                      <td style={{ padding: "8px 12px", textAlign: "right" }}>{rate.rate}</td>
-                      <td style={{ padding: "8px 12px" }}>{rate.source ?? "—"}</td>
-                      <td style={{ padding: "8px 12px" }}>{formatTimestamp(rate.effectiveDate)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Box>
-          )}
+          <AppDataGrid
+            rows={rates}
+            columns={columns}
+            loading={ratesLoading}
+            emptyMessage={labels.common.noRates}
+            autoHeight
+            disableColumnMenu
+          />
         </SectionPanel>
       </RequirePermission>
 

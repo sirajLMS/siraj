@@ -15,7 +15,8 @@ export type StatusBadgeCategory =
   | "sessionTracking"
   | "trackingStatus"
   | "invoice"
-  | "paymentMethod";
+  | "paymentMethod"
+  | "syncStatus";
 
 interface StatusBadgeProps {
   readonly category: StatusBadgeCategory;
@@ -93,6 +94,16 @@ function resolveStatusPaletteKey(
         inactive: "cancelled",
         verified: "confirmed",
         unverified: "pending",
+      };
+      return map[status] ?? "pending";
+    }
+    case "syncStatus": {
+      const map: Record<string, "completed" | "pending" | "blocked" | "confirmed"> = {
+        success: "completed",
+        running: "pending",
+        partial: "confirmed",
+        failed: "blocked",
+        unknown: "pending",
       };
       return map[status] ?? "pending";
     }

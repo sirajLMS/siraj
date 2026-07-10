@@ -19,6 +19,7 @@ import {
 import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
 import { ParentProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/parent/sections/ParentProfileLoadingSkeleton";
 import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
+import { PaymentMethodsTab } from "@/frontend/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { useRouter } from "@/shared/i18n/routing";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
@@ -122,6 +123,10 @@ export function ParentProfileContainer({
 
   if (activeTab === "meeting") {
     return <MeetingConfigsTab targetUserId={targetUserId} />;
+  }
+
+  if (activeTab === "paymentMethods") {
+    return <PaymentMethodsTab targetUserId={targetUserId} scope={scope} slot="payin" />;
   }
 
   if (activeTab !== "profile") {

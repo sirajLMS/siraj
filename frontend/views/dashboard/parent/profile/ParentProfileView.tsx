@@ -12,6 +12,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
 import { AvatarUploadDialog } from "@/frontend/views/dashboard/parent/profile/AvatarUploadDialog";
 import ParentProfileActions from "@/frontend/views/dashboard/parent/profile/ParentProfileActions";
+import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";
 import ParentProfileDetails from "@/frontend/views/dashboard/parent/profile/ParentProfileDetails";
 import ParentProfileHeader from "@/frontend/views/dashboard/parent/profile/ParentProfileHeader";
 import ParentStudentsDataGrid from "@/frontend/views/dashboard/parent/profile/ParentStudentsDataGrid";
@@ -52,6 +53,12 @@ function ParentProfileView({ parent, parentId, onRefetchStudents }: ParentProfil
       <ParentProfileActions parentId={parentId} userId={parent.userId} onEditAvatar={() => setAvatarDialogOpen(true)} />
 
       <ParentProfileDetails parent={parent} />
+
+      <SectionPanel title={t("sections.paymentMethods")} sx={{ mt: theme.layout.sectionGap }}>
+        <Box sx={{ p: 3 }}>
+          <PaymentMethodsManager targetUserId={parent.userId} slot="payin" canManage />
+        </Box>
+      </SectionPanel>
 
       <ProfileAdministrationPanel profileUserId={parent.userId} profileUserName={parent.name} />
 

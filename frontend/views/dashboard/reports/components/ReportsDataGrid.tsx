@@ -2,12 +2,14 @@
 
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { ReportLedgerRow, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import { formatReportPaidAmounts } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 
 export interface ReportsDataGridLabels {
   readonly name: string;
@@ -16,8 +18,7 @@ export interface ReportsDataGridLabels {
   readonly leave: string;
   readonly pending: string;
   readonly hours: string;
-  readonly paidEgp: string;
-  readonly paidUsd: string;
+  readonly paid: string;
   readonly noEntries: string;
 }
 
@@ -40,15 +41,6 @@ function nameHrefForRow(row: ReportLedgerRow, reportType: ReportType): string | 
     return studentHref(row.entityId);
   }
   return undefined;
-}
-
-function formatMoney(value: number, currency: CurrencyCode): string {
-  return value.toLocaleString("en-US", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 function renderCountCell(value: number, tone: "default" | "error" | "primary" = "default") {
@@ -79,6 +71,9 @@ export function ReportsDataGrid({
 }: Readonly<ReportsDataGridProps>) {
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
+  const locale = useLocale();
+  const t = useTranslations("dashboard.reports");
+  const tErrors = useTranslations("errors");
 
   const columns = useMemo<GridColDef<ReportLedgerRow>[]>(() => {
     const cols: GridColDef<ReportLedgerRow>[] = [
@@ -146,26 +141,19 @@ export function ReportsDataGrid({
           ),
         },
         {
-          field: "paidEgp",
-          headerName: labels.paidEgp,
-          width: 130,
+          field: "paidAmounts",
+          headerName: labels.paid,
+          flex: 1,
+          minWidth: 180,
           align: "right",
           headerAlign: "right",
+          sortable: false,
           renderCell: ({ row }) => (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-              {formatMoney(row.paidEgp, CurrencyCode.Egp)}
-            </Typography>
-          ),
-        },
-        {
-          field: "paidUsd",
-          headerName: labels.paidUsd,
-          width: 130,
-          align: "right",
-          headerAlign: "right",
-          renderCell: ({ row }) => (
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-              {formatMoney(row.paidUsd, CurrencyCode.Usd)}
+              {formatReportPaidAmounts(row.paidAmounts, locale, {
+                convertedAmount: values => t("convertedAmount", values),
+                displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+              })}
             </Typography>
           ),
         }
@@ -173,7 +161,7 @@ export function ReportsDataGrid({
     }
 
     return cols;
-  }, [labels, reportType, showFinancials]);
+  }, [labels, locale, reportType, showFinancials, t, tErrors]);
 
   return (
     <Box sx={{ px: { xs: 0, md: 1 }, pb: 1 }}>

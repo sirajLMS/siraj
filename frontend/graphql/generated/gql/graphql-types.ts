@@ -254,6 +254,15 @@ export type AttendanceReportFiltersInput = {
   toDate: Scalars['String']['input'];
 };
 
+/** Locked paid amount for a report row in a specific currency. */
+export type AttendanceReportPaidAmount = {
+  __typename?: 'AttendanceReportPaidAmount';
+  amount: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
+  id: Maybe<Scalars['ID']['output']>;
+};
+
 /** The full attendance report result including rows and growth metric. */
 export type AttendanceReportPayload = {
   __typename?: 'AttendanceReportPayload';
@@ -272,8 +281,7 @@ export type AttendanceReportRow = {
   groupLabel: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   leaveClasses: Maybe<Scalars['Int']['output']>;
-  paidEGP: Maybe<Scalars['Float']['output']>;
-  paidUSD: Maybe<Scalars['Float']['output']>;
+  paidAmounts: Maybe<Array<AttendanceReportPaidAmount>>;
   pendingClasses: Maybe<Scalars['Int']['output']>;
   takenClasses: Maybe<Scalars['Int']['output']>;
   totalHours: Maybe<Scalars['Float']['output']>;

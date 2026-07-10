@@ -34,6 +34,7 @@ export const profile: ParentProfileLabels = {
     parentInfo: "معلومات ولي الأمر",
     socialMedia: "وسائل التواصل الاجتماعي والاتصالات",
     feesDetails: "تفاصيل الرسوم",
+    paymentMethods: "طرق الدفع",
     parentStudents: "طلاب ولي الأمر",
   },
   fields: {

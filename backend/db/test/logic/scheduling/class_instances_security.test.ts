@@ -142,14 +142,11 @@ describe("Class Instances Security Logic", () => {
     }));
 
   describe("Story 2: State Transitions", () => {
-    const testOutcome = async (tx: DBTransaction, key: string, outcome: "ABSENT" | "LEAVE") => {
-      const { teacher, student } = await setupTestEntities(tx, key, { skipInstance: true });
-      const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
-
+    const testOutcome = async (tx: DBTransaction, instanceId: string, outcome: "ABSENT" | "LEAVE") => {
       await tx
         .update(classInstances)
         .set({ executionState: "COMPLETED", outcome })
-        .where(eq(classInstances.id, instance.id));
+        .where(eq(classInstances.id, instanceId));
     };
 
     it("allows ACTIVATED → COMPLETED with outcome=ABSENT", () =>
@@ -157,7 +154,7 @@ describe("Class Instances Security Logic", () => {
         const { teacher, student } = await setupTestEntities(tx, "S2-1", { skipInstance: true });
         const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 
-        await testOutcome(tx, "S2-1", "ABSENT");
+        await testOutcome(tx, instance.id, "ABSENT");
 
         const [updated] = await tx
           .select({ executionState: classInstances.executionState, outcome: classInstances.outcome })
@@ -172,7 +169,7 @@ describe("Class Instances Security Logic", () => {
         const { teacher, student } = await setupTestEntities(tx, "S2-2", { skipInstance: true });
         const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 
-        await testOutcome(tx, "S2-2", "LEAVE");
+        await testOutcome(tx, instance.id, "LEAVE");
 
         const [updated] = await tx
           .select({ executionState: classInstances.executionState, outcome: classInstances.outcome })

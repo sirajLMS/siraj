@@ -3,31 +3,14 @@ import {
   type ParentOnboardingInput,
   type ParentOnboardingResult,
   PaymentDirection,
-  type PaymentMethodDetailsInput,
+  PaymentMethodType,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
+import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
-
-function buildEmptyPaymentDetails(): PaymentMethodDetailsInput {
-  return {
-    accountNumber: null,
-    bankName: null,
-    beneficiaryName: null,
-    iban: null,
-    identifier: null,
-    note: null,
-    onlineAccountId: null,
-    paymentLinkId: null,
-    phone: null,
-    routingNumber: null,
-    swiftBic: null,
-    url: null,
-    walletId: null,
-  };
-}
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);
@@ -50,11 +33,11 @@ export function useCreateParentOnboarding() {
         invoiceType: formData.invoiceType,
         feeAmount: formData.feeAmount,
         initialPayinMethod: {
-          type: formData.paymentMethodType,
+          type: formData.payinMethod.type as PaymentMethodType,
           direction: PaymentDirection.Payin,
           isDefault: true,
-          label: null,
-          details: buildEmptyPaymentDetails(),
+          label: formData.payinMethod.label?.trim() || null,
+          details: formDetailsToInput(formData.payinMethod.details),
         },
         currency: formData.currency,
         timezone: toGraphqlIanaTimezone(formData.timezone || null),

@@ -102,6 +102,7 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
 
   return (
     <ParentProfileEditView
+      userId={profile.userId ?? ""}
       register={register}
       control={control}
       errors={errors}

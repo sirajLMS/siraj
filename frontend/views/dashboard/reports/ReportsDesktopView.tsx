@@ -97,12 +97,7 @@ export function ReportsDesktopView({
           loading={loading}
           onRowClick={onRowClick}
         />
-        <ReportsTotalsRow
-          summary={summary}
-          totalsLabel={totalsLabel}
-          egpLabel={summaryLabels.egpLabel}
-          usdLabel={summaryLabels.usdLabel}
-        />
+        <ReportsTotalsRow summary={summary} totalsLabel={totalsLabel} />
       </SectionPanel>
 
       <Grid container spacing={2}>
@@ -117,12 +112,9 @@ export function ReportsDesktopView({
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
           <FinancialDistributionCard
-            egpPercent={summary.egpPercent}
-            usdPercent={summary.usdPercent}
+            currencyDistribution={summary.currencyDistribution}
             title={summaryLabels.financialDistribution}
             subtitle={summaryLabels.financialSubtitle}
-            egpLabel={summaryLabels.egpLabel}
-            usdLabel={summaryLabels.usdLabel}
           />
         </Grid>
       </Grid>
