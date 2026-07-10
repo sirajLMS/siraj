@@ -96,6 +96,7 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
   Operations.TeacherFutureScheduleQuery,
   Types.QueryTeacherFutureScheduleArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query teacherFutureSchedule($teacherId: String) {
     teacherFutureSchedule(teacherId: $teacherId) {
       id
@@ -118,6 +119,9 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
         subjectName
         classType
         meetingJoinUrl
+        effectiveMeeting {
+          ...EffectiveMeetingFields
+        }
         avatarUrl
       }
       importantNotes {

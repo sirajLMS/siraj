@@ -15,7 +15,7 @@ import {
   Select,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/components/ui";
@@ -29,8 +29,21 @@ type ProviderSettingsSectionProps = {
   readonly onFeedback: (message: string, severity: "success" | "error") => void;
 };
 
+function formatAuditDate(value: string | null | undefined, locale: string): string {
+  if (!value) {
+    return "";
+  }
+  return new Date(value).toLocaleString(locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettingsSectionProps) {
-  const tActions = useTranslations("dashboard.billing.currencyHedges");
+  const locale = useLocale();
   const [selectedProvider, setSelectedProvider] = useState<FxProvider>(FxProvider.Fixer);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingProvider, setPendingProvider] = useState<FxProvider | null>(null);
@@ -53,6 +66,12 @@ export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettings
   const config = data?.fxProviderConfig;
   const activeProvider = config?.activeProvider ?? FxProvider.Fixer;
   const sourceLabel = config?.source === FxProviderConfigSource.Database ? labels.sourceDatabase : labels.sourceEnv;
+  const lastChangedLabel =
+    config?.updatedByName && config.updatedAt
+      ? labels.lastChangedBy
+          .replace("{name}", config.updatedByName)
+          .replace("{date}", formatAuditDate(config.updatedAt, locale))
+      : null;
 
   useEffect(() => {
     setSelectedProvider(activeProvider);
@@ -82,6 +101,11 @@ export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettings
           <Typography variant="bodyMd" color="textSecondary">
             {sourceLabel}
           </Typography>
+          {lastChangedLabel ? (
+            <Typography variant="bodyMd" color="textSecondary">
+              {lastChangedLabel}
+            </Typography>
+          ) : null}
           <FormControl fullWidth disabled={loading || saving}>
             <InputLabel id="fx-provider-select-label">{labels.activeProvider}</InputLabel>
             <Select
@@ -100,7 +124,7 @@ export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettings
               onClick={handleSaveClick}
               disabled={loading || saving || selectedProvider === activeProvider}
             >
-              {tActions("save")}
+              {labels.save}
             </Button>
           </Box>
         </Box>
@@ -112,9 +136,9 @@ export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettings
           <DialogContentText>{labels.confirmBody}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>{tActions("cancel")}</Button>
+          <Button onClick={() => setConfirmOpen(false)}>{labels.cancel}</Button>
           <Button variant="contained" onClick={() => void handleConfirm()} disabled={saving}>
-            {tActions("save")}
+            {labels.save}
           </Button>
         </DialogActions>
       </Dialog>

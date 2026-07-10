@@ -1,8 +1,9 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
+import { Alert, Snackbar } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-class.documents";
@@ -12,11 +13,18 @@ import { logger } from "@/frontend/utils/logger";
 import { CreateRecurringClassView } from "@/frontend/views/dashboard/classes/recurring/CreateRecurringClassView";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import { mapFormDataToInput } from "@/frontend/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
+import {
+  postCreateRecurringMeetingConfig,
+  type RecurringMeetingConfigFormState,
+} from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function CreateRecurringClassContainer() {
   const t = useTranslations("dashboard.createRecurringClass");
+  const tMeeting = useTranslations("ui.meetingConfig.manager");
   const router = useRouter();
+  const client = useApolloClient();
+  const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const permissions = useUserStore(state => state.permissions);
 
   const isSubmitting = useCreateRecurringClassStore(state => state.isSubmitting);
@@ -37,7 +45,7 @@ export function CreateRecurringClassContainer() {
   }, [router]);
 
   const handleSubmit = useCallback(
-    async (data: RecurringClassFormData) => {
+    async (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => {
       setSubmitting(true);
       resetSuccess();
       clearError();
@@ -50,6 +58,14 @@ export function CreateRecurringClassContainer() {
         });
 
         if (result?.createRecurringClass) {
+          const recurringScheduleId = result.createRecurringClass.recurringScheduleId;
+          if (recurringScheduleId) {
+            const meetingResult = await postCreateRecurringMeetingConfig(client, recurringScheduleId, meetingConfig);
+            if (!meetingResult.success) {
+              setMeetingConfigWarning(true);
+            }
+          }
+
           setShowSuccess(true);
           logger.info("Recurring class created:", result.createRecurringClass.id);
 
@@ -70,7 +86,7 @@ export function CreateRecurringClassContainer() {
         setSubmitting(false);
       }
     },
-    [createClassMutation, setSubmitting, resetSuccess, clearError, setShowSuccess, setErrorMessage, router, t]
+    [createClassMutation, setSubmitting, resetSuccess, clearError, setShowSuccess, setErrorMessage, router, t, client]
   );
 
   const labels = useMemo(
@@ -132,15 +148,27 @@ export function CreateRecurringClassContainer() {
   }
 
   return (
-    <CreateRecurringClassView
-      isSubmitting={isSubmitting}
-      showSuccess={showSuccess}
-      errorMessage={errorMessage}
-      labels={labels}
-      onClose={handleClose}
-      onSubmit={handleSubmit}
-      onDismissSuccess={resetSuccess}
-      onDismissError={clearError}
-    />
+    <>
+      <CreateRecurringClassView
+        isSubmitting={isSubmitting}
+        showSuccess={showSuccess}
+        errorMessage={errorMessage}
+        labels={labels}
+        onClose={handleClose}
+        onSubmit={handleSubmit}
+        onDismissSuccess={resetSuccess}
+        onDismissError={clearError}
+      />
+      <Snackbar
+        open={meetingConfigWarning}
+        autoHideDuration={8000}
+        onClose={() => setMeetingConfigWarning(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="warning" onClose={() => setMeetingConfigWarning(false)}>
+          {tMeeting("postCreateFailure")}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

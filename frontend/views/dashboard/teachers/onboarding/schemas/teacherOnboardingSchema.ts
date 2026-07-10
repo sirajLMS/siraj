@@ -28,9 +28,12 @@ export const teacherOnboardingSchema = (validationLabels: {
       nationalId: z.string().min(1, validationLabels.nationalIdRequired),
       phone: z.string().min(1, validationLabels.phoneRequired),
       dateOfBirth: z.string().optional(),
-      gender: z.custom<Gender>(val => typeof val === "string" && Object.values(Gender).includes(val as Gender), {
-        message: validationLabels.genderRequired,
-      }),
+      gender: z.custom<Gender>(
+        val => typeof val === "string" && (Object.values(Gender) as readonly string[]).includes(val),
+        {
+          message: validationLabels.genderRequired,
+        }
+      ),
       address: z.string().optional(),
       qualifications: z.string().optional(),
       countryCode: z.custom<CountryCode>(

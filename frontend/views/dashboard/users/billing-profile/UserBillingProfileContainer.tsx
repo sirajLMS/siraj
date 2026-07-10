@@ -245,7 +245,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
 
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]}>
-      <DisplayCurrencyHint />
+      <DisplayCurrencyHint mode="subject" subjectUserId={userId} />
       <UserBillingProfileView {...viewProps} />
       <SubmitPaymentProofDialog
         open={proofTarget !== null}

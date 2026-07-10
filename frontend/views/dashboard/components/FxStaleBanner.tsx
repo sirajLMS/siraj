@@ -24,7 +24,7 @@ export function FxStaleBanner(): React.ReactNode {
     return null;
   }
 
-  if (pathname.includes("/billing/exchange-rates")) {
+  if (pathname.includes("/billing/exchange-rates") || pathname.includes("/profile/edit")) {
     return null;
   }
 

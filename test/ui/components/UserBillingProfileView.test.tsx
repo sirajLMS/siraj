@@ -255,6 +255,9 @@ const mockLabels: BillingLabels = {
       confirmBody: "Continue?",
       saveSuccess: "Saved",
       saveFailed: "Failed",
+      lastChangedBy: "Last changed by {name} on {date}",
+      cancel: "Cancel",
+      save: "Save",
     },
     manualOverride: {
       title: "Manual override",
@@ -265,6 +268,7 @@ const mockLabels: BillingLabels = {
       submit: "Save",
       success: "Saved",
       failed: "Failed",
+      cancel: "Cancel",
     },
   },
   fxStaleBanner: {
@@ -277,7 +281,13 @@ const mockLabels: BillingLabels = {
     title: "No display currency",
     body: "Set display currency",
     cta: "Edit profile",
+    subject: {
+      title: "No display currency for user",
+      body: "User has no display currency",
+      cta: "Edit user profile",
+    },
   },
+  fxConversionNote: "Converted totals use your display currency ({code})",
   currencyHedges: {
     pageTitle: "Currency Hedges",
     pageSubtitle: "Manage hedges",
@@ -306,6 +316,10 @@ const mockLabels: BillingLabels = {
       hedgeType: "Type",
       notes: "Notes",
     },
+    hedgeTypes: {
+      long: "LONG",
+      short: "SHORT",
+    },
   },
   supportedCurrencies: {
     pageTitle: "Supported Currencies",
@@ -314,7 +328,9 @@ const mockLabels: BillingLabels = {
     symbol: "Symbol",
     name: "Name",
     country: "Country",
+    flag: "Flag",
     empty: "Empty",
+    footerNote: "Footer note",
   },
   paymentMethodSelector: {
     label: "Payment Method",

@@ -113,6 +113,9 @@ export type FxProviderConfigReturnType = {
   readonly id: string;
   readonly activeProvider: FxProvider;
   readonly source: FxProviderConfigSource;
+  readonly updatedAt: Date | null;
+  readonly updatedByUserId: string | null;
+  readonly updatedByName: string | null;
 };
 
 export type UpsertManualExchangeRateInput = {

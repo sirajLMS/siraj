@@ -78,6 +78,7 @@ export function RescheduleContainer() {
         teacherName: classInstance.teacher?.name ?? "",
         studentName: classInstance.student?.name ?? "",
         teacherTimezone: classInstance.teacherTimezone ?? IanaTimezone.Utc,
+        effectiveMeeting: classInstance.effectiveMeeting ?? null,
       }
     : fallbackSession;
 

@@ -23,6 +23,7 @@ export type MeetingConfigDisplayData = {
     readonly tenantId?: string | null;
   } | null;
   readonly masked?: boolean;
+  readonly hasSecret?: boolean;
 };
 
 export type MeetingConfigDisplayProps = {
@@ -87,6 +88,7 @@ export function MeetingConfigDisplay({
           <Typography sx={{ typography: "titleMd" }}>{providerTitle}</Typography>
         )}
         {config.isDefault ? <Chip size="small" color="primary" label={t("defaultBadge")} /> : null}
+        {config.hasSecret ? <Chip size="small" variant="outlined" label={t("passwordProtected")} /> : null}
       </Stack>
 
       <Stack spacing={0.75}>

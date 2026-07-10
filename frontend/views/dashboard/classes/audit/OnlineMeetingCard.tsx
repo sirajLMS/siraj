@@ -107,13 +107,13 @@ const StyledMeetingUrlText = styled(Typography)(({ theme }) => ({
 }));
 
 const MobileMeetingCard = ({ meetingInfo, labels, onJoinMeeting }: OnlineMeetingCardProps) => {
-  const platform = meetingInfo?.platform ?? "zoom";
+  const platform = meetingInfo?.platform?.trim();
 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden" }}>
       <StyledPreviewContainer sx={{ height: 128 }}>
         <StyledMobileVideoIcon />
-        <StyledPlatformBadge>{platform.toUpperCase()}</StyledPlatformBadge>
+        {platform ? <StyledPlatformBadge>{platform.toUpperCase()}</StyledPlatformBadge> : null}
       </StyledPreviewContainer>
       <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
@@ -137,7 +137,7 @@ const MobileMeetingCard = ({ meetingInfo, labels, onJoinMeeting }: OnlineMeeting
 };
 
 const DesktopMeetingCard = ({ meetingInfo, labels }: Omit<OnlineMeetingCardProps, "onJoinMeeting">) => {
-  const platform = meetingInfo?.platform ?? "zoom";
+  const platform = meetingInfo?.platform?.trim();
 
   return (
     <BaseCard>
@@ -155,7 +155,7 @@ const DesktopMeetingCard = ({ meetingInfo, labels }: Omit<OnlineMeetingCardProps
         <StyledDesktopVideoIcon />
         <StyledDesktopScrimOverlay>
           <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            <StyledOverlayPlatformName variant="bodyLg">{platform}:</StyledOverlayPlatformName>
+            {platform ? <StyledOverlayPlatformName variant="bodyLg">{platform}:</StyledOverlayPlatformName> : null}
             <StyledOverlayMeetingId variant="labelMd">{meetingInfo?.meetingId ?? labels.online}</StyledOverlayMeetingId>
           </Box>
         </StyledDesktopScrimOverlay>

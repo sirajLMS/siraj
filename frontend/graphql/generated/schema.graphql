@@ -1336,6 +1336,9 @@ type FxProviderConfig {
   activeProvider: FxProvider
   id: String
   source: FxProviderConfigSource
+  updatedAt: DateTime
+  updatedByName: String
+  updatedByUserId: String
 }
 
 enum FxProviderConfigSource {

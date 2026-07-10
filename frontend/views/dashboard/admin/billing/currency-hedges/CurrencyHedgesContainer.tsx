@@ -9,7 +9,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
 } from "@mui/material";
@@ -28,6 +32,9 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { getCurrencyByCode, getCurrencyDisplayName } from "@/frontend/lib/currency";
 import { logger } from "@/frontend/utils/logger";
+
+const HEDGE_TYPE_LONG = "LONG";
+const HEDGE_TYPE_SHORT = "SHORT";
 
 type HedgeRow = {
   readonly id: string;
@@ -54,7 +61,7 @@ export function CurrencyHedgesContainer() {
   const [deletingRow, setDeletingRow] = useState<HedgeRow | null>(null);
   const [currency, setCurrency] = useState<CurrencyCode>(CurrencyCode.Usd);
   const [amount, setAmount] = useState("");
-  const [hedgeType, setHedgeType] = useState("");
+  const [hedgeType, setHedgeType] = useState(HEDGE_TYPE_LONG);
   const [notes, setNotes] = useState("");
 
   const { data, loading, refetch } = useQuery(currencyHedgesQueryDocument, {
@@ -83,7 +90,7 @@ export function CurrencyHedgesContainer() {
   const resetForm = () => {
     setCurrency(CurrencyCode.Usd);
     setAmount("");
-    setHedgeType("");
+    setHedgeType(HEDGE_TYPE_LONG);
     setNotes("");
     setEditingRow(null);
   };
@@ -231,12 +238,18 @@ export function CurrencyHedgesContainer() {
                 onChange={event => setAmount(event.target.value)}
                 fullWidth
               />
-              <TextField
-                label={t("fields.hedgeType")}
-                value={hedgeType}
-                onChange={event => setHedgeType(event.target.value)}
-                fullWidth
-              />
+              <FormControl fullWidth>
+                <InputLabel id="hedge-type-label">{t("fields.hedgeType")}</InputLabel>
+                <Select
+                  labelId="hedge-type-label"
+                  label={t("fields.hedgeType")}
+                  value={hedgeType}
+                  onChange={event => setHedgeType(event.target.value)}
+                >
+                  <MenuItem value={HEDGE_TYPE_LONG}>{t("hedgeTypes.long")}</MenuItem>
+                  <MenuItem value={HEDGE_TYPE_SHORT}>{t("hedgeTypes.short")}</MenuItem>
+                </Select>
+              </FormControl>
               <TextField
                 label={t("fields.notes")}
                 value={notes}

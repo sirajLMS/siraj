@@ -34,7 +34,7 @@ interface InvoiceFieldsProps {
 function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
   const t = useTranslations("dashboard.parentOnboarding");
   const currency = useWatch({ control, name: "currency" });
-  const currencySymbol = getCurrencySymbol((currency as CurrencyCode | undefined) ?? CurrencyCode.Usd);
+  const currencySymbol = getCurrencySymbol(currency ?? CurrencyCode.Usd);
   return (
     <>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -152,9 +152,7 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
           name="currency"
           control={control}
           render={({ field }) => {
-            const option: CurrencyOption | null = field.value
-              ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
-              : null;
+            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
             return (
               <CurrencySelect
                 currency={option}

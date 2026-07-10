@@ -26,6 +26,8 @@ import {
 } from "@/frontend/graphql/sharedDocuments/billing/billing-management.documents";
 import { invoicePaymentsQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-payments.documents";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { getErrorMessage } from "@/shared/utils/error";
 
 export type InvoicePaymentDetailsDialogProps = {
@@ -65,7 +67,7 @@ function proofFileUrl(filePath: string): string {
 }
 
 function isImageMimeType(mimeType: string | null | undefined): boolean {
-  return mimeType?.startsWith("image/");
+  return mimeType?.startsWith("image/") ?? false;
 }
 
 function PaymentProofPreview({
@@ -275,6 +277,7 @@ export function InvoicePaymentDetailsDialog({
   const tProfile = useTranslations("profile");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
+  const displayCurrency = useUserStore(state => state.displayCurrency);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -365,6 +368,7 @@ export function InvoicePaymentDetailsDialog({
     </Stack>
   ) : (
     <Stack spacing={2} sx={{ py: 1 }}>
+      {!displayCurrency ? <DisplayCurrencyHint /> : null}
       {submission ? (
         <SubmissionDetailsSection
           submission={submission}

@@ -118,7 +118,13 @@ export function ClassDetailsAdminView({
         />
       </RequirePermission>
 
-      <ClassMeetingConfigsSection classInstanceId={instance.id ?? undefined} />
+      <ClassMeetingConfigsSection
+        classInstanceId={instance.id ?? undefined}
+        effectiveMeeting={
+          (instance as { effectiveMeeting?: import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment })
+            .effectiveMeeting
+        }
+      />
 
       <Grid container rowSpacing={{ xs: 2, lg: 3 }} columnSpacing={{ xs: 0, lg: 3 }}>
         <Grid size={{ xs: 12, md: 8 }}>

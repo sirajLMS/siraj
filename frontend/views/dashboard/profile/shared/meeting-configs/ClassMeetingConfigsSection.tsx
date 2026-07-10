@@ -5,7 +5,7 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { ErrorState, FormSuccessSnackbar, SectionPanel } from "@/frontend/components/ui";
+import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/components/ui";
 import { MeetingConfigList } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -16,16 +16,21 @@ import {
   setDefaultClassMeetingConfigMutationDocument,
   updateClassMeetingConfigMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
-import type { ClassMeetingConfigFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
+import type {
+  ClassMeetingConfigFieldsFragment,
+  EffectiveMeetingFieldsFragment,
+} from "@/frontend/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
+import { ClassMeetingContextBanner } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
 import { MeetingConfigDeleteDialog } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
 
 export type ClassMeetingConfigsSectionProps = {
   readonly classInstanceId?: string;
   readonly recurringScheduleId?: string;
   readonly canManage?: boolean;
+  readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 };
 
 function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): string {
@@ -38,6 +43,7 @@ export function ClassMeetingConfigsSection({
   classInstanceId,
   recurringScheduleId,
   canManage,
+  effectiveMeeting,
 }: ClassMeetingConfigsSectionProps) {
   const t = useTranslations("ui.meetingConfig.classScope");
   const tManager = useTranslations("ui.meetingConfig.manager");
@@ -77,6 +83,7 @@ export function ClassMeetingConfigsSection({
   const [editConfig, setEditConfig] = useState<ClassMeetingConfigFieldsFragment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [deleteConfig, { loading: deleting }] = useMutation(deleteClassMeetingConfigMutationDocument);
   const [setDefault, { loading: settingDefault }] = useMutation(setDefaultClassMeetingConfigMutationDocument);
@@ -107,8 +114,10 @@ export function ClassMeetingConfigsSection({
   const busy = loading || deleting || settingDefault;
 
   return (
-    <SectionPanel title={t("sectionTitle")} subTitle={t("sectionSubtitle")}>
+    <SectionPanel id="meeting-configs" title={t("sectionTitle")} subTitle={t("sectionSubtitle")}>
       <Stack spacing={2}>
+        <ClassMeetingContextBanner effectiveMeeting={effectiveMeeting} hasScopeConfigs={configs.length > 0} />
+
         {resolvedCanManage ? (
           <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
             <Button
@@ -141,8 +150,12 @@ export function ClassMeetingConfigsSection({
           onSetDefaultAction={
             resolvedCanManage
               ? async id => {
-                  await setDefault({ variables: { id } });
-                  await refetch();
+                  try {
+                    await setDefault({ variables: { id } });
+                    await refetch();
+                  } catch {
+                    setErrorMessage(tManager("saveError"));
+                  }
                 }
               : undefined
           }
@@ -180,13 +193,22 @@ export function ClassMeetingConfigsSection({
         onClose={() => setDeleteId(null)}
         onConfirm={async () => {
           if (!deleteId) return;
-          await deleteConfig({ variables: { id: deleteId } });
-          setDeleteId(null);
-          await refetch();
+          try {
+            await deleteConfig({ variables: { id: deleteId } });
+            setDeleteId(null);
+            await refetch();
+          } catch {
+            setErrorMessage(tManager("deleteError"));
+          }
         }}
       />
 
       <FormSuccessSnackbar open={showSuccess} message={tManager("saved")} onClose={() => setShowSuccess(false)} />
+      <FormErrorSnackbar
+        open={errorMessage != null}
+        message={errorMessage ?? ""}
+        onClose={() => setErrorMessage(null)}
+      />
     </SectionPanel>
   );
 }

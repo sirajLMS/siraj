@@ -38,6 +38,7 @@ import type {
   StudentCreditRow,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
+import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface AdminBillingContainerProps {
@@ -290,6 +291,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
       <DisplayCurrencyHint />
+      <FxConversionNote />
       <AdminBillingView
         labels={labels}
         summary={summary}

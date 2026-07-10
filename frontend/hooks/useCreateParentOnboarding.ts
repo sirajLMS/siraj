@@ -1,4 +1,5 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
+import { useState } from "react";
 import {
   type ParentOnboardingInput,
   type ParentOnboardingResult,
@@ -15,6 +16,7 @@ import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/pa
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);
+  const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const client = useApolloClient();
   const { cache } = client;
 
@@ -51,23 +53,28 @@ export function useCreateParentOnboarding() {
       if (result.data?.createParent) {
         const created = result.data.createParent;
         if (formData.meetingProvider?.id && formData.meetingUrl?.trim() && created.userId) {
-          await client.mutate({
-            mutation: createUserMeetingConfigMutationDocument,
-            variables: {
-              input: {
-                userId: created.userId,
-                providerId: formData.meetingProvider.id,
-                label: formData.meetingLabel?.trim() || null,
-                isDefault: true,
-                password: null,
-                details: {
-                  meetingUrl: formData.meetingUrl.trim(),
-                  username: null,
-                  tenantId: null,
+          try {
+            await client.mutate({
+              mutation: createUserMeetingConfigMutationDocument,
+              variables: {
+                input: {
+                  userId: created.userId,
+                  providerId: formData.meetingProvider.id,
+                  label: formData.meetingLabel?.trim() || null,
+                  isDefault: true,
+                  password: null,
+                  details: {
+                    meetingUrl: formData.meetingUrl.trim(),
+                    username: null,
+                    tenantId: null,
+                  },
                 },
               },
-            },
-          });
+            });
+          } catch (meetingErr) {
+            logger.warn("Parent created but meeting config failed", { meetingErr });
+            setMeetingConfigWarning(true);
+          }
         }
 
         cache.evict({ id: "ROOT_QUERY", fieldName: "parentDirectory" });
@@ -87,5 +94,12 @@ export function useCreateParentOnboarding() {
     }
   };
 
-  return { execute, loading, error, data };
+  return {
+    execute,
+    loading,
+    error,
+    data,
+    meetingConfigWarning,
+    clearMeetingConfigWarning: () => setMeetingConfigWarning(false),
+  };
 }

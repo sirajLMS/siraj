@@ -7,6 +7,7 @@ import { edgeToEdgeSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 
 interface SectionPanelProps {
+  readonly id?: string;
   readonly title?: ReactNode;
   readonly subTitle?: string;
   readonly actions?: ReactNode;
@@ -18,9 +19,10 @@ interface SectionPanelProps {
 /**
  * Standard section shell: bordered Paper with optional title bar + actions.
  */
-export function SectionPanel({ title, subTitle, actions, children, edgeToEdge = false, sx }: SectionPanelProps) {
+export function SectionPanel({ id, title, subTitle, actions, children, edgeToEdge = false, sx }: SectionPanelProps) {
   return (
     <Paper
+      id={id}
       elevation={0}
       sx={mergeSx(
         {

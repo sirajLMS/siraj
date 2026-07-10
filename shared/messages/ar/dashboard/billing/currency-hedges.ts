@@ -28,4 +28,8 @@ export const currencyHedges: CurrencyHedgesLabels = {
     hedgeType: "نوع التحوط",
     notes: "ملاحظات",
   },
+  hedgeTypes: {
+    long: "LONG",
+    short: "SHORT",
+  },
 };

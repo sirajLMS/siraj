@@ -52,7 +52,11 @@ export function TeacherProfileView({
       >
         <AccountSection mode="view" teacherData={teacherData} avatarUrl={avatarUrl} displayCurrency={displayCurrency} />
         <ContactSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
-        <CompensationSection mode="view" teacherData={teacherData} />
+        <CompensationSection
+          mode="view"
+          teacherData={teacherData}
+          subjectUserId={isAdminScope ? targetUserId : undefined}
+        />
         {isAdminScope && adminData ? <AdminOnlySection mode="view" adminData={adminData} /> : null}
         {targetUserId ? <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} /> : null}
       </Box>

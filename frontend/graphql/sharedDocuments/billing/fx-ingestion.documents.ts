@@ -108,6 +108,9 @@ export const fxProviderConfigQueryDocument: TypedDocumentNode<Operations.FxProvi
       id
       activeProvider
       source
+      updatedAt
+      updatedByUserId
+      updatedByName
     }
   }
 `;
@@ -121,6 +124,9 @@ export const updateFxProviderMutationDocument: TypedDocumentNode<
       id
       activeProvider
       source
+      updatedAt
+      updatedByUserId
+      updatedByName
     }
   }
 `;

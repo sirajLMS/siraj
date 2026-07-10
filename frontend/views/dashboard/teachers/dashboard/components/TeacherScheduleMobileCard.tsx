@@ -307,6 +307,7 @@ function VideoButton({ row, labels }: { readonly row: TeacherScheduleRow; readon
       disabled={!row.videoEnabled}
       label={labels.actions.joinVideo}
       emptyRole="teacher"
+      setupHref="/profile?tab=meeting"
     />
   );
 }

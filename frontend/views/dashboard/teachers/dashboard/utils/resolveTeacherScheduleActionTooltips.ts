@@ -11,7 +11,8 @@ export interface TeacherScheduleActionTooltips {
 
 export function resolveTeacherScheduleActionTooltips(
   row: TeacherScheduleRow,
-  labels: TeacherDashboardLabels
+  labels: TeacherDashboardLabels,
+  meetingLabels?: { readonly emptyTeacher?: string; readonly emptyParent?: string }
 ): TeacherScheduleActionTooltips {
   const disabled = labels.actions.disabledTooltips;
   const actions = labels.actions;
@@ -26,7 +27,8 @@ export function resolveTeacherScheduleActionTooltips(
     activate = disabled.activateAfterWindow;
   }
 
-  const joinVideo = row.videoEnabled ? actions.joinVideo : disabled.joinVideoUnavailable;
+  const hasJoinUrl = Boolean(row.meetingJoinUrl?.trim() || row.effectiveMeeting?.joinUrl?.trim());
+  const joinVideo = hasJoinUrl ? actions.joinVideo : (meetingLabels?.emptyTeacher ?? disabled.joinVideoUnavailable);
 
   const markAbsent = row.markAbsentEnabled === false ? disabled.markAbsentWaitingPeriod : controls.markAbsent;
 

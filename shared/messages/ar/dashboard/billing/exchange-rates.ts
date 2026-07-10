@@ -50,6 +50,9 @@ export const exchangeRates: ExchangeRatesLabels = {
     confirmBody: "سيؤثر تغيير مزود أسعار الصرف على المزامنات المستقبلية. هل تريد المتابعة؟",
     saveSuccess: "تم تحديث مزود أسعار الصرف",
     saveFailed: "تعذر تحديث مزود أسعار الصرف",
+    lastChangedBy: "آخر تعديل بواسطة {name} في {date}",
+    cancel: "إلغاء",
+    save: "حفظ",
   },
   manualOverride: {
     title: "تجاوز يدوي لسعر الصرف",
@@ -60,5 +63,6 @@ export const exchangeRates: ExchangeRatesLabels = {
     submit: "حفظ السعر",
     success: "تم حفظ سعر الصرف اليدوي",
     failed: "تعذر حفظ سعر الصرف اليدوي",
+    cancel: "إلغاء",
   },
 };

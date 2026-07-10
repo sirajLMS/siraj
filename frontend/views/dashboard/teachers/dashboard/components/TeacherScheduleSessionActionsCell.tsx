@@ -89,6 +89,7 @@ export function TeacherScheduleSessionActionsCell({
           disabled={!row.videoEnabled}
           label={labels.actions.joinVideo}
           emptyRole="teacher"
+          setupHref="/profile?tab=meeting"
         />
       ) : null}
     </Box>

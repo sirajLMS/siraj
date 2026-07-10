@@ -74,7 +74,7 @@ export function ClassDetailsToolbarArea({
         <Stack direction="row" sx={classDetailsContentPaddingSx}>
           <MeetingJoinAction
             emptyRole="class"
-            setupHref={`/classes/${instance.id}`}
+            setupHref={`/classes/${instance.id}#meeting-configs`}
             label={t("joinZoom")}
             id={`join-meeting-${instance.id}`}
           />

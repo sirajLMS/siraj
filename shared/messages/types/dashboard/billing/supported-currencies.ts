@@ -5,5 +5,7 @@ export interface SupportedCurrenciesLabels {
   readonly symbol: string;
   readonly name: string;
   readonly country: string;
+  readonly flag: string;
   readonly empty: string;
+  readonly footerNote: string;
 }

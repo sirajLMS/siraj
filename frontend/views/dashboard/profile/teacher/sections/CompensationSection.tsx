@@ -9,6 +9,7 @@ import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/Cu
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 import type { TeacherViewData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type { TeacherAdminEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
@@ -17,6 +18,7 @@ type CompensationSectionProps =
   | {
       readonly mode: "view";
       readonly teacherData: TeacherViewData;
+      readonly subjectUserId?: string;
     }
   | {
       readonly mode: "edit";
@@ -105,6 +107,7 @@ export function CompensationSection(props: CompensationSectionProps) {
 
   return (
     <SectionPanel title={t("sections.compensation")}>
+      {props.subjectUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={props.subjectUserId} /> : null}
       <Stack spacing={2}>
         <InfoField label={t("fields.hourlyRate")} value={salaryLabel} />
       </Stack>

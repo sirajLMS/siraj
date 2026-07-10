@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
@@ -24,6 +25,13 @@ export function SupportedCurrenciesContainer() {
 
   const columns = useMemo<GridColDef<CurrencyOption & { id: string }>[]>(
     () => [
+      {
+        field: "flagEmoji",
+        headerName: t("flag"),
+        width: 80,
+        sortable: false,
+        renderCell: ({ row }) => <span aria-hidden>{row.flagEmoji}</span>,
+      },
       { field: "code", headerName: t("code"), flex: 1, minWidth: 100 },
       { field: "symbol", headerName: t("symbol"), width: 120 },
       {
@@ -49,6 +57,9 @@ export function SupportedCurrenciesContainer() {
       <PageContainer>
         <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
         <AppDataGrid rows={rows} columns={columns} emptyMessage={t("empty")} getRowId={row => row.id} autoHeight />
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {t("footerNote")}
+        </Alert>
       </PageContainer>
     </RequirePermission>
   );

@@ -1403,6 +1403,9 @@ export type FxProviderConfig = {
   activeProvider: Maybe<FxProvider>;
   id: Maybe<Scalars['String']['output']>;
   source: Maybe<FxProviderConfigSource>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  updatedByName: Maybe<Scalars['String']['output']>;
+  updatedByUserId: Maybe<Scalars['String']['output']>;
 };
 
 export enum FxProviderConfigSource {

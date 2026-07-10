@@ -98,6 +98,9 @@ export interface RescheduleSession {
   readonly teacherName: string;
   readonly studentName: string;
   readonly teacherTimezone: string;
+  readonly effectiveMeeting?:
+    | import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment
+    | null;
 }
 
 // --- Teacher Dashboard ---

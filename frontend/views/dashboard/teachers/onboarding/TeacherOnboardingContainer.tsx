@@ -47,7 +47,7 @@ export function TeacherOnboardingContainer() {
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity="warning" onClose={() => clearMeetingConfigWarning()}>
-          {tMeeting("loadError")}
+          {tMeeting("postCreateFailure")}
         </Alert>
       </Snackbar>
     </RequirePermission>

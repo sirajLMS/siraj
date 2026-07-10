@@ -52,6 +52,7 @@ export interface MeetingConfigManagerLabels {
   readonly delete: string;
   readonly saveError: string;
   readonly deleteError: string;
+  readonly postCreateFailure: string;
 }
 
 export interface MeetingConfigFieldsLabels {
@@ -73,6 +74,7 @@ export interface MeetingConfigClassScopeLabels {
   readonly effectiveSourceBanner: string;
   readonly recurringSectionTitle: string;
   readonly recurringSectionSubtitle: string;
+  readonly createNewConfig: string;
 }
 
 export interface MeetingConfigProviderSelectLabels {

@@ -62,6 +62,7 @@ export const meetingConfig: MeetingConfigLabels = {
     delete: "حذف",
     saveError: "فشل حفظ إعداد الاجتماع",
     deleteError: "فشل حذف إعداد الاجتماع",
+    postCreateFailure: "تم الإنشاء بنجاح، لكن تعذر حفظ إعداد الاجتماع. يرجى إعداده يدوياً.",
   },
   fields: {
     meetingUrl: "رابط الاجتماع",
@@ -81,6 +82,7 @@ export const meetingConfig: MeetingConfigLabels = {
     effectiveSourceBanner: "مصدر الاجتماع الفعلي: {source}",
     recurringSectionTitle: "اجتماع الجدول المتكرر",
     recurringSectionSubtitle: "تجاوز اختياري لجميع حصص هذا الجدول المتكرر.",
+    createNewConfig: "إنشاء إعداد اجتماع جديد",
   },
   providerSelect: {
     emptyCatalogTitle: "لا توجد مزودات اجتماعات",

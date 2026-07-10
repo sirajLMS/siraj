@@ -2,6 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   DisplayAmountPothosObject,
+  populateBillingFxDisplayCurrencyByUserId,
   resolveDisplayAmountField,
   setBillingFxDisplayCurrencyForSubject,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";

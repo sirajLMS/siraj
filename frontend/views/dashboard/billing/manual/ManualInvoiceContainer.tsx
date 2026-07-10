@@ -19,6 +19,7 @@ import type {
   StudentOption,
 } from "@/frontend/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import { buildManualInvoiceLabels } from "@/frontend/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { useRouter } from "@/shared/i18n/routing";
 
 const MONTH_MAP: Record<string, number> = {
@@ -132,6 +133,7 @@ export function ManualInvoiceContainer() {
 
   return (
     <RequirePermission permissions={[AppPermission.BillingCreateInvoice]} fallback={null}>
+      <DisplayCurrencyHint />
       <ManualInvoiceView
         labels={labels}
         parentOptions={parentOptions}

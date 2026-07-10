@@ -26,4 +26,8 @@ export interface CurrencyHedgesLabels {
     readonly hedgeType: string;
     readonly notes: string;
   };
+  readonly hedgeTypes: {
+    readonly long: string;
+    readonly short: string;
+  };
 }

@@ -68,6 +68,9 @@ export function MeetingConfigList({
                 <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
                   <Typography sx={{ typography: "titleMd" }}>{providerName}</Typography>
                   {config.isDefault ? <Chip size="small" label={tDisplay("defaultBadge")} color="primary" /> : null}
+                  {"hasSecret" in config && config.hasSecret ? (
+                    <Chip size="small" label={tDisplay("passwordProtected")} variant="outlined" />
+                  ) : null}
                   {config.label ? (
                     <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{config.label}</Typography>
                   ) : null}

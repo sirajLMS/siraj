@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, Snackbar } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -42,7 +43,8 @@ const defaultValues: ParentOnboardingFormData = {
 
 export function ParentOnboardingContainer() {
   const t = useTranslations("dashboard.parentOnboarding");
-  const { execute, loading } = useCreateParentOnboarding();
+  const tMeeting = useTranslations("ui.meetingConfig.manager");
+  const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateParentOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const form = useForm<ParentOnboardingFormData>({
@@ -87,6 +89,16 @@ export function ParentOnboardingContainer() {
         message={t("actions.successMessage")}
         onClose={() => setShowSuccess(false)}
       />
+      <Snackbar
+        open={meetingConfigWarning}
+        autoHideDuration={8000}
+        onClose={() => clearMeetingConfigWarning()}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="warning" onClose={() => clearMeetingConfigWarning()}>
+          {tMeeting("postCreateFailure")}
+        </Alert>
+      </Snackbar>
     </RequirePermission>
   );
 }

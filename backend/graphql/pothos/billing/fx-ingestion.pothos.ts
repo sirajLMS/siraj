@@ -146,6 +146,9 @@ export const FxProviderConfigPothosObject = FxProviderConfigRef.implement({
     id: t.exposeString("id"),
     activeProvider: t.expose("activeProvider", { type: FxProviderPothosEnum }),
     source: t.expose("source", { type: FxProviderConfigSourceEnum }),
+    updatedAt: t.expose("updatedAt", { type: "DateTime", nullable: true }),
+    updatedByUserId: t.exposeString("updatedByUserId", { nullable: true }),
+    updatedByName: t.exposeString("updatedByName", { nullable: true }),
   }),
 });
 

@@ -48,6 +48,9 @@ export interface ExchangeRatesLabels {
     readonly confirmBody: string;
     readonly saveSuccess: string;
     readonly saveFailed: string;
+    readonly lastChangedBy: string;
+    readonly cancel: string;
+    readonly save: string;
   };
   readonly manualOverride: {
     readonly title: string;
@@ -58,5 +61,6 @@ export interface ExchangeRatesLabels {
     readonly submit: string;
     readonly success: string;
     readonly failed: string;
+    readonly cancel: string;
   };
 }

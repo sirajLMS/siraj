@@ -13,6 +13,7 @@ import type {
 } from "react-hook-form";
 import { RecurringClassFormFields } from "@/frontend/views/dashboard/classes/recurring/RecurringClassFormFields";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
+import type { RecurringMeetingConfigFormState } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 
 interface RecurringClassFormProps {
@@ -50,6 +51,8 @@ interface RecurringClassFormProps {
     readonly days: CreateRecurringClassLabels["days"];
   };
   readonly onSubmit: (data: RecurringClassFormData) => void;
+  readonly meetingConfig: RecurringMeetingConfigFormState;
+  readonly onMeetingConfigChangeAction: (next: RecurringMeetingConfigFormState) => void;
 }
 
 const StyledScrollableFormBody = styled(Box, {
@@ -127,6 +130,8 @@ export function RecurringClassForm({
   showSuccess,
   labels,
   onSubmit,
+  meetingConfig,
+  onMeetingConfigChangeAction,
 }: RecurringClassFormProps) {
   return (
     <Box
@@ -147,6 +152,8 @@ export function RecurringClassForm({
           isSubmitting={isSubmitting}
           isMobile={isMobile}
           labels={labels}
+          meetingConfig={meetingConfig}
+          onMeetingConfigChangeAction={onMeetingConfigChangeAction}
         />
       </StyledScrollableFormBody>
 

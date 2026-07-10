@@ -2829,6 +2829,9 @@ const en: MessageSchema = {
           confirmBody: "Changing the FX provider affects future sync runs. Continue?",
           saveSuccess: "FX provider updated",
           saveFailed: "Could not update FX provider",
+          lastChangedBy: "Last changed by {name} on {date}",
+          cancel: "Cancel",
+          save: "Save",
         },
         manualOverride: {
           title: "Manual rate override",
@@ -2839,6 +2842,7 @@ const en: MessageSchema = {
           submit: "Save rate",
           success: "Manual exchange rate saved",
           failed: "Could not save manual exchange rate",
+          cancel: "Cancel",
         },
       },
       fxStaleBanner: {
@@ -2852,7 +2856,13 @@ const en: MessageSchema = {
         title: "No display currency set",
         body: "Set a display currency in your profile to see converted amounts on invoices and reports.",
         cta: "Edit profile",
+        subject: {
+          title: "No display currency for this user",
+          body: "This user has not set a display currency. Converted amounts will be hidden until they set one in their profile.",
+          cta: "Edit user profile",
+        },
       },
+      fxConversionNote: "Converted totals use your display currency ({code})",
       currencyHedges: {
         pageTitle: "Currency Hedges",
         pageSubtitle: "Manage foreign-currency hedge positions",
@@ -2881,6 +2891,10 @@ const en: MessageSchema = {
           hedgeType: "Hedge type",
           notes: "Notes",
         },
+        hedgeTypes: {
+          long: "LONG",
+          short: "SHORT",
+        },
       },
       supportedCurrencies: {
         pageTitle: "Supported Currencies",
@@ -2889,7 +2903,10 @@ const en: MessageSchema = {
         symbol: "Symbol",
         name: "Name",
         country: "Country",
+        flag: "Flag",
         empty: "No currencies in catalog",
+        footerNote:
+          "To add new ISO codes, update the server currency enum and frontend currency catalog, then re-run seeds if needed.",
       },
       paymentMethodSelector: {
         label: "Payment Method",
@@ -3507,6 +3524,7 @@ const en: MessageSchema = {
         delete: "Delete",
         saveError: "Failed to save meeting config",
         deleteError: "Failed to delete meeting config",
+        postCreateFailure: "Created successfully, but the meeting config could not be saved. Please configure it manually.",
       },
       fields: {
         meetingUrl: "Meeting URL",
@@ -3526,6 +3544,7 @@ const en: MessageSchema = {
         effectiveSourceBanner: "Effective meeting source: {source}",
         recurringSectionTitle: "Recurring schedule meeting",
         recurringSectionSubtitle: "Optional override for all instances in this recurring schedule.",
+        createNewConfig: "Create new meeting config",
       },
       providerSelect: {
         emptyCatalogTitle: "No meeting providers available",

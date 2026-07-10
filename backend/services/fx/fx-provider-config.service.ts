@@ -1,4 +1,4 @@
-import { SystemSettingsRepository } from "@/backend/db/repo";
+import { SystemSettingsRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, type FxProvider } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -21,10 +21,29 @@ export namespace FxProviderConfigService {
 
   export async function getConfig(): Promise<FxProviderConfigReturnType> {
     const { provider, source } = await getResolvedFxProviderConfig();
+    let updatedAt: Date | null = null;
+    let updatedByUserId: string | null = null;
+    let updatedByName: string | null = null;
+
+    if (source === "database") {
+      const setting = await SystemSettingsRepository.getByKey(FX_PROVIDER_SETTING_KEY);
+      if (setting) {
+        updatedAt = setting.updatedAt ?? null;
+        updatedByUserId = setting.updatedByUserId ?? null;
+        if (setting.updatedByUserId) {
+          const user = await UserRepository.findSafeById(setting.updatedByUserId);
+          updatedByName = user?.name ?? null;
+        }
+      }
+    }
+
     return {
       id: "fx-provider-config",
       activeProvider: provider,
       source,
+      updatedAt,
+      updatedByUserId,
+      updatedByName,
     };
   }
 

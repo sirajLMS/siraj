@@ -5,7 +5,7 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { ErrorState, FormSuccessSnackbar } from "@/frontend/components/ui";
+import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/components/ui";
 import { MeetingConfigList } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import {
@@ -40,6 +40,7 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
   const [editConfig, setEditConfig] = useState<UserMeetingConfigFieldsFragment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const configs = data?.userMeetingConfigs ?? [];
 
@@ -67,9 +68,13 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
 
   const handleConfirmDelete = async () => {
     if (!deleteId) return;
-    await deleteConfig({ variables: { id: deleteId } });
-    setDeleteId(null);
-    await refetch();
+    try {
+      await deleteConfig({ variables: { id: deleteId } });
+      setDeleteId(null);
+      await refetch();
+    } catch {
+      setErrorMessage(t("deleteError"));
+    }
   };
 
   if (error && configs.length === 0) {
@@ -121,8 +126,12 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
         onSetDefaultAction={
           canManage
             ? async id => {
-                await setDefault({ variables: { id } });
-                await refetch();
+                try {
+                  await setDefault({ variables: { id } });
+                  await refetch();
+                } catch {
+                  setErrorMessage(t("saveError"));
+                }
               }
             : undefined
         }
@@ -153,6 +162,11 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
       />
 
       <FormSuccessSnackbar open={showSuccess} message={t("saved")} onClose={() => setShowSuccess(false)} />
+      <FormErrorSnackbar
+        open={errorMessage != null}
+        message={errorMessage ?? ""}
+        onClose={() => setErrorMessage(null)}
+      />
     </Stack>
   );
 }

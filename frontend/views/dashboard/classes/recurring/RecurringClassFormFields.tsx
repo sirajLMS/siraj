@@ -13,6 +13,8 @@ import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/t
 import { DaysScheduleSection } from "@/frontend/views/dashboard/classes/recurring/DaysScheduleSection";
 import { DurationInput } from "@/frontend/views/dashboard/classes/recurring/DurationInput";
 import { EntitySelect } from "@/frontend/views/dashboard/classes/recurring/EntitySelect";
+import { RecurringMeetingConfigSection } from "@/frontend/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
+import type { RecurringMeetingConfigFormState } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import { TimeInput } from "@/frontend/views/dashboard/classes/recurring/TimeInput";
 import type { SimpleEntity } from "@/frontend/views/dashboard/classes/recurring/types";
@@ -48,6 +50,8 @@ interface RecurringClassFormFieldsProps {
     readonly classTypePlaceholder: string;
     readonly days: CreateRecurringClassLabels["days"];
   };
+  readonly meetingConfig: RecurringMeetingConfigFormState;
+  readonly onMeetingConfigChangeAction: (next: RecurringMeetingConfigFormState) => void;
 }
 
 function FormRow({ isMobile, children }: { readonly isMobile: boolean; readonly children: React.ReactNode }) {
@@ -280,6 +284,8 @@ export function RecurringClassFormFields({
   isSubmitting,
   isMobile,
   labels,
+  meetingConfig,
+  onMeetingConfigChangeAction,
 }: RecurringClassFormFieldsProps) {
   const studentId = watch("studentId");
   const teacherId = watch("teacherId");
@@ -322,6 +328,15 @@ export function RecurringClassFormFields({
         setValue={setValue}
         errors={errors}
       />
+
+      {teacherId ? (
+        <RecurringMeetingConfigSection
+          teacherId={teacherId}
+          value={meetingConfig}
+          onChangeAction={onMeetingConfigChangeAction}
+          disabled={isSubmitting}
+        />
+      ) : null}
 
       <TimeTimezoneRow
         control={control}

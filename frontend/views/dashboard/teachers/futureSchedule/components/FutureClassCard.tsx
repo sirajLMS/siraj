@@ -3,7 +3,6 @@
 import {
   BlockOutlined,
   EventBusyOutlined,
-  LocationOnOutlined,
   PersonOutlined,
   ScheduleOutlined,
 } from "@mui/icons-material";
@@ -11,6 +10,7 @@ import { alpha, Box, Button, Stack, Typography, useMediaQuery, useTheme } from "
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { FutureClassCardProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
@@ -78,7 +78,13 @@ function ClassInfo({ item, isMobile }: Readonly<{ item: FutureClass; isMobile: b
           </Typography>
         </Box>
         <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.onSurfaceVariant })}>
-          <LocationOnOutlined sx={{ fontSize: 16 }} />
+          <MeetingJoinAction
+            variant="icon"
+            joinUrl={item.meetingJoinUrl}
+            meeting={item.effectiveMeeting}
+            emptyRole="teacher"
+            setupHref="/profile?tab=meeting"
+          />
           <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
             {item.location}
           </Typography>

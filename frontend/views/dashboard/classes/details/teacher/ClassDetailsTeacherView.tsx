@@ -103,7 +103,13 @@ export function ClassDetailsTeacherView({
               status={status}
               labels={labels.instanceDetails}
             />
-            <ClassMeetingConfigsSection classInstanceId={instance.id ?? undefined} />
+            <ClassMeetingConfigsSection
+              classInstanceId={instance.id ?? undefined}
+              effectiveMeeting={
+                (instance as { effectiveMeeting?: import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment })
+                  .effectiveMeeting
+              }
+            />
             <RemarksCard remarks={instance.remarks ?? ""} labels={labels.remarks} />
             <PerformanceOverviewCard
               attendanceRate={performance?.attendanceRate ?? 0}

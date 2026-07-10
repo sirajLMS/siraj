@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircleOutlined, CloseOutlined, ErrorOutlined } from "@mui/icons-material";
 import { alpha, Box, IconButton, Snackbar, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/lib/timezone";
@@ -12,6 +12,10 @@ import { RecurringClassForm } from "@/frontend/views/dashboard/classes/recurring
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import { createRecurringClassSchema } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import { DEFAULT_DAY_SCHEDULE } from "@/frontend/views/dashboard/classes/recurring/types";
+import {
+  emptyRecurringMeetingConfigState,
+  type RecurringMeetingConfigFormState,
+} from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 
 interface CreateRecurringClassViewProps {
@@ -20,7 +24,7 @@ interface CreateRecurringClassViewProps {
   readonly errorMessage: string | null;
   readonly labels: CreateRecurringClassLabels;
   readonly onClose: () => void;
-  readonly onSubmit: (data: RecurringClassFormData) => void;
+  readonly onSubmit: (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => void;
   readonly onDismissSuccess: () => void;
   readonly onDismissError: () => void;
 }
@@ -172,6 +176,7 @@ export function CreateRecurringClassView({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const schema = useMemo(() => createRecurringClassSchema(labels.validation), [labels.validation]);
   const formLabels = useMemo(() => buildFormLabels(labels), [labels]);
+  const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(emptyRecurringMeetingConfigState);
 
   const {
     register,
@@ -256,7 +261,9 @@ export function CreateRecurringClassView({
             isMobile={isMobile}
             showSuccess={showSuccess}
             labels={formLabels}
-            onSubmit={onSubmit}
+            meetingConfig={meetingConfig}
+            onMeetingConfigChangeAction={setMeetingConfig}
+            onSubmit={data => onSubmit(data, meetingConfig)}
           />
         </SectionPanel>
       </Box>

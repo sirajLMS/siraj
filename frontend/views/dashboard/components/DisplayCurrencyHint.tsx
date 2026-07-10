@@ -1,31 +1,79 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { userQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { profileHrefForUser } from "@/frontend/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 
-export function DisplayCurrencyHint(): React.ReactNode {
-  const displayCurrency = useUserStore(state => state.displayCurrency);
+type DisplayCurrencyHintMode = "viewer" | "subject";
+
+interface DisplayCurrencyHintProps {
+  readonly mode?: DisplayCurrencyHintMode;
+  readonly subjectUserId?: string;
+}
+
+export function DisplayCurrencyHint({
+  mode = "viewer",
+  subjectUserId,
+}: Readonly<DisplayCurrencyHintProps>): React.ReactNode {
+  const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
   const t = useTranslations("dashboard.billing.displayCurrencyHint");
 
-  if (displayCurrency) {
+  const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
+    variables: { id: subjectUserId ?? "" },
+    skip: mode !== "subject" || !subjectUserId,
+    fetchPolicy: "cache-first",
+  });
+
+  if (mode === "viewer") {
+    if (viewerDisplayCurrency) {
+      return null;
+    }
+
+    return (
+      <Alert
+        severity="info"
+        sx={{ mb: 2 }}
+        action={
+          <Button component={Link} href="/profile/edit" color="inherit" size="small">
+            {t("cta")}
+          </Button>
+        }
+      >
+        <strong>{t("title")}</strong>
+        <br />
+        {t("body")}
+      </Alert>
+    );
+  }
+
+  if (!subjectUserId || subjectLoading) {
     return null;
   }
+
+  const subjectDisplayCurrency = subjectData?.user?.displayCurrency;
+  if (subjectDisplayCurrency) {
+    return null;
+  }
+
+  const editHref = `${profileHrefForUser(subjectUserId)}/edit`;
 
   return (
     <Alert
       severity="info"
       sx={{ mb: 2 }}
       action={
-        <Button component={Link} href="/profile/edit" color="inherit" size="small">
-          {t("cta")}
+        <Button component={Link} href={editHref} color="inherit" size="small">
+          {t("subject.cta")}
         </Button>
       }
     >
-      <strong>{t("title")}</strong>
+      <strong>{t("subject.title")}</strong>
       <br />
-      {t("body")}
+      {t("subject.body")}
     </Alert>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useMutation } from "@apollo/client/react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { AppDatePicker } from "@/frontend/components/ui/form/date/AppDatePicker";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
@@ -21,7 +20,6 @@ type ManualOverrideDialogProps = {
 };
 
 export function ManualOverrideDialog({ open, labels, onClose, onSuccess, onError }: ManualOverrideDialogProps) {
-  const tActions = useTranslations("dashboard.billing.currencyHedges");
   const [fromCurrency, setFromCurrency] = useState<CurrencyCode>(CurrencyCode.Usd);
   const [toCurrency, setToCurrency] = useState<CurrencyCode>(CurrencyCode.Sar);
   const [rate, setRate] = useState("");
@@ -92,7 +90,7 @@ export function ManualOverrideDialog({ open, labels, onClose, onSuccess, onError
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{tActions("cancel")}</Button>
+        <Button onClick={onClose}>{labels.cancel}</Button>
         <Button variant="contained" onClick={() => void handleSubmit()} disabled={loading}>
           {labels.submit}
         </Button>

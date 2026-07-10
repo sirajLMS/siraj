@@ -10,6 +10,7 @@ import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDispla
 import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 
 export function TeacherOwnProfileContainer() {
   const t = useTranslations("dashboard.teacherOwnProfile");
@@ -45,7 +46,9 @@ export function TeacherOwnProfileContainer() {
           <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.failedToLoad")}</Typography>
         ) : null}
         {profile ? (
-          <Grid container spacing={3}>
+          <>
+            <DisplayCurrencyHint />
+            <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper variant="outlined" sx={{ p: 3 }}>
                 <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.contact")}</Typography>
@@ -72,7 +75,8 @@ export function TeacherOwnProfileContainer() {
                 </Stack>
               </Paper>
             </Grid>
-          </Grid>
+            </Grid>
+          </>
         ) : null}
       </PageContainer>
     </RequirePermission>

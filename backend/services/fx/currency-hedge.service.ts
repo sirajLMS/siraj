@@ -4,6 +4,8 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { CurrencyHedgeReturnType, CurrencyHedgeSubmitInput, CurrencyHedgeUpdateInput } from "@/backend/types";
 
+const VALID_HEDGE_TYPES = ["LONG", "SHORT"] as const;
+
 export namespace CurrencyHedgeService {
   async function assertManagePermission(actorUserId: string, locale?: string): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(
@@ -13,6 +15,13 @@ export namespace CurrencyHedgeService {
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
+    }
+  }
+
+  async function assertValidHedgeType(hedgeType: string, locale?: string): Promise<void> {
+    if (!VALID_HEDGE_TYPES.includes(hedgeType as (typeof VALID_HEDGE_TYPES)[number])) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invalidInput"));
     }
   }
 
@@ -27,6 +36,7 @@ export namespace CurrencyHedgeService {
     locale?: string
   ): Promise<CurrencyHedgeReturnType> {
     await assertManagePermission(actorUserId, locale);
+    await assertValidHedgeType(input.hedgeType, locale);
     const now = new Date();
     return CurrencyHedgeRepository.create({ ...input, createdAt: now, updatedAt: now });
   }
@@ -38,6 +48,9 @@ export namespace CurrencyHedgeService {
     locale?: string
   ): Promise<CurrencyHedgeReturnType> {
     await assertManagePermission(actorUserId, locale);
+    if (input.hedgeType) {
+      await assertValidHedgeType(input.hedgeType, locale);
+    }
     return CurrencyHedgeRepository.update(id, input, undefined, locale);
   }
 

@@ -2,10 +2,13 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
+import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+
 export const classInstanceQueryDocument: TypedDocumentNode<
   Operations.ClassInstanceQuery,
   Types.QueryClassInstanceArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query classInstance($id: ID!) {
     classInstance(id: $id) {
       id
@@ -22,6 +25,9 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       studentTimezone
       teacherTimezone
       meetingJoinUrl
+      effectiveMeeting {
+        ...EffectiveMeetingFields
+      }
       payrollCredited
       isRescheduled
       executionState

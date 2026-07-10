@@ -215,7 +215,13 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
       title: t("displayCurrencyHint.title"),
       body: t("displayCurrencyHint.body"),
       cta: t("displayCurrencyHint.cta"),
+      subject: {
+        title: t("displayCurrencyHint.subject.title"),
+        body: t("displayCurrencyHint.subject.body"),
+        cta: t("displayCurrencyHint.subject.cta"),
+      },
     },
+    fxConversionNote: t("fxConversionNote"),
     currencyHedges: t.raw("currencyHedges") as CurrencyHedgesLabels,
     supportedCurrencies: t.raw("supportedCurrencies") as SupportedCurrenciesLabels,
   };

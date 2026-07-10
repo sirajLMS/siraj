@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, type BoxProps, Divider, styled, useMediaQuery, useTheme } from "@mui/material";
+import { Box, type BoxProps, Divider, Link as MuiLink, Stack, styled, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormGetValues, UseFormHandleSubmit, UseFormSetValue } from "react-hook-form";
 import {
@@ -10,6 +10,10 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
+import {
+  effectiveMeetingToDisplayData,
+  MeetingConfigDisplay,
+} from "@/frontend/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import { ClassParticipantsSection } from "@/frontend/views/dashboard/reschedule/home/ClassParticipantsSection";
 import { NotificationPolicyCard } from "@/frontend/views/dashboard/reschedule/home/NotificationPolicyCard";
 import { QuickAdjustSection } from "@/frontend/views/dashboard/reschedule/home/QuickAdjustSection";
@@ -17,6 +21,7 @@ import { RescheduleDateTimeSection } from "@/frontend/views/dashboard/reschedule
 import type { RescheduleFormData } from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import { TimezoneWarningBanner } from "@/frontend/views/dashboard/reschedule/home/TimezoneWarningBanner";
 import type { RescheduleSession } from "@/frontend/views/dashboard/reschedule/home/types";
+import { Link } from "@/shared/i18n/routing";
 
 interface Props {
   readonly session: RescheduleSession;
@@ -57,6 +62,7 @@ export function RescheduleView({
   onDismissSuccess,
 }: Readonly<Props>) {
   const t = useTranslations("dashboard.rescheduleForm");
+  const tMeeting = useTranslations("ui.meetingConfig");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const submitLabel = isMobile ? t("actions.submitMobile") : t("actions.submit");
@@ -76,6 +82,26 @@ export function RescheduleView({
           sx={theme => ({ p: theme.layout.cardPadding, display: "flex", flexDirection: "column", gap: 4 })}
         >
           <ClassParticipantsSection session={session} />
+
+          {session.effectiveMeeting ? (
+            <>
+              <Divider />
+              <Stack spacing={1}>
+                <MeetingConfigDisplay
+                  config={effectiveMeetingToDisplayData(session.effectiveMeeting)}
+                  showSource
+                />
+                <MuiLink
+                  component={Link}
+                  href={`/classes/${session.sessionId}#meeting-configs`}
+                  underline="hover"
+                  sx={{ typography: "labelMd" }}
+                >
+                  {tMeeting("summary.manageLink")}
+                </MuiLink>
+              </Stack>
+            </>
+          ) : null}
 
           <Divider />
 

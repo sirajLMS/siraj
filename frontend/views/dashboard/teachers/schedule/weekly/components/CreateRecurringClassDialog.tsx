@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import {
   Box,
   Button,
@@ -33,12 +33,20 @@ import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/studen
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { logger } from "@/frontend/utils/logger";
+import {
+  emptyRecurringMeetingConfigState,
+  postCreateRecurringMeetingConfig,
+  type RecurringMeetingConfigFormState,
+} from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import { RecurringMeetingConfigSection } from "@/frontend/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
 import { CLASS_TYPE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassDialogProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
   const t = useTranslations("dashboard.teacherCreateRecurringClass");
+  const tMeeting = useTranslations("ui.meetingConfig.manager");
   const notifications = useNotifications();
+  const client = useApolloClient();
   const { isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =
     useCreateRecurringClassStore();
 
@@ -47,6 +55,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
   const [defaultStartTime, setDefaultStartTime] = useState("09:00");
   const [timezone, setTimezone] = useState("Africa/Cairo");
   const [classType, setClassType] = useState<ClassTypeEnum>(ClassTypeEnum.Regular);
+  const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(emptyRecurringMeetingConfigState);
 
   const { data: studentsData, loading: loadingStudents } = useQuery(studentsQueryDocument, {
     variables: {
@@ -74,6 +83,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
       setDefaultStartTime("09:00");
       setTimezone("Africa/Cairo");
       setClassType(ClassTypeEnum.Regular);
+      setMeetingConfig(emptyRecurringMeetingConfigState());
       resetDays();
     }
   }, [isDialogOpen, resetDays]);
@@ -122,6 +132,14 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
       });
 
       if (data?.createRecurringClass) {
+        const recurringScheduleId = data.createRecurringClass.recurringScheduleId;
+        if (recurringScheduleId) {
+          const meetingResult = await postCreateRecurringMeetingConfig(client, recurringScheduleId, meetingConfig);
+          if (!meetingResult.success) {
+            notifications.show(tMeeting("postCreateFailure"), { severity: "warning" });
+          }
+        }
+
         notifications.show(t("success.description", { count: data.createRecurringClass.classInstanceCount ?? 0 }), {
           severity: "success",
         });
@@ -280,6 +298,13 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
                 ))}
               </Stack>
             </Box>
+
+            <RecurringMeetingConfigSection
+              teacherId={teacherId}
+              value={meetingConfig}
+              onChangeAction={setMeetingConfig}
+              disabled={mutationLoading}
+            />
           </Stack>
         </DialogContent>
         <DialogActions>

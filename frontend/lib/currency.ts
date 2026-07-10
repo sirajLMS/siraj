@@ -91,7 +91,7 @@ const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
 
 /** ISO 4217 minor-unit decimals; default 2 when not listed. */
 export function getCurrencyDecimals(code: CurrencyCode | string): number {
-  return CURRENCY_DECIMALS[code as CurrencyCode] ?? 2;
+  return CURRENCY_DECIMALS[code] ?? 2;
 }
 
 export function formatLockedAmount(amount: string, currency: CurrencyCode, locale = "en"): string {

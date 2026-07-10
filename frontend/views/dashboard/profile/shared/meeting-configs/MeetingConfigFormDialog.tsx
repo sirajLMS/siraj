@@ -130,16 +130,16 @@ export function MeetingConfigFormDialog({
     if (!details.meetingUrl.trim()) return;
 
     if (isEdit && editConfig?.id) {
-      const updateInput: UserMeetingConfigUpdateInput & { providerId?: string | null } = {
+      const updateInput: UserMeetingConfigUpdateInput = {
         label: label.trim() || null,
         isDefault,
         password: details.password.trim() || null,
+        providerId: providerChanged && provider?.id ? provider.id : null,
         details: {
           meetingUrl: details.meetingUrl.trim(),
           username: details.username.trim() || null,
           tenantId: details.tenantId.trim() || null,
         },
-        ...(providerChanged && provider?.id ? { providerId: provider.id } : {}),
       };
       await updateConfig({
         variables: {
