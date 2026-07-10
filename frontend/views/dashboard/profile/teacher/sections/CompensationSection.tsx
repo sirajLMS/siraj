@@ -48,7 +48,7 @@ export function CompensationSection(props: CompensationSectionProps) {
           <Controller
             name="rateCurrency"
             control={props.control}
-            render={({ field }) => {
+            render={({ field, fieldState }) => {
               const option: CurrencyOption | null = field.value
                 ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
                 : null;
@@ -60,6 +60,8 @@ export function CompensationSection(props: CompensationSectionProps) {
                   }}
                   onBlurAction={field.onBlur}
                   label={t("fields.currency")}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
                   fullWidth
                 />
               );

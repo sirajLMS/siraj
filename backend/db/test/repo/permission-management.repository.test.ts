@@ -93,7 +93,7 @@ describe("PermissionManagementRepository", () => {
       // Create a custom group to test getGroupById
       const group = await PermissionManagementRepository.createGroup(
         {
-          name: "GetGroup Test",
+          name: loc("GetGroup Test"),
           slug: "getgroup_test",
           permissionIds: [perm.id],
         },
@@ -124,9 +124,9 @@ describe("PermissionManagementRepository", () => {
 
       const group = await PermissionManagementRepository.createGroup(
         {
-          name: "Test Group Created",
+          name: loc("Test Group Created"),
           slug: "test_group_created",
-          description: "Test description",
+          description: loc("Test description"),
           permissionIds: [perm.id],
         },
         undefined,
@@ -148,7 +148,7 @@ describe("PermissionManagementRepository", () => {
     testRepoError("createGroup should throw on database error", () =>
       PermissionManagementRepository.createGroup(
         {
-          name: "Test Group Fail",
+          name: loc("Test Group Fail"),
           slug: "test_group_fail",
           permissionIds: [],
         },
@@ -164,7 +164,7 @@ describe("PermissionManagementRepository", () => {
       // Create a custom group first
       const group = await PermissionManagementRepository.createGroup(
         {
-          name: "Original Group",
+          name: loc("Original Group"),
           slug: "original_group",
           permissionIds: [perm1.id],
         },
@@ -176,7 +176,7 @@ describe("PermissionManagementRepository", () => {
       const updated = await PermissionManagementRepository.updateGroup(
         {
           id: group.id,
-          name: "Updated Group Name",
+          name: loc("Updated Group Name"),
           permissionIds: [perm2.id],
         },
         undefined,
@@ -200,7 +200,7 @@ describe("PermissionManagementRepository", () => {
         await PermissionManagementRepository.updateGroup(
           {
             id: "00000000-0000-0000-0000-000000000000",
-            name: "Fail Update",
+            name: loc("Fail Update"),
           },
           undefined,
           tx
@@ -221,7 +221,7 @@ describe("PermissionManagementRepository", () => {
         await PermissionManagementRepository.updateGroup(
           {
             id: sysGroup.id,
-            name: "Try Modifying System Group",
+            name: loc("Try Modifying System Group"),
           },
           undefined,
           tx
@@ -237,7 +237,7 @@ describe("PermissionManagementRepository", () => {
       PermissionManagementRepository.updateGroup(
         {
           id: "00000000-0000-0000-0000-000000000000",
-          name: "Mock Err",
+          name: loc("Mock Err"),
         },
         undefined,
         badTx
@@ -250,7 +250,7 @@ describe("PermissionManagementRepository", () => {
       // 1. Create a custom group to delete
       const group = await PermissionManagementRepository.createGroup(
         {
-          name: "Group to Delete",
+          name: loc("Group to Delete"),
           slug: "group_to_delete",
           permissionIds: [],
         },
@@ -302,7 +302,7 @@ describe("PermissionManagementRepository", () => {
 
       const group = await PermissionManagementRepository.createGroup(
         {
-          name: "User Group",
+          name: loc("User Group"),
           slug: "user_group",
           permissionIds: [],
         },
@@ -337,7 +337,7 @@ describe("PermissionManagementRepository", () => {
     testRepo("bulkAssignUsersToGroup and bulkRevokeUsersFromGroup should return early on empty user list", async tx => {
       const group = await PermissionManagementRepository.createGroup(
         {
-          name: "Early Exit Group",
+          name: loc("Early Exit Group"),
           slug: "early_exit_group",
           permissionIds: [],
         },
@@ -436,7 +436,7 @@ describe("PermissionManagementRepository", () => {
       // Create group
       const group = await PermissionManagementRepository.createGroup(
         {
-          name: "Ntx Group",
+          name: loc("Ntx Group"),
           slug: "ntx_group",
           permissionIds: [perm.id],
         },
@@ -457,7 +457,7 @@ describe("PermissionManagementRepository", () => {
       const updated = await PermissionManagementRepository.updateGroup(
         {
           id: group.id,
-          name: "Ntx Group Updated",
+          name: loc("Ntx Group Updated"),
         },
         undefined,
         tx

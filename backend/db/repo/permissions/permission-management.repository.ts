@@ -9,7 +9,7 @@ import {
 } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { localeJsonKey, omitEmptyLocalized } from "@/backend/db/repo/utils/resolve-localized";
+import { localeJsonKey, omitEmptyLocalized, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import type {
   CreateGroupInput,
@@ -24,14 +24,14 @@ import type {
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 
-function toPermissionReturn(row: PermissionSelectType, _locale?: string): PermissionReturnType {
+function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
   return {
     id: row.id,
     key: row.key,
     resource: row.resource,
     action: row.action,
-    description: row.description,
-    category: row.category,
+    description: resolveLocalized(row.description, locale),
+    category: resolveLocalized(row.category, locale),
     isSystem: row.isSystem,
   };
 }

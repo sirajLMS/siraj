@@ -1,12 +1,13 @@
 "use client";
 
-import { Box, FormControl, FormControlLabel, Grid, Input, MenuItem, Radio, RadioGroup, Select } from "@mui/material";
+import { Grid, Input, MenuItem, Select } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
-import { FieldWrapper, labelSx, standardInputSx } from "@/frontend/components/ui/form";
+import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
 import { LanguageSelector } from "@/frontend/components/ui/input/languageSelector/LanguageSelector";
-import { Gender, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { getLanguageByCode } from "@/frontend/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
@@ -59,45 +60,41 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
           </FieldWrapper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Box component="label" sx={labelSx}>
-            {labels.gender}
-          </Box>
           <Controller
             control={control}
             name="gender"
             render={({ field }) => (
-              <FormControl>
-                <RadioGroup
-                  row
-                  value={field.value ?? ""}
-                  onChange={event => {
-                    field.onChange(event.target.value || null);
-                  }}
-                >
-                  <FormControlLabel value={Gender.Male} control={<Radio />} label={labels.male} />
-                  <FormControlLabel value={Gender.Female} control={<Radio />} label={labels.female} />
-                </RadioGroup>
-              </FormControl>
+              <GenderSelector
+                gender={field.value ?? null}
+                setGenderAction={field.onChange}
+                fullWidth
+                labels={{
+                  title: labels.gender,
+                  male: labels.male,
+                  female: labels.female,
+                }}
+              />
             )}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={labels.language}>
-            <Controller
-              control={control}
-              name="language"
-              render={({ field }) => (
-                <LanguageSelector
-                  fullWidth
-                  label={labels.languagePlaceholder}
-                  language={field.value ? getLanguageByCode(field.value) : undefined}
-                  setLanguageAction={option => {
-                    field.onChange(option.code);
-                  }}
-                />
-              )}
-            />
-          </FieldWrapper>
+          <Controller
+            control={control}
+            name="language"
+            render={({ field }) => (
+              <LanguageSelector
+                fullWidth
+                label={labels.language}
+                language={field.value ? getLanguageByCode(field.value) : undefined}
+                setLanguageAction={option => {
+                  field.onChange(option.code);
+                }}
+                error={!!errors.language}
+                helperText={errors.language?.message}
+                onBlurAction={field.onBlur}
+              />
+            )}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <FieldWrapper label={labels.status}>

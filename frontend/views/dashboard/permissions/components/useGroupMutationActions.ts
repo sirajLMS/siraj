@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import type { PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
 
 interface UseGroupMutationActionsProps {
   readonly group: PermissionGroup;
@@ -7,7 +8,12 @@ interface UseGroupMutationActionsProps {
   readonly selectedAssignedUserIds: string[];
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (id: string, name: string, description: string, permissionIds: string[]) => Promise<void>;
+  readonly onUpdateGroup: (
+    id: string,
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) => Promise<void>;
   readonly setActiveSubTab: (val: "current" | "add" | "users") => void;
   readonly setSelectedAddPermissionIds: React.Dispatch<React.SetStateAction<string[]>>;
   readonly setSelectedAssignedUserIds: React.Dispatch<React.SetStateAction<string[]>>;
@@ -29,7 +35,7 @@ export function useGroupMutationActions({
       const groupId = group.id;
       if (!groupId) return;
       const remainingIds = (group.permissionIds ?? []).filter(id => id !== permissionId);
-      await onUpdateGroup(groupId, group.name ?? "", group.description ?? "", remainingIds);
+      await onUpdateGroup(groupId, group.name ?? {}, group.description ?? {}, remainingIds);
     },
     [group.id, group.permissionIds, group.name, group.description, onUpdateGroup]
   );
@@ -38,7 +44,7 @@ export function useGroupMutationActions({
     const groupId = group.id;
     if (!groupId || selectedAddPermissionIds.length === 0) return;
     const updatedIds = [...(group.permissionIds ?? []), ...selectedAddPermissionIds];
-    await onUpdateGroup(groupId, group.name ?? "", group.description ?? "", updatedIds);
+    await onUpdateGroup(groupId, group.name ?? {}, group.description ?? {}, updatedIds);
     setSelectedAddPermissionIds([]);
     setActiveSubTab("current");
   }, [

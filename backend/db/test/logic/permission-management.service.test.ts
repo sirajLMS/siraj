@@ -227,7 +227,7 @@ describe("PermissionManagementService Business Logic", () => {
     test("createGroup should throw if name is empty", async () => {
       mockContext = manageContext();
       await assertThrows(
-        () => PermissionManagementService.createGroup(adminUser.id, { name: "   ", permissionIds: [] }),
+        () => PermissionManagementService.createGroup(adminUser.id, { name: loc("   "), permissionIds: [] }),
         "Permission group name is required"
       );
     });
@@ -235,7 +235,7 @@ describe("PermissionManagementService Business Logic", () => {
     test("createGroup should throw if name too long", async () => {
       mockContext = manageContext();
       await assertThrows(
-        () => PermissionManagementService.createGroup(adminUser.id, { name: "a".repeat(256), permissionIds: [] }),
+        () => PermissionManagementService.createGroup(adminUser.id, { name: loc("a".repeat(256)), permissionIds: [] }),
         "Permission group name cannot exceed 255 characters"
       );
     });
@@ -244,16 +244,16 @@ describe("PermissionManagementService Business Logic", () => {
       mockContext = manageContext();
 
       const group = await PermissionManagementService.createGroup(adminUser.id, {
-        name: "My Custom Group & Permissions!!",
-        description: "Custom group description",
+        name: loc("My Custom Group & Permissions!!"),
+        description: loc("Custom group description"),
         permissionIds: testPerm1 ? [testPerm1.id] : [],
       });
       createdGroupIds.add(group.id);
 
       expect(group).toBeDefined();
-      expect(group.name).toBe("My Custom Group & Permissions!!");
+      expect(group.name).toEqual(loc("My Custom Group & Permissions!!"));
       expect(group.slug).toBe("my_custom_group_permissions");
-      expect(group.description).toBe("Custom group description");
+      expect(group.description).toEqual(loc("Custom group description"));
       if (testPerm1) {
         expect(group.permissionIds).toContain(testPerm1.id);
       }
@@ -263,26 +263,26 @@ describe("PermissionManagementService Business Logic", () => {
       mockContext = manageContext();
 
       const group = await PermissionManagementService.createGroup(adminUser.id, {
-        name: "Initial Group",
+        name: loc("Initial Group"),
         permissionIds: [],
       });
       createdGroupIds.add(group.id);
 
       const updated = await PermissionManagementService.updateGroup(adminUser.id, {
         groupId: group.id,
-        name: "Updated Group Name",
-        description: "   Updated description   ",
+        name: loc("Updated Group Name"),
+        description: loc("   Updated description   "),
       });
 
-      expect(updated.name).toBe("Updated Group Name");
+      expect(updated.name).toEqual(loc("Updated Group Name"));
       expect(updated.slug).toBe("updated_group_name");
-      expect(updated.description).toBe("Updated description");
+      expect(updated.description).toEqual(loc("Updated description"));
     });
 
     testSystemGroupGuard(
       "updateGroup on system group should throw cannotModifySystemPermissionGroup",
       manageContext,
-      groupId => PermissionManagementService.updateGroup(adminUser.id, { groupId, name: "New System Name" }),
+      groupId => PermissionManagementService.updateGroup(adminUser.id, { groupId, name: loc("New System Name") }),
       "Cannot modify core properties of system permission groups"
     );
 
@@ -431,13 +431,13 @@ describe("PermissionManagementService Business Logic", () => {
       mockContext = manageContext();
 
       const group1 = await PermissionManagementService.createGroup(adminUser.id, {
-        name: "Collision Group Name",
+        name: loc("Collision Group Name"),
         permissionIds: [],
       });
       createdGroupIds.add(group1.id);
 
       const group2 = await PermissionManagementService.createGroup(adminUser.id, {
-        name: "Collision Group Name!",
+        name: loc("Collision Group Name!"),
         permissionIds: [],
       });
       createdGroupIds.add(group2.id);

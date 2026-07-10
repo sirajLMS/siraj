@@ -5,10 +5,14 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import type { Permission, PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import { PermissionManagementDialogs } from "@/frontend/views/dashboard/permissions/components/PermissionManagementDialogs";
+import {
+  PermissionTabContent,
+  type TabKey,
+} from "@/frontend/views/dashboard/permissions/components/PermissionTabContent";
+import { SingleGroupView } from "@/frontend/views/dashboard/permissions/components/SingleGroupView";
 import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
-import { PermissionManagementDialogs } from "./components/PermissionManagementDialogs";
-import { PermissionTabContent, type TabKey } from "./components/PermissionTabContent";
-import { SingleGroupView } from "./components/SingleGroupView";
 
 export interface PermissionManagementViewProps {
   readonly permissions: readonly Permission[];
@@ -46,8 +50,17 @@ export interface PermissionManagementViewProps {
   readonly openManageOverrides: () => void;
   readonly closeManageOverrides: () => void;
 
-  readonly onCreateGroup: (name: string, description: string, permissionIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (id: string, name: string, description: string, permissionIds: string[]) => Promise<void>;
+  readonly onCreateGroup: (
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) => Promise<void>;
+  readonly onUpdateGroup: (
+    id: string,
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) => Promise<void>;
   readonly onDeleteGroup: (id: string) => Promise<void>;
   readonly onAssignGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;

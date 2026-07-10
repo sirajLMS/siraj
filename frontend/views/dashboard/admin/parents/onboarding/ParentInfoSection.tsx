@@ -36,6 +36,9 @@ export function ParentInfoSection({ register, control, errors }: Props) {
                   country={selectedCountry}
                   setCountryAction={country => field.onChange(country.code)}
                   label={t("fields.nationality")}
+                  error={!!errors.nationality}
+                  helperText={errors.nationality?.message}
+                  onBlurAction={field.onBlur}
                   fullWidth
                 />
               );

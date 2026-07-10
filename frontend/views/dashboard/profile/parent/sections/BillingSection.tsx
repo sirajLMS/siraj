@@ -43,7 +43,7 @@ export function BillingSection(props: BillingSectionProps) {
           <Controller
             name="currency"
             control={props.control}
-            render={({ field }) => {
+            render={({ field, fieldState }) => {
               const option: CurrencyOption | null = field.value
                 ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
                 : null;
@@ -55,6 +55,8 @@ export function BillingSection(props: BillingSectionProps) {
                   }}
                   onBlurAction={field.onBlur}
                   label={t("fields.currency")}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
                   fullWidth
                 />
               );
@@ -63,7 +65,7 @@ export function BillingSection(props: BillingSectionProps) {
           <Controller
             name="timezone"
             control={props.control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <TimezoneSelect
                 value={field.value ? toGraphqlIanaTimezone(field.value) : null}
                 onChangeAction={value => {
@@ -71,6 +73,8 @@ export function BillingSection(props: BillingSectionProps) {
                 }}
                 onBlurAction={field.onBlur}
                 label={t("fields.timezone")}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
                 fullWidth
               />
             )}

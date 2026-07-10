@@ -1,17 +1,20 @@
 import type { permissions } from "@/backend/db/schema/permissions";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 
 // Canonical: {Entity}SelectType and {Entity}InsertType must be derived from Drizzle
 //--------------------------------------------------------------------------------
 export type PermissionSelectType = typeof permissions.$inferSelect;
 export type PermissionInsertType = typeof permissions.$inferInsert;
 
-// Canonical: {Entity}ReturnType exposes the raw JSONB `LocalizedString` maps;
-// clients resolve via `resolveLocalizedString` for display-only text.
+// Canonical: {Entity}ReturnType resolves JSONB `LocalizedString` maps to plain
+// strings for the request locale. The permission catalog is read-only and
+// consumed as flat strings across the frontend (search, grouping, listing).
 //--------------------------------------------------------------------------------
-export type PermissionReturnType = Omit<PermissionSelectType, "deletedAt" | "internalNotes"> & {
-  description: LocalizedString;
-  category: LocalizedString;
+export type PermissionReturnType = Omit<
+  PermissionSelectType,
+  "description" | "category" | "deletedAt" | "internalNotes"
+> & {
+  description: string;
+  category: string;
 };
 
 // Input types
@@ -22,5 +25,3 @@ export type PermissionFilterInput = {
   key?: string | string[];
   groupId?: string | string[];
 };
-
-export type { LocalizedString };

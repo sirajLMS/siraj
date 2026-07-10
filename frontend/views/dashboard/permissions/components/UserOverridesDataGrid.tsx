@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
+import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/utils/profileHref";
 
 export interface UserOverridesDataGridProps {
@@ -106,23 +107,27 @@ function UserGroupsCell({ userGroups }: Readonly<UserGroupsCellProps>) {
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
-      {userGroups.map(g => (
-        <Box
-          key={g.id || g.slug}
-          sx={theme => ({
-            typography: "labelMd",
-            fontWeight: 500,
-            backgroundColor: theme.palette.secondaryContainer,
-            color: theme.palette.onSecondaryContainer,
-            px: 1,
-            py: 0.25,
-            borderRadius: 1,
-            border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
-          })}
-        >
-          {g.name}
-        </Box>
-      ))}
+      {userGroups.map(group => {
+        const name = resolveLocalizedString(group.name);
+        if (!name) return null;
+        return (
+          <Box
+            key={group.id || group.slug}
+            sx={theme => ({
+              typography: "labelMd",
+              fontWeight: 500,
+              backgroundColor: theme.palette.secondaryContainer,
+              color: theme.palette.onSecondaryContainer,
+              px: 1,
+              py: 0.25,
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
+            })}
+          >
+            {name}
+          </Box>
+        );
+      })}
     </Box>
   );
 }

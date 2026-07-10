@@ -17,14 +17,12 @@ tsconfig.tsbuildinfo
 .vscode
 .idea
 .continue
-.claude
 .gemini
 .agent-sandbox
 .opencode
 .codex
 .kilo
 opencode.json
-.claude
 .container
 .devcontainer
 .github

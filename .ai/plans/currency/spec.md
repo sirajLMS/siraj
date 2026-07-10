@@ -1,11 +1,11 @@
 # Currency Migration — Specification
 
-**Status:** Planning
+**Status:** Ready to Implement (prerequisite landed)
 **Implements:** `.ai/plans/user-entity-enhancement/decisions/03-currency-vs-rate-currency.md` (Decision **3A**)
 **Updates:** `.ai/plans/user-entity-enhancement/ANALYSIS.md` § 7.1 + § 2.3 (mark currency as landed)
 **Migration strategy:** Inherited Decision **8C** — clean-slate (`bun db cleanGenerate`), no dual-write
 **Parent plan:** `.ai/plans/user-entity-enhancement/` (currency slice only — other decisions untouched here)
-**Prerequisite:** [`.ai/plans/fx-ingestion/`](../fx-ingestion/spec.md) — FX rate ingestion (provider/cron/observability) has landed; this plan consumes the `currency_exchange_rates` rows it produces. Read fx-ingestion spec.md before implementing the FX read-path fork below.
+**Prerequisite:** [`.ai/plans/fx-ingestion/`](../fx-ingestion/spec.md) — **LANDED** — FX rate ingestion (provider/cron/observability) has landed; this plan consumes the `currency_exchange_rates` rows it produces and reuses its permissions, `fx_sync_runs` table, USD-hub provider adapters, and cron route. Read fx-ingestion spec.md before implementing the FX read-path fork below — see §1a for the exact landed primitives to reuse (do NOT re-implement them).
 
 ---
 
@@ -18,6 +18,29 @@ This plan implements **ALL of Decision 3A** (`.ai/plans/user-entity-enhancement/
 3. **LIVE FX read-path** — render-time locked→display conversion honoring `users.displayCurrency`, with the decision's "stale FX → show locked-only" rule.
 
 Currency is stored today as free `varchar(10)` on every money entity (`teachers.rateCurrency`, `parents.currency`, `invoices.currency`, `payments.currency`, `teacher_payments.currency`, `class_instances.rateCurrency`) and on the FX catalog (`currency_exchange_rates.fromCurrency/toCurrency`, `currency_exchange_audit_logs`, `currency_hedges`). There is no `users.displayCurrency` column at all. The FX-convert-on-render read path does NOT exist — `getLatestExchangeRate` is only called from the invoice-insert snapshot path and THROWS on stale rates (it does not return a soft "show locked only" signal). UIs hardcode 3–5-item `<MenuItem>` lists or raw `<TextField>`s, and render money duplicating a `formatCurrency` helper per file with hardcoded `"USD"` defaults.
+
+## 1a. Landed fx-ingestion primitives (REUSE — do NOT re-implement)
+
+The [`fx-ingestion`](../fx-ingestion/) plan landed the *ingestion* half of the FX surface. This plan consumes those rows and reuses the primitives; it ONLY adds the **display-path read fork**. The concrete landed artifacts (all `tsgo → biome → lint-queue` clean, tests passing) are:
+
+| Primitive | Path | How this plan uses it |
+|-----------|------|-----------------------|
+| `currency_exchange_rates` rows | seeded/written by `FxIngestionService.refreshRates` | The display path reads these rows via the soft variant below |
+| `BillingRepository.listLatestExchangeRates` | `backend/db/repo/billing/billing.repository.ts` | Already supports a typed `CurrencyExchangeRateReturnType`; consumed by the admin UI (already shipped) — no currency-plan work |
+| `BillingRepository.listExchangeRateHistory` | `backend/db/repo/billing/billing.repository.ts` | Already supports paginated typed history — no currency-plan work |
+| `BillingRepository.updateExchangeRateInTx` | `backend/db/repo/billing/billing.repository.ts` | Atomic write used by the ingestion cron; NOT touched here (display path is read-only) |
+| `BillingRepository.getLatestExchangeRate` (THROW variant) | `backend/db/repo/billing/billing.repository.ts:105` | Stays the throw-variant for the financial snapshot insert; the display path forks a NEW soft sibling `getLatestExchangeRateForDisplay` (T15.1) — see "FX read-path fork" in §5 |
+| `fx_sync_runs` schema + `FxSyncRepository` | `backend/db/schema/fx-sync.ts` · `backend/db/repo/fx-sync.repository.ts` | Observability for the ingestion cron; the currency plan does NOT re-create it. `FxSyncRepository.getLatestSyncRun` is already exposed via the FX ingestion GraphQL `latestFxSyncRun` query (see below) |
+| Permissions `billing.view_exchange_rates` / `billing.refresh_exchange_rates` | `backend/enum/permissions/permission.enum.ts` · migrations 3+4 · granted to `super_admin` + `academy_admin` | Seed already idempotent (migration 3 for clean DBs, incremental migration `4-fx_exchange_rate_permissions.sql` for existing DBs). The currency plan does NOT re-add them |
+| `FxProvider` / `FxSyncStatus` / `FxSyncTrigger` enums | `backend/enum/fx/fx-provider.enum.ts` · Pg enums in `backend/db/schema/enums.ts` | Landed; no re-creation |
+| `FxRateProviderFactory`, `OpenExchangeRatesAdapter`, `FixerAdapter` | `backend/services/fx/providers/` | USD-hub conversion (locked → USD → display) mirrors the same hub the adapters normalize to. No adapter edits |
+| `FxIngestionService.refreshRates` / `FxRateQueryService` / `FxRateLimitService` | `backend/services/fx/` | Cron + manual refresh + rate-limit + permission-gated queries already shipped; NOT re-implemented |
+| GraphQL `latestExchangeRates` / `exchangeRateHistory` / `latestFxSyncRun` queries + `refreshExchangeRates` mutation | `backend/graphql/pothos/billing/fx-ingestion.pothos.ts` · docs in `frontend/graphql/sharedDocuments/fx-ingestion.documents.ts` | Admin UI (`frontend/views/dashboard/admin/billing/exchange-rates/ExchangeRatesContainer.tsx`) already shipped. The currency plan does NOT re-author ingestion GraphQL |
+| Cron security + route | `backend/lib/cron-auth.ts` · `app/api/fx/refresh/route.ts` · `backend/lib/cron-auth.test.ts` · `app/api/fx/refresh/route.test.ts` · `vercel.json` (`0 6 * * *`) | R1–R11 enforced; no re-implementation |
+| FX error keys | `shared/messages/types/errors/main.ts` + AR/EN (`fxSyncAlreadyRunning`, `fxRefreshRateLimitExceeded`) | Landed; currency plan adds its OWN `displayCurrencyFallback` key (stale-FX display rule 5) without touching these |
+| Env | `environment.d.ts` + `backend/lib/env.ts` (`FX_PROVIDER`, `OPENEXCHANGERATES_APP_ID`, `FIXER_API_KEY`, `CRON_SECRET`) | Landed; no re-declaration |
+
+**Net effect:** the "FX rate ingestion" out-of-scope bullet (§4) is now operational. The currency plan's Phase 15 shrinks to: (a) NEW `getLatestExchangeRateForDisplay` soft repo sibling; (b) NEW `fx-display.service.ts` doing USD-hub transitive conversion (mirroring the provider USD-hub); (c) NEW `DisplayAmount` Pothos object + resolvers; (d) frontend `formatCurrencyForDisplay` lib + UI swap. The ingestion-side (provider, cron, sync-run, permissions, GraphQL ingestion queries) is DONE — the currency plan consumes the rows, never re-ingests.
 
 A typed `CurrencyCode` GraphQL enum was already landed in the prior step (foundation):
 
@@ -47,7 +70,7 @@ This plan covers ALL of Decision 3A in one clean-slate wave: type every money/FX
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-This plan implements all three concepts from Decision 3A in one wave: part 1 (typing locked columns), part 2 (`users.displayCurrency`), and part 3 (the FX-convert-on-render read path with the stale-FX fallback). FX rate *ingestion* (fetching/caching/staleness-window tuning) is the only FX concern left untouched — the decision does not request changes to upload/cron cadence; only the 24h staleness THROW behavior is forked into a soft "show locked only" variant for the display path. The financial-path THROW stays intact so invoice snapshots keep failing loudly on stale FX.
+This plan implements all three concepts from Decision 3A in one wave: part 1 (typing locked columns), part 2 (`users.displayCurrency`), and part 3 (the FX-convert-on-render read path with the stale-FX fallback). FX rate *ingestion* (provider, cron, `fx_sync_runs`, `billing.refresh_exchange_rates`, rate-limit, admin UI, cron-auth) is **landed in [`.ai/plans/fx-ingestion/`](../fx-ingestion/spec.md)** — see §1a for the full landed inventory. This plan does NOT re-implement ingestion; it only forks the read path into a soft "show locked only" variant (rule 5) and builds the display conversion + `DisplayAmount` GraphQL object + frontend render helper on top of the rows ingestion already writes. The financial-path THROW (`getLatestExchangeRate`) stays intact so invoice snapshots keep failing loudly on stale FX.
 
 ## 3. Scope (IN)
 
@@ -143,9 +166,9 @@ Migrate, in one clean-slate wave, every existing currency surface PLUS the three
 
 ## 7. Out of scope (re-iteration)
 
-Decision 3A is fully in scope. The ONLY currency behaviors left out are:
+Decision 3A is fully in scope. The ONLY currency behavior left out is the **ingestion-side** (provider, cron, `fx_sync_runs`, permissions, ingestion GraphQL) — but that **already landed in [`.ai/plans/fx-ingestion/`](../fx-ingestion/spec.md)** (see §1a). The currency plan consumes its `currency_exchange_rates` rows via the soft `getLatestExchangeRateForDisplay` sibling; it does NOT re-ingest. Out-of-scope-here-but-not-for-the-codebase:
 
-- **FX rate *ingestion*** (fetch source, cron cadence, cache TTL tuning) — the decision doesn't request changes here; only the read-path fork is new.
+- **FX rate *ingestion*** (fetch source, cron cadence, cache TTL tuning, provider adapters, sync-run observability, `billing.view_exchange_rates` / `billing.refresh_exchange_rates` permissions, ingestion GraphQL queries/mutation, cron-auth + route, rate-limit, admin UI) — **LANDED** in the fx-ingestion plan. The currency plan's display path only reads rates from the table ingestion populates.
 - **New money entities** not covered by Decision 3A (wallets, payment links, online accounts) — they don't exist yet and are governed by separate `payment-methods` decisions. When they land they must use `currencyCodeEnum` + the `displayAmount` field from day one.
 - **Dropping deprecated payment tables / renaming `rate_currency`** — schema-churn with no semantic gain in clean-slate mode.
 

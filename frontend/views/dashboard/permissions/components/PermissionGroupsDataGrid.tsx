@@ -6,6 +6,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
 import type { PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface PermissionGroupsDataGridProps {
@@ -96,8 +97,9 @@ export function PermissionGroupsDataGrid({
         flex: 1.5,
         minWidth: 200,
         renderCell: params => (
-          <Typography
-            variant="bodyMd"
+          <LocalizedStringDisplay
+            value={params.value}
+            typographyVariant="bodyMd"
             onClick={() => params.row.id && onViewGroup(params.row.id)}
             sx={theme => ({
               fontWeight: 500,
@@ -107,9 +109,7 @@ export function PermissionGroupsDataGrid({
                 textDecoration: "underline",
               },
             })}
-          >
-            {params.value as string}
-          </Typography>
+          />
         ),
       },
       {

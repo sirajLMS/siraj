@@ -3,12 +3,13 @@
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AddPermissionsTab } from "./AddPermissionsTab";
-import { AssignedUsersTab } from "./AssignedUsersTab";
-import { CurrentPermissionsTab } from "./CurrentPermissionsTab";
-import { SingleGroupHeader } from "./SingleGroupHeader";
-import type { SubTabKey } from "./useSingleGroupState";
-import { useSingleGroupState } from "./useSingleGroupState";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import { AddPermissionsTab } from "@/frontend/views/dashboard/permissions/components/AddPermissionsTab";
+import { AssignedUsersTab } from "@/frontend/views/dashboard/permissions/components/AssignedUsersTab";
+import { CurrentPermissionsTab } from "@/frontend/views/dashboard/permissions/components/CurrentPermissionsTab";
+import { SingleGroupHeader } from "@/frontend/views/dashboard/permissions/components/SingleGroupHeader";
+import type { SubTabKey } from "@/frontend/views/dashboard/permissions/components/useSingleGroupState";
+import { useSingleGroupState } from "@/frontend/views/dashboard/permissions/components/useSingleGroupState";
 
 interface SingleGroupViewProps {
   readonly group: PermissionGroup;
@@ -20,7 +21,12 @@ interface SingleGroupViewProps {
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onBulkAssign: (groupId: string, userIds: string[]) => Promise<void>;
   readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (id: string, name: string, description: string, permissionIds: string[]) => Promise<void>;
+  readonly onUpdateGroup: (
+    id: string,
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) => Promise<void>;
 }
 
 export function SingleGroupView({

@@ -8,6 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import type { PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 
 interface AssignGroupDialogProps {
   readonly open: boolean;
@@ -78,7 +79,7 @@ export function AssignGroupDialog({
       aria-labelledby="assign-group-dialog-title"
     >
       <DialogTitle id="assign-group-dialog-title">
-        {t("assignGroupTitle")} ({group.name})
+        {t("assignGroupTitle")} ({resolveLocalizedString(group.name)})
       </DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
         <Box

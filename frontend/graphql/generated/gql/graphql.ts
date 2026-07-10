@@ -2093,7 +2093,7 @@ export type UpdateStudentQuotaMutationVariables = Exact<{
 
 export type UpdateStudentQuotaMutation = { updateStudentQuota: { id: string | null, classesRemaining: number | null, classesTotal: number | null, version: number | null } | null };
 
-export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: Partial<Record<'ar' | 'en', string>> | null, category: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null };
+export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
 
 export type PermissionGroupFieldsFragment = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null };
 
@@ -2104,7 +2104,7 @@ export type UserOverrideFieldsFragment = { permissionId: string | null, state: O
 export type PermissionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PermissionsQuery = { permissions: Array<{ id: string | null, key: string | null, resource: string | null, action: string | null, description: Partial<Record<'ar' | 'en', string>> | null, category: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null }> | null };
+export type PermissionsQuery = { permissions: Array<{ id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null }> | null };
 
 export type PermissionGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 

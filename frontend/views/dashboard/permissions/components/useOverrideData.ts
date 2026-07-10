@@ -48,9 +48,9 @@ export function useOverrideData({ userId, users, groups, permissions, open, sear
 
     return permissions.filter(
       p =>
-        p.key?.toLowerCase().includes(query) ||
-        p.category?.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query)
+        (p.key?.toLowerCase().includes(query) ?? false) ||
+        (p.category?.toLowerCase().includes(query) ?? false) ||
+        (p.description?.toLowerCase().includes(query) ?? false)
     );
   }, [permissions, searchQuery]);
 

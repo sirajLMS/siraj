@@ -2407,8 +2407,8 @@ enum PaymentMethod {
 
 type Permission {
   action: String
-  category: LocalizedString
-  description: LocalizedString
+  category: String
+  description: String
   id: String
   isSystem: Boolean
   key: String

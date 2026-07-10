@@ -6,6 +6,7 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui";
 import type { PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 
 const StyledBreadcrumbNav = styled(Box)({
   display: "flex",
@@ -103,6 +104,8 @@ interface SingleGroupHeaderProps {
 
 export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<SingleGroupHeaderProps>) {
   const t = useTranslations("dashboard.permissions");
+  const groupName = resolveLocalizedString(group.name);
+  const groupDescription = resolveLocalizedString(group.description);
 
   return (
     <>
@@ -112,7 +115,7 @@ export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<Singl
           {t("groupsTab")}
         </StyledBackButton>
         <StyledBreadcrumbSeparator variant="bodyMd">/</StyledBreadcrumbSeparator>
-        <StyledBreadcrumbName variant="bodyMd">{group.name}</StyledBreadcrumbName>
+        <StyledBreadcrumbName variant="bodyMd">{groupName}</StyledBreadcrumbName>
       </StyledBreadcrumbNav>
 
       {/* Main Header Panel */}
@@ -120,7 +123,7 @@ export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<Singl
         {/* Header Info Section */}
         <StyledHeaderInfo>
           <StyledHeaderTitleRow>
-            <StyledHeaderTitle variant="headlineMd">{group.name}</StyledHeaderTitle>
+            <StyledHeaderTitle variant="headlineMd">{groupName}</StyledHeaderTitle>
             <StatusBadge
               category="session"
               status={group.isSystem ? "active" : "pending"}
@@ -128,7 +131,7 @@ export function SingleGroupHeader({ group, onBack, onEditGroup }: Readonly<Singl
             />
           </StyledHeaderTitleRow>
           <StyledHeaderDescription variant="bodyMd">
-            {group.description || "No description provided."}
+            {groupDescription || t("noDescriptionProvided")}
           </StyledHeaderDescription>
         </StyledHeaderInfo>
 

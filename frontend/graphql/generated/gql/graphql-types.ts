@@ -2951,8 +2951,8 @@ export enum PaymentMethod {
 export type Permission = {
   __typename?: 'Permission';
   action: Maybe<Scalars['String']['output']>;
-  category: Maybe<Scalars['LocalizedString']['output']>;
-  description: Maybe<Scalars['LocalizedString']['output']>;
+  category: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isSystem: Maybe<Scalars['Boolean']['output']>;
   key: Maybe<Scalars['String']['output']>;

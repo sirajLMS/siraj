@@ -67,9 +67,6 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
         ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.currency}
-        </Box>
         <Controller
           name="rateCurrency"
           control={control}
@@ -84,8 +81,11 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
                   field.onChange(selected.code as string);
                 }}
                 onBlurAction={field.onBlur}
-                fullWidth
+                label={labels.fields.currency}
                 required
+                error={!!errors.rateCurrency}
+                helperText={errors.rateCurrency?.message}
+                fullWidth
               />
             );
           }}

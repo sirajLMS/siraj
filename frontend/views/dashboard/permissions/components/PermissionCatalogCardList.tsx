@@ -3,6 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface PermissionCatalogCardListProps {
@@ -53,9 +54,9 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                   {permission.key}
                 </Box>
                 {permission.category && (
-                  <Box
+                  <Typography
+                    variant="labelMd"
                     sx={theme => ({
-                      typography: "labelMd",
                       fontWeight: 500,
                       backgroundColor: theme.palette.surfaceVariant,
                       color: theme.palette.onSurfaceVariant,
@@ -63,10 +64,11 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                       px: 1,
                       py: 0.5,
                       borderRadius: 1,
+                      display: "inline-block",
                     })}
                   >
                     {permission.category}
-                  </Box>
+                  </Typography>
                 )}
               </Box>
 
@@ -99,10 +101,11 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                     {usedGroups.map(g => {
                       if (!g.id || !g.name) return null;
                       return (
-                        <Box
+                        <LocalizedStringDisplay
                           key={g.id}
+                          value={g.name}
+                          typographyVariant="labelMd"
                           sx={theme => ({
-                            typography: "labelMd",
                             fontWeight: 500,
                             backgroundColor: theme.palette.secondaryContainer,
                             color: theme.palette.onSecondaryContainer,
@@ -110,10 +113,9 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                             py: 0.5,
                             borderRadius: 1,
                             border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
+                            display: "inline-block",
                           })}
-                        >
-                          {g.name}
-                        </Box>
+                        />
                       );
                     })}
                   </Box>

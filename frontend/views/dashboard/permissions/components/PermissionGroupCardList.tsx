@@ -5,6 +5,7 @@ import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
 import type { PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface PermissionGroupCardListProps {
@@ -68,7 +69,7 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
                 },
               })}
             >
-              {group.name}
+              <LocalizedStringDisplay value={group.name} />
             </Typography>
             <Typography
               variant="labelMd"
@@ -114,9 +115,12 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
 
         {/* Description */}
         {group.description && (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {group.description}
-          </Typography>
+          <LocalizedStringDisplay
+            value={group.description}
+            typographyVariant="bodyMd"
+            fallback={null}
+            sx={theme => ({ color: theme.palette.text.secondary })}
+          />
         )}
 
         {/* Footer: Badge (System/Custom) and permissions count */}

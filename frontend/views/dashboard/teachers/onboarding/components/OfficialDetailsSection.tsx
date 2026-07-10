@@ -8,9 +8,9 @@ import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/Coun
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { getCountryByCode } from "@/frontend/lib/locale";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
+import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
-import type { CountryCode } from "../types";
+import type { CountryCode } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
 interface OfficialDetailsSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
@@ -65,16 +65,14 @@ export function OfficialDetailsSection({ register, control, errors, labels }: Re
                 setCountryAction={country => field.onChange(country.code as CountryCode)}
                 label={`${labels.fields.country} *`}
                 required
+                error={!!errors.countryCode}
+                helperText={errors.countryCode?.message}
+                onBlurAction={field.onBlur}
                 fullWidth
               />
             );
           }}
         />
-        {errors.countryCode ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.countryCode.message}
-          </Typography>
-        ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 3 }}>
         <Box component="label" sx={labelSx}>
@@ -112,15 +110,12 @@ export function OfficialDetailsSection({ register, control, errors, labels }: Re
               onBlurAction={field.onBlur}
               label={labels.fields.timezone}
               required
+              error={!!errors.timezone}
+              helperText={errors.timezone?.message}
               fullWidth
             />
           )}
         />
-        {errors.timezone ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.timezone.message}
-          </Typography>
-        ) : null}
       </Grid>
     </Grid>
   );

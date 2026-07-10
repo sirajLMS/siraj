@@ -1,10 +1,12 @@
 "use client";
 
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AssignGroupDialog } from "./AssignGroupDialog";
-import { DeleteGroupDialog } from "./DeleteGroupDialog";
-import { ManageOverridesDialog } from "./ManageOverridesDialog";
-import { PermissionGroupForm } from "./PermissionGroupForm";
+import { resolveLocalizedString } from "@/frontend/lib/localized-string";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import { AssignGroupDialog } from "@/frontend/views/dashboard/permissions/components/AssignGroupDialog";
+import { DeleteGroupDialog } from "@/frontend/views/dashboard/permissions/components/DeleteGroupDialog";
+import { ManageOverridesDialog } from "@/frontend/views/dashboard/permissions/components/ManageOverridesDialog";
+import { PermissionGroupForm } from "@/frontend/views/dashboard/permissions/components/PermissionGroupForm";
 
 export interface PermissionManagementDialogsProps {
   readonly permissions: readonly Permission[];
@@ -25,8 +27,17 @@ export interface PermissionManagementDialogsProps {
   readonly closeAssignDialog: () => void;
   readonly closeManageOverrides: () => void;
   readonly setSelectedUserIdForOverrides: (id: string | null) => void;
-  readonly onCreateGroup: (name: string, description: string, permissionIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (id: string, name: string, description: string, permissionIds: string[]) => Promise<void>;
+  readonly onCreateGroup: (
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) => Promise<void>;
+  readonly onUpdateGroup: (
+    id: string,
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) => Promise<void>;
   readonly onDeleteGroup: (id: string) => Promise<void>;
   readonly onAssignGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onUpdateOverrides: (
@@ -86,7 +97,7 @@ export function PermissionManagementDialogs({
 
       <DeleteGroupDialog
         open={isDeleteDialogOpen}
-        groupName={activeGroup?.name || ""}
+        groupName={activeGroup?.name ? resolveLocalizedString(activeGroup.name) : ""}
         isLoading={isLoading}
         onClose={closeDeleteDialog}
         onConfirm={async () => {

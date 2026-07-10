@@ -36,9 +36,9 @@ export function useGroupPermissionFilters({
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return (
-          p.key?.toLowerCase().includes(q) ||
-          p.category?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
+          (p.key?.toLowerCase().includes(q) ?? false) ||
+          (p.category?.toLowerCase().includes(q) ?? false) ||
+          (p.description?.toLowerCase().includes(q) ?? false)
         );
       }
       return true;

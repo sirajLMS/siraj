@@ -1,17 +1,9 @@
 "use client";
 
 import { CloudUploadOutlined, DeleteOutlined, ErrorOutlined, LinkOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Divider,
-  IconButton,
-  InputAdornment,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Divider, InputAdornment, TextField, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -188,11 +180,12 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           })}
         >
           {resolvedPreview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={resolvedPreview}
               alt={label ?? t("previewAlt")}
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              fill
+              unoptimized
+              style={{ objectFit: "contain" }}
             />
           ) : (
             <CloudUploadOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
@@ -287,6 +280,3 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
     </Box>
   );
 };
-
-// keep IconButton import referenced for future toolbar variant without unused import lint
-void IconButton;

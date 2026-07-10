@@ -115,21 +115,18 @@ function PaymentFields({ register, control, errors }: SectionProps) {
               ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
               : null;
             return (
-              <FieldWrapper
+              <CurrencySelect
+                currency={option}
+                setCurrencyAction={selected => {
+                  field.onChange(selected.code as string);
+                }}
+                onBlurAction={field.onBlur}
                 label={t("fields.currency")}
                 required
-                error={errors.currency ? t(`validation.${errors.currency.message}`) : undefined}
-              >
-                <CurrencySelect
-                  currency={option}
-                  setCurrencyAction={selected => {
-                    field.onChange(selected.code as string);
-                  }}
-                  onBlurAction={field.onBlur}
-                  fullWidth
-                  required
-                />
-              </FieldWrapper>
+                error={!!errors.currency}
+                helperText={errors.currency ? t(`validation.${errors.currency.message}`) : undefined}
+                fullWidth
+              />
             );
           }}
         />
@@ -139,20 +136,18 @@ function PaymentFields({ register, control, errors }: SectionProps) {
           name="timezone"
           control={control}
           render={({ field }) => (
-            <FieldWrapper
+            <TimezoneSelect
+              value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+              onChangeAction={value => {
+                field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+              }}
+              onBlurAction={field.onBlur}
               label={t("fields.timezone")}
               required
-              error={errors.timezone ? t(`validation.${errors.timezone.message}`) : undefined}
-            >
-              <TimezoneSelect
-                value={field.value ? toGraphqlIanaTimezone(field.value) : null}
-                onChangeAction={value => {
-                  field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
-                }}
-                onBlurAction={field.onBlur}
-                fullWidth
-              />
-            </FieldWrapper>
+              error={!!errors.timezone}
+              helperText={errors.timezone ? t(`validation.${errors.timezone.message}`) : undefined}
+              fullWidth
+            />
           )}
         />
       </Grid>

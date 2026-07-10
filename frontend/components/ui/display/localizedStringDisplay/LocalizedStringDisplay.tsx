@@ -14,6 +14,12 @@ export type LocalizedStringDisplayProps = {
   readonly fallback?: React.ReactNode;
   readonly typographyVariant?: TypographyProps["variant"];
   readonly sx?: SxProps<Theme>;
+  /**
+   * Optional click handler forwarded to the underlying `Typography`. Useful
+   * for interactive list/grid cells that render the resolved text as the
+   * clickable affordance (e.g. a row's primary name cell).
+   */
+  readonly onClick?: React.MouseEventHandler<HTMLElement>;
 };
 
 /**
@@ -30,6 +36,7 @@ export const LocalizedStringDisplay: React.FC<LocalizedStringDisplayProps> = ({
   fallback,
   typographyVariant,
   sx,
+  onClick,
 }): React.ReactNode => {
   const uiLocale = useLocale();
   const displayLocale = locale ?? uiLocale;
@@ -43,7 +50,7 @@ export const LocalizedStringDisplay: React.FC<LocalizedStringDisplayProps> = ({
   const isRtl = displayLocale === "ar";
 
   return (
-    <Typography variant={typographyVariant} dir={isRtl ? "rtl" : "ltr"} sx={sx}>
+    <Typography variant={typographyVariant} dir={isRtl ? "rtl" : "ltr"} onClick={onClick} sx={sx}>
       {resolved}
     </Typography>
   );

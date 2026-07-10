@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { SectionPanel } from "@/frontend/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PermissionCatalogCardList } from "./PermissionCatalogCardList";
-import { PermissionCatalogDataGrid } from "./PermissionCatalogDataGrid";
-import { PermissionCatalogToolbar } from "./PermissionCatalogToolbar";
+import { PermissionCatalogCardList } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogCardList";
+import { PermissionCatalogDataGrid } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogDataGrid";
+import { PermissionCatalogToolbar } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogToolbar";
 
 export interface PermissionCatalogSectionProps {
   readonly permissions: readonly Permission[];

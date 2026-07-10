@@ -11,15 +11,15 @@ import {
   DialogTitle,
   Grid,
   IconButton,
-  Input,
   Typography,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
-import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { LocalizedStringFormField } from "@/frontend/components/ui/input/localizedString";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
 import { PermissionCategoryList } from "@/frontend/views/dashboard/permissions/components/PermissionCategoryList";
 import { PermissionFilterBar } from "@/frontend/views/dashboard/permissions/components/PermissionFilterBar";
 import {
@@ -33,7 +33,7 @@ interface PermissionGroupFormProps {
   readonly permissions: readonly Permission[];
   readonly isLoading: boolean;
   readonly onClose: () => void;
-  readonly onSave: (name: string, description: string, permissionIds: string[]) => Promise<void>;
+  readonly onSave: (name: LocalizedString, description: LocalizedString, permissionIds: string[]) => Promise<void>;
 }
 
 /**
@@ -54,18 +54,11 @@ export function PermissionGroupForm({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    setValue,
-    reset,
-    formState: { errors },
-  } = useForm<PermissionGroupFormData>({
+  const { control, handleSubmit, setValue, reset } = useForm<PermissionGroupFormData>({
     resolver: zodResolver(permissionGroupSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: {},
+      description: {},
       permissionIds: [],
     },
   });
@@ -77,14 +70,14 @@ export function PermissionGroupForm({
     if (open) {
       if (group) {
         reset({
-          name: group.name ?? "",
-          description: group.description ?? "",
+          name: (group.name ?? {}) as PermissionGroupFormData["name"],
+          description: (group.description ?? {}) as PermissionGroupFormData["description"],
           permissionIds: (group.permissionIds ?? []).filter((id): id is string => !!id),
         });
       } else {
         reset({
-          name: "",
-          description: "",
+          name: {},
+          description: {},
           permissionIds: [],
         });
       }
@@ -94,39 +87,53 @@ export function PermissionGroupForm({
   }, [open, group, reset]);
 
   const onSubmit = async (data: PermissionGroupFormData) => {
-    await onSave(data.name, data.description ?? "", data.permissionIds);
+    await onSave(data.name, data.description ?? {}, data.permissionIds);
   };
 
-  // Filter out any permission without id, key or category to make typing completely safe
-  const validPermissions = permissions.filter(
-    (p): p is Permission & { id: string; key: string; category: string } => !!p.id && !!p.key && !!p.category
+  // Filter out any permission without id or key to make typing completely safe
+  const validPermissions = useMemo(
+    () =>
+      permissions.filter(
+        (p): p is Permission & { id: string; key: string; category: string } => !!p.id && !!p.key && !!p.category
+      ),
+    [permissions]
   );
 
   // Get list of unique categories from all permissions
-  const categories = Array.from(new Set(validPermissions.map(p => p.category)));
+  const categories = useMemo(() => {
+    const cats = validPermissions.map(p => p.category).filter((c): c is string => c.trim() !== "");
+    return Array.from(new Set(cats));
+  }, [validPermissions]);
 
   // Filter permissions based on search text and category dropdown selection
-  const filteredPermissions = validPermissions.filter(perm => {
-    const matchesSearch =
-      perm.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      perm.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredPermissions = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return validPermissions.filter(perm => {
+      const matchesSearch =
+        perm.key.toLowerCase().includes(q) || (perm.description?.toLowerCase().includes(q) ?? false);
 
-    const matchesCategory = selectedCategory === "ALL" || perm.category === selectedCategory;
+      const matchesCategory = selectedCategory === "ALL" || perm.category === selectedCategory;
 
-    return matchesSearch && matchesCategory;
-  });
+      return matchesSearch && matchesCategory;
+    });
+  }, [validPermissions, searchTerm, selectedCategory]);
 
   // Group filtered permissions by their category
-  const groupedPermissions = filteredPermissions.reduce<
-    Record<string, Array<Permission & { id: string; key: string; category: string }>>
-  >((acc, perm) => {
-    const cat = perm.category;
-    if (!acc[cat]) {
-      acc[cat] = [];
-    }
-    acc[cat].push(perm);
-    return acc;
-  }, {});
+  const groupedPermissions = useMemo(
+    () =>
+      filteredPermissions.reduce<Record<string, Array<Permission & { id: string; key: string; category: string }>>>(
+        (acc, perm) => {
+          const cat = perm.category || t("allCategoriesOption");
+          if (!acc[cat]) {
+            acc[cat] = [];
+          }
+          acc[cat].push(perm);
+          return acc;
+        },
+        {}
+      ),
+    [filteredPermissions, t]
+  );
 
   const handleTogglePermission = (permId: string, isSystem: boolean) => {
     if (isSystem) return; // Cannot modify system permissions
@@ -201,37 +208,25 @@ export function PermissionGroupForm({
           {/* Section 1: Basic Info */}
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <FieldWrapper
+              <LocalizedStringFormField
+                name="name"
+                control={control}
                 label={t("groupNameLabel")}
                 required
-                error={errors.name ? t("groupNamePlaceholder") : undefined}
-              >
-                <Input
-                  {...register("name")}
-                  error={!!errors.name}
-                  placeholder={t("groupNamePlaceholder")}
-                  fullWidth
-                  sx={standardInputSx}
-                  disabled={isLoading}
-                />
-              </FieldWrapper>
+                disabled={isLoading}
+                fullWidth
+              />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <FieldWrapper
+              <LocalizedStringFormField
+                name="description"
+                control={control}
                 label={t("descriptionLabel")}
-                error={errors.description ? t("descriptionPlaceholder") : undefined}
-              >
-                <Input
-                  {...register("description")}
-                  error={!!errors.description}
-                  placeholder={t("descriptionPlaceholder")}
-                  fullWidth
-                  multiline
-                  rows={2}
-                  sx={standardInputSx}
-                  disabled={isLoading}
-                />
-              </FieldWrapper>
+                multiline
+                minRows={2}
+                disabled={isLoading}
+                fullWidth
+              />
             </Grid>
           </Grid>
 

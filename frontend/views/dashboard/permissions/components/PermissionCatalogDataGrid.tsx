@@ -5,6 +5,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface PermissionCatalogDataGridProps {
@@ -57,10 +58,11 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
       {usedGroups.map(g => {
         if (!g.id || !g.name) return null;
         return (
-          <Box
+          <LocalizedStringDisplay
             key={g.id}
+            value={g.name}
+            typographyVariant="labelMd"
             sx={theme => ({
-              typography: "labelMd",
               fontWeight: 500,
               backgroundColor: theme.palette.secondaryContainer,
               color: theme.palette.onSecondaryContainer,
@@ -68,10 +70,9 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
               py: 0.25,
               borderRadius: 1,
               border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
+              display: "inline-block",
             })}
-          >
-            {g.name}
-          </Box>
+          />
         );
       })}
     </Box>

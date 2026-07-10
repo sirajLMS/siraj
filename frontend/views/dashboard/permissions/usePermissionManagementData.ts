@@ -17,6 +17,7 @@ import {
   updateUserOverridesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
 import { usePermissionManagementStore } from "@/frontend/stores/permissionManagementStore";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
 import { logger } from "@/frontend/utils/logger";
 
 // Hook for handling queries
@@ -154,14 +155,19 @@ export function usePermissionManagementData() {
 
   const { run } = useRunMutation(store);
 
-  const handleCreateGroup = (name: string, description: string, permissionIds: string[]) =>
+  const handleCreateGroup = (name: LocalizedString, description: LocalizedString, permissionIds: string[]) =>
     run(
       "handleCreateGroup",
       () => createGroupMutation({ variables: { input: { name, description, permissionIds } } }),
       store.closeCreateDialog
     );
 
-  const handleUpdateGroup = (id: string, name: string, description: string, permissionIds: string[]) =>
+  const handleUpdateGroup = (
+    id: string,
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) =>
     run(
       "handleUpdateGroup",
       () => updateGroupMutation({ variables: { input: { groupId: id, name, description, permissionIds } } }),

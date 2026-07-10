@@ -43,16 +43,10 @@ export function SalaryDetailsSection() {
         </Box>
 
         <Box>
-          <Typography
-            variant="labelMd"
-            sx={theme => ({ mb: 1, display: "block", color: theme.palette.onSurfaceVariant })}
-          >
-            {t("fields.currency")}
-          </Typography>
           <Controller
             name="currency"
             control={control}
-            render={({ field }) => {
+            render={({ field, fieldState }) => {
               const option: CurrencyOption | null = field.value
                 ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
                 : null;
@@ -63,6 +57,9 @@ export function SalaryDetailsSection() {
                     field.onChange(selected.code as string);
                   }}
                   onBlurAction={field.onBlur}
+                  label={t("fields.currency")}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
                   fullWidth
                 />
               );

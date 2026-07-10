@@ -207,12 +207,13 @@ function TimeTimezoneRow({
               onBlurAction={field.onBlur}
               label={labels.timezone}
               required
+              error={!!errors.timezone}
+              helperText={errors.timezone?.message}
               fullWidth
               disabled={isSubmitting}
             />
           )}
         />
-        {errors.timezone?.message ? <FormHelperText error>{errors.timezone.message}</FormHelperText> : null}
       </Box>
     </FormRow>
   );

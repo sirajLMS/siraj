@@ -37,7 +37,7 @@ export function IdentitySection(props: IdentitySectionProps) {
           <Controller
             name="nationality"
             control={props.control}
-            render={({ field }) => {
+            render={({ field, fieldState }) => {
               const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
 
               return (
@@ -45,6 +45,9 @@ export function IdentitySection(props: IdentitySectionProps) {
                   country={selectedCountry}
                   setCountryAction={country => field.onChange(country.code)}
                   label={t("fields.nationality")}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  onBlurAction={field.onBlur}
                   fullWidth
                 />
               );

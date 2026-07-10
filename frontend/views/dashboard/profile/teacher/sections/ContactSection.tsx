@@ -63,7 +63,7 @@ export function ContactSection(props: ContactSectionProps) {
               <Controller
                 name="timezone"
                 control={props.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <TimezoneSelect
                     value={field.value ? toGraphqlIanaTimezone(field.value) : null}
                     onChangeAction={value => {
@@ -71,6 +71,8 @@ export function ContactSection(props: ContactSectionProps) {
                     }}
                     onBlurAction={field.onBlur}
                     label={t("fields.timezone")}
+                    error={Boolean(fieldState.error)}
+                    helperText={fieldState.error?.message}
                     fullWidth
                   />
                 )}

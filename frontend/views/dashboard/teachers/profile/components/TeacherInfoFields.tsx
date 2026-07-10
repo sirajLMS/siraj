@@ -146,23 +146,18 @@ export function TimezoneField() {
         name="timezone"
         control={control}
         render={({ field }) => (
-          <>
-            <TimezoneSelect
-              value={field.value ? toGraphqlIanaTimezone(field.value) : null}
-              onChangeAction={value => {
-                field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
-              }}
-              onBlurAction={field.onBlur}
-              label={t("fields.timezone")}
-              required
-              fullWidth
-            />
-            {errors.timezone && (
-              <FormHelperText sx={theme => ({ color: theme.palette.error.main })}>
-                {errors.timezone.message}
-              </FormHelperText>
-            )}
-          </>
+          <TimezoneSelect
+            value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+            onChangeAction={value => {
+              field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+            }}
+            onBlurAction={field.onBlur}
+            label={t("fields.timezone")}
+            required
+            error={!!errors.timezone}
+            helperText={errors.timezone?.message}
+            fullWidth
+          />
         )}
       />
     </Box>

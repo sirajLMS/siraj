@@ -8,7 +8,7 @@ import { PhoneFormField } from "@/frontend/components/ui/input";
 import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
 import { getCountryByCode } from "@/frontend/lib/locale";
-import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
+import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 interface BaseSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
@@ -99,6 +99,9 @@ export function BasicInfoFields({ register, control, errors, labels }: Readonly<
                 country={selectedCountry}
                 setCountryAction={country => field.onChange(country.code)}
                 label={labels.fields.nationality}
+                error={!!errors.nationality}
+                helperText={errors.nationality?.message}
+                onBlurAction={field.onBlur}
                 fullWidth
               />
             );

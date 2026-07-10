@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
 import { useGroupMutationActions } from "./useGroupMutationActions";
 import { useGroupPermissionFilters } from "./useGroupPermissionFilters";
 
@@ -10,7 +11,12 @@ interface UseSingleGroupStateProps {
   readonly permissions: readonly Permission[];
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (id: string, name: string, description: string, permissionIds: string[]) => Promise<void>;
+  readonly onUpdateGroup: (
+    id: string,
+    name: LocalizedString,
+    description: LocalizedString,
+    permissionIds: string[]
+  ) => Promise<void>;
 }
 
 export function useSingleGroupState({

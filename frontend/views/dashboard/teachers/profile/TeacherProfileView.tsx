@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import { ProfileAdministrationPanel } from "@/frontend/components/auth/ProfileAdministrationPanel";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { SalaryDetailsSection } from "@/frontend/views/dashboard/teachers/profile/components/SalaryDetailsSection";
 import { SystemConfigSection } from "@/frontend/views/dashboard/teachers/profile/components/SystemConfigSection";
 import { TeacherInfoSection } from "@/frontend/views/dashboard/teachers/profile/components/TeacherInfoSection";
@@ -37,7 +37,7 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
       fullName: "",
       email: "",
       phone: "",
-      gender: "FEMALE",
+      gender: Gender.Female,
       timezone: IanaTimezone.AfricaCairo,
       address: "",
       baseSalary: 0,

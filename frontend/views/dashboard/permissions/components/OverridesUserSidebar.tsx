@@ -3,6 +3,7 @@
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
 import type { PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({
@@ -108,7 +109,9 @@ export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUse
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {userGroups.map(g => (
               <StyledGroupChip key={g.id || g.slug}>
-                <StyledGroupName variant="bodyMd">{g.name}</StyledGroupName>
+                <StyledGroupName variant="bodyMd">
+                  <LocalizedStringDisplay value={g.name ?? {}} typographyVariant="bodyMd" />
+                </StyledGroupName>
               </StyledGroupChip>
             ))}
           </Box>

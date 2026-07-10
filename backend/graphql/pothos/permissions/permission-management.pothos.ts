@@ -29,8 +29,8 @@ export const PermissionObject = gqlSchemaBuilder.objectRef<PermissionEntity>("Pe
     key: t.exposeString("key"),
     resource: t.exposeString("resource"),
     action: t.exposeString("action"),
-    description: t.expose("description", { type: "LocalizedString" }),
-    category: t.expose("category", { type: "LocalizedString" }),
+    description: t.exposeString("description"),
+    category: t.exposeString("category"),
     isSystem: t.exposeBoolean("isSystem"),
   }),
 });

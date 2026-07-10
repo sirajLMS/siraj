@@ -94,8 +94,8 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
 
     const groupRes = await authenticatedRequest(superAdminToken, "mutate", createPermissionGroupMutationDocument, {
       input: {
-        name: `Temp Report Group ${Date.now()}`,
-        description: "Temporary group for testing report auth scope denial",
+        name: { en: `Temp Report Group ${Date.now()}` },
+        description: { en: "Temporary group for testing report auth scope denial" },
         permissionIds: [customPerm.id],
       },
     });
