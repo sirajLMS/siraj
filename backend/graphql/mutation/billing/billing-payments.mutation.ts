@@ -1,4 +1,3 @@
-import type { CurrencyCode } from "@/backend/enum";
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {

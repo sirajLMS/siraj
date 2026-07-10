@@ -2,8 +2,7 @@ import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AppPermission, ClassExecutionState, ClassOutcome } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import {
   parseClassExecutionState,

@@ -2,9 +2,10 @@ import { createHash } from "node:crypto";
 import { db } from "@/backend/db/drizzleDb";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository, ParentRepository, UserPaymentMethodRepository } from "@/backend/db/repo";
-import { AppPermission, type CurrencyCode, type InvoiceStatus, type InvoiceType } from "@/backend/enum";
+import { AppPermission, type CurrencyCode } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { ForbiddenError, getBackendTranslations, logger, NotFoundError } from "@/backend/lib";
+import { parseInvoiceStatus, parseInvoiceType } from "@/backend/lib/enum";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type * as Types from "@/backend/types";
@@ -65,8 +66,8 @@ function mapToManualInvoiceResult(created: Types.InvoiceSelectType): Types.Manua
     studentId: created.studentId ?? null,
     amount: created.amount,
     currency: created.currency,
-    status: created.status as InvoiceStatus,
-    invoiceType: created.invoiceType as InvoiceType,
+    status: parseInvoiceStatus(created.status),
+    invoiceType: parseInvoiceType(created.invoiceType),
     issueDate: created.issueDate,
     dueDate: created.dueDate,
     paidDate: created.paidDate ?? null,
@@ -217,7 +218,7 @@ export namespace BillingManagementService {
         invoice: {
           id: updated.id,
           parentId: updated.parentId,
-          status: updated.status as InvoiceStatus,
+          status: parseInvoiceStatus(updated.status),
           paidDate: updated.paidDate ?? null,
           version: updated.version,
         },

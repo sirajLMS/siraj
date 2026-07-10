@@ -150,14 +150,14 @@ export async function startTestServer() {
 
   pipeStreamLogs(serverProcess);
 
-  const isReady = await waitForServerReady(3001, 120000);
+  const isReady = await waitForServerReady(3001, 180000);
 
   if (!isReady) {
     if (serverProcess) {
       serverProcess.kill();
       serverProcess = undefined;
     }
-    throw new Error("Next.js dev server failed to start within 120 seconds. See logs/next-dev-server.log for details.");
+    throw new Error("Next.js dev server failed to start within 180 seconds. See logs/next-dev-server.log for details.");
   }
   testLogger.info("Next.js dev server is ready on port 3001!");
 }

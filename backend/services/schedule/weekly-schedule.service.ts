@@ -3,7 +3,7 @@ import {
   getWeeklyWorkloadMetrics,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
-import { AppPermission, ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/backend/lib/enum";

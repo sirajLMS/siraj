@@ -1,6 +1,7 @@
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { logger } from "@/backend/lib/logger";
+import { parseCurrencyCode } from "@/backend/lib/enum";
 import type { FixerLatestResponse } from "@/backend/services/fx/providers/fixer/fixer.types";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
 import type { FxProviderFetchResult } from "@/backend/types";
@@ -13,8 +14,8 @@ const REQUEST_TIMEOUT_MS = 10_000;
  * — Fixer rejects `symbols=EUR` because EUR->EUR is trivially 1. The adapter
  * synthesises EUR->EUR=1 itself during normalisation.
  */
-const TARGET_SYMBOLS: readonly CurrencyCode[] = (Object.values(CurrencyCode) as CurrencyCode[]).filter(
-  code => code !== CurrencyCode.EUR
+const TARGET_SYMBOLS: readonly CurrencyCode[] = Object.values(CurrencyCode).filter(
+  (code): code is CurrencyCode => code !== CurrencyCode.EUR
 );
 
 function buildSymbolsParam(): string {
@@ -61,7 +62,10 @@ function normaliseToUsdHub(eurRates: Record<string, number>): ReadonlyMap<Curren
       continue;
     }
 
-    const code = symbol as CurrencyCode;
+    const code = parseCurrencyCode(symbol);
+    if (!code) {
+      continue;
+    }
 
     if (code === CurrencyCode.USD) {
       // USD->USD is always 1, regardless of provider numbers.

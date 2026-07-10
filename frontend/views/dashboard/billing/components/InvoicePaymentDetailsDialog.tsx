@@ -56,7 +56,7 @@ export function InvoicePaymentDetailsDialog({
       <DialogTitle>{t("title")}</DialogTitle>
       <DialogContent>
         {loading ? (
-          <Stack alignItems="center" sx={{ py: 3 }}>
+          <Stack sx={{ alignItems: "center", py: 3 }}>
             <CircularProgress size={28} />
           </Stack>
         ) : payments.length === 0 ? (

@@ -7,6 +7,7 @@ import {
   CountryCode,
   CurrencyCode,
   Gender,
+  InvoiceStatus,
   InvoiceType,
   OverrideState,
   ParentStatus,
@@ -75,6 +76,11 @@ export const parseClassExecutionState = (
   value: string | null | undefined,
   fallback: ClassExecutionState = ClassExecutionState.NOT_ACTIVATED
 ): ClassExecutionState => parseEnumValue(ClassExecutionState, value, fallback) ?? fallback;
+
+export const parseInvoiceStatus = (
+  value: string | null | undefined,
+  fallback: InvoiceStatus = InvoiceStatus.UNPAID
+): InvoiceStatus => parseEnumValue(InvoiceStatus, value, fallback) ?? fallback;
 
 export const parseInvoiceType = (
   value: string | null | undefined,

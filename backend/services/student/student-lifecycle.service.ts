@@ -1,6 +1,7 @@
 import { StudentRepository, TeacherRepository } from "@/backend/db/repo";
-import { AppPermission, type StudentStatus } from "@/backend/enum";
+import { AppPermission, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
@@ -88,7 +89,7 @@ export namespace StudentLifecycleService {
 
       return {
         id: updated.id,
-        status: updated.status as StudentStatus,
+        status: parseStudentStatus(updated.status) ?? StudentStatus.REGULAR,
         version: updated.version,
       };
     } catch (error) {

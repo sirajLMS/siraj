@@ -17,6 +17,7 @@ export function UserBillingProfileDesktopView({
   canView,
   onSearchChange,
   onPayNow,
+  onViewPaymentDetails,
   onDownloadPdf,
   page,
   pageSize,
@@ -54,6 +55,7 @@ export function UserBillingProfileDesktopView({
           rows={invoices}
           canView={canView}
           onPayNow={onPayNow}
+          onViewPaymentDetails={onViewPaymentDetails}
           onDownloadPdf={onDownloadPdf}
           labels={getParentInvoiceGridLabels(labels)}
           page={page}

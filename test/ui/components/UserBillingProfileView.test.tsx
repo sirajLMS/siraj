@@ -155,6 +155,21 @@ const mockLabels: BillingLabels = {
   },
   markAsPaidSuccess: "Invoice marked as paid",
   deleteInvoiceSuccess: "Invoice deleted",
+  markPaidDialog: {
+    title: "Mark invoice as paid",
+    confirm: "Confirm payment",
+    selectMethod: "Payment method",
+    noMethods: "No methods",
+    addMethods: "Add methods",
+    manageMethods: "Manage methods",
+    cancel: "Cancel",
+  },
+  paymentDetailsDialog: {
+    title: "Payment details",
+    empty: "No payments",
+    amount: "Amount",
+    date: "Date",
+  },
   noUnpaidInvoices: "No unpaid invoices to pay",
   errors: {
     invalidId: "Invalid ID",

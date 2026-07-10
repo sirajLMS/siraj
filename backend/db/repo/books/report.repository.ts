@@ -2,6 +2,7 @@ import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
+import type { CurrencyCode } from "@/backend/enum";
 import { parseCurrencyCode } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {

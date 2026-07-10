@@ -4,6 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { AppPermission, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
@@ -72,7 +73,7 @@ export namespace StudentOnboardingService {
         studentId: student.id,
         parentId: student.parentId,
         name: student.name,
-        status: student.status as StudentStatus,
+        status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
         primaryTeacherId: student.primaryTeacherId,
       };
     };

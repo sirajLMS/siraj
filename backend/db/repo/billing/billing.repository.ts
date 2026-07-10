@@ -13,8 +13,8 @@ import {
   systemSettings,
   users,
 } from "@/backend/db/schema";
-import { CurrencyCode, InvoiceStatus, InvoiceType, StudentStatus } from "@/backend/enum";
-import { parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
+import { CurrencyCode, StudentStatus } from "@/backend/enum";
+import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
@@ -650,8 +650,8 @@ export namespace BillingRepository {
       paidDate: r.paidDate ?? null,
       amount: r.amount,
       currency: r.currency,
-      status: r.status as InvoiceStatus,
-      invoiceType: (r.invoiceType ?? "MONTHLY") as InvoiceType,
+      status: parseInvoiceStatus(r.status),
+      invoiceType: parseInvoiceType(r.invoiceType),
       studentId: r.studentId ?? null,
       studentName: r.studentName ?? null,
       parentId: r.parentId,

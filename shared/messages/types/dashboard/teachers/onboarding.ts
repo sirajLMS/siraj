@@ -25,12 +25,6 @@ export interface TeacherOnboardingLabels {
     readonly timezone: string;
     readonly salaryAmount: string;
     readonly currency: string;
-    readonly beneficiaryName: string;
-    readonly bankName: string;
-    readonly accountNumber: string;
-    readonly routingNumber: string;
-    readonly swiftBic: string;
-    readonly iban: string;
     readonly meetingProvider: string;
     readonly meetingUrl: string;
     readonly meetingLabel: string;
@@ -45,12 +39,6 @@ export interface TeacherOnboardingLabels {
     readonly address: string;
     readonly qualifications: string;
     readonly salaryAmount: string;
-    readonly beneficiaryName: string;
-    readonly bankName: string;
-    readonly accountNumber: string;
-    readonly routingNumber: string;
-    readonly swiftBic: string;
-    readonly iban: string;
     readonly meetingUrl: string;
     readonly meetingLabel: string;
   };
@@ -71,10 +59,6 @@ export interface TeacherOnboardingLabels {
     readonly timezoneRequired: string;
     readonly salaryAmountRequired: string;
     readonly currencyRequired: string;
-    readonly beneficiaryNameRequired: string;
-    readonly bankNameRequired: string;
-    readonly accountNumberRequired: string;
-    readonly ibanRequired: string;
     readonly urlInvalid: string;
   };
   readonly bannerJoinFaculty: string;

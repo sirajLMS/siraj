@@ -1,4 +1,4 @@
-import { StudentStatus } from "@/backend/enum";
+import { StudentStatus, ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/backend/lib/enum";
 import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
@@ -43,7 +43,7 @@ export function mapStatusTrackingQueryRow(r: {
     scheduledEndAt: r.scheduledEndAt,
     durationMinutes: r.durationMinutes,
     executionState: parseClassExecutionState(r.executionState),
-    outcome: parseClassOutcome(r.outcome),
+    outcome: parseClassOutcome(r.outcome) ?? ClassOutcome.PENDING,
     isFrozen: r.isFrozen,
   };
 }

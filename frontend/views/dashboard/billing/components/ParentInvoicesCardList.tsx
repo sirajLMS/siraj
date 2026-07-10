@@ -5,6 +5,7 @@ import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
@@ -18,7 +19,8 @@ interface ParentInvoicesCardListProps {
   readonly rows: readonly ParentInvoiceRow[];
   readonly labels: ParentInvoicesCardListLabels;
   readonly canView: boolean;
-  readonly onPayNow: (id: string) => void;
+  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onViewPaymentDetails?: (invoiceId: string) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
@@ -55,6 +57,7 @@ export function ParentInvoicesCardList({
   labels,
   canView,
   onPayNow,
+  onViewPaymentDetails,
   onDownloadPdf,
   page = 0,
   pageSize = 10,
@@ -87,7 +90,7 @@ export function ParentInvoicesCardList({
             <PrimaryPageAction
               fullWidth
               onClick={() => {
-                onPayNow(row.id);
+                onPayNow({ id: row.id });
               }}
             >
               {labels.payNow}
@@ -95,7 +98,13 @@ export function ParentInvoicesCardList({
           )}
           {canView && row.status === InvoiceStatus.Paid && (
             <StyledActionsContainer sx={{ gap: 0.5 }}>
-              <IconButton size="small" aria-label={labels.viewDetails}>
+              <IconButton
+                size="small"
+                aria-label={labels.viewDetails}
+                onClick={() => {
+                  onViewPaymentDetails?.(row.id);
+                }}
+              >
                 <VisibilityOutlined fontSize="small" />
               </IconButton>
               <IconButton

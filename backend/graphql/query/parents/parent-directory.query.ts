@@ -1,4 +1,3 @@
-import type { ParentStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ParentDirectoryPothosObject } from "@/backend/graphql/pothos/parents/parent-directory.pothos";
 import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";

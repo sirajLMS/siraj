@@ -10,7 +10,7 @@ import {
   userPermissionOverrides,
   users,
 } from "@/backend/db/schema";
-import { AccountStatus, OverrideState } from "@/backend/enum";
+import { OverrideState } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";

@@ -6,8 +6,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
-import { OrderSortDirection, type StudentStatus } from "@/backend/enum";
+import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseStudentStatus } from "@/backend/lib/enum";
 import * as Types from "@/backend/types";
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
@@ -398,7 +399,8 @@ export namespace StudentRepository {
         t,
         studentId,
         async current => {
-          const allowedTargets = ALLOWED_STATUS_TRANSITIONS[current.status as StudentStatus] ?? [];
+          const currentStatus = parseStudentStatus(current.status) ?? StudentStatus.REGULAR;
+          const allowedTargets = ALLOWED_STATUS_TRANSITIONS[currentStatus] ?? [];
           if (!allowedTargets.includes(newStatus)) {
             const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
             throw new Error(
@@ -528,7 +530,7 @@ export namespace StudentRepository {
         parentName: row.parentName,
         parentAvatarUrl: row.parentAvatarUrl,
         className: row.className,
-        status: row.status as StudentStatus,
+        status: parseStudentStatus(row.status) ?? StudentStatus.REGULAR,
         hoursPerWeek: row.hoursPerWeek ? Number.parseFloat(row.hoursPerWeek) : 0,
         classesRemaining: row.classesRemaining,
         classesTotal: row.classesTotal,

@@ -1,13 +1,12 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
-  markInvoicePaidMutationDocument,
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
@@ -15,7 +14,9 @@ import { formatLockedAmount } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
+import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
+import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
@@ -36,11 +37,12 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   const tProfile = useTranslations("profile.teacher");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
-  const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
   const notifications = useNotifications();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
+  const [detailsInvoiceId, setDetailsInvoiceId] = useState<string | null>(null);
 
   const page = useUserBillingProfileStore(state => state.page);
   const pageSize = useUserBillingProfileStore(state => state.pageSize);
@@ -51,7 +53,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
     fetchPolicy: "cache-and-network",
   });
 
-  const { data, loading } = useQuery(userBillingProfileInvoiceHistoryQueryDocument, {
+  const { data, loading, refetch } = useQuery(userBillingProfileInvoiceHistoryQueryDocument, {
     variables: {
       userId,
       parentId: null,
@@ -67,44 +69,6 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
     },
     skip: summaryLoading,
     fetchPolicy: "cache-and-network",
-  });
-
-  const [markAsPaidMutation] = useMutation(markInvoicePaidMutationDocument, {
-    refetchQueries: [
-      {
-        query: userBillingProfileInvoiceHistoryQueryDocument,
-        variables: {
-          userId,
-          parentId: null,
-          paginationArgs: {
-            first: pageSize,
-            page: page + 1,
-            skip: null,
-            after: null,
-            before: null,
-            last: null,
-            maxCount: null,
-          },
-        },
-      },
-      {
-        query: userBillingProfileSummaryQueryDocument,
-        variables: { userId, parentId: null },
-      },
-    ],
-    onCompleted: () => {
-      notifications.show(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), {
-        severity: "success",
-        autoHideDuration: 4000,
-      });
-    },
-    onError: err => {
-      logger.error("Failed to mark invoice as paid:", { err });
-      notifications.show(tc("operationFailed"), {
-        severity: "error",
-        autoHideDuration: 5000,
-      });
-    },
   });
 
   const totalCount = data?.parentInvoiceHistory?.totalCount ?? 0;
@@ -165,8 +129,16 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   const canManage = hasPermission(AppPermission.BillingUpdateStatusPaid);
   const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
 
-  const handlePayNow = (invoiceId: string) => {
-    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null, userPaymentMethodId: null } });
+  const handlePayNow = (invoice: MarkPaidInvoiceTarget) => {
+    setMarkPaidTarget({ ...invoice, parentUserId: userId });
+  };
+
+  const handleMarkPaidSuccess = () => {
+    void refetch();
+    notifications.show(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), {
+      severity: "success",
+      autoHideDuration: 4000,
+    });
   };
 
   const handleDownloadPdf = (invoiceId: string) => {
@@ -176,7 +148,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   const handleQuickPay = () => {
     const firstUnpaid = invoices.find(inv => inv.status === InvoiceStatus.Unpaid);
     if (firstUnpaid) {
-      handlePayNow(firstUnpaid.id);
+      handlePayNow({ id: firstUnpaid.id });
     } else {
       notifications.show(labels.noUnpaidInvoices, {
         severity: "info",
@@ -198,6 +170,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
     canCreate,
     onSearchChange: setSearchQuery,
     onPayNow: handlePayNow,
+    onViewPaymentDetails: setDetailsInvoiceId,
     onDownloadPdf: handleDownloadPdf,
     onQuickPay: handleQuickPay,
     page,
@@ -210,6 +183,18 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]}>
       <UserBillingProfileView {...viewProps} />
+      <MarkInvoicePaidDialog
+        open={markPaidTarget !== null}
+        onClose={() => setMarkPaidTarget(null)}
+        invoiceId={markPaidTarget?.id ?? null}
+        targetUserId={userId}
+        onSuccess={handleMarkPaidSuccess}
+      />
+      <InvoicePaymentDetailsDialog
+        open={detailsInvoiceId !== null}
+        onClose={() => setDetailsInvoiceId(null)}
+        invoiceId={detailsInvoiceId}
+      />
     </RequirePermission>
   );
 }

@@ -13,7 +13,7 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import { BookingStatus, ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { BookingStatus, ClassOutcome, ParentStatus } from "@/backend/enum";
 import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -619,7 +619,7 @@ export namespace ParentRepository {
         durationMinutes: r.durationMinutes,
         bookingStatus: r.isRescheduled ? BookingStatus.RESCHEDULED : BookingStatus.CONFIRMED,
         executionState: parseClassExecutionState(r.executionState),
-        outcome: parseClassOutcome(r.outcome),
+        outcome: parseClassOutcome(r.outcome) ?? ClassOutcome.PENDING,
         meetingJoinUrl: r.meetingJoinUrl ?? null,
         classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone, locale),
       };

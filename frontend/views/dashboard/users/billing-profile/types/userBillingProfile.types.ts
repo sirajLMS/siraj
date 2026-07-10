@@ -2,6 +2,7 @@ import type {
   ParentBillingSummary,
   ParentInvoiceRow,
 } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
+import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import type { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
@@ -22,7 +23,8 @@ export interface UserBillingProfileViewProps {
   readonly canView: boolean;
   readonly canCreate: boolean;
   readonly onSearchChange: (value: string) => void;
-  readonly onPayNow: (id: string) => void;
+  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onViewPaymentDetails?: (invoiceId: string) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly onQuickPay: () => void;
   readonly page: number;

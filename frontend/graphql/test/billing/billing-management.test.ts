@@ -6,10 +6,16 @@ import {
   InvoiceType as InvoiceTypeEnum,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
+  PaymentDirection,
+  PaymentMethodType,
+} from "@/frontend/graphql/generated/gql/graphql-types";
+import {
   createManualInvoiceMutationDocument,
   deleteInvoiceMutationDocument,
   markInvoicePaidMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { invoicePaymentsQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-payments.documents";
+import { createUserPaymentMethodMutationDocument } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,
@@ -180,6 +186,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   };
   let unpaidInvoiceId = "";
   let deleteInvoiceId = "";
+  let parentPayinMethodId = "";
 
   test("provision test entities and login", async () => {
     await provisionAndLogin(state, "BillPaidTest");
@@ -191,11 +198,40 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     unpaidInvoiceId = await createInvoice(state.superAdminToken, state.parentId, "300.00");
   });
 
+  test("create parent pay-in method for mark-paid", async () => {
+    const data = await authenticatedRequest(state.superAdminToken, "mutate", createUserPaymentMethodMutationDocument, {
+      input: {
+        userId: state.parentUserId,
+        type: PaymentMethodType.Cash,
+        direction: PaymentDirection.Payin,
+        isDefault: true,
+        label: "Billing test cash",
+        details: {
+          note: "Test pay-in",
+          walletId: null,
+          phone: null,
+          paymentLinkId: null,
+          url: null,
+          onlineAccountId: null,
+          identifier: null,
+          iban: null,
+          bankName: null,
+          beneficiaryName: null,
+          swiftBic: null,
+          accountNumber: null,
+          routingNumber: null,
+        },
+      },
+    });
+    parentPayinMethodId = data.createUserPaymentMethod?.id ?? "";
+    expect(parentPayinMethodId).not.toBe("");
+  });
+
   test("admin marks UNPAID invoice as PAID", async () => {
     const data = await authenticatedRequest(state.superAdminToken, "mutate", markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
-      userPaymentMethodId: null,
+      userPaymentMethodId: parentPayinMethodId,
     });
 
     expect(data.markInvoicePaid?.id).toBe(unpaidInvoiceId);
@@ -203,11 +239,21 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     expect(data.markInvoicePaid?.paidDate).toBeTruthy();
   });
 
+  test("markInvoicePaid records payment snapshot retrievable via invoicePayments", async () => {
+    const payments = await authenticatedRequest(state.superAdminToken, "query", invoicePaymentsQueryDocument, {
+      invoiceId: unpaidInvoiceId,
+    });
+    const rows = payments.invoicePayments ?? [];
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0]?.paymentMethodSnapshot?.type).toBe(PaymentMethodType.Cash);
+    expect(rows[0]?.paymentMethodSnapshot?.label).toBe("Billing test cash");
+  });
+
   test("Threat 1 — double settlement: second markInvoicePaid returns error", async () => {
     await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
-      userPaymentMethodId: null,
+      userPaymentMethodId: parentPayinMethodId,
     });
     expect(unpaidInvoiceId).toBeTruthy();
   });
@@ -216,7 +262,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     const denied = await assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
-      userPaymentMethodId: null,
+      userPaymentMethodId: parentPayinMethodId,
     });
     expect(denied).toBe(true);
   });
@@ -225,7 +271,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
-      userPaymentMethodId: null,
+      userPaymentMethodId: parentPayinMethodId,
     });
     expect(state.superAdminToken).toBeTruthy();
   });

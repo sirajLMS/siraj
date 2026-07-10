@@ -3,13 +3,12 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AppPermission, ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
+import { AppPermission, ClassOutcome } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import {
   parseClassExecutionState,
   parseClassOutcome,
-  parseClassType,
   parseClassTypeOrNull,
   parseIanaTimezone,
 } from "@/backend/lib/enum";
@@ -50,7 +49,7 @@ export namespace ScheduleService {
       scheduledStartAt: item.scheduledStartAt,
       scheduledEndAt: item.scheduledEndAt,
       status: parseClassExecutionState(item.outcome || item.executionState),
-      outcome: parseClassOutcome(item.outcome),
+      outcome: parseClassOutcome(item.outcome) ?? ClassOutcome.PENDING,
       executionState: parseClassExecutionState(item.executionState),
       student: {
         id: item.studentId,

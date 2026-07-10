@@ -1,5 +1,5 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
-import { AppPermission, ClassExecutionState, StudentStatus } from "@/backend/enum";
+import { AppPermission, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseClassExecutionState, parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";

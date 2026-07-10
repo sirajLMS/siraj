@@ -10,6 +10,7 @@ import type { AdminInvoiceRow, AdminInvoiceStatus, MarkPaidInvoiceTarget } from 
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;
   readonly quickPay: string;
+  readonly viewDetails: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
 }
 
@@ -17,7 +18,8 @@ interface AdminInvoicesCardListProps {
   readonly rows: readonly AdminInvoiceRow[];
   readonly labels: AdminInvoicesCardListLabels;
   readonly canManage: boolean;
-  readonly onMarkAsPaid: (id: string) => void;
+  readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onViewPaymentDetails?: (invoiceId: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -55,6 +57,7 @@ export function AdminInvoicesCardList({
   labels,
   canManage,
   onMarkAsPaid,
+  onViewPaymentDetails,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -95,13 +98,26 @@ export function AdminInvoicesCardList({
                 fullWidth
                 variant="outlined"
                 onClick={() => {
-                  onMarkAsPaid(row.id);
+                  onMarkAsPaid({ id: row.id, parentUserId: row.parentUserId });
                 }}
                 sx={{ mt: 1.5, textTransform: "uppercase", fontWeight: 700 }}
               >
                 {actionLabel}
               </Button>
             )}
+            {row.status === InvoiceStatus.Paid && onViewPaymentDetails ? (
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+                <IconButton
+                  size="small"
+                  aria-label={labels.viewDetails}
+                  onClick={() => {
+                    onViewPaymentDetails(row.id);
+                  }}
+                >
+                  <VisibilityOutlined fontSize="small" />
+                </IconButton>
+              </Box>
+            ) : null}
           </StyledInvoiceCard>
         );
       })}

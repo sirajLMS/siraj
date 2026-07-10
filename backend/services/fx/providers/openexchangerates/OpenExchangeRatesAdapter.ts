@@ -1,6 +1,7 @@
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { logger } from "@/backend/lib/logger";
+import { parseCurrencyCode } from "@/backend/lib/enum";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
 import type { OpenExchangeRatesResponse } from "@/backend/services/fx/providers/openexchangerates/openexchangerates.types";
 import type { FxProviderFetchResult } from "@/backend/types";
@@ -13,8 +14,8 @@ const REQUEST_TIMEOUT_MS = 10_000;
  * OER rejects `symbols=USD` because USD->USD is trivially 1 and would skew
  * the response.
  */
-const TARGET_SYMBOLS: readonly CurrencyCode[] = (Object.values(CurrencyCode) as CurrencyCode[]).filter(
-  code => code !== CurrencyCode.USD
+const TARGET_SYMBOLS: readonly CurrencyCode[] = Object.values(CurrencyCode).filter(
+  (code): code is CurrencyCode => code !== CurrencyCode.USD
 );
 
 function buildSymbolsParam(): string {
@@ -72,7 +73,10 @@ export class OpenExchangeRatesAdapter implements IFxRateProvider {
 
     const rates = new Map<CurrencyCode, string>();
     for (const [symbol, rate] of Object.entries(parsed.rates)) {
-      const code = symbol as CurrencyCode;
+      const code = parseCurrencyCode(symbol);
+      if (!code) {
+        continue;
+      }
       if (code === CurrencyCode.USD) {
         continue;
       }

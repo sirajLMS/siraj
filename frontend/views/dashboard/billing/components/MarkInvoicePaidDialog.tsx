@@ -85,7 +85,7 @@ export function MarkInvoicePaidDialog({
       <DialogTitle>{t("title")}</DialogTitle>
       <DialogContent>
         {methodsLoading ? (
-          <Stack alignItems="center" sx={{ py: 3 }}>
+          <Stack sx={{ alignItems: "center", py: 3 }}>
             <CircularProgress size={28} />
           </Stack>
         ) : methods.length === 0 ? (

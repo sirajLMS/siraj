@@ -60,7 +60,6 @@ export interface AdminBillingViewProps extends BillingCapabilityProps {
   readonly onSendReminder: (id: string) => void;
   readonly onManualInvoice: () => void;
   readonly onDeleteInvoice?: (id: string) => void;
-  readonly markingPaid?: boolean;
   readonly deletingInvoice?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
