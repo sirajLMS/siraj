@@ -1,13 +1,12 @@
 "use client";
 
-import { AccountCircleOutlined } from "@mui/icons-material";
+import { AccountCircleOutlined, SettingsSuggestOutlined } from "@mui/icons-material";
 import { Box, Switch, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { SectionHeader } from "@/frontend/views/dashboard/teachers/profile/components/SectionHeader";
-import { SettingsSuggestOutlined } from "@mui/icons-material";
 import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 
 export function SystemConfigSection() {

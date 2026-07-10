@@ -20,10 +20,7 @@ export interface TeacherOnboardingLabels {
     readonly female: string;
     readonly address: string;
     readonly qualifications: string;
-    readonly zoomLink: string;
     readonly country: string;
-    readonly zoomUsername: string;
-    readonly zoomPassword: string;
     readonly timezone: string;
     readonly salaryAmount: string;
     readonly currency: string;
@@ -43,9 +40,6 @@ export interface TeacherOnboardingLabels {
     readonly age: string;
     readonly address: string;
     readonly qualifications: string;
-    readonly zoomLink: string;
-    readonly zoomUsername: string;
-    readonly zoomPassword: string;
     readonly salaryAmount: string;
     readonly beneficiaryName: string;
     readonly bankName: string;

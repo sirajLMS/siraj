@@ -23,7 +23,6 @@ const createMinimalParentInput = (overrides?: Partial<{ name: string; email: str
   currency: null,
   timezone: IanaTimezone.Utc,
   address: null,
-  defaultZoomLink: null,
   facebook: null,
   nationality: null,
   twitter: null,

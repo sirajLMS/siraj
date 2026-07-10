@@ -12,7 +12,6 @@ const parentOwnProfile = {
   facebook: "facebook.com/noor",
   whatsapp: "+966501234567",
   twitter: "@noor",
-  defaultZoomLink: "https://zoom.us/j/parent123",
 };
 
 const parentAdminProfile = {
@@ -28,7 +27,6 @@ const parentAdminProfile = {
   facebook: "facebook.com/noor",
   whatsapp: "+966501234567",
   twitter: "@noor",
-  defaultZoomLink: "https://zoom.us/j/parent123",
   invoiceType: "Monthly",
   feeAmount: "500",
   paymentMethod: "Bank Transfer",

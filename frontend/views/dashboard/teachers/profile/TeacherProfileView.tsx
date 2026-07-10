@@ -43,7 +43,6 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
       baseSalary: 0,
       currency: CurrencyCode.Usd,
       paymentMethod: "PAYPAL",
-      zoomLink: "",
       accountStatus: true,
     },
   });

@@ -12,7 +12,6 @@ const ownParentData = {
   facebook: "facebook.com/noor.abdullah",
   whatsapp: "+966501234567",
   twitter: "@noor_abdullah",
-  defaultZoomLink: "https://zoom.us/j/parent123",
 };
 
 const adminParentData = {

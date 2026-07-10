@@ -118,9 +118,6 @@ function ParentProfileDetails({ parent }: ParentProfileDetailsProps) {
               value={<PhoneDisplay phone={parent.whatsapp ?? null} fallback="-" typographyVariant="bodyLg" />}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <DetailItem label={t("fields.zoomLink")} value={parent.zoomLink || "-"} isLink={!!parent.zoomLink} />
-          </Grid>
         </Grid>
       </SectionPanel>
 

@@ -24,7 +24,6 @@ const teacherOwnProfile: TeacherOwnData = {
   hourlyRate: "45.00",
   rateCurrency: CurrencyCode.Usd,
   paymentMethod: PaymentMethod.Paypal,
-  zoomLink: "https://zoom.us/j/teacher123",
   totalClasses: 128,
 };
 
@@ -38,9 +37,6 @@ const teacherAdminProfile: TeacherAdminData = {
   gender: Gender.Male,
   address: "123 King Fahd Rd, Riyadh",
   qualifications: "Bachelor of Islamic Studies",
-  zoomLink: "https://zoom.us/j/teacher123",
-  zoomUsername: "ahmed.teacher",
-  hasZoomPassword: true,
   timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
   rateCurrency: CurrencyCode.Usd,

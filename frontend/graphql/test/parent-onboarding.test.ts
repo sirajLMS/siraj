@@ -26,7 +26,6 @@ const createMinimalParentInput = (
   currency: null,
   timezone: IanaTimezone.Utc,
   address: null,
-  defaultZoomLink: null,
   facebook: null,
   nationality: null,
   twitter: null,
@@ -43,7 +42,6 @@ const createFullParentInput = (
     currency: CurrencyCode | null;
     timezone: IanaTimezone | null;
     address: string | null;
-    defaultZoomLink: string | null;
     facebook: string | null;
     whatsapp: string | null;
     twitter: string | null;
@@ -62,7 +60,6 @@ const createFullParentInput = (
   currency: overrides?.currency ?? CurrencyCode.Usd,
   timezone: overrides?.timezone ?? IanaTimezone.AmericaChicago,
   address: overrides?.address ?? "123 Main St",
-  defaultZoomLink: overrides?.defaultZoomLink ?? "https://zoom.us/j/1234567890",
   facebook: overrides?.facebook ?? "facebook.com/testparent",
   whatsapp: overrides?.whatsapp ?? "+1234567890",
   twitter: overrides?.twitter ?? "@testparent",

@@ -95,7 +95,6 @@ export function ParentSocialContainer() {
                     </Typography>
                     <PhoneDisplay phone={profile.phone} typographyVariant="bodyLg" />
                   </Stack>
-                  <SocialLink label={t("fields.zoom")} value={profile.defaultZoomLink} />
                 </Stack>
               </SectionPanel>
             </Grid>

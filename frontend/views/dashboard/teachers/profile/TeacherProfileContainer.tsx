@@ -51,8 +51,6 @@ export function TeacherProfileContainer() {
             dateOfBirth: null,
             nationalId: null,
             qualifications: null,
-            zoomPassword: null,
-            zoomUsername: null,
           },
         },
       });
@@ -77,7 +75,6 @@ export function TeacherProfileContainer() {
         baseSalary: Number.parseFloat(data.teacherProfileForEdit.hourlyRate ?? "0"),
         currency: (data.teacherProfileForEdit.rateCurrency as CurrencyCode) ?? CurrencyCode.Usd,
         paymentMethod: data.teacherProfileForEdit.paymentMethod ?? null,
-        zoomLink: data.teacherProfileForEdit.zoomLink ?? "",
         accountStatus: data.teacherProfileForEdit.status === GqlAccountStatus.Activated,
         updatedAt: data.teacherProfileForEdit.updatedAt ?? "",
         totalClasses: data.teacherProfileForEdit.totalClasses ?? 0,

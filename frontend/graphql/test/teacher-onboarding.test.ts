@@ -36,9 +36,6 @@ const createMinimalTeacherInput = (
   qualifications: "PhD",
   routingNumber: "123456789",
   swiftBic: "BOFAUS3N",
-  zoomLink: "https://zoom.us/j/1234567890",
-  zoomPassword: `Zoom_${randomUUID()}`,
-  zoomUsername: "johndoe",
 });
 
 describe("Teacher Onboarding GraphQL API", () => {

@@ -40,7 +40,6 @@ describe("profileByUserIdQueryDocument", () => {
 
   test("includes teacher admin profile sensitive metadata fields", () => {
     const querySource = profileByUserIdQueryDocument.loc?.source.body ?? "";
-    expect(querySource).toContain("hasZoomPassword");
     expect(querySource).toContain("avgEngagementScore");
     expect(querySource).toContain("nationalId");
     expect(querySource).toContain("qualifications");

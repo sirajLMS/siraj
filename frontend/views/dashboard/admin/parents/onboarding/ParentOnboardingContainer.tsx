@@ -26,7 +26,6 @@ const defaultValues: ParentOnboardingFormData = {
   whatsapp: "",
   facebook: "",
   twitter: "",
-  defaultZoomLink: "",
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",
   paymentMethod: PaymentMethod.Paypal,

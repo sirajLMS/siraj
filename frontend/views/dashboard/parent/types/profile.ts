@@ -30,7 +30,6 @@ export interface ParentProfileData {
   readonly address: string;
   readonly facebook?: string;
   readonly whatsapp?: string;
-  readonly zoomLink?: string;
   readonly invoiceType: string;
   readonly feeAmount: number;
   readonly paymentMethod: string;

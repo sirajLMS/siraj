@@ -62,7 +62,6 @@ function mapProfileData(
     readonly address: string | null;
     readonly facebook: string | null;
     readonly whatsapp: string | null;
-    readonly defaultZoomLink: string | null;
     readonly invoiceType: string | null;
     readonly feeAmount: string | null;
     readonly paymentMethod: string | null;
@@ -104,7 +103,6 @@ function mapProfileData(
     address: profile.address ?? "",
     facebook: profile.facebook ?? undefined,
     whatsapp: profile.whatsapp ?? undefined,
-    zoomLink: profile.defaultZoomLink ?? undefined,
     invoiceType: profile.invoiceType ?? "",
     feeAmount: profile.feeAmount ? Number(profile.feeAmount) : 0,
     paymentMethod: profile.paymentMethod ?? "",

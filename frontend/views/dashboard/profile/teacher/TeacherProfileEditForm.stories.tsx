@@ -10,7 +10,6 @@ const ownTeacherData = {
   name: "Ahmed Hassan",
   email: "ahmed.hassan@example.com",
   phone: "+966 50 123 4567",
-  zoomLink: "https://zoom.us/j/teacher123",
 };
 
 const adminTeacherData = {
@@ -20,7 +19,6 @@ const adminTeacherData = {
   gender: null,
   address: "123 King Fahd Rd, Riyadh",
   qualifications: "Bachelor of Islamic Studies",
-  zoomUsername: "ahmed.teacher",
   timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
   rateCurrency: CurrencyCode.Usd,
@@ -59,7 +57,6 @@ export const AdminEdit: Story = {
   render: () => (
     <TeacherAdminEditForm
       teacherData={adminTeacherData}
-      hasZoomPassword
       isSaving={false}
       onSubmit={async () => {
         await Promise.resolve();

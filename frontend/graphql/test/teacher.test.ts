@@ -29,9 +29,6 @@ function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): Teacher
     rateCurrency: overrides.rateCurrency ?? null,
     status: overrides.status ?? null,
     timezone: overrides.timezone ?? IanaTimezone.Utc,
-    zoomLink: overrides.zoomLink ?? null,
-    zoomPassword: overrides.zoomPassword ?? null,
-    zoomUsername: overrides.zoomUsername ?? null,
   };
 }
 
@@ -219,9 +216,6 @@ describe("GraphQL Teacher Integration Tests", () => {
           rateCurrency: CurrencyCode.Usd,
           status: null,
           timezone: IanaTimezone.Utc,
-          zoomLink: "https://zoom.us/j/123",
-          zoomPassword: "password",
-          zoomUsername: "username",
         },
       },
       context: {
@@ -254,9 +248,6 @@ describe("GraphQL Teacher Integration Tests", () => {
           rateCurrency: null,
           status: null,
           timezone: IanaTimezone.AmericaNewYork,
-          zoomLink: null,
-          zoomPassword: null,
-          zoomUsername: null,
         },
       }
     );
@@ -284,9 +275,6 @@ describe("GraphQL Teacher Integration Tests", () => {
           rateCurrency: CurrencyCode.Usd,
           status: null,
           timezone: IanaTimezone.Utc,
-          zoomLink: null,
-          zoomPassword: null,
-          zoomUsername: null,
         },
       }
     );

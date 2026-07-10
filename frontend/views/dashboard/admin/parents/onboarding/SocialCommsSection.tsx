@@ -1,6 +1,6 @@
 "use client";
 
-import { AlternateEmailOutlined, GroupsOutlined, MeetingRoomOutlined } from "@mui/icons-material";
+import { AlternateEmailOutlined, GroupsOutlined } from "@mui/icons-material";
 import { Grid, Input, InputAdornment } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
@@ -53,21 +53,6 @@ export function SocialCommsSection({ register, control }: Props) {
               startAdornment={
                 <InputAdornment position="start">
                   <AlternateEmailOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
-                </InputAdornment>
-              }
-            />
-          </FieldWrapper>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <FieldWrapper label={t("fields.zoomId")}>
-            <Input
-              {...register("defaultZoomLink")}
-              placeholder={t("placeholders.zoomId")}
-              fullWidth
-              sx={standardInputSx}
-              startAdornment={
-                <InputAdornment position="start">
-                  <MeetingRoomOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
                 </InputAdornment>
               }
             />

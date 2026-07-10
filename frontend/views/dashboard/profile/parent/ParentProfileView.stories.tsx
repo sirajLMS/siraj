@@ -19,7 +19,6 @@ const parentOwnProfile: ParentOwnData = {
   facebook: "facebook.com/noor.abdullah",
   whatsapp: "+966501234567",
   twitter: "@noor_abdullah",
-  defaultZoomLink: "https://zoom.us/j/parent123",
 };
 
 const parentAdminProfile: ParentAdminData = {
@@ -35,7 +34,6 @@ const parentAdminProfile: ParentAdminData = {
   facebook: "facebook.com/noor.abdullah",
   whatsapp: "+966501234567",
   twitter: "@noor_abdullah",
-  defaultZoomLink: "https://zoom.us/j/parent123",
   invoiceType: "Monthly",
   feeAmount: "500",
   paymentMethod: "Bank Transfer",
@@ -119,7 +117,6 @@ export const SocialLinks: Story = {
       facebook: "https://facebook.com/noor.abdullah",
       whatsapp: "+966501234567",
       twitter: "@noor_abdullah",
-      defaultZoomLink: "https://zoom.us/j/parent123",
     },
     associatedStudents: { id: "associated-students-empty", totalCount: 0, rows: [] },
     avatarUrl: "/demo/avatars/02.png",

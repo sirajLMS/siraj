@@ -5,7 +5,6 @@ export interface TeacherDirectoryRow {
   readonly email: string;
   readonly avatarUrl: string;
   readonly status: "active" | "offline";
-  readonly zoomLink: string | null;
 }
 
 export interface TeacherMetrics {

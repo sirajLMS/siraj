@@ -1,11 +1,10 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
-import { Box, IconButton, Link, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { isSafeUrl } from "@/frontend/lib/safeRedirect";
 import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 
