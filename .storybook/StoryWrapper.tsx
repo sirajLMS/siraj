@@ -10,6 +10,7 @@ import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
+  AccountStatus,
   AppPermission as AppPermissionEnum,
   CurrencyCode as CurrencyCodeEnum,
 } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -128,6 +129,8 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
       updatedAt: new Date().toISOString(),
       emailVerifiedAt: new Date().toISOString(),
       email: "admin@example.com",
+      phone: null,
+      status: AccountStatus.Activated,
       displayCurrency: CurrencyCodeEnum.Usd,
       __typename: "User" as const,
     };

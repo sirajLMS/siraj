@@ -3,7 +3,12 @@ import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { mapBackendPermissionsToGraphql } from "@/backend/lib/auth/map-graphql-permissions";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
-import type { AppPermission, CurrencyCode, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AccountStatus,
+  type AppPermission,
+  type CurrencyCode,
+  type User,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { DashboardLayoutContainer } from "@/frontend/views/dashboard/components/DashboardLayoutContainer";
 import { type AppLocale, locales } from "@/shared/i18n/routing";
@@ -51,6 +56,8 @@ export default async function DashboardLayout({
     updatedAt: userProfile.updatedAt?.toISOString() ?? null,
     emailVerifiedAt: userProfile.emailVerifiedAt?.toISOString() ?? null,
     displayCurrency: userProfile.displayCurrency as CurrencyCode | null,
+    phone: userProfile.phone ?? null,
+    status: userProfile.status === "DEACTIVATED" ? AccountStatus.Deactivated : AccountStatus.Activated,
   };
 
   return (

@@ -44,7 +44,18 @@
     "dist/dev/types/**/*.ts",
     ".next-test/dev/types/**/*.ts",
     ".next-test/dev/dev/types/**/*.ts",
-    ".next-test/types/**/*.ts"
+    ".next-test/types/**/*.ts",
+    ".next-test-*/dev/types/**/*.ts",
+    ".next-test-*/dev/dev/types/**/*.ts",
+    ".next-test-*/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "draft", "frontend/graphql/generated", "**/unRefactored_tests", "**/.ai", ".next-test/**"]
+  "exclude": [
+    "node_modules",
+    "draft",
+    "frontend/graphql/generated",
+    "**/unRefactored_tests",
+    "**/.ai",
+    ".next-test/**",
+    ".next-test-*/**"
+  ]
 }

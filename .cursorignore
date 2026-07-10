@@ -36,30 +36,13 @@ debug-eslint.js
 debug-storybook.log
 node_modules
 public
-scripts
 # storage & local uploads
 /storage/
 /storage
 
-# tests, seeds & dev scripts (not needed for deployment)
-test/
-backend/db/test/
-backend/db/seeds/
-backend/db/scripts/
-frontend/graphql/test/
-docs/
-*.ps1
-*.sh
-.github/
-
 # temp & backups
-.env.bak
-.env.example
-.env.vercel
-.env.test
-.env.redis
 .env
-.env.local
+!.env.example
 .gitattributes
 .mcp.json
 .vercelignore

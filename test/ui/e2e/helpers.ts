@@ -1,6 +1,7 @@
 import { expect } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
+import { getTestBaseUrl } from "@/frontend/graphql/test/testPort";
 import { academyAdmins, parents, teachers } from "@/shared/demo-users";
 
 const PWD = "12345678";
@@ -79,7 +80,7 @@ export async function createMobileContext(browser: {
   newContext: (options?: unknown) => Promise<BrowserContext>;
 }): Promise<BrowserContext> {
   return browser.newContext({
-    baseURL: "http://localhost:3001",
+    baseURL: getTestBaseUrl(),
     viewport: { width: 390, height: 844 },
     isMobile: true,
     hasTouch: true,

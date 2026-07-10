@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-test/**",
+    ".next-test-*/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
@@ -277,6 +278,33 @@ const eslintConfig = defineConfig([
     files: ["**/index.ts"],
     rules: {
       "no-restricted-syntax": "off",
+    },
+  },
+  // Seeders must not import from the database layer directly — use services instead.
+  {
+    files: ["backend/db/seeds/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@/backend/db/drizzleDb",
+                "@/backend/db/db.types",
+                "@/backend/db/schema",
+                "@/backend/db/schema/**",
+                "@/backend/db/repo",
+                "@/backend/db/repo/**",
+                "@/backend/db/migration",
+                "@/backend/db/migration/**",
+              ],
+              message:
+                "Seeders must not import from the database layer — call backend services (bootstrap methods) instead. See backend/db/seeds/AGENTS.md",
+            },
+          ],
+        },
+      ],
     },
   },
 ]);

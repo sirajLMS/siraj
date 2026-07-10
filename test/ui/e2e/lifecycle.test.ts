@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { getTestBaseUrl } from "@/frontend/graphql/test/testPort";
 import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 describe("E2E Lifecycle", () => {
@@ -8,7 +9,7 @@ describe("E2E Lifecycle", () => {
     const context = await createContext();
     const page = await context.newPage();
     await page.goto("/");
-    expect(page.url()).toContain("localhost:3001");
+    expect(page.url()).toContain(getTestBaseUrl());
     await context.close();
   });
 });
