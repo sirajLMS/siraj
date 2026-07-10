@@ -2,10 +2,68 @@
 
 Integration tests for GraphQL queries/mutations under `frontend/graphql/test/` must adhere strictly to these rules:
 
+## Layout
+
+Tests are organized **by domain** into sub-directories mirroring the `frontend/graphql/sharedDocuments/` taxonomy. Shared infrastructure files stay at the top level:
+
+```
+frontend/graphql/test/
+├── AGENTS.md             ← this file
+├── helpers.ts            ← shared test helpers (loginAndProvision, authenticatedRequest, etc.)
+├── lifecycle.ts          ← setupTestServerLifecycle
+├── testClient.ts         ← Apollo test client + clearCookies
+├── testServer.ts         ← Next.js dev server spawn/kill (used by lifecycle.ts)
+│
+├── auth/                 auth, impersonation
+├── billing/              billing-management, payment-method
+├── classes/              group-class, class-instance-detail, class-session
+├── complaints/           complaint
+├── meeting/              meeting-config
+├── notifications/        notification-preferences
+├── parents/              parent, parent-onboarding, parent-portal
+├── permissions/          permission-group-simulation
+├── profile/              profile
+├── reports/              report
+├── resources/            learning-resource-graphql
+├── scheduling/           schedule
+├── students/             student-directory-graphql, student-history, student-lifecycle, student-onboarding, status-tracking
+├── suggestions/          suggestion
+├── teachers/             teacher, teacher-dashboard, teacher-onboarding, teacher-portal, manager-directory-graphql, manager-onboarding
+└── translations/         translation
+```
+
+### Infra files (MUST stay flat)
+
+The four files `helpers.ts`, `lifecycle.ts`, `testClient.ts`, `testServer.ts` MUST stay flat at `frontend/graphql/test/`. They form the shared harness imported by virtually every test; moving them into a sub-directory would break the alias `@/frontend/graphql/test/<infra>` used across all tests.
+
+### No `index.ts` barrels in sub-directories
+
+Sub-directories contain only `*.test.ts` files. They are NOT imported by anything outside this directory — the bun test runner discovers tests by glob (`frontend/graphql/test/**/*.test.ts`), so **no `index.ts` barrel is needed** in sub-directories. They exist purely for organization.
+
+### Import conventions for test files
+
+| Target | Recommended import pattern | Notes |
+|---|---|---|
+| `helpers.ts` | `import { loginAndProvision } from "@/frontend/graphql/test/helpers";` | **Preferred alias** — works from any sub-directory unchanged. |
+| `lifecycle.ts` | `import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";` | **Preferred alias** — works from any sub-directory unchanged. |
+| `testClient.ts` | `import { testClient, clearCookies } from "@/frontend/graphql/test/testClient";` | **Preferred alias** — works from any sub-directory unchanged. |
+| Documents | `import { fooQueryDocument } from "@/frontend/graphql/sharedDocuments/<subdir>/foo.documents";` | Always use the full deep alias, including the `sharedDocuments` sub-directory segment. See `frontend/graphql/sharedDocuments/AGENTS.md`. |
+| Generated types | `import { … } from "@/frontend/graphql/generated/gql/graphql-types";` or `Operations` | Unchanged. |
+| Relative `../helpers` etc. | `import { … } from "../helpers";` | Tolerated in legacy files. Files in a sub-directory are one level deeper than the old flat layout, so infra resolves as `../helpers` / `../lifecycle` / `../testClient`. Prefer the `@/` alias for new tests. |
+
+When adding a **new** test:
+1. Identify the matching sub-directory (or create a new one following the conventions above).
+2. Create `<scenario>.test.ts` in that sub-directory.
+3. Use the alias form `@/frontend/graphql/test/(helpers|lifecycle|testClient)` — it keeps the test portable across sub-directory moves.
+4. If a new sub-directory is created, document it under **Layout** above.
+5. Run `bun tsgo` and `bun biome:check` on the new file before considering it done.
+
+---
+
 1. **Next.js Server Lifecycle Management**:
    - Import the reusable dev server setup lifecycle helper from `lifecycle.ts` and call it at the root of your `describe` block:
      ```typescript
-     import { setupTestServerLifecycle } from "./lifecycle";
+     import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 
      describe("My GraphQL Tests", () => {
        setupTestServerLifecycle();
@@ -17,12 +75,12 @@ Integration tests for GraphQL queries/mutations under `frontend/graphql/test/` m
 2. **Apollo Shared Client**:
    - Import the shared, cache-disabled test client from `testClient.ts` to perform all GraphQL operations:
      ```typescript
-     import { testClient } from "./testClient";
+     import { testClient } from "@/frontend/graphql/test/testClient";
      ```
 
 3. **Type-Safe GraphQL Execution**:
    - Do **NOT** write raw string queries in tests or use raw HTTP `fetch` POST requests.
-   - Define queries as `TypedDocumentNode` in `frontend/graphql/sharedDocuments/` files, run `bun run generate:gqlSchema` and `bun codegen`, and pass the imported document node directly to the query call:
+   - Define queries as `TypedDocumentNode` in `frontend/graphql/sharedDocuments/<subdir>/` files, run `bun run generate:gqlSchema` and `bun codegen`, and pass the imported document node directly to the query call:
      ```typescript
      const result = await testClient.query({
        query: {entityName}QueryDocument,
@@ -56,7 +114,7 @@ Integration tests for GraphQL queries/mutations under `frontend/graphql/test/` m
 
 8. **Test Duplication Prevention (SonarQube Compliance)**:
    - Never duplicate standard test setup routines—such as demo user login mutations or querying/extracting basic database entities (e.g., matching student/teacher ID pairs)—across multiple test files.
-   - Centralize all reusable test logic in a shared helpers file (e.g., [helpers.ts](file:///c:/Users/PC/Projects/siraj/frontend/graphql/test/helpers.ts)).
+   - Centralize all reusable test logic in the shared helpers file at `frontend/graphql/test/helpers.ts`.
    - Use `authenticatedRequest` from `helpers.ts` when performing authenticated queries/mutations in tests instead of manually setting authorization headers and assertions on each call.
 
 9. **Large Method Remediation (CodeScene Compliance)**:
