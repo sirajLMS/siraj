@@ -175,7 +175,10 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
     }
     case "session": {
       const allowedStatuses = ["active", "pending", "blocked", "confirmed", "completed", "cancelled"] as const;
-      const key = allowedStatuses.includes(status as any) ? status : "pending";
+      type SessionStatus = (typeof allowedStatuses)[number];
+      const isSessionStatus = (value: string): value is SessionStatus =>
+        (allowedStatuses as readonly string[]).includes(value);
+      const key: SessionStatus = isSessionStatus(status) ? status : "pending";
       const containerKey = `${key}Container` as keyof typeof theme.palette.status;
       const onContainerKey =
         `on${key.charAt(0).toUpperCase()}${key.slice(1)}Container` as keyof typeof theme.palette.status;

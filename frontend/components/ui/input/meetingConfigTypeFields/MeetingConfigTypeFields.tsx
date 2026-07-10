@@ -19,6 +19,7 @@ export type MeetingConfigTypeFieldsProps = {
   readonly onChangeAction: (value: MeetingConfigDetailsFormValue) => void;
   readonly disabled?: boolean;
   readonly passwordHelperText?: string;
+  readonly onMeetingUrlBlur?: () => void;
 };
 
 export function MeetingConfigTypeFields({
@@ -27,6 +28,7 @@ export function MeetingConfigTypeFields({
   onChangeAction,
   disabled,
   passwordHelperText,
+  onMeetingUrlBlur,
 }: MeetingConfigTypeFieldsProps) {
   const t = useTranslations("ui.meetingConfig.fields");
 
@@ -45,6 +47,7 @@ export function MeetingConfigTypeFields({
         fullWidth
         placeholder={provider.urlExample ?? undefined}
         onChange={event => onChangeAction({ ...value, meetingUrl: event.target.value })}
+        onBlur={onMeetingUrlBlur}
         slotProps={{ htmlInput: { dir: "ltr" } }}
       />
       {fields.showUsername ? (

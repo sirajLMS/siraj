@@ -25,6 +25,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       studentTimezone
       teacherTimezone
       meetingJoinUrl
+      recurringScheduleId
       effectiveMeeting {
         ...EffectiveMeetingFields
       }

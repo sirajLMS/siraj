@@ -1,3 +1,4 @@
+import type { FormatCurrencyMessages } from "@/frontend/lib/fx-render";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import {
   aggregatePaidAmountTotals,
@@ -31,15 +32,7 @@ interface ReportExportData {
   readonly toDate: string;
   readonly showFinancials: boolean;
   readonly locale: string;
-  readonly fxMessages: {
-    readonly convertedAmount: (values: {
-      lockedAmount: string;
-      lockedCurrency: string;
-      convertedApprox: string;
-      displayCurrency: string;
-    }) => string;
-    readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-  };
+  readonly fxMessages: FormatCurrencyMessages;
 }
 
 type CellStyle = import("xlsx-js-style").CellStyle;

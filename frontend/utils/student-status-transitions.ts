@@ -14,7 +14,7 @@ export const ALLOWED_STATUS_TRANSITIONS: Record<StudentStatus, readonly StudentS
 function mapTransitions(): Record<string, StudentStatus[]> {
   const result: Record<string, StudentStatus[]> = {};
   for (const [key, targets] of Object.entries(ALLOWED_STATUS_TRANSITIONS)) {
-    result[key] = [...targets] as StudentStatus[];
+    result[key] = [...targets];
   }
   return result;
 }

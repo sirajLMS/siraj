@@ -1,5 +1,6 @@
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { CurrencyCode as CurrencyCodeEnum } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { FxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatLockedAmount } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 
@@ -41,17 +42,6 @@ export function mapBillingCurrencyBuckets(
     }));
 }
 
-type FormatCurrencyMessages = {
-  readonly convertedAmount: (values: {
-    lockedAmount: string;
-    lockedCurrency: string;
-    convertedApprox: string;
-    displayCurrency: string;
-  }) => string;
-  readonly convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) => string;
-  readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-};
-
 export interface BillingCurrencyTotalsDisplay {
   readonly primary: string;
   readonly breakdown?: string;
@@ -60,7 +50,7 @@ export interface BillingCurrencyTotalsDisplay {
 export function formatBillingCurrencyTotals(
   buckets: readonly BillingCurrencyBucket[],
   locale: string,
-  messages: FormatCurrencyMessages
+  messages: FxDisplayMessages
 ): BillingCurrencyTotalsDisplay {
   if (buckets.length === 0) {
     return { primary: formatLockedAmount("0.00", CurrencyCodeEnum.Usd, locale) };

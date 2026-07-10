@@ -14,6 +14,14 @@ export const userBillingProfileSummaryQueryDocument: TypedDocumentNode<
       paidThisTerm
       nextDueDate
       activeStudents
+      pendingPaymentCount
+      nextUnpaidInvoice {
+        id
+        amount
+        currency
+        dueDate
+        studentName
+      }
       outstandingByCurrency {
         id
         currency
@@ -44,8 +52,8 @@ export const userBillingProfileInvoiceHistoryQueryDocument: TypedDocumentNode<
   Operations.UserBillingProfileInvoiceHistoryQuery,
   Types.QueryParentInvoiceHistoryArgs
 > = gql`
-  query UserBillingProfileInvoiceHistory($userId: String, $parentId: String, $paginationArgs: PaginationArgs) {
-    parentInvoiceHistory(userId: $userId, parentId: $parentId, paginationArgs: $paginationArgs) {
+  query UserBillingProfileInvoiceHistory($userId: String, $parentId: String, $paginationArgs: PaginationArgs, $search: String) {
+    parentInvoiceHistory(userId: $userId, parentId: $parentId, paginationArgs: $paginationArgs, search: $search) {
       id
       rows {
         id

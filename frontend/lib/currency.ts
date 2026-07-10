@@ -89,8 +89,22 @@ const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
   [CurrencyCode.Tnd]: 3,
 };
 
+function isCurrencyCode(code: string): code is CurrencyCode {
+  return (Object.values(CurrencyCode) as readonly string[]).includes(code);
+}
+
+export function parseCurrencyCode(value: string | null | undefined): CurrencyCode | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return isCurrencyCode(value) ? value : null;
+}
+
 /** ISO 4217 minor-unit decimals; default 2 when not listed. */
 export function getCurrencyDecimals(code: CurrencyCode | string): number {
+  if (!isCurrencyCode(code)) {
+    return 2;
+  }
   return CURRENCY_DECIMALS[code] ?? 2;
 }
 

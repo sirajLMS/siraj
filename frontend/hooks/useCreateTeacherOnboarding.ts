@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   PaymentDirection,
   type PaymentMethodDetailsInput,
-  type PaymentMethodType,
   type TeacherOnboardingInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";
@@ -47,7 +46,7 @@ export function useCreateTeacherOnboarding() {
         hourlyRate: formData.hourlyRate,
         rateCurrency: formData.rateCurrency,
         initialPayoutMethod: {
-          type: formData.payoutMethod.type as PaymentMethodType,
+          type: formData.payoutMethod.type,
           direction: PaymentDirection.Payout,
           isDefault: true,
           label: formData.payoutMethod.label?.trim() || null,

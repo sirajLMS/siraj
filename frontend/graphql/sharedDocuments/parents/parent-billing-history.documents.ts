@@ -7,8 +7,8 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
   Operations.ParentInvoiceHistoryQuery,
   Types.QueryParentInvoiceHistoryArgs
 > = gql`
-  query ParentInvoiceHistory($parentId: String, $userId: String, $paginationArgs: PaginationArgs) {
-    parentInvoiceHistory(parentId: $parentId, userId: $userId, paginationArgs: $paginationArgs) {
+  query ParentInvoiceHistory($parentId: String, $userId: String, $paginationArgs: PaginationArgs, $search: String) {
+    parentInvoiceHistory(parentId: $parentId, userId: $userId, paginationArgs: $paginationArgs, search: $search) {
       id
       rows {
         id
@@ -51,8 +51,8 @@ export const adminInvoicesQueryDocument: TypedDocumentNode<
   Operations.AdminInvoicesQuery,
   Types.QueryAdminInvoicesArgs
 > = gql`
-  query AdminInvoices($paginationArgs: PaginationArgs) {
-    adminInvoices(paginationArgs: $paginationArgs) {
+  query AdminInvoices($paginationArgs: PaginationArgs, $search: String) {
+    adminInvoices(paginationArgs: $paginationArgs, search: $search) {
       id
       rows {
         id
@@ -150,6 +150,14 @@ export const parentBillingSummaryQueryDocument: TypedDocumentNode<
       paidThisTerm
       nextDueDate
       activeStudents
+      pendingPaymentCount
+      nextUnpaidInvoice {
+        id
+        amount
+        currency
+        dueDate
+        studentName
+      }
       outstandingByCurrency {
         id
         currency

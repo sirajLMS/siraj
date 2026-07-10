@@ -33,6 +33,9 @@ export const groupClassAuditQueryDocument: TypedDocumentNode<
         platform
         meetingId
         joinUrl
+        logoUrl
+        providerName
+        source
       }
       communications {
         id
@@ -82,6 +85,9 @@ export const updateClassAdminNoteMutationDocument: TypedDocumentNode<
         platform
         meetingId
         joinUrl
+        logoUrl
+        providerName
+        source
       }
       communications {
         id

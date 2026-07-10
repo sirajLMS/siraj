@@ -4,7 +4,6 @@ import {
   type ParentOnboardingInput,
   type ParentOnboardingResult,
   PaymentDirection,
-  type PaymentMethodType,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { createUserMeetingConfigMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
@@ -37,7 +36,7 @@ export function useCreateParentOnboarding() {
         invoiceType: formData.invoiceType,
         feeAmount: formData.feeAmount,
         initialPayinMethod: {
-          type: formData.payinMethod.type as PaymentMethodType,
+          type: formData.payinMethod.type,
           direction: PaymentDirection.Payin,
           isDefault: true,
           label: formData.payinMethod.label?.trim() || null,

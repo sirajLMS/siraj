@@ -1,12 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
+  changeParentLifecycleStatusMutationDocument,
   deactivateParentMutationDocument,
   parentAssociatedStudentsQueryDocument,
   parentDirectoryQueryDocument,
   parentDocumentsQueryDocument,
   parentInvoiceHistoryQueryDocument,
   parentProfileQueryDocument,
+  reactivateParentMutationDocument,
   updateStudentQuotaMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import {
@@ -277,6 +279,83 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
     expect(data.deactivateParent).toBeDefined();
     expect(data.deactivateParent?.id).toBe(parentId);
     expect(data.deactivateParent?.accountStatus).toBe(AccountStatus.Deactivated);
+  });
+});
+
+describe("GraphQL Parent Profile Tests — reactivateParent mutation", () => {
+  setupTestServerLifecycle();
+
+  let superAdminToken = "";
+  let parentId = "";
+
+  test("provision deactivated parent and login", async () => {
+    const r = await loginAndProvision("ParentReactivateTest");
+    superAdminToken = r.superAdminToken;
+    parentId = r.parentId;
+    await authenticatedRequest(superAdminToken, "mutate", deactivateParentMutationDocument, { parentId });
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
+  });
+
+  test("reactivateParent — restores ACTIVATED account status", async () => {
+    const data = await authenticatedRequest(superAdminToken, "mutate", reactivateParentMutationDocument, {
+      parentId,
+    });
+
+    expect(data.reactivateParent?.id).toBe(parentId);
+    expect(data.reactivateParent?.accountStatus).toBe(AccountStatus.Activated);
+  });
+});
+
+describe("GraphQL Parent Profile Tests — changeParentLifecycleStatus mutation", () => {
+  setupTestServerLifecycle();
+
+  let superAdminToken = "";
+  let parentId = "";
+
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("ParentLifecycleTest");
+    superAdminToken = r.superAdminToken;
+    parentId = r.parentId;
+    expect(superAdminToken).toBeTruthy();
+    expect(parentId).toBeTruthy();
+  });
+
+  test("changeParentLifecycleStatus — updates lifecycle without changing account status", async () => {
+    const data = await authenticatedRequest(superAdminToken, "mutate", changeParentLifecycleStatusMutationDocument, {
+      parentId,
+      newStatus: ParentStatus.OnTrial,
+    });
+
+    expect(data.changeParentLifecycleStatus?.id).toBe(parentId);
+    expect(data.changeParentLifecycleStatus?.lifecycleStatus).toBe(ParentStatus.OnTrial);
+
+    const profile = await authenticatedRequest(superAdminToken, "query", parentProfileQueryDocument, { parentId });
+    expect(profile.parentProfile?.lifecycleStatus).toBe(ParentStatus.OnTrial);
+    expect(profile.parentProfile?.accountStatus).toBe(AccountStatus.Activated);
+  });
+});
+
+describe("GraphQL Parent Directory Tests — accountStatus field", () => {
+  setupTestServerLifecycle();
+
+  let superAdminToken = "";
+
+  test("provision and login", async () => {
+    const r = await loginAndProvision("ParentDirectoryAccountTest");
+    superAdminToken = r.superAdminToken;
+    expect(superAdminToken).toBeTruthy();
+  });
+
+  test("parentDirectory rows include accountStatus", async () => {
+    const data = await authenticatedRequest(superAdminToken, "query", parentDirectoryQueryDocument, {
+      search: null,
+      lifecycleStatusFilter: null,
+      paginationArgs: { first: 10, page: 1, skip: null, after: null, before: null, last: null, maxCount: null },
+    });
+
+    const row = data.parentDirectory?.rows?.find(r => r?.accountStatus != null);
+    expect(row?.accountStatus).toBeDefined();
   });
 });
 

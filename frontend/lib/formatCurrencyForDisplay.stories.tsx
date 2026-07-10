@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useLocale, useTranslations } from "next-intl";
 import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useUserStore } from "@/frontend/stores/userStore";
 
@@ -25,10 +26,13 @@ function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStory
   const tErrors = useTranslations("errors");
   const displayCurrency = useUserStore(state => state.displayCurrency);
 
-  const formatted = formatCurrencyForDisplay(lockedAmount, lockedCurrency, displayAmount, locale, {
-    convertedAmount: values => t("convertedAmount", values),
-    displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-  });
+  const formatted = formatCurrencyForDisplay(
+    lockedAmount,
+    lockedCurrency,
+    displayAmount,
+    locale,
+    buildFxDisplayMessages(t, tErrors)
+  );
 
   return (
     <Stack spacing={2} sx={{ p: 2, maxWidth: 480 }}>

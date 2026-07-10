@@ -1,11 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 
 export const teacherWeeklyScheduleGridQueryDocument: TypedDocumentNode<
   Operations.TeacherWeeklyScheduleGridQuery,
   Types.QueryTeacherWeeklyScheduleGridArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query teacherWeeklyScheduleGrid($teacherId: String, $weekDate: String!) {
     teacherWeeklyScheduleGrid(teacherId: $teacherId, weekDate: $weekDate) {
       id
@@ -23,6 +25,10 @@ export const teacherWeeklyScheduleGridQueryDocument: TypedDocumentNode<
         outcome
         subjectName
         classType
+        meetingJoinUrl
+        effectiveMeeting {
+          ...EffectiveMeetingFields
+        }
       }
     }
   }

@@ -1,4 +1,5 @@
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { FxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatLockedAmount, getCurrencyDecimals } from "@/frontend/lib/currency";
 
 export type DisplayAmountLike = {
@@ -9,15 +10,10 @@ export type DisplayAmountLike = {
 
 export { formatLockedAmount, getCurrencyDecimals };
 
-type FormatCurrencyMessages = {
-  readonly convertedAmount: (values: {
-    lockedAmount: string;
-    lockedCurrency: string;
-    convertedApprox: string;
-    displayCurrency: string;
-  }) => string;
-  readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-};
+export type FormatCurrencyMessages = Pick<
+  FxDisplayMessages,
+  "convertedAmount" | "displayCurrencyNotSet" | "displayCurrencyStale"
+>;
 
 export function formatCurrencyForDisplay(
   lockedAmount: string,
@@ -29,8 +25,15 @@ export function formatCurrencyForDisplay(
   const lockedFormatted = formatLockedAmount(lockedAmount, lockedCurrency, locale);
   const lockedCurrencyLabel = lockedCurrency;
 
-  if (!displayAmount || displayAmount.stale || !displayAmount.amount || !displayAmount.currency) {
-    return messages.displayCurrencyFallback({
+  if (!displayAmount) {
+    return messages.displayCurrencyNotSet({
+      lockedAmount: lockedFormatted,
+      lockedCurrency: lockedCurrencyLabel,
+    });
+  }
+
+  if (displayAmount.stale || !displayAmount.amount || !displayAmount.currency) {
+    return messages.displayCurrencyStale({
       lockedAmount: lockedFormatted,
       lockedCurrency: lockedCurrencyLabel,
     });

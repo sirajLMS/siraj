@@ -1,11 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 
 export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
   Operations.AdminDashboardScheduleQuery,
   Types.QueryAdminDashboardScheduleArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query adminDashboardSchedule($input: AdminDashboardScheduleInput!) {
     adminDashboardSchedule(input: $input) {
       id
@@ -37,6 +39,10 @@ export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
         scheduledEndAt
         outcome
         executionState
+        meetingJoinUrl
+        effectiveMeeting {
+          ...EffectiveMeetingFields
+        }
         student {
           id
           name
@@ -91,6 +97,7 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
   Operations.DailyScheduleListQuery,
   Types.QueryDailyScheduleListArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query dailyScheduleList($date: String!, $teacherId: String, $search: String, $metricFilter: String) {
     dailyScheduleList(date: $date, teacherId: $teacherId, search: $search, metricFilter: $metricFilter) {
       id
@@ -102,6 +109,10 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
       duration
       outcome
       executionState
+      meetingJoinUrl
+      effectiveMeeting {
+        ...EffectiveMeetingFields
+      }
       student {
         id
         name
@@ -186,6 +197,7 @@ export const statusTrackingScheduleQueryDocument: TypedDocumentNode<
   Operations.StatusTrackingScheduleQuery,
   Types.QueryStatusTrackingScheduleArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: IanaTimezone) {
     statusTrackingSchedule(date: $date, search: $search, viewerTimezone: $viewerTimezone) {
       id
@@ -205,6 +217,10 @@ export const statusTrackingScheduleQueryDocument: TypedDocumentNode<
       executionState
       outcome
       isFrozen
+      meetingJoinUrl
+      effectiveMeeting {
+        ...EffectiveMeetingFields
+      }
     }
   }
 `;
