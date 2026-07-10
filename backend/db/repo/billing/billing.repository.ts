@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray, isNull, type SQL, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNull, ne, or, type SQL, sql } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
@@ -587,7 +587,10 @@ export namespace BillingRepository {
       const parent = parentMap.get(parentId);
       if (!parent?.userId) continue;
 
-      const amountsByCurrency = groupAmountsByCurrency(invs, `unpaid-${parentId}`);
+      const amountsByCurrency = groupAmountsByCurrency(invs, `unpaid-${parentId}`).map(bucket => ({
+        ...bucket,
+        subjectUserId: parent.userId,
+      }));
       const sortedInvs = [...invs].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
       const primaryCurrency = amountsByCurrency[0]?.currency ?? sortedInvs[0]?.currency;
       const primaryAmount = amountsByCurrency.find(bucket => bucket.currency === primaryCurrency)?.amount ?? "0.00";
@@ -669,6 +672,30 @@ export namespace BillingRepository {
     )`.as("has_rejected_submission"),
   };
 
+  function buildInvoiceSearchCondition(search: string | null | undefined): SQL | undefined {
+    const normalized = search?.trim();
+    if (!normalized) {
+      return undefined;
+    }
+    const pattern = `%${normalized.toLowerCase()}%`;
+    return or(
+      sql`LOWER(${invoices.id}::text) LIKE ${pattern}`,
+      sql`LOWER(COALESCE(${students.name}, '')::text) LIKE ${pattern}`,
+      sql`LOWER(${invoices.amount}::text) LIKE ${pattern}`
+    );
+  }
+
+  function mergeWhereConditions(...conditions: (SQL | undefined)[]): SQL | undefined {
+    const merged = conditions.filter((condition): condition is SQL => condition !== undefined);
+    if (merged.length === 0) {
+      return undefined;
+    }
+    if (merged.length === 1) {
+      return merged[0];
+    }
+    return and(...merged);
+  }
+
   function mapInvoiceRow(r: {
     id: string;
     issueDate: string;
@@ -706,10 +733,14 @@ export namespace BillingRepository {
   export const getInvoicesForParent = async (
     parentId: string,
     pagination: Types.PaginationArgs | null = null,
+    search: string | null | undefined = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
     const queryDb = tx ?? db;
-    const whereCondition = and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt));
+    const whereCondition = mergeWhereConditions(
+      and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt)),
+      buildInvoiceSearchCondition(search)
+    );
 
     if (!pagination) {
       const rows = await queryDb
@@ -732,6 +763,18 @@ export namespace BillingRepository {
     return fetchInvoicesPaginated(queryDb, parentId, whereCondition, pagination);
   };
 
+  async function countInvoicesWithJoin(
+    queryDb: DBTransaction | typeof db,
+    whereCondition: SQL | undefined
+  ): Promise<number> {
+    const countResult = await queryDb
+      .select({ count: count() })
+      .from(invoices)
+      .leftJoin(students, eq(invoices.studentId, students.id))
+      .where(whereCondition);
+    return countResult[0]?.count ?? 0;
+  }
+
   async function fetchInvoicesPaginated(
     queryDb: DBTransaction | typeof db,
     parentId: string,
@@ -742,7 +785,7 @@ export namespace BillingRepository {
     const currentPage = pagination.currentPage;
     const offset = pagination.offset;
 
-    const [dataRows, countResult] = await Promise.all([
+    const [dataRows, totalCount] = await Promise.all([
       queryDb
         .select(invoiceBaseFields)
         .from(invoices)
@@ -752,10 +795,9 @@ export namespace BillingRepository {
         .orderBy(desc(invoices.issueDate))
         .limit(perPage)
         .offset(offset),
-      queryDb.select({ count: count() }).from(invoices).where(whereCondition),
+      countInvoicesWithJoin(queryDb, whereCondition),
     ]);
 
-    const totalCount = countResult[0]?.count ?? 0;
     const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
     const rows: Types.InvoiceHistoryRow[] = dataRows.map(mapInvoiceRow);
 
@@ -778,10 +820,11 @@ export namespace BillingRepository {
 
   export const getAllInvoices = async (
     pagination: Types.PaginationArgs | null = null,
+    search: string | null | undefined = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
     const queryDb = tx ?? db;
-    const whereCondition = isNull(invoices.deletedAt);
+    const whereCondition = mergeWhereConditions(isNull(invoices.deletedAt), buildInvoiceSearchCondition(search));
 
     if (!pagination) {
       const rows = await queryDb
@@ -805,7 +848,7 @@ export namespace BillingRepository {
     const currentPage = pagination.currentPage;
     const offset = pagination.offset;
 
-    const [dataRows, countResult] = await Promise.all([
+    const [dataRows, totalCount] = await Promise.all([
       queryDb
         .select(invoiceBaseFields)
         .from(invoices)
@@ -815,10 +858,9 @@ export namespace BillingRepository {
         .orderBy(desc(invoices.issueDate))
         .limit(perPage)
         .offset(offset),
-      queryDb.select({ count: count() }).from(invoices).where(whereCondition),
+      countInvoicesWithJoin(queryDb, whereCondition),
     ]);
 
-    const totalCount = countResult[0]?.count ?? 0;
     const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
     const rows: Types.InvoiceHistoryRow[] = dataRows.map(mapInvoiceRow);
 
@@ -981,7 +1023,26 @@ export namespace BillingRepository {
         activeStudents: count(),
       })
       .from(students)
-      .where(and(eq(students.parentId, parentId), eq(students.status, "ACTIVE")));
+      .where(and(eq(students.parentId, parentId), ne(students.status, StudentStatus.DEACTIVATED)));
+
+    const [nextUnpaidRow] = await t
+      .select({
+        id: invoices.id,
+        amount: invoices.amount,
+        currency: invoices.currency,
+        dueDate: invoices.dueDate,
+        studentName: students.name,
+      })
+      .from(invoices)
+      .leftJoin(students, eq(invoices.studentId, students.id))
+      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)))
+      .orderBy(asc(invoices.dueDate))
+      .limit(1);
+
+    const [pendingCountResult] = await t
+      .select({ pendingPaymentCount: count() })
+      .from(invoices)
+      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAYMENT_PENDING"), isNull(invoices.deletedAt)));
 
     return {
       id: `parent-billing-summary-${parentId}`,
@@ -989,6 +1050,16 @@ export namespace BillingRepository {
       paidThisTerm: paidResult[0]?.paidThisTerm ?? "0.00",
       nextDueDate: unpaidResult[0]?.nextDueDate ?? null,
       activeStudents: activeStudentsResult[0]?.activeStudents ?? 0,
+      nextUnpaidInvoice: nextUnpaidRow
+        ? {
+            id: nextUnpaidRow.id,
+            amount: nextUnpaidRow.amount,
+            currency: nextUnpaidRow.currency,
+            dueDate: nextUnpaidRow.dueDate,
+            studentName: nextUnpaidRow.studentName ?? null,
+          }
+        : null,
+      pendingPaymentCount: pendingCountResult?.pendingPaymentCount ?? 0,
       outstandingByCurrency: unpaidByCurrency.map(row => ({
         id: `outstanding-${row.currency}`,
         currency: row.currency,

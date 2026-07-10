@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, invoicePaymentSubmissions } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -84,5 +84,36 @@ export namespace InvoicePaymentSubmissionRepository {
       return null;
     }
     return updateSubmissionStatus(pending.id, "rejected", reviewedByUserId, rejectionReason, tx, locale);
+  }
+
+  export async function findByInvoiceIds(
+    invoiceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoicePaymentSubmissionSelectType[]> {
+    if (invoiceIds.length === 0) return [];
+    const queryDb = tx ?? db;
+    return queryDb
+      .select()
+      .from(invoicePaymentSubmissions)
+      .where(inArray(invoicePaymentSubmissions.invoiceId, [...invoiceIds]));
+  }
+
+  export async function createMany(
+    inputs: readonly Types.InvoicePaymentSubmissionInsertType[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoicePaymentSubmissionSelectType[]> {
+    if (inputs.length === 0) return [];
+    const results: Types.InvoicePaymentSubmissionSelectType[] = [];
+
+    for (const input of inputs) {
+      const existing = await getLatestByInvoiceId(input.invoiceId, tx);
+      if (existing) {
+        results.push(existing);
+        continue;
+      }
+      results.push(await createSubmission(input, tx));
+    }
+
+    return results;
   }
 }

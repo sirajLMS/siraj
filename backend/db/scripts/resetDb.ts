@@ -1,4 +1,4 @@
-import { neonConfig, Pool as NeonPool } from "@neondatabase/serverless";
+import { Pool as NeonPool, neonConfig } from "@neondatabase/serverless";
 import { Pool } from "pg";
 import ws from "ws";
 import { getStringEnv, requireEnv } from "@/backend/lib/env";
@@ -21,8 +21,7 @@ function parseDatabaseUrl(url: string): ParsedDatabaseUrl {
     throw new Error("Invalid DATABASE_URL format: missing database name");
   }
 
-  const requiresSsl =
-    parsed.searchParams.get("sslmode") === "require" || /\.neon\.tech$/i.test(parsed.hostname);
+  const requiresSsl = parsed.searchParams.get("sslmode") === "require" || /\.neon\.tech$/i.test(parsed.hostname);
 
   return {
     connectionString: url,
@@ -39,8 +38,7 @@ function buildConnectionString(connectionString: string, database: string): stri
 
 function createPgPool(connectionString: string): Pool {
   const parsed = new URL(connectionString);
-  const requiresSsl =
-    parsed.searchParams.get("sslmode") === "require" || /\.neon\.tech$/i.test(parsed.hostname);
+  const requiresSsl = parsed.searchParams.get("sslmode") === "require" || /\.neon\.tech$/i.test(parsed.hostname);
 
   return new Pool({
     connectionString,
@@ -57,28 +55,39 @@ function createResetPool(connectionString: string, isNeon: boolean): ResetPool {
   return isNeon ? createNeonPool(connectionString) : createPgPool(connectionString);
 }
 
+type QueryablePool = {
+  query: (sql: string, params?: unknown[]) => Promise<unknown>;
+  end: () => Promise<void>;
+};
+
+function asQueryablePool(pool: ResetPool): QueryablePool {
+  return pool as QueryablePool;
+}
+
 async function resetNeonDatabase(pool: ResetPool, database: string): Promise<void> {
+  const queryable = asQueryablePool(pool);
   logger.log(`Resetting Neon database schema: ${database}`);
-  await pool.query("DROP SCHEMA IF EXISTS public CASCADE");
-  await pool.query("CREATE SCHEMA public");
-  await pool.query("GRANT ALL ON SCHEMA public TO PUBLIC");
-  await pool.query('DROP TABLE IF EXISTS "__drizzle_migrations" CASCADE');
+  await queryable.query("DROP SCHEMA IF EXISTS public CASCADE");
+  await queryable.query("CREATE SCHEMA public");
+  await queryable.query("GRANT ALL ON SCHEMA public TO PUBLIC");
+  await queryable.query('DROP TABLE IF EXISTS "__drizzle_migrations" CASCADE');
   logger.log(`Reset Neon schema for: ${database}`);
 }
 
 async function resetPostgresDatabase(adminPool: ResetPool, database: string): Promise<void> {
-  await adminPool.query(
+  const queryable = asQueryablePool(adminPool);
+  await queryable.query(
     "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid();",
     [database]
   );
-  await adminPool.query(`DROP DATABASE IF EXISTS "${database}";`);
+  await queryable.query(`DROP DATABASE IF EXISTS "${database}";`);
   logger.log(`Dropped database: ${database}`);
-  await adminPool.query(`CREATE DATABASE "${database}";`);
+  await queryable.query(`CREATE DATABASE "${database}";`);
   logger.log(`Created database: ${database}`);
 }
 
 async function closeResetPool(pool: ResetPool): Promise<void> {
-  await pool.end();
+  await asQueryablePool(pool).end();
 }
 
 async function resetDatabase() {
@@ -104,10 +113,7 @@ async function resetDatabase() {
 
   logger.log(`Resetting database: ${database} (provider: ${provider})`);
 
-  const pool = createResetPool(
-    isNeon ? connectionString : buildConnectionString(connectionString, "postgres"),
-    isNeon
-  );
+  const pool = createResetPool(isNeon ? connectionString : buildConnectionString(connectionString, "postgres"), isNeon);
 
   try {
     if (isNeon) {

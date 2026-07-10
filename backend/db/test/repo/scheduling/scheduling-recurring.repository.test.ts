@@ -529,4 +529,50 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
       });
     });
   });
+
+  describe("RecurringScheduleRepository.findById", () => {
+    test("returns schedule with student and teacher names", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "FindById", { skipInstance: true });
+
+        const result = await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            durationMinutes: 45,
+            defaultStartTime: "09:00:00",
+            timezone: IanaTimezone.UTC,
+            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+            days: [{ dayOfWeek: "TUESDAY", startTime: "09:00:00", isActive: true }],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 1,
+            quotaDeducted: false,
+          },
+          tx
+        );
+
+        const { RecurringScheduleRepository } = await import(
+          "@/backend/db/repo/scheduling/recurring-schedule.repository"
+        );
+        const row = await RecurringScheduleRepository.findById(result.recurringScheduleId, tx);
+
+        expect(row).not.toBeNull();
+        expect(row?.schedule.id).toBe(result.recurringScheduleId);
+        expect(row?.schedule.durationMinutes).toBe(45);
+        expect(row?.studentName).toBeTruthy();
+        expect(row?.teacherUserName).toBeTruthy();
+      });
+    });
+
+    test("returns null for unknown id", async () => {
+      await runInRollback(async tx => {
+        const { RecurringScheduleRepository } = await import(
+          "@/backend/db/repo/scheduling/recurring-schedule.repository"
+        );
+        const row = await RecurringScheduleRepository.findById(randomUUID(), tx);
+        expect(row).toBeNull();
+      });
+    });
+  });
 });

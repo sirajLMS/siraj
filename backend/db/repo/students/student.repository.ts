@@ -617,4 +617,85 @@ export namespace StudentRepository {
     const executor = tx ?? db;
     await executor.insert(teacherAssignments).values({ studentId, teacherId, assignedAt });
   };
+
+  export type StudentProfileRow = {
+    readonly id: string;
+    readonly name: string;
+    readonly status: StudentStatus;
+    readonly avatarUrl: string | null;
+    readonly dateOfBirth: Date | null;
+    readonly gender: string | null;
+    readonly language: string | null;
+    readonly parentId: string;
+    readonly parentName: string | null;
+    readonly primaryTeacherId: string | null;
+    readonly teacherUserId: string | null;
+    readonly teacherName: string | null;
+    readonly hoursPerWeek: string;
+    readonly classesRemaining: number;
+    readonly classesTotal: number;
+    readonly version: number;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
+  };
+
+  export const findProfileById = async (studentId: string, tx?: DBTransaction): Promise<StudentProfileRow | null> => {
+    const queryDb = tx ?? db;
+    const parentUser = alias(users, "parent_user");
+
+    const results = await queryDb
+      .select({
+        id: students.id,
+        name: students.name,
+        status: students.status,
+        avatarUrl: students.avatarUrl,
+        dateOfBirth: students.dateOfBirth,
+        gender: students.gender,
+        language: students.language,
+        parentId: students.parentId,
+        parentName: parentUser.name,
+        primaryTeacherId: students.primaryTeacherId,
+        teacherUserId: teachers.userId,
+        teacherName: users.name,
+        hoursPerWeek: students.hoursPerWeek,
+        classesRemaining: students.classesRemaining,
+        classesTotal: students.classesTotal,
+        version: students.version,
+        createdAt: students.createdAt,
+        updatedAt: students.updatedAt,
+      })
+      .from(students)
+      .leftJoin(parents, eq(students.parentId, parents.id))
+      .leftJoin(parentUser, eq(parents.userId, parentUser.id))
+      .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
+      .leftJoin(users, eq(teachers.userId, users.id))
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    const row = results[0];
+    return {
+      id: row.id,
+      name: row.name,
+      status: parseStudentStatus(row.status) ?? StudentStatus.REGULAR,
+      avatarUrl: row.avatarUrl,
+      dateOfBirth: row.dateOfBirth,
+      gender: row.gender,
+      language: row.language,
+      parentId: row.parentId,
+      parentName: row.parentName,
+      primaryTeacherId: row.primaryTeacherId,
+      teacherUserId: row.teacherUserId,
+      teacherName: row.teacherName,
+      hoursPerWeek: row.hoursPerWeek,
+      classesRemaining: row.classesRemaining,
+      classesTotal: row.classesTotal,
+      version: row.version,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
+  };
 }

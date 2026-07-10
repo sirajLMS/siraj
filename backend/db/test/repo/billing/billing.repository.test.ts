@@ -25,7 +25,11 @@ async function createOverdueInvoice(
   parentId: string,
   amount: string,
   dueDateOffsetDays: number,
-  status: InvoiceStatus.UNPAID | InvoiceStatus.PAID | InvoiceStatus.CANCELLED = InvoiceStatus.UNPAID
+  status:
+    | InvoiceStatus.UNPAID
+    | InvoiceStatus.PAID
+    | InvoiceStatus.CANCELLED
+    | InvoiceStatus.PAYMENT_PENDING = InvoiceStatus.UNPAID
 ) {
   const now = new Date();
   const dueDate = new Date(now.getTime() + dueDateOffsetDays * 86400000);
@@ -148,7 +152,7 @@ describe("BillingRepository — getInvoicesForParent", () => {
       const inv1 = await createOverdueInvoice(tx, parent.id, "120.00", -5, InvoiceStatus.UNPAID);
       const inv2 = await createOverdueInvoice(tx, parent.id, "80.00", -10, InvoiceStatus.PAID);
 
-      const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
+      const result = await BillingRepository.getInvoicesForParent(parent.id, null, null, tx);
 
       expect(result.rows).toHaveLength(2);
       expect(result.totalCount).toBe(2);
@@ -175,7 +179,12 @@ describe("BillingRepository — getInvoicesForParent", () => {
 
   test("returns empty rows for parent with no invoices", async () => {
     await runInRollback(async tx => {
-      const result = await BillingRepository.getInvoicesForParent("00000000-0000-0000-0000-000000000000", null, tx);
+      const result = await BillingRepository.getInvoicesForParent(
+        "00000000-0000-0000-0000-000000000000",
+        null,
+        null,
+        tx
+      );
       expect(result.rows).toEqual([]);
       expect(result.totalCount).toBe(0);
     });
@@ -207,7 +216,7 @@ describe("BillingRepository — getInvoicesForParent", () => {
         })
         .returning();
 
-      const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
+      const result = await BillingRepository.getInvoicesForParent(parent.id, null, null, tx);
       expect(result.rows.some(item => item.id === softDeletedInv.id)).toBeFalse();
     });
   });
@@ -269,7 +278,7 @@ describe("BillingRepository — deleteInvoice", () => {
     await runInRollback(async tx => {
       const { parent, invoice } = await setupInvoiceTest(tx);
       await BillingRepository.deleteInvoice(invoice.id, tx);
-      const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
+      const result = await BillingRepository.getInvoicesForParent(parent.id, null, null, tx);
       expect(result.rows.find(inv => inv.id === invoice.id)).toBeUndefined();
     });
   });
@@ -571,6 +580,69 @@ describe("BillingRepository — listExchangeRateHistory", () => {
       expect(result.pageInfo?.hasMorePages).toBe(true);
       expect(result.pageInfo?.lastPage).toBe(2);
       expect(result.pageInfo?.perPage).toBe(2);
+    });
+  });
+});
+
+describe("BillingRepository — getParentBillingSummary", () => {
+  test("returns next unpaid invoice by earliest due date and pending payment count", async () => {
+    await runInRollback(async tx => {
+      const parentUser = await createTestUser(tx, {
+        name: "Summary Parent",
+        email: `summary-${randomUUID()}@test.com`,
+      });
+      const parent = await createTestParent(tx, parentUser.id);
+
+      const laterUnpaid = await createOverdueInvoice(tx, parent.id, "200.00", 20, InvoiceStatus.UNPAID);
+      const earlierUnpaid = await createOverdueInvoice(tx, parent.id, "100.00", 5, InvoiceStatus.UNPAID);
+      await createOverdueInvoice(tx, parent.id, "50.00", -2, InvoiceStatus.PAYMENT_PENDING);
+
+      const result = await BillingRepository.getParentBillingSummary(parent.id, tx);
+
+      expect(result.nextUnpaidInvoice?.id).toBe(earlierUnpaid.id);
+      expect(result.nextUnpaidInvoice?.amount).toBe("100.00");
+      expect(result.nextUnpaidInvoice?.dueDate).toBe(earlierUnpaid.dueDate);
+      expect(result.pendingPaymentCount).toBe(1);
+      expect(result.outstandingBalance).toBe("300.00");
+      expect(result.nextDueDate).toBe(earlierUnpaid.dueDate);
+      expect(laterUnpaid.id).not.toBe(result.nextUnpaidInvoice?.id);
+    });
+  });
+
+  test("returns null next unpaid invoice when parent has no unpaid invoices", async () => {
+    await runInRollback(async tx => {
+      const parentUser = await createTestUser(tx, {
+        name: "Summary Paid Parent",
+        email: `summary-paid-${randomUUID()}@test.com`,
+      });
+      const parent = await createTestParent(tx, parentUser.id);
+
+      await createOverdueInvoice(tx, parent.id, "100.00", -5, InvoiceStatus.PAID);
+
+      const result = await BillingRepository.getParentBillingSummary(parent.id, tx);
+
+      expect(result.nextUnpaidInvoice).toBeNull();
+      expect(result.pendingPaymentCount).toBe(0);
+    });
+  });
+});
+
+describe("BillingRepository — invoice search", () => {
+  test("filters parent invoices by id fragment server-side", async () => {
+    await runInRollback(async tx => {
+      const parentUser = await createTestUser(tx, {
+        name: "Search Parent",
+        email: `search-${randomUUID()}@test.com`,
+      });
+      const parent = await createTestParent(tx, parentUser.id);
+
+      const target = await createOverdueInvoice(tx, parent.id, "111.00", -3, InvoiceStatus.UNPAID);
+      await createOverdueInvoice(tx, parent.id, "222.00", -4, InvoiceStatus.UNPAID);
+
+      const result = await BillingRepository.getInvoicesForParent(parent.id, null, target.id.slice(0, 8), tx);
+
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0]?.id).toBe(target.id);
     });
   });
 });

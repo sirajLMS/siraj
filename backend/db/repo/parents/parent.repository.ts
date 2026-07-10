@@ -73,7 +73,6 @@ export namespace ParentRepository {
       .values({
         userId: input.userId,
         status: input.status,
-        phone: input.phone ?? null,
         nationality: input.nationality ?? null,
         address: input.address ?? null,
         facebook: input.facebook ?? null,
@@ -299,7 +298,7 @@ export namespace ParentRepository {
         avatarUrl: users.avatarUrl,
         lifecycleStatus: parents.status,
         accountStatus: users.status,
-        phone: parents.phone,
+        phone: users.phone,
         nationality: parents.nationality,
         address: parents.address,
         facebook: parents.facebook,
@@ -345,7 +344,6 @@ export namespace ParentRepository {
     const now = new Date();
     const parentUpdate: Record<string, unknown> = { updatedAt: now };
 
-    if (input.phone !== undefined) parentUpdate.phone = input.phone;
     if (input.nationality !== undefined) parentUpdate.nationality = input.nationality;
     if (input.address !== undefined) parentUpdate.address = input.address;
     if (input.facebook !== undefined) parentUpdate.facebook = input.facebook;
@@ -369,6 +367,16 @@ export namespace ParentRepository {
     const queryDb = tx ?? db;
     const [parent] = await queryDb.select().from(parents).where(eq(parents.userId, userId)).limit(1);
     return parent ?? null;
+  };
+
+  export const findUserIdByParentId = async (parentId: string, tx?: DBTransaction): Promise<string | null> => {
+    const queryDb = tx ?? db;
+    const [parent] = await queryDb
+      .select({ userId: parents.userId })
+      .from(parents)
+      .where(eq(parents.id, parentId))
+      .limit(1);
+    return parent?.userId ?? null;
   };
 
   export type DeactivatedParentResult = {

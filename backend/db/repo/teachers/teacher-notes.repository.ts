@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherImportantNotes } from "@/backend/db/schema";
@@ -179,5 +179,40 @@ export namespace TeacherNotesRepository {
       logger.error("Error listing all teacher notes:", error);
       throw error;
     }
+  }
+
+  export async function findByTitles(
+    titles: readonly string[],
+    tx?: DBTransaction
+  ): Promise<TeacherImportantNoteSelectType[]> {
+    if (titles.length === 0) return [];
+    try {
+      const client = tx ?? db;
+      return await client
+        .select()
+        .from(teacherImportantNotes)
+        .where(and(inArray(teacherImportantNotes.title, [...titles]), isNull(teacherImportantNotes.deletedAt)));
+    } catch (error) {
+      logger.error("Error finding teacher notes by titles:", error);
+      throw error;
+    }
+  }
+
+  export async function createMany(
+    inputs: readonly (TeacherImportantNoteSubmitInput & { createdByUserId: string; teacherId: string | null })[],
+    tx?: DBTransaction
+  ): Promise<TeacherImportantNoteSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const results: TeacherImportantNoteSelectType[] = [];
+    for (const input of inputs) {
+      const existing = await findByTitles([input.title], tx);
+      if (existing[0]) {
+        results.push(existing[0]);
+        continue;
+      }
+      results.push(await createNote(input, undefined, tx));
+    }
+    return results;
   }
 }

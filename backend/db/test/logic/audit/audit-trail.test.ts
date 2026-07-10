@@ -18,8 +18,8 @@ import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo";
 import { auditLogs, users } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
-import { type AccountStatus, CurrencyCode, StudentStatus, type UserRole } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { AccountStatus, CurrencyCode, StudentStatus, UserRole } from "@/backend/enum";
+import { parseIanaTimezone } from "@/backend/lib/enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
@@ -62,18 +62,18 @@ describe("Audit Trail System", () => {
       // Construct UserReturnType with resolved fields
       testUser1 = {
         ...user1,
-        timezone: (user1.timezone ?? IanaTimezone.UTC) as IanaTimezone,
-        role: "SUPER_ADMIN" as UserRole,
-        status: "ACTIVATED" as AccountStatus,
+        timezone: parseIanaTimezone(user1.timezone),
+        role: UserRole.SUPER_ADMIN,
+        status: AccountStatus.ACTIVATED,
         teacherId: null,
         parentId: null,
       };
 
       testUser2 = {
         ...user2,
-        timezone: (user2.timezone ?? IanaTimezone.UTC) as IanaTimezone,
-        role: "SUPER_ADMIN" as UserRole,
-        status: "ACTIVATED" as AccountStatus,
+        timezone: parseIanaTimezone(user2.timezone),
+        role: UserRole.SUPER_ADMIN,
+        status: AccountStatus.ACTIVATED,
         teacherId: null,
         parentId: null,
       };

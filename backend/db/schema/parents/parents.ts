@@ -12,7 +12,6 @@ export const parents = pgTable(
       .unique()
       .references(() => users.id, { onDelete: "restrict" }),
     status: parentStatusEnum("status").notNull(),
-    phone: varchar("phone", { length: 50 }),
     nationality: countryCodeEnum("nationality"),
     address: text("address"),
     facebook: varchar("facebook", { length: 512 }),

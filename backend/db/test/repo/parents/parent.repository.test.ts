@@ -7,7 +7,7 @@ import { ParentRepository } from "@/backend/db/repo";
 import { parents, users } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { AccountStatus, CurrencyCode } from "@/backend/enum";
+import { AccountStatus, CurrencyCode, ParentStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -195,7 +195,6 @@ describe("ParentRepository — create", () => {
         {
           userId: user.id,
           status: "REGULAR",
-          phone: "+1234567890",
           nationality: "US",
           address: "123 Main St",
           invoiceType: "MONTHLY",
@@ -398,6 +397,74 @@ describe("ParentRepository — non-transactional coverage fallback", () => {
 
     const directory = await ParentRepository.getParentDirectory({});
     expect(directory.rows.length).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("ParentRepository — reactivateParent", () => {
+  test("reactivates a deactivated parent account", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, {
+        name: "Reactivate Parent",
+        email: `rp-${randomUUID()}@test.com`,
+        status: AccountStatus.DEACTIVATED,
+      });
+      const parent = await createTestParent(tx, user.id);
+
+      const result = await ParentRepository.reactivateParent(parent.id, tx);
+
+      expect(result.accountStatus).toBe(AccountStatus.ACTIVATED);
+      const updated = await tx.select({ status: users.status }).from(users).where(eq(users.id, user.id)).limit(1);
+      expect(updated[0]?.status).toBe(AccountStatus.ACTIVATED);
+    });
+  });
+
+  test("throws parentAlreadyActivated when account is already ACTIVATED", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Active Parent", email: `ap2-${randomUUID()}@test.com` });
+      const parent = await createTestParent(tx, user.id);
+
+      const error = await expectRepoError(() => ParentRepository.reactivateParent(parent.id, tx));
+      expect(error.message).toContain("already activated");
+    });
+  });
+});
+
+describe("ParentRepository — changeLifecycleStatus", () => {
+  test("updates parents.status without touching users.status", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Lifecycle Parent", email: `lp-${randomUUID()}@test.com` });
+      const parent = await createTestParent(tx, user.id, { status: "REGULAR" });
+
+      const result = await ParentRepository.changeLifecycleStatus(parent.id, ParentStatus.ON_TRIAL, tx);
+
+      expect(result.lifecycleStatus).toBe(ParentStatus.ON_TRIAL);
+
+      const parentRow = await tx
+        .select({ status: parents.status })
+        .from(parents)
+        .where(eq(parents.id, parent.id))
+        .limit(1);
+      expect(parentRow[0]?.status).toBe("ON_TRIAL");
+
+      const userRow = await tx.select({ status: users.status }).from(users).where(eq(users.id, user.id)).limit(1);
+      expect(userRow[0]?.status).toBe(AccountStatus.ACTIVATED);
+    });
+  });
+});
+
+describe("ParentRepository — getParentProfile phone from users", () => {
+  test("returns phone from users.phone join", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, {
+        name: "Phone Parent",
+        email: `pp2-${randomUUID()}@test.com`,
+        phone: "+15551234567",
+      });
+      const parent = await createTestParent(tx, user.id);
+
+      const profile = await ParentRepository.getParentProfile(parent.id, tx);
+      expect(profile?.phone).toBe("+15551234567");
+    });
   });
 });
 

@@ -1,7 +1,9 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { teachers, users } from "@/backend/db/schema";
 import { recurringScheduleDays, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
+import { students } from "@/backend/db/schema/students/students";
 import type {
   RecurringScheduleDayEntity,
   RecurringScheduleDayInsertInput,
@@ -32,6 +34,32 @@ async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTran
 }
 
 export namespace RecurringScheduleRepository {
+  export async function findById(id: string, tx?: DBTransaction) {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .select({
+        schedule: recurringSchedules,
+        studentName: students.name,
+        teacherUserName: users.name,
+      })
+      .from(recurringSchedules)
+      .innerJoin(students, eq(recurringSchedules.studentId, students.id))
+      .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(and(eq(recurringSchedules.id, id), isNull(recurringSchedules.deletedAt)))
+      .limit(1);
+
+    return row ?? null;
+  }
+
+  export async function findDaysByScheduleId(recurringScheduleId: string, tx?: DBTransaction) {
+    const queryDb = tx ?? db;
+    return queryDb
+      .select()
+      .from(recurringScheduleDays)
+      .where(eq(recurringScheduleDays.recurringScheduleId, recurringScheduleId));
+  }
+
   export async function listByStudentIds(
     studentIds: readonly string[],
     tx?: DBTransaction
