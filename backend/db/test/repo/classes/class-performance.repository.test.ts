@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { ClassPerformanceRepository } from "@/backend/db/repo";
-import { setupTestEntities } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { setupTestEntities } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 describe("ClassPerformanceRepository", () => {
   it("should return null if no performance record exists", async () => {

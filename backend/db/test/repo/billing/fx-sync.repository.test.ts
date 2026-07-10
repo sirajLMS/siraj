@@ -30,7 +30,6 @@ async function insertSyncRun(
   return row;
 }
 
-
 type SyncRunTransition = {
   status: FxSyncStatus;
   pairsWritten?: string;
@@ -39,11 +38,7 @@ type SyncRunTransition = {
   finishedAt?: Date;
 };
 
-async function transitionSyncRun(
-  tx: DBTransaction,
-  id: string,
-  patch: SyncRunTransition
-): Promise<void> {
+async function transitionSyncRun(tx: DBTransaction, id: string, patch: SyncRunTransition): Promise<void> {
   await tx
     .update(fxSyncRuns)
     .set({

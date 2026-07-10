@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { GroupClassRepository } from "@/backend/db/repo";
 import { classCommunications, classInstances, groupClassEnrollments, groupClasses } from "@/backend/db/schema";
-import { runInRollback } from "@/backend/db/test/test-utils";
 import {
   createMockClassInstance,
   createTestParent,
@@ -12,7 +11,8 @@ import {
   createTestUser,
   setupStudent,
   setupTeacher,
-} from "../entity-setup";
+} from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

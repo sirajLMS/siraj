@@ -10,10 +10,10 @@ import {
   teacherAssignments,
   users,
 } from "@/backend/db/schema";
+import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
+import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { createMockClassInstance, setupTestEntities } from "../entity-setup";
-import { runInRollback } from "../test-utils";
-import { testRepoError } from "./scheduling-test-helpers";
 
 interface ClassStatusEventState {
   executionState?: string;

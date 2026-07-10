@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { runInRollback } from "../test-utils";
+import { runInRollback } from "@/backend/db/test/test-utils";
 
 /**
  * Shared test helpers for scheduling repository tests.

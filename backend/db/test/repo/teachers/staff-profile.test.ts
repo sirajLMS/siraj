@@ -6,10 +6,10 @@ import { db } from "@/backend/db/drizzleDb";
 import { StaffProfileRepository } from "@/backend/db/repo";
 import type { ManagerProfileUpdateInput } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
+import { createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus } from "@/backend/enum";
 import { PaginationArgs } from "@/backend/types";
-import { createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 function loc(en: string, ar?: string) {
   return { ar: ar ?? en, en };

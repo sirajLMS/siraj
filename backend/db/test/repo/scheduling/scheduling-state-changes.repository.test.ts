@@ -10,7 +10,7 @@ import {
   setupTeacher,
   setupTestEntities,
 } from "@/backend/db/test/entity-setup";
-import { expectRepositoryError } from "@/backend/db/test/repo/scheduling-test-helpers";
+import { expectRepositoryError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
