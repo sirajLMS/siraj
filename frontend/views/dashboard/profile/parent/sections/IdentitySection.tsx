@@ -2,8 +2,12 @@
 
 import { Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
+import { CountryDisplay } from "@/frontend/components/ui/display";
+import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
+import { getCountryByCode } from "@/frontend/lib/locale";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
 import {
@@ -19,6 +23,7 @@ type IdentitySectionProps =
   | {
       readonly mode: "edit";
       readonly register: UseFormRegister<ParentAdminEditFormData>;
+      readonly control: Control<ParentAdminEditFormData>;
     };
 
 export function IdentitySection(props: IdentitySectionProps) {
@@ -29,7 +34,22 @@ export function IdentitySection(props: IdentitySectionProps) {
     return (
       <SectionPanel title={t("sections.identity")}>
         <Stack spacing={2}>
-          <TextField label={t("fields.nationality")} fullWidth size="small" {...props.register("nationality")} />
+          <Controller
+            name="nationality"
+            control={props.control}
+            render={({ field }) => {
+              const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
+
+              return (
+                <CountrySelect
+                  country={selectedCountry}
+                  setCountryAction={country => field.onChange(country.code)}
+                  label={t("fields.nationality")}
+                  fullWidth
+                />
+              );
+            }}
+          />
           <TextField label={t("fields.address")} fullWidth size="small" {...props.register("address")} />
         </Stack>
       </SectionPanel>
@@ -39,7 +59,16 @@ export function IdentitySection(props: IdentitySectionProps) {
   return (
     <SectionPanel title={t("sections.identity")}>
       <Stack spacing={2}>
-        <InfoField label={t("fields.nationality")} value={toDisplayValue(props.adminData.nationality, tc("notSet"))} />
+        <InfoField
+          label={t("fields.nationality")}
+          value={
+            props.adminData.nationality ? (
+              <CountryDisplay code={props.adminData.nationality} fallback={tc("notSet")} />
+            ) : (
+              tc("notSet")
+            )
+          }
+        />
         <InfoField label={t("fields.address")} value={toDisplayValue(props.adminData.address, tc("notSet"))} />
       </Stack>
     </SectionPanel>

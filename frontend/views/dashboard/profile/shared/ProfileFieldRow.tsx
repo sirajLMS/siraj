@@ -1,11 +1,12 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import { Link, Stack, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
+import type * as React from "react";
 
 interface ProfileFieldRowProps {
   readonly icon: SvgIconComponent;
   readonly label: string;
-  readonly value: string | null | undefined;
+  readonly value: React.ReactNode;
   readonly href?: string | null;
   readonly fallback?: string;
   readonly hover?: boolean;
@@ -19,9 +20,11 @@ export function ProfileFieldRow({
   fallback = "—",
   hover = false,
 }: ProfileFieldRowProps) {
-  const displayValue = value?.trim() || fallback;
   const hasLink = Boolean(href);
   const linkHref = href ?? undefined;
+
+  const valueIsEmptyString = typeof value === "string" && value.trim() === "";
+  const displayValue: React.ReactNode = valueIsEmptyString ? fallback : value;
 
   return (
     <Stack

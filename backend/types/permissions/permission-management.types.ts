@@ -1,6 +1,7 @@
 import type { userPermissionOverrides } from "@/backend/db/schema";
 import type { OverrideState } from "@/backend/enum";
 import type { PermissionGroupReturnType } from "@/backend/types/permissions/permission-group.types";
+import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 
 export type UserOverrideEntity = typeof userPermissionOverrides.$inferSelect;
@@ -15,9 +16,9 @@ export type GroupWithPermissionIds = PermissionGroupReturnType & {
 };
 
 export type CreateGroupInput = {
-  name: string;
+  name: LocalizedString;
   slug: string;
-  description?: string | null;
+  description?: LocalizedString | null;
   isSystem?: boolean;
   createdByUserId?: string | null;
   permissionIds: string[];

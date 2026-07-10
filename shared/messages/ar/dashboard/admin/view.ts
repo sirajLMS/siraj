@@ -13,7 +13,8 @@ const performanceLabels: ClassDetailsPerformanceLabels = {
 export const adminView: AdminViewLabels = {
   timezone: {
     title: "تم اكتشاف تعارض في المنطقة الزمنية",
-    description: "التوقيت المحلي للطالب ({timezone}) يختلف عن إعداد الخادم (UTC). قد يكون تسجيل الحضور متأخراً.",
+    prefix: "التوقيت المحلي للطالب (",
+    suffix: ") يختلف عن إعداد الخادم (UTC). قد يكون تسجيل الحضور متأخراً.",
   },
   adminActions: {
     administrativeActions: "الإجراءات الإدارية",

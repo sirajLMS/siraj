@@ -2,9 +2,12 @@
 
 import { MenuItem, Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
-import { PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import { CurrencyCode, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 import type { TeacherViewData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type { TeacherAdminEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
@@ -17,6 +20,7 @@ type CompensationSectionProps =
   | {
       readonly mode: "edit";
       readonly register: UseFormRegister<TeacherAdminEditFormData>;
+      readonly control: Control<TeacherAdminEditFormData>;
     };
 
 function formatPaymentMethod(method: string | null | undefined, fallback: string): string {
@@ -41,7 +45,26 @@ export function CompensationSection(props: CompensationSectionProps) {
       <SectionPanel title={t("sections.compensation")}>
         <Stack spacing={2}>
           <TextField label={t("fields.hourlyRate")} fullWidth size="small" {...props.register("hourlyRate")} />
-          <TextField label={t("fields.currency")} fullWidth size="small" {...props.register("rateCurrency")} />
+          <Controller
+            name="rateCurrency"
+            control={props.control}
+            render={({ field }) => {
+              const option: CurrencyOption | null = field.value
+                ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
+                : null;
+              return (
+                <CurrencySelect
+                  currency={option}
+                  setCurrencyAction={selected => {
+                    field.onChange(selected.code as string);
+                  }}
+                  onBlurAction={field.onBlur}
+                  label={t("fields.currency")}
+                  fullWidth
+                />
+              );
+            }}
+          />
           <TextField
             label={t("fields.paymentMethod")}
             fullWidth
@@ -59,7 +82,7 @@ export function CompensationSection(props: CompensationSectionProps) {
 
   const salaryLabel = t("baseSalary", {
     amount: props.teacherData.hourlyRate ?? "0",
-    currency: props.teacherData.rateCurrency ?? "USD",
+    currency: props.teacherData.rateCurrency ?? CurrencyCode.Usd,
   });
 
   return (

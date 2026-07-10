@@ -4,7 +4,8 @@ import { AccessTimeOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/ic
 import { Avatar, Box, CircularProgress, Paper, Stack, type Theme, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { useLocale } from "next-intl";
-import { ActionIconLink } from "@/frontend/components/ui";
+import type * as React from "react";
+import { ActionIconLink, TimezoneDisplay } from "@/frontend/components/ui";
 import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
@@ -267,8 +268,9 @@ const StyledPersonName = styled(Typography, {
 
 interface MetaStatItem {
   readonly label: string;
-  readonly value: string;
+  readonly value: React.ReactNode;
   readonly tone?: PersonAccentTone;
+  readonly timezone?: string | null;
 }
 
 function ScheduleMetaStatBar({ items }: { readonly items: readonly MetaStatItem[] }) {
@@ -283,9 +285,10 @@ function ScheduleMetaStatBar({ items }: { readonly items: readonly MetaStatItem[
           <StyledMetaLabel variant="labelMd" title={item.label}>
             {item.label}
           </StyledMetaLabel>
-          <StyledMetaValue variant="bodyMd" title={item.value} tone={item.tone}>
+          <StyledMetaValue variant="bodyMd" tone={item.tone}>
             {item.value}
           </StyledMetaValue>
+          {item.timezone ? <TimezoneDisplay timezone={item.timezone} typographyVariant="labelMd" /> : null}
         </StyledMetaTile>
       ))}
     </StyledMetaPanel>
@@ -417,8 +420,26 @@ function ScheduleOverviewMobileCard({
 
       <ScheduleMetaStatBar
         items={[
-          ...(showTimezones ? [{ label: headers.teacherTime, value: teacherTime, tone: "teacher" as const }] : []),
-          ...(showTimezones ? [{ label: headers.studentTime, value: studentTime, tone: "student" as const }] : []),
+          ...(showTimezones
+            ? [
+                {
+                  label: headers.teacherTime,
+                  value: teacherTime,
+                  tone: "teacher" as const,
+                  timezone: row.teacherTimezone,
+                },
+              ]
+            : []),
+          ...(showTimezones
+            ? [
+                {
+                  label: headers.studentTime,
+                  value: studentTime,
+                  tone: "student" as const,
+                  timezone: row.studentTimezone,
+                },
+              ]
+            : []),
           { label: headers.duration, value: duration, tone: "default" as const },
         ]}
       />

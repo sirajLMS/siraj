@@ -158,10 +158,6 @@ export function StudentOnboardingContainer() {
             primaryTeacher: t("placeholders.primaryTeacher"),
           },
           options: {
-            language: {
-              arabic: t("options.language.arabic"),
-              english: t("options.language.english"),
-            },
             status: {
               onTrial: t("options.status.onTrial"),
               regular: t("options.status.regular"),

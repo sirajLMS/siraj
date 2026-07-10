@@ -7,7 +7,7 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher-portal.documents";
 
 export function TeacherOwnProfileContainer() {
@@ -54,7 +54,7 @@ export function TeacherOwnProfileContainer() {
                   <Typography sx={{ typography: "bodyMd" }}>
                     {t("baseSalary", {
                       amount: profile.hourlyRate ?? "0",
-                      currency: profile.rateCurrency ?? "USD",
+                      currency: profile.rateCurrency ?? CurrencyCode.Usd,
                     })}
                   </Typography>
                   <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>

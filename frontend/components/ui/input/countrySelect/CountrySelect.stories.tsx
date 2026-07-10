@@ -2,12 +2,13 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { CountrySelect, type CountrySelectProps } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
+import { CountryCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CountryType, countries } from "@/frontend/lib/locale";
 
 function CountrySelectStory({
   initialCountryCode,
   ...props
-}: Readonly<Partial<CountrySelectProps> & { initialCountryCode?: string }>) {
+}: Readonly<Partial<CountrySelectProps> & { initialCountryCode?: CountryCode }>) {
   const [country, setCountry] = useState<CountryType | undefined>(() =>
     initialCountryCode ? countries.find(entry => entry.code === initialCountryCode) : undefined
   );
@@ -30,7 +31,7 @@ type Story = StoryObj<typeof CountrySelectStory>;
 
 export const Default: Story = {
   args: {
-    initialCountryCode: "SA",
+    initialCountryCode: CountryCode.Sa,
   },
 };
 
@@ -38,8 +39,15 @@ export const Empty: Story = {};
 
 export const Required: Story = {
   args: {
-    initialCountryCode: "EG",
+    initialCountryCode: CountryCode.Eg,
     required: true,
+  },
+};
+
+export const Disabled: Story = {
+  args: {
+    initialCountryCode: CountryCode.Sa,
+    disabled: true,
   },
 };
 
@@ -48,6 +56,6 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    initialCountryCode: "SA",
+    initialCountryCode: CountryCode.Sa,
   },
 };

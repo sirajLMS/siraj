@@ -11,12 +11,16 @@ import { LocaleEmoji } from "@/frontend/components/ui/display";
 import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/lib/locale";
 
 export type LanguageSelectorProps = {
-  language?: LanguageType;
-  setLanguageAction: (language: LanguageType) => void;
-  fullWidth?: boolean;
-  required?: boolean;
-  label?: string;
-  style?: React.CSSProperties;
+  readonly language?: LanguageType;
+  readonly setLanguageAction: (language: LanguageType) => void;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
 };
 
 /**
@@ -27,7 +31,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   setLanguageAction: setLanguage,
   fullWidth,
   required,
+  disabled,
   label,
+  error,
+  helperText,
+  onBlurAction: onBlur,
   style,
 }: LanguageSelectorProps): React.ReactNode => {
   const t = useTranslations("ui.languageSelector");
@@ -35,11 +43,16 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   const getLanguageName = useCallback((code: string) => getLanguageDisplayName(code, locale), [locale]);
 
+  const showRequiredError = Boolean(required) && !language;
+  const showError = Boolean(error) || showRequiredError;
+  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+
   return (
     <Autocomplete
       fullWidth={fullWidth}
       options={languages}
       autoHighlight
+      disabled={disabled}
       value={language ?? null}
       sx={{ ...style }}
       onChange={(_, newValue) => {
@@ -47,6 +60,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           setLanguage(newValue);
         }
       }}
+      onBlur={onBlur}
       isOptionEqualToValue={(option, value) => option.code === value.code}
       getOptionLabel={option => getLanguageName(option.code)}
       renderOption={(props, option) => {
@@ -63,6 +77,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           {...params}
           label={label ?? t("selectLanguage")}
           required={required}
+          error={showError}
+          helperText={resolvedHelperText}
+          onBlur={onBlur}
           slotProps={{
             ...params.slotProps,
             input: {

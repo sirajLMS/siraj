@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
   AppPermission,
+  CurrencyCode,
   type Gender,
   AccountStatus as GqlAccountStatus,
   type PaymentMethod,
@@ -77,7 +78,7 @@ export function TeacherProfileContainer() {
         timezone: data.teacherProfileForEdit.timezone ?? "",
         address: data.teacherProfileForEdit.address ?? "",
         baseSalary: Number.parseFloat(data.teacherProfileForEdit.hourlyRate ?? "0"),
-        currency: data.teacherProfileForEdit.rateCurrency ?? "USD",
+        currency: data.teacherProfileForEdit.rateCurrency ?? CurrencyCode.Usd,
         paymentMethod: data.teacherProfileForEdit.paymentMethod ?? null,
         zoomLink: data.teacherProfileForEdit.zoomLink ?? "",
         accountStatus: data.teacherProfileForEdit.status === GqlAccountStatus.Activated,

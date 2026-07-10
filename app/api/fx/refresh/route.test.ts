@@ -1,6 +1,17 @@
-import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
+import type { NextRequest } from "next/server";
+
+const { NextRequest: NextRequestImpl } = await import("next/server");
 
 const TEST_SECRET = "test-cron-secret-1234567890abcdef";
+
+// Set env before any import that transitively loads @/backend/services / env validation.
+function setEnv(key: string, value: string | undefined): void {
+  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true });
+}
+
+setEnv("NODE_ENV", "test");
+setEnv("CRON_SECRET", TEST_SECRET);
 
 type RefreshRatesResult = {
   id: string;
@@ -21,14 +32,6 @@ const refreshRatesMock = mock(
   })
 );
 
-// Mock the deep service module so the @/backend/services barrel re-exports
-// the mocked FxIngestionService while leaving every other service real.
-mock.module("@/backend/services/fx/fx-ingestion.service", () => ({
-  FxIngestionService: {
-    refreshRates: refreshRatesMock,
-  },
-}));
-
 // Suppress expected logger output from cron-auth, the route error path, and
 // the deep db factory logger.log used when services barrel loads drizzleDb.
 const noop = () => {};
@@ -37,29 +40,21 @@ mock.module("@/backend/lib/logger", () => ({
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
 
-// Ensure CRON_SECRET is set before any route import triggers env validation,
-// and NODE_ENV=test so cron-auth allows missing secret only if explicitly unset.
 // Use Reflect.defineProperty to bypass the TS read-only annotation on process.env.
-function setEnv(key: string, value: string | undefined): void {
-  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true });
-}
-
-setEnv("NODE_ENV", "test");
-setEnv("CRON_SECRET", TEST_SECRET);
+// (setEnv is declared above, before service imports.)
 
 async function importRoute() {
   return import("./route") as Promise<{
-    GET: (request: import("next/server").NextRequest) => Promise<Response>;
+    GET: (request: NextRequest) => Promise<Response>;
   }>;
 }
 
-function makeRequest(method: string, headers: Record<string, string | null> = {}): import("next/server").NextRequest {
-  const { NextRequest } = require("next/server") as typeof import("next/server");
+function makeRequest(method: string, headers: Record<string, string | null> = {}): NextRequest {
   const headersInit = new Headers();
   for (const [key, value] of Object.entries(headers)) {
     if (value !== null) headersInit.set(key, value);
   }
-  return new NextRequest("http://localhost:3000/api/fx/refresh", { method, headers: headersInit });
+  return new NextRequestImpl("http://localhost:3000/api/fx/refresh", { method, headers: headersInit }) as NextRequest;
 }
 
 async function parseJson(response: Response): Promise<Record<string, unknown>> {
@@ -69,13 +64,17 @@ async function parseJson(response: Response): Promise<Record<string, unknown>> {
 const originalNodeEnv = process.env.NODE_ENV;
 const originalSecret = process.env.CRON_SECRET;
 
-beforeEach(() => {
+beforeEach(async () => {
   refreshRatesMock.mockClear();
+  const { FxIngestionService } = await import("@/backend/services/fx/fx-ingestion.service");
+  spyOn(FxIngestionService, "refreshRates").mockImplementation(refreshRatesMock);
   setEnv("NODE_ENV", "test");
   setEnv("CRON_SECRET", TEST_SECRET);
 });
 
-afterEach(() => {
+afterEach(async () => {
+  const { FxIngestionService } = await import("@/backend/services/fx/fx-ingestion.service");
+  spyOn(FxIngestionService, "refreshRates").mockRestore();
   setEnv("NODE_ENV", originalNodeEnv ?? "test");
   setEnv("CRON_SECRET", originalSecret ?? TEST_SECRET);
 });
@@ -165,13 +164,4 @@ describe("GET /api/fx/refresh", () => {
     const body = await parseJson(response);
     expect(body).toHaveProperty("success", false);
   });
-
-  // R1 / R1b: production without CRON_SECRET -> 500 (server misconfigured).
-  // The env validator caches its result in a module-level `cachedConfig` that
-  // survives `clearGlobalSingleton`, so flipping NODE_ENV=production + clearing
-  // CRON_SECRET mid-suite does not re-validate. cron-auth unit tests (planned
-  // for backend/lib/cron-auth.test.ts) cover this case directly against the
-  // validator. This case is intentionally left as todo to avoid fragile env
-  // juggling that would couple the route test to env.ts internals.
-  test.todo("returns 500 in production when CRON_SECRET is missing", () => {});
 });

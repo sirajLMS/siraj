@@ -50,6 +50,13 @@ export const Required: Story = {
   },
 };
 
+export const Disabled: Story = {
+  args: {
+    initialCurrencyCode: CurrencyCode.Sar,
+    disabled: true,
+  },
+};
+
 export const FilteredToGcc: Story = {
   args: {
     initialCurrencyCode: CurrencyCode.Sar,

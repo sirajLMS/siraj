@@ -549,8 +549,8 @@ export type CreateManualClassEntryInput = {
 };
 
 export type CreatePermissionGroupInput = {
-  description: string | null | undefined;
-  name: string;
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>>;
   permissionIds: Array<string>;
 };
 
@@ -1479,9 +1479,9 @@ export type UpdateOwnProfileInput = {
 };
 
 export type UpdatePermissionGroupInput = {
-  description: string | null | undefined;
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
   groupId: string;
-  name: string | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>> | null | undefined;
   permissionIds: Array<string> | null | undefined;
 };
 
@@ -2093,30 +2093,30 @@ export type UpdateStudentQuotaMutationVariables = Exact<{
 
 export type UpdateStudentQuotaMutation = { updateStudentQuota: { id: string | null, classesRemaining: number | null, classesTotal: number | null, version: number | null } | null };
 
-export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
+export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: Partial<Record<'ar' | 'en', string>> | null, category: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null };
 
-export type PermissionGroupFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null };
+export type PermissionGroupFieldsFragment = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null };
 
-export type PermissionGroupDetailFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null };
+export type PermissionGroupDetailFieldsFragment = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null };
 
 export type UserOverrideFieldsFragment = { permissionId: string | null, state: OverrideState | null, assignedBy: string | null };
 
 export type PermissionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PermissionsQuery = { permissions: Array<{ id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null }> | null };
+export type PermissionsQuery = { permissions: Array<{ id: string | null, key: string | null, resource: string | null, action: string | null, description: Partial<Record<'ar' | 'en', string>> | null, category: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null }> | null };
 
 export type PermissionGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PermissionGroupsQuery = { permissionGroups: Array<{ id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null }> | null };
+export type PermissionGroupsQuery = { permissionGroups: Array<{ id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null }> | null };
 
 export type PermissionGroupQueryVariables = Exact<{
   id: string;
 }>;
 
 
-export type PermissionGroupQuery = { permissionGroup: { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
+export type PermissionGroupQuery = { permissionGroup: { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
 
 export type UserPermissionGroupsQueryVariables = Exact<{
   userId: string;
@@ -2144,14 +2144,14 @@ export type CreatePermissionGroupMutationVariables = Exact<{
 }>;
 
 
-export type CreatePermissionGroupMutation = { createPermissionGroup: { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
+export type CreatePermissionGroupMutation = { createPermissionGroup: { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
 
 export type UpdatePermissionGroupMutationVariables = Exact<{
   input: UpdatePermissionGroupInput;
 }>;
 
 
-export type UpdatePermissionGroupMutation = { updatePermissionGroup: { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
+export type UpdatePermissionGroupMutation = { updatePermissionGroup: { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
 
 export type DeletePermissionGroupMutationVariables = Exact<{
   groupId: string;

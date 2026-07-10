@@ -2,9 +2,10 @@
 
 import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import { type Control, Controller, type UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
 import { AccountStatus, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 import {
@@ -21,6 +22,7 @@ type AdminOnlySectionProps =
   | {
       readonly mode: "edit";
       readonly register: UseFormRegister<TeacherAdminEditFormData>;
+      readonly control: Control<TeacherAdminEditFormData>;
     };
 
 function formatGender(
@@ -46,10 +48,22 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
         <Stack spacing={2}>
           <TextField label={t("fields.nationalId")} fullWidth size="small" {...props.register("nationalId")} />
           <TextField label={t("fields.dateOfBirth")} fullWidth size="small" {...props.register("dateOfBirth")} />
-          <TextField label={t("fields.gender")} fullWidth size="small" select {...props.register("gender")}>
-            <MenuItem value={Gender.Male}>{t("gender.male")}</MenuItem>
-            <MenuItem value={Gender.Female}>{t("gender.female")}</MenuItem>
-          </TextField>
+          <Controller
+            control={props.control}
+            name="gender"
+            render={({ field }) => (
+              <GenderSelector
+                gender={field.value ?? null}
+                setGenderAction={field.onChange}
+                fullWidth
+                labels={{
+                  title: t("fields.gender"),
+                  male: t("gender.male"),
+                  female: t("gender.female"),
+                }}
+              />
+            )}
+          />
           <TextField
             label={t("fields.qualifications")}
             fullWidth

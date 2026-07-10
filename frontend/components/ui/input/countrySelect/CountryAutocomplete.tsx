@@ -21,7 +21,10 @@ export type CountryAutocompleteProps = {
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;
   readonly required?: boolean;
+  readonly disabled?: boolean;
   readonly label?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
   readonly onBlurAction?: () => void;
   readonly style?: React.CSSProperties;
   readonly open?: boolean;
@@ -40,7 +43,10 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
   autoComplete = "country",
   fullWidth,
   required,
+  disabled,
   label,
+  error,
+  helperText,
   onBlurAction: onBlur,
   style,
   open: openProp,
@@ -62,11 +68,16 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
     [locale, showPhonePrefix]
   );
 
+  const showRequiredError = Boolean(required) && !country;
+  const showError = Boolean(error) || showRequiredError;
+  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+
   return (
     <Autocomplete
       fullWidth={fullWidth}
       options={countries}
       autoHighlight
+      disabled={disabled}
       open={isOpen}
       onOpen={() => {
         if (openProp === undefined) {
@@ -128,6 +139,8 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
             label={resolvedLabel}
             placeholder={resolvedPlaceholder}
             required={required}
+            error={showError}
+            helperText={resolvedHelperText}
             onBlur={onBlur}
             autoFocus={autoFocus}
             slotProps={{

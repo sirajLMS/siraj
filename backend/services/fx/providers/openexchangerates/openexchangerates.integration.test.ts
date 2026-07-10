@@ -5,17 +5,10 @@
  * https://openexchangerates.org/api/latest.json and consume the provider
  * monthly quota. They must NOT run in default CI.
  *
- * B5 (default CI excludes `@live-fx`) is satisfied by the skip-on-missing-env
- * pattern below: the suite skips wholesale when
- * `OPENEXCHANGERATES_APP_ID` is absent. CI environments (and this dev
- * environment) do not inject that secret, so the suite reports as skipped
- * rather than failing. The `@live-fx` tag in the describe name additionally
- * allows a future bun test filter (e.g. `--test-name-pattern "^(?!.*@live-fx)"`)
- * to exclude these tests explicitly even when keys are present locally.
- *
- * Run locally with the env var set:
- *   OPENEXCHANGERATES_APP_ID=... ~/.bun/bin/bun test \
- *     backend/services/fx/providers/openexchangerates/openexchangerates.integration.test.ts
+ * B5 (default CI excludes `@live-fx`) is satisfied by `describe.skip` when
+ * `OPENEXCHANGERATES_APP_ID` is absent. CI environments do not inject that
+ * secret, so the suite reports as skipped rather than failing. For a real
+ * live run locally, use `bun run test:live-fx` (requires keys in `.env`).
  */
 import { describe, expect, test } from "bun:test";
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
@@ -24,25 +17,16 @@ import { OpenExchangeRatesAdapter } from "@/backend/services/fx/providers/openex
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 const hasAppId = Boolean(process.env.OPENEXCHANGERATES_APP_ID);
+const describeLive = hasAppId ? describe : describe.skip;
 
-describe("OpenExchangeRatesAdapter @live-fx", () => {
+describeLive("OpenExchangeRatesAdapter @live-fx", () => {
   test("validateConfig() returns true when OPENEXCHANGERATES_APP_ID is set", () => {
-    if (!hasAppId) {
-      testLogger.warn("Skipping @live-fx validateConfig: OPENEXCHANGERATES_APP_ID is not set.");
-      return;
-    }
-
     const adapter = new OpenExchangeRatesAdapter();
 
     expect(adapter.validateConfig()).toBe(true);
   });
 
   test("fetchLatestRates() returns a USD-hub rates Map with USD and common currencies", async () => {
-    if (!hasAppId) {
-      testLogger.warn("Skipping @live-fx fetchLatestRates: OPENEXCHANGERATES_APP_ID is not set.");
-      return;
-    }
-
     const adapter = new OpenExchangeRatesAdapter();
     const result = await adapter.fetchLatestRates();
 

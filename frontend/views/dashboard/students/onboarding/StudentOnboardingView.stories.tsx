@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useForm } from "react-hook-form";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { StudentOnboardingView } from "./StudentOnboardingView";
-import type { StudentOnboardingFormData } from "./schemas/studentOnboardingSchema";
+import { StudentOnboardingView } from "@/frontend/views/dashboard/students/onboarding/StudentOnboardingView";
+import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
 const labels = {
   pageTitle: "New Student Registration",
@@ -34,10 +34,6 @@ const labels = {
     primaryTeacher: "Select teacher (optional)",
   },
   options: {
-    language: {
-      arabic: "Arabic",
-      english: "English",
-    },
     status: {
       onTrial: "On Trial",
       regular: "Regular",

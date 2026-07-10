@@ -20,7 +20,8 @@ export interface ClassDetailsToolbarAreaProps {
   readonly labels: {
     readonly timezone: {
       readonly title: string;
-      readonly description: string;
+      readonly prefix: string;
+      readonly suffix: string;
     };
   };
   readonly onStart: () => void;

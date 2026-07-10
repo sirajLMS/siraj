@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
-import { AppPermission, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useCreateParentOnboarding } from "@/frontend/hooks/useCreateParentOnboarding";
 import { logger } from "@/frontend/utils/logger";
 import { ParentOnboardingView } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView";
@@ -30,7 +30,7 @@ const defaultValues: ParentOnboardingFormData = {
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",
   paymentMethod: PaymentMethod.Paypal,
-  currency: "USD",
+  currency: CurrencyCode.Usd,
   timezone: IanaTimezone.AfricaCairo,
 };
 

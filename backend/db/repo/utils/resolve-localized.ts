@@ -56,4 +56,21 @@ export function localeJsonKey(locale?: string): string {
   return normalizeContentLocale(locale);
 }
 
+/**
+ * Drop entries whose value is empty/whitespace.
+ * Mirrors `frontend/lib/localized-string.ts → omitEmptyLocalizedString`.
+ */
+export function omitEmptyLocalized(map: LocalizedString | null | undefined): LocalizedString {
+  if (!map) {
+    return {};
+  }
+  const next: Record<string, string> = {};
+  for (const [locale, value] of Object.entries(map)) {
+    if (typeof value === "string" && value.trim() !== "") {
+      next[locale] = value;
+    }
+  }
+  return next as unknown as LocalizedString;
+}
+
 export { DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale };

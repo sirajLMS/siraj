@@ -29,8 +29,8 @@ export const PermissionObject = gqlSchemaBuilder.objectRef<PermissionEntity>("Pe
     key: t.exposeString("key"),
     resource: t.exposeString("resource"),
     action: t.exposeString("action"),
-    description: t.exposeString("description"),
-    category: t.exposeString("category"),
+    description: t.expose("description", { type: "LocalizedString" }),
+    category: t.expose("category", { type: "LocalizedString" }),
     isSystem: t.exposeBoolean("isSystem"),
   }),
 });
@@ -46,9 +46,9 @@ export const GroupUserObject = gqlSchemaBuilder.objectRef<GroupUserEntity>("Grou
 export const PermissionGroupObject = gqlSchemaBuilder.objectRef<GroupWithPermissionIds>("PermissionGroup").implement({
   fields: t => ({
     id: t.exposeString("id"),
-    name: t.exposeString("name"),
+    name: t.expose("name", { type: "LocalizedString" }),
     slug: t.exposeString("slug"),
-    description: t.exposeString("description", { nullable: true }),
+    description: t.expose("description", { type: "LocalizedString", nullable: true }),
     isSystem: t.exposeBoolean("isSystem"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
@@ -75,8 +75,8 @@ export const UserOverrideObject = gqlSchemaBuilder.objectRef<UserOverrideReturnT
 
 const CreatePermissionGroupInput = gqlSchemaBuilder.inputType("CreatePermissionGroupInput", {
   fields: t => ({
-    name: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
-    description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
+    name: t.field({ type: "LocalizedString", required: true }),
+    description: t.field({ type: "LocalizedString", required: false }),
     permissionIds: t.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
   }),
 });
@@ -84,8 +84,8 @@ const CreatePermissionGroupInput = gqlSchemaBuilder.inputType("CreatePermissionG
 const UpdatePermissionGroupInput = gqlSchemaBuilder.inputType("UpdatePermissionGroupInput", {
   fields: t => ({
     groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-    description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
+    name: t.field({ type: "LocalizedString", required: false }),
+    description: t.field({ type: "LocalizedString", required: false }),
     permissionIds: t.stringList({ required: false, directives: { constraint: { maxItems: 100 } } }),
   }),
 });
@@ -174,7 +174,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         ctx.user?.id || "",
         {
           name: args.input.name,
-          description: args.input.description ?? undefined,
+          description: args.input.description ?? null,
           permissionIds: args.input.permissionIds,
         },
         ctx.locale

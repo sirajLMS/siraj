@@ -1,8 +1,12 @@
 import { z } from "zod";
+import {
+  localizedStringOptionalSchema,
+  localizedStringRequiredSchema,
+} from "@/frontend/lib/localized-string.validation";
 
 export const permissionGroupSchema = z.object({
-  name: z.string().min(1, "nameRequired").max(255, "nameTooLong"),
-  description: z.string().max(1000, "descriptionTooLong").optional().or(z.literal("")),
+  name: localizedStringRequiredSchema(["ar"]),
+  description: localizedStringOptionalSchema(),
   permissionIds: z.array(z.string()),
 });
 

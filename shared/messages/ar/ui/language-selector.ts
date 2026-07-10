@@ -2,4 +2,5 @@ import type { LanguageSelectorLabels } from "@/shared/messages/types/ui/language
 
 export const languageSelector: LanguageSelectorLabels = {
   selectLanguage: "اختر اللغة",
+  required: "اللغة مطلوبة",
 };

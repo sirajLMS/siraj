@@ -6,7 +6,10 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
+import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
@@ -37,7 +40,26 @@ export function BillingSection(props: BillingSectionProps) {
           <TextField label={t("fields.invoiceType")} fullWidth size="small" {...props.register("invoiceType")} />
           <TextField label={t("fields.feeAmount")} fullWidth size="small" {...props.register("feeAmount")} />
           <TextField label={t("fields.paymentMethod")} fullWidth size="small" {...props.register("paymentMethod")} />
-          <TextField label={t("fields.currency")} fullWidth size="small" {...props.register("currency")} />
+          <Controller
+            name="currency"
+            control={props.control}
+            render={({ field }) => {
+              const option: CurrencyOption | null = field.value
+                ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
+                : null;
+              return (
+                <CurrencySelect
+                  currency={option}
+                  setCurrencyAction={selected => {
+                    field.onChange(selected.code as string);
+                  }}
+                  onBlurAction={field.onBlur}
+                  label={t("fields.currency")}
+                  fullWidth
+                />
+              );
+            }}
+          />
           <Controller
             name="timezone"
             control={props.control}

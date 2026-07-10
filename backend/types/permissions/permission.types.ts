@@ -6,14 +6,12 @@ import type { LocalizedString } from "@/backend/types/shared/localized-string.ty
 export type PermissionSelectType = typeof permissions.$inferSelect;
 export type PermissionInsertType = typeof permissions.$inferInsert;
 
-// Canonical: {Entity}ReturnType resolves localized JSONB maps to flat strings
+// Canonical: {Entity}ReturnType exposes the raw JSONB `LocalizedString` maps;
+// clients resolve via `resolveLocalizedString` for display-only text.
 //--------------------------------------------------------------------------------
-export type PermissionReturnType = Omit<
-  PermissionSelectType,
-  "description" | "category" | "deletedAt" | "internalNotes"
-> & {
-  description: string;
-  category: string;
+export type PermissionReturnType = Omit<PermissionSelectType, "deletedAt" | "internalNotes"> & {
+  description: LocalizedString;
+  category: LocalizedString;
 };
 
 // Input types

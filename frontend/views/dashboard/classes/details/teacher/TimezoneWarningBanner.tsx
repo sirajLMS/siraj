@@ -4,6 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Alert, Box, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { TimezoneDisplay } from "@/frontend/components/ui/display";
 import { edgeToEdgeSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 import { classDetailsContentPaddingSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
@@ -13,7 +14,8 @@ interface TimezoneWarningBannerProps {
   readonly onDismiss: () => void;
   readonly labels: {
     readonly title: string;
-    readonly description: string;
+    readonly prefix: string;
+    readonly suffix: string;
   };
 }
 
@@ -56,7 +58,9 @@ export function TimezoneWarningBanner({ studentTimezone, onDismiss, labels }: Ti
           {labels.title}
         </Typography>
         <Typography variant="body2" sx={{ opacity: 0.9 }}>
-          {labels.description.replace("{timezone}", studentTimezone)}
+          {labels.prefix}
+          <TimezoneDisplay timezone={studentTimezone} sx={{ opacity: 0.9 }} />
+          {labels.suffix}
         </Typography>
       </Box>
     </StyledTimezoneWarningAlert>

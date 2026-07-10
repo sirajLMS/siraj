@@ -13,8 +13,11 @@ export type CurrencySelectProps = {
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;
   readonly required?: boolean;
+  readonly disabled?: boolean;
   readonly label?: string;
   readonly placeholder?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
   readonly onBlurAction?: () => void;
   readonly style?: React.CSSProperties;
   readonly open?: boolean;

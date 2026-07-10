@@ -1,11 +1,19 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
+import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { GroupWithPermissionIds, PermissionEntity, UserOverrideEntity, UserOverrideInput } from "@/backend/types";
+import type {
+  GroupWithPermissionIds,
+  LocalizedString,
+  PermissionEntity,
+  UserOverrideEntity,
+  UserOverrideInput,
+} from "@/backend/types";
+import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
 
 export namespace PermissionManagementService {
@@ -81,8 +89,9 @@ export namespace PermissionManagementService {
     return t;
   }
 
-  async function validateGroupName(name: string, t: TranslationFn<ErrorsLabels>) {
-    const trimmedName = name.trim();
+  async function validateGroupName(name: LocalizedString, t: TranslationFn<ErrorsLabels>) {
+    const resolvedName = resolveLocalized(name, DEFAULT_CONTENT_LOCALE);
+    const trimmedName = resolvedName.trim();
     if (!trimmedName) throw new Error(t("permissionGroupNameRequired"));
     if (trimmedName.length > 255) throw new Error(t("permissionGroupNameTooLong"));
 
@@ -155,14 +164,13 @@ export namespace PermissionManagementService {
 
   export async function createGroup(
     actorUserId: string,
-    input: { name: string; description?: string; permissionIds: string[] },
+    input: { name: LocalizedString; description?: LocalizedString | null; permissionIds: string[] },
     locale?: string
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, locale);
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
-    // Using the new helper
-    const { trimmedName, slug: baseSlug } = await validateGroupName(input.name, t);
+    const { slug: baseSlug } = await validateGroupName(input.name, t);
 
     let slug = baseSlug;
     let counter = 1;
@@ -179,9 +187,9 @@ export namespace PermissionManagementService {
 
     return PermissionManagementRepository.createGroup(
       {
-        name: trimmedName,
+        name: input.name,
         slug,
-        description: input.description?.trim() ?? null,
+        description: input.description ?? null,
         permissionIds: input.permissionIds,
         createdByUserId: actorUserId,
       },
@@ -191,28 +199,30 @@ export namespace PermissionManagementService {
 
   export async function updateGroup(
     actorUserId: string,
-    input: { groupId: string; name?: string; description?: string; permissionIds?: string[] },
+    input: {
+      groupId: string;
+      name?: LocalizedString;
+      description?: LocalizedString | null;
+      permissionIds?: string[];
+    },
     locale?: string
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, locale);
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
-    let trimmedName: string | undefined;
     let slug: string | undefined;
 
     if (input.name !== undefined) {
-      // Using the new helper
       const validated = await validateGroupName(input.name, t);
-      trimmedName = validated.trimmedName;
       slug = validated.slug;
     }
 
     return PermissionManagementRepository.updateGroup(
       {
         id: input.groupId,
-        name: trimmedName,
+        name: input.name,
         slug,
-        description: input.description === undefined ? undefined : input.description?.trim(),
+        description: input.description,
         permissionIds: input.permissionIds,
       },
       locale

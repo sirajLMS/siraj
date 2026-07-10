@@ -2,35 +2,44 @@
 
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type React from "react";
+import type * as React from "react";
 import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { GenderSelectorLabels } from "@/shared/messages/types/ui/gender-selector";
 
-/**
- * Props for the GenderSelector component.
- *
- * @typedef {Object} GenderSelectorProps
- * @property {Gender} gender - The selected gender.
- * @property {(gender: Gender) => void} setGender - Function to update the selected gender.
- * @property {boolean} error - Indicates if there's an error.
- * @property {React.Dispatch<React.SetStateAction<boolean>>} setError - Function to update the error state.
- */
 export type GenderSelectorProps = {
-  gender: Gender;
-  setGender: (gender: Gender) => void;
-  error: boolean;
-  setError: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly gender: Gender | null;
+  readonly setGenderAction: (gender: Gender | null) => void;
+  readonly error?: boolean;
+  readonly required?: boolean;
+  readonly fullWidth?: boolean;
+  readonly labels?: Partial<GenderSelectorLabels>;
+  readonly allowEmpty?: boolean;
 };
 
-/**
- * GenderSelector Component
- *
- * Allows users to select their gender.
- *
- * @param {GenderSelectorProps} props - The props for the component.
- * @returns {JSX.Element} The rendered GenderSelector component.
- */
-export const GenderSelector: React.FC<GenderSelectorProps> = ({ gender, setGender, error, setError }) => {
+export const GenderSelector: React.FC<GenderSelectorProps> = ({
+  gender,
+  setGenderAction,
+  error = false,
+  required = false,
+  fullWidth = false,
+  labels,
+  allowEmpty = false,
+}): React.ReactNode => {
   const t = useTranslations("ui.genderSelector");
+  const title = labels?.title ?? t("title");
+  const maleLabel = labels?.male ?? t("male");
+  const femaleLabel = labels?.female ?? t("female");
+  const ariaLabel = labels?.ariaLabel ?? t("ariaLabel");
+
+  const buttons: ReadonlyArray<{
+    readonly value: Gender;
+    readonly label: string;
+  }> = [
+    { value: Gender.Male, label: maleLabel },
+    { value: Gender.Female, label: femaleLabel },
+  ];
+
+  const totalButtons = allowEmpty ? buttons.length + 1 : buttons.length;
 
   return (
     <Box
@@ -39,7 +48,7 @@ export const GenderSelector: React.FC<GenderSelectorProps> = ({ gender, setGende
         justifyContent: "space-between",
         alignItems: "center",
         gap: 1,
-        width: "100%",
+        width: fullWidth ? "100%" : "auto",
         flexWrap: "wrap",
         minWidth: 0,
       }}
@@ -47,45 +56,51 @@ export const GenderSelector: React.FC<GenderSelectorProps> = ({ gender, setGende
       <Typography
         color={error ? "error" : "default"}
         sx={{
-          overflow: "show",
+          overflow: "visible",
           textOverflow: "ellipsis",
           display: "-webkit-box",
           WebkitLineClamp: 1,
           WebkitBoxOrient: "vertical",
         }}
-        variant={"subtitle1"}
+        variant="subtitle1"
       >
-        {t("title")}
+        {title}
+        {required ? (
+          <Box component="span" sx={theme => ({ color: theme.palette.error.main, ml: 0.5 })}>
+            *
+          </Box>
+        ) : null}
       </Typography>
       <ButtonGroup
         color={error ? "error" : "primary"}
         disableElevation
         variant="outlined"
-        aria-label={t("ariaLabel")}
-        sx={{
-          width: "70%",
-        }}
+        aria-label={ariaLabel}
+        sx={{ width: "70%" }}
       >
-        <Button
-          onClick={() => {
-            setGender(Gender.Male);
-            setError(false);
-          }}
-          variant={gender === Gender.Male ? "contained" : "outlined"}
-          sx={{ width: "50%", minWidth: 0 }}
-        >
-          {t("male")}
-        </Button>
-        <Button
-          onClick={() => {
-            setGender(Gender.Female);
-            setError(false);
-          }}
-          variant={gender === Gender.Female ? "contained" : "outlined"}
-          sx={{ width: "50%", minWidth: 0 }}
-        >
-          {t("female")}
-        </Button>
+        {buttons.map(button => (
+          <Button
+            key={button.value}
+            onClick={() => {
+              setGenderAction(button.value);
+            }}
+            variant={gender === button.value ? "contained" : "outlined"}
+            sx={{ width: `${100 / totalButtons}%`, minWidth: 0 }}
+          >
+            {button.label}
+          </Button>
+        ))}
+        {allowEmpty ? (
+          <Button
+            onClick={() => {
+              setGenderAction(null);
+            }}
+            variant={gender === null ? "contained" : "outlined"}
+            sx={{ width: `${100 / totalButtons}%`, minWidth: 0 }}
+          >
+            {labels?.any ?? t("any")}
+          </Button>
+        ) : null}
       </ButtonGroup>
     </Box>
   );

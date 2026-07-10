@@ -27,8 +27,11 @@ export type CurrencyAutocompleteProps = {
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;
   readonly required?: boolean;
+  readonly disabled?: boolean;
   readonly label?: string;
   readonly placeholder?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
   readonly onBlurAction?: () => void;
   readonly style?: React.CSSProperties;
   readonly open?: boolean;
@@ -56,8 +59,11 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
   autoComplete = "off",
   fullWidth,
   required,
+  disabled,
   label,
   placeholder,
+  error,
+  helperText,
   onBlurAction: onBlur,
   style,
   open: openProp,
@@ -85,11 +91,16 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
 
   const getOptionLabel = useCallback((option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale), [locale]);
 
+  const showRequiredError = Boolean(required) && !currency;
+  const showError = Boolean(error) || showRequiredError;
+  const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+
   return (
     <Autocomplete<CurrencyOption, false, false, false>
       fullWidth={fullWidth}
       options={options}
       autoHighlight
+      disabled={disabled}
       open={isOpen}
       onOpen={() => {
         if (openProp === undefined) {
@@ -154,6 +165,8 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
             label={resolvedLabel}
             placeholder={resolvedPlaceholder}
             required={required}
+            error={showError}
+            helperText={resolvedHelperText}
             onBlur={onBlur}
             autoFocus={autoFocus}
             slotProps={{

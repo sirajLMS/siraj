@@ -9,7 +9,7 @@ import {
 } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { localeJsonKey, resolveLocalized, setLocalized } from "@/backend/db/repo/utils/resolve-localized";
+import { localeJsonKey, omitEmptyLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import type {
   CreateGroupInput,
@@ -24,14 +24,14 @@ import type {
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
 
-function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
+function toPermissionReturn(row: PermissionSelectType, _locale?: string): PermissionReturnType {
   return {
     id: row.id,
     key: row.key,
     resource: row.resource,
     action: row.action,
-    description: resolveLocalized(row.description, locale),
-    category: resolveLocalized(row.category, locale),
+    description: row.description,
+    category: row.category,
     isSystem: row.isSystem,
   };
 }
@@ -48,14 +48,13 @@ function toGroupReturn(
     updatedAt: Date;
   },
   permissionIds: string[],
-  locale?: string
+  _locale?: string
 ): GroupWithPermissionIds {
-  const resolvedDescription = resolveLocalized(group.description, locale);
   return {
     id: group.id,
-    name: resolveLocalized(group.name, locale),
+    name: group.name,
     slug: group.slug,
-    description: resolvedDescription === "" ? null : resolvedDescription,
+    description: group.description,
     isSystem: group.isSystem,
     createdByUserId: group.createdByUserId,
     createdAt: group.createdAt,
@@ -174,7 +173,8 @@ export namespace PermissionManagementRepository {
 
   /**
    * Atomic transaction inserting group + permissions.
-   * Writes name/description into the request-locale key of the JSONB map.
+   * Persists the full `LocalizedString` map received from the caller; empty
+   * entries are stripped before writing so the column never holds whitespace.
    */
   export async function createGroup(
     input: CreateGroupInput,
@@ -183,11 +183,9 @@ export namespace PermissionManagementRepository {
   ): Promise<GroupWithPermissionIds> {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const now = new Date();
-      const nameMap = setLocalized(null, locale ?? DEFAULT_CONTENT_LOCALE, input.name);
+      const nameMap = omitEmptyLocalized(input.name);
       const descriptionMap =
-        input.description === undefined || input.description === null
-          ? null
-          : setLocalized(null, locale ?? DEFAULT_CONTENT_LOCALE, input.description);
+        input.description === undefined || input.description === null ? null : omitEmptyLocalized(input.description);
 
       const [insertedGroup] = await t
         .insert(permissionGroups)
@@ -227,7 +225,9 @@ export namespace PermissionManagementRepository {
 
   /**
    * Atomic transaction. Clears and replaces groupPermissions. Throws if isSystem.
-   * Merges name/description into the request-locale key of existing JSONB maps.
+   * Replaces the name/description JSONB maps with the incoming `LocalizedString`
+   * maps (empty entries stripped); pass `undefined` to leave a column untouched
+   * or `null` to clear the description.
    */
   export async function updateGroup(
     input: UpdateGroupInput,
@@ -247,16 +247,14 @@ export namespace PermissionManagementRepository {
         throw new Error(tFunc("cannotModifySystemPermissionGroup"));
       }
 
-      const contentLocale = locale ?? DEFAULT_CONTENT_LOCALE;
       const now = new Date();
-      const nextName =
-        input.name === undefined ? existing.name : setLocalized(existing.name, contentLocale, input.name);
+      const nextName = input.name === undefined ? existing.name : omitEmptyLocalized(input.name);
       const nextDescription =
         input.description === undefined
           ? existing.description
           : input.description === null
             ? null
-            : setLocalized(existing.description, contentLocale, input.description);
+            : omitEmptyLocalized(input.description);
 
       const [updatedGroup] = await t
         .update(permissionGroups)

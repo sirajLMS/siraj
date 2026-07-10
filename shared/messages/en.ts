@@ -1216,8 +1216,8 @@ const en: MessageSchema = {
       },
       timezone: {
         title: "Timezone Mismatch Detected",
-        description:
-          "Student's local time ({timezone}) differs from server configuration (UTC). Attendance logging may be shifted.",
+        prefix: "Student's local time (",
+        suffix: ") differs from server configuration (UTC). Attendance logging may be shifted.",
       },
       adminActions: {
         administrativeActions: "Administrative Actions",
@@ -2133,10 +2133,6 @@ const en: MessageSchema = {
         primaryTeacher: "Select teacher (optional)",
       },
       options: {
-        language: {
-          arabic: "Arabic",
-          english: "English",
-        },
         status: {
           onTrial: "On Trial",
           regular: "Regular",
@@ -2166,8 +2162,8 @@ const en: MessageSchema = {
         newTime: "Select New Time",
       },
       warning: {
-        description:
-          "Warning: The class time is calculated based on the Teacher's timezone ({timezone}). Please ensure local conversions are correct.",
+        prefix: "Warning: The class time is calculated based on the Teacher's timezone (",
+        suffix: "). Please ensure local conversions are correct.",
       },
       quickAdjust: {
         label: "Quick Adjust",
@@ -3134,9 +3130,11 @@ const en: MessageSchema = {
       male: "Male",
       female: "Female",
       ariaLabel: "Gender selection button group",
+      any: "Any",
     },
     countrySelect: {
       selectCountry: "Select country",
+      required: "Country is required",
     },
     currencySelect: {
       selectCurrency: "Select currency",
@@ -3145,6 +3143,7 @@ const en: MessageSchema = {
     },
     languageSelector: {
       selectLanguage: "Select language",
+      required: "Language is required",
     },
     localizedString: {
       editTranslations: "Edit translations",

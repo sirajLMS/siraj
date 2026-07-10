@@ -3,8 +3,11 @@
 import { Grid, Input } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
+import { getCountryByCode } from "@/frontend/lib/locale";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { OnboardingIdentityFields } from "@/frontend/views/dashboard/components/onboarding/OnboardingIdentityFields";
 
@@ -22,14 +25,22 @@ export function ParentInfoSection({ register, control, errors }: Props) {
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <OnboardingIdentityFields register={register} control={control} errors={errors} translate={t} phoneRequired />
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper label={t("fields.nationality")}>
-            <Input
-              {...register("nationality")}
-              placeholder={t("placeholders.nationality")}
-              fullWidth
-              sx={standardInputSx}
-            />
-          </FieldWrapper>
+          <Controller
+            name="nationality"
+            control={control}
+            render={({ field }) => {
+              const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
+
+              return (
+                <CountrySelect
+                  country={selectedCountry}
+                  setCountryAction={country => field.onChange(country.code)}
+                  label={t("fields.nationality")}
+                  fullWidth
+                />
+              );
+            }}
+          />
         </Grid>
         <Grid size={{ xs: 12 }}>
           <FieldWrapper

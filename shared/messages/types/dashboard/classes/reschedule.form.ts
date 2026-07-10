@@ -11,7 +11,8 @@ export interface RescheduleFormLabels {
     readonly newTime: string;
   };
   readonly warning: {
-    readonly description: string;
+    readonly prefix: string;
+    readonly suffix: string;
   };
   readonly quickAdjust: {
     readonly label: string;

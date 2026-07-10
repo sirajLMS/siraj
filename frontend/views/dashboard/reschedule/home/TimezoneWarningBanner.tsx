@@ -3,6 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { TimezoneDisplay } from "@/frontend/components/ui/display";
 
 interface Props {
   readonly timezone: string;
@@ -26,7 +27,9 @@ export function TimezoneWarningBanner({ timezone }: Readonly<Props>) {
     >
       <InfoOutlined sx={theme => ({ color: theme.palette.onWarningContainer })} />
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onWarningContainer })}>
-        {t("description", { timezone })}
+        {t("prefix")}
+        <TimezoneDisplay timezone={timezone} sx={theme => ({ color: theme.palette.onWarningContainer })} />
+        {t("suffix")}
       </Typography>
     </Box>
   );

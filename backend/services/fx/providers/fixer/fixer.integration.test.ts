@@ -5,17 +5,10 @@
  * https://api.apilayer.com/fixer/latest and consume the Fixer monthly quota.
  * They must NOT run in default CI.
  *
- * B5 (default CI excludes `@live-fx`) is satisfied by the skip-on-missing-env
- * pattern below: the suite skips wholesale when `FIXER_API_KEY` is absent. CI
- * environments (and this dev environment) do not inject that secret, so the
- * suite reports as skipped rather than failing. The `@live-fx` tag in the
- * describe name additionally allows a future bun test filter (e.g.
- * `--test-name-pattern "^(?!.*@live-fx)"`) to exclude these tests explicitly
- * even when keys are present locally.
- *
- * Run locally with the env var set:
- *   FIXER_API_KEY=... ~/.bun/bin/bun test \
- *     backend/services/fx/providers/fixer/fixer.integration.test.ts
+ * B5 (default CI excludes `@live-fx`) is satisfied by `describe.skip` when
+ * `FIXER_API_KEY` is absent. CI environments do not inject that secret, so the
+ * suite reports as skipped rather than failing. For a real live run locally,
+ * use `bun run test:live-fx` (requires keys in `.env`).
  */
 import { describe, expect, test } from "bun:test";
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
@@ -24,25 +17,16 @@ import { FixerAdapter } from "@/backend/services/fx/providers/fixer/FixerAdapter
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 const hasApiKey = Boolean(process.env.FIXER_API_KEY);
+const describeLive = hasApiKey ? describe : describe.skip;
 
-describe("FixerAdapter @live-fx", () => {
+describeLive("FixerAdapter @live-fx", () => {
   test("validateConfig() returns true when FIXER_API_KEY is set", () => {
-    if (!hasApiKey) {
-      testLogger.warn("Skipping @live-fx validateConfig: FIXER_API_KEY is not set.");
-      return;
-    }
-
     const adapter = new FixerAdapter();
 
     expect(adapter.validateConfig()).toBe(true);
   });
 
   test("fetchLatestRates() returns USD-hub rates including a USD->EUR pair after normalisation", async () => {
-    if (!hasApiKey) {
-      testLogger.warn("Skipping @live-fx fetchLatestRates: FIXER_API_KEY is not set.");
-      return;
-    }
-
     const adapter = new FixerAdapter();
     const result = await adapter.fetchLatestRates();
 

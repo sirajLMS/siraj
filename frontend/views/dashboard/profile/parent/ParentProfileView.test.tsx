@@ -23,7 +23,7 @@ const parentAdminProfile = {
   avatarUrl: null,
   status: "REGULAR",
   phone: "+966 50 123 4567",
-  nationality: "Saudi Arabia",
+  nationality: "SA",
   address: "123 King Fahd Rd, Riyadh",
   facebook: "facebook.com/noor",
   whatsapp: "+966501234567",

@@ -41,6 +41,32 @@ function SocialLink({ label, value }: { readonly label: string; readonly value: 
   );
 }
 
+function WhatsAppLink({ label, value }: { readonly label: string; readonly value: string | null | undefined }) {
+  if (!value) return null;
+  const digits = value.replace(/[^\d]/g, "");
+  if (!digits) return null;
+
+  return (
+    <Stack spacing={0.5}>
+      <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
+        {label}
+      </Typography>
+      <Link
+        href={`https://wa.me/${digits}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={theme => ({
+          color: theme.palette.primary.main,
+          textDecoration: "underline",
+          typography: "bodyLg",
+        })}
+      >
+        <PhoneDisplay phone={value} typographyVariant="bodyLg" />
+      </Link>
+    </Stack>
+  );
+}
+
 export function ParentSocialContainer() {
   const t = useTranslations("dashboard.parentSocial");
   const { data, loading, error } = useQuery(parentOwnProfileQueryDocument);
@@ -77,7 +103,7 @@ export function ParentSocialContainer() {
               <SectionPanel title={t("sections.social")}>
                 <Stack spacing={2}>
                   <SocialLink label={t("fields.facebook")} value={profile.facebook} />
-                  <SocialLink label={t("fields.whatsapp")} value={profile.whatsapp} />
+                  <WhatsAppLink label={t("fields.whatsapp")} value={profile.whatsapp} />
                   <SocialLink label={t("fields.twitter")} value={profile.twitter} />
                 </Stack>
               </SectionPanel>

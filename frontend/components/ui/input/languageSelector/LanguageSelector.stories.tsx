@@ -47,6 +47,13 @@ export const Required: Story = {
   },
 };
 
+export const Disabled: Story = {
+  args: {
+    initialLanguageCode: AppLanguage.Ar,
+    disabled: true,
+  },
+};
+
 export const Arabic: Story = {
   globals: {
     locale: "ar",

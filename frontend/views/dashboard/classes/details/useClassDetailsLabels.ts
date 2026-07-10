@@ -6,7 +6,8 @@ import type { AdminViewLabels } from "@/shared/messages/types/message";
 export interface TeacherViewLabels {
   readonly timezone: {
     readonly title: string;
-    readonly description: string;
+    readonly prefix: string;
+    readonly suffix: string;
   };
   readonly instanceDetails: {
     readonly classInstanceDetails: string;
@@ -43,14 +44,15 @@ export interface TeacherViewLabels {
   };
 }
 
-export const useAdminViewLabels = (timezone: string): AdminViewLabels => {
+export const useAdminViewLabels = (_timezone: string): AdminViewLabels => {
   const t = useTranslations("dashboard.classDetails");
 
   return useMemo(
     () => ({
       timezone: {
         title: t("timezone.title"),
-        description: t("timezone.description", { timezone }),
+        prefix: t("timezone.prefix"),
+        suffix: t("timezone.suffix"),
       },
       adminActions: {
         administrativeActions: t("adminActions.administrativeActions"),
@@ -104,11 +106,11 @@ export const useAdminViewLabels = (timezone: string): AdminViewLabels => {
         noData: t("heatmap.noData"),
       },
     }),
-    [t, timezone]
+    [t]
   );
 };
 
-export const useTeacherViewLabels = (timezone: string): TeacherViewLabels => {
+export const useTeacherViewLabels = (_timezone: string): TeacherViewLabels => {
   const t = useTranslations("dashboard.classDetails");
 
   return useMemo(() => {
@@ -123,7 +125,8 @@ export const useTeacherViewLabels = (timezone: string): TeacherViewLabels => {
     return {
       timezone: {
         title: t("timezone.title"),
-        description: t("timezone.description", { timezone }),
+        prefix: t("timezone.prefix"),
+        suffix: t("timezone.suffix"),
       },
       instanceDetails: {
         classInstanceDetails: t("instanceDetails.classInstanceDetails"),
@@ -159,5 +162,5 @@ export const useTeacherViewLabels = (timezone: string): TeacherViewLabels => {
         viewFullProfile: t("studentProfile.viewFullProfile"),
       },
     };
-  }, [t, timezone]);
+  }, [t]);
 };

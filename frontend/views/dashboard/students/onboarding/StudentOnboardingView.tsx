@@ -54,10 +54,6 @@ interface StudentOnboardingViewProps {
       readonly primaryTeacher: string;
     };
     readonly options: {
-      readonly language: {
-        readonly arabic: string;
-        readonly english: string;
-      };
       readonly status: {
         readonly onTrial: string;
         readonly regular: string;
@@ -144,8 +140,6 @@ export function StudentOnboardingView({
             female: labels.fields.female,
             language: labels.fields.language,
             languagePlaceholder: labels.placeholders.language,
-            languageArabic: labels.options.language.arabic,
-            languageEnglish: labels.options.language.english,
             status: labels.fields.status,
             statusOnTrial: labels.options.status.onTrial,
             statusRegular: labels.options.status.regular,

@@ -1,12 +1,14 @@
 "use client";
 
-import { Box, FormControl, FormControlLabel, Grid, Input, Radio, RadioGroup, Typography } from "@mui/material";
+import { Box, Grid, Input, Typography } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import { PhoneFormField } from "@/frontend/components/ui/input";
+import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
+import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
+import { getCountryByCode } from "@/frontend/lib/locale";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
-
-import { Gender } from "../types";
 
 interface BaseSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
@@ -42,7 +44,7 @@ interface SectionProps extends BaseSectionProps {
   readonly control: Control<TeacherOnboardingFormData>;
 }
 
-export function BasicInfoFields({ register, errors, labels }: Readonly<BaseSectionProps>) {
+export function BasicInfoFields({ register, control, errors, labels }: Readonly<SectionProps>) {
   return (
     <>
       <Grid size={{ xs: 12, md: 4 }}>
@@ -86,14 +88,21 @@ export function BasicInfoFields({ register, errors, labels }: Readonly<BaseSecti
         ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.nationality}
-        </Box>
-        <Input
-          {...register("nationality")}
-          placeholder={labels.placeholders.nationality}
-          fullWidth
-          sx={standardInputSx}
+        <Controller
+          name="nationality"
+          control={control}
+          render={({ field }) => {
+            const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
+
+            return (
+              <CountrySelect
+                country={selectedCountry}
+                setCountryAction={country => field.onChange(country.code)}
+                label={labels.fields.nationality}
+                fullWidth
+              />
+            );
+          }}
         />
       </Grid>
     </>
@@ -156,30 +165,29 @@ export function IdentityFields({ register, control, errors, labels }: Readonly<S
             />
           </Grid>
           <Grid size={{ xs: 6 }}>
-            <FormControl error={!!errors.gender}>
-              <Box component="label" sx={labelSx}>
-                {labels.fields.gender}
-              </Box>
-              <RadioGroup row name="gender">
-                <FormControlLabel
-                  value={Gender.Male}
-                  control={<Radio {...register("gender")} sx={theme => ({ color: theme.palette.primary.main })} />}
-                  label={labels.fields.male}
-                  slotProps={{ typography: { variant: "bodyMd" } }}
+            <Controller
+              control={control}
+              name="gender"
+              render={({ field }) => (
+                <GenderSelector
+                  gender={field.value ?? null}
+                  setGenderAction={field.onChange}
+                  required
+                  error={!!errors.gender}
+                  fullWidth
+                  labels={{
+                    title: labels.fields.gender,
+                    male: labels.fields.male,
+                    female: labels.fields.female,
+                  }}
                 />
-                <FormControlLabel
-                  value={Gender.Female}
-                  control={<Radio {...register("gender")} sx={theme => ({ color: theme.palette.primary.main })} />}
-                  label={labels.fields.female}
-                  slotProps={{ typography: { variant: "bodyMd" } }}
-                />
-              </RadioGroup>
-              {errors.gender ? (
-                <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-                  {errors.gender.message}
-                </Typography>
-              ) : null}
-            </FormControl>
+              )}
+            />
+            {errors.gender ? (
+              <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
+                {errors.gender.message}
+              </Typography>
+            ) : null}
           </Grid>
         </Grid>
       </Grid>
@@ -214,7 +222,7 @@ export function AddressFields({ register, labels }: Readonly<BaseSectionProps>) 
 export function TeacherInfoSection({ register, control, errors, labels }: Readonly<SectionProps>) {
   return (
     <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-      <BasicInfoFields register={register} errors={errors} labels={labels} />
+      <BasicInfoFields register={register} control={control} errors={errors} labels={labels} />
       <IdentityFields register={register} control={control} errors={errors} labels={labels} />
       <AddressFields register={register} errors={errors} labels={labels} />
     </Grid>

@@ -1,22 +1,13 @@
 "use client";
 
-import {
-  Box,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  Input,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
-  Typography,
-} from "@mui/material";
+import { Box, FormControl, FormControlLabel, Grid, Input, MenuItem, Radio, RadioGroup, Select } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import { AppLanguage, Gender, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { LanguageSelector } from "@/frontend/components/ui/input/languageSelector/LanguageSelector";
+import { Gender, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { getLanguageByCode } from "@/frontend/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
 interface StudentInfoSectionProps {
@@ -35,8 +26,6 @@ interface StudentInfoSectionProps {
     readonly female: string;
     readonly language: string;
     readonly languagePlaceholder: string;
-    readonly languageArabic: string;
-    readonly languageEnglish: string;
     readonly status: string;
     readonly statusOnTrial: string;
     readonly statusRegular: string;
@@ -98,21 +87,14 @@ export function StudentInfoSection({ register, errors, control, labels }: Readon
               control={control}
               name="language"
               render={({ field }) => (
-                <Select
-                  value={field.value ?? ""}
-                  displayEmpty
+                <LanguageSelector
                   fullWidth
-                  onChange={event => {
-                    field.onChange(event.target.value || null);
+                  label={labels.languagePlaceholder}
+                  language={field.value ? getLanguageByCode(field.value) : undefined}
+                  setLanguageAction={option => {
+                    field.onChange(option.code);
                   }}
-                  sx={standardInputSx}
-                >
-                  <MenuItem value="">
-                    <Typography variant="bodyMd">{labels.languagePlaceholder}</Typography>
-                  </MenuItem>
-                  <MenuItem value={AppLanguage.Ar}>{labels.languageArabic}</MenuItem>
-                  <MenuItem value={AppLanguage.En}>{labels.languageEnglish}</MenuItem>
-                </Select>
+                />
               )}
             />
           </FieldWrapper>

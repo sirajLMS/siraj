@@ -100,8 +100,8 @@ export function TeacherAdminEditForm({
           />
           <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
           <ZoomSection mode="edit" isAdminScope register={form.register} hasZoomPassword={hasZoomPassword} />
-          <CompensationSection mode="edit" register={form.register} />
-          <AdminOnlySection mode="edit" register={form.register} />
+          <CompensationSection mode="edit" register={form.register} control={form.control} />
+          <AdminOnlySection mode="edit" register={form.register} control={form.control} />
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {isSaving ? tc("shell.loading") : tc("actions.save")}

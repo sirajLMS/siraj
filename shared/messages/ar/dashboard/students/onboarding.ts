@@ -30,10 +30,6 @@ export const onboarding: StudentOnboardingLabels = {
     primaryTeacher: "اختر المعلم (اختياري)",
   },
   options: {
-    language: {
-      arabic: "العربية",
-      english: "الإنجليزية",
-    },
     status: {
       onTrial: "تجريبي",
       regular: "منتظم",

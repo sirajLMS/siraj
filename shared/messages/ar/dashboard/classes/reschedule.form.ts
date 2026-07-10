@@ -13,8 +13,8 @@ export const rescheduleForm: RescheduleFormLabels = {
     newTime: "اختر الوقت الجديد",
   },
   warning: {
-    description:
-      "تحذير: يُحسب وقت الحصة بناءً على المنطقة الزمنية للمعلم ({timezone}). يرجى التأكد من صحة التحويلات المحلية.",
+    prefix: "تحذير: يُحسب وقت الحصة بناءً على المنطقة الزمنية للمعلم (",
+    suffix: "). يرجى التأكد من صحة التحويلات المحلية.",
   },
   quickAdjust: {
     label: "تعديل سريع",

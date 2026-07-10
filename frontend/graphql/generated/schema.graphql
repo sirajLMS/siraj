@@ -846,8 +846,8 @@ input CreateManualClassEntryInput {
 }
 
 input CreatePermissionGroupInput {
-  description: String
-  name: String!
+  description: LocalizedString
+  name: LocalizedString!
   permissionIds: [String!]!
 }
 
@@ -1802,6 +1802,11 @@ enum LeaveRequestStatus {
   RESCHEDULED
 }
 
+"""
+A JSONB map of AppLocale → string (e.g. { ar: "فودافون كاش", en: "Vodafone Cash" }). Keys are restricted to the app locales from @/shared/i18n/routing.
+"""
+scalar LocalizedString
+
 input LogSupportRequestInput {
   reason: String!
 }
@@ -2402,8 +2407,8 @@ enum PaymentMethod {
 
 type Permission {
   action: String
-  category: String
-  description: String
+  category: LocalizedString
+  description: LocalizedString
   id: String
   isSystem: Boolean
   key: String
@@ -2413,10 +2418,10 @@ type Permission {
 type PermissionGroup {
   assignedUsers: [GroupUser!]
   createdAt: DateTime
-  description: String
+  description: LocalizedString
   id: String
   isSystem: Boolean
-  name: String
+  name: LocalizedString
   permissionIds: [String!]
   slug: String
   updatedAt: DateTime
@@ -3564,9 +3569,9 @@ input UpdateOwnProfileInput {
 }
 
 input UpdatePermissionGroupInput {
-  description: String
+  description: LocalizedString
   groupId: String!
-  name: String
+  name: LocalizedString
   permissionIds: [String!]
 }
 

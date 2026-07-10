@@ -4,7 +4,7 @@ import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined, MeetingRoomOutlin
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui";
+import { PhoneDisplay, SectionPanel } from "@/frontend/components/ui";
 import { PhoneFormField } from "@/frontend/components/ui/input";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import {
@@ -75,6 +75,20 @@ export function SocialSection(props: SocialSectionProps) {
       <Stack spacing={2.5}>
         {VIEW_FIELDS.map(({ key, platform, icon: Icon }) => {
           const value = props.parentData[key];
+          if (key === "whatsapp") {
+            const whatsappLink = buildSocialLink("whatsapp", value);
+            return (
+              <ProfileFieldRow
+                key={key}
+                icon={Icon}
+                label={t(`fields.${key}`)}
+                value={<PhoneDisplay phone={value} fallback={tc("notSet")} />}
+                href={whatsappLink?.href}
+                fallback={tc("notSet")}
+                hover
+              />
+            );
+          }
           const link = buildSocialLink(platform, value);
           return (
             <ProfileFieldRow

@@ -2,10 +2,11 @@
 "use client";
 
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
-import { AvatarGroup, Box, Typography } from "@mui/material";
+import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { TimezoneDisplay } from "@/frontend/components/ui/display";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,
@@ -83,16 +84,17 @@ function TimezoneInsight({
         })}
       >
         {timezones.map((tz, index) => (
-          <UserAvatar
-            key={tz}
-            size={32}
-            sx={theme => ({
-              backgroundColor: index === 0 ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
-              color: index === 0 ? theme.palette.onPrimaryContainer : theme.palette.onSecondaryContainer,
-            })}
-          >
-            {tz}
-          </UserAvatar>
+          <Tooltip key={tz} title={<TimezoneDisplay timezone={tz} />} arrow describeChild>
+            <UserAvatar
+              size={32}
+              sx={theme => ({
+                backgroundColor: index === 0 ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
+                color: index === 0 ? theme.palette.onPrimaryContainer : theme.palette.onSecondaryContainer,
+              })}
+            >
+              {tz}
+            </UserAvatar>
+          </Tooltip>
         ))}
       </AvatarGroup>
 

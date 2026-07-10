@@ -17,6 +17,7 @@ import type { Email } from "@/backend/lib";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PhoneNumber } from "@/shared/lib/phone";
+import type { LocalizedString } from "@/shared/types/localized-string";
 
 export interface PothosTypes {
   DrizzleRelations: DrizzleRelations;
@@ -36,6 +37,10 @@ export interface PothosTypes {
     StringMap: {
       Input: Record<string, string>;
       Output: Record<string, string>;
+    };
+    LocalizedString: {
+      Input: LocalizedString;
+      Output: LocalizedString;
     };
     // use following scalars for input types only for automatic validation
     PhoneNumber: { Input: PhoneNumber; Output: PhoneNumber };

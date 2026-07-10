@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
@@ -7,7 +8,7 @@ export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"][
     fullName: z.string().min(1, messages.nameRequired),
     email: z.email({ message: messages.emailInvalid }),
     phone: z.string().optional(),
-    gender: z.enum(["MALE", "FEMALE"]),
+    gender: z.nativeEnum(Gender),
     timezone: z
       .string()
       .min(1, messages.timezoneRequired)

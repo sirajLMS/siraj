@@ -10,16 +10,15 @@ function GenderSelectorStory({
   ...props
 }: Readonly<
   Partial<GenderSelectorProps> & {
-    initialGender?: Gender;
+    initialGender?: Gender | null;
     initialError?: boolean;
   }
 >) {
-  const [gender, setGender] = useState(initialGender);
-  const [error, setError] = useState(initialError);
+  const [gender, setGender] = useState<Gender | null>(initialGender);
 
   return (
     <Box sx={{ width: 480, p: 2 }}>
-      <GenderSelector gender={gender} setGender={setGender} error={error} setError={setError} {...props} />
+      <GenderSelector gender={gender} setGenderAction={setGender} error={initialError} {...props} />
     </Box>
   );
 }
@@ -49,6 +48,20 @@ export const WithError: Story = {
   args: {
     initialGender: Gender.Male,
     initialError: true,
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    initialGender: null,
+  },
+};
+
+export const AllowAny: Story = {
+  args: {
+    initialGender: null,
+    allowEmpty: true,
+    labels: { any: "Any" },
   },
 };
 

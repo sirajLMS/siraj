@@ -30,10 +30,6 @@ export const onboarding: StudentOnboardingLabels = {
     primaryTeacher: "Select teacher (optional)",
   },
   options: {
-    language: {
-      arabic: "Arabic",
-      english: "English",
-    },
     status: {
       onTrial: "On Trial",
       regular: "Regular",

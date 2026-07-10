@@ -6,6 +6,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import type { SupportContactProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
@@ -56,6 +57,11 @@ export function SupportContact({ contact }: Readonly<SupportContactProps>) {
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
               {contact.role}
             </Typography>
+            <PhoneDisplay
+              phone={contact.phone}
+              typographyVariant="bodyMd"
+              sx={theme => ({ color: theme.palette.onSurfaceVariant })}
+            />
           </Box>
         </Stack>
       )}

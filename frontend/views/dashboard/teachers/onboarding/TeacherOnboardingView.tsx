@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { BankingLedgerSection } from "@/frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection";
 import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { SalaryDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
@@ -112,7 +112,7 @@ export function TeacherOnboardingView({
       gender: Gender.Male,
       countryCode: CountryCode.Eg,
       timezone: IanaTimezone.AfricaCairo,
-      rateCurrency: "USD",
+      rateCurrency: CurrencyCode.Usd,
     },
   });
 

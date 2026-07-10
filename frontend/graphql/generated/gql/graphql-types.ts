@@ -15,6 +15,8 @@ export type Scalars = {
   Email: { input: string; output: string; }
   /** A type representing arbitrary JSON values */
   JSON: { input: unknown; output: unknown; }
+  /** A JSONB map of AppLocale → string (e.g. { ar: "فودافون كاش", en: "Vodafone Cash" }). Keys are restricted to the app locales from @/shared/i18n/routing. */
+  LocalizedString: { input: Partial<Record<'ar' | 'en', string>>; output: Partial<Record<'ar' | 'en', string>>; }
   /** A type representing a validated phone number */
   PhoneNumber: { input: string; output: string; }
   /** A map of string keys to string values (Record<string, string>). Limits: max 100 entries, keys up to 64 chars, values up to 1024 chars. */
@@ -890,8 +892,8 @@ export type CreateManualClassEntryInput = {
 };
 
 export type CreatePermissionGroupInput = {
-  description: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
+  name: Scalars['LocalizedString']['input'];
   permissionIds: Array<Scalars['String']['input']>;
 };
 
@@ -2949,8 +2951,8 @@ export enum PaymentMethod {
 export type Permission = {
   __typename?: 'Permission';
   action: Maybe<Scalars['String']['output']>;
-  category: Maybe<Scalars['String']['output']>;
-  description: Maybe<Scalars['String']['output']>;
+  category: Maybe<Scalars['LocalizedString']['output']>;
+  description: Maybe<Scalars['LocalizedString']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isSystem: Maybe<Scalars['Boolean']['output']>;
   key: Maybe<Scalars['String']['output']>;
@@ -2961,10 +2963,10 @@ export type PermissionGroup = {
   __typename?: 'PermissionGroup';
   assignedUsers: Maybe<Array<GroupUser>>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
-  description: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['LocalizedString']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isSystem: Maybe<Scalars['Boolean']['output']>;
-  name: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['LocalizedString']['output']>;
   permissionIds: Maybe<Array<Scalars['String']['output']>>;
   slug: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
@@ -4425,9 +4427,9 @@ export type UpdateOwnProfileInput = {
 };
 
 export type UpdatePermissionGroupInput = {
-  description: InputMaybe<Scalars['String']['input']>;
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
   groupId: Scalars['String']['input'];
-  name: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['LocalizedString']['input']>;
   permissionIds: InputMaybe<Array<Scalars['String']['input']>>;
 };
 

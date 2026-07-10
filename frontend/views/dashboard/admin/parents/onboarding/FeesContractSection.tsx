@@ -6,7 +6,10 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
@@ -104,25 +107,32 @@ function PaymentFields({ register, control, errors }: SectionProps) {
         </FieldWrapper>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper
-          label={t("fields.currency")}
-          required
-          error={errors.currency ? t(`validation.${errors.currency.message}`) : undefined}
-        >
-          <Select
-            {...register("currency")}
-            error={!!errors.currency}
-            fullWidth
-            variant="standard"
-            sx={standardInputSx}
-            defaultValue="USD"
-          >
-            <MenuItem value="USD">USD - US Dollar</MenuItem>
-            <MenuItem value="SAR">SAR - Saudi Riyal</MenuItem>
-            <MenuItem value="AED">AED - UAE Dirham</MenuItem>
-            <MenuItem value="EUR">EUR - Euro</MenuItem>
-          </Select>
-        </FieldWrapper>
+        <Controller
+          name="currency"
+          control={control}
+          render={({ field }) => {
+            const option: CurrencyOption | null = field.value
+              ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
+              : null;
+            return (
+              <FieldWrapper
+                label={t("fields.currency")}
+                required
+                error={errors.currency ? t(`validation.${errors.currency.message}`) : undefined}
+              >
+                <CurrencySelect
+                  currency={option}
+                  setCurrencyAction={selected => {
+                    field.onChange(selected.code as string);
+                  }}
+                  onBlurAction={field.onBlur}
+                  fullWidth
+                  required
+                />
+              </FieldWrapper>
+            );
+          }}
+        />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <Controller

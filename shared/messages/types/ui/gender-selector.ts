@@ -3,4 +3,5 @@ export interface GenderSelectorLabels {
   readonly male: string;
   readonly female: string;
   readonly ariaLabel: string;
+  readonly any?: string;
 }

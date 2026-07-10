@@ -28,10 +28,6 @@ export interface StudentOnboardingLabels {
     readonly primaryTeacher: string;
   };
   readonly options: {
-    readonly language: {
-      readonly arabic: string;
-      readonly english: string;
-    };
     readonly status: {
       readonly onTrial: string;
       readonly regular: string;

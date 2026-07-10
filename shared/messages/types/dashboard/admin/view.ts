@@ -11,7 +11,8 @@ export interface ClassDetailsPerformanceLabels {
 export interface AdminViewLabels {
   readonly timezone: {
     readonly title: string;
-    readonly description: string;
+    readonly prefix: string;
+    readonly suffix: string;
   };
   readonly adminActions: {
     readonly administrativeActions: string;

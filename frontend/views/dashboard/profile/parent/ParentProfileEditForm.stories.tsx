@@ -16,7 +16,7 @@ const ownParentData = {
 
 const adminParentData = {
   ...ownParentData,
-  nationality: "Saudi Arabia",
+  nationality: "SA",
   address: "123 King Fahd Rd, Riyadh",
   invoiceType: "Monthly",
   feeAmount: "500",

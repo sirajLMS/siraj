@@ -1,14 +1,16 @@
 "use client";
 
-import { Box, Grid, Input, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Grid, Input, Typography } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { labelSx, outlinedInputSx, standardInputSx } from "@/frontend/components/ui/form";
+import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
+import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
+import { getCountryByCode } from "@/frontend/lib/locale";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
 
-import { CountryCode } from "../types";
+import type { CountryCode } from "../types";
 
 interface OfficialDetailsSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
@@ -51,19 +53,28 @@ export function OfficialDetailsSection({ register, control, errors, labels }: Re
         ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 3 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.country}{" "}
-          <Box component="span" sx={theme => ({ color: theme.palette.error.main })}>
-            *
-          </Box>
-        </Box>
-        <Select {...register("countryCode")} defaultValue={CountryCode.Eg} fullWidth sx={outlinedInputSx}>
-          <MenuItem value={CountryCode.Eg}>Egypt</MenuItem>
-          <MenuItem value={CountryCode.Ae}>United Arab Emirates</MenuItem>
-          <MenuItem value={CountryCode.Sa}>Saudi Arabia</MenuItem>
-          <MenuItem value={CountryCode.Gb}>United Kingdom</MenuItem>
-          <MenuItem value={CountryCode.Us}>United States</MenuItem>
-        </Select>
+        <Controller
+          name="countryCode"
+          control={control}
+          render={({ field }) => {
+            const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
+
+            return (
+              <CountrySelect
+                country={selectedCountry}
+                setCountryAction={country => field.onChange(country.code as CountryCode)}
+                label={`${labels.fields.country} *`}
+                required
+                fullWidth
+              />
+            );
+          }}
+        />
+        {errors.countryCode ? (
+          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
+            {errors.countryCode.message}
+          </Typography>
+        ) : null}
       </Grid>
       <Grid size={{ xs: 12, md: 3 }}>
         <Box component="label" sx={labelSx}>
