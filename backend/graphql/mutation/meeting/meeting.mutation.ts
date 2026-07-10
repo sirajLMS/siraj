@@ -1,3 +1,4 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassMeetingConfigCreateInputPothos,
@@ -15,6 +16,21 @@ import { ClassMeetingConfigService, MeetingConfigService } from "@/backend/servi
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
+
+function withAuthResult<TArgs, TResult>(fn: (actorUserId: string, args: TArgs, locale: string) => Promise<TResult>) {
+  return async (_parent: unknown, args: TArgs, ctx: BaseContext): Promise<TResult> => {
+    const actorUserId = await requireAuth(ctx);
+    return fn(actorUserId, args, ctx.locale);
+  };
+}
+
+function withAuthVoid<TArgs>(fn: (actorUserId: string, args: TArgs, locale: string) => Promise<unknown>) {
+  return async (_parent: unknown, args: TArgs, ctx: BaseContext): Promise<boolean> => {
+    const actorUserId = await requireAuth(ctx);
+    await fn(actorUserId, args, ctx.locale);
+    return true;
+  };
+}
 
 function normalizeFieldSchema(input: {
   readonly requiresMeetingUrl: boolean;
@@ -93,9 +109,9 @@ function normalizeConfigUpdateInput(input: {
 
 function extractCommonMeetingConfigFields(input: {
   readonly providerId: string;
-  readonly label: string;
+  readonly label?: string | null;
   readonly isDefault: boolean;
-  readonly password: string;
+  readonly password?: string | null;
   readonly details: {
     readonly meetingUrl: string;
     readonly username?: string | null;
@@ -104,9 +120,9 @@ function extractCommonMeetingConfigFields(input: {
 }) {
   return {
     providerId: input.providerId,
-    label: input.label,
+    label: input.label ?? null,
     isDefault: input.isDefault,
-    password: input.password,
+    password: input.password ?? null,
     details: normalizeMeetingConfigDetails(input.details),
   };
 }
@@ -118,24 +134,23 @@ gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
       input: t.arg({ type: MeetingProviderCreateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return MeetingProviderCatalogService.createProvider(
+    resolve: withAuthResult((userId, args, locale) =>
+      MeetingProviderCatalogService.createProvider(
         userId,
         {
-          slug: args.input.slug,
-          name: args.input.name,
+          slug: args.input.slug ?? "",
+          name: args.input.name ?? {},
           description: args.input.description,
           instructions: args.input.instructions,
-          urlAllowlist: args.input.urlAllowlist,
+          urlAllowlist: args.input.urlAllowlist ?? [],
           urlExample: args.input.urlExample,
           logoUrl: args.input.logoUrl,
-          fieldSchema: normalizeFieldSchema(args.input.fieldSchema),
+          fieldSchema: normalizeFieldSchema(args.input.fieldSchema ?? { requiresMeetingUrl: false }),
           isActive: args.input.isActive ?? undefined,
         },
-        ctx.locale
-      );
-    },
+        locale
+      )
+    ),
   })
 );
 
@@ -147,15 +162,9 @@ gqlSchemaBuilder.mutationField("updateMeetingProvider", t =>
       input: t.arg({ type: MeetingProviderUpdateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return MeetingProviderCatalogService.updateProvider(
-        userId,
-        args.id,
-        normalizeProviderUpdateInput(args.input),
-        ctx.locale
-      );
-    },
+    resolve: withAuthResult((userId, args, locale) =>
+      MeetingProviderCatalogService.updateProvider(userId, args.id, normalizeProviderUpdateInput(args.input), locale)
+    ),
   })
 );
 
@@ -166,11 +175,9 @@ gqlSchemaBuilder.mutationField("deleteMeetingProvider", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      await MeetingProviderCatalogService.deleteProvider(userId, args.id, ctx.locale);
-      return true;
-    },
+    resolve: withAuthVoid((userId, args, locale) =>
+      MeetingProviderCatalogService.deleteProvider(userId, args.id, locale)
+    ),
   })
 );
 
@@ -181,17 +188,16 @@ gqlSchemaBuilder.mutationField("createUserMeetingConfig", t =>
       input: t.arg({ type: UserMeetingConfigCreateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      return MeetingConfigService.createUserMeetingConfig(
+    resolve: withAuthResult((actorUserId, args, locale) =>
+      MeetingConfigService.createUserMeetingConfig(
         actorUserId,
         {
           userId: args.input.userId,
           ...extractCommonMeetingConfigFields(args.input),
         },
-        ctx.locale
-      );
-    },
+        locale
+      )
+    ),
   })
 );
 
@@ -203,15 +209,9 @@ gqlSchemaBuilder.mutationField("updateUserMeetingConfig", t =>
       input: t.arg({ type: UserMeetingConfigUpdateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      return MeetingConfigService.updateUserMeetingConfig(
-        actorUserId,
-        args.id,
-        normalizeConfigUpdateInput(args.input),
-        ctx.locale
-      );
-    },
+    resolve: withAuthResult((actorUserId, args, locale) =>
+      MeetingConfigService.updateUserMeetingConfig(actorUserId, args.id, normalizeConfigUpdateInput(args.input), locale)
+    ),
   })
 );
 
@@ -222,11 +222,9 @@ gqlSchemaBuilder.mutationField("deleteUserMeetingConfig", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      await MeetingConfigService.deleteUserMeetingConfig(actorUserId, args.id, ctx.locale);
-      return true;
-    },
+    resolve: withAuthVoid((actorUserId, args, locale) =>
+      MeetingConfigService.deleteUserMeetingConfig(actorUserId, args.id, locale)
+    ),
   })
 );
 
@@ -237,10 +235,9 @@ gqlSchemaBuilder.mutationField("setDefaultMeetingConfig", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      return MeetingConfigService.setDefaultMeetingConfig(actorUserId, args.id, ctx.locale);
-    },
+    resolve: withAuthResult((actorUserId, args, locale) =>
+      MeetingConfigService.setDefaultMeetingConfig(actorUserId, args.id, locale)
+    ),
   })
 );
 
@@ -251,18 +248,17 @@ gqlSchemaBuilder.mutationField("createClassMeetingConfig", t =>
       input: t.arg({ type: ClassMeetingConfigCreateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      return ClassMeetingConfigService.createClassMeetingConfig(
+    resolve: withAuthResult((actorUserId, args, locale) =>
+      ClassMeetingConfigService.createClassMeetingConfig(
         actorUserId,
         {
           classInstanceId: args.input.classInstanceId,
           recurringScheduleId: args.input.recurringScheduleId,
           ...extractCommonMeetingConfigFields(args.input),
         },
-        ctx.locale
-      );
-    },
+        locale
+      )
+    ),
   })
 );
 
@@ -274,18 +270,17 @@ gqlSchemaBuilder.mutationField("updateClassMeetingConfig", t =>
       input: t.arg({ type: ClassMeetingConfigUpdateInputPothos, required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      return ClassMeetingConfigService.updateClassMeetingConfig(
+    resolve: withAuthResult((actorUserId, args, locale) =>
+      ClassMeetingConfigService.updateClassMeetingConfig(
         actorUserId,
         args.id,
         {
           ...normalizeConfigUpdateInput(args.input),
           ...(args.input.providerId != null ? { providerId: args.input.providerId } : {}),
         },
-        ctx.locale
-      );
-    },
+        locale
+      )
+    ),
   })
 );
 
@@ -296,11 +291,9 @@ gqlSchemaBuilder.mutationField("deleteClassMeetingConfig", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      await ClassMeetingConfigService.deleteClassMeetingConfig(actorUserId, args.id, ctx.locale);
-      return true;
-    },
+    resolve: withAuthVoid((actorUserId, args, locale) =>
+      ClassMeetingConfigService.deleteClassMeetingConfig(actorUserId, args.id, locale)
+    ),
   })
 );
 
@@ -311,9 +304,8 @@ gqlSchemaBuilder.mutationField("setDefaultClassMeetingConfig", t =>
       id: t.arg.id({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      return ClassMeetingConfigService.setDefaultClassMeetingConfig(actorUserId, args.id, ctx.locale);
-    },
+    resolve: withAuthResult((actorUserId, args, locale) =>
+      ClassMeetingConfigService.setDefaultClassMeetingConfig(actorUserId, args.id, locale)
+    ),
   })
 );

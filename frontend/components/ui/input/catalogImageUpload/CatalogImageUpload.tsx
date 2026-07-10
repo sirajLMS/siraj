@@ -29,7 +29,6 @@ export type CatalogImageUploadProps = {
 type UploadState = "idle" | "uploading" | "ready" | "error";
 
 type ImageUploadHookParams = {
-  readonly fileInputRef: React.RefObject<HTMLInputElement | null>;
   readonly onImageUrlChangeAction?: (url: string | null) => void;
   readonly onUploadAction?: (file: File) => Promise<{ url: string; filePath?: string }>;
   readonly onFilePathChangeAction?: (filePath: string | null) => void;
@@ -64,19 +63,13 @@ type UrlFallbackFieldProps = {
   readonly onUrlChange: (value: string) => void;
   readonly disabled: boolean;
   readonly showError: boolean;
-  readonly errorMessage: string | undefined;
-  readonly label: string;
-  readonly optionalLabel: string;
+  readonly errorMessage: string | null;
+  readonly label: string | undefined;
+  readonly optionalLabel: string | undefined;
 };
 
 function useImageUpload(params: ImageUploadHookParams) {
-  const {
-    fileInputRef,
-    onImageUrlChangeAction,
-    onUploadAction,
-    onFilePathChangeAction,
-    maxSizeMb = DEFAULT_MAX_SIZE_MB,
-  } = params;
+  const { onImageUrlChangeAction, onUploadAction, onFilePathChangeAction, maxSizeMb = DEFAULT_MAX_SIZE_MB } = params;
   const t = useTranslations("ui.catalogImageUpload");
   const notifications = useNotifications();
   const objectUrlRef = useRef<string | null>(null);
@@ -301,7 +294,7 @@ const UrlFallbackField: React.FC<UrlFallbackFieldProps> = ({
       onChange={event => onUrlChange(event.target.value)}
       disabled={disabled}
       error={showError}
-      helperText={showError ? errorMessage : undefined}
+      helperText={showError && errorMessage ? errorMessage : undefined}
       slotProps={{
         input: {
           startAdornment: (
@@ -331,14 +324,13 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   const t = useTranslations("ui.catalogImageUpload");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const upload = useImageUpload({
-    fileInputRef,
     onImageUrlChangeAction,
     onUploadAction,
     onFilePathChangeAction,
     maxSizeMb,
   });
 
-  const _triggerFileInput = useCallback(() => {
+  const triggerFileInput = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 

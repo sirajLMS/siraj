@@ -5,9 +5,14 @@ import { type CountryType, getCountryByCode } from "@/frontend/lib/locale";
 import {
   buildE164FromParts,
   canAppendCallingCodeDigit,
+  clampSelectionToDigits,
+  formatNationalDigits,
   getCallingCodeForRegion,
+  getMaxCallingCodeLength,
   getNextFormatChar,
   isCallingCodeComplete,
+  isCallingCodePrefixValid,
+  isCompletePhoneValid,
   matchCallingCodeFromDigits,
   splitPhoneValueToParts,
 } from "@/shared/lib/phone";
@@ -41,7 +46,7 @@ export type UsePhoneInputResult = {
   readonly maxPrefixDisplayLength: number;
 };
 
-function _resolveCountry(region: string | null | undefined): CountryType | undefined {
+function resolveCountry(region: string | null | undefined): CountryType | undefined {
   if (!region) {
     return undefined;
   }
@@ -210,7 +215,7 @@ function useNationalKeyDown(
   );
 }
 
-function _useDerivedPhoneState(
+function useDerivedPhoneState(
   region: string | null,
   prefixDigits: string,
   nationalDigits: string,
@@ -308,7 +313,7 @@ type PhoneInputState = {
   readonly setNationalDigits: (digits: string) => void;
 };
 
-function _usePhoneInputState(value: string | null, defaultRegion: string): PhoneInputState {
+function usePhoneInputState(value: string | null, defaultRegion: string): PhoneInputState {
   const prefixInputRef = useRef<HTMLInputElement>(null);
   const nationalInputRef = useRef<HTMLInputElement>(null);
   const lastEmittedRef = useRef<string | null | undefined>(undefined);

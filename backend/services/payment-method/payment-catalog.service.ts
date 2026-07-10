@@ -53,7 +53,7 @@ async function listCatalogEntries<TListAllItem, TListActiveFilters>(
 }
 
 export namespace PaymentCatalogService {
-  export async function listMobileWallets(
+  export function listMobileWallets(
     actorUserId: string,
     filters?: { countryCode?: CountryCode; direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
@@ -62,10 +62,7 @@ export namespace PaymentCatalogService {
       actorUserId,
       { activeOnly: filters?.activeOnly },
       { countryCode: filters?.countryCode, direction: filters?.direction },
-      {
-        listAll: SupportedMobileWalletRepository.listAll,
-        listActive: SupportedMobileWalletRepository.listActive,
-      },
+      { listAll: SupportedMobileWalletRepository.listAll, listActive: SupportedMobileWalletRepository.listActive },
       locale
     );
   }
@@ -94,7 +91,7 @@ export namespace PaymentCatalogService {
     return SupportedMobileWalletRepository.deactivate(id, undefined, locale);
   }
 
-  export async function listPaymentLinks(
+  export function listPaymentLinks(
     actorUserId: string,
     filters?: { direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
@@ -103,10 +100,7 @@ export namespace PaymentCatalogService {
       actorUserId,
       { activeOnly: filters?.activeOnly },
       { direction: filters?.direction },
-      {
-        listAll: SupportedPaymentLinkRepository.listAll,
-        listActive: SupportedPaymentLinkRepository.listActive,
-      },
+      { listAll: SupportedPaymentLinkRepository.listAll, listActive: SupportedPaymentLinkRepository.listActive },
       locale
     );
   }
@@ -135,7 +129,7 @@ export namespace PaymentCatalogService {
     return SupportedPaymentLinkRepository.deactivate(id, undefined, locale);
   }
 
-  export async function listOnlineAccounts(
+  export function listOnlineAccounts(
     actorUserId: string,
     filters?: { direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
@@ -144,10 +138,7 @@ export namespace PaymentCatalogService {
       actorUserId,
       { activeOnly: filters?.activeOnly },
       { direction: filters?.direction },
-      {
-        listAll: SupportedOnlineAccountRepository.listAll,
-        listActive: SupportedOnlineAccountRepository.listActive,
-      },
+      { listAll: SupportedOnlineAccountRepository.listAll, listActive: SupportedOnlineAccountRepository.listActive },
       locale
     );
   }

@@ -33,35 +33,32 @@ async function requirePermission(actorUserId: string, permission: AppPermission,
   }
 }
 
-async function _requireEntityOrError<T>(
-  fetchFn: () => Promise<T | null>,
-  locale: string | undefined,
-  errorKey: string,
-  errorParams: Record<string, unknown>
-): Promise<T> {
-  const entity = await fetchFn();
-  if (!entity) {
+async function requireParentProfile(parentId: string, locale: string | undefined): Promise<ParentProfileRepoResult> {
+  const profile = await ParentRepository.getParentProfile(parentId);
+  if (!profile) {
     const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc(errorKey, errorParams));
+    throw new Error(tFunc("parentNotFound", { id: parentId }));
   }
-  return entity;
+  return profile;
 }
 
-function _toAssociatedStudentResult(student: { status: string }): AssociatedStudentResult {
+async function requireStudent(
+  studentId: string,
+  locale: string | undefined
+): Promise<NonNullable<Awaited<ReturnType<typeof ParentRepository.getAssociatedStudentById>>>> {
+  const student = await ParentRepository.getAssociatedStudentById(studentId);
+  if (!student) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("studentNotFound", { id: studentId }));
+  }
+  return student;
+}
+
+function toStudentResult(student: { status: string }): AssociatedStudentResult {
   return {
     ...student,
     status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
   } as AssociatedStudentResult;
-}
-
-type AccountStatusResult = { id: string; userId: string; accountStatus: string };
-
-function _toAccountStatusResult(result: AccountStatusResult): AccountStatusResult {
-  return {
-    id: result.id,
-    userId: result.userId,
-    accountStatus: result.accountStatus,
-  };
 }
 
 export namespace ParentProfileService {
@@ -76,12 +73,7 @@ export namespace ParentProfileService {
   ): Promise<ParentProfileResult> {
     await requirePermission(actorUserId, AppPermission.PARENT_VIEW_PROFILE, locale);
 
-    const profile = await _requireEntityOrError(
-      () => ParentRepository.getParentProfile(parentId),
-      locale,
-      "parentNotFound",
-      { id: parentId }
-    );
+    const profile = await requireParentProfile(parentId, locale);
 
     return toParentProfileResult(profile);
   }
@@ -98,7 +90,7 @@ export namespace ParentProfileService {
     await requirePermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED, locale);
 
     const students = await ParentRepository.getAssociatedStudents(parentId);
-    return students.map(toAssociatedStudentResult);
+    return students.map(toStudentResult);
   }
 
   /**
@@ -112,14 +104,9 @@ export namespace ParentProfileService {
   ): Promise<AssociatedStudentResult> {
     await requirePermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED, locale);
 
-    const student = await _requireEntityOrError(
-      () => ParentRepository.getAssociatedStudentById(studentId),
-      locale,
-      "studentNotFound",
-      { id: studentId }
-    );
+    const student = await requireStudent(studentId, locale);
 
-    return _toAssociatedStudentResult(student);
+    return toStudentResult(student);
   }
 
   /**
@@ -149,7 +136,11 @@ export namespace ParentProfileService {
       });
     }
 
-    return _toAccountStatusResult(result);
+    return {
+      id: result.id,
+      userId: result.userId,
+      accountStatus: result.accountStatus,
+    };
   }
 
   /**
@@ -165,7 +156,11 @@ export namespace ParentProfileService {
 
     const result = await ParentRepository.reactivateParent(parentId, undefined, locale);
 
-    return _toAccountStatusResult(result);
+    return {
+      id: result.id,
+      userId: result.userId,
+      accountStatus: result.accountStatus,
+    };
   }
 
   /**
@@ -209,21 +204,11 @@ export namespace ParentProfileService {
 
     const { timezone, phone, ...repoInput } = input;
     if (phone !== undefined) {
-      const existing = await _requireEntityOrError(
-        () => ParentRepository.getParentProfile(parentId),
-        locale,
-        "parentNotFound",
-        { id: parentId }
-      );
+      const existing = await requireParentProfile(parentId, locale);
       await UserRepository.updateProfileFields(existing.userId, { phone }, locale);
     }
     if (timezone != null) {
-      const existing = await _requireEntityOrError(
-        () => ParentRepository.getParentProfile(parentId),
-        locale,
-        "parentNotFound",
-        { id: parentId }
-      );
+      const existing = await requireParentProfile(parentId, locale);
       await UserRepository.updateTimezone(existing.userId, timezone, undefined, locale);
     }
 

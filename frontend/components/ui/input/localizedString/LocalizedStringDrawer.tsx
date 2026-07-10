@@ -25,12 +25,14 @@ import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "
 import type { AppLocale, LocalizedString } from "@/frontend/types/localized-string.types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
+type TranslationFn = (key: string, params?: Record<string, string>) => string;
+
 type HelperTextParams = {
   readonly draft: LocalizedString;
   readonly required: boolean;
   readonly resolvedRequired: readonly AppLocale[];
   readonly uiLocale: string;
-  readonly t: (key: string, params?: Record<string, string>) => string;
+  readonly t: TranslationFn;
 };
 
 function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: HelperTextParams): string | undefined {
@@ -54,22 +56,6 @@ function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: Hel
     return t("atLeastOneTranslationRequired");
   }
   return undefined;
-}
-
-function resolveFieldChange(params: {
-  readonly draft: LocalizedString;
-  readonly locale: AppLocale;
-  readonly text: string;
-  readonly autosave: boolean;
-  readonly onSaveAction: (next: LocalizedString) => void;
-  readonly setDraft: React.Dispatch<React.SetStateAction<LocalizedString>>;
-}): void {
-  const { draft, locale, text, autosave, onSaveAction, setDraft } = params;
-  const next = setLocalizedString(draft, locale, text);
-  setDraft(next);
-  if (autosave) {
-    onSaveAction(next);
-  }
 }
 
 function resolveDismiss(params: {
@@ -120,7 +106,7 @@ type LocaleFieldProps = {
   readonly minRows: number | undefined;
   readonly disabled: boolean;
   readonly onChange: (locale: AppLocale, text: string) => void;
-  readonly t: (key: string, params?: Record<string, string>) => string;
+  readonly t: TranslationFn;
 };
 
 const LocaleField: React.FC<LocaleFieldProps> = ({
@@ -173,6 +159,78 @@ const LocaleField: React.FC<LocaleFieldProps> = ({
     }}
   />
 );
+
+type DrawerFooterProps = {
+  readonly isMobile: boolean;
+  readonly canSave: boolean;
+  readonly saving: boolean;
+  readonly onSaveAction: (next: LocalizedString) => void;
+  readonly draft: LocalizedString;
+  readonly onCancelAction: () => void;
+  readonly t: TranslationFn;
+};
+
+const DrawerFooter: React.FC<DrawerFooterProps> = ({
+  isMobile,
+  canSave,
+  saving,
+  onSaveAction,
+  draft,
+  onCancelAction,
+  t,
+}) => {
+  const buttonSx = useMemo(
+    () => ({ flex: isMobile ? 1 : undefined, minHeight: isMobile ? 48 : undefined }),
+    [isMobile]
+  );
+  return (
+    <DialogActions
+      sx={{
+        px: 3,
+        pb: theme => `calc(${theme.spacing(3)} + env(safe-area-inset-bottom, 0px))`,
+        pt: 2,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        gap: 1.5,
+        flexShrink: 0,
+      }}
+    >
+      <Button onClick={onCancelAction} disabled={saving} variant="text" sx={buttonSx}>
+        {t("cancel")}
+      </Button>
+      <Button variant="contained" disabled={!canSave} onClick={() => onSaveAction(draft)} sx={buttonSx}>
+        {t("save")}
+      </Button>
+    </DialogActions>
+  );
+};
+
+function computePaperSx(isMobile: boolean) {
+  return {
+    width: isMobile ? "100%" : { xs: "100%", sm: 480 },
+    maxHeight: isMobile ? "85vh" : "100%",
+    borderTopLeftRadius: isMobile ? 16 : 0,
+    borderTopRightRadius: isMobile ? 16 : 0,
+    display: "flex" as const,
+    flexDirection: "column" as const,
+  };
+}
+
+function computeFieldConfigs(draft: LocalizedString, requiredSet: Set<AppLocale>, uiLocale: string) {
+  return ALLOWED_LOCALES.map(locale => ({
+    locale,
+    isLocaleRequired: requiredSet.has(locale),
+    fieldValue: draft[locale] ?? "",
+    isRtl: locale === "ar",
+    languageName: getLanguageDisplayName(locale, uiLocale),
+    emoji: getLanguageEmoji(locale),
+  }));
+}
+
+function computeShowError(isLocaleRequired: boolean, fieldValue: string): boolean {
+  return isLocaleRequired && !(typeof fieldValue === "string" && fieldValue.trim() !== "");
+}
 
 export type LocalizedStringDrawerProps = {
   readonly open: boolean;
@@ -246,14 +304,14 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
   const uiLocale = useLocale();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const resolvedAnchor = isMobile ? "bottom" : anchor;
-  const showFooter = showActions ?? !autosave;
+  const [draft, setDraft] = useState<LocalizedString>(value);
 
+  const resolvedAnchor = useMemo(() => (isMobile ? "bottom" : anchor), [isMobile, anchor]);
+  const showFooter = useMemo(() => showActions ?? !autosave, [showActions, autosave]);
   const resolvedRequired = useMemo(
     () => requiredLocales ?? (required ? [DEFAULT_CONTENT_LOCALE] : []),
     [requiredLocales, required]
   );
-  const [draft, setDraft] = useState<LocalizedString>(value);
 
   useEffect(() => {
     if (open) {
@@ -262,15 +320,7 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
   }, [open, value]);
 
   const handleFieldChange = useCallback(
-    (locale: AppLocale, text: string) =>
-      resolveFieldChange({
-        draft,
-        locale,
-        text,
-        autosave,
-        onSaveAction,
-        setDraft,
-      }),
+    (locale: AppLocale, text: string) => resolveFieldChange({ draft, locale, text, autosave, onSaveAction, setDraft }),
     [draft, autosave, onSaveAction]
   );
 
@@ -278,51 +328,21 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
   const canSave = valid && !saving;
 
   const handleDismiss = useCallback(
-    () =>
-      resolveDismiss({
-        autosave,
-        dismissAction,
-        canSave,
-        draft,
-        onSaveAction,
-        onCancelAction,
-      }),
+    () => resolveDismiss({ autosave, dismissAction, canSave, draft, onSaveAction, onCancelAction }),
     [autosave, dismissAction, canSave, draft, onSaveAction, onCancelAction]
   );
 
-  const headerTitle = title ?? t("editTranslations");
-
+  const headerTitle = useMemo(() => title ?? t("editTranslations"), [title, t]);
   const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequired), [resolvedRequired]);
-
   const helperText = useMemo(
-    () =>
-      buildHelperText({
-        draft,
-        required,
-        resolvedRequired,
-        uiLocale,
-        t,
-      }),
+    () => buildHelperText({ draft, required, resolvedRequired, uiLocale, t }),
     [draft, required, resolvedRequired, uiLocale, t]
   );
+  const fieldConfigs = useMemo(() => computeFieldConfigs(draft, requiredSet, uiLocale), [draft, requiredSet, uiLocale]);
+  const paperSx = useMemo<ReturnType<typeof computePaperSx>>(() => computePaperSx(isMobile), [isMobile]);
+
   return (
-    <Drawer
-      open={open}
-      anchor={resolvedAnchor}
-      onClose={handleDismiss}
-      slotProps={{
-        paper: {
-          sx: {
-            width: isMobile ? "100%" : { xs: "100%", sm: 480 },
-            maxHeight: isMobile ? "85vh" : "100%",
-            borderTopLeftRadius: isMobile ? 16 : 0,
-            borderTopRightRadius: isMobile ? 16 : 0,
-            display: "flex",
-            flexDirection: "column",
-          },
-        },
-      }}
-    >
+    <Drawer open={open} anchor={resolvedAnchor} onClose={handleDismiss} slotProps={{ paper: { sx: paperSx } }}>
       <DialogTitle
         sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexShrink: 0 }}
       >
@@ -336,64 +356,36 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
       <Divider />
       <DialogContent dividers sx={{ flex: 1, overflow: "auto" }}>
         <Stack sx={{ gap: 2.5 }}>
-          {ALLOWED_LOCALES.map(locale => {
-            const isLocaleRequired = requiredSet.has(locale);
-            const fieldValue = draft[locale] ?? "";
-            const isRtl = locale === "ar";
-            const languageName = getLanguageDisplayName(locale, uiLocale);
-            const emoji = getLanguageEmoji(locale);
-            const showError = isLocaleRequired && !(typeof fieldValue === "string" && fieldValue.trim() !== "");
-            return (
-              <LocaleField
-                key={locale}
-                locale={locale}
-                fieldValue={fieldValue}
-                isLocaleRequired={isLocaleRequired}
-                isRtl={isRtl}
-                languageName={languageName}
-                emoji={emoji}
-                showError={showError}
-                multiline={multiline}
-                minRows={minRows}
-                disabled={saving}
-                onChange={handleFieldChange}
-                t={t}
-              />
-            );
-          })}
+          {fieldConfigs.map(cfg => (
+            <LocaleField
+              key={cfg.locale}
+              locale={cfg.locale}
+              fieldValue={cfg.fieldValue}
+              isLocaleRequired={cfg.isLocaleRequired}
+              isRtl={cfg.isRtl}
+              languageName={cfg.languageName}
+              emoji={cfg.emoji}
+              showError={computeShowError(cfg.isLocaleRequired, cfg.fieldValue)}
+              multiline={multiline}
+              minRows={minRows}
+              disabled={saving}
+              onChange={handleFieldChange}
+              t={t}
+            />
+          ))}
           {helperText ? <FormHelperText>{helperText}</FormHelperText> : null}
         </Stack>
       </DialogContent>
       {showFooter ? (
-        <DialogActions
-          sx={{
-            px: 3,
-            pb: theme => `calc(${theme.spacing(3)} + env(safe-area-inset-bottom, 0px))`,
-            pt: 2,
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-end",
-            gap: 1.5,
-            flexShrink: 0,
-          }}
-        >
-          <Button
-            onClick={onCancelAction}
-            disabled={saving}
-            variant="text"
-            sx={{ flex: isMobile ? 1 : undefined, minHeight: isMobile ? 48 : undefined }}
-          >
-            {t("cancel")}
-          </Button>
-          <Button
-            variant="contained"
-            disabled={!canSave}
-            onClick={() => onSaveAction(draft)}
-            sx={{ flex: isMobile ? 1 : undefined, minHeight: isMobile ? 48 : undefined }}
-          >
-            {t("save")}
-          </Button>
-        </DialogActions>
+        <DrawerFooter
+          isMobile={isMobile}
+          canSave={canSave}
+          saving={saving}
+          onSaveAction={onSaveAction}
+          draft={draft}
+          onCancelAction={onCancelAction}
+          t={t}
+        />
       ) : null}
     </Drawer>
   );

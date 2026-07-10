@@ -123,10 +123,7 @@ type PaymentMethodsManagerData = {
   readonly userPaymentMethods?: readonly UserPaymentMethodFieldsFragment[] | null;
 };
 
-function usePaymentMethods(
-  data: PaymentMethodsManagerData | undefined,
-  slot: PaymentMethodsSlot,
-): PaymentMethodRow[] {
+function usePaymentMethods(data: PaymentMethodsManagerData | undefined, slot: PaymentMethodsSlot): PaymentMethodRow[] {
   return useMemo(() => {
     const rows = (data?.userPaymentMethods ?? [])
       .map(toRow)
