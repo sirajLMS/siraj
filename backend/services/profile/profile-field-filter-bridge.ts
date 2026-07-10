@@ -63,45 +63,80 @@ function permissionsInclude(permissions: ReadonlySet<AppPermission>, key: AppPer
   return permissions.has(key);
 }
 
-function hasLegacyProfileGroupView(ctx: FieldFilterContext, group: ProfileFieldGroupDefinition): boolean {
-  const { permissions, scope, audience } = ctx;
-  const groupKey = group.groupKey;
+const TEACHER_VIEW_OTHER_ALLOWED_GROUPS = new Set<ProfileFieldGroupKey>([
+  "core_identity",
+  "core_contact",
+  "teacher_professional",
+  "teacher_identity",
+  "teacher_students",
+]);
 
-  if (scope === ProfileScope.OWN) {
-    if (
-      permissionsInclude(permissions, AppPermission.AUTH_VIEW_OWN_PROFILE) &&
-      (groupKey === "core_identity" || groupKey === "core_contact")
-    ) {
-      return true;
-    }
+function matchPermission(
+  permissions: ReadonlySet<AppPermission>,
+  audience: ProfileAudience,
+  expectedAudience: ProfileAudience,
+  permission: AppPermission,
+  groupKey: ProfileFieldGroupKey,
+  allowedGroups: readonly ProfileFieldGroupKey[]
+): boolean {
+  return (
+    audience === expectedAudience && permissionsInclude(permissions, permission) && allowedGroups.includes(groupKey)
+  );
+}
 
-    if (
-      audience === ProfileAudience.TEACHER &&
-      permissionsInclude(permissions, AppPermission.TEACHER_VIEW_OWN_PROFILE) &&
-      TEACHER_VIEW_OWN_GROUPS.includes(groupKey)
-    ) {
-      return true;
-    }
-
-    if (
-      audience === ProfileAudience.PARENT &&
-      permissionsInclude(permissions, AppPermission.PARENT_VIEW_OWN_PROFILE) &&
-      PARENT_VIEW_OWN_GROUPS.includes(groupKey)
-    ) {
-      return true;
-    }
-
-    return false;
+function hasLegacyProfileGroupViewOwn(
+  permissions: ReadonlySet<AppPermission>,
+  audience: ProfileAudience,
+  groupKey: ProfileFieldGroupKey
+): boolean {
+  if (
+    permissionsInclude(permissions, AppPermission.AUTH_VIEW_OWN_PROFILE) &&
+    (groupKey === "core_identity" || groupKey === "core_contact")
+  ) {
+    return true;
   }
 
+  if (
+    matchPermission(
+      permissions,
+      audience,
+      ProfileAudience.TEACHER,
+      AppPermission.TEACHER_VIEW_OWN_PROFILE,
+      groupKey,
+      TEACHER_VIEW_OWN_GROUPS
+    )
+  ) {
+    return true;
+  }
+
+  return matchPermission(
+    permissions,
+    audience,
+    ProfileAudience.PARENT,
+    AppPermission.PARENT_VIEW_OWN_PROFILE,
+    groupKey,
+    PARENT_VIEW_OWN_GROUPS
+  );
+}
+
+function hasLegacyProfileGroupViewOther(
+  permissions: ReadonlySet<AppPermission>,
+  audience: ProfileAudience,
+  groupKey: ProfileFieldGroupKey
+): boolean {
   if (permissionsInclude(permissions, AppPermission.USER_VIEW_PROFILE)) {
     return true;
   }
 
   if (
-    audience === ProfileAudience.PARENT &&
-    permissionsInclude(permissions, AppPermission.PARENT_VIEW_PROFILE) &&
-    PARENT_VIEW_OTHER_GROUPS.includes(groupKey)
+    matchPermission(
+      permissions,
+      audience,
+      ProfileAudience.PARENT,
+      AppPermission.PARENT_VIEW_PROFILE,
+      groupKey,
+      PARENT_VIEW_OTHER_GROUPS
+    )
   ) {
     return true;
   }
@@ -109,32 +144,35 @@ function hasLegacyProfileGroupView(ctx: FieldFilterContext, group: ProfileFieldG
   if (
     audience === ProfileAudience.TEACHER &&
     permissionsInclude(permissions, AppPermission.TEACHER_VIEW_PROFILE) &&
-    (groupKey === "core_identity" ||
-      groupKey === "core_contact" ||
-      groupKey === "teacher_professional" ||
-      groupKey === "teacher_identity" ||
-      groupKey === "teacher_students")
+    TEACHER_VIEW_OTHER_ALLOWED_GROUPS.has(groupKey)
   ) {
     return true;
   }
 
-  if (
-    audience === ProfileAudience.STAFF &&
-    permissionsInclude(permissions, AppPermission.STAFF_EDIT_PROFILE) &&
-    STAFF_VIEW_OTHER_GROUPS.includes(groupKey)
-  ) {
-    return true;
+  return matchPermission(
+    permissions,
+    audience,
+    ProfileAudience.STAFF,
+    AppPermission.STAFF_EDIT_PROFILE,
+    groupKey,
+    STAFF_VIEW_OTHER_GROUPS
+  );
+}
+
+function hasLegacyProfileGroupView(ctx: FieldFilterContext, group: ProfileFieldGroupDefinition): boolean {
+  const { permissions, scope, audience } = ctx;
+  const groupKey = group.groupKey;
+
+  if (scope === ProfileScope.OWN) {
+    return hasLegacyProfileGroupViewOwn(permissions, audience, groupKey);
   }
 
-  return false;
+  return hasLegacyProfileGroupViewOther(permissions, audience, groupKey);
 }
 
 export function hasProfileGroupViewPermission(ctx: FieldFilterContext, group: ProfileFieldGroupDefinition): boolean {
   const viewPermission = getProfileViewPermission(group, ctx.scope);
-  if (permissionsInclude(ctx.permissions, viewPermission)) {
-    return true;
-  }
-  return hasLegacyProfileGroupView(ctx, group);
+  return checkPermissionOrLegacy(ctx.permissions, viewPermission, () => hasLegacyProfileGroupView(ctx, group));
 }
 
 function shouldApplyProfileGroupForEdit(ctx: FieldFilterContext, group: ProfileFieldGroupDefinition): boolean {
@@ -152,24 +190,19 @@ function hasLegacyProfileGroupEdit(ctx: FieldFilterContext, group: ProfileFieldG
     return shouldApplyProfileGroupForEdit(ctx, group);
   }
 
-  if (
-    scope === ProfileScope.OTHER &&
-    audience === ProfileAudience.STAFF &&
-    permissionsInclude(permissions, AppPermission.STAFF_EDIT_PROFILE) &&
-    STAFF_EDIT_OTHER_GROUPS.includes(groupKey)
-  ) {
-    return true;
-  }
-
-  return false;
+  return matchPermission(
+    permissions,
+    audience,
+    ProfileAudience.STAFF,
+    AppPermission.STAFF_EDIT_PROFILE,
+    groupKey,
+    STAFF_EDIT_OTHER_GROUPS
+  );
 }
 
 export function hasProfileGroupEditPermission(ctx: FieldFilterContext, group: ProfileFieldGroupDefinition): boolean {
   const editPermission = getProfileEditPermission(group, ctx.scope);
-  if (permissionsInclude(ctx.permissions, editPermission)) {
-    return true;
-  }
-  return hasLegacyProfileGroupEdit(ctx, group);
+  return checkPermissionOrLegacy(ctx.permissions, editPermission, () => hasLegacyProfileGroupEdit(ctx, group));
 }
 
 function hasLegacyStudentGroupView(ctx: StudentFieldFilterContext, group: StudentFieldGroupDefinition): boolean {
@@ -216,10 +249,7 @@ export function hasStudentGroupViewPermission(
   group: StudentFieldGroupDefinition
 ): boolean {
   const viewPermission = getStudentScope(ctx) === ProfileScope.OWN ? group.viewOwn : group.viewOther;
-  if (permissionsInclude(ctx.permissions, viewPermission)) {
-    return true;
-  }
-  return hasLegacyStudentGroupView(ctx, group);
+  return checkPermissionOrLegacy(ctx.permissions, viewPermission, () => hasLegacyStudentGroupView(ctx, group));
 }
 
 export function hasStudentGroupEditPermission(
@@ -227,10 +257,7 @@ export function hasStudentGroupEditPermission(
   group: StudentFieldGroupDefinition
 ): boolean {
   const editPermission = getStudentScope(ctx) === ProfileScope.OWN ? group.editOwn : group.editOther;
-  if (permissionsInclude(ctx.permissions, editPermission)) {
-    return true;
-  }
-  return hasLegacyStudentGroupEdit(ctx, group);
+  return checkPermissionOrLegacy(ctx.permissions, editPermission, () => hasLegacyStudentGroupEdit(ctx, group));
 }
 
 function getStudentScope(ctx: StudentFieldFilterContext): ProfileScope {

@@ -178,7 +178,7 @@ export namespace EffectiveMeetingService {
     providerId: null,
   };
 
-  async function fromClassConfig(
+  async function _fromClassConfig(
     config: Awaited<ReturnType<typeof ClassMeetingConfigRepository.getDefaultForClassInstance>>,
     source: "class" | "recurring",
     tx?: DBTransaction
@@ -200,45 +200,10 @@ export namespace EffectiveMeetingService {
     };
   }
 
-  export async function resolveForClassInstance(
-    classInstanceId: string,
+  async function fromTeacherDefault(
+    teacherDefault: Awaited<ReturnType<typeof UserMeetingConfigRepository.getDefaultForUser>>,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
-    const client = tx ?? db;
-    const classDefault = await ClassMeetingConfigRepository.getDefaultForClassInstance(classInstanceId, tx);
-    if (classDefault) {
-      return fromClassConfig(classDefault, "class", tx);
-    }
-
-    const [instance] = await client
-      .select({
-        recurringScheduleId: classInstances.recurringScheduleId,
-        teacherId: classInstances.teacherId,
-      })
-      .from(classInstances)
-      .where(eq(classInstances.id, classInstanceId))
-      .limit(1);
-
-    if (!instance) {
-      return empty;
-    }
-
-    if (instance.recurringScheduleId) {
-      const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(
-        instance.recurringScheduleId,
-        tx
-      );
-      if (recurringDefault) {
-        return fromClassConfig(recurringDefault, "recurring", tx);
-      }
-    }
-
-    const userId = await getTeacherUserId(instance.teacherId, tx);
-    if (!userId) {
-      return empty;
-    }
-
-    const teacherDefault = await UserMeetingConfigRepository.getDefaultForUser(userId, tx);
     if (!teacherDefault) {
       return empty;
     }
@@ -256,69 +221,88 @@ export namespace EffectiveMeetingService {
     };
   }
 
-  export async function resolveForRecurringSchedule(
-    recurringScheduleId: string,
-    teacherId: string,
-    tx?: DBTransaction
-  ): Promise<EffectiveMeetingReturnType> {
-    const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(recurringScheduleId, tx);
+  async function _resolveTeacherDefault(userId: string, tx?: DBTransaction): Promise<EffectiveMeetingReturnType> {
+    const teacherDefault = await UserMeetingConfigRepository.getDefaultForUser(userId, tx);
+    return fromTeacherDefault(teacherDefault, tx);
+  }
+}
+}
+
+export async function resolveForClassInstance(
+  classInstanceId: string,
+  tx?: DBTransaction
+): Promise<EffectiveMeetingReturnType> {
+  const client = tx ?? db;
+  const classDefault = await ClassMeetingConfigRepository.getDefaultForClassInstance(classInstanceId, tx);
+  if (classDefault) {
+    return fromClassConfig(classDefault, "class", tx);
+  }
+
+  const [instance] = await client
+    .select({
+      recurringScheduleId: classInstances.recurringScheduleId,
+      teacherId: classInstances.teacherId,
+    })
+    .from(classInstances)
+    .where(eq(classInstances.id, classInstanceId))
+    .limit(1);
+
+  if (!instance) {
+    return empty;
+  }
+
+  if (instance.recurringScheduleId) {
+    const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(
+      instance.recurringScheduleId,
+      tx
+    );
     if (recurringDefault) {
       return fromClassConfig(recurringDefault, "recurring", tx);
     }
-
-    const userId = await getTeacherUserId(teacherId, tx);
-    if (!userId) {
-      return empty;
-    }
-
-    const teacherDefault = await UserMeetingConfigRepository.getDefaultForUser(userId, tx);
-    if (!teacherDefault) {
-      return empty;
-    }
-
-    const snapshot = await MeetingConfigSnapshotService.buildSessionSnapshot(teacherDefault.id, tx);
-    return {
-      joinUrl: snapshot.details.meetingUrl,
-      providerSlug: snapshot.provider.catalogSlug,
-      providerName: snapshot.provider.catalogName,
-      logoUrl: snapshot.provider.logoUrl,
-      meetingId: extractMeetingId(snapshot.details.meetingUrl),
-      source: "teacher",
-      configId: teacherDefault.id,
-      providerId: teacherDefault.providerId,
-    };
   }
 
-  export async function resolveForNewBooking(
-    teacherId: string,
-    options?: { readonly recurringScheduleId?: string | null; readonly tx?: DBTransaction }
-  ): Promise<EffectiveMeetingReturnType> {
-    const { recurringScheduleId, tx } = options ?? {};
-
-    if (recurringScheduleId) {
-      return resolveForRecurringSchedule(recurringScheduleId, teacherId, tx);
-    }
-
-    const userId = await getTeacherUserId(teacherId, tx);
-    if (!userId) {
-      return empty;
-    }
-
+  const userId = await getTeacherUserId(instance.teacherId, tx);
+  if (userId) {
     const teacherDefault = await UserMeetingConfigRepository.getDefaultForUser(userId, tx);
-    if (!teacherDefault) {
-      return empty;
-    }
-
-    const snapshot = await MeetingConfigSnapshotService.buildSessionSnapshot(teacherDefault.id, tx);
-    return {
-      joinUrl: snapshot.details.meetingUrl,
-      providerSlug: snapshot.provider.catalogSlug,
-      providerName: snapshot.provider.catalogName,
-      logoUrl: snapshot.provider.logoUrl,
-      meetingId: extractMeetingId(snapshot.details.meetingUrl),
-      source: "teacher",
-      configId: teacherDefault.id,
-      providerId: teacherDefault.providerId,
-    };
+    return fromTeacherDefault(teacherDefault, tx);
   }
+
+  return empty;
+}
+
+export async function resolveForRecurringSchedule(
+  recurringScheduleId: string,
+  teacherId: string,
+  tx?: DBTransaction
+): Promise<EffectiveMeetingReturnType> {
+  const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(recurringScheduleId, tx);
+  if (recurringDefault) {
+    return fromClassConfig(recurringDefault, "recurring", tx);
+  }
+
+  const userId = await getTeacherUserId(teacherId, tx);
+  if (!userId) {
+    return empty;
+  }
+
+  return resolveTeacherDefault(userId, tx);
+}
+
+export async function resolveForNewBooking(
+  teacherId: string,
+  options?: { readonly recurringScheduleId?: string | null; readonly tx?: DBTransaction }
+): Promise<EffectiveMeetingReturnType> {
+  const { recurringScheduleId, tx } = options ?? {};
+
+  if (recurringScheduleId) {
+    return resolveForRecurringSchedule(recurringScheduleId, teacherId, tx);
+  }
+
+  const userId = await getTeacherUserId(teacherId, tx);
+  if (userId) {
+    return resolveTeacherDefault(userId, tx);
+  }
+
+  return empty;
+}
 }

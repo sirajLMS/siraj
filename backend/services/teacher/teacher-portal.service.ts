@@ -71,6 +71,7 @@ export namespace TeacherPortalService {
           durationMinutes: row.durationMinutes,
           executionState: row.executionState as TeacherAssignedClassesResult["rows"][number]["executionState"],
           outcome: row.outcome as TeacherAssignedClassesResult["rows"][number]["outcome"],
+          isFrozen: row.isFrozen,
           meetingJoinUrl: effectiveMeeting.joinUrl,
           effectiveMeeting,
         };

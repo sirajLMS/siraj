@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, type SQL } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { userPaymentMethods } from "@/backend/db/schema";
@@ -27,15 +27,22 @@ function slotDirections(slot: DefaultSlot): PaymentDirection[] {
     : [PaymentDirection.PAYOUT, PaymentDirection.BOTH];
 }
 
+async function selectByCondition(
+  condition: SQL,
+  tx: DBTransaction | undefined,
+  orderBy?: SQL
+): Promise<UserPaymentMethodSelectType[]> {
+  const client = tx ?? db;
+  let query = client.select().from(userPaymentMethods).where(condition);
+  if (orderBy) {
+    query = query.orderBy(orderBy);
+  }
+  return query.then(rows => rows.map(toSelectType));
+}
+
 export namespace UserPaymentMethodRepository {
   export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserPaymentMethodSelectType[]> {
-    const client = tx ?? db;
-    return client
-      .select()
-      .from(userPaymentMethods)
-      .where(eq(userPaymentMethods.userId, userId))
-      .orderBy(userPaymentMethods.createdAt)
-      .then(rows => rows.map(toSelectType));
+    return selectByCondition(eq(userPaymentMethods.userId, userId), tx, userPaymentMethods.createdAt);
   }
 
   export async function getById(id: string, tx?: DBTransaction): Promise<UserPaymentMethodSelectType | null> {
@@ -135,12 +142,7 @@ export namespace UserPaymentMethodRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodSelectType[]> {
-    const client = tx ?? db;
-    return client
-      .select()
-      .from(userPaymentMethods)
-      .where(and(eq(userPaymentMethods.userId, userId), eq(userPaymentMethods.isDefault, true)))
-      .then(rows => rows.map(toSelectType));
+    return selectByCondition(and(eq(userPaymentMethods.userId, userId), eq(userPaymentMethods.isDefault, true)), tx);
   }
 
   export async function findDefaultForSlot(

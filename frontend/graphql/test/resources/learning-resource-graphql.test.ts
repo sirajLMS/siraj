@@ -80,6 +80,26 @@ async function createTestResource(token: string): Promise<string> {
   return resource.id;
 }
 
+async function _expectUploadMutationError(token: string, displayName: string): Promise<void> {
+  const file = await uploadDummyFile(token);
+
+  const result = await testClient.mutate({
+    mutation: uploadLearningResourceMutationDocument,
+    variables: {
+      input: {
+        displayName,
+        filePath: file.path,
+        fileId: file.id,
+      },
+    },
+    context: {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  });
+
+  expect(result.error).toBeDefined();
+}
+
 async function testQueryLearningResources(role: string) {
   const token = await loginDemoUser(role);
   const data = await authenticatedRequest(token, "query", learningResourcesQueryDocument, {
@@ -145,25 +165,8 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
 
   test("Teacher denied from uploading resource", async () => {
     if (!superAdminToken) throw new Error("Missing super admin token");
-
-    const file = await uploadDummyFile(superAdminToken);
     const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.mutate({
-      mutation: uploadLearningResourceMutationDocument,
-      variables: {
-        input: {
-          displayName: "Teacher Attempt Upload",
-          filePath: file.path,
-          fileId: file.id,
-        },
-      },
-      context: {
-        headers: { Authorization: `Bearer ${teacherToken}` },
-      },
-    });
-
-    expect(result.error).toBeDefined();
+    await expectUploadMutationError(teacherToken, "Teacher Attempt Upload");
   });
 
   test("Parent denied from resource directory", async () => {
@@ -182,26 +185,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
 
   test("Upload with missing displayName returns validation error", async () => {
     if (!superAdminToken) throw new Error("Missing super admin token");
-
-    const file = await uploadDummyFile(superAdminToken);
-
-    const result = await testClient.mutate({
-      mutation: uploadLearningResourceMutationDocument,
-      variables: {
-        input: {
-          displayName: "",
-          filePath: file.path,
-          fileId: file.id,
-        },
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${superAdminToken}`,
-        },
-      },
-    });
-
-    expect(result.error).toBeDefined();
+    await expectUploadMutationError(superAdminToken, "");
   });
 
   test("Super Admin can delete learning resource successfully", async () => {

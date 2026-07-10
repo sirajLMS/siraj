@@ -56,32 +56,31 @@ export namespace ClassMeetingConfigRepository {
     return row;
   }
 
-  export async function getDefaultForClassInstance(
-    classInstanceId: string,
+  async function getDefaultForScope(
+    scope: ClassMeetingConfigScopeFilter,
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType | null> {
     const client = tx ?? db;
     const [row] = await client
       .select()
       .from(classMeetingConfigs)
-      .where(and(eq(classMeetingConfigs.classInstanceId, classInstanceId), eq(classMeetingConfigs.isDefault, true)))
+      .where(and(scopeCondition(scope), eq(classMeetingConfigs.isDefault, true)))
       .limit(1);
     return row ?? null;
+  }
+
+  export async function getDefaultForClassInstance(
+    classInstanceId: string,
+    tx?: DBTransaction
+  ): Promise<ClassMeetingConfigSelectType | null> {
+    return getDefaultForScope({ classInstanceId }, tx);
   }
 
   export async function getDefaultForRecurringSchedule(
     recurringScheduleId: string,
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType | null> {
-    const client = tx ?? db;
-    const [row] = await client
-      .select()
-      .from(classMeetingConfigs)
-      .where(
-        and(eq(classMeetingConfigs.recurringScheduleId, recurringScheduleId), eq(classMeetingConfigs.isDefault, true))
-      )
-      .limit(1);
-    return row ?? null;
+    return getDefaultForScope({ recurringScheduleId }, tx);
   }
 
   async function clearDefault(scope: ClassMeetingConfigScopeFilter, tx: DBTransaction): Promise<void> {

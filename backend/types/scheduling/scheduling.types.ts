@@ -184,6 +184,7 @@ export type WeeklyScheduleGridRow = {
   dayOfWeek: string;
   executionState: string;
   outcome: string;
+  isFrozen: boolean;
   subjectId?: string | null;
   subjectName?: string | null;
   classType?: string | null;
@@ -237,4 +238,5 @@ export type TeacherAssignedClassRow = {
   durationMinutes: number;
   executionState: string;
   outcome: string | null;
+  isFrozen: boolean;
 };

@@ -175,70 +175,37 @@ function FormActions({
   );
 }
 
-export function StudentQuotaView({
+function QuotaFormCard({
+  methods,
+  onSubmit,
   studentData,
-  isLoading,
   isSaving,
   isSaved,
-  embedded = false,
-  readOnly = false,
-  onSave,
+  readOnly,
+  embedded,
   onCancel,
-}: Readonly<StudentQuotaViewProps>) {
+  canEditIdentity,
+  canEditQuota,
+  canViewQuota,
+  canViewTeacher,
+}: Readonly<{
+  methods: UseFormReturn<StudentQuotaFormInput, undefined, StudentQuotaFormData>;
+  onSubmit: (data: StudentQuotaFormData) => Promise<void>;
+  studentData: NonNullable<StudentQuotaViewProps["studentData"]>;
+  isSaving: boolean;
+  isSaved: boolean;
+  readOnly: boolean;
+  embedded: boolean;
+  onCancel: () => void;
+  canEditIdentity: boolean;
+  canEditQuota: boolean;
+  canViewQuota: boolean;
+  canViewTeacher: boolean;
+}>) {
   const t = useTranslations("dashboard.studentQuota");
-  const validationMessages = useTranslations("dashboard.studentQuota.validation");
-  const { canView, canEdit } = useStudentFieldAccess();
-  const canEditIdentity = canEdit("student_identity");
-  const canEditQuota = canEdit("student_quota_edit");
-  const canViewQuota = canView("student_quota_edit");
-  const canViewTeacher = canView("student_teacher");
   const showAvatarEdit = !embedded && !readOnly && canEditIdentity;
 
-  const schema = createStudentQuotaSchema(
-    validationMessages as unknown as MessageSchema["dashboard"]["studentQuota"]["validation"]
-  );
-
-  const methods = useForm<StudentQuotaFormInput, undefined, StudentQuotaFormData>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      studentName: "",
-      dateOfBirth: "",
-      language: "ar",
-      gender: "MALE",
-      teacher: "",
-      totalClasses: 0,
-      classesLeft: 0,
-    },
-  });
-
-  useEffect(() => {
-    if (studentData) {
-      methods.reset({
-        studentName: studentData.studentName,
-        dateOfBirth: studentData.dateOfBirth,
-        language: studentData.language,
-        gender: studentData.gender,
-        teacher: studentData.teacher,
-        totalClasses: studentData.totalClasses,
-        classesLeft: studentData.classesLeft,
-      });
-    }
-  }, [studentData, methods]);
-
-  const onSubmit = async (data: StudentQuotaFormData) => {
-    await onSave(data);
-  };
-
-  if (isLoading || !studentData) {
-    const loadingContent = (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-    return embedded ? loadingContent : <PageContainer>{loadingContent}</PageContainer>;
-  }
-
-  const formContent = (
+  return (
     <>
       {!embedded ? <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} /> : null}
       {!embedded ? (
@@ -304,6 +271,94 @@ export function StudentQuotaView({
         </Box>
       ) : null}
     </>
+  );
+}
+
+function useQuotaForm(
+  studentData: StudentQuotaViewProps["studentData"],
+  onSave: (data: StudentQuotaFormData) => Promise<void>
+) {
+  const validationMessages = useTranslations("dashboard.studentQuota.validation");
+  const schema = createStudentQuotaSchema(
+    validationMessages as unknown as MessageSchema["dashboard"]["studentQuota"]["validation"]
+  );
+
+  const methods = useForm<StudentQuotaFormInput, undefined, StudentQuotaFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      studentName: "",
+      dateOfBirth: "",
+      language: "ar",
+      gender: "MALE",
+      teacher: "",
+      totalClasses: 0,
+      classesLeft: 0,
+    },
+  });
+
+  useEffect(() => {
+    if (studentData) {
+      methods.reset({
+        studentName: studentData.studentName,
+        dateOfBirth: studentData.dateOfBirth,
+        language: studentData.language,
+        gender: studentData.gender,
+        teacher: studentData.teacher,
+        totalClasses: studentData.totalClasses,
+        classesLeft: studentData.classesLeft,
+      });
+    }
+  }, [studentData, methods]);
+
+  const onSubmit = async (data: StudentQuotaFormData) => {
+    await onSave(data);
+  };
+
+  return { methods, onSubmit };
+}
+
+export function StudentQuotaView({
+  studentData,
+  isLoading,
+  isSaving,
+  isSaved,
+  embedded = false,
+  readOnly = false,
+  onSave,
+  onCancel,
+}: Readonly<StudentQuotaViewProps>) {
+  const { canView, canEdit } = useStudentFieldAccess();
+  const canEditIdentity = canEdit("student_identity");
+  const canEditQuota = canEdit("student_quota_edit");
+  const canViewQuota = canView("student_quota_edit");
+  const canViewTeacher = canView("student_teacher");
+
+  const { methods, onSubmit } = useQuotaForm(studentData, onSave);
+
+  if (isLoading || !studentData) {
+    const loadingContent = (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+    return embedded ? loadingContent : <PageContainer>{loadingContent}</PageContainer>;
+  }
+
+  const formContent = (
+    <QuotaFormCard
+      methods={methods}
+      onSubmit={onSubmit}
+      studentData={studentData}
+      isSaving={isSaving}
+      isSaved={isSaved}
+      readOnly={readOnly}
+      embedded={embedded}
+      onCancel={onCancel}
+      canEditIdentity={canEditIdentity}
+      canEditQuota={canEditQuota}
+      canViewQuota={canViewQuota}
+      canViewTeacher={canViewTeacher}
+    />
   );
 
   if (embedded) {

@@ -66,6 +66,7 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
+    isFrozen: t.exposeBoolean("isFrozen"),
     student: t.expose("student", { type: DailyScheduleListUserItemObject }),
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
     courseName: t.exposeString("courseName", { nullable: true }),

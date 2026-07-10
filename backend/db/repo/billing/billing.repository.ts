@@ -979,12 +979,7 @@ export namespace BillingRepository {
     }));
   };
 
-  export const getParentBillingSummary = async (
-    parentId: string,
-    tx?: DBTransaction
-  ): Promise<Types.ParentBillingSummaryResult> => {
-    const t = tx ?? db;
-
+  async function fetchUnpaidInvoiceSummary(t: DBTransaction | typeof db, parentId: string) {
     const unpaidResult = await t
       .select({
         outstandingBalance: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
@@ -1002,6 +997,10 @@ export namespace BillingRepository {
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)))
       .groupBy(invoices.currency);
 
+    return { unpaidResult, unpaidByCurrency };
+  }
+
+  async function fetchPaidInvoiceSummary(t: DBTransaction | typeof db, parentId: string) {
     const paidResult = await t
       .select({
         paidThisTerm: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
@@ -1018,10 +1017,12 @@ export namespace BillingRepository {
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAID"), isNull(invoices.deletedAt)))
       .groupBy(invoices.currency);
 
+    return { paidResult, paidByCurrency };
+  }
+
+  async function fetchParentBillingExtras(t: DBTransaction | typeof db, parentId: string) {
     const activeStudentsResult = await t
-      .select({
-        activeStudents: count(),
-      })
+      .select({ activeStudents: count() })
       .from(students)
       .where(and(eq(students.parentId, parentId), ne(students.status, StudentStatus.DEACTIVATED)));
 
@@ -1043,6 +1044,19 @@ export namespace BillingRepository {
       .select({ pendingPaymentCount: count() })
       .from(invoices)
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAYMENT_PENDING"), isNull(invoices.deletedAt)));
+
+    return { activeStudentsResult, nextUnpaidRow, pendingCountResult };
+  }
+
+  export const getParentBillingSummary = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<Types.ParentBillingSummaryResult> => {
+    const t = tx ?? db;
+
+    const { unpaidResult, unpaidByCurrency } = await fetchUnpaidInvoiceSummary(t, parentId);
+    const { paidResult, paidByCurrency } = await fetchPaidInvoiceSummary(t, parentId);
+    const { activeStudentsResult, nextUnpaidRow, pendingCountResult } = await fetchParentBillingExtras(t, parentId);
 
     return {
       id: `parent-billing-summary-${parentId}`,

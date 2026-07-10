@@ -138,10 +138,13 @@ const useRunMutation = (store: PermissionManagementStore) => {
   return { run };
 };
 
-export function usePermissionManagementData() {
-  const { usersData, permissionsLoading, groupsLoading, usersLoading } = usePermissionQueries();
-
+// Hook for building mutation handler functions
+const usePermissionHandlers = (
+  run: (label: string, fn: () => Promise<unknown>, onSuccess?: () => void) => Promise<void>,
+  mutations: ReturnType<typeof usePermissionMutations>
+) => {
   const {
+    store,
     createGroupMutation,
     updateGroupMutation,
     deleteGroupMutation,
@@ -150,72 +153,66 @@ export function usePermissionManagementData() {
     bulkAssignMutation,
     bulkRevokeMutation,
     updateOverridesMutation,
-    store,
-  } = usePermissionMutations();
-
-  const { run } = useRunMutation(store);
-
-  const handleCreateGroup = (name: LocalizedString, description: LocalizedString, permissionIds: string[]) =>
-    run(
-      "handleCreateGroup",
-      () => createGroupMutation({ variables: { input: { name, description, permissionIds } } }),
-      store.closeCreateDialog
-    );
-
-  const handleUpdateGroup = (
-    id: string,
-    name: LocalizedString,
-    description: LocalizedString,
-    permissionIds: string[]
-  ) =>
-    run(
-      "handleUpdateGroup",
-      () => updateGroupMutation({ variables: { input: { groupId: id, name, description, permissionIds } } }),
-      store.closeEditDialog
-    );
-
-  const handleDeleteGroup = (id: string) =>
-    run("handleDeleteGroup", () => deleteGroupMutation({ variables: { groupId: id } }), store.closeDeleteDialog);
-
-  const handleAssignGroup = (groupId: string, userId: string) =>
-    run(
-      "handleAssignGroup",
-      () => assignGroupMutation({ variables: { input: { groupId, userId } } }),
-      store.closeAssignDialog
-    );
-
-  const handleRevokeGroup = (groupId: string, userId: string) =>
-    run("handleRevokeGroup", () => revokeGroupMutation({ variables: { input: { groupId, userId } } }));
-
-  const handleBulkAssign = (groupId: string, userIds: string[]) =>
-    run("handleBulkAssign", () => bulkAssignMutation({ variables: { groupId, userIds } }));
-
-  const handleBulkRevoke = (groupId: string, userIds: string[]) =>
-    run("handleBulkRevoke", () => bulkRevokeMutation({ variables: { groupId, userIds } }));
-
-  const handleUpdateOverrides = (userId: string, overrides: Array<{ permissionId: string; state: string }>) =>
-    run(
-      "handleUpdateOverrides",
-      () =>
-        updateOverridesMutation({
-          variables: {
-            userId,
-            overrides: overrides as Array<{ permissionId: string; state: OverrideState }>,
-          },
-        }),
-      store.closeManageOverrides
-    );
+  } = mutations;
 
   return {
-    isLoading: permissionsLoading || groupsLoading || usersLoading || store.isLoading,
+    handleCreateGroup: (name: LocalizedString, description: LocalizedString, permissionIds: string[]) =>
+      run(
+        "handleCreateGroup",
+        () => createGroupMutation({ variables: { input: { name, description, permissionIds } } }),
+        store.closeCreateDialog
+      ),
+
+    handleUpdateGroup: (id: string, name: LocalizedString, description: LocalizedString, permissionIds: string[]) =>
+      run(
+        "handleUpdateGroup",
+        () => updateGroupMutation({ variables: { input: { groupId: id, name, description, permissionIds } } }),
+        store.closeEditDialog
+      ),
+
+    handleDeleteGroup: (id: string) =>
+      run("handleDeleteGroup", () => deleteGroupMutation({ variables: { groupId: id } }), store.closeDeleteDialog),
+
+    handleAssignGroup: (groupId: string, userId: string) =>
+      run(
+        "handleAssignGroup",
+        () => assignGroupMutation({ variables: { input: { groupId, userId } } }),
+        store.closeAssignDialog
+      ),
+
+    handleRevokeGroup: (groupId: string, userId: string) =>
+      run("handleRevokeGroup", () => revokeGroupMutation({ variables: { input: { groupId, userId } } })),
+
+    handleBulkAssign: (groupId: string, userIds: string[]) =>
+      run("handleBulkAssign", () => bulkAssignMutation({ variables: { groupId, userIds } })),
+
+    handleBulkRevoke: (groupId: string, userIds: string[]) =>
+      run("handleBulkRevoke", () => bulkRevokeMutation({ variables: { groupId, userIds } })),
+
+    handleUpdateOverrides: (userId: string, overrides: Array<{ permissionId: string; state: string }>) =>
+      run(
+        "handleUpdateOverrides",
+        () =>
+          updateOverridesMutation({
+            variables: {
+              userId,
+              overrides: overrides as Array<{ permissionId: string; state: OverrideState }>,
+            },
+          }),
+        store.closeManageOverrides
+      ),
+  };
+};
+
+export function usePermissionManagementData() {
+  const { usersData, permissionsLoading, groupsLoading, usersLoading } = usePermissionQueries();
+  const mutations = usePermissionMutations();
+  const { run } = useRunMutation(mutations.store);
+  const handlers = usePermissionHandlers(run, mutations);
+
+  return {
+    isLoading: permissionsLoading || groupsLoading || usersLoading || mutations.store.isLoading,
     users: (usersData?.users || []) as User[],
-    handleCreateGroup,
-    handleUpdateGroup,
-    handleDeleteGroup,
-    handleAssignGroup,
-    handleRevokeGroup,
-    handleBulkAssign,
-    handleBulkRevoke,
-    handleUpdateOverrides,
+    ...handlers,
   };
 }

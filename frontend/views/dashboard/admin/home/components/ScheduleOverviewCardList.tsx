@@ -344,6 +344,70 @@ interface ScheduleOverviewMobileCardProps {
   readonly locale: string;
 }
 
+interface ScheduleCardActionsProps {
+  readonly row: DailyScheduleRow;
+  readonly headers: ScheduleOverviewCardListProps["headers"];
+  readonly detailsLabel: string;
+  readonly studentId: string | undefined;
+  readonly classId: string;
+}
+
+function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }: ScheduleCardActionsProps) {
+  return (
+    <StyledCardActions>
+      {isJoinableByExecutionState(row.executionState, row.outcome) ? (
+        <MeetingJoinAction
+          variant="icon"
+          joinUrl={row.meetingJoinUrl}
+          meeting={row.effectiveMeeting}
+          emptyRole="parent"
+        />
+      ) : null}
+      {studentId ? (
+        <Tooltip title={headers.history}>
+          <ActionIconLink href={studentProfileTabHref(studentId, "history")} aria-label={headers.history}>
+            <HistoryOutlined fontSize="small" />
+          </ActionIconLink>
+        </Tooltip>
+      ) : null}
+      {classId ? (
+        <Tooltip title={detailsLabel}>
+          <ActionIconLink href={`/classes/${classId}`} aria-label={detailsLabel}>
+            <VisibilityOutlined fontSize="small" />
+          </ActionIconLink>
+        </Tooltip>
+      ) : null}
+    </StyledCardActions>
+  );
+}
+
+function buildScheduleMetaItems(
+  headers: ScheduleOverviewCardListProps["headers"],
+  row: DailyScheduleRow,
+  teacherTime: string,
+  studentTime: string,
+  duration: string,
+  showTimezones: boolean
+): MetaStatItem[] {
+  const items: MetaStatItem[] = [];
+  if (showTimezones) {
+    items.push({
+      label: headers.teacherTime,
+      value: teacherTime,
+      tone: "teacher",
+      timezone: row.teacherTimezone,
+    });
+    items.push({
+      label: headers.studentTime,
+      value: studentTime,
+      tone: "student",
+      timezone: row.studentTimezone,
+    });
+  }
+  items.push({ label: headers.duration, value: duration, tone: "default" });
+  return items;
+}
+
 function ScheduleOverviewMobileCard({
   row,
   headers,
@@ -392,30 +456,13 @@ function ScheduleOverviewMobileCard({
           />
         </StyledCardHeaderMain>
 
-        <StyledCardActions>
-          {isJoinableByExecutionState(row.executionState, row.outcome) ? (
-            <MeetingJoinAction
-              variant="icon"
-              joinUrl={row.meetingJoinUrl}
-              meeting={row.effectiveMeeting}
-              emptyRole="parent"
-            />
-          ) : null}
-          {studentId ? (
-            <Tooltip title={headers.history}>
-              <ActionIconLink href={studentProfileTabHref(studentId, "history")} aria-label={headers.history}>
-                <HistoryOutlined fontSize="small" />
-              </ActionIconLink>
-            </Tooltip>
-          ) : null}
-          {classId ? (
-            <Tooltip title={detailsLabel}>
-              <ActionIconLink href={`/classes/${classId}`} aria-label={detailsLabel}>
-                <VisibilityOutlined fontSize="small" />
-              </ActionIconLink>
-            </Tooltip>
-          ) : null}
-        </StyledCardActions>
+        <ScheduleCardActions
+          row={row}
+          headers={headers}
+          detailsLabel={detailsLabel}
+          studentId={studentId}
+          classId={classId}
+        />
       </StyledCardHeader>
 
       <StyledTimeHighlight>
@@ -429,29 +476,7 @@ function ScheduleOverviewMobileCard({
       </StyledTimeHighlight>
 
       <ScheduleMetaStatBar
-        items={[
-          ...(showTimezones
-            ? [
-                {
-                  label: headers.teacherTime,
-                  value: teacherTime,
-                  tone: "teacher" as const,
-                  timezone: row.teacherTimezone,
-                },
-              ]
-            : []),
-          ...(showTimezones
-            ? [
-                {
-                  label: headers.studentTime,
-                  value: studentTime,
-                  tone: "student" as const,
-                  timezone: row.studentTimezone,
-                },
-              ]
-            : []),
-          { label: headers.duration, value: duration, tone: "default" as const },
-        ]}
+        items={buildScheduleMetaItems(headers, row, teacherTime, studentTime, duration, showTimezones)}
       />
 
       <StyledPeopleRow>

@@ -316,6 +316,37 @@ export namespace TeacherAvailabilityRepository {
     }
   }
 
+  function buildCommonWindowValues(
+    teacherId: string,
+    input: {
+      dayOfWeek: DayOfWeek;
+      startTime: string;
+      endTime: string;
+      timezone: IanaTimezone;
+      utcOffsetSnapshot?: string | null;
+      effectiveFrom?: string | null;
+      effectiveUntil?: string | null;
+    }
+  ) {
+    const now = new Date();
+    return {
+      teacherId,
+      dayOfWeek: input.dayOfWeek,
+      startTime: input.startTime,
+      endTime: input.endTime,
+      timezone: input.timezone,
+      utcOffsetSnapshot: input.utcOffsetSnapshot ?? null,
+      effectiveFrom: input.effectiveFrom ?? null,
+      effectiveUntil: input.effectiveUntil ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
+  function withTransaction<T>(runner: (t: DBTransaction) => Promise<T>, tx?: DBTransaction): Promise<T> {
+    return tx ? runner(tx) : db.transaction(runner);
+  }
+
   export const addAvailabilityWindow = async (
     teacherId: string,
     input: Types.AvailabilityWindowInput,
@@ -325,28 +356,16 @@ export namespace TeacherAvailabilityRepository {
     const runner = async (t: DBTransaction) => {
       await acquireAvailabilityLock(t, teacherId);
       await assertValidTimeRange(input.startTime, input.endTime, locale);
-      const now = new Date();
 
       const [created] = await t
         .insert(teacherAvailabilityWindows)
-        .values({
-          teacherId,
-          dayOfWeek: input.dayOfWeek,
-          startTime: input.startTime,
-          endTime: input.endTime,
-          timezone: input.timezone,
-          utcOffsetSnapshot: input.utcOffsetSnapshot ?? null,
-          effectiveFrom: input.effectiveFrom ?? null,
-          effectiveUntil: input.effectiveUntil ?? null,
-          createdAt: now,
-          updatedAt: now,
-        })
+        .values(buildCommonWindowValues(teacherId, input))
         .returning();
 
       return created;
     };
 
-    return tx ? runner(tx) : db.transaction(runner);
+    return withTransaction(runner, tx);
   };
 
   export const addRecurringUnavailability = async (
@@ -358,29 +377,20 @@ export namespace TeacherAvailabilityRepository {
     const runner = async (t: DBTransaction) => {
       await acquireAvailabilityLock(t, teacherId);
       await assertValidTimeRange(input.startTime, input.endTime, locale);
-      const now = new Date();
+      const _now = new Date();
 
       const [created] = await t
         .insert(teacherRecurringUnavailability)
         .values({
-          teacherId,
-          dayOfWeek: input.dayOfWeek,
-          startTime: input.startTime,
-          endTime: input.endTime,
-          timezone: input.timezone,
-          utcOffsetSnapshot: input.utcOffsetSnapshot ?? null,
-          effectiveFrom: input.effectiveFrom ?? null,
-          effectiveUntil: input.effectiveUntil ?? null,
+          ...buildCommonWindowValues(teacherId, input),
           reason: input.reason ?? null,
-          createdAt: now,
-          updatedAt: now,
         })
         .returning();
 
       return created;
     };
 
-    return tx ? runner(tx) : db.transaction(runner);
+    return withTransaction(runner, tx);
   };
 
   export const submitVacationRequest = async (

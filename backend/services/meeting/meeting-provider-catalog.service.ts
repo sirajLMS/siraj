@@ -47,14 +47,30 @@ export namespace MeetingProviderCatalogService {
     return provider;
   }
 
+  interface ManagedWriteArgs<TInput> {
+    readonly userId: string;
+    readonly input: TInput;
+    readonly locale?: string;
+  }
+
+  async function runManagedWrite<TInput, TResult>(
+    args: ManagedWriteArgs<TInput>,
+    parse: (input: TInput) => TInput,
+    write: (parsed: TInput, locale?: string) => Promise<TResult>
+  ): Promise<TResult> {
+    await assertManageCatalog(args.userId, args.locale);
+    const parsed = parse(args.input);
+    return write(parsed, args.locale);
+  }
+
   export async function createProvider(
     userId: string,
     input: MeetingProviderSubmitInput,
     locale?: string
   ): Promise<MeetingProviderReturnType> {
-    await assertManageCatalog(userId, locale);
-    const parsed = parseMeetingProviderSubmitInput(input);
-    return MeetingProviderRepository.create(parsed, undefined, locale);
+    return runManagedWrite({ userId, input, locale }, parseMeetingProviderSubmitInput, (parsed, loc) =>
+      MeetingProviderRepository.create(parsed, undefined, loc)
+    );
   }
 
   export async function updateProvider(
@@ -63,9 +79,9 @@ export namespace MeetingProviderCatalogService {
     input: UpdateMeetingProviderInput,
     locale?: string
   ): Promise<MeetingProviderReturnType> {
-    await assertManageCatalog(userId, locale);
-    const parsed = parseUpdateMeetingProviderInput(input);
-    return MeetingProviderRepository.update(id, parsed, undefined, locale);
+    return runManagedWrite({ userId, input, locale }, parseUpdateMeetingProviderInput, (parsed, loc) =>
+      MeetingProviderRepository.update(id, parsed, undefined, loc)
+    );
   }
 
   export async function deleteProvider(userId: string, id: string, locale?: string): Promise<{ id: string }> {

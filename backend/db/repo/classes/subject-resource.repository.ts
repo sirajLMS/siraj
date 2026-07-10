@@ -6,6 +6,45 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { SubjectResourceAttachInput, SubjectResourceReturnType } from "@/backend/types";
 
+type SubjectResourceRow = {
+  id: string;
+  subjectId: string;
+  learningResourceId: string;
+  resourceType: string | null;
+  sortOrder: number;
+  displayName: string | null;
+  filePath: string | null;
+};
+
+const resourceSelectColumns = {
+  id: subjectResources.id,
+  subjectId: subjectResources.subjectId,
+  learningResourceId: subjectResources.learningResourceId,
+  resourceType: subjectResources.resourceType,
+  sortOrder: subjectResources.sortOrder,
+  displayName: learningResources.displayName,
+  filePath: learningResources.filePath,
+};
+
+function mapRowToReturnType(row: SubjectResourceRow): SubjectResourceReturnType {
+  return {
+    id: row.id,
+    subjectId: row.subjectId,
+    learningResourceId: row.learningResourceId,
+    resourceType: row.resourceType,
+    sortOrder: row.sortOrder,
+    displayName: row.displayName ?? null,
+    filePath: row.filePath ?? null,
+  };
+}
+
+async function runInTx<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) => Promise<T>): Promise<T> {
+  if (tx) {
+    return fn(tx);
+  }
+  return db.transaction(fn);
+}
+
 export namespace SubjectResourceRepository {
   export async function listResourcesForSubject(
     subjectId: string,
@@ -14,29 +53,13 @@ export namespace SubjectResourceRepository {
     try {
       const client = tx ?? db;
       const rows = await client
-        .select({
-          id: subjectResources.id,
-          subjectId: subjectResources.subjectId,
-          learningResourceId: subjectResources.learningResourceId,
-          resourceType: subjectResources.resourceType,
-          sortOrder: subjectResources.sortOrder,
-          displayName: learningResources.displayName,
-          filePath: learningResources.filePath,
-        })
+        .select(resourceSelectColumns)
         .from(subjectResources)
         .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
         .where(eq(subjectResources.subjectId, subjectId))
         .orderBy(asc(subjectResources.sortOrder));
 
-      return rows.map(row => ({
-        id: row.id,
-        subjectId: row.subjectId,
-        learningResourceId: row.learningResourceId,
-        resourceType: row.resourceType,
-        sortOrder: row.sortOrder,
-        displayName: row.displayName ?? null,
-        filePath: row.filePath ?? null,
-      }));
+      return rows.map(mapRowToReturnType);
     } catch (error) {
       logger.error(`Error listing resources for subject ${subjectId}:`, error);
       throw error;
@@ -51,15 +74,7 @@ export namespace SubjectResourceRepository {
       if (subjectIds.length === 0) return new Map();
       const client = tx ?? db;
       const rows = await client
-        .select({
-          id: subjectResources.id,
-          subjectId: subjectResources.subjectId,
-          learningResourceId: subjectResources.learningResourceId,
-          resourceType: subjectResources.resourceType,
-          sortOrder: subjectResources.sortOrder,
-          displayName: learningResources.displayName,
-          filePath: learningResources.filePath,
-        })
+        .select(resourceSelectColumns)
         .from(subjectResources)
         .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
         .where(inArray(subjectResources.subjectId, subjectIds))
@@ -68,15 +83,7 @@ export namespace SubjectResourceRepository {
       const map = new Map<string, SubjectResourceReturnType[]>();
       for (const row of rows) {
         const arr = map.get(row.subjectId) ?? [];
-        arr.push({
-          id: row.id,
-          subjectId: row.subjectId,
-          learningResourceId: row.learningResourceId,
-          resourceType: row.resourceType,
-          sortOrder: row.sortOrder,
-          displayName: row.displayName ?? null,
-          filePath: row.filePath ?? null,
-        });
+        arr.push(mapRowToReturnType(row));
         map.set(row.subjectId, arr);
       }
       return map;
@@ -91,44 +98,31 @@ export namespace SubjectResourceRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<SubjectResourceReturnType> {
-    const run = async (t: DBTransaction): Promise<SubjectResourceReturnType> => {
-      const [result] = await t
-        .insert(subjectResources)
-        .values({
-          subjectId: input.subjectId,
-          learningResourceId: input.learningResourceId,
-          resourceType: input.resourceType ?? null,
-          sortOrder: input.sortOrder ?? 0,
-        })
-        .returning();
-
-      if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("subjectResourceAttachFailed"));
-      }
-
-      logger.info("Resource attached to subject", {
-        subjectResourceId: result.id,
-        subjectId: result.subjectId,
-        learningResourceId: result.learningResourceId,
-      });
-
-      return {
-        id: result.id,
-        subjectId: result.subjectId,
-        learningResourceId: result.learningResourceId,
-        resourceType: result.resourceType,
-        sortOrder: result.sortOrder,
-        displayName: null,
-        filePath: null,
-      };
-    };
-
     try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
+      return await runInTx(tx, async t => {
+        const [result] = await t
+          .insert(subjectResources)
+          .values({
+            subjectId: input.subjectId,
+            learningResourceId: input.learningResourceId,
+            resourceType: input.resourceType ?? null,
+            sortOrder: input.sortOrder ?? 0,
+          })
+          .returning();
+
+        if (!result) {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("subjectResourceAttachFailed"));
+        }
+
+        logger.info("Resource attached to subject", {
+          subjectResourceId: result.id,
+          subjectId: result.subjectId,
+          learningResourceId: result.learningResourceId,
+        });
+
+        return mapRowToReturnType(result as SubjectResourceRow);
+      });
     } catch (error) {
       logger.error("Error attaching resource to subject:", error);
       throw error;
@@ -141,36 +135,31 @@ export namespace SubjectResourceRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<{ id: string }> {
-    const run = async (t: DBTransaction): Promise<{ id: string }> => {
-      const [existing] = await t
-        .select({ id: subjectResources.id })
-        .from(subjectResources)
-        .where(
-          and(eq(subjectResources.subjectId, subjectId), eq(subjectResources.learningResourceId, learningResourceId))
-        )
-        .limit(1);
-
-      if (!existing) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("subjectResourceLinkNotFound"));
-      }
-
-      await t
-        .delete(subjectResources)
-        .where(
-          and(eq(subjectResources.subjectId, subjectId), eq(subjectResources.learningResourceId, learningResourceId))
-        );
-
-      logger.info("Resource detached from subject", { subjectId, learningResourceId });
-
-      return { id: existing.id };
-    };
-
     try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
+      return await runInTx(tx, async t => {
+        const [existing] = await t
+          .select({ id: subjectResources.id })
+          .from(subjectResources)
+          .where(
+            and(eq(subjectResources.subjectId, subjectId), eq(subjectResources.learningResourceId, learningResourceId))
+          )
+          .limit(1);
+
+        if (!existing) {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("subjectResourceLinkNotFound"));
+        }
+
+        await t
+          .delete(subjectResources)
+          .where(
+            and(eq(subjectResources.subjectId, subjectId), eq(subjectResources.learningResourceId, learningResourceId))
+          );
+
+        logger.info("Resource detached from subject", { subjectId, learningResourceId });
+
+        return { id: existing.id };
+      });
     } catch (error) {
       logger.error(`Error detaching resource from subject ${subjectId}:`, error);
       throw error;
@@ -183,28 +172,23 @@ export namespace SubjectResourceRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<{ id: string; sortOrder: number }> {
-    const run = async (t: DBTransaction): Promise<{ id: string; sortOrder: number }> => {
-      const [updated] = await t
-        .update(subjectResources)
-        .set({ sortOrder })
-        .where(eq(subjectResources.id, id))
-        .returning({ id: subjectResources.id, sortOrder: subjectResources.sortOrder });
-
-      if (!updated) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("subjectResourceNotFound"));
-      }
-
-      logger.info("Resource reordered", { subjectResourceId: id, sortOrder });
-
-      return updated;
-    };
-
     try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
+      return await runInTx(tx, async t => {
+        const [updated] = await t
+          .update(subjectResources)
+          .set({ sortOrder })
+          .where(eq(subjectResources.id, id))
+          .returning({ id: subjectResources.id, sortOrder: subjectResources.sortOrder });
+
+        if (!updated) {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("subjectResourceNotFound"));
+        }
+
+        logger.info("Resource reordered", { subjectResourceId: id, sortOrder });
+
+        return updated;
+      });
     } catch (error) {
       logger.error(`Error reordering resource ${id}:`, error);
       throw error;
@@ -217,65 +201,44 @@ export namespace SubjectResourceRepository {
   ): Promise<SubjectResourceReturnType[]> {
     if (inputs.length === 0) return [];
 
-    const run = async (t: DBTransaction): Promise<SubjectResourceReturnType[]> => {
-      const results: SubjectResourceReturnType[] = [];
-
-      for (const input of inputs) {
-        const [existing] = await t
-          .select()
-          .from(subjectResources)
-          .where(
-            and(
-              eq(subjectResources.subjectId, input.subjectId),
-              eq(subjectResources.learningResourceId, input.learningResourceId)
-            )
-          )
-          .limit(1);
-
-        if (existing) {
-          results.push({
-            id: existing.id,
-            subjectId: existing.subjectId,
-            learningResourceId: existing.learningResourceId,
-            resourceType: existing.resourceType,
-            sortOrder: existing.sortOrder,
-            displayName: null,
-            filePath: null,
-          });
-          continue;
-        }
-
-        const [created] = await t
-          .insert(subjectResources)
-          .values({
-            subjectId: input.subjectId,
-            learningResourceId: input.learningResourceId,
-            resourceType: input.resourceType ?? null,
-            sortOrder: input.sortOrder ?? 0,
-          })
-          .returning();
-
-        if (created) {
-          results.push({
-            id: created.id,
-            subjectId: created.subjectId,
-            learningResourceId: created.learningResourceId,
-            resourceType: created.resourceType,
-            sortOrder: created.sortOrder,
-            displayName: null,
-            filePath: null,
-          });
-        }
-      }
-
-      return results;
-    };
-
     try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
+      return await runInTx(tx, async t => {
+        const results: SubjectResourceReturnType[] = [];
+
+        for (const input of inputs) {
+          const [existing] = await t
+            .select()
+            .from(subjectResources)
+            .where(
+              and(
+                eq(subjectResources.subjectId, input.subjectId),
+                eq(subjectResources.learningResourceId, input.learningResourceId)
+              )
+            )
+            .limit(1);
+
+          if (existing) {
+            results.push(mapRowToReturnType(existing as SubjectResourceRow));
+            continue;
+          }
+
+          const [created] = await t
+            .insert(subjectResources)
+            .values({
+              subjectId: input.subjectId,
+              learningResourceId: input.learningResourceId,
+              resourceType: input.resourceType ?? null,
+              sortOrder: input.sortOrder ?? 0,
+            })
+            .returning();
+
+          if (created) {
+            results.push(mapRowToReturnType(created as SubjectResourceRow));
+          }
+        }
+
+        return results;
+      });
     } catch (error) {
       logger.error("Error creating subject resources:", error);
       throw error;

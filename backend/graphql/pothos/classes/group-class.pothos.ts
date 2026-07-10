@@ -77,6 +77,7 @@ export const GroupClassAuditPothosObject = GroupClassAuditRef.implement({
     venue: t.exposeString("venue"),
     status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
+    isFrozen: t.exposeBoolean("isFrozen"),
     auditRemark: t.exposeString("auditRemark", { nullable: true }),
     auditLoggedAt: t.exposeString("auditLoggedAt"),
     registeredStudentCount: t.exposeInt("registeredStudentCount"),

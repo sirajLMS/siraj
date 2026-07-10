@@ -24,6 +24,38 @@ function mockNavigation(moduleOverrides = {}) {
 
 const enLocale = { locale: "en" as const };
 
+type TabNavOptions = {
+  audience: ProfileAudience;
+  scope: ProfileScope;
+  permissions: AppPermission[];
+  currentTab?: string;
+  onTabChange?: (tab: string) => void;
+  moduleOverrides?: Parameters<typeof mockNavigation>[0];
+};
+
+function renderTabNav({
+  audience,
+  scope,
+  permissions,
+  currentTab = "profile",
+  onTabChange = () => {},
+  moduleOverrides,
+}: TabNavOptions) {
+  mockNavigation(moduleOverrides);
+  renderWithWrapper(
+    <ProfileTabNav audience={audience} scope={scope} currentTab={currentTab} onTabChange={onTabChange} />,
+    { ...enLocale, permissions }
+  );
+}
+
+function expectTabVisible(label: string) {
+  expect(screen.getAllByText(label).length).toBeGreaterThan(0);
+}
+
+function expectTabHidden(label: string) {
+  expect(screen.queryByText(label)).toBeNull();
+}
+
 afterEach(() => {
   cleanup();
   useUserStore.setState({ permissions: [] }, false);
@@ -33,245 +65,141 @@ afterEach(() => {
 
 describe("ProfileTabNav", () => {
   test("shows Meeting tab for teacher in own scope with view_own permission", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfileMeetingConfigsViewOwn],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfileMeetingConfigsViewOwn],
+    });
 
-    expect(screen.getAllByText("Meeting").length).toBeGreaterThan(0);
+    expectTabVisible("Meeting");
   });
 
   test("shows Meeting tab for teacher in own scope with manage_own permission", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.MeetingConfigsManageOwn],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.MeetingConfigsManageOwn],
+    });
 
-    expect(screen.getAllByText("Meeting").length).toBeGreaterThan(0);
-    expect(screen.queryByText("Students")).toBeNull();
-    expect(screen.getAllByText("Notifications").length).toBeGreaterThan(0);
+    expectTabVisible("Meeting");
+    expectTabHidden("Students");
+    expectTabVisible("Notifications");
   });
 
   test("hides Meeting tab for teacher in own scope without manage_own permission", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile],
+    });
 
-    expect(screen.queryByText("Meeting")).toBeNull();
+    expectTabHidden("Meeting");
   });
 
   test("hides Students tab for teacher admin without edit permission", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Other}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Other,
+      permissions: [AppPermission.AuthViewOwnProfile],
+    });
 
-    expect(screen.queryByText("Students")).toBeNull();
+    expectTabHidden("Students");
   });
 
   test("shows Students tab for teacher admin with manage_other permission", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Other}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [
-          AppPermission.AuthViewOwnProfile,
-          AppPermission.UserEditProfile,
-          AppPermission.MeetingConfigsManageOther,
-        ],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Other,
+      permissions: [
+        AppPermission.AuthViewOwnProfile,
+        AppPermission.UserEditProfile,
+        AppPermission.MeetingConfigsManageOther,
+      ],
+    });
 
-    expect(screen.getAllByText("Students").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Meeting").length).toBeGreaterThan(0);
+    expectTabVisible("Students");
+    expectTabVisible("Meeting");
   });
 
   test("hides Permissions tab for teacher admin with legacy edit only", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Other}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Other,
+      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
+    });
 
-    expect(screen.queryByText("Permissions")).toBeNull();
+    expectTabHidden("Permissions");
   });
 
   test("shows Payment Methods tab when view permission granted", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Parent}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfilePaymentMethodsViewOwn],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Parent,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfilePaymentMethodsViewOwn],
+    });
 
-    expect(screen.getAllByText("Payment Methods").length).toBeGreaterThan(0);
+    expectTabVisible("Payment Methods");
   });
 
   test("hides Payment Methods tab without view permission", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Parent}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Parent,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile],
+    });
 
-    expect(screen.queryByText("Payment Methods")).toBeNull();
+    expectTabHidden("Payment Methods");
   });
 
   test("shows Permissions tab for staff admin in other scope", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Staff}
-        scope={ProfileScope.Other}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Staff,
+      scope: ProfileScope.Other,
+      permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
+    });
 
-    expect(screen.getAllByText("Permissions").length).toBeGreaterThan(0);
+    expectTabVisible("Permissions");
   });
 
   test("hides Permissions tab for non-admin staff in other scope", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Staff}
-        scope={ProfileScope.Other}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Staff,
+      scope: ProfileScope.Other,
+      permissions: [AppPermission.AuthViewOwnProfile],
+    });
 
-    expect(screen.queryByText("Permissions")).toBeNull();
+    expectTabHidden("Permissions");
   });
 
   test("reads tab from query param on mount", () => {
-    const testParams = new URLSearchParams("tab=notifications");
     const onTabChange = mock(() => {});
-    mockNavigation({ useSearchParams: () => testParams });
-
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={onTabChange}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile],
+      onTabChange,
+      moduleOverrides: { useSearchParams: () => new URLSearchParams("tab=notifications") },
+    });
 
     expect(onTabChange).toHaveBeenCalledWith("notifications");
   });
 
   test("renders chip labels alongside desktop tabs", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile],
+    });
 
     expect(screen.getAllByText("Notifications")).toHaveLength(2);
   });
 
   test("renders tablist for desktop layout", () => {
-    mockNavigation();
-    renderWithWrapper(
-      <ProfileTabNav
-        audience={ProfileAudience.Teacher}
-        scope={ProfileScope.Own}
-        currentTab="profile"
-        onTabChange={() => {}}
-      />,
-      {
-        ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile],
-      }
-    );
+    renderTabNav({
+      audience: ProfileAudience.Teacher,
+      scope: ProfileScope.Own,
+      permissions: [AppPermission.AuthViewOwnProfile],
+    });
 
     expect(screen.getByRole("tablist")).toBeTruthy();
     expect(screen.getByRole("tab", { name: "Notifications" })).toBeTruthy();

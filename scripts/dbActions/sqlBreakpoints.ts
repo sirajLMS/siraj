@@ -2,121 +2,160 @@
  * Insert drizzle statement breakpoints so multi-statement custom SQL migrates correctly.
  * Skips semicolons inside PostgreSQL dollar-quoted bodies.
  */
+
+type SqlState = "code" | "line_comment" | "block_comment" | "dollar" | "single" | "double";
+
+interface ParseContext {
+  source: string;
+  result: string;
+  i: number;
+  state: SqlState;
+  dollarTag: string;
+}
+
+/** Process one character in the "code" state — handles transitions and semicolon breakpoints. */
+function _processCode(ctx: ParseContext): void {
+  const ch = ctx.source[ctx.i];
+  const nxt = ctx.i + 1 < ctx.source.length ? ctx.source[ctx.i + 1] : "";
+
+  if (ch === "-" && nxt === "-") {
+    ctx.state = "line_comment";
+    ctx.result += ch;
+    ctx.i += 1;
+    return;
+  }
+  if (ch === "/" && nxt === "*") {
+    ctx.state = "block_comment";
+    ctx.result += ch;
+    ctx.i += 1;
+    return;
+  }
+  if (ch === "'") {
+    ctx.state = "single";
+    ctx.result += ch;
+    ctx.i += 1;
+    return;
+  }
+  if (ch === '"') {
+    ctx.state = "double";
+    ctx.result += ch;
+    ctx.i += 1;
+    return;
+  }
+  const dollarMatch = /^\$([A-Za-z_]*)\$/.exec(ctx.source.slice(ctx.i));
+  if (dollarMatch) {
+    ctx.state = "dollar";
+    ctx.dollarTag = dollarMatch[0];
+    ctx.result += ctx.dollarTag;
+    ctx.i += ctx.dollarTag.length;
+    return;
+  }
+  ctx.result += ch;
+  if (ch === ";") {
+    ctx.result += "\n--> statement-breakpoint";
+  }
+  ctx.i += 1;
+}
+
+/** Process one character in the "line_comment" state — ends at newline. */
+function _processLineComment(ctx: ParseContext): void {
+  const ch = ctx.source[ctx.i];
+  ctx.result += ch;
+  if (ch === "\n") {
+    ctx.state = "code";
+  }
+  ctx.i += 1;
+}
+
+/** Process one character in the "block_comment" state — ends at star-slash. */
+function processBlockComment(ctx: ParseContext): void {
+  const ch = ctx.source[ctx.i];
+  const nxt = ctx.i + 1 < ctx.source.length ? ctx.source[ctx.i + 1] : "";
+  ctx.result += ch;
+  if (ch === "*" && nxt === "/") {
+    ctx.result += nxt;
+    ctx.i += 2;
+    ctx.state = "code";
+    return;
+  }
+  ctx.i += 1;
+}
+
+/** Process one character in the "single" (single-quoted string) state. */
+function processSingleQuote(ctx: ParseContext): void {
+  const ch = ctx.source[ctx.i];
+  const nxt = ctx.i + 1 < ctx.source.length ? ctx.source[ctx.i + 1] : "";
+  ctx.result += ch;
+  if (ch === "'" && nxt === "'") {
+    ctx.result += nxt;
+    ctx.i += 2;
+    return;
+  }
+  if (ch === "'") {
+    ctx.state = "code";
+  }
+  ctx.i += 1;
+}
+
+/** Process one character in the "double" (double-quoted identifier) state. */
+function processDoubleQuote(ctx: ParseContext): void {
+  const ch = ctx.source[ctx.i];
+  const nxt = ctx.i + 1 < ctx.source.length ? ctx.source[ctx.i + 1] : "";
+  ctx.result += ch;
+  if (ch === '"' && nxt === '"') {
+    ctx.result += nxt;
+    ctx.i += 2;
+    return;
+  }
+  if (ch === '"') {
+    ctx.state = "code";
+  }
+  ctx.i += 1;
+}
+
+/** Process the dollar-quoted body — scans to the closing tag. Returns true if loop should break. */
+function processDollarQuote(ctx: ParseContext): boolean {
+  const end = ctx.source.indexOf(ctx.dollarTag, ctx.i);
+  if (end === -1) {
+    ctx.result += ctx.source.slice(ctx.i);
+    return true;
+  }
+  ctx.result += ctx.source.slice(ctx.i, end + ctx.dollarTag.length);
+  ctx.i = end + ctx.dollarTag.length;
+  ctx.state = "code";
+  ctx.dollarTag = "";
+  return false;
+}
+
 export function withStatementBreakpoints(sql: string): string {
-  // Rebuild breakpoints from scratch so comment semicolons are never treated as statement ends.
   const source = sql.replaceAll("--> statement-breakpoint\n", "").replaceAll("--> statement-breakpoint", "");
 
-  let result = "";
-  let i = 0;
-  type State = "code" | "line_comment" | "block_comment" | "dollar" | "single" | "double";
-  let state: State = "code";
-  let dollarTag = "";
+  const ctx: ParseContext = { source, result: "", i: 0, state: "code", dollarTag: "" };
 
-  while (i < source.length) {
-    const ch = source[i];
-    const nxt = i + 1 < source.length ? source[i + 1] : "";
-
-    if (state === "code") {
-      if (ch === "-" && nxt === "-") {
-        state = "line_comment";
-        result += ch;
-        i += 1;
-        continue;
-      }
-      if (ch === "/" && nxt === "*") {
-        state = "block_comment";
-        result += ch;
-        i += 1;
-        continue;
-      }
-      if (ch === "'") {
-        state = "single";
-        result += ch;
-        i += 1;
-        continue;
-      }
-      if (ch === '"') {
-        state = "double";
-        result += ch;
-        i += 1;
-        continue;
-      }
-      const dollarMatch = /^\$([A-Za-z_]*)\$/.exec(source.slice(i));
-      if (dollarMatch) {
-        state = "dollar";
-        dollarTag = dollarMatch[0];
-        result += dollarTag;
-        i += dollarTag.length;
-        continue;
-      }
-      result += ch;
-      if (ch === ";") {
-        result += "\n--> statement-breakpoint";
-      }
-      i += 1;
-      continue;
+  while (ctx.i < source.length) {
+    switch (ctx.state) {
+      case "code":
+        processCode(ctx);
+        break;
+      case "line_comment":
+        processLineComment(ctx);
+        break;
+      case "block_comment":
+        processBlockComment(ctx);
+        break;
+      case "single":
+        processSingleQuote(ctx);
+        break;
+      case "double":
+        processDoubleQuote(ctx);
+        break;
+      case "dollar":
+        if (processDollarQuote(ctx)) {
+          break;
+        }
+        break;
     }
-
-    if (state === "line_comment") {
-      result += ch;
-      if (ch === "\n") {
-        state = "code";
-      }
-      i += 1;
-      continue;
-    }
-
-    if (state === "block_comment") {
-      result += ch;
-      if (ch === "*" && nxt === "/") {
-        result += nxt;
-        i += 2;
-        state = "code";
-        continue;
-      }
-      i += 1;
-      continue;
-    }
-
-    if (state === "single") {
-      result += ch;
-      if (ch === "'" && nxt === "'") {
-        result += nxt;
-        i += 2;
-        continue;
-      }
-      if (ch === "'") {
-        state = "code";
-      }
-      i += 1;
-      continue;
-    }
-
-    if (state === "double") {
-      result += ch;
-      if (ch === '"' && nxt === '"') {
-        result += nxt;
-        i += 2;
-        continue;
-      }
-      if (ch === '"') {
-        state = "code";
-      }
-      i += 1;
-      continue;
-    }
-
-    // dollar
-    const end = source.indexOf(dollarTag, i);
-    if (end === -1) {
-      result += source.slice(i);
-      break;
-    }
-    result += source.slice(i, end + dollarTag.length);
-    i = end + dollarTag.length;
-    state = "code";
-    dollarTag = "";
   }
 
-  return result.replace(/(--> statement-breakpoint\n?)+/g, "--> statement-breakpoint\n");
+  return ctx.result.replace(/(--> statement-breakpoint\n?)+/g, "--> statement-breakpoint\n");
 }

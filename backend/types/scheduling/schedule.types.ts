@@ -79,6 +79,7 @@ export type WeeklyScheduleClassReturnType = {
   day: string;
   executionState: ClassExecutionState | null;
   outcome: ClassOutcome | null;
+  isFrozen: boolean;
   subjectId?: string | null;
   subjectName?: string | null;
   classType?: ClassType | null;
@@ -119,6 +120,7 @@ export type DailyScheduleListReturnType = {
   status: ClassExecutionState;
   outcome: ClassOutcome;
   executionState: ClassExecutionState;
+  isFrozen: boolean;
   student: DailyScheduleListUserItem;
   teacher: DailyScheduleListUserItem;
   courseName?: string | null;

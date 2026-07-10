@@ -44,86 +44,100 @@ function resolveLifecycleStatus(adminData: ParentAdminData): string {
   return String(raw ?? "REGULAR").toLowerCase();
 }
 
-export function BillingSection(props: BillingSectionProps) {
+function BillingEditSection({
+  register,
+  control,
+}: {
+  readonly register: UseFormRegister<ParentAdminEditFormData>;
+  readonly control: Control<ParentAdminEditFormData>;
+}) {
+  const t = useTranslations("profile.parent");
+
+  return (
+    <SectionPanel title={t("sections.billing")}>
+      <Stack spacing={2.5}>
+        <Controller
+          name="lifecycleStatus"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Stack spacing={0.5}>
+              <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
+                {t("fields.lifecycleStatus")}
+              </Typography>
+              <Select
+                {...field}
+                value={field.value ?? ParentStatus.Regular}
+                fullWidth
+                size="small"
+                error={Boolean(fieldState.error)}
+              >
+                <MenuItem value={ParentStatus.Regular}>{t("status.regular")}</MenuItem>
+                <MenuItem value={ParentStatus.OnTrial}>{t("status.on_trial")}</MenuItem>
+                <MenuItem value={ParentStatus.OnLeave}>{t("status.on_leave")}</MenuItem>
+                <MenuItem value={ParentStatus.Suspended}>{t("status.suspended")}</MenuItem>
+              </Select>
+            </Stack>
+          )}
+        />
+        <TextField label={t("fields.invoiceType")} fullWidth size="small" {...register("invoiceType")} />
+        <TextField label={t("fields.feeAmount")} fullWidth size="small" {...register("feeAmount")} />
+        <Controller
+          name="currency"
+          control={control}
+          render={({ field, fieldState }) => {
+            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
+            return (
+              <CurrencySelect
+                currency={option}
+                setCurrencyAction={selected => {
+                  field.onChange(selected.code);
+                }}
+                onBlurAction={field.onBlur}
+                label={t("fields.currency")}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                fullWidth
+              />
+            );
+          }}
+        />
+        <Controller
+          name="timezone"
+          control={control}
+          render={({ field, fieldState }) => (
+            <TimezoneSelect
+              value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+              onChangeAction={value => {
+                field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+              }}
+              onBlurAction={field.onBlur}
+              label={t("fields.timezone")}
+              error={Boolean(fieldState.error)}
+              helperText={fieldState.error?.message}
+              fullWidth
+            />
+          )}
+        />
+      </Stack>
+    </SectionPanel>
+  );
+}
+
+function BillingViewSection({
+  adminData,
+  parentId,
+}: {
+  readonly adminData: ParentAdminData;
+  readonly parentId?: string | null;
+}) {
   const t = useTranslations("profile.parent");
   const tc = useTranslations("profile");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
 
-  if (props.mode === "edit") {
-    return (
-      <SectionPanel title={t("sections.billing")}>
-        <Stack spacing={2.5}>
-          <Controller
-            name="lifecycleStatus"
-            control={props.control}
-            render={({ field, fieldState }) => (
-              <Stack spacing={0.5}>
-                <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
-                  {t("fields.lifecycleStatus")}
-                </Typography>
-                <Select
-                  {...field}
-                  value={field.value ?? ParentStatus.Regular}
-                  fullWidth
-                  size="small"
-                  error={Boolean(fieldState.error)}
-                >
-                  <MenuItem value={ParentStatus.Regular}>{t("status.regular")}</MenuItem>
-                  <MenuItem value={ParentStatus.OnTrial}>{t("status.on_trial")}</MenuItem>
-                  <MenuItem value={ParentStatus.OnLeave}>{t("status.on_leave")}</MenuItem>
-                  <MenuItem value={ParentStatus.Suspended}>{t("status.suspended")}</MenuItem>
-                </Select>
-              </Stack>
-            )}
-          />
-          <TextField label={t("fields.invoiceType")} fullWidth size="small" {...props.register("invoiceType")} />
-          <TextField label={t("fields.feeAmount")} fullWidth size="small" {...props.register("feeAmount")} />
-          <Controller
-            name="currency"
-            control={props.control}
-            render={({ field, fieldState }) => {
-              const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
-              return (
-                <CurrencySelect
-                  currency={option}
-                  setCurrencyAction={selected => {
-                    field.onChange(selected.code);
-                  }}
-                  onBlurAction={field.onBlur}
-                  label={t("fields.currency")}
-                  error={Boolean(fieldState.error)}
-                  helperText={fieldState.error?.message}
-                  fullWidth
-                />
-              );
-            }}
-          />
-          <Controller
-            name="timezone"
-            control={props.control}
-            render={({ field, fieldState }) => (
-              <TimezoneSelect
-                value={field.value ? toGraphqlIanaTimezone(field.value) : null}
-                onChangeAction={value => {
-                  field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
-                }}
-                onBlurAction={field.onBlur}
-                label={t("fields.timezone")}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                fullWidth
-              />
-            )}
-          />
-        </Stack>
-      </SectionPanel>
-    );
-  }
-
-  const lockedAmount = props.adminData.feeAmount ?? "0";
-  const lockedCurrency = props.adminData.currency ?? CurrencyCode.Usd;
-  const displayAmount = props.adminData.displayAmount;
+  const lockedAmount = adminData.feeAmount ?? "0";
+  const lockedCurrency = adminData.currency ?? CurrencyCode.Usd;
+  const displayAmount = adminData.displayAmount;
   const feeLabel = formatCurrencyForDisplay(
     lockedAmount,
     lockedCurrency,
@@ -138,20 +152,20 @@ export function BillingSection(props: BillingSectionProps) {
     buildFxDisplayMessages(t, tErrors)
   );
 
-  const lifecycleStatus = resolveLifecycleStatus(props.adminData);
+  const lifecycleStatus = resolveLifecycleStatus(adminData);
 
   return (
     <SectionPanel title={t("sections.billing")}>
       <Stack spacing={2}>
-        <InfoField label={t("fields.invoiceType")} value={toDisplayValue(props.adminData.invoiceType, tc("notSet"))} />
+        <InfoField label={t("fields.invoiceType")} value={toDisplayValue(adminData.invoiceType, tc("notSet"))} />
         <InfoField label={t("fields.feeAmount")} value={feeLabel} />
         <InfoField
           label={t("fields.currency")}
-          value={<CurrencyDisplay code={props.adminData.currency} fallback={tc("notSet")} />}
+          value={<CurrencyDisplay code={adminData.currency} fallback={tc("notSet")} />}
         />
         <InfoField
           label={t("fields.timezone")}
-          value={<TimezoneDisplay timezone={props.adminData.timezone} fallback={tc("notSet")} />}
+          value={<TimezoneDisplay timezone={adminData.timezone} fallback={tc("notSet")} />}
         />
         <Stack spacing={0.5}>
           <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
@@ -159,10 +173,10 @@ export function BillingSection(props: BillingSectionProps) {
           </Typography>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
             <StatusBadge category="studentAccount" status={lifecycleStatus} label={t(`status.${lifecycleStatus}`)} />
-            {props.parentId ? (
+            {parentId ? (
               <Typography
                 component={Link}
-                href={`/parents/${props.parentId}/lifecycle`}
+                href={`/parents/${parentId}/lifecycle`}
                 variant="labelMd"
                 sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}
               >
@@ -174,4 +188,12 @@ export function BillingSection(props: BillingSectionProps) {
       </Stack>
     </SectionPanel>
   );
+}
+
+export function BillingSection(props: BillingSectionProps) {
+  if (props.mode === "edit") {
+    return <BillingEditSection register={props.register} control={props.control} />;
+  }
+
+  return <BillingViewSection adminData={props.adminData} parentId={props.parentId} />;
 }

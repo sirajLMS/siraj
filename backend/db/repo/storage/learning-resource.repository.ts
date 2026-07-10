@@ -21,20 +21,33 @@ export interface LearningResourceListResult {
   readonly totalCount: number;
 }
 
+const resourceSelectColumns = {
+  id: learningResources.id,
+  displayName: learningResources.displayName,
+  filePath: learningResources.filePath,
+  uploadedByUserId: learningResources.uploadedByUserId,
+  uploadedByUserName: sql<string | null>`NULL`,
+  fileSize: sql<number | null>`NULL`,
+  contentType: sql<string | null>`NULL`,
+  createdAt: learningResources.createdAt,
+};
+
+function resourceReturnShape<
+  T extends { id: string; displayName: string; filePath: string; uploadedByUserId: string; createdAt: Date },
+>(resource: T): LearningResourceRow {
+  return {
+    ...resource,
+    uploadedByUserName: null,
+    fileSize: null,
+    contentType: null,
+  };
+}
+
 export namespace LearningResourceRepository {
   export async function findByFilePath(filePath: string, tx?: DBTransaction): Promise<LearningResourceRow | null> {
     const queryDb = tx ?? db;
     const results = await queryDb
-      .select({
-        id: learningResources.id,
-        displayName: learningResources.displayName,
-        filePath: learningResources.filePath,
-        uploadedByUserId: learningResources.uploadedByUserId,
-        uploadedByUserName: sql<string | null>`NULL`,
-        fileSize: sql<number | null>`NULL`,
-        contentType: sql<string | null>`NULL`,
-        createdAt: learningResources.createdAt,
-      })
+      .select(resourceSelectColumns)
       .from(learningResources)
       .where(and(eq(learningResources.filePath, filePath), isNull(learningResources.deletedAt)))
       .limit(1);
@@ -61,12 +74,7 @@ export namespace LearningResourceRepository {
       throw new Error("Failed to create seed learning resource");
     }
 
-    return {
-      ...resource,
-      uploadedByUserName: null,
-      fileSize: null,
-      contentType: null,
-    };
+    return resourceReturnShape(resource);
   }
 
   export async function listResources(
@@ -83,16 +91,7 @@ export namespace LearningResourceRepository {
 
       const [rows, countResult] = await Promise.all([
         queryDb
-          .select({
-            id: learningResources.id,
-            displayName: learningResources.displayName,
-            filePath: learningResources.filePath,
-            uploadedByUserId: learningResources.uploadedByUserId,
-            uploadedByUserName: sql<string | null>`NULL`,
-            fileSize: sql<number | null>`NULL`,
-            contentType: sql<string | null>`NULL`,
-            createdAt: learningResources.createdAt,
-          })
+          .select(resourceSelectColumns)
           .from(learningResources)
           .where(baseWhere)
           .orderBy(desc(learningResources.createdAt))
@@ -107,16 +106,7 @@ export namespace LearningResourceRepository {
     }
 
     const rowsQuery = queryDb
-      .select({
-        id: learningResources.id,
-        displayName: learningResources.displayName,
-        filePath: learningResources.filePath,
-        uploadedByUserId: learningResources.uploadedByUserId,
-        uploadedByUserName: sql<string | null>`NULL`,
-        fileSize: sql<number | null>`NULL`,
-        contentType: sql<string | null>`NULL`,
-        createdAt: learningResources.createdAt,
-      })
+      .select(resourceSelectColumns)
       .from(learningResources)
       .where(baseWhere)
       .orderBy(desc(learningResources.createdAt))
@@ -167,12 +157,7 @@ export namespace LearningResourceRepository {
         userId: input.uploadedByUserId,
       });
 
-      return {
-        ...resource,
-        uploadedByUserName: null,
-        fileSize: null,
-        contentType: null,
-      };
+      return resourceReturnShape(resource);
     };
 
     if (tx) {
@@ -185,16 +170,7 @@ export namespace LearningResourceRepository {
     const queryDb = tx ?? db;
 
     const results = await queryDb
-      .select({
-        id: learningResources.id,
-        displayName: learningResources.displayName,
-        filePath: learningResources.filePath,
-        uploadedByUserId: learningResources.uploadedByUserId,
-        uploadedByUserName: sql<string | null>`NULL`,
-        fileSize: sql<number | null>`NULL`,
-        contentType: sql<string | null>`NULL`,
-        createdAt: learningResources.createdAt,
-      })
+      .select(resourceSelectColumns)
       .from(learningResources)
       .where(and(eq(learningResources.id, resourceId), isNull(learningResources.deletedAt)))
       .limit(1);

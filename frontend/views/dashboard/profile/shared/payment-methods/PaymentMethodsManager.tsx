@@ -52,6 +52,70 @@ function matchesSlot(direction: PaymentDirection, slot: PaymentMethodsSlot): boo
   return direction === PaymentDirection.Payout || direction === PaymentDirection.Both;
 }
 
+type VerifyButtonProps = {
+  readonly methods: readonly PaymentMethodRow[];
+  readonly verifying: boolean;
+  readonly onVerify: (id: string) => Promise<void>;
+  readonly t: ReturnType<typeof useTranslations<"ui.paymentMethod.manager">>;
+  readonly tType: ReturnType<typeof useTranslations<"ui.paymentMethod">>;
+};
+
+function VerifyBankTransferButtons({ methods, verifying, onVerify, t, tType }: VerifyButtonProps) {
+  const verifyTargets = methods.filter(row => row.type === PaymentMethodType.BankTransfer && !row.verifiedAt);
+  if (verifyTargets.length === 0) return null;
+
+  return verifyTargets.map(row => (
+    <Button
+      key={`verify-${row.id}`}
+      variant="outlined"
+      size="small"
+      startIcon={<VerifiedOutlinedIcon />}
+      disabled={verifying}
+      onClick={async () => {
+        await onVerify(row.id);
+      }}
+      sx={{ alignSelf: "flex-start" }}
+    >
+      {t("verify", { label: row.label ?? getPaymentMethodTypeLabel(row.type, key => tType(key as never)) })}
+    </Button>
+  ));
+}
+
+function PaymentMethodFormDialogWrapped({
+  formOpen,
+  targetUserId,
+  slotDirection,
+  allowedDirections,
+  editMethod,
+  setFormOpen,
+  setEditMethod,
+  onSaved,
+}: {
+  formOpen: boolean;
+  targetUserId: string;
+  slotDirection: PaymentDirection;
+  allowedDirections: readonly PaymentDirection[];
+  editMethod: UserPaymentMethodFieldsFragment | null;
+  setFormOpen: (open: boolean) => void;
+  setEditMethod: (method: UserPaymentMethodFieldsFragment | null) => void;
+  onSaved: () => Promise<void>;
+}) {
+  return (
+    <PaymentMethodFormDialog
+      open={formOpen}
+      userId={targetUserId}
+      slotDirection={slotDirection}
+      allowedDirections={allowedDirections}
+      editMethod={editMethod}
+      onClose={() => {
+        setFormOpen(false);
+        setEditMethod(null);
+      }}
+      onSaved={onSaved}
+    />
+  );
+}
+
 export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
   const t = useTranslations("ui.paymentMethod.manager");
   const tType = useTranslations("ui.paymentMethod");
@@ -110,20 +174,38 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
     await refetch();
   };
 
+  const handleSetDefault = async (id: string) => {
+    await setDefault({ variables: { id } });
+    await refetch();
+  };
+
+  const handleVerify = async (id: string) => {
+    await verifyMethod({ variables: { id } });
+    await refetch();
+  };
+
+  const handleEdit = canManage
+    ? (id: string) => {
+        const method = methodById.get(id) ?? null;
+        setEditMethod(method);
+        setFormOpen(true);
+      }
+    : undefined;
+
+  const busy = loading || deleting || settingDefault || verifying;
+
   if (error && methods.length === 0) {
     return (
       <ErrorState
         embedded
         message={t("loadError")}
         retryLabel={t("retry")}
-        onRetry={() => {
-          void refetch();
+        onRetry={async () => {
+          await refetch();
         }}
       />
     );
   }
-
-  const busy = loading || deleting || settingDefault || verifying;
 
   return (
     <Stack spacing={2}>
@@ -147,59 +229,30 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
         loading={busy}
         title={t("listTitle")}
         emptyMessage={t("empty")}
-        onEditAction={
-          canManage
-            ? id => {
-                const method = methodById.get(id) ?? null;
-                setEditMethod(method);
-                setFormOpen(true);
-              }
-            : undefined
-        }
+        onEditAction={handleEdit}
         onDeleteAction={canManage ? id => setDeleteId(id) : undefined}
-        onSetDefaultAction={
-          canManage
-            ? async id => {
-                await setDefault({ variables: { id } });
-                await refetch();
-              }
-            : undefined
-        }
+        onSetDefaultAction={canManage ? handleSetDefault : undefined}
       />
 
-      {canVerify
-        ? methods
-            .filter(row => row.type === PaymentMethodType.BankTransfer && !row.verifiedAt)
-            .map(row => (
-              <Button
-                key={`verify-${row.id}`}
-                variant="outlined"
-                size="small"
-                startIcon={<VerifiedOutlinedIcon />}
-                disabled={verifying}
-                onClick={() => {
-                  void verifyMethod({ variables: { id: row.id } }).then(() => refetch());
-                }}
-                sx={{ alignSelf: "flex-start" }}
-              >
-                {t("verify", { label: row.label ?? getPaymentMethodTypeLabel(row.type, key => tType(key as never)) })}
-              </Button>
-            ))
-        : null}
+      {canVerify ? (
+        <VerifyBankTransferButtons
+          methods={methods}
+          verifying={verifying}
+          onVerify={handleVerify}
+          t={t}
+          tType={tType}
+        />
+      ) : null}
 
-      <PaymentMethodFormDialog
-        open={formOpen}
-        userId={targetUserId}
+      <PaymentMethodFormDialogWrapped
+        formOpen={formOpen}
+        targetUserId={targetUserId}
         slotDirection={slotDirection}
         allowedDirections={allowedDirections}
         editMethod={editMethod}
-        onClose={() => {
-          setFormOpen(false);
-          setEditMethod(null);
-        }}
-        onSaved={() => {
-          void handleSaved();
-        }}
+        setFormOpen={setFormOpen}
+        setEditMethod={setEditMethod}
+        onSaved={handleSaved}
       />
 
       <PaymentMethodDeleteDialog
@@ -207,9 +260,7 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
         methodLabel={deleteLabel}
         isLoading={deleting}
         onClose={() => setDeleteId(null)}
-        onConfirm={() => {
-          void handleConfirmDelete();
-        }}
+        onConfirm={handleConfirmDelete}
       />
     </Stack>
   );

@@ -25,6 +25,103 @@ import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "
 import type { AppLocale, LocalizedString } from "@/frontend/types/localized-string.types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
+type HelperTextParams = {
+  readonly draft: LocalizedString;
+  readonly required: boolean;
+  readonly resolvedRequired: readonly AppLocale[];
+  readonly uiLocale: string;
+  readonly t: (key: string, params?: Record<string, string>) => string;
+};
+
+function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: HelperTextParams): string | undefined {
+  if (!required && resolvedRequired.length === 0) {
+    return undefined;
+  }
+  if (resolvedRequired.length > 0) {
+    const missing = resolvedRequired.filter(locale => {
+      const v = draft[locale];
+      return !(typeof v === "string" && v.trim() !== "");
+    });
+    if (missing.length === 1) {
+      return t("localeRequired", { localeName: getLanguageDisplayName(missing[0], uiLocale) });
+    }
+    if (missing.length > 1) {
+      const names = missing.map(l => getLanguageDisplayName(l, uiLocale)).join(", ");
+      return t("localesRequired", { localeNames: names });
+    }
+  }
+  if (required) {
+    return t("atLeastOneTranslationRequired");
+  }
+  return undefined;
+}
+
+type LocaleFieldProps = {
+  readonly locale: AppLocale;
+  readonly fieldValue: string;
+  readonly isLocaleRequired: boolean;
+  readonly isRtl: boolean;
+  readonly languageName: string;
+  readonly emoji: string;
+  readonly showError: boolean;
+  readonly multiline: boolean | undefined;
+  readonly minRows: number | undefined;
+  readonly disabled: boolean;
+  readonly onChange: (locale: AppLocale, text: string) => void;
+  readonly t: (key: string, params?: Record<string, string>) => string;
+};
+
+const LocaleField: React.FC<LocaleFieldProps> = ({
+  locale,
+  fieldValue,
+  isLocaleRequired,
+  isRtl,
+  languageName,
+  emoji,
+  showError,
+  multiline,
+  minRows,
+  disabled,
+  onChange,
+  t,
+}) => (
+  <TextField
+    key={locale}
+    label={
+      multiline ? (
+        <>
+          <LocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
+          {languageName}
+          {isLocaleRequired ? " *" : ""}
+        </>
+      ) : (
+        `${languageName}${isLocaleRequired ? " *" : ""}`
+      )
+    }
+    value={fieldValue}
+    onChange={event => onChange(locale, event.target.value)}
+    multiline={multiline}
+    minRows={minRows}
+    error={showError}
+    helperText={showError ? t("localeRequiredEntry", { localeName: languageName }) : undefined}
+    disabled={disabled}
+    dir={isRtl ? "rtl" : "ltr"}
+    slotProps={{
+      inputLabel: { shrink: true },
+      input: multiline
+        ? undefined
+        : {
+            startAdornment: (
+              <InputAdornment position="start">
+                <LocaleEmoji emoji={emoji} />
+              </InputAdornment>
+            ),
+          },
+      htmlInput: { dir: isRtl ? "rtl" : "ltr" },
+    }}
+  />
+);
+
 export type LocalizedStringDrawerProps = {
   readonly open: boolean;
   readonly value: LocalizedString;
@@ -144,29 +241,17 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
 
   const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequired), [resolvedRequired]);
 
-  const helperText = useMemo(() => {
-    if (!required && resolvedRequired.length === 0) {
-      return undefined;
-    }
-    if (resolvedRequired.length > 0) {
-      const missing = resolvedRequired.filter(locale => {
-        const v = draft[locale];
-        return !(typeof v === "string" && v.trim() !== "");
-      });
-      if (missing.length === 1) {
-        const name = getLanguageDisplayName(missing[0], uiLocale);
-        return t("localeRequired", { localeName: name });
-      }
-      if (missing.length > 1) {
-        const names = missing.map(l => getLanguageDisplayName(l, uiLocale)).join(", ");
-        return t("localesRequired", { localeNames: names });
-      }
-    }
-    if (required) {
-      return t("atLeastOneTranslationRequired");
-    }
-    return undefined;
-  }, [draft, required, resolvedRequired, t, uiLocale]);
+  const helperText = useMemo(
+    () =>
+      buildHelperText({
+        draft,
+        required,
+        resolvedRequired,
+        uiLocale,
+        t,
+      }),
+    [draft, required, resolvedRequired, uiLocale, t]
+  );
 
   return (
     <Drawer
@@ -207,40 +292,20 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
             const emoji = getLanguageEmoji(locale);
             const showError = isLocaleRequired && !(typeof fieldValue === "string" && fieldValue.trim() !== "");
             return (
-              <TextField
+              <LocaleField
                 key={locale}
-                label={
-                  multiline ? (
-                    <>
-                      <LocaleEmoji emoji={emoji} sx={{ marginInlineEnd: 0.5 }} />
-                      {languageName}
-                      {isLocaleRequired ? " *" : ""}
-                    </>
-                  ) : (
-                    `${languageName}${isLocaleRequired ? " *" : ""}`
-                  )
-                }
-                value={fieldValue}
-                onChange={event => handleFieldChange(locale, event.target.value)}
+                locale={locale}
+                fieldValue={fieldValue}
+                isLocaleRequired={isLocaleRequired}
+                isRtl={isRtl}
+                languageName={languageName}
+                emoji={emoji}
+                showError={showError}
                 multiline={multiline}
                 minRows={minRows}
-                error={showError}
-                helperText={showError ? t("localeRequiredEntry", { localeName: languageName }) : undefined}
                 disabled={saving}
-                dir={isRtl ? "rtl" : "ltr"}
-                slotProps={{
-                  inputLabel: { shrink: true },
-                  input: multiline
-                    ? undefined
-                    : {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <LocaleEmoji emoji={emoji} />
-                          </InputAdornment>
-                        ),
-                      },
-                  htmlInput: { dir: isRtl ? "rtl" : "ltr" },
-                }}
+                onChange={handleFieldChange}
+                t={t}
               />
             );
           })}

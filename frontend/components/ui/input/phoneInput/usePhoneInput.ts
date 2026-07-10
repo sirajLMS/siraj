@@ -67,6 +67,154 @@ function buildEmittedValue(prefixDigits: string, nationalDigits: string): string
   return null;
 }
 
+function usePhoneStateSync(
+  value: string | null,
+  defaultRegion: string,
+  lastEmittedRef: React.RefObject<string | null | undefined>,
+  setRegion: (region: string | null) => void,
+  setPrefixDigits: (digits: string) => void,
+  setNationalDigits: (digits: string) => void
+): void {
+  useEffect(() => {
+    if (lastEmittedRef.current !== undefined && value === lastEmittedRef.current) {
+      return;
+    }
+    lastEmittedRef.current = value;
+    const parts = splitPhoneValueToParts(value, defaultRegion);
+    setRegion(parts.prefixDigits ? (parts.region ?? defaultRegion) : null);
+    setPrefixDigits(parts.prefixDigits);
+    setNationalDigits(parts.nationalDigits);
+  }, [value, defaultRegion, lastEmittedRef, setRegion, setPrefixDigits, setNationalDigits]);
+}
+
+function useFocusSlot(
+  prefixInputRef: React.RefObject<HTMLInputElement | null>,
+  nationalInputRef: React.RefObject<HTMLInputElement | null>,
+  setActiveSlot: (slot: PhoneInputSlot) => void
+): {
+  readonly focusPrefix: () => void;
+  readonly focusNational: () => void;
+} {
+  const focusPrefix = useCallback(() => {
+    setActiveSlot("prefix");
+    prefixInputRef.current?.focus();
+  }, [prefixInputRef, setActiveSlot]);
+
+  const focusNational = useCallback(() => {
+    setActiveSlot("national");
+    nationalInputRef.current?.focus();
+  }, [nationalInputRef, setActiveSlot]);
+
+  return { focusPrefix, focusNational };
+}
+
+function usePrefixUpdate(
+  region: string | null,
+  nationalDigits: string,
+  defaultRegion: string,
+  setPrefixDigits: (digits: string) => void,
+  setRegion: (region: string | null) => void,
+  emitChange: (prefixDigits: string, nationalDigits: string) => void
+): (nextPrefix: string) => void {
+  return useCallback(
+    (nextPrefix: string) => {
+      setPrefixDigits(nextPrefix);
+      if (!nextPrefix) {
+        setRegion(null);
+        emitChange(nextPrefix, nationalDigits);
+        return;
+      }
+      const match = matchCallingCodeFromDigits(nextPrefix, region ?? defaultRegion);
+      if (match) {
+        setRegion(match.region);
+      }
+      emitChange(nextPrefix, nationalDigits);
+    },
+    [region, nationalDigits, defaultRegion, setPrefixDigits, setRegion, emitChange]
+  );
+}
+
+function usePrefixKeyDown(
+  prefixDigits: string,
+  updateFromPrefix: (nextPrefix: string) => void,
+  focusNational: () => void
+): (event: React.KeyboardEvent<HTMLInputElement>) => void {
+  return useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Backspace") {
+        event.preventDefault();
+        if (prefixDigits.length === 0) {
+          return;
+        }
+        updateFromPrefix(prefixDigits.slice(0, -1));
+        return;
+      }
+
+      if (event.key === "ArrowRight" && isCallingCodeComplete(prefixDigits)) {
+        event.preventDefault();
+        focusNational();
+        return;
+      }
+
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault();
+        if (!canAppendCallingCodeDigit(prefixDigits, event.key)) {
+          return;
+        }
+        updateFromPrefix(`${prefixDigits}${event.key}`);
+      }
+    },
+    [prefixDigits, updateFromPrefix, focusNational]
+  );
+}
+
+function useNationalKeyDown(
+  prefixDigits: string,
+  nationalDigits: string,
+  region: string | null,
+  defaultRegion: string,
+  nationalDisplay: string,
+  setNationalDigits: (digits: string) => void,
+  emitChange: (prefixDigits: string, nationalDigits: string) => void,
+  focusPrefix: () => void
+): (event: React.KeyboardEvent<HTMLInputElement>) => void {
+  return useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Backspace") {
+        event.preventDefault();
+        if (nationalDigits.length > 0) {
+          const nextNational = nationalDigits.slice(0, -1);
+          setNationalDigits(nextNational);
+          emitChange(prefixDigits, nextNational);
+          return;
+        }
+        focusPrefix();
+        return;
+      }
+
+      if (event.key === "ArrowLeft" && nationalDigits.length === 0) {
+        event.preventDefault();
+        focusPrefix();
+        return;
+      }
+
+      const nextFormatChar = getNextFormatChar(nationalDisplay, nationalDigits, region ?? defaultRegion);
+      if (nextFormatChar && event.key === nextFormatChar) {
+        event.preventDefault();
+        return;
+      }
+
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault();
+        const nextNational = `${nationalDigits}${event.key}`;
+        setNationalDigits(nextNational);
+        emitChange(prefixDigits, nextNational);
+      }
+    },
+    [prefixDigits, nationalDigits, region, defaultRegion, nationalDisplay, setNationalDigits, emitChange, focusPrefix]
+  );
+}
+
 export function usePhoneInput({
   value,
   onChangeAction,
@@ -103,42 +251,17 @@ export function usePhoneInput({
     [onChangeAction]
   );
 
-  useEffect(() => {
-    if (lastEmittedRef.current !== undefined && value === lastEmittedRef.current) {
-      return;
-    }
-    lastEmittedRef.current = value;
-    const parts = splitPhoneValueToParts(value, defaultRegion);
-    setRegion(parts.prefixDigits ? (parts.region ?? defaultRegion) : null);
-    setPrefixDigits(parts.prefixDigits);
-    setNationalDigits(parts.nationalDigits);
-  }, [value, defaultRegion]);
+  usePhoneStateSync(value, defaultRegion, lastEmittedRef, setRegion, setPrefixDigits, setNationalDigits);
 
-  const focusPrefix = useCallback(() => {
-    setActiveSlot("prefix");
-    prefixInputRef.current?.focus();
-  }, []);
+  const { focusPrefix, focusNational } = useFocusSlot(prefixInputRef, nationalInputRef, setActiveSlot);
 
-  const focusNational = useCallback(() => {
-    setActiveSlot("national");
-    nationalInputRef.current?.focus();
-  }, []);
-
-  const updateFromPrefix = useCallback(
-    (nextPrefix: string) => {
-      setPrefixDigits(nextPrefix);
-      if (!nextPrefix) {
-        setRegion(null);
-        emitChange(nextPrefix, nationalDigits);
-        return;
-      }
-      const match = matchCallingCodeFromDigits(nextPrefix, region ?? defaultRegion);
-      if (match) {
-        setRegion(match.region);
-      }
-      emitChange(nextPrefix, nationalDigits);
-    },
-    [defaultRegion, emitChange, nationalDigits, region]
+  const updateFromPrefix = usePrefixUpdate(
+    region,
+    nationalDigits,
+    defaultRegion,
+    setPrefixDigits,
+    setRegion,
+    emitChange
   );
 
   const selectCountry = useCallback(
@@ -152,68 +275,17 @@ export function usePhoneInput({
     [emitChange, focusPrefix, nationalDigits]
   );
 
-  const handlePrefixKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "Backspace") {
-        event.preventDefault();
-        if (prefixDigits.length === 0) {
-          return;
-        }
-        updateFromPrefix(prefixDigits.slice(0, -1));
-        return;
-      }
+  const handlePrefixKeyDown = usePrefixKeyDown(prefixDigits, updateFromPrefix, focusNational);
 
-      if (event.key === "ArrowRight" && isCallingCodeComplete(prefixDigits)) {
-        event.preventDefault();
-        focusNational();
-        return;
-      }
-
-      if (/^\d$/.test(event.key)) {
-        event.preventDefault();
-        if (!canAppendCallingCodeDigit(prefixDigits, event.key)) {
-          return;
-        }
-        updateFromPrefix(`${prefixDigits}${event.key}`);
-      }
-    },
-    [prefixDigits, updateFromPrefix, focusNational]
-  );
-
-  const handleNationalKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "Backspace") {
-        event.preventDefault();
-        if (nationalDigits.length > 0) {
-          const nextNational = nationalDigits.slice(0, -1);
-          setNationalDigits(nextNational);
-          emitChange(prefixDigits, nextNational);
-          return;
-        }
-        focusPrefix();
-        return;
-      }
-
-      if (event.key === "ArrowLeft" && nationalDigits.length === 0) {
-        event.preventDefault();
-        focusPrefix();
-        return;
-      }
-
-      const nextFormatChar = getNextFormatChar(nationalDisplay, nationalDigits, region ?? defaultRegion);
-      if (nextFormatChar && event.key === nextFormatChar) {
-        event.preventDefault();
-        return;
-      }
-
-      if (/^\d$/.test(event.key)) {
-        event.preventDefault();
-        const nextNational = `${nationalDigits}${event.key}`;
-        setNationalDigits(nextNational);
-        emitChange(prefixDigits, nextNational);
-      }
-    },
-    [defaultRegion, emitChange, focusPrefix, nationalDigits, nationalDisplay, prefixDigits, region]
+  const handleNationalKeyDown = useNationalKeyDown(
+    prefixDigits,
+    nationalDigits,
+    region,
+    defaultRegion,
+    nationalDisplay,
+    setNationalDigits,
+    emitChange,
+    focusPrefix
   );
 
   const handleNationalSelect = useCallback(

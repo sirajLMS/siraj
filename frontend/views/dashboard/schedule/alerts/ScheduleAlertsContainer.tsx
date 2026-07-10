@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments";

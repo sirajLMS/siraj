@@ -68,27 +68,90 @@ export type LocalizedStringInputProps = {
  * `backend/enum/auth.enum.ts` (`AppLanguage`) +
  * `frontend/lib/locale/language/languages.ts`.
  */
-export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
+type EditDrawerControlProps = {
+  readonly t: ReturnType<typeof useTranslations<"ui.localizedString">>;
+  readonly isCompact: boolean;
+  readonly disabled: boolean;
+  readonly onOpen: () => void;
+};
+
+const EditDrawerControl: React.FC<EditDrawerControlProps> = ({ t, isCompact, disabled, onOpen }) => {
+  if (isCompact) {
+    return (
+      <IconButton
+        aria-label={t("editTranslations")}
+        onClick={onOpen}
+        disabled={disabled}
+        size="small"
+        sx={{ flexShrink: 0 }}
+      >
+        <EditOutlined fontSize="small" />
+      </IconButton>
+    );
+  }
+  return (
+    <Button
+      variant="text"
+      size="small"
+      onClick={onOpen}
+      disabled={disabled}
+      startIcon={<EditOutlined fontSize="small" />}
+      sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
+    >
+      {t("editTranslations")}
+    </Button>
+  );
+};
+
+type LocalizedStringInputStateProps = {
+  readonly value: LocalizedString;
+  readonly onChangeAction: (value: LocalizedString) => void;
+  readonly error: boolean;
+  readonly required: boolean;
+  readonly requiredLocales?: readonly AppLocale[];
+  readonly errorMessage?: string;
+  readonly helperText?: string;
+  readonly label?: string;
+  readonly drawerTitle?: string;
+  readonly drawerAutosave: boolean;
+  readonly multiline?: boolean;
+};
+
+type LocalizedStringInputState = {
+  readonly containerRef: React.RefObject<HTMLDivElement | null>;
+  readonly isCompact: boolean;
+  readonly activeLocale: AppLocale;
+  readonly draft: LocalizedString;
+  readonly drawerOpen: boolean;
+  readonly successSwitch: boolean;
+  readonly resolvedRequiredLocales: readonly AppLocale[];
+  readonly fieldValue: string;
+  readonly isRtl: boolean;
+  readonly showInlineError: boolean;
+  readonly inlineHelperText: string | undefined;
+  readonly drawerResolvedTitle: string;
+  readonly textFieldSuccessSx: SxProps<Theme> | undefined;
+  readonly adornmentTopSx: { alignSelf: string; height: string; marginTop: number } | undefined;
+  readonly handleFieldChange: (text: string) => void;
+  readonly handleLocaleSwitch: (nextLocale: AppLocale) => void;
+  readonly handleDrawerSave: (next: LocalizedString) => void;
+  readonly handleDrawerCancel: () => void;
+  readonly setDrawerOpen: (open: boolean) => void;
+};
+
+const useLocalizedStringInputState = ({
   value,
   onChangeAction,
-  onBlurAction,
-  label,
-  helperText,
-  error = false,
-  errorMessage,
+  error,
+  required,
   requiredLocales,
-  required = false,
-  multiline,
-  minRows,
-  disabled = false,
-  fullWidth = true,
+  errorMessage,
+  helperText,
+  label,
   drawerTitle,
-  disableDrawer = false,
-  drawerAutosave = false,
-  drawerShowActions,
-  drawerDismissAction = "save",
-  sx,
-}) => {
+  drawerAutosave,
+  multiline,
+}: LocalizedStringInputStateProps): LocalizedStringInputState => {
   const t = useTranslations("ui.localizedString");
   const uiLocale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -105,7 +168,6 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
 
   const { successSwitch, triggerSuccess } = useLocaleSwitchSuccess();
 
-  // Sync the draft when the parent prop changes (e.g. form reset).
   useEffect(() => {
     setDraft(value);
   }, [value]);
@@ -127,14 +189,9 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
 
   const handleLocaleSwitch = useCallback(
     (nextLocale: AppLocale) => {
-      // Commit current text under the active locale before switching — the
-      // draft already holds it via handleFieldChange, so we only need to
-      // validate the just-written value to decide the green tint.
       const currentValue = draft[activeLocale] ?? "";
       const wasValid =
-        currentValue.trim() !== "" &&
-        // If the active locale was required, it must be non-empty.
-        (!resolvedRequiredLocales.includes(activeLocale) || currentValue.trim() !== "");
+        currentValue.trim() !== "" && (!resolvedRequiredLocales.includes(activeLocale) || currentValue.trim() !== "");
       setActiveLocale(nextLocale);
       if (wasValid && !error) {
         triggerSuccess();
@@ -160,8 +217,6 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
 
   const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequiredLocales), [resolvedRequiredLocales]);
 
-  // Resolve per-state helper text/error: parent-supplied errorMessage takes
-  // precedence, then required-locale error, then optional helperText.
   const activeRequired = requiredSet.has(activeLocale);
   const showInlineError = error || (activeRequired && fieldValue.trim() === "" && required);
   const inlineHelperText =
@@ -182,82 +237,124 @@ export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
         }
       : undefined;
 
-  /** Multiline inputs align adornments to the top edge instead of vertically centered. */
   const adornmentTopSx = multiline ? { alignSelf: "flex-start", height: "auto", marginTop: 1.75 } : undefined;
 
-  const editDrawerControl = disableDrawer ? null : isCompact ? (
-    <IconButton
-      aria-label={t("editTranslations")}
-      onClick={() => setDrawerOpen(true)}
-      disabled={disabled}
-      size="small"
-      sx={{ flexShrink: 0 }}
-    >
-      <EditOutlined fontSize="small" />
-    </IconButton>
-  ) : (
-    <Button
-      variant="text"
-      size="small"
-      onClick={() => setDrawerOpen(true)}
-      disabled={disabled}
-      startIcon={<EditOutlined fontSize="small" />}
-      sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
-    >
-      {t("editTranslations")}
-    </Button>
-  );
+  return {
+    containerRef,
+    isCompact,
+    activeLocale,
+    draft,
+    drawerOpen,
+    successSwitch,
+    resolvedRequiredLocales,
+    fieldValue,
+    isRtl,
+    showInlineError,
+    inlineHelperText,
+    drawerResolvedTitle,
+    textFieldSuccessSx,
+    adornmentTopSx,
+    handleFieldChange,
+    handleLocaleSwitch,
+    handleDrawerSave,
+    handleDrawerCancel,
+    setDrawerOpen,
+  };
+};
+
+export const LocalizedStringInput: React.FC<LocalizedStringInputProps> = ({
+  value,
+  onChangeAction,
+  onBlurAction,
+  label,
+  helperText,
+  error = false,
+  errorMessage,
+  requiredLocales,
+  required = false,
+  multiline,
+  minRows,
+  disabled = false,
+  fullWidth = true,
+  drawerTitle,
+  disableDrawer = false,
+  drawerAutosave = false,
+  drawerShowActions,
+  drawerDismissAction = "save",
+  sx,
+}) => {
+  const t = useTranslations("ui.localizedString");
+  const state = useLocalizedStringInputState({
+    value,
+    onChangeAction,
+    error,
+    required,
+    requiredLocales,
+    errorMessage,
+    helperText,
+    label,
+    drawerTitle,
+    drawerAutosave,
+    multiline,
+  });
 
   return (
-    <Box ref={containerRef} sx={{ width: fullWidth ? "100%" : undefined, ...sx }}>
+    <Box ref={state.containerRef} sx={{ width: fullWidth ? "100%" : undefined, ...sx }}>
       <TextField
         label={label}
-        value={fieldValue}
-        onChange={event => handleFieldChange(event.target.value)}
+        value={state.fieldValue}
+        onChange={event => state.handleFieldChange(event.target.value)}
         onBlur={onBlurAction}
         required={required}
         disabled={disabled}
-        error={showInlineError}
+        error={state.showInlineError}
         multiline={multiline}
         minRows={minRows}
         fullWidth={fullWidth}
-        dir={isRtl ? "rtl" : "ltr"}
-        key={activeLocale}
-        sx={textFieldSuccessSx}
+        dir={state.isRtl ? "rtl" : "ltr"}
+        key={state.activeLocale}
+        sx={state.textFieldSuccessSx}
         slotProps={{
           inputLabel: { shrink: true },
           input: {
             startAdornment: (
-              <InputAdornment position="start" sx={adornmentTopSx}>
+              <InputAdornment position="start" sx={state.adornmentTopSx}>
                 <LocaleAdornmentSwitch
-                  activeLocale={activeLocale}
-                  onChangeAction={handleLocaleSwitch}
+                  activeLocale={state.activeLocale}
+                  onChangeAction={state.handleLocaleSwitch}
                   disabled={disabled}
-                  compact={isCompact}
-                  successSwitch={successSwitch}
+                  compact={state.isCompact}
+                  successSwitch={state.successSwitch}
                 />
               </InputAdornment>
             ),
-            endAdornment: editDrawerControl ? (
-              <InputAdornment position="end" sx={adornmentTopSx}>
-                {editDrawerControl}
+            endAdornment: disableDrawer ? undefined : (
+              <InputAdornment position="end" sx={state.adornmentTopSx}>
+                <EditDrawerControl
+                  t={t}
+                  isCompact={state.isCompact}
+                  disabled={disabled}
+                  onOpen={() => state.setDrawerOpen(true)}
+                />
               </InputAdornment>
-            ) : undefined,
+            ),
           },
-          htmlInput: { dir: isRtl ? "rtl" : "ltr" },
+          htmlInput: { dir: state.isRtl ? "rtl" : "ltr" },
         }}
       />
-      {inlineHelperText ? <FormHelperText error={showInlineError}>{inlineHelperText}</FormHelperText> : null}
+      {state.inlineHelperText ? (
+        <FormHelperText error={state.showInlineError}>{state.inlineHelperText}</FormHelperText>
+      ) : null}
       <LocalizedStringDrawer
-        open={drawerOpen}
-        value={draft}
-        title={drawerResolvedTitle}
+        open={state.drawerOpen}
+        value={state.draft}
+        title={state.drawerResolvedTitle}
         multiline={multiline}
         minRows={minRows}
         required={required}
-        requiredLocales={resolvedRequiredLocales}
-        onSaveAction={handleDrawerSave}
-        onCancelAction={handleDrawerCancel}
+        requiredLocales={state.resolvedRequiredLocales}
+        onSaveAction={state.handleDrawerSave}
+        onCancelAction={state.handleDrawerCancel}
         autosave={drawerAutosave}
         showActions={drawerShowActions}
         dismissAction={drawerDismissAction}

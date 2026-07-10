@@ -35,6 +35,170 @@ const StyledManualInvoiceFab = styled(Fab)(({ theme }) => ({
   },
 }));
 
+function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewProps["labels"] }) {
+  return (
+    <Box sx={{ mb: 2, px: { xs: 2, md: 0 } }}>
+      <Button
+        component={Link}
+        href="/billing/exchange-rates"
+        variant="outlined"
+        size="small"
+        startIcon={<TimelineOutlined />}
+      >
+        {labels.exchangeRatesLink}
+      </Button>
+    </Box>
+  );
+}
+
+function InvoicesSection({
+  labels,
+  invoices,
+  canManage,
+  canDelete,
+  billingActionsDisabled,
+  isSearchPending,
+  loading,
+  onMarkAsPaid,
+  onViewPaymentDetails,
+  onDeleteInvoice,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
+}: Readonly<
+  Pick<
+    AdminBillingViewProps,
+    | "labels"
+    | "invoices"
+    | "canManage"
+    | "canDelete"
+    | "billingActionsDisabled"
+    | "isSearchPending"
+    | "loading"
+    | "onMarkAsPaid"
+    | "onViewPaymentDetails"
+    | "onDeleteInvoice"
+    | "page"
+    | "pageSize"
+    | "totalCount"
+    | "onPageChange"
+  >
+>) {
+  return (
+    <SectionPanel title={labels.sections.recentInvoices}>
+      {invoices.length === 0 && !loading ? (
+        <Box sx={{ py: 6, textAlign: "center" }}>
+          <Typography variant="headlineMd" sx={{ mb: 1 }}>
+            {labels.parentTable.emptyTitle}
+          </Typography>
+          <StyledEmptySubtitle variant="bodyMd">{labels.adminTable.noEntries}</StyledEmptySubtitle>
+        </Box>
+      ) : (
+        <AdminInvoicesCardList
+          rows={invoices}
+          canManage={canManage}
+          canDelete={canDelete}
+          billingActionsDisabled={billingActionsDisabled}
+          loading={isSearchPending || (loading && invoices.length === 0)}
+          onMarkAsPaid={onMarkAsPaid}
+          onViewPaymentDetails={onViewPaymentDetails}
+          onDeleteInvoice={onDeleteInvoice}
+          labels={{
+            markAsPaid: labels.adminTable.markAsPaid,
+            quickPay: labels.adminTable.quickPay,
+            reviewSubmission: labels.adminTable.reviewSubmission,
+            viewRejection: labels.adminTable.viewRejection,
+            viewDetails: labels.parentTable.viewDetails,
+            deleteInvoice: labels.adminTable.deleteInvoice,
+            statusLabels: labels.invoiceStatus,
+          }}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+        />
+      )}
+    </SectionPanel>
+  );
+}
+
+function StudentCreditSection({
+  labels,
+  creditRows,
+  canManage,
+  billingActionsDisabled,
+  creditFilter,
+  creditLoading,
+  onSendReminder,
+  onViewAllNegativeBalance,
+  onClearCreditFilter,
+}: Readonly<
+  Pick<
+    AdminBillingViewProps,
+    | "labels"
+    | "creditRows"
+    | "canManage"
+    | "billingActionsDisabled"
+    | "creditFilter"
+    | "creditLoading"
+    | "onSendReminder"
+    | "onViewAllNegativeBalance"
+    | "onClearCreditFilter"
+  >
+>) {
+  return (
+    <SectionPanel
+      id="student-credit-section"
+      title={labels.sections.studentCreditStatus}
+      subTitle={creditFilter === "negative_balance" ? labels.creditTable.showingNegativeBalanceOnly : undefined}
+      actions={
+        creditFilter === "negative_balance" ? (
+          <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
+        ) : undefined
+      }
+    >
+      <StudentCreditCardList
+        rows={creditRows}
+        canManage={canManage}
+        billingActionsDisabled={billingActionsDisabled}
+        onSendReminder={onSendReminder}
+        loading={creditLoading && creditRows.length === 0}
+        labels={{
+          classesLeft: labels.creditTable.classesLeft,
+          sendReminder: labels.creditTable.sendReminder,
+          creditStatusLabels: labels.creditStatus,
+        }}
+      />
+      <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
+        {creditFilter === "negative_balance" ? (
+          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
+            {labels.creditTable.clearFilter}
+          </Button>
+        ) : (
+          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
+            {labels.viewAllNegativeBalance}
+          </Button>
+        )}
+      </StyledCreditFooterBox>
+    </SectionPanel>
+  );
+}
+
+function ManualInvoiceFab({
+  label,
+  onClick,
+}: {
+  readonly label: string;
+  readonly onClick: AdminBillingViewProps["onManualInvoice"];
+}) {
+  return (
+    <StyledManualInvoiceFab aria-label={label} onClick={onClick}>
+      <AddOutlined />
+    </StyledManualInvoiceFab>
+  );
+}
+
 export function AdminBillingMobileView({
   labels,
   summary,
@@ -68,19 +232,7 @@ export function AdminBillingMobileView({
     <>
       <PageContainer>
         <PageHeader title={labels.adminPageTitle} subtitle={labels.adminPageSubtitle} titleVariant="headlineMd" />
-        {canViewExchangeRates ? (
-          <Box sx={{ mb: 2, px: { xs: 2, md: 0 } }}>
-            <Button
-              component={Link}
-              href="/billing/exchange-rates"
-              variant="outlined"
-              size="small"
-              startIcon={<TimelineOutlined />}
-            >
-              {labels.exchangeRatesLink}
-            </Button>
-          </Box>
-        ) : null}
+        {canViewExchangeRates ? <ExchangeRatesLink labels={labels} /> : null}
         <BillingMetricsRow metrics={buildAdminMetrics(summary, labels)} compact loading={summaryLoading} />
         <BillingMobileSearchBar
           value={searchQuery}
@@ -89,82 +241,37 @@ export function AdminBillingMobileView({
           isSearching={isSearchPending}
           onChange={onSearchChange}
         />
-        <SectionPanel title={labels.sections.recentInvoices}>
-          {invoices.length === 0 && !loading ? (
-            <Box sx={{ py: 6, textAlign: "center" }}>
-              <Typography variant="headlineMd" sx={{ mb: 1 }}>
-                {labels.parentTable.emptyTitle}
-              </Typography>
-              <StyledEmptySubtitle variant="bodyMd">{labels.adminTable.noEntries}</StyledEmptySubtitle>
-            </Box>
-          ) : (
-            <AdminInvoicesCardList
-              rows={invoices}
-              canManage={canManage}
-              canDelete={canDelete}
-              billingActionsDisabled={billingActionsDisabled}
-              loading={isSearchPending || (loading && invoices.length === 0)}
-              onMarkAsPaid={onMarkAsPaid}
-              onViewPaymentDetails={onViewPaymentDetails}
-              onDeleteInvoice={onDeleteInvoice}
-              labels={{
-                markAsPaid: labels.adminTable.markAsPaid,
-                quickPay: labels.adminTable.quickPay,
-                reviewSubmission: labels.adminTable.reviewSubmission,
-                viewRejection: labels.adminTable.viewRejection,
-                viewDetails: labels.parentTable.viewDetails,
-                deleteInvoice: labels.adminTable.deleteInvoice,
-                statusLabels: labels.invoiceStatus,
-              }}
-              page={page}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              onPageChange={onPageChange}
-            />
-          )}
-        </SectionPanel>
+        <InvoicesSection
+          labels={labels}
+          invoices={invoices}
+          canManage={canManage}
+          canDelete={canDelete}
+          billingActionsDisabled={billingActionsDisabled}
+          isSearchPending={isSearchPending}
+          loading={loading}
+          onMarkAsPaid={onMarkAsPaid}
+          onViewPaymentDetails={onViewPaymentDetails}
+          onDeleteInvoice={onDeleteInvoice}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+        />
         {canManage && (
-          <SectionPanel
-            id="student-credit-section"
-            title={labels.sections.studentCreditStatus}
-            subTitle={creditFilter === "negative_balance" ? labels.creditTable.showingNegativeBalanceOnly : undefined}
-            actions={
-              creditFilter === "negative_balance" ? (
-                <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
-              ) : undefined
-            }
-          >
-            <StudentCreditCardList
-              rows={creditRows}
-              canManage={canManage}
-              billingActionsDisabled={billingActionsDisabled}
-              onSendReminder={onSendReminder}
-              loading={creditLoading && creditRows.length === 0}
-              labels={{
-                classesLeft: labels.creditTable.classesLeft,
-                sendReminder: labels.creditTable.sendReminder,
-                creditStatusLabels: labels.creditStatus,
-              }}
-            />
-            <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
-              {creditFilter === "negative_balance" ? (
-                <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
-                  {labels.creditTable.clearFilter}
-                </Button>
-              ) : (
-                <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
-                  {labels.viewAllNegativeBalance}
-                </Button>
-              )}
-            </StyledCreditFooterBox>
-          </SectionPanel>
+          <StudentCreditSection
+            labels={labels}
+            creditRows={creditRows}
+            canManage={canManage}
+            billingActionsDisabled={billingActionsDisabled}
+            creditFilter={creditFilter}
+            creditLoading={creditLoading}
+            onSendReminder={onSendReminder}
+            onViewAllNegativeBalance={onViewAllNegativeBalance}
+            onClearCreditFilter={onClearCreditFilter}
+          />
         )}
       </PageContainer>
-      {canCreate && (
-        <StyledManualInvoiceFab aria-label={labels.manualInvoice} onClick={onManualInvoice}>
-          <AddOutlined />
-        </StyledManualInvoiceFab>
-      )}
+      {canCreate && <ManualInvoiceFab label={labels.manualInvoice} onClick={onManualInvoice} />}
     </>
   );
 }

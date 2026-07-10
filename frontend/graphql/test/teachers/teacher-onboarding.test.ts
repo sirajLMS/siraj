@@ -16,6 +16,7 @@ import {
   provisionTestSuperAdmin,
 } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 const createMinimalTeacherInput = (
   overrides?: Partial<{
@@ -52,6 +53,20 @@ const createMinimalTeacherInput = (
     } as import("@/frontend/graphql/generated/gql/graphql-types").PaymentMethodDetailsInput,
   },
 });
+
+const _expectTeacherCreationDenied = async (demoUser: string) => {
+  const token = await loginDemoUser(demoUser);
+
+  const result = await testClient.mutate({
+    mutation: createTeacherMutationDocument,
+    variables: { input: createMinimalTeacherInput() },
+    context: { headers: { Authorization: `Bearer ${token}` } },
+    errorPolicy: "all",
+  });
+
+  expect(result.error).toBeDefined();
+  expect(result.data?.createTeacher).toBeFalsy();
+};
 
 describe("Teacher Onboarding GraphQL API", () => {
   setupTestServerLifecycle();

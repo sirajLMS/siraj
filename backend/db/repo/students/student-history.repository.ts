@@ -52,6 +52,7 @@ export namespace StudentHistoryRepository {
         duration: r.instance.durationMinutes,
         status: r.instance.executionState,
         outcome: r.instance.outcome,
+        isFrozen: r.instance.isFrozen,
         instructor: r.user.name,
         timeSlot: `${hh}:${mm}`,
         room: r.instance.meetingJoinUrl ?? null,

@@ -49,6 +49,130 @@ const filterOptions = createFilterOptions<PaymentMethodCatalogOption>({
   stringify: option => `${option.displayName} ${option.slug}`,
 });
 
+type OptionRenderProps = {
+  readonly key: React.Key;
+  readonly [key: string]: unknown;
+};
+
+const PaymentMethodOption: React.FC<{
+  readonly props: OptionRenderProps;
+  readonly entry: PaymentMethodCatalogOption;
+  readonly type?: PaymentMethodType | null;
+  readonly showSlug: boolean;
+}> = ({ props, entry, type, showSlug }) => {
+  const { key, ...optionProps } = props;
+  return (
+    <Box key={key} component="li" sx={{ px: 2, py: 1 }} {...optionProps}>
+      <PaymentMethodOptionRow option={entry} type={type} showSlug={showSlug} />
+    </Box>
+  );
+};
+
+const buildAutocompleteSx = (
+  style: React.CSSProperties | undefined,
+  listAttached: boolean,
+  isOpen: boolean
+): React.CSSProperties => ({
+  ...style,
+  ...(listAttached && {
+    "& .MuiOutlinedInput-root": {
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+      ...(isOpen && {
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+      }),
+    },
+  }),
+});
+
+const StartAdornment: React.FC<{
+  readonly option?: PaymentMethodCatalogOption | null;
+  readonly existingAdornment: React.ReactNode;
+}> = ({ option, existingAdornment }) => (
+  <>
+    <InputAdornment position="start">
+      <SearchOutlinedIcon fontSize="small" />
+    </InputAdornment>
+    {option?.logoUrl ? (
+      <InputAdornment position="start">
+        <Avatar src={option.logoUrl} alt="" sx={{ width: 20, height: 20 }} />
+      </InputAdornment>
+    ) : null}
+    {existingAdornment}
+  </>
+);
+
+const EndAdornment: React.FC<{
+  readonly option?: PaymentMethodCatalogOption | null;
+  readonly existingAdornment: React.ReactNode;
+}> = ({ option, existingAdornment }) =>
+  option ? (
+    <>
+      {existingAdornment}
+      <InputAdornment position="end">
+        <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
+          {option.slug}
+        </Typography>
+      </InputAdornment>
+    </>
+  ) : (
+    existingAdornment
+  );
+
+const AutocompleteTextField: React.FC<{
+  readonly params: React.ComponentProps<typeof TextField>;
+  readonly label?: string;
+  readonly placeholder?: string;
+  readonly required?: boolean;
+  readonly showError: boolean;
+  readonly resolvedHelperText?: string;
+  readonly onBlur?: () => void;
+  readonly autoFocus?: boolean;
+  readonly autoComplete: string;
+  readonly option?: PaymentMethodCatalogOption | null;
+}> = ({
+  params,
+  label,
+  placeholder,
+  required,
+  showError,
+  resolvedHelperText,
+  onBlur,
+  autoFocus,
+  autoComplete,
+  option,
+}) => {
+  const slotProps = params.slotProps as {
+    input?: { startAdornment?: React.ReactNode; endAdornment?: React.ReactNode } & Record<string, unknown>;
+    htmlInput?: Record<string, unknown>;
+  };
+  return (
+    <TextField
+      {...params}
+      label={label}
+      placeholder={placeholder}
+      required={required}
+      error={showError}
+      helperText={resolvedHelperText}
+      onBlur={onBlur}
+      autoFocus={autoFocus}
+      slotProps={{
+        ...params.slotProps,
+        input: {
+          ...slotProps.input,
+          startAdornment: <StartAdornment option={option} existingAdornment={slotProps.input?.startAdornment} />,
+          endAdornment: <EndAdornment option={option} existingAdornment={slotProps.input?.endAdornment} />,
+        },
+        htmlInput: {
+          ...slotProps.htmlInput,
+          autoComplete,
+        },
+      }}
+    />
+  );
+};
+
 export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps> = ({
   option,
   options: allOptionsProp,
@@ -90,9 +214,56 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
     []
   );
 
+  const handleOpen = useCallback(() => {
+    if (openProp === undefined) {
+      setInternalOpen(true);
+    }
+    onOpenAction?.();
+  }, [openProp, onOpenAction]);
+
+  const handleClose = useCallback(() => {
+    if (openProp === undefined) {
+      setInternalOpen(false);
+    }
+    onCloseAction?.();
+  }, [openProp, onCloseAction]);
+
+  const handleChange = useCallback(
+    (_: unknown, newValue: PaymentMethodCatalogOption | null) => {
+      if (newValue) {
+        onChangeAction(newValue);
+      }
+    },
+    [onChangeAction]
+  );
+
+  const renderOption = useCallback(
+    (props: OptionRenderProps, entry: PaymentMethodCatalogOption) => (
+      <PaymentMethodOption props={props} entry={entry} type={type} showSlug={showSlug} />
+    ),
+    [type, showSlug]
+  );
+
   const showRequiredError = Boolean(required) && !option;
   const showError = Boolean(error) || showRequiredError;
   const resolvedHelperText = helperText ?? (showRequiredError ? t("required") : undefined);
+
+  const resolvedLabel = listAttached ? undefined : (label ?? t("selectMethod"));
+  const resolvedPlaceholder = listAttached ? (label ?? t("selectMethod")) : (placeholder ?? t("searchByNameOrSlug"));
+
+  const autocompleteSx = useMemo(() => buildAutocompleteSx(style, listAttached, isOpen), [style, listAttached, isOpen]);
+
+  const slotProps = useMemo(
+    () => ({
+      popper: getPaymentMethodAutocompletePopperSlotProps({
+        matchAnchorWidth,
+        disablePortal: disablePortal || listAttached,
+        listAttached,
+      }),
+      paper: getPaymentMethodAutocompletePaperSlotProps(listAttached),
+    }),
+    [matchAnchorWidth, disablePortal, listAttached]
+  );
 
   return (
     <Autocomplete<PaymentMethodCatalogOption, false, false, false>
@@ -101,115 +272,31 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
       autoHighlight
       disabled={disabled}
       open={isOpen}
-      onOpen={() => {
-        if (openProp === undefined) {
-          setInternalOpen(true);
-        }
-        onOpenAction?.();
-      }}
-      onClose={() => {
-        if (openProp === undefined) {
-          setInternalOpen(false);
-        }
-        onCloseAction?.();
-      }}
+      onOpen={handleOpen}
+      onClose={handleClose}
       value={option ?? null}
-      sx={{
-        ...style,
-        ...(listAttached && {
-          "& .MuiOutlinedInput-root": {
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            ...(isOpen && {
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-            }),
-          },
-        }),
-      }}
-      onChange={(_, newValue) => {
-        if (newValue) {
-          onChangeAction(newValue);
-        }
-      }}
+      sx={autocompleteSx}
+      onChange={handleChange}
       onBlur={onBlur}
       isOptionEqualToValue={(left, right) => left.id === right.id}
       getOptionLabel={getOptionLabel}
       filterOptions={filterOptions}
-      slotProps={{
-        popper: getPaymentMethodAutocompletePopperSlotProps({
-          matchAnchorWidth,
-          disablePortal: disablePortal || listAttached,
-          listAttached,
-        }),
-        paper: getPaymentMethodAutocompletePaperSlotProps(listAttached),
-      }}
-      renderOption={(props, entry) => {
-        const { key, ...optionProps } = props;
-        return (
-          <Box key={key} component="li" sx={{ px: 2, py: 1 }} {...optionProps}>
-            <PaymentMethodOptionRow option={entry} type={type} showSlug={showSlug} />
-          </Box>
-        );
-      }}
-      renderInput={params => {
-        const resolvedLabel = listAttached ? undefined : (label ?? t("selectMethod"));
-        const resolvedPlaceholder = listAttached
-          ? (label ?? t("selectMethod"))
-          : (placeholder ?? t("searchByNameOrSlug"));
-
-        return (
-          <TextField
-            {...params}
-            label={resolvedLabel}
-            placeholder={resolvedPlaceholder}
-            required={required}
-            error={showError}
-            helperText={resolvedHelperText}
-            onBlur={onBlur}
-            autoFocus={autoFocus}
-            slotProps={{
-              ...params.slotProps,
-              input: {
-                ...params.slotProps.input,
-                startAdornment: (
-                  <>
-                    <InputAdornment position="start">
-                      <SearchOutlinedIcon fontSize="small" />
-                    </InputAdornment>
-                    {option?.logoUrl ? (
-                      <InputAdornment position="start">
-                        <Avatar src={option.logoUrl} alt="" sx={{ width: 20, height: 20 }} />
-                      </InputAdornment>
-                    ) : null}
-                    {params.slotProps.input?.startAdornment}
-                  </>
-                ),
-                endAdornment: option ? (
-                  <>
-                    {params.slotProps.input?.endAdornment}
-                    <InputAdornment position="end">
-                      <Typography
-                        component="span"
-                        dir="ltr"
-                        sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
-                      >
-                        {option.slug}
-                      </Typography>
-                    </InputAdornment>
-                  </>
-                ) : (
-                  params.slotProps.input?.endAdornment
-                ),
-              },
-              htmlInput: {
-                ...params.slotProps.htmlInput,
-                autoComplete,
-              },
-            }}
-          />
-        );
-      }}
+      slotProps={slotProps}
+      renderOption={renderOption}
+      renderInput={params => (
+        <AutocompleteTextField
+          params={params}
+          label={resolvedLabel}
+          placeholder={resolvedPlaceholder}
+          required={required}
+          showError={showError}
+          resolvedHelperText={resolvedHelperText}
+          onBlur={onBlur}
+          autoFocus={autoFocus}
+          autoComplete={autoComplete}
+          option={option}
+        />
+      )}
     />
   );
 };

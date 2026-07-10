@@ -23,6 +23,7 @@ export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement(
     day: t.exposeString("day"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject, nullable: true }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
+    isFrozen: t.exposeBoolean("isFrozen"),
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),

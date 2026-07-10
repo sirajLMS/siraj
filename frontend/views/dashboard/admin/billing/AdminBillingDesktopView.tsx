@@ -27,6 +27,92 @@ const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
+function AdminBillingHeaderActions({
+  labels,
+  canViewExchangeRates,
+  canCreate,
+  onManualInvoice,
+}: {
+  readonly labels: AdminBillingViewProps["labels"];
+  readonly canViewExchangeRates?: boolean;
+  readonly canCreate: boolean;
+  readonly onManualInvoice: () => void;
+}) {
+  return (
+    <>
+      {canViewExchangeRates ? (
+        <Button component={Link} href="/billing/exchange-rates" variant="outlined" startIcon={<TimelineOutlined />}>
+          {labels.exchangeRatesLink}
+        </Button>
+      ) : null}
+      {canCreate ? (
+        <PrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
+          {labels.manualInvoice}
+        </PrimaryPageAction>
+      ) : null}
+    </>
+  );
+}
+
+function StudentCreditSection({
+  labels,
+  creditRows,
+  creditLoading,
+  canManage,
+  billingActionsDisabled,
+  creditFilter,
+  onSendReminder,
+  onViewAllNegativeBalance,
+  onClearCreditFilter,
+}: {
+  readonly labels: AdminBillingViewProps["labels"];
+  readonly creditRows: AdminBillingViewProps["creditRows"];
+  readonly creditLoading?: boolean;
+  readonly canManage: boolean;
+  readonly billingActionsDisabled?: boolean;
+  readonly creditFilter: AdminBillingViewProps["creditFilter"];
+  readonly onSendReminder: (id: string) => void;
+  readonly onViewAllNegativeBalance: () => void;
+  readonly onClearCreditFilter: () => void;
+}) {
+  const isNegativeFilter = creditFilter === "negative_balance";
+
+  return (
+    <SectionPanel
+      id="student-credit-section"
+      title={labels.sections.studentCreditStatus}
+      actions={
+        isNegativeFilter ? (
+          <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
+        ) : (
+          <StyledAttentionChip label={labels.requiresAttention} size="small" />
+        )
+      }
+      subTitle={isNegativeFilter ? labels.creditTable.showingNegativeBalanceOnly : undefined}
+    >
+      <StudentCreditDataGrid
+        rows={creditRows}
+        canManage={canManage}
+        billingActionsDisabled={billingActionsDisabled}
+        onSendReminder={onSendReminder}
+        labels={getStudentCreditGridLabels(labels)}
+        loading={creditLoading && creditRows.length === 0}
+      />
+      <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
+        {isNegativeFilter ? (
+          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
+            {labels.creditTable.clearFilter}
+          </Button>
+        ) : (
+          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
+            {labels.viewAllNegativeBalance}
+          </Button>
+        )}
+      </StyledCreditFooterBox>
+    </SectionPanel>
+  );
+}
+
 export function AdminBillingDesktopView({
   labels,
   summary,
@@ -64,23 +150,12 @@ export function AdminBillingDesktopView({
         title={labels.adminPageTitle}
         subtitle={labels.adminPageSubtitle}
         actions={
-          <>
-            {canViewExchangeRates ? (
-              <Button
-                component={Link}
-                href="/billing/exchange-rates"
-                variant="outlined"
-                startIcon={<TimelineOutlined />}
-              >
-                {labels.exchangeRatesLink}
-              </Button>
-            ) : null}
-            {canCreate ? (
-              <PrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
-                {labels.manualInvoice}
-              </PrimaryPageAction>
-            ) : null}
-          </>
+          <AdminBillingHeaderActions
+            labels={labels}
+            canViewExchangeRates={canViewExchangeRates}
+            canCreate={canCreate}
+            onManualInvoice={onManualInvoice}
+          />
         }
       />
 
@@ -116,38 +191,17 @@ export function AdminBillingDesktopView({
       </SectionPanel>
 
       {canManage && (
-        <SectionPanel
-          id="student-credit-section"
-          title={labels.sections.studentCreditStatus}
-          actions={
-            creditFilter === "negative_balance" ? (
-              <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
-            ) : (
-              <StyledAttentionChip label={labels.requiresAttention} size="small" />
-            )
-          }
-          subTitle={creditFilter === "negative_balance" ? labels.creditTable.showingNegativeBalanceOnly : undefined}
-        >
-          <StudentCreditDataGrid
-            rows={creditRows}
-            canManage={canManage}
-            billingActionsDisabled={billingActionsDisabled}
-            onSendReminder={onSendReminder}
-            labels={getStudentCreditGridLabels(labels)}
-            loading={creditLoading && creditRows.length === 0}
-          />
-          <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
-            {creditFilter === "negative_balance" ? (
-              <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
-                {labels.creditTable.clearFilter}
-              </Button>
-            ) : (
-              <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
-                {labels.viewAllNegativeBalance}
-              </Button>
-            )}
-          </StyledCreditFooterBox>
-        </SectionPanel>
+        <StudentCreditSection
+          labels={labels}
+          creditRows={creditRows}
+          creditLoading={creditLoading}
+          canManage={canManage}
+          billingActionsDisabled={billingActionsDisabled}
+          creditFilter={creditFilter}
+          onSendReminder={onSendReminder}
+          onViewAllNegativeBalance={onViewAllNegativeBalance}
+          onClearCreditFilter={onClearCreditFilter}
+        />
       )}
     </PageContainer>
   );

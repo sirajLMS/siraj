@@ -49,22 +49,41 @@ function groupGapsByDayOfMonth(
   return grouped;
 }
 
-export function TeacherAvailabilityMonthDrawer({
-  open,
-  teacher,
-  anchorFromDate,
-  onClose,
-}: Readonly<TeacherAvailabilityMonthDrawerProps>) {
-  const t = useTranslations("dashboard.searchSchedule");
+const EMPTY_INPUT: AvailabilitySearchInput = {
+  fromDate: "",
+  toDate: "",
+  fromTime: "",
+  toTime: "",
+  gender: null,
+  minAvailableDays: null,
+  minTotalGaps: null,
+  teacherNameSearch: null,
+  daysOfWeek: null,
+  sortBy: AvailabilitySearchSortBy.MostAvailableDays,
+  paginationArgs: {
+    first: null,
+    page: null,
+    skip: null,
+    after: null,
+    before: null,
+    last: null,
+    maxCount: null,
+  },
+};
+
+interface MonthDrawerQueryResult {
+  readonly monthTeacher: { readonly id: string; readonly gaps?: readonly TeacherAvailabilityGapItem[] | null } | null;
+  readonly daysByDate: Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>;
+  readonly loading: boolean;
+  readonly error: unknown;
+}
+
+function useMonthDrawerQuery(
+  open: boolean,
+  teacher: SearchScheduleResultItem | null,
+  currentMonth: Date
+): MonthDrawerQueryResult {
   const draft = useSearchScheduleStore(state => state.draft);
-
-  const [currentMonth, setCurrentMonth] = useState(() => parse(anchorFromDate, "yyyy-MM-dd", new Date()));
-
-  useEffect(() => {
-    if (open) {
-      setCurrentMonth(parse(anchorFromDate, "yyyy-MM-dd", new Date()));
-    }
-  }, [anchorFromDate, open]);
 
   const monthInput = useMemo((): AvailabilitySearchInput | null => {
     if (!teacher?.id || !teacher.name) {
@@ -74,29 +93,8 @@ export function TeacherAvailabilityMonthDrawer({
     return buildTeacherMonthAvailabilityInput(draft, { id: teacher.id, name: teacher.name }, currentMonth);
   }, [currentMonth, draft, teacher?.id, teacher?.name]);
 
-  const emptyInput: AvailabilitySearchInput = {
-    fromDate: "",
-    toDate: "",
-    fromTime: "",
-    toTime: "",
-    gender: null,
-    minAvailableDays: null,
-    minTotalGaps: null,
-    teacherNameSearch: null,
-    daysOfWeek: null,
-    sortBy: AvailabilitySearchSortBy.MostAvailableDays,
-    paginationArgs: {
-      first: null,
-      page: null,
-      skip: null,
-      after: null,
-      before: null,
-      last: null,
-      maxCount: null,
-    },
-  };
   const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {
-    variables: monthInput ? { input: monthInput } : { input: emptyInput },
+    variables: monthInput ? { input: monthInput } : { input: EMPTY_INPUT },
     skip: !open || monthInput === null,
     fetchPolicy: "cache-and-network",
   });
@@ -111,8 +109,119 @@ export function TeacherAvailabilityMonthDrawer({
     [currentMonth, monthTeacher?.gaps]
   );
 
+  return { monthTeacher, daysByDate, loading, error };
+}
+
+function DrawerHeader({ title, onClose }: { readonly title: string; readonly onClose: () => void }) {
+  const t = useTranslations("dashboard.searchSchedule");
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 1,
+        px: 2,
+        py: 1.5,
+        borderBottom: 1,
+        borderColor: "divider",
+      }}
+    >
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="titleLg" sx={{ color: (theme: Theme) => theme.palette.primary.main }}>
+          {title}
+        </Typography>
+      </Box>
+      <IconButton aria-label={t("closeMonthSchedule")} onClick={onClose} size="small">
+        <CloseOutlined />
+      </IconButton>
+    </Box>
+  );
+}
+
+function MonthNavigator({
+  currentMonth,
+  onMonthChange,
+}: {
+  readonly currentMonth: Date;
+  readonly onMonthChange: (fn: (prev: Date) => Date) => void;
+}) {
+  const t = useTranslations("dashboard.searchSchedule");
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
   const yearStr = currentMonth.getFullYear();
+
+  const flipSx = (theme: Theme) => ({
+    transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+  });
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
+      <IconButton aria-label={t("previousMonth")} onClick={() => onMonthChange(prev => subMonths(prev, 1))} sx={flipSx}>
+        <ChevronLeft />
+      </IconButton>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <CalendarToday sx={(theme: Theme) => ({ fontSize: 20, color: theme.palette.primary.main })} />
+        <Typography variant="titleLg" sx={(theme: Theme) => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+          {monthStr} {yearStr}
+        </Typography>
+      </Box>
+      <IconButton aria-label={t("nextMonth")} onClick={() => onMonthChange(prev => addMonths(prev, 1))} sx={flipSx}>
+        <ChevronRight />
+      </IconButton>
+    </Box>
+  );
+}
+
+function DrawerContent({
+  loading,
+  error,
+  currentMonth,
+  daysByDate,
+}: {
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly currentMonth: Date;
+  readonly daysByDate: Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>;
+}) {
+  const t = useTranslations("dashboard.searchSchedule");
+  return (
+    <Box sx={{ flex: 1, overflow: "auto", px: 2, pb: 3 }}>
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <CircularProgress size={32} />
+        </Box>
+      ) : null}
+
+      {error ? (
+        <Typography color="error" sx={{ textAlign: "center", py: 4 }}>
+          {t("monthScheduleError")}
+        </Typography>
+      ) : null}
+
+      {!loading && !error ? (
+        <TeacherAvailabilityCalendarGrid currentMonth={currentMonth} daysByDate={daysByDate} />
+      ) : null}
+    </Box>
+  );
+}
+
+export function TeacherAvailabilityMonthDrawer({
+  open,
+  teacher,
+  anchorFromDate,
+  onClose,
+}: Readonly<TeacherAvailabilityMonthDrawerProps>) {
+  const t = useTranslations("dashboard.searchSchedule");
+
+  const [currentMonth, setCurrentMonth] = useState(() => parse(anchorFromDate, "yyyy-MM-dd", new Date()));
+
+  useEffect(() => {
+    if (open) {
+      setCurrentMonth(parse(anchorFromDate, "yyyy-MM-dd", new Date()));
+    }
+  }, [anchorFromDate, open]);
+
+  const { daysByDate, loading, error } = useMonthDrawerQuery(open, teacher, currentMonth);
 
   return (
     <Drawer
@@ -129,72 +238,9 @@ export function TeacherAvailabilityMonthDrawer({
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1,
-            px: 2,
-            py: 1.5,
-            borderBottom: 1,
-            borderColor: "divider",
-          }}
-        >
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="titleLg" sx={{ color: theme => theme.palette.primary.main }}>
-              {t("monthScheduleTitle", { name: teacher?.name ?? "" })}
-            </Typography>
-          </Box>
-          <IconButton aria-label={t("closeMonthSchedule")} onClick={onClose} size="small">
-            <CloseOutlined />
-          </IconButton>
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, py: 2 }}>
-          <IconButton
-            aria-label={t("previousMonth")}
-            onClick={() => setCurrentMonth(previous => subMonths(previous, 1))}
-            sx={theme => ({
-              transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            })}
-          >
-            <ChevronLeft />
-          </IconButton>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
-            <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-              {monthStr} {yearStr}
-            </Typography>
-          </Box>
-          <IconButton
-            aria-label={t("nextMonth")}
-            onClick={() => setCurrentMonth(previous => addMonths(previous, 1))}
-            sx={theme => ({
-              transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            })}
-          >
-            <ChevronRight />
-          </IconButton>
-        </Box>
-
-        <Box sx={{ flex: 1, overflow: "auto", px: 2, pb: 3 }}>
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={32} />
-            </Box>
-          ) : null}
-
-          {error ? (
-            <Typography color="error" sx={{ textAlign: "center", py: 4 }}>
-              {t("monthScheduleError")}
-            </Typography>
-          ) : null}
-
-          {!loading && !error ? (
-            <TeacherAvailabilityCalendarGrid currentMonth={currentMonth} daysByDate={daysByDate} />
-          ) : null}
-        </Box>
+        <DrawerHeader title={t("monthScheduleTitle", { name: teacher?.name ?? "" })} onClose={onClose} />
+        <MonthNavigator currentMonth={currentMonth} onMonthChange={setCurrentMonth} />
+        <DrawerContent loading={loading} error={error} currentMonth={currentMonth} daysByDate={daysByDate} />
       </Box>
     </Drawer>
   );

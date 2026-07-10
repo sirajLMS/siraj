@@ -14,57 +14,20 @@ import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/hom
 import { resolveDailyScheduleMetricFilter } from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
 import { DashboardView } from "@/frontend/views/dashboard/dashboard/DashboardView";
 
-// Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
-// This container component handles all GraphQL queries, filter state, and metric/row transformations
-export function AdminDashboardContainer() {
+const PAGE_SIZE = 10;
+
+/** Tracks when dashboard data first arrives and computes an elapsed-time label that updates every minute. */
+function useLastUpdatedLabel(data: unknown) {
   const t = useTranslations("dashboard");
 
-  const { hasPermission } = useUserStore();
-
-  const { filters, setDateFilter, setTeacherFilter, setSearchQuery, setSelectedStatus } = useDashboardStore();
-
-  const { headers, statusLabels } = useAdminDashboardLabels();
-
-  const selectedMetricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
-
-  const [teacherSearchQuery] = useState("");
-  const [page, setPage] = useState(0);
-  const pageSize = 10;
-
-  const {
-    data: dashboardData,
-    loading,
-    refetch,
-  } = useQuery(adminDashboardScheduleQueryDocument, {
-    variables: {
-      input: {
-        date: filters.date,
-        teacherId: filters.teacherId || null,
-        search: filters.searchQuery || null,
-        metricFilter: selectedMetricFilter,
-        paginationArgs: {
-          first: pageSize,
-          page: page + 1,
-          skip: null,
-          after: null,
-          before: null,
-          last: null,
-          maxCount: null,
-        },
-      },
-    },
-    fetchPolicy: "cache-and-network",
-  });
-
   const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
+  const [lastUpdated, setLastUpdated] = useState(t("admin.updatedJustNow"));
 
   useEffect(() => {
-    if (dashboardData && dataArrivedAt === null) {
+    if (data && dataArrivedAt === null) {
       setDataArrivedAt(Date.now());
     }
-  }, [dashboardData, dataArrivedAt]);
-
-  const [lastUpdated, setLastUpdated] = useState(t("admin.updatedJustNow"));
+  }, [data, dataArrivedAt]);
 
   useEffect(() => {
     if (dataArrivedAt === null) {
@@ -83,6 +46,61 @@ export function AdminDashboardContainer() {
     return () => clearInterval(interval);
   }, [dataArrivedAt, t]);
 
+  return lastUpdated;
+}
+
+/** Fetches the admin dashboard schedule with pagination and filter variables derived from the dashboard store. */
+function useAdminScheduleQuery() {
+  const { filters } = useDashboardStore();
+  const [page, setPage] = useState(0);
+  const selectedMetricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
+
+  const {
+    data: dashboardData,
+    loading,
+    refetch,
+  } = useQuery(adminDashboardScheduleQueryDocument, {
+    variables: {
+      input: {
+        date: filters.date,
+        teacherId: filters.teacherId || null,
+        search: filters.searchQuery || null,
+        metricFilter: selectedMetricFilter,
+        paginationArgs: {
+          first: PAGE_SIZE,
+          page: page + 1,
+          skip: null,
+          after: null,
+          before: null,
+          last: null,
+          maxCount: null,
+        },
+      },
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  return { dashboardData, loading, refetch, page, setPage };
+}
+
+/** Fetches the teacher list for the filter dropdown. */
+function useTeachers() {
+  const [teacherSearchQuery] = useState("");
+  const { data: teachersData } = useQuery(teachersQueryDocument, {
+    variables: { search: teacherSearchQuery, limit: 10 },
+  });
+
+  return (teachersData?.teachers ?? []).map(teacher => ({
+    id: teacher?.id ?? "",
+    name: teacher?.name ?? "",
+  }));
+}
+
+/** Groups the filter-change handlers so they stay cohesive and the container stays small. */
+function useAdminDashboardHandlers(setPage: (p: number) => void) {
+  const { hasPermission } = useUserStore();
+  const { filters, setDateFilter, setTeacherFilter, setSearchQuery, setSelectedStatus } = useDashboardStore();
+
   const handleDateChange = (date: string) => {
     setDateFilter(date);
     setPage(0);
@@ -98,22 +116,6 @@ export function AdminDashboardContainer() {
     setPage(0);
   };
 
-  const { data: teachersData } = useQuery(teachersQueryDocument, {
-    variables: {
-      search: teacherSearchQuery,
-      limit: 10,
-    },
-  });
-
-  const handleSubmit = () => {
-    void refetch();
-  };
-
-  const teachers = (teachersData?.teachers ?? []).map(teacher => ({
-    id: teacher?.id ?? "",
-    name: teacher?.name ?? "",
-  }));
-
   const handleMetricClick = (key: string) => {
     if (!hasPermission(AppPermission.DashboardFilterMetrics)) {
       return;
@@ -124,6 +126,25 @@ export function AdminDashboardContainer() {
     } else {
       setSelectedStatus(key as AdminMetricKey);
     }
+  };
+
+  return { filters, handleDateChange, handleTeacherChange, handleSearchChange, handleMetricClick };
+}
+
+// Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
+export function AdminDashboardContainer() {
+  const t = useTranslations("dashboard");
+  const { headers, statusLabels } = useAdminDashboardLabels();
+
+  const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();
+  const teachers = useTeachers();
+  const lastUpdated = useLastUpdatedLabel(dashboardData);
+
+  const { filters, handleDateChange, handleTeacherChange, handleSearchChange, handleMetricClick } =
+    useAdminDashboardHandlers(setPage);
+
+  const handleSubmit = () => {
+    void refetch();
   };
 
   const scheduleResult = dashboardData?.adminDashboardSchedule;
@@ -162,7 +183,7 @@ export function AdminDashboardContainer() {
       detailsLabel={t("admin.details")}
       emptyMessage={loading ? "Loading..." : t("admin.noClasses")}
       page={page}
-      pageSize={pageSize}
+      pageSize={PAGE_SIZE}
       totalCount={totalCount}
       onPageChange={setPage}
       onSearchChange={handleSearchChange}

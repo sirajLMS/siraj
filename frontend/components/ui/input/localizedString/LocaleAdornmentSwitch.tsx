@@ -73,6 +73,54 @@ const LanguageOption = styled(Box, {
  * `frontend/lib/locale/language/languages.ts`; this adornment then lists it
  * automatically.
  */
+type LocaleListProps = {
+  readonly activeLocale: AppLocale;
+  readonly ariaLabel?: string;
+  readonly isMobile: boolean;
+  readonly onPick: (locale: AppLocale) => void;
+};
+
+const LocaleList: React.FC<LocaleListProps> = ({ activeLocale, ariaLabel, isMobile, onPick }) => {
+  const t = useTranslations("ui.localizedString");
+  const uiLocale = useLocale();
+
+  return (
+    <Stack role="listbox" aria-label={ariaLabel ?? t("selectLocale")}>
+      {languages.map((language, index, array) => {
+        const isSelected = language.code === activeLocale;
+        const isLastItem = index === array.length - 1;
+        return (
+          <LanguageOption
+            key={language.code}
+            role="option"
+            aria-selected={isSelected}
+            isSelected={isSelected}
+            isLastItem={isLastItem}
+            isTouch={isMobile}
+            onClick={() => onPick(language.code as AppLocale)}
+          >
+            <LocaleEmoji emoji={language.emoji} />
+            <Typography component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>
+              {getLanguageDisplayName(language.code, uiLocale)}
+            </Typography>
+            {isSelected ? (
+              <Box
+                aria-hidden
+                sx={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  backgroundColor: theme => theme.palette.primary.main,
+                }}
+              />
+            ) : null}
+          </LanguageOption>
+        );
+      })}
+    </Stack>
+  );
+};
+
 export const LocaleAdornmentSwitch: React.FC<LocaleAdornmentSwitchProps> = ({
   activeLocale,
   onChangeAction,
@@ -174,39 +222,7 @@ export const LocaleAdornmentSwitch: React.FC<LocaleAdornmentSwitchProps> = ({
           },
         }}
       >
-        <Stack role="listbox" aria-label={ariaLabel ?? t("selectLocale")}>
-          {languages.map((language, index, array) => {
-            const isSelected = language.code === activeLocale;
-            const isLastItem = index === array.length - 1;
-            return (
-              <LanguageOption
-                key={language.code}
-                role="option"
-                aria-selected={isSelected}
-                isSelected={isSelected}
-                isLastItem={isLastItem}
-                isTouch={isPopoverMobile}
-                onClick={() => handlePick(language.code as AppLocale)}
-              >
-                <LocaleEmoji emoji={language.emoji} />
-                <Typography component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>
-                  {getLanguageDisplayName(language.code, uiLocale)}
-                </Typography>
-                {isSelected ? (
-                  <Box
-                    aria-hidden
-                    sx={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      backgroundColor: theme => theme.palette.primary.main,
-                    }}
-                  />
-                ) : null}
-              </LanguageOption>
-            );
-          })}
-        </Stack>
+        <LocaleList activeLocale={activeLocale} ariaLabel={ariaLabel} isMobile={isPopoverMobile} onPick={handlePick} />
       </Popover>
     </>
   );

@@ -48,25 +48,18 @@ export namespace GroupClassService {
     return groupClass;
   }
 
-  export async function getGroupClassAudit(
-    userId: string,
-    classInstanceId: string,
-    locale?: string
-  ): Promise<GroupClassAuditReturnType> {
-    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, locale);
-
-    const groupClass = await getGroupClassOrThrow(classInstanceId, locale);
-
+  async function getClassInstanceOrThrow(classInstanceId: string, locale?: string) {
     const classInstance = await SchedulingRepository.getClassInstanceById(classInstanceId);
     if (!classInstance) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("notFound"));
     }
+    return classInstance;
+  }
 
-    const enrollmentRows = await GroupClassRepository.getEnrollmentsWithStudentDetails(groupClass.id);
-    const communications = await GroupClassRepository.getCommunications(groupClass.id);
-
-    const students: GroupClassStudentReturnType[] = enrollmentRows.map(e => ({
+  async function fetchStudents(groupClassId: string): Promise<GroupClassStudentReturnType[]> {
+    const enrollmentRows = await GroupClassRepository.getEnrollmentsWithStudentDetails(groupClassId);
+    return enrollmentRows.map(e => ({
       id: e.studentId,
       name: e.studentName,
       studentId: e.studentIdNumber ?? e.studentId,
@@ -79,8 +72,11 @@ export namespace GroupClassService {
       attendanceStatus: e.attendanceStatus as GroupClassAttendanceStatus,
       avatarUrl: e.studentAvatarUrl,
     }));
+  }
 
-    const communicationLogs: GroupClassCommunicationLogEntryReturnType[] = communications.map(c => ({
+  async function fetchCommunicationLogs(groupClassId: string): Promise<GroupClassCommunicationLogEntryReturnType[]> {
+    const communications = await GroupClassRepository.getCommunications(groupClassId);
+    return communications.map(c => ({
       id: c.id,
       type: c.type,
       title: c.title,
@@ -89,12 +85,13 @@ export namespace GroupClassService {
       isDelivered: c.isDelivered,
       timestamp: c.timestamp ? c.timestamp.toISOString() : null,
     }));
+  }
 
+  async function buildMeetingInfo(classInstanceId: string): Promise<GroupClassOnlineMeetingInfoReturnType> {
     const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId);
     const joinUrl = effectiveMeeting.joinUrl;
     const providerSlug = effectiveMeeting.providerSlug;
-
-    const meetingInfo: GroupClassOnlineMeetingInfoReturnType = {
+    return {
       platform: providerSlug ?? "unknown",
       meetingId:
         effectiveMeeting.meetingId ?? (joinUrl && providerSlug ? extractMeetingId(providerSlug, joinUrl) : null),
@@ -103,26 +100,41 @@ export namespace GroupClassService {
       providerName: effectiveMeeting.providerName,
       source: effectiveMeeting.source,
     };
+  }
+
+  export async function getGroupClassAudit(
+    userId: string,
+    classInstanceId: string,
+    locale?: string
+  ): Promise<GroupClassAuditReturnType> {
+    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, locale);
+
+    const groupClass = await getGroupClassOrThrow(classInstanceId, locale);
+    const classInstance = await getClassInstanceOrThrow(classInstanceId, locale);
+
+    const [students, communicationLogs, meetingInfo] = await Promise.all([
+      fetchStudents(groupClass.id),
+      fetchCommunicationLogs(groupClass.id),
+      buildMeetingInfo(classInstanceId),
+    ]);
 
     const adminNote: GroupClassAdminNoteReturnType = {
       content: classInstance.adminNotes ?? "",
       lastUpdated: classInstance.updatedAt.toISOString(),
     };
 
-    const originalDate = groupClass.originalDate ? groupClass.originalDate.toISOString() : null;
-    const rescheduledDate = groupClass.rescheduledDate ? groupClass.rescheduledDate.toISOString() : null;
-
     return {
       id: groupClass.id,
       className: groupClass.courseName,
       courseCode: classInstance.classType,
       teacherName: groupClass.teacherName,
-      originalDate,
-      rescheduledDate,
+      originalDate: groupClass.originalDate?.toISOString() ?? null,
+      rescheduledDate: groupClass.rescheduledDate?.toISOString() ?? null,
       timeSlot: groupClass.timeSlot,
       venue: "Online",
       status: resolveGroupClassStatus(classInstance.executionState),
       outcome: parseClassOutcome(classInstance.outcome) ?? ClassOutcome.PENDING,
+      isFrozen: classInstance.isFrozen,
       auditRemark: groupClass.auditRemark ?? null,
       auditLoggedAt: groupClass.auditLoggedAt.toISOString(),
       registeredStudentCount: students.length,

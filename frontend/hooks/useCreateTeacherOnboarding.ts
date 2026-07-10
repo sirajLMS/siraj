@@ -22,74 +22,84 @@ export function useCreateTeacherOnboarding() {
   const client = useApolloClient();
   const { cache } = client;
 
+  const buildTeacherInput = (formData: TeacherOnboardingFormData): TeacherOnboardingInput => {
+    const details: PaymentMethodDetailsInput = formDetailsToInput(formData.payoutMethod.details);
+    return {
+      name: formData.name,
+      email: formData.email,
+      password: "",
+      nationality: formData.nationality || null,
+      nationalId: formData.nationalId,
+      phone: formData.phone,
+      dateOfBirth: formData.dateOfBirth || null,
+      gender: formData.gender,
+      address: formData.address || null,
+      qualifications: formData.qualifications || null,
+      countryCode: formData.countryCode,
+      timezone: toGraphqlIanaTimezone(formData.timezone),
+      hourlyRate: formData.hourlyRate,
+      rateCurrency: formData.rateCurrency,
+      initialPayoutMethod: {
+        type: formData.payoutMethod.type,
+        direction: PaymentDirection.Payout,
+        isDefault: true,
+        label: formData.payoutMethod.label?.trim() || null,
+        details,
+      },
+    };
+  };
+
+  const createMeetingConfig = async (formData: TeacherOnboardingFormData, userId: string): Promise<void> => {
+    if (!formData.meetingProvider?.id || !formData.meetingUrl?.trim()) return;
+    try {
+      await client.mutate({
+        mutation: createUserMeetingConfigMutationDocument,
+        variables: {
+          input: {
+            userId,
+            providerId: formData.meetingProvider.id,
+            label: formData.meetingLabel?.trim() || null,
+            isDefault: true,
+            password: null,
+            details: {
+              meetingUrl: formData.meetingUrl.trim(),
+              username: null,
+              tenantId: null,
+            },
+          },
+        },
+      });
+    } catch (meetingErr) {
+      logger.warn("Teacher created but meeting config failed", { meetingErr });
+      setMeetingConfigWarning(true);
+    }
+  };
+
+  const handleTeacherCreated = (created: TeacherOnboardingCreateResult): void => {
+    cache.evict({ id: "ROOT_QUERY", fieldName: "teacherDirectory" });
+    cache.gc();
+    useTeacherOnboardingStore.setState({ result: created, isSubmitting: false });
+  };
+
   const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboardingCreateResult> => {
     useTeacherOnboardingStore.getState().reset();
     useTeacherOnboardingStore.setState({ isSubmitting: true });
     setMeetingConfigWarning(false);
 
     try {
-      const details: PaymentMethodDetailsInput = formDetailsToInput(formData.payoutMethod.details);
-
-      const input: TeacherOnboardingInput = {
-        name: formData.name,
-        email: formData.email,
-        password: "",
-        nationality: formData.nationality || null,
-        nationalId: formData.nationalId,
-        phone: formData.phone,
-        dateOfBirth: formData.dateOfBirth || null,
-        gender: formData.gender,
-        address: formData.address || null,
-        qualifications: formData.qualifications || null,
-        countryCode: formData.countryCode,
-        timezone: toGraphqlIanaTimezone(formData.timezone),
-        hourlyRate: formData.hourlyRate,
-        rateCurrency: formData.rateCurrency,
-        initialPayoutMethod: {
-          type: formData.payoutMethod.type,
-          direction: PaymentDirection.Payout,
-          isDefault: true,
-          label: formData.payoutMethod.label?.trim() || null,
-          details,
-        },
-      };
-
+      const input = buildTeacherInput(formData);
       const result = await mutate({ variables: { input } });
 
-      if (result.data?.createTeacher) {
-        const created = result.data.createTeacher;
-        if (formData.meetingProvider?.id && formData.meetingUrl?.trim() && created.userId) {
-          try {
-            await client.mutate({
-              mutation: createUserMeetingConfigMutationDocument,
-              variables: {
-                input: {
-                  userId: created.userId,
-                  providerId: formData.meetingProvider.id,
-                  label: formData.meetingLabel?.trim() || null,
-                  isDefault: true,
-                  password: null,
-                  details: {
-                    meetingUrl: formData.meetingUrl.trim(),
-                    username: null,
-                    tenantId: null,
-                  },
-                },
-              },
-            });
-          } catch (meetingErr) {
-            logger.warn("Teacher created but meeting config failed", { meetingErr });
-            setMeetingConfigWarning(true);
-          }
-        }
-
-        cache.evict({ id: "ROOT_QUERY", fieldName: "teacherDirectory" });
-        cache.gc();
-        useTeacherOnboardingStore.setState({ result: created, isSubmitting: false });
-        return created;
+      if (!result.data?.createTeacher) {
+        throw new Error("Mutation returned no data");
       }
 
-      throw new Error("Mutation returned no data");
+      const created = result.data.createTeacher;
+      if (created.userId) {
+        await createMeetingConfig(formData, created.userId);
+      }
+      handleTeacherCreated(created);
+      return created;
     } catch (err) {
       logger.error("Teacher creation failed:", { err });
       useTeacherOnboardingStore.setState({

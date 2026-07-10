@@ -15,9 +15,78 @@ import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDo
 import { studentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-profile.documents";
 import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-status.documents";
 import { logger } from "@/frontend/utils/logger";
+import type { StudentProfileQueryData } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 import { StudentStatusView } from "@/frontend/views/dashboard/students/status/StudentStatusView";
 import type { StudentStatusPageData, UpcomingClassDisplay } from "@/frontend/views/dashboard/students/status/types";
+
+type UpcomingClassInput = {
+  readonly id?: string | null;
+  readonly instructor?: string | null;
+  readonly teacherId?: string | null;
+  readonly scheduledStartAt?: string | null;
+  readonly scheduledEndAt?: string | null;
+  readonly durationMinutes?: number | null;
+  readonly executionState?: string | null;
+  readonly outcome?: string | null;
+  readonly isFrozen?: boolean | null;
+  readonly meetingJoinUrl?: string | null;
+  readonly effectiveMeeting?: UpcomingClassDisplay["effectiveMeeting"];
+};
+
+function mapUpcomingClasses(classes: readonly UpcomingClassInput[] | null | undefined): UpcomingClassDisplay[] {
+  return (classes ?? []).map(cls => ({
+    id: cls?.id ?? "",
+    instructor: cls?.instructor ?? "",
+    teacherId: cls?.teacherId ?? null,
+    scheduledStartAt: cls?.scheduledStartAt ?? "",
+    scheduledEndAt: cls?.scheduledEndAt ?? "",
+    durationMinutes: cls?.durationMinutes ?? 0,
+    executionState: cls?.executionState ?? GqlClassExecutionState.NotActivated,
+    outcome: cls?.outcome ?? null,
+    isFrozen: cls?.isFrozen ?? false,
+    meetingJoinUrl: cls?.meetingJoinUrl,
+    effectiveMeeting: cls?.effectiveMeeting,
+  }));
+}
+
+function _buildStudentFromProfile(profile: StudentProfileQueryData): StudentStatusPageData {
+  return {
+    id: profile.id,
+    name: profile.name ?? "",
+    status: profile.upcomingClasses?.status ?? profile.status ?? StudentStatus.Regular,
+    avatarUrl: profile.avatarUrl ?? null,
+    primaryTeacherId: profile.primaryTeacherId ?? null,
+    teacherName: profile.teacherName ?? null,
+    parentUserId: profile.parentUserId ?? null,
+    hoursPerWeek: profile.hoursPerWeek != null ? String(profile.hoursPerWeek) : null,
+    classesRemaining: profile.classesRemaining ?? 0,
+    classesTotal: profile.classesTotal ?? 0,
+    version: profile.version ?? null,
+    upcomingClasses: mapUpcomingClasses(profile.upcomingClasses?.classes),
+  };
+}
+
+function _buildStudentFromQuery(
+  student: NonNullable<typeof studentData>["studentById"],
+  upcoming: (typeof upcomingData)["studentUpcomingClasses"]
+): StudentStatusPageData {
+  const s = student;
+  const uc = upcoming;
+  return {
+    id: s.id,
+    name: s.name,
+    status: uc?.status ?? s.status ?? StudentStatus.Regular,
+    avatarUrl: null,
+    primaryTeacherId: s.primaryTeacherId ?? null,
+    teacherName: s.teacherName ?? null,
+    hoursPerWeek: s.hoursPerWeek ?? null,
+    classesRemaining: s.classesRemaining ?? 0,
+    classesTotal: s.classesTotal ?? 0,
+    version: s.version ?? null,
+    upcomingClasses: mapUpcomingClasses(uc?.classes),
+  };
+}
 
 export function StudentStatusContainer() {
   const t = useTranslations("dashboard.studentStatus");

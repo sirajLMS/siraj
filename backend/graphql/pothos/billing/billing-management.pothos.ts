@@ -14,12 +14,38 @@ import {
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
 import type {
+  DeleteInvoiceResult,
   DeleteInvoiceReturnType,
   InvoicePaymentSubmissionReturnType,
   ManualInvoiceResult,
+  MarkInvoicePaidResult,
   MarkInvoicePaidReturnType,
   SendPaymentReminderResult,
 } from "@/backend/types";
+
+// ─── Result Flattening Helpers ──────────────────────────────────────────────
+// Services return nested { invoice: {...}, notificationSummaryUpdated } shapes.
+// GraphQL objects expose flat top-level fields, so these helpers perform the mapping.
+
+function _flattenMarkInvoicePaidResult(result: MarkInvoicePaidResult): MarkInvoicePaidReturnType {
+  return {
+    id: result.invoice.id,
+    parentId: result.invoice.parentId,
+    status: result.invoice.status,
+    paidDate: result.invoice.paidDate,
+    version: result.invoice.version,
+    notificationSummaryUpdated: result.notificationSummaryUpdated,
+  };
+}
+
+function _flattenDeleteInvoiceResult(result: DeleteInvoiceResult): DeleteInvoiceReturnType {
+  return {
+    id: result.invoice.id,
+    parentId: result.invoice.parentId,
+    version: result.invoice.version,
+    notificationSummaryUpdated: result.notificationSummaryUpdated,
+  };
+}
 
 // ─── ManualInvoiceResult Object ──────────────────────────────────────────────
 

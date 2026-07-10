@@ -25,6 +25,27 @@ async function toParentProfileResult(profile: ParentProfileRepoResult): Promise<
   return profile;
 }
 
+async function requirePermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
+  const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
+  if (!hasPermission) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("insufficientPermissions"));
+  }
+}
+
+async function requireEntityExists<T>(
+  entity: T | null | undefined,
+  locale: string | undefined,
+  errorKey: string,
+  errorParams: Record<string, unknown>
+): Promise<T> {
+  if (!entity) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc(errorKey, errorParams));
+  }
+  return entity;
+}
+
 export namespace ParentProfileService {
   /**
    * Retrieves the full profile for a specific parent.
@@ -35,17 +56,10 @@ export namespace ParentProfileService {
     parentId: string,
     locale?: string
   ): Promise<ParentProfileResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_PROFILE);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await requirePermission(actorUserId, AppPermission.PARENT_VIEW_PROFILE, locale);
 
     const profile = await ParentRepository.getParentProfile(parentId);
-    if (!profile) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound", { id: parentId }));
-    }
+    await requireEntityExists(profile, locale, "parentNotFound", { id: parentId });
 
     return toParentProfileResult(profile);
   }
@@ -59,11 +73,7 @@ export namespace ParentProfileService {
     parentId: string,
     locale?: string
   ): Promise<AssociatedStudentResult[]> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await requirePermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED, locale);
 
     const students = await ParentRepository.getAssociatedStudents(parentId);
     return students.map(student => ({
@@ -81,17 +91,10 @@ export namespace ParentProfileService {
     studentId: string,
     locale?: string
   ): Promise<AssociatedStudentResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await requirePermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED, locale);
 
     const student = await ParentRepository.getAssociatedStudentById(studentId);
-    if (!student) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("studentNotFound", { id: studentId }));
-    }
+    await requireEntityExists(student, locale, "studentNotFound", { id: studentId });
 
     return {
       ...student,
@@ -109,11 +112,7 @@ export namespace ParentProfileService {
     parentId: string,
     locale?: string
   ): Promise<DeactivateParentResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_MANAGE_STATUS);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await requirePermission(actorUserId, AppPermission.PARENT_MANAGE_STATUS, locale);
 
     const result = await ParentRepository.deactivateParent(parentId, undefined, locale);
 
@@ -146,11 +145,7 @@ export namespace ParentProfileService {
     parentId: string,
     locale?: string
   ): Promise<ReactivateParentResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_MANAGE_STATUS);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await requirePermission(actorUserId, AppPermission.PARENT_MANAGE_STATUS, locale);
 
     const result = await ParentRepository.reactivateParent(parentId, undefined, locale);
 
@@ -171,11 +166,7 @@ export namespace ParentProfileService {
     input: ParentOwnProfileUpdateInput,
     locale?: string
   ): Promise<ParentProfileResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_EDIT_OWN_PROFILE);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await requirePermission(actorUserId, AppPermission.PARENT_EDIT_OWN_PROFILE, locale);
 
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (parent?.id !== parentId) {
@@ -202,27 +193,25 @@ export namespace ParentProfileService {
     input: ParentProfileUpdateInput,
     locale?: string
   ): Promise<ParentProfileResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENTS_EDIT);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await requirePermission(actorUserId, AppPermission.PARENTS_EDIT, locale);
 
     const { timezone, phone, ...repoInput } = input;
     if (phone !== undefined) {
-      const existing = await ParentRepository.getParentProfile(parentId);
-      if (!existing) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("parentNotFound", { id: parentId }));
-      }
+      const existing = await requireEntityExists(
+        await ParentRepository.getParentProfile(parentId),
+        locale,
+        "parentNotFound",
+        { id: parentId }
+      );
       await UserRepository.updateProfileFields(existing.userId, { phone }, locale);
     }
     if (timezone != null) {
-      const existing = await ParentRepository.getParentProfile(parentId);
-      if (!existing) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("parentNotFound", { id: parentId }));
-      }
+      const existing = await requireEntityExists(
+        await ParentRepository.getParentProfile(parentId),
+        locale,
+        "parentNotFound",
+        { id: parentId }
+      );
       await UserRepository.updateTimezone(existing.userId, timezone, undefined, locale);
     }
 

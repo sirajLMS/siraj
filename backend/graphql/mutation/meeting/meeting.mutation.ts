@@ -91,6 +91,26 @@ function normalizeConfigUpdateInput(input: {
   };
 }
 
+function _extractCommonMeetingConfigFields(input: {
+  readonly providerId: string;
+  readonly label: string;
+  readonly isDefault: boolean;
+  readonly password: string;
+  readonly details: {
+    readonly meetingUrl: string;
+    readonly username?: string | null;
+    readonly tenantId?: string | null;
+  };
+}) {
+  return {
+    providerId: input.providerId,
+    label: input.label,
+    isDefault: input.isDefault,
+    password: input.password,
+    details: normalizeMeetingConfigDetails(input.details),
+  };
+}
+
 gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
   t.field({
     type: MeetingProviderPothosObject,
@@ -167,11 +187,7 @@ gqlSchemaBuilder.mutationField("createUserMeetingConfig", t =>
         actorUserId,
         {
           userId: args.input.userId,
-          providerId: args.input.providerId,
-          label: args.input.label,
-          isDefault: args.input.isDefault,
-          password: args.input.password,
-          details: normalizeMeetingConfigDetails(args.input.details),
+          ...extractCommonMeetingConfigFields(args.input),
         },
         ctx.locale
       );
@@ -242,11 +258,7 @@ gqlSchemaBuilder.mutationField("createClassMeetingConfig", t =>
         {
           classInstanceId: args.input.classInstanceId,
           recurringScheduleId: args.input.recurringScheduleId,
-          providerId: args.input.providerId,
-          label: args.input.label,
-          isDefault: args.input.isDefault,
-          password: args.input.password,
-          details: normalizeMeetingConfigDetails(args.input.details),
+          ...extractCommonMeetingConfigFields(args.input),
         },
         ctx.locale
       );

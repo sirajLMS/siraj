@@ -68,8 +68,8 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(result.createManager.assignedGroupSlug).toBe("staff_default");
   });
 
-  test("Admin denied creating manager", async () => {
-    const token = await loginDemoUser("academy_admin");
+  const assertManagerCreationDeniedForRole = async (role: string) => {
+    const token = await loginDemoUser(role);
     const { testClient } = await import("@/frontend/graphql/test/testClient");
     const result = await testClient.mutate({
       mutation: createManagerMutationDocument,
@@ -78,18 +78,14 @@ describe("Manager Onboarding GraphQL API", () => {
       errorPolicy: "all",
     });
     expect(result.error).toBeDefined();
+  };
+
+  test("Admin denied creating manager", async () => {
+    await assertManagerCreationDeniedForRole("academy_admin");
   });
 
   test("Teacher denied creating manager", async () => {
-    const token = await loginDemoUser("teacher_default");
-    const { testClient } = await import("@/frontend/graphql/test/testClient");
-    const result = await testClient.mutate({
-      mutation: createManagerMutationDocument,
-      variables: { input: createMinimalManagerInput() },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-      errorPolicy: "all",
-    });
-    expect(result.error).toBeDefined();
+    await assertManagerCreationDeniedForRole("teacher_default");
   });
 
   test("Unauthenticated denied creating manager", async () => {

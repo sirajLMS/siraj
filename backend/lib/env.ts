@@ -254,6 +254,66 @@ function validateRequiredAppSecret(name: string): string {
 }
 
 /**
+ * Build the EnvironmentConfig object from validated env vars and process.env passthroughs.
+ */
+function buildEnvironmentConfig(
+  nodeEnv: string,
+  cacheProvider: "redis" | "postgres",
+  redisConfig: {
+    redisProvider: "local" | "upstash";
+    redisUrl: string;
+    upstashRedisUrl?: string;
+    upstashRedisToken?: string;
+  }
+): EnvironmentConfig {
+  return {
+    nodeEnv,
+    jwtSecret: validateJwtSecret(),
+    databaseUrl: validateDatabaseUrl(),
+    cacheProvider,
+    ...redisConfig,
+    allowedOrigin: process.env.ALLOWED_ORIGIN,
+    databaseEncryptionKey: validateRequiredAppSecret("DATABASE_ENCRYPTION_KEY"),
+    adminEmail: validateRequiredAppSecret("ADMIN_EMAIL"),
+    adminPassword: validateRequiredAppSecret("ADMIN_PASSWORD"),
+    storageProvider: validateRequiredAppSecret("STORAGE_PROVIDER"),
+    gcpProjectId: process.env.GCP_PROJECT_ID,
+    gcpSecretId: process.env.GCP_SECRET_ID,
+    gcpSecretVersion: process.env.GCP_SECRET_VERSION,
+    gcpCredentialsJson: process.env.GCP_CREDENTIALS_JSON,
+    twilioAccountSid: process.env.TWILIO_ACCOUNT_SID,
+    twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
+    twilioFromNumber: process.env.TWILIO_FROM_NUMBER,
+    resendApiKey: process.env.RESEND_API_KEY,
+    resendFromEmail: process.env.RESEND_FROM_EMAIL,
+    firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
+    firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY,
+    firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN,
+    smsProvider: process.env.SMS_PROVIDER,
+    emailProvider: process.env.EMAIL_PROVIDER,
+    pushProvider: process.env.PUSH_PROVIDER,
+    fxProvider: process.env.FX_PROVIDER,
+    openexchangeratesAppId: process.env.OPENEXCHANGERATES_APP_ID,
+    fixerApiKey: process.env.FIXER_API_KEY,
+    cronSecret:
+      process.env.NODE_ENV === "production"
+        ? validateRequiredAppSecret("CRON_SECRET")
+        : (process.env.CRON_SECRET ?? ""),
+    signedUrlCleanupStrategy: process.env.SIGNED_URL_CLEANUP_STRATEGY,
+    localStoragePath: process.env.LOCAL_STORAGE_PATH,
+    nextPublicBaseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+    disableRateLimiting: getBooleanEnv("DISABLE_RATE_LIMITING"),
+    isDemo: getBooleanEnv("IS_DEMO"),
+    nextPublicIsDemo: getBooleanEnv("NEXT_PUBLIC_IS_DEMO"),
+    dbConnectionMode: process.env.DB_CONNECTION_MODE,
+    dbProvider: process.env.DB_PROVIDER,
+    cleanupEnabled: getBooleanEnv("CLEANUP_ENABLED"),
+    devOrigin: process.env.DEV_ORIGIN,
+  };
+}
+
+/**
  * Main validation function
  */
 export function validateEnvironment(): EnvironmentConfig {
@@ -274,51 +334,7 @@ export function validateEnvironment(): EnvironmentConfig {
 
     validateNoPlaceholderSecrets();
 
-    const config: EnvironmentConfig = {
-      nodeEnv,
-      jwtSecret: validateJwtSecret(),
-      databaseUrl: validateDatabaseUrl(),
-      cacheProvider,
-      ...redisConfig,
-      allowedOrigin: process.env.ALLOWED_ORIGIN,
-      databaseEncryptionKey: validateRequiredAppSecret("DATABASE_ENCRYPTION_KEY"),
-      adminEmail: validateRequiredAppSecret("ADMIN_EMAIL"),
-      adminPassword: validateRequiredAppSecret("ADMIN_PASSWORD"),
-      storageProvider: validateRequiredAppSecret("STORAGE_PROVIDER"),
-      gcpProjectId: process.env.GCP_PROJECT_ID,
-      gcpSecretId: process.env.GCP_SECRET_ID,
-      gcpSecretVersion: process.env.GCP_SECRET_VERSION,
-      gcpCredentialsJson: process.env.GCP_CREDENTIALS_JSON,
-      twilioAccountSid: process.env.TWILIO_ACCOUNT_SID,
-      twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
-      twilioFromNumber: process.env.TWILIO_FROM_NUMBER,
-      resendApiKey: process.env.RESEND_API_KEY,
-      resendFromEmail: process.env.RESEND_FROM_EMAIL,
-      firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
-      firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY,
-      firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN,
-      smsProvider: process.env.SMS_PROVIDER,
-      emailProvider: process.env.EMAIL_PROVIDER,
-      pushProvider: process.env.PUSH_PROVIDER,
-      fxProvider: process.env.FX_PROVIDER,
-      openexchangeratesAppId: process.env.OPENEXCHANGERATES_APP_ID,
-      fixerApiKey: process.env.FIXER_API_KEY,
-      cronSecret:
-        process.env.NODE_ENV === "production"
-          ? validateRequiredAppSecret("CRON_SECRET")
-          : (process.env.CRON_SECRET ?? ""),
-      signedUrlCleanupStrategy: process.env.SIGNED_URL_CLEANUP_STRATEGY,
-      localStoragePath: process.env.LOCAL_STORAGE_PATH,
-      nextPublicBaseUrl: process.env.NEXT_PUBLIC_BASE_URL,
-      disableRateLimiting: getBooleanEnv("DISABLE_RATE_LIMITING"),
-      isDemo: getBooleanEnv("IS_DEMO"),
-      nextPublicIsDemo: getBooleanEnv("NEXT_PUBLIC_IS_DEMO"),
-      dbConnectionMode: process.env.DB_CONNECTION_MODE,
-      dbProvider: process.env.DB_PROVIDER,
-      cleanupEnabled: getBooleanEnv("CLEANUP_ENABLED"),
-      devOrigin: process.env.DEV_ORIGIN,
-    };
+    const config = buildEnvironmentConfig(nodeEnv, cacheProvider, redisConfig);
 
     if (process.env.NODE_ENV === "production" && !config.allowedOrigin) {
       logger.warn("⚠️  ALLOWED_ORIGIN not set in production.");

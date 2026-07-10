@@ -15,7 +15,6 @@ import {
   StaffProfileService,
   TeacherPortalService,
 } from "@/backend/services";
-import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import {
   canEditProfileFieldGroup,
@@ -32,7 +31,6 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
-import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
@@ -404,6 +402,43 @@ export namespace ProfileService {
     return context;
   }
 
+  async function safeLoadMeetingConfigs(
+    actorUserId: string,
+    targetUserId: string,
+    locale?: string
+  ): Promise<UserMeetingConfigReturnType[] | null> {
+    try {
+      return await MeetingConfigService.listUserMeetingConfigs(actorUserId, targetUserId, locale);
+    } catch {
+      return null;
+    }
+  }
+
+  async function buildProfileFilterContext(
+    actorUserId: string,
+    targetUserId: string,
+    scope: ProfileScope,
+    audience: ProfileAudience
+  ): Promise<FieldFilterContext> {
+    const permissionContext = await PermissionsService.getUserContext(actorUserId);
+    return {
+      actorUserId,
+      targetUserId,
+      scope,
+      audience,
+      permissions: new Set(permissionContext.permissions),
+    };
+  }
+
+  async function resolveUserOrThrow(targetUserId: string, locale?: string) {
+    const user = await UserRepository.findSafeById(targetUserId);
+    if (!user) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("userNotFound", { id: targetUserId }));
+    }
+    return user;
+  }
+
   export async function getProfileByUserId(
     actorUserId: string,
     targetUserId: string,
@@ -419,11 +454,7 @@ export namespace ProfileService {
 
     await assertCanViewProfile(actorUserId, targetUserId, scope, roleIds.audience, locale);
 
-    const user = await UserRepository.findSafeById(targetUserId);
-    if (!user) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("userNotFound", { id: targetUserId }));
-    }
+    const user = await resolveUserOrThrow(targetUserId, locale);
 
     const {
       teacherOwnProfile,
@@ -437,29 +468,18 @@ export namespace ProfileService {
       assignedStudents,
     } = await loadRoleProfiles(actorUserId, targetUserId, scope, roleIds, locale);
 
-    let meetingConfigs: UserMeetingConfigReturnType[] | null = null;
-    try {
-      meetingConfigs = await MeetingConfigService.listUserMeetingConfigs(actorUserId, targetUserId, locale);
-    } catch {
-      meetingConfigs = null;
-    }
+    const meetingConfigs = await safeLoadMeetingConfigs(actorUserId, targetUserId, locale);
 
-    const paymentMethods = await PaymentMethodService.listForProfile(actorUserId, targetUserId, scope, locale);
+    const [paymentMethods, filterCtx] = await Promise.all([
+      PaymentMethodService.listForProfile(actorUserId, targetUserId, scope, locale),
+      buildProfileFilterContext(actorUserId, targetUserId, scope, roleIds.audience),
+    ]);
     const paymentMethodDefaults = await PaymentMethodService.getDefaultsForProfile(
       actorUserId,
       targetUserId,
       scope,
       locale
     );
-
-    const permissionContext = await PermissionsService.getUserContext(actorUserId);
-    const filterCtx: FieldFilterContext = {
-      actorUserId,
-      targetUserId,
-      scope,
-      audience: roleIds.audience,
-      permissions: new Set(permissionContext.permissions),
-    };
 
     return filterProfileByFieldGroups(
       {

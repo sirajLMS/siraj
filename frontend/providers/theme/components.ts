@@ -279,6 +279,94 @@ const getMuiDataGrid = (): Components<Omit<Theme, "components">>["MuiDataGrid"] 
   },
 });
 
+type SwitchGeo = typeof MD3_SWITCH | typeof MD3_SWITCH.small;
+
+/** SwitchBase interaction states: hover, focus, active, checked, disabled. */
+const getSwitchBaseStyles = (theme: Theme, geo: SwitchGeo, main: string, onColor: string): Record<string, unknown> => ({
+  padding: 0,
+  margin: geo.unselectedMargin,
+  color: theme.palette.outline,
+  transition: theme.transitions.create(["transform", "margin", "color"], {
+    duration: theme.transitions.duration.shortest,
+  }),
+  "&:hover": {
+    backgroundColor: theme.alpha(theme.palette.onSurface, theme.palette.action.hoverOpacity),
+    "@media (hover: none)": {
+      backgroundColor: "transparent",
+    },
+  },
+  "&.Mui-focusVisible": {
+    backgroundColor: theme.alpha(theme.palette.onSurface, theme.palette.action.focusOpacity),
+  },
+  "&:active .MuiSwitch-thumb": {
+    width: geo.pressedThumb,
+    height: geo.pressedThumb,
+  },
+  "&.Mui-checked": {
+    transform: `translateX(${geo.checkedTranslateX}px)`,
+    margin: geo.selectedMargin,
+    color: onColor,
+    "&:hover": {
+      backgroundColor: theme.alpha(main, theme.palette.action.hoverOpacity),
+      "@media (hover: none)": {
+        backgroundColor: "transparent",
+      },
+    },
+    "&.Mui-focusVisible": {
+      backgroundColor: theme.alpha(main, theme.palette.action.focusOpacity),
+    },
+    "& .MuiSwitch-thumb": {
+      width: geo.selectedThumb,
+      height: geo.selectedThumb,
+    },
+    "& + .MuiSwitch-track": {
+      opacity: 1,
+      backgroundColor: main,
+      borderColor: main,
+    },
+  },
+  "&.Mui-checked.Mui-disabled": {
+    color: theme.palette.surface,
+    "& .MuiSwitch-thumb": {
+      opacity: 1,
+    },
+    "& + .MuiSwitch-track": {
+      opacity: 0.12,
+      backgroundColor: theme.palette.onSurface,
+      borderColor: theme.palette.onSurface,
+    },
+  },
+  "&.Mui-disabled": {
+    color: theme.palette.onSurface,
+    "& .MuiSwitch-thumb": {
+      opacity: 0.38,
+    },
+    "& + .MuiSwitch-track": {
+      opacity: 0.12,
+      backgroundColor: theme.palette.surfaceContainerHighest,
+      borderColor: theme.palette.onSurface,
+    },
+  },
+});
+
+/** Thumb element geometry and transition for unselected state. */
+const getSwitchThumbStyles = (geo: SwitchGeo): Record<string, unknown> => ({
+  width: geo.unselectedThumb,
+  height: geo.unselectedThumb,
+  boxShadow: "none",
+  border: "none",
+  transition: "width 100ms ease, height 100ms ease",
+});
+
+/** Track element base appearance: outlined outline when off. */
+const getSwitchTrackStyles = (theme: Theme, geo: SwitchGeo): Record<string, unknown> => ({
+  borderRadius: geo.trackHeight / 2,
+  opacity: 1,
+  backgroundColor: theme.palette.surfaceContainerHighest,
+  border: `${MD3_SWITCH.trackOutlineWidth}px solid ${theme.palette.outline}`,
+  boxSizing: "border-box",
+});
+
 /**
  * Restyles MUI's MD2 Switch to Material Design 3 geometry and color roles.
  *
@@ -295,8 +383,7 @@ const getMuiSwitch = (): Components<Omit<Theme, "components">>["MuiSwitch"] => (
     // Color/state rules live on `root` so nested selectors beat MUI's
     // per-color SwitchBase variants (which still paint MD2 `*.main` thumbs).
     root: ({ theme, ownerState }) => {
-      const isSmall = ownerState.size === "small";
-      const geo = isSmall ? MD3_SWITCH.small : MD3_SWITCH;
+      const geo = ownerState.size === "small" ? MD3_SWITCH.small : MD3_SWITCH;
       const main = getSwitchMainColor(theme, ownerState.color);
       const onColor = getSwitchOnColor(theme, ownerState.color);
 
@@ -305,86 +392,9 @@ const getMuiSwitch = (): Components<Omit<Theme, "components">>["MuiSwitch"] => (
         height: geo.trackHeight,
         padding: 0,
         overflow: "hidden",
-        "& .MuiSwitch-switchBase": {
-          padding: 0,
-          margin: geo.unselectedMargin,
-          color: theme.palette.outline,
-          transition: theme.transitions.create(["transform", "margin", "color"], {
-            duration: theme.transitions.duration.shortest,
-          }),
-          "&:hover": {
-            backgroundColor: theme.alpha(theme.palette.onSurface, theme.palette.action.hoverOpacity),
-            "@media (hover: none)": {
-              backgroundColor: "transparent",
-            },
-          },
-          "&.Mui-focusVisible": {
-            backgroundColor: theme.alpha(theme.palette.onSurface, theme.palette.action.focusOpacity),
-          },
-          "&:active .MuiSwitch-thumb": {
-            width: geo.pressedThumb,
-            height: geo.pressedThumb,
-          },
-          "&.Mui-checked": {
-            transform: `translateX(${geo.checkedTranslateX}px)`,
-            margin: geo.selectedMargin,
-            color: onColor,
-            "&:hover": {
-              backgroundColor: theme.alpha(main, theme.palette.action.hoverOpacity),
-              "@media (hover: none)": {
-                backgroundColor: "transparent",
-              },
-            },
-            "&.Mui-focusVisible": {
-              backgroundColor: theme.alpha(main, theme.palette.action.focusOpacity),
-            },
-            "& .MuiSwitch-thumb": {
-              width: geo.selectedThumb,
-              height: geo.selectedThumb,
-            },
-            "& + .MuiSwitch-track": {
-              opacity: 1,
-              backgroundColor: main,
-              borderColor: main,
-            },
-          },
-          "&.Mui-checked.Mui-disabled": {
-            color: theme.palette.surface,
-            "& .MuiSwitch-thumb": {
-              opacity: 1,
-            },
-            "& + .MuiSwitch-track": {
-              opacity: 0.12,
-              backgroundColor: theme.palette.onSurface,
-              borderColor: theme.palette.onSurface,
-            },
-          },
-          "&.Mui-disabled": {
-            color: theme.palette.onSurface,
-            "& .MuiSwitch-thumb": {
-              opacity: 0.38,
-            },
-            "& + .MuiSwitch-track": {
-              opacity: 0.12,
-              backgroundColor: theme.palette.surfaceContainerHighest,
-              borderColor: theme.palette.onSurface,
-            },
-          },
-        },
-        "& .MuiSwitch-thumb": {
-          width: geo.unselectedThumb,
-          height: geo.unselectedThumb,
-          boxShadow: "none",
-          border: "none",
-          transition: "width 100ms ease, height 100ms ease",
-        },
-        "& .MuiSwitch-track": {
-          borderRadius: geo.trackHeight / 2,
-          opacity: 1,
-          backgroundColor: theme.palette.surfaceContainerHighest,
-          border: `${MD3_SWITCH.trackOutlineWidth}px solid ${theme.palette.outline}`,
-          boxSizing: "border-box",
-        },
+        "& .MuiSwitch-switchBase": getSwitchBaseStyles(theme, geo, main, onColor),
+        "& .MuiSwitch-thumb": getSwitchThumbStyles(geo),
+        "& .MuiSwitch-track": getSwitchTrackStyles(theme, geo),
       };
     },
   },

@@ -28,6 +28,148 @@ import { ProviderSettingsSection } from "@/frontend/views/dashboard/admin/billin
 import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 
+type SyncRun = {
+  readonly finishedAt?: string | null;
+  readonly startedAt?: string | null;
+  readonly provider?: string | null;
+  readonly pairsWritten?: number | string | null;
+  readonly pairsFailed?: number | string | null;
+  readonly status?: string | null;
+  readonly errorMessage?: string | null;
+};
+
+function _mapExchangeRatesToRows(
+  rates:
+    | readonly {
+        readonly id?: string | null;
+        readonly fromCurrency?: string | null;
+        readonly toCurrency?: string | null;
+        readonly rate?: string | null;
+        readonly source?: string | null;
+        readonly effectiveDate?: string | null;
+      }[]
+    | null
+    | undefined
+): ExchangeRateRow[] {
+  return (rates ?? [])
+    .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
+    .map(rate => ({
+      id: rate.id ?? "",
+      fromCurrency: parseCurrencyCode(rate.fromCurrency) ?? CurrencyCode.Usd,
+      toCurrency: parseCurrencyCode(rate.toCurrency) ?? CurrencyCode.Sar,
+      rate: rate.rate ?? "0",
+      source: rate.source ?? null,
+      effectiveDate: rate.effectiveDate ?? "",
+    }));
+}
+
+type FeedbackFn = (message: string, severity: "success" | "error") => void;
+
+function _ExchangeRatesViewContent({
+  labels,
+  rates,
+  ratesLoading,
+  ratesColumns,
+  availablePairs,
+  syncRun,
+  syncLoading,
+  refreshing,
+  showStaleWarning,
+  billingActionsDisabled,
+  onRefresh,
+  onRefreshManualOverride,
+  manualOverrideOpen,
+  onCloseManualOverride,
+  onSuccessManualOverride,
+  onErrorManualOverride,
+  showFeedback,
+}: Readonly<{
+  labels: ExchangeRatesLabels;
+  rates: ExchangeRateRow[];
+  ratesLoading: boolean;
+  ratesColumns: GridColDef<ExchangeRateRow>[];
+  availablePairs: { from: CurrencyCode; to: CurrencyCode }[];
+  syncRun: SyncRun | null;
+  syncLoading: boolean;
+  refreshing: boolean;
+  showStaleWarning: boolean;
+  billingActionsDisabled: boolean;
+  onRefresh: () => void;
+  onRefreshManualOverride: () => void;
+  manualOverrideOpen: boolean;
+  onCloseManualOverride: () => void;
+  onSuccessManualOverride: () => void;
+  onErrorManualOverride: (message: string) => void;
+  showFeedback: FeedbackFn;
+}>) {
+  return (
+    <PageContainer>
+      <BillingImpersonationNotice />
+      <PageHeader
+        title={labels.pageTitle}
+        subtitle={labels.pageSubtitle}
+        actions={
+          <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
+            <PrimaryPageAction onClick={onRefresh} disabled={refreshing || billingActionsDisabled}>
+              {refreshing ? labels.refreshing : labels.syncStatus.refresh}
+            </PrimaryPageAction>
+          </RequirePermission>
+        }
+      />
+
+      <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
+        {showStaleWarning ? (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {labels.staleWarning}
+          </Alert>
+        ) : null}
+
+        <SectionPanel title={labels.syncStatus.title}>
+          <ExchangeRatesSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
+        </SectionPanel>
+
+        <ProviderSettingsSection
+          labels={labels.providerSettings}
+          onFeedback={showFeedback}
+          actionsDisabled={billingActionsDisabled}
+        />
+
+        <SectionPanel title={labels.rateTable.title}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
+              <Button variant="outlined" onClick={onRefreshManualOverride} disabled={billingActionsDisabled}>
+                {labels.manualOverride.title}
+              </Button>
+            </RequirePermission>
+          </Box>
+          <AppDataGrid
+            rows={rates}
+            columns={ratesColumns}
+            loading={ratesLoading}
+            emptyMessage={labels.noRates}
+            autoHeight
+            disableColumnMenu
+          />
+        </SectionPanel>
+
+        <SectionPanel title={labels.history.title}>
+          <ExchangeRateHistorySection labels={labels} availablePairs={availablePairs} />
+        </SectionPanel>
+      </RequirePermission>
+
+      <ManualOverrideDialog
+        open={manualOverrideOpen && !billingActionsDisabled}
+        labels={labels.manualOverride}
+        onClose={onCloseManualOverride}
+        onSuccess={onSuccessManualOverride}
+        onError={onErrorManualOverride}
+      />
+
+      <SnackbarFeedback />
+    </PageContainer>
+  );
+}
+
 function SyncStatusBadge({
   status,
   labels,

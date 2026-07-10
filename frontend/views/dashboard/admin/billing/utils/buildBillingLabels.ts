@@ -149,14 +149,8 @@ function buildPaymentLabels(t: BillingTranslator) {
   };
 }
 
-export function buildBillingLabels(t: BillingTranslator): BillingLabels {
+function buildSuccessAndDialogLabels(t: BillingTranslator) {
   return {
-    ...buildPageLabels(t),
-    ...buildMetricLabels(t),
-    ...buildSectionAndSearchLabels(t),
-    ...buildTableLabels(t),
-    ...buildStatusLabels(t),
-    ...buildPaymentLabels(t),
     manual: buildManualInvoiceLabels((key: string) => {
       if (key === "createSuccess") return t.raw(`manual.${key}`) as string;
       return t(`manual.${key}`);
@@ -225,6 +219,11 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
       invalidId: t("errors.invalidId"),
       retry: t("errors.retry"),
     },
+  };
+}
+
+function buildFxAndCurrencyLabels(t: BillingTranslator) {
+  return {
     exchangeRates: t.raw("exchangeRates") as ExchangeRatesLabels,
     fxStaleBanner: {
       adminBody: t("fxStaleBanner.adminBody"),
@@ -247,5 +246,18 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     adminBillingFxNote: t("adminBillingFxNote"),
     currencyHedges: t.raw("currencyHedges") as CurrencyHedgesLabels,
     supportedCurrencies: t.raw("supportedCurrencies") as SupportedCurrenciesLabels,
+  };
+}
+
+export function buildBillingLabels(t: BillingTranslator): BillingLabels {
+  return {
+    ...buildPageLabels(t),
+    ...buildMetricLabels(t),
+    ...buildSectionAndSearchLabels(t),
+    ...buildTableLabels(t),
+    ...buildStatusLabels(t),
+    ...buildPaymentLabels(t),
+    ...buildSuccessAndDialogLabels(t),
+    ...buildFxAndCurrencyLabels(t),
   };
 }

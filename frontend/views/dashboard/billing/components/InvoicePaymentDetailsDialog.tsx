@@ -536,43 +536,37 @@ export function InvoicePaymentDetailsDialog({
 
   const fxMessages: FxMessages = buildFxDisplayMessages(tProfile, tErrors);
 
-  const handleApprove = async () => {
+  const executeReview = async (mutation: () => Promise<unknown>, action: "approve" | "reject") => {
     if (!invoiceId || billingActionsDisabled) {
       return;
     }
     setActionError(null);
     try {
-      await approveProof({ variables: { invoiceId, expectedVersion: null } });
+      await mutation();
       await refetchSubmission();
       await refetchPayments();
-      onSuccess?.("approve");
+      onSuccess?.(action);
       onClose();
     } catch (error) {
       setActionError(getErrorMessage(error));
     }
   };
 
-  const handleReject = async () => {
-    if (!invoiceId || billingActionsDisabled) {
-      return;
-    }
-    setActionError(null);
-    try {
-      await rejectProof({
-        variables: {
-          invoiceId,
-          rejectionReason: rejectionReason.trim() || null,
-          expectedVersion: null,
-        },
-      });
-      await refetchSubmission();
-      await refetchPayments();
-      onSuccess?.("reject");
-      onClose();
-    } catch (error) {
-      setActionError(getErrorMessage(error));
-    }
-  };
+  const handleApprove = () =>
+    executeReview(() => approveProof({ variables: { invoiceId, expectedVersion: null } }), "approve");
+
+  const handleReject = () =>
+    executeReview(
+      () =>
+        rejectProof({
+          variables: {
+            invoiceId,
+            rejectionReason: rejectionReason.trim() || null,
+            expectedVersion: null,
+          },
+        }),
+      "reject"
+    );
 
   const handleRetryLoad = () => {
     void refetchSubmission();

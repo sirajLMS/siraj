@@ -82,6 +82,7 @@ export const TeacherAssignedClassPothosObject = TeacherAssignedClassRef.implemen
     durationMinutes: t.exposeInt("durationMinutes"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
+    isFrozen: t.exposeBoolean("isFrozen"),
     meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
     effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),

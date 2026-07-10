@@ -157,6 +157,7 @@ export type StudentHistorySession = {
   duration: number;
   status: string;
   outcome?: string | null;
+  isFrozen: boolean;
   instructor: string;
   timeSlot: string;
   room: string | null;

@@ -92,27 +92,32 @@ describe("MeetingProviderRepository", () => {
     expect(found?.id).toBe(provider.id);
   });
 
+  function setupActiveInactivePair(): (tx: DBTransaction) => Promise<{ activeId: string; inactiveId: string }> {
+    return async tx => {
+      const active = await createTestMeetingProvider(tx, { slug: `active-${randomUUID().slice(0, 8)}` });
+      const inactive = await createTestMeetingProvider(tx, {
+        slug: `inactive-${randomUUID().slice(0, 8)}`,
+        isActive: false,
+      });
+      return { activeId: active.id, inactiveId: inactive.id };
+    };
+  }
+
+  const createProviderPair = setupActiveInactivePair();
+
   providerTest("listActive returns only active providers", async tx => {
-    const active = await createTestMeetingProvider(tx, { slug: `active-${randomUUID().slice(0, 8)}` });
-    await createTestMeetingProvider(tx, {
-      slug: `inactive-${randomUUID().slice(0, 8)}`,
-      isActive: false,
-    });
+    const { activeId } = await createProviderPair(tx);
 
     const results = await MeetingProviderRepository.listActive(tx);
-    expectProviderIdsInclude(results, [active.id]);
+    expectProviderIdsInclude(results, [activeId]);
     expect(results.every(row => row.isActive)).toBe(true);
   });
 
   providerTest("listAll returns active and inactive providers", async tx => {
-    const active = await createTestMeetingProvider(tx, { slug: `all-active-${randomUUID().slice(0, 8)}` });
-    const inactive = await createTestMeetingProvider(tx, {
-      slug: `all-inactive-${randomUUID().slice(0, 8)}`,
-      isActive: false,
-    });
+    const { activeId, inactiveId } = await createProviderPair(tx);
 
     const results = await MeetingProviderRepository.listAll(tx);
-    expectProviderIdsInclude(results, [active.id, inactive.id]);
+    expectProviderIdsInclude(results, [activeId, inactiveId]);
   });
 
   providerTest("update modifies provider fields", async tx => {

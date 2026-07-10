@@ -82,8 +82,8 @@ describe("studentDirectory GraphQL Integration Tests", () => {
     expect(students.length).toBeGreaterThan(0);
   });
 
-  test("Teacher denied from student directory", async () => {
-    const token = await loginDemoUser("teacher_default");
+  async function expectDemoUserDenied(demoUser: string) {
+    const token = await loginDemoUser(demoUser);
     const result = await testClient.query({
       query: studentDirectoryQueryDocument,
       variables: {
@@ -95,21 +95,14 @@ describe("studentDirectory GraphQL Integration Tests", () => {
       errorPolicy: "all",
     });
     expect(result.error).toBeDefined();
+  }
+
+  test("Teacher denied from student directory", async () => {
+    await expectDemoUserDenied("teacher_default");
   });
 
   test("Parent denied from student directory", async () => {
-    const token = await loginDemoUser("parent_default");
-    const result = await testClient.query({
-      query: studentDirectoryQueryDocument,
-      variables: {
-        paginationArgs: null,
-        filterArgs: null,
-        orderBy: null,
-      },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-      errorPolicy: "all",
-    });
-    expect(result.error).toBeDefined();
+    await expectDemoUserDenied("parent_default");
   });
 
   test("Unauthenticated request denied", async () => {

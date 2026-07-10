@@ -76,6 +76,7 @@ export namespace WeeklyScheduleService {
             day: row.dayOfWeek,
             executionState: parseClassExecutionState(row.executionState),
             outcome: parseClassOutcome(row.outcome),
+            isFrozen: row.isFrozen,
             subjectId: row.subjectId,
             subjectName: row.subjectName,
             classType: parseClassType(row.classType),

@@ -20,6 +20,7 @@ export type GroupClassAuditReturnType = {
   venue: string;
   status: ClassExecutionState;
   outcome: ClassOutcome;
+  isFrozen: boolean;
   auditRemark: string | null;
   auditLoggedAt: string;
   registeredStudentCount: number;

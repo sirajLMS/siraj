@@ -20,6 +20,39 @@ export type TagInputEditingApi = {
   readonly handleEditAndCommit: (index: number, currentTags: readonly string[]) => void;
 };
 
+type CancelEditFn = () => void;
+type UpdateTagFn = (index: number, currentTags: readonly string[]) => void;
+
+function performUpdateTag(
+  editingValue: string,
+  index: number,
+  currentTags: readonly string[],
+  onCommit: (index: number, value: string) => void,
+  cancelEdit: CancelEditFn
+): void {
+  const trimmedValue = editingValue.trim();
+  if (trimmedValue && !currentTags.includes(trimmedValue)) {
+    onCommit(index, trimmedValue);
+  }
+  cancelEdit();
+}
+
+function processEditKeyDown(
+  e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  index: number,
+  currentTags: readonly string[],
+  updateTag: UpdateTagFn,
+  cancelEdit: CancelEditFn
+): void {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    updateTag(index, currentTags);
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    cancelEdit();
+  }
+}
+
 /**
  * Manages the chip-editing lifecycle for TagInput: which chip is being edited,
  * the editing buffer value, focus handling, and commit/cancel flows.
@@ -51,11 +84,7 @@ export function useTagInputEditing(onCommit: (index: number, value: string) => v
 
   const updateTag = useCallback(
     (index: number, currentTags: readonly string[]) => {
-      const trimmedValue = editingValue.trim();
-      if (trimmedValue && !currentTags.includes(trimmedValue)) {
-        onCommit(index, trimmedValue);
-      }
-      cancelEdit();
+      performUpdateTag(editingValue, index, currentTags, onCommit, cancelEdit);
     },
     [editingValue, onCommit, cancelEdit]
   );
@@ -66,13 +95,7 @@ export function useTagInputEditing(onCommit: (index: number, value: string) => v
 
   const handleEditKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, index: number, currentTags: readonly string[]) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        updateTag(index, currentTags);
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        cancelEdit();
-      }
+      processEditKeyDown(e, index, currentTags, updateTag, cancelEdit);
     },
     [updateTag, cancelEdit]
   );

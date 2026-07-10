@@ -21,119 +21,12 @@ import {
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import { useRouter } from "@/shared/i18n/routing";
+import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 
-export function CreateRecurringClassContainer() {
-  const t = useTranslations("dashboard.createRecurringClass");
-  const tMeeting = useTranslations("ui.meetingConfig.manager");
-  const tClassScope = useTranslations("ui.meetingConfig.classScope");
-  const tRecurring = useTranslations("ui.meetingConfig.recurringSchedule");
-  const router = useRouter();
-  const client = useApolloClient();
-  const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
-  const [createdClassInstanceId, setCreatedClassInstanceId] = useState<string | null>(null);
-  const permissions = useUserStore(state => state.permissions);
+type TranslationFn = ReturnType<typeof useTranslations>;
 
-  const isSubmitting = useCreateRecurringClassStore(state => state.isSubmitting);
-  const showSuccess = useCreateRecurringClassStore(state => state.showSuccess);
-  const errorMessage = useCreateRecurringClassStore(state => state.errorMessage);
-  const setSubmitting = useCreateRecurringClassStore(state => state.setSubmitting);
-  const setShowSuccess = useCreateRecurringClassStore(state => state.setShowSuccess);
-  const resetSuccess = useCreateRecurringClassStore(state => state.resetSuccess);
-  const setErrorMessage = useCreateRecurringClassStore(state => state.setErrorMessage);
-  const clearError = useCreateRecurringClassStore(state => state.clearError);
-
-  const canCreate = permissions.includes(AppPermission.ScheduleManageRecurring);
-
-  const [createClassMutation] = useMutation(createRecurringClassMutationDocument);
-
-  const handleClose = useCallback(() => {
-    router.push("/dashboard");
-  }, [router]);
-
-  const handleSubmit = useCallback(
-    async (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => {
-      const meetingErrorKey = getRecurringMeetingConfigErrorKey(meetingConfig);
-      const meetingErrorMessage = resolveRecurringMeetingConfigErrorMessage(meetingErrorKey, {
-        recurringFieldsRequired: tClassScope("recurringFieldsRequired"),
-        urlNotAllowed: tMeeting("urlNotAllowed"),
-      });
-      if (meetingErrorMessage) {
-        setErrorMessage(meetingErrorMessage);
-        return;
-      }
-
-      setSubmitting(true);
-      resetSuccess();
-      clearError();
-      setMeetingConfigWarning(false);
-      setCreatedClassInstanceId(null);
-
-      try {
-        const input: CreateRecurringClassInput = mapFormDataToInput(data);
-
-        const { data: result } = await createClassMutation({
-          variables: { input },
-        });
-
-        if (result?.createRecurringClass) {
-          const recurringScheduleId = result.createRecurringClass.recurringScheduleId;
-          const firstClassInstanceId = result.createRecurringClass.classInstanceIds?.[0] ?? null;
-          let meetingConfigSaved = true;
-
-          if (recurringScheduleId) {
-            const meetingResult = await postCreateRecurringMeetingConfig(client, recurringScheduleId, meetingConfig);
-            meetingConfigSaved = meetingResult.success;
-            if (!meetingResult.success) {
-              setMeetingConfigWarning(true);
-              setCreatedClassInstanceId(firstClassInstanceId);
-            }
-          }
-
-          setShowSuccess(true);
-          logger.info("Recurring class created:", result.createRecurringClass.id);
-
-          if (meetingConfigSaved) {
-            setTimeout(() => {
-              if (firstClassInstanceId) {
-                router.push(`/classes/${firstClassInstanceId}`);
-              } else {
-                router.push("/dashboard");
-              }
-            }, 1500);
-          }
-        } else {
-          setErrorMessage(t("validation.creationFailed"));
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        logger.error("Error creating recurring class", { err: error });
-        setErrorMessage(t("validation.creationFailed"));
-      } finally {
-        setSubmitting(false);
-      }
-    },
-    [
-      createClassMutation,
-      setSubmitting,
-      resetSuccess,
-      clearError,
-      setShowSuccess,
-      setErrorMessage,
-      router,
-      t,
-      client,
-      tMeeting,
-      tClassScope,
-    ]
-  );
-
-  const handleGoToCreatedClass = useCallback(() => {
-    if (createdClassInstanceId) {
-      router.push(`/classes/${createdClassInstanceId}`);
-    }
-  }, [createdClassInstanceId, router]);
-
-  const labels = useMemo(
+function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
+  return useMemo(
     () => ({
       title: t("title"),
       subtitle: t("subtitle"),
@@ -186,6 +79,153 @@ export function CreateRecurringClassContainer() {
     }),
     [t]
   );
+}
+
+interface SubmitHookParams {
+  readonly t: TranslationFn;
+  readonly tMeeting: TranslationFn;
+  readonly tClassScope: TranslationFn;
+  readonly client: ReturnType<typeof useApolloClient>;
+  readonly router: ReturnType<typeof useRouter>;
+  readonly createClassMutation: ReturnType<typeof useMutation<typeof createRecurringClassMutationDocument>>[0];
+  readonly setSubmitting: (value: boolean) => void;
+  readonly resetSuccess: () => void;
+  readonly clearError: () => void;
+  readonly setShowSuccess: (value: boolean) => void;
+  readonly setErrorMessage: (message: string) => void;
+  readonly setMeetingConfigWarning: (value: boolean) => void;
+  readonly setCreatedClassInstanceId: (id: string | null) => void;
+}
+
+function useRecurringClassSubmit(params: SubmitHookParams) {
+  return useCallback(
+    async (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => {
+      const {
+        t,
+        tMeeting,
+        tClassScope,
+        client,
+        router,
+        createClassMutation,
+        setSubmitting,
+        resetSuccess,
+        clearError,
+        setShowSuccess,
+        setErrorMessage,
+        setMeetingConfigWarning,
+        setCreatedClassInstanceId,
+      } = params;
+
+      const meetingErrorKey = getRecurringMeetingConfigErrorKey(meetingConfig);
+      const meetingErrorMessage = resolveRecurringMeetingConfigErrorMessage(meetingErrorKey, {
+        recurringFieldsRequired: tClassScope("recurringFieldsRequired"),
+        urlNotAllowed: tMeeting("urlNotAllowed"),
+      });
+      if (meetingErrorMessage) {
+        setErrorMessage(meetingErrorMessage);
+        return;
+      }
+
+      setSubmitting(true);
+      resetSuccess();
+      clearError();
+      setMeetingConfigWarning(false);
+      setCreatedClassInstanceId(null);
+
+      try {
+        const input: CreateRecurringClassInput = mapFormDataToInput(data);
+        const { data: result } = await createClassMutation({ variables: { input } });
+
+        if (result?.createRecurringClass) {
+          const recurringScheduleId = result.createRecurringClass.recurringScheduleId;
+          const firstClassInstanceId = result.createRecurringClass.classInstanceIds?.[0] ?? null;
+          let meetingConfigSaved = true;
+
+          if (recurringScheduleId) {
+            const meetingResult = await postCreateRecurringMeetingConfig(client, recurringScheduleId, meetingConfig);
+            meetingConfigSaved = meetingResult.success;
+            if (!meetingResult.success) {
+              setMeetingConfigWarning(true);
+              setCreatedClassInstanceId(firstClassInstanceId);
+            }
+          }
+
+          setShowSuccess(true);
+          logger.info("Recurring class created:", result.createRecurringClass.id);
+
+          if (meetingConfigSaved) {
+            setTimeout(() => {
+              if (firstClassInstanceId) {
+                router.push(`/classes/${firstClassInstanceId}`);
+              } else {
+                router.push("/dashboard");
+              }
+            }, 1500);
+          }
+        } else {
+          setErrorMessage(t("validation.creationFailed"));
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        logger.error("Error creating recurring class", { err: error });
+        setErrorMessage(t("validation.creationFailed"));
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [params]
+  );
+}
+
+export function CreateRecurringClassContainer() {
+  const t = useTranslations("dashboard.createRecurringClass");
+  const tMeeting = useTranslations("ui.meetingConfig.manager");
+  const tClassScope = useTranslations("ui.meetingConfig.classScope");
+  const tRecurring = useTranslations("ui.meetingConfig.recurringSchedule");
+  const router = useRouter();
+  const client = useApolloClient();
+  const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
+  const [createdClassInstanceId, setCreatedClassInstanceId] = useState<string | null>(null);
+  const permissions = useUserStore(state => state.permissions);
+
+  const isSubmitting = useCreateRecurringClassStore(state => state.isSubmitting);
+  const showSuccess = useCreateRecurringClassStore(state => state.showSuccess);
+  const errorMessage = useCreateRecurringClassStore(state => state.errorMessage);
+  const setSubmitting = useCreateRecurringClassStore(state => state.setSubmitting);
+  const setShowSuccess = useCreateRecurringClassStore(state => state.setShowSuccess);
+  const resetSuccess = useCreateRecurringClassStore(state => state.resetSuccess);
+  const setErrorMessage = useCreateRecurringClassStore(state => state.setErrorMessage);
+  const clearError = useCreateRecurringClassStore(state => state.clearError);
+
+  const canCreate = permissions.includes(AppPermission.ScheduleManageRecurring);
+  const [createClassMutation] = useMutation(createRecurringClassMutationDocument);
+  const labels = useRecurringClassLabels(t);
+
+  const handleClose = useCallback(() => {
+    router.push("/dashboard");
+  }, [router]);
+
+  const handleSubmit = useRecurringClassSubmit({
+    t,
+    tMeeting,
+    tClassScope,
+    client,
+    router,
+    createClassMutation,
+    setSubmitting,
+    resetSuccess,
+    clearError,
+    setShowSuccess,
+    setErrorMessage,
+    setMeetingConfigWarning,
+    setCreatedClassInstanceId,
+  });
+
+  const handleGoToCreatedClass = useCallback(() => {
+    if (createdClassInstanceId) {
+      router.push(`/classes/${createdClassInstanceId}`);
+    }
+  }, [createdClassInstanceId, router]);
 
   if (!canCreate) {
     return null;

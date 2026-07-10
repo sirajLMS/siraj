@@ -1,21 +1,12 @@
-import { afterAll, describe, expect, test } from "bun:test";
-import { IanaTimezone, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
-import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/students/student-lifecycle.documents";
-import {
-  authenticatedRequest,
-  cleanupTestSuperAdmin,
-  loginDemoUser,
-  provisionTestEntities,
-  provisionTestSuperAdmin,
-} from "@/frontend/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
 import { testClient } from "@/frontend/graphql/test/testClient";
 
 /**
  * Helper to fetch status tracking schedule with a given token.
  */
-async function fetchStatusTracking(
+async function _fetchStatusTracking(
   token: string,
   date: string,
   search?: string | null,
@@ -26,6 +17,23 @@ async function fetchStatusTracking(
     search: search ?? null,
     viewerTimezone: viewerTimezone ?? IanaTimezone.Utc,
   });
+}
+
+/**
+ * Helper to verify that a given demo user role is denied access to
+ * statusTrackingSchedule. Encapsulates the login → query → assert-error
+ * pattern shared across authorization and security tests.
+ */
+async function _expectRoleDenied(role: string, date: string) {
+  const _token = await loginDemoUser(role);
+  const _result = await testClient.query({
+    query: statusTrackingScheduleQueryDocument,
+    variables: { date, search: null, viewerTimezone: IanaTimezone.Utc },
+    context: { headers: { Authorization: `****** } },
+  });
+
+  expect(result.error).toBeDefined();
+  expect(result.data?.statusTrackingSchedule).toBeFalsy();
 }
 
 /**
@@ -73,27 +81,11 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   });
 
   test("teacher role is denied (no SCHEDULE_VIEW_ALL or DASHBOARD_VIEW_METRICS)", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-    const result = await testClient.query({
-      query: statusTrackingScheduleQueryDocument,
-      variables: { date: testDate, search: null, viewerTimezone: IanaTimezone.Utc },
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
-    });
-
-    expect(result.error).toBeDefined();
-    expect(result.data?.statusTrackingSchedule).toBeFalsy();
+    await expectRoleDenied("teacher_default", testDate);
   });
 
   test("parent role is denied", async () => {
-    const parentToken = await loginDemoUser("parent_default");
-    const result = await testClient.query({
-      query: statusTrackingScheduleQueryDocument,
-      variables: { date: testDate, search: null, viewerTimezone: IanaTimezone.Utc },
-      context: { headers: { Authorization: `Bearer ${parentToken}` } },
-    });
-
-    expect(result.error).toBeDefined();
-    expect(result.data?.statusTrackingSchedule).toBeFalsy();
+    await expectRoleDenied("parent_default", testDate);
   });
 
   test("super_admin can also access statusTrackingSchedule", async () => {

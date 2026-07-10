@@ -77,7 +77,10 @@ export function ClassMeetingConfigsSection({
   const loading = classLoading || recurringLoading;
   const error = classError ?? recurringError;
   const refetch = isClassScope ? refetchClass : refetchRecurring;
-  const configs = (isClassScope ? classData?.classMeetingConfigs : recurringData?.recurringMeetingConfigs) ?? [];
+  const configs = useMemo(
+    () => (isClassScope ? classData?.classMeetingConfigs : recurringData?.recurringMeetingConfigs) ?? [],
+    [isClassScope, classData?.classMeetingConfigs, recurringData?.recurringMeetingConfigs]
+  );
 
   const [formOpen, setFormOpen] = useState(false);
   const [editConfig, setEditConfig] = useState<ClassMeetingConfigFieldsFragment | null>(null);
