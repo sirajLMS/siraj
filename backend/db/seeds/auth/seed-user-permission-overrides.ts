@@ -1,14 +1,11 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { permissions, userPermissionOverrides } from "@/backend/db/schema/permissions/permissions";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, OverrideState } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding user permission overrides...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   if (!seedConfig.enableAuditLogs || !usersList?.length) {
@@ -19,31 +16,17 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
   const adminUser = findAdminUser(usersList);
   if (!parentUser || !adminUser) return [];
 
-  const [permission] = await db
-    .select()
-    .from(permissions)
-    .where(eq(permissions.key, AppPermission.SUPPORT_SUBMIT_COMPLAINT))
-    .limit(1);
+  const inserted = await PermissionManagementService.ensureUserPermissionOverride({
+    userId: parentUser.id,
+    permissionKey: AppPermission.SUPPORT_SUBMIT_COMPLAINT,
+    state: OverrideState.GRANTED,
+    assignedByUserId: adminUser.id,
+  });
 
-  if (!permission) {
+  if (!inserted) {
     logger.warn("SUPPORT_SUBMIT_COMPLAINT permission not found; skipping permission overrides.");
     return [];
   }
-
-  const [inserted] = await db
-    .insert(userPermissionOverrides)
-    .values({
-      userId: parentUser.id,
-      permissionId: permission.id,
-      state: "GRANTED",
-      assignedByUserId: adminUser.id,
-      createdAt: now,
-    })
-    .onConflictDoUpdate({
-      target: [userPermissionOverrides.userId, userPermissionOverrides.permissionId],
-      set: { state: "GRANTED" },
-    })
-    .returning();
 
   logger.info("User permission overrides seeded.");
   return [inserted];

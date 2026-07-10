@@ -27,7 +27,6 @@ async function insertTeacherDetails(args: { tx: DBTransaction; userId: string; p
   const { tx, userId, plainNationalId, now } = args;
   const teacherInput: TeacherEntityInput = {
     userId,
-    status: "ACTIVATED",
     nationalId: plainNationalId,
     createdAt: now,
     updatedAt: now,

@@ -12,7 +12,7 @@ gqlSchemaBuilder.queryField("parentDirectory", t =>
     args: {
       search: t.arg.string(),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-      statusFilter: t.arg({ type: ParentStatusPothosEnum, required: false }),
+      lifecycleStatusFilter: t.arg({ type: ParentStatusPothosEnum, required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -35,7 +35,7 @@ gqlSchemaBuilder.queryField("parentDirectory", t =>
         userId,
         args.search ?? null,
         pagination,
-        args.statusFilter ?? null,
+        args.lifecycleStatusFilter ?? null,
         ctx.locale
       );
     },

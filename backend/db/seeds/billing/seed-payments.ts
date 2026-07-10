@@ -1,11 +1,13 @@
-import { db } from "@/backend/db/drizzleDb";
-import { payments } from "@/backend/db/schema/billing/billing";
 import { DEFAULT_INVOICE_CURRENCY, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
+import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import { InvoiceStatus } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import logger from "@/backend/lib/logger";
-import type { InvoiceSelectType } from "@/backend/types";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import type { InvoiceSelectType, SeedPaymentInput } from "@/backend/types";
 import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
+
+type PaymentSeedSpec = SeedPaymentInput & { readonly idempotencyKey: string };
 
 function buildPaymentSnapshot(
   index: number,
@@ -46,6 +48,32 @@ function buildPaymentSnapshot(
   };
 }
 
+function buildPaymentSpecs(invoicesList: InvoiceSelectType[], now: Date, snapshottedAt: string): PaymentSeedSpec[] {
+  const paidInvoices = invoicesList.filter(inv => inv.status === InvoiceStatus.PAID);
+
+  return paidInvoices.map((invoice, index) => {
+    const { paymentMethodType, paymentMethodSnapshot } = buildPaymentSnapshot(index, snapshottedAt);
+    const idempotencyKey = `seed_pay_${invoice.id}`;
+
+    return {
+      invoiceId: invoice.id,
+      amount: invoice.amount,
+      currency: invoice.currency ?? DEFAULT_INVOICE_CURRENCY,
+      paymentDate: invoice.paidDate ? new Date(`${invoice.paidDate}T12:00:00.000Z`) : now,
+      userPaymentMethodId: null,
+      paymentMethodType,
+      paymentMethodSnapshot,
+      transactionId: `seed_txn_${invoice.id.slice(0, 8)}`,
+      idempotencyKey,
+    };
+  });
+}
+
+async function findPaymentsByKeys(keys: readonly string[]) {
+  const rows = await PaymentMethodService.findPaymentsByIdempotencyKeys(keys);
+  return new Map(rows.map(row => [row.idempotencyKey, row] as const));
+}
+
 export async function seedOrGet(invoicesList: InvoiceSelectType[], config?: SeedConfig) {
   logger.info("Seeding payments...");
   const now = new Date();
@@ -56,36 +84,14 @@ export async function seedOrGet(invoicesList: InvoiceSelectType[], config?: Seed
     return [];
   }
 
-  const results = [];
-  const paidInvoices = invoicesList.filter(inv => inv.status === InvoiceStatus.PAID);
-
-  for (const [index, invoice] of paidInvoices.entries()) {
-    const idempotencyKey = `seed_pay_${invoice.id}`;
-    const { paymentMethodType, paymentMethodSnapshot } = buildPaymentSnapshot(index, snapshottedAt);
-
-    const [inserted] = await db
-      .insert(payments)
-      .values({
-        invoiceId: invoice.id,
-        amount: invoice.amount,
-        currency: invoice.currency ?? DEFAULT_INVOICE_CURRENCY,
-        paymentDate: invoice.paidDate ? new Date(`${invoice.paidDate}T12:00:00.000Z`) : now,
-        userPaymentMethodId: null,
-        paymentMethodType,
-        paymentMethodSnapshot,
-        transactionId: `seed_txn_${invoice.id.slice(0, 8)}`,
-        idempotencyKey,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: payments.idempotencyKey,
-        set: { updatedAt: now },
-      })
-      .returning();
-
-    results.push(inserted);
-  }
+  const specs = buildPaymentSpecs(invoicesList, now, snapshottedAt);
+  const results = await orchestrateSeedMany({
+    specs,
+    toKey: spec => spec.idempotencyKey,
+    findExisting: findPaymentsByKeys,
+    createMany: toCreate => PaymentMethodService.createManyPayments(toCreate),
+    refetchOnRace: findPaymentsByKeys,
+  });
 
   logger.info(`Payments seeded (${results.length} rows).`);
   return results;

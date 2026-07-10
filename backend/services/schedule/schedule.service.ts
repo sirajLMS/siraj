@@ -15,6 +15,7 @@ import {
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type {
   PaginationArgs,
@@ -286,50 +287,53 @@ export namespace ScheduleService {
 
     const futureClasses = await SchedulingRepository.getTeacherFutureClasses(resolvedTeacherId, fromDate, toDate);
 
-    const classes = futureClasses.map(cls => {
-      const classStart = new Date(cls.scheduledStartAt);
-      const isPast = classStart < now;
-      const isQuotaExhausted = usedLeaves >= maxLeaves;
+    const classes = await Promise.all(
+      futureClasses.map(async cls => {
+        const classStart = new Date(cls.scheduledStartAt);
+        const isPast = classStart < now;
+        const isQuotaExhausted = usedLeaves >= maxLeaves;
 
-      let leaveRequestDisabled = false;
-      let leaveRequestDisabledReason: string | null = null;
+        let leaveRequestDisabled = false;
+        let leaveRequestDisabledReason: string | null = null;
 
-      if (isPast) {
-        leaveRequestDisabled = true;
-        leaveRequestDisabledReason = "time";
-      } else if (isQuotaExhausted) {
-        leaveRequestDisabled = true;
-        leaveRequestDisabledReason = "quota";
-      }
+        if (isPast) {
+          leaveRequestDisabled = true;
+          leaveRequestDisabledReason = "time";
+        } else if (isQuotaExhausted) {
+          leaveRequestDisabled = true;
+          leaveRequestDisabledReason = "quota";
+        }
 
-      const formatTime = (date: Date): string =>
-        date.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        });
+        const formatTime = (date: Date): string =>
+          date.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
 
-      const resolvedClassType = parseClassTypeOrNull(cls.classType);
+        const resolvedClassType = parseClassTypeOrNull(cls.classType);
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(cls.id);
 
-      return {
-        id: cls.id,
-        courseName: cls.subjectName || cls.studentName,
-        scheduledDate: cls.scheduledStartAt.toISOString().split("T")[0],
-        startTime: formatTime(cls.scheduledStartAt),
-        endTime: formatTime(cls.scheduledEndAt),
-        durationMinutes: cls.durationMinutes,
-        isRescheduled: cls.isRescheduled,
-        leaveRequestDisabled,
-        leaveRequestDisabledReason,
-        studentCount: 1,
-        location: cls.meetingJoinUrl || "Virtual",
-        subjectId: cls.subjectId,
-        subjectName: cls.subjectName,
-        classType: resolvedClassType,
-        meetingJoinUrl: cls.meetingJoinUrl ?? null,
-        avatarUrl: resolveClassAvatarUrl(cls.recurringAvatarUrl, cls.subjectAvatarUrl),
-      };
-    });
+        return {
+          id: cls.id,
+          courseName: cls.subjectName || cls.studentName,
+          scheduledDate: cls.scheduledStartAt.toISOString().split("T")[0],
+          startTime: formatTime(cls.scheduledStartAt),
+          endTime: formatTime(cls.scheduledEndAt),
+          durationMinutes: cls.durationMinutes,
+          isRescheduled: cls.isRescheduled,
+          leaveRequestDisabled,
+          leaveRequestDisabledReason,
+          studentCount: 1,
+          location: effectiveMeeting.joinUrl || "Virtual",
+          subjectId: cls.subjectId,
+          subjectName: cls.subjectName,
+          classType: resolvedClassType,
+          meetingJoinUrl: effectiveMeeting.joinUrl ?? null,
+          avatarUrl: resolveClassAvatarUrl(cls.recurringAvatarUrl, cls.subjectAvatarUrl),
+        };
+      })
+    );
 
     const [importantNotes, supportContact] = await Promise.all([
       TeacherNotesService.getActiveNotes(userId, resolvedTeacherId, locale).catch(

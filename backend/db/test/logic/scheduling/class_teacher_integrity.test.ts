@@ -40,7 +40,7 @@ async function createTestTeacher(tx: DBTransaction, name: string, email: string)
   const { user, now } = await createTestUser(tx, name, email);
   const [teacher] = (await tx
     .insert(teachers)
-    .values({ userId: user.id, status: "ACTIVATED", createdAt: now, updatedAt: now })
+    .values({ userId: user.id, createdAt: now, updatedAt: now })
     .returning()) as [TeacherEntity];
   return teacher;
 }

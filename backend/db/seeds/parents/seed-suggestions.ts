@@ -1,5 +1,3 @@
-import { db } from "@/backend/db/drizzleDb";
-import { suggestions } from "@/backend/db/schema/communications/communications";
 import {
   buildSuggestionBody,
   findAdminUser,
@@ -9,6 +7,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { SuggestionStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { SuggestionService } from "@/backend/services/communication/suggestion.service";
 import type { ParentEntity, UserSelectType } from "@/backend/types";
 
 function resolveAdminResponse(status: SuggestionStatus): string | null {
@@ -32,30 +31,27 @@ export async function seedOrGet(parentsList: ParentEntity[], usersList: UserSele
 
   const adminUser = findAdminUser(usersList);
   const count = seedConfig.profile === "standard" ? 10 : 2;
-  const results = [];
+  const inputs = [];
 
   for (let i = 0; i < count; i++) {
     const parent = parentsList[i % parentsList.length];
     const parentUser = usersList.find(u => u.id === parent.userId);
     const status = pickSuggestionStatus(i);
 
-    const [inserted] = await db
-      .insert(suggestions)
-      .values({
-        parentId: parent.id,
-        submitterName: parentUser?.name ?? `Parent ${i + 1}`,
-        body: buildSuggestionBody(seedConfig, i),
-        status,
-        adminResponse: resolveAdminResponse(status),
-        reviewedByUserId:
-          status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? adminUser?.id : null,
-        reviewedAt: status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? now : null,
-        createdAt: now,
-      })
-      .returning();
-    results.push(inserted);
+    inputs.push({
+      parentId: parent.id,
+      submitterName: parentUser?.name ?? `Parent ${i + 1}`,
+      body: buildSuggestionBody(seedConfig, i),
+      status,
+      adminResponse: resolveAdminResponse(status),
+      reviewedByUserId:
+        status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? adminUser?.id : null,
+      reviewedAt: status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? now : null,
+      createdAt: now,
+    });
   }
 
+  const results = await SuggestionService.createManySeedSuggestions(inputs);
   logger.info(`Suggestions seeded (${results.length} rows).`);
   return results;
 }

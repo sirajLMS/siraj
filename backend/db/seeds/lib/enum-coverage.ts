@@ -35,8 +35,6 @@ export const ALL_PARENT_STATUSES = [
   ParentStatus.ON_TRIAL,
   ParentStatus.ON_LEAVE,
   ParentStatus.SUSPENDED,
-  ParentStatus.ACTIVATED,
-  ParentStatus.DEACTIVATED,
 ] as const;
 
 export const ALL_ACCOUNT_STATUSES = [AccountStatus.ACTIVATED, AccountStatus.DEACTIVATED] as const;

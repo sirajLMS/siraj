@@ -137,4 +137,60 @@ export namespace SupportedOnlineAccountRepository {
       .where(inArray(supportedOnlineAccounts.id, [...ids]))
       .then(rows => rows.map(toSelectType));
   }
+
+  export async function upsertMany(
+    inputs: readonly SupportedOnlineAccountInsertType[],
+    tx?: DBTransaction
+  ): Promise<SupportedOnlineAccountSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<SupportedOnlineAccountSelectType[]> => {
+      const now = new Date();
+      const results: SupportedOnlineAccountSelectType[] = [];
+
+      for (const input of inputs) {
+        const [row] = await t
+          .insert(supportedOnlineAccounts)
+          .values({
+            slug: input.slug,
+            name: input.name,
+            description: input.description ?? null,
+            instructions: input.instructions ?? null,
+            identifierKind: input.identifierKind,
+            identifierLabel: input.identifierLabel ?? input.name,
+            supportedDirections: input.supportedDirections ?? "BOTH",
+            logoUrl: input.logoUrl ?? null,
+            isActive: input.isActive ?? true,
+            createdAt: input.createdAt ?? now,
+            updatedAt: input.updatedAt ?? now,
+          })
+          .onConflictDoUpdate({
+            target: supportedOnlineAccounts.slug,
+            set: {
+              name: input.name,
+              description: input.description ?? null,
+              instructions: input.instructions ?? null,
+              identifierKind: input.identifierKind,
+              identifierLabel: input.identifierLabel ?? input.name,
+              supportedDirections: input.supportedDirections ?? "BOTH",
+              logoUrl: input.logoUrl ?? null,
+              isActive: input.isActive ?? true,
+              updatedAt: now,
+            },
+          })
+          .returning();
+
+        if (row) {
+          results.push(toSelectType(row));
+        }
+      }
+
+      return results;
+    };
+
+    if (tx) {
+      return run(tx);
+    }
+    return db.transaction(run);
+  }
 }

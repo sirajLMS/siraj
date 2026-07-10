@@ -1,3 +1,4 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import {
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,
@@ -8,9 +9,13 @@ import { AppPermission } from "@/backend/enum";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
+  SupportedMobileWalletInsertType,
   SupportedMobileWalletSubmitInput,
+  SupportedOnlineAccountInsertType,
   SupportedOnlineAccountSubmitInput,
+  SupportedPaymentLinkInsertType,
   SupportedPaymentLinkSubmitInput,
   UpdateSupportedMobileWalletInput,
   UpdateSupportedOnlineAccountInput,
@@ -138,5 +143,88 @@ export namespace PaymentCatalogService {
   export async function deactivateOnlineAccount(actorUserId: string, id: string, locale?: string) {
     await assertCatalogAdmin(actorUserId, locale);
     return SupportedOnlineAccountRepository.deactivate(id, undefined, locale);
+  }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function listAllMobileWallets(tx?: DBTransaction) {
+    return SupportedMobileWalletRepository.listAll(tx);
+  }
+
+  export async function listAllPaymentLinks(tx?: DBTransaction) {
+    return SupportedPaymentLinkRepository.listAll(tx);
+  }
+
+  export async function listAllOnlineAccounts(tx?: DBTransaction) {
+    return SupportedOnlineAccountRepository.listAll(tx);
+  }
+
+  async function upsertWithDuplicateFallback<T extends { slug: string }>(
+    inputs: readonly T[],
+    upsertMany: (items: readonly T[], tx?: DBTransaction) => Promise<T[]>,
+    getBySlug: (slug: string, tx?: DBTransaction) => Promise<T | null>,
+    updateById: (id: string, input: Partial<T>, tx?: DBTransaction) => Promise<T>,
+    tx?: DBTransaction
+  ): Promise<T[]> {
+    if (inputs.length === 0) return [];
+
+    try {
+      return await upsertMany(inputs, tx);
+    } catch (error) {
+      if (!isDuplicateError(error)) throw error;
+
+      const results: T[] = [];
+      for (const input of inputs) {
+        const existing = await getBySlug(input.slug, tx);
+        if (existing && "id" in existing) {
+          results.push(await updateById(existing.id as string, input, tx));
+        }
+      }
+      return results;
+    }
+  }
+
+  export async function upsertManyMobileWallets(
+    inputs: readonly SupportedMobileWalletInsertType[],
+    tx?: DBTransaction
+  ) {
+    return upsertWithDuplicateFallback(
+      inputs,
+      SupportedMobileWalletRepository.upsertMany,
+      SupportedMobileWalletRepository.getBySlug,
+      (id, input, transaction) => SupportedMobileWalletRepository.update(id, input, transaction),
+      tx
+    );
+  }
+
+  export async function upsertManyPaymentLinks(inputs: readonly SupportedPaymentLinkInsertType[], tx?: DBTransaction) {
+    return upsertWithDuplicateFallback(
+      inputs,
+      SupportedPaymentLinkRepository.upsertMany,
+      SupportedPaymentLinkRepository.getBySlug,
+      (id, input, transaction) => SupportedPaymentLinkRepository.update(id, input, transaction),
+      tx
+    );
+  }
+
+  export async function getMobileWalletBySlug(slug: string, tx?: DBTransaction) {
+    return SupportedMobileWalletRepository.getBySlug(slug, tx);
+  }
+
+  export async function getPaymentLinkBySlug(slug: string, tx?: DBTransaction) {
+    return SupportedPaymentLinkRepository.getBySlug(slug, tx);
+  }
+
+  export async function upsertManyOnlineAccounts(
+    inputs: readonly SupportedOnlineAccountInsertType[],
+    tx?: DBTransaction
+  ) {
+    return upsertWithDuplicateFallback(
+      inputs,
+      SupportedOnlineAccountRepository.upsertMany,
+      SupportedOnlineAccountRepository.getBySlug,
+      (id, input, transaction) => SupportedOnlineAccountRepository.update(id, input, transaction),
+      tx
+    );
   }
 }

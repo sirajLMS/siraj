@@ -22,6 +22,53 @@ export interface LearningResourceListResult {
 }
 
 export namespace LearningResourceRepository {
+  export async function findByFilePath(filePath: string, tx?: DBTransaction): Promise<LearningResourceRow | null> {
+    const queryDb = tx ?? db;
+    const results = await queryDb
+      .select({
+        id: learningResources.id,
+        displayName: learningResources.displayName,
+        filePath: learningResources.filePath,
+        uploadedByUserId: learningResources.uploadedByUserId,
+        uploadedByUserName: sql<string | null>`NULL`,
+        fileSize: sql<number | null>`NULL`,
+        contentType: sql<string | null>`NULL`,
+        createdAt: learningResources.createdAt,
+      })
+      .from(learningResources)
+      .where(and(eq(learningResources.filePath, filePath), isNull(learningResources.deletedAt)))
+      .limit(1);
+    return results[0] ?? null;
+  }
+
+  export async function createSeedResource(
+    input: { displayName: string; filePath: string; uploadedByUserId: string; createdAt?: Date },
+    tx?: DBTransaction
+  ): Promise<LearningResourceRow> {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [resource] = await queryDb
+      .insert(learningResources)
+      .values({
+        displayName: input.displayName,
+        filePath: input.filePath,
+        uploadedByUserId: input.uploadedByUserId,
+        createdAt: input.createdAt ?? now,
+      })
+      .returning();
+
+    if (!resource) {
+      throw new Error("Failed to create seed learning resource");
+    }
+
+    return {
+      ...resource,
+      uploadedByUserName: null,
+      fileSize: null,
+      contentType: null,
+    };
+  }
+
   export async function listResources(
     pagination?: PaginationArgs | null,
     tx?: DBTransaction

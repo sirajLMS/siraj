@@ -1,5 +1,3 @@
-import { db } from "@/backend/db/drizzleDb";
-import { complaints } from "@/backend/db/schema/communications/communications";
 import {
   buildComplaintBody,
   loadSeedConfig,
@@ -10,6 +8,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import type { ParentEntity, StudentEntity, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(
@@ -27,28 +26,31 @@ export async function seedOrGet(
   }
 
   const count = seedConfig.profile === "standard" ? 8 : 2;
-  const results = [];
+  const inputs = [];
 
   for (let i = 0; i < count; i++) {
     const parent = parentsList[i % parentsList.length];
     const parentUser = usersList.find(u => u.id === parent.userId);
     const student = studentsList.find(s => s.parentId === parent.id);
 
-    const [inserted] = await db
-      .insert(complaints)
-      .values({
-        parentId: parent.id,
-        studentId: student?.id ?? null,
-        category: pickComplaintCategory(i),
-        submitterEmail: parentUser?.email ?? `parent-${i}@seed.siraj.local`,
-        body: buildComplaintBody(seedConfig, i),
-        status: pickComplaintStatus(i),
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+    inputs.push({
+      parentId: parent.id,
+      studentId: student?.id ?? null,
+      category: pickComplaintCategory(i),
+      submitterEmail: parentUser?.email ?? `parent-${i}@seed.siraj.local`,
+      body: buildComplaintBody(seedConfig, i),
+      status: pickComplaintStatus(i),
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
 
-    if (shouldSeedExtendedFiles(seedConfig) && i % 2 === 0) {
+  const results = await ComplaintService.createManySeedComplaints(inputs);
+
+  if (shouldSeedExtendedFiles(seedConfig)) {
+    for (let i = 0; i < results.length; i++) {
+      if (i % 2 !== 0) continue;
+      const inserted = results[i];
       try {
         await seedEntityFile({
           assetRelativePath: "documents/sample-attachment.pdf",
@@ -62,8 +64,6 @@ export async function seedOrGet(
         logger.error(`Failed to seed complaint file for ${inserted.id}:`, error);
       }
     }
-
-    results.push(inserted);
   }
 
   logger.info(`Complaints seeded (${results.length} rows).`);

@@ -1,13 +1,13 @@
-import { StaffProfileRepository } from "@/backend/db";
-import type { ManagerProfileUpdateInput } from "@/backend/db/repo/teachers/staff-profile.repository";
-import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import { StaffProfileRepository, UserRepository } from "@/backend/db";
+import { AccountStatus, AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
+import { parseAccountStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services";
 import type { ManagerDirectoryRow } from "@/backend/types";
 
 export interface UpdateManagerProfileInput {
   readonly phone?: string | null;
-  readonly status?: string | null;
+  readonly status?: AccountStatus | null;
 }
 
 export namespace ManagerProfileService {
@@ -24,12 +24,14 @@ export namespace ManagerProfileService {
       throw new Error(t("insufficientPermissions"));
     }
 
-    const repoInput: ManagerProfileUpdateInput = {
-      phone: input.phone,
-      phoneIsSet: input.phone !== undefined,
-    };
+    if (input.phone !== undefined) {
+      await UserRepository.updateProfileFields(actorUserId, { phone: input.phone }, locale);
+    }
 
-    const updatedProfile = await StaffProfileRepository.updateManagerProfile(targetStaffProfileId, repoInput, locale);
+    const updatedProfile = await StaffProfileRepository.findByStaffProfileId(targetStaffProfileId, undefined, locale);
+    if (!updatedProfile) {
+      throw new Error(t("staffProfileNotFound"));
+    }
 
     logger.info("Own staff profile updated", {
       staffProfileId: targetStaffProfileId,
@@ -75,14 +77,23 @@ export namespace ManagerProfileService {
       throw new Error(t("insufficientPermissions"));
     }
 
-    const repoInput: ManagerProfileUpdateInput = {
-      phone: input.phone,
-      phoneIsSet: input.phone !== undefined,
-      status: input.status,
-      statusIsSet: input.status !== undefined,
-    };
+    if (input.phone !== undefined) {
+      await UserRepository.updateProfileFields(targetRow.id, { phone: input.phone }, locale);
+    }
 
-    const updatedProfile = await StaffProfileRepository.updateManagerProfile(targetStaffProfileId, repoInput, locale);
+    if (input.status !== undefined) {
+      await UserRepository.updateStatus(
+        targetRow.id,
+        parseAccountStatus(input.status ?? AccountStatus.ACTIVATED),
+        undefined,
+        locale
+      );
+    }
+
+    const updatedProfile = await StaffProfileRepository.findByStaffProfileId(targetStaffProfileId, undefined, locale);
+    if (!updatedProfile) {
+      throw new Error(t("staffProfileNotFound"));
+    }
 
     logger.info("Manager profile updated successfully", {
       staffProfileId: targetStaffProfileId,

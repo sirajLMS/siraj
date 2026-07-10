@@ -71,6 +71,12 @@ export type LeaveQuotaUsageEntity = typeof leaveQuotaUsage.$inferSelect;
 export type LeaveQuotaUsageInsertInput = typeof leaveQuotaUsage.$inferInsert;
 
 export type TimezoneEntity = typeof timezones.$inferSelect;
+
+export type TimezoneUpsertInput = {
+  ianaId: string;
+  baseOffsetMinutes: number;
+  isDstSupported?: boolean;
+};
 export type TimezoneInsertInput = typeof timezones.$inferInsert;
 
 export type RescheduleTrackingRow = {

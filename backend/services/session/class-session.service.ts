@@ -1,5 +1,7 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { AppPermission } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
@@ -7,7 +9,13 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
-import type { ClassInstanceDetailReturnType, ClassInstanceEntity, ClassStatusEventReturnType } from "@/backend/types";
+import type {
+  ClassInstanceDetailReturnType,
+  ClassInstanceEntity,
+  ClassInstanceInsertInput,
+  ClassStatusEventReturnType,
+} from "@/backend/types";
+import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
 
 /**
  * ClassSessionService
@@ -242,6 +250,40 @@ export namespace ClassSessionService {
   export async function reset(userId: string, classInstanceId: string, locale?: string) {
     await assertPermission(userId, AppPermission.SESSION_RESET, locale);
     return handleUpdate(SchedulingRepository.resetClassInstance(classInstanceId, userId), locale);
+  }
+  export async function listClassInstancesByIdempotencyKeys(
+    keys: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, ClassInstanceEntity>> {
+    return SchedulingRepository.listByIdempotencyKeys(keys, tx);
+  }
+
+  export async function upsertManyClassInstances(
+    instances: ClassInstanceInsertInput[],
+    options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
+  ): Promise<ClassInstanceEntity[]> {
+    return SchedulingRepository.upsertManyForSeed(instances, options);
+  }
+
+  export async function listClassInstanceIdsWithStatusEvents(
+    classInstanceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Set<string>> {
+    return ClassStatusEventsRepository.listClassInstanceIdsWithEvents(classInstanceIds, tx);
+  }
+
+  export async function createManyStatusEvents(
+    inputs: Parameters<typeof ClassStatusEventsRepository.createMany>[0],
+    tx?: DBTransaction
+  ): Promise<ClassStatusEventSelectType[]> {
+    return ClassStatusEventsRepository.createMany(inputs, tx);
+  }
+
+  export async function findStatusEventsByClassInstanceIds(
+    classInstanceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, ClassStatusEventSelectType>> {
+    return ClassStatusEventsRepository.findFirstByClassInstanceIds(classInstanceIds, tx);
   }
 }
 

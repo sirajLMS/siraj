@@ -1,7 +1,3 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { teachers } from "@/backend/db/schema/teachers/teachers";
-import { users } from "@/backend/db/schema/users/users";
 import {
   ALL_ACCOUNT_STATUSES,
   cycleAtIndex,
@@ -14,30 +10,8 @@ import {
 } from "@/backend/db/seeds/lib";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
+import { PersonaBootstrapService } from "@/backend/services/system/persona-bootstrap.service";
 import type { TimezoneEntity, UserSelectType } from "@/backend/types";
-
-async function upsertTeacher(userId: string, timezoneIana: string, status: string, now: Date) {
-  await db.update(users).set({ timezone: timezoneIana, updatedAt: now }).where(eq(users.id, userId));
-
-  const [insertedTeacher] = await db
-    .insert(teachers)
-    .values({
-      userId,
-      status,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: teachers.userId,
-      set: {
-        status,
-        updatedAt: now,
-      },
-    })
-    .returning();
-
-  return insertedTeacher;
-}
 
 function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneEntity {
   const match = timezones.find(t => t.ianaId === ianaId);
@@ -49,7 +23,6 @@ function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneE
 
 export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEntity[], config?: SeedConfig) {
   logger.info("Seeding system teachers...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   const defaultTimezone = timezones.find(t => t.ianaId === IanaTimezone.UTC) || timezones[0];
@@ -71,7 +44,11 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEnti
     const tzIana = i === 0 ? IanaTimezone.UTC : pickTimezoneForIndex(i);
     resolveTimezone(timezones, tzIana);
     const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
-    const teacher = await upsertTeacher(user.id, tzIana, status, now);
+    const teacher = await PersonaBootstrapService.upsertTeacherProfile({
+      userId: user.id,
+      timezone: tzIana,
+      status,
+    });
 
     if (shouldSeedExtendedFiles(seedConfig)) {
       try {

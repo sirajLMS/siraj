@@ -15,6 +15,32 @@ type CreateComplaintResponseInput = ComplaintResponseInput & {
 };
 
 export namespace ComplaintResponseRepository {
+  export const findByComplaintId = async (complaintId: string, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .select()
+      .from(complaintResponses)
+      .where(eq(complaintResponses.complaintId, complaintId))
+      .limit(1);
+    return row ?? null;
+  };
+
+  export const createSeedResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [created] = await queryDb
+      .insert(complaintResponses)
+      .values({
+        complaintId: input.complaintId,
+        responderUserId: input.responderUserId ?? null,
+        body: input.body,
+        emailSent: input.emailSent,
+        createdAt: now,
+      })
+      .returning();
+    return created;
+  };
+
   export const createResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();

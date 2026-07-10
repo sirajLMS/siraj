@@ -2,6 +2,7 @@ export { AuditRepository } from "@/backend/db/repo/audit";
 export { ImpersonationRepository } from "@/backend/db/repo/auth";
 export {
   BillingRepository,
+  InvoicePaymentSubmissionRepository,
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,
   SupportedPaymentLinkRepository,
@@ -41,6 +42,7 @@ export {
 } from "@/backend/db/repo/shared";
 export {
   LearningResourceRepository,
+  SiteContentRepository,
   StorageDbRepository,
 } from "@/backend/db/repo/storage";
 export {

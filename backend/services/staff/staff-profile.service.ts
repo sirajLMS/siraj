@@ -36,7 +36,7 @@ export namespace StaffProfileService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    const { timezone: timezoneInput, ...restInput } = input;
+    const { timezone: timezoneInput, status, ...restInput } = input;
 
     if (timezoneInput != null) {
       const teacher = await TeacherRepository.findById(teacherId);
@@ -45,6 +45,15 @@ export namespace StaffProfileService {
         throw new Error(tFunc("teacherNotFound", { id: teacherId }));
       }
       await UserRepository.updateTimezone(teacher.userId, timezoneInput, undefined, locale);
+    }
+
+    if (status != null) {
+      const teacher = await TeacherRepository.findById(teacherId);
+      if (!teacher) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("teacherNotFound", { id: teacherId }));
+      }
+      await UserRepository.updateStatus(teacher.userId, status, undefined, locale);
     }
 
     const success = await TeacherRepository.updateTeacherProfile(teacherId, restInput);

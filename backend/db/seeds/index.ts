@@ -1,5 +1,3 @@
-import { db } from "@/backend/db/drizzleDb";
-import { permissionGroups as permissionGroupsSchema } from "@/backend/db/schema";
 import { seedOrGet as seedOrGetAdminAuditLogs } from "@/backend/db/seeds/audit/seed-admin-audit-logs";
 import { seedOrGet as seedOrGetAuditLogs } from "@/backend/db/seeds/audit/seed-audit-logs";
 import { seedOrGet as seedOrGetMeetingPermissions } from "@/backend/db/seeds/auth/seed-meeting-permissions";
@@ -27,7 +25,7 @@ import { seedOrGet as seedOrGetGroupClasses } from "@/backend/db/seeds/classes/s
 import { seedOrGet as seedOrGetRecurringScheduleDays } from "@/backend/db/seeds/classes/seed-recurring-schedule-days";
 import { seedOrGet as seedOrGetComplaintResponses } from "@/backend/db/seeds/complaints/seed-complaint-responses";
 import { seedOrGet as seedOrGetComplaints } from "@/backend/db/seeds/complaints/seed-complaints";
-import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
+import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { seedOrGet as seedOrGetMeetingProviders } from "@/backend/db/seeds/meeting/seed-meeting-providers";
 import { seedOrGet as seedOrGetNotificationDeliveries } from "@/backend/db/seeds/notifications/seed-notification-deliveries";
 import { seedOrGet as seedOrGetUserNotificationPreferences } from "@/backend/db/seeds/notifications/seed-user-notification-preferences";
@@ -51,11 +49,12 @@ import { seedOrGet as seedOrGetTeachers } from "@/backend/db/seeds/teachers/seed
 import { seedOrGet as seedOrGetUserDeviceTokens } from "@/backend/db/seeds/users/seed-user-device-tokens";
 import { seedOrGet as seedOrGetUsers } from "@/backend/db/seeds/users/seed-users";
 import logger from "@/backend/lib/logger";
+import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 import type {
   ClassInstanceEntity,
+  GroupWithPermissionIds,
   InvoiceSelectType,
   ParentEntity,
-  PermissionGroupEntity,
   RecurringScheduleDayEntity,
   RecurringScheduleEntity,
   StudentEntity,
@@ -66,10 +65,11 @@ import type {
 } from "@/backend/types";
 
 export type SeedContext = {
+  actorUserId?: string;
   config?: SeedConfig;
   systemSettings?: SystemSettingSelectType[];
   timezones?: TimezoneEntity[];
-  permissionGroups?: PermissionGroupEntity[];
+  permissionGroups?: GroupWithPermissionIds[];
   users?: UserSelectType[];
   teachers?: TeacherEntity[];
   parents?: ParentEntity[];
@@ -118,12 +118,19 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   if (!context.permissionGroups) {
     logger.log("Fetching system permission groups...");
-    context.permissionGroups = await db.select().from(permissionGroupsSchema);
+    context.permissionGroups = await ReferenceDataService.listPermissionGroups();
   }
 
   if (!context.users) {
     logger.log("Seeding system users...");
     context.users = await seedOrGetUsers(context.permissionGroups, config);
+  }
+
+  if (!context.actorUserId && context.users?.length) {
+    const actor = findAdminUserOrFallback(context.users);
+    if (actor) {
+      context.actorUserId = actor.id;
+    }
   }
 
   if (!context.teachers) {

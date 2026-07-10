@@ -1,7 +1,6 @@
-import { db } from "@/backend/db/drizzleDb";
-import { timezones } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
+import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 
 export async function seedOrGet() {
   logger.log("Seeding common timezones...");
@@ -16,20 +15,5 @@ export async function seedOrGet() {
     { ianaId: "Australia/Sydney", baseOffsetMinutes: 600 },
   ];
 
-  const results = [];
-
-  for (const tz of commonTimezones) {
-    const [inserted] = await db
-      .insert(timezones)
-      .values(tz)
-      .onConflictDoUpdate({
-        target: timezones.ianaId,
-        set: { baseOffsetMinutes: tz.baseOffsetMinutes },
-      })
-      .returning();
-
-    results.push(inserted);
-  }
-
-  return results;
+  return ReferenceDataService.upsertManyTimezones(commonTimezones);
 }

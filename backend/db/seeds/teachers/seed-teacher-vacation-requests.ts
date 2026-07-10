@@ -1,53 +1,9 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { teacherVacationRequests } from "@/backend/db/schema/teachers/teacher-availability";
 import { addMonths, findAdminUser, loadSeedConfig, type SeedConfig, startOfDay } from "@/backend/db/seeds/lib";
 import { VacationRequestStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
+import { TeacherAvailabilityService } from "@/backend/services/teacher/teacher-availability.service";
 import type { TeacherEntity, TimezoneEntity, UserSelectType } from "@/backend/types";
-
-async function upsertVacationRequest(
-  teacher: TeacherEntity,
-  teacherTimezone: string,
-  requestedByUserId: string,
-  startAt: Date,
-  endAt: Date,
-  tz: TimezoneEntity | undefined,
-  processing: { status: VacationRequestStatus; adminUserId: string | undefined; now: Date }
-) {
-  const [existing] = await db
-    .select()
-    .from(teacherVacationRequests)
-    .where(eq(teacherVacationRequests.teacherId, teacher.id))
-    .limit(1);
-
-  if (existing) {
-    return existing;
-  }
-
-  const { status, adminUserId, now } = processing;
-  const isPending = status === VacationRequestStatus.PENDING;
-
-  const [inserted] = await db
-    .insert(teacherVacationRequests)
-    .values({
-      teacherId: teacher.id,
-      requestedByUserId,
-      startAt,
-      endAt,
-      timezone: teacherTimezone,
-      timezoneId: tz?.id ?? null,
-      reason: "Seed vacation request",
-      status,
-      processedAt: isPending ? null : now,
-      processedByUserId: isPending ? null : (adminUserId ?? null),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-  return inserted;
-}
 
 function buildVacationSpecs(teachersList: TeacherEntity[], profile: string) {
   const specs: Array<{
@@ -114,11 +70,19 @@ export async function seedOrGet(
     endAt.setDate(endAt.getDate() + spec.durationDays);
     const teacherTimezone = usersList.find(u => u.id === teacher.userId)?.timezone ?? IanaTimezone.UTC;
     const tz = timezones.find(t => t.ianaId === teacherTimezone) ?? timezones[0];
+    const isPending = spec.status === VacationRequestStatus.PENDING;
 
-    const inserted = await upsertVacationRequest(teacher, teacherTimezone, requestedByUserId, startAt, endAt, tz, {
+    const inserted = await TeacherAvailabilityService.createVacationRequestIfMissing({
+      teacherId: teacher.id,
+      requestedByUserId,
+      startAt,
+      endAt,
+      timezone: teacherTimezone,
+      timezoneId: tz?.id ?? null,
+      reason: "Seed vacation request",
       status: spec.status,
-      adminUserId: adminUser?.id,
-      now,
+      processedAt: isPending ? null : now,
+      processedByUserId: isPending ? null : (adminUser?.id ?? null),
     });
     results.push(inserted);
   }

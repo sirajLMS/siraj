@@ -1,7 +1,7 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { UserRepository } from "@/backend/db/repo";
-import { UserRole } from "@/backend/enum";
+import { AccountStatus, UserRole } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -28,13 +28,13 @@ function mockNonSuperAdminActor() {
   });
 }
 
-function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; isActive: boolean; deletedAt: Date | null }> = {}) {
+function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; status: string; deletedAt: Date | null }> = {}) {
   return spyOn(UserRepository, "findById").mockResolvedValue({
     id: TARGET_ID,
     name: "Target User",
     email: "target@example.com",
     password: randomUUID(),
-    isActive: overrides.isActive ?? true,
+    status: overrides.status ?? AccountStatus.ACTIVATED,
     isSuperAdmin: overrides.isSuperAdmin ?? false,
     deletedAt: overrides.deletedAt ?? null,
     createdAt: new Date(),
@@ -46,6 +46,7 @@ function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; isActive: bo
     lastLoginAt: null,
     timezone: IanaTimezone.UTC,
     displayCurrency: null,
+    phone: null,
   });
 }
 
@@ -102,7 +103,7 @@ describe("ImpersonationService.assertCanImpersonate", () => {
   });
 
   test("rejects inactive target", async () => {
-    const spies = mockActorAndTarget("superAdmin", { isActive: false });
+    const spies = mockActorAndTarget("superAdmin", { status: AccountStatus.DEACTIVATED });
     const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, LOCALE));
     expect(error.message).toContain("inactive");
     restoreSpies(spies);

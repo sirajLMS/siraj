@@ -1,7 +1,3 @@
-import { and, eq, inArray } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
-import { teacherPayments } from "@/backend/db/schema/teachers/teacher-payments";
 import {
   addMonths,
   DEFAULT_INVOICE_CURRENCY,
@@ -11,6 +7,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import logger from "@/backend/lib/logger";
+import { TeacherPaymentService } from "@/backend/services/teacher/teacher-payment.service";
 import type { PaymentMethodTransactionSnapshot, TeacherEntity, UserSelectType } from "@/backend/types";
 
 function buildBankTransferSnapshot(
@@ -32,24 +29,8 @@ function buildBankTransferSnapshot(
   };
 }
 
-async function findDefaultPayoutMethod(userId: string) {
-  const [method] = await db
-    .select()
-    .from(userPaymentMethods)
-    .where(
-      and(
-        eq(userPaymentMethods.userId, userId),
-        eq(userPaymentMethods.isDefault, true),
-        inArray(userPaymentMethods.direction, [PaymentDirection.PAYOUT, PaymentDirection.BOTH])
-      )
-    )
-    .limit(1);
-
-  return method;
-}
-
 function buildSnapshotFromPayoutMethod(
-  payoutMethod: NonNullable<Awaited<ReturnType<typeof findDefaultPayoutMethod>>>,
+  payoutMethod: NonNullable<Awaited<ReturnType<typeof TeacherPaymentService.findDefaultPayoutMethod>>>,
   snapshottedAt: string
 ): PaymentMethodTransactionSnapshot {
   return {
@@ -74,11 +55,11 @@ export async function seedOrGet(teachersList: TeacherEntity[], _usersList: UserS
   }
 
   const anchor = startOfDay(seedConfig.anchorDate);
-  const results = [];
   const monthsBack = seedConfig.profile === "standard" ? 3 : 1;
+  const inputs = [];
 
   for (const teacher of teachersList) {
-    const payoutMethod = await findDefaultPayoutMethod(teacher.userId);
+    const payoutMethod = await TeacherPaymentService.findDefaultPayoutMethod(teacher.userId);
     const snapshot = payoutMethod
       ? buildSnapshotFromPayoutMethod(payoutMethod, snapshottedAt)
       : buildBankTransferSnapshot(null, snapshottedAt);
@@ -86,37 +67,22 @@ export async function seedOrGet(teachersList: TeacherEntity[], _usersList: UserS
 
     for (let m = 1; m <= monthsBack; m++) {
       const paymentDate = addMonths(anchor, -m);
-
-      const [existing] = await db
-        .select()
-        .from(teacherPayments)
-        .where(and(eq(teacherPayments.teacherId, teacher.id), eq(teacherPayments.paymentDate, paymentDate)))
-        .limit(1);
-
-      if (existing) {
-        results.push(existing);
-        continue;
-      }
-
-      const [inserted] = await db
-        .insert(teacherPayments)
-        .values({
-          teacherId: teacher.id,
-          userPaymentMethodId: payoutMethod?.id ?? null,
-          paymentMethodType,
-          paymentMethodSnapshot: snapshot,
-          amount: (150 + m * 25).toFixed(2),
-          currency: DEFAULT_INVOICE_CURRENCY,
-          paymentDate,
-          isTestPayment: true,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-      results.push(inserted);
+      inputs.push({
+        teacherId: teacher.id,
+        userPaymentMethodId: payoutMethod?.id ?? null,
+        paymentMethodType,
+        paymentMethodSnapshot: snapshot,
+        amount: (150 + m * 25).toFixed(2),
+        currency: DEFAULT_INVOICE_CURRENCY,
+        paymentDate,
+        isTestPayment: true,
+        createdAt: now,
+        updatedAt: now,
+      });
     }
   }
 
+  const results = await TeacherPaymentService.createManyIfMissing(inputs);
   logger.info(`Teacher payments seeded (${results.length} rows).`);
   return results;
 }

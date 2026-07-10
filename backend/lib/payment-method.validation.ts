@@ -138,6 +138,8 @@ export function parsePaymentMethodDetails(type: PaymentMethodType, details: unkn
       return bankTransferDetailsSchema.parse(details) as BankTransferDetails;
     case PaymentMethodType.CASH:
       return cashDetailsSchema.parse(details) as CashDetails;
+    case PaymentMethodType.PROOF_UPLOAD:
+      throw new Error("Proof upload is not a configurable payment method type");
     default: {
       const exhaustive: never = type;
       throw new Error(`Unknown payment method type: ${String(exhaustive)}`);

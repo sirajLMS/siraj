@@ -87,15 +87,21 @@ async function setupTwoTestTeachers(
     toTime?: string;
   }
 ) {
-  const user1 = await createTestUser(tx, { name: options.teacher1Name, email: `t1-${randomUUID()}@test.com` });
-  const teacher1 = await createTestTeacher(tx, user1.id, {
+  const user1 = await createTestUser(tx, {
+    name: options.teacher1Name,
+    email: `t1-${randomUUID()}@test.com`,
     status: options.teacher1Status,
+  });
+  const teacher1 = await createTestTeacher(tx, user1.id, {
     gender: options.teacher1Gender,
   });
 
-  const user2 = await createTestUser(tx, { name: options.teacher2Name, email: `t2-${randomUUID()}@test.com` });
-  const teacher2 = await createTestTeacher(tx, user2.id, {
+  const user2 = await createTestUser(tx, {
+    name: options.teacher2Name,
+    email: `t2-${randomUUID()}@test.com`,
     status: options.teacher2Status,
+  });
+  const teacher2 = await createTestTeacher(tx, user2.id, {
     gender: options.teacher2Gender,
   });
 
@@ -149,7 +155,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
   test("returns gaps for teacher with availability windows", async () => {
     await runInRollback(async tx => {
       const user = await createTestUser(tx, { name: "Avail Teacher", email: `avail-${randomUUID()}@test.com` });
-      const teacher = await createTestTeacher(tx, user.id, { status: "ACTIVATED" });
+      const teacher = await createTestTeacher(tx, user.id);
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
 
@@ -175,7 +181,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
   test("scopes results to the selected date range", async () => {
     await runInRollback(async tx => {
       const user = await createTestUser(tx, { name: "Range Teacher", email: `range-${randomUUID()}@test.com` });
-      const teacher = await createTestTeacher(tx, user.id, { status: "ACTIVATED" });
+      const teacher = await createTestTeacher(tx, user.id);
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.TUESDAY, "08:00", "12:00");
@@ -213,7 +219,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
   test("subtracts recurring unavailability from gaps", async () => {
     await runInRollback(async tx => {
       const user = await createTestUser(tx, { name: "Blocked Teacher", email: `blocked-${randomUUID()}@test.com` });
-      const teacher = await createTestTeacher(tx, user.id, { status: "ACTIVATED" });
+      const teacher = await createTestTeacher(tx, user.id);
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "17:00");
       await createRecurringUnavailability(tx, teacher.id, DayOfWeek.MONDAY, "12:00", "13:00");
@@ -253,7 +259,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
   test("returns no gaps for teacher when search range does not overlap windows", async () => {
     await runInRollback(async tx => {
       const user = await createTestUser(tx, { name: "Early Teacher", email: `early-${randomUUID()}@test.com` });
-      const teacher = await createTestTeacher(tx, user.id, { status: "ACTIVATED" });
+      const teacher = await createTestTeacher(tx, user.id);
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "06:00", "08:00");
 
@@ -271,7 +277,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
     await runInRollback(async tx => {
       const adminUser = await createTestUser(tx, { name: "Admin", email: `admin-${randomUUID()}@test.com` });
       const user = await createTestUser(tx, { name: "Vacation Teacher", email: `vac-${randomUUID()}@test.com` });
-      const teacher = await createTestTeacher(tx, user.id, { status: "ACTIVATED" });
+      const teacher = await createTestTeacher(tx, user.id);
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "17:00");
 
@@ -306,7 +312,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
   test("excludes gaps blocked by booked class instances", async () => {
     await runInRollback(async tx => {
       const user = await createTestUser(tx, { name: "Booked Teacher", email: `booked-${randomUUID()}@test.com` });
-      const teacher = await createTestTeacher(tx, user.id, { status: "ACTIVATED" });
+      const teacher = await createTestTeacher(tx, user.id);
       const { student } = await setupStudent(tx, { name: "Parent", email: `parent-${randomUUID()}@test.com` }, {}, {});
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "17:00");
@@ -332,7 +338,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
   test("filters by minimum available days and total gaps", async () => {
     await runInRollback(async tx => {
       const user = await createTestUser(tx, { name: "Threshold Teacher", email: `thresh-${randomUUID()}@test.com` });
-      const teacher = await createTestTeacher(tx, user.id, { status: "ACTIVATED" });
+      const teacher = await createTestTeacher(tx, user.id);
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
 

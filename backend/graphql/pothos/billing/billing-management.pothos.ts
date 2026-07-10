@@ -14,6 +14,7 @@ import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
 import type {
   DeleteInvoiceReturnType,
+  InvoicePaymentSubmissionReturnType,
   ManualInvoiceResult,
   MarkInvoicePaidReturnType,
   SendPaymentReminderResult,
@@ -75,6 +76,29 @@ export const DeleteInvoiceResultPothosObject = DeleteInvoiceResultRef.implement(
   }),
 });
 
+const InvoicePaymentSubmissionStatusEnum = gqlSchemaBuilder.enumType("InvoicePaymentSubmissionStatus", {
+  values: ["pending", "approved", "rejected"] as const,
+});
+
+const InvoicePaymentSubmissionRef =
+  gqlSchemaBuilder.objectRef<InvoicePaymentSubmissionReturnType>("InvoicePaymentSubmission");
+
+export const InvoicePaymentSubmissionPothosObject = InvoicePaymentSubmissionRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    invoiceId: t.exposeString("invoiceId"),
+    fileId: t.exposeString("fileId"),
+    filePath: t.exposeString("filePath"),
+    mimeType: t.exposeString("mimeType"),
+    status: t.expose("status", { type: InvoicePaymentSubmissionStatusEnum }),
+    submittedByUserId: t.exposeString("submittedByUserId"),
+    submittedAt: t.exposeString("submittedAt"),
+    reviewedByUserId: t.exposeString("reviewedByUserId", { nullable: true }),
+    reviewedAt: t.exposeString("reviewedAt", { nullable: true }),
+    rejectionReason: t.exposeString("rejectionReason", { nullable: true }),
+  }),
+});
+
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
 gqlSchemaBuilder.mutationField("createManualInvoice", t =>
@@ -117,21 +141,21 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
+gqlSchemaBuilder.mutationField("submitPaymentProof", t =>
   t.field({
     type: MarkInvoicePaidResultRef,
-    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    authScopes: { permission: AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, notImpersonating: true },
     args: {
       invoiceId: t.arg.string({ required: true }),
+      proofFileId: t.arg.id({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
-      userPaymentMethodId: t.arg.id({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const result = await BillingManagementService.markInvoicePaid(
+      const result = await BillingManagementService.submitPaymentProof(
         userId,
         args.invoiceId,
-        args.userPaymentMethodId,
+        args.proofFileId,
         args.expectedVersion ?? undefined,
         ctx.locale
       );
@@ -143,6 +167,109 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
         version: result.invoice.version,
         notificationSummaryUpdated: result.notificationSummaryUpdated,
       };
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("approvePaymentProof", t =>
+  t.field({
+    type: MarkInvoicePaidResultRef,
+    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    args: {
+      invoiceId: t.arg.string({ required: true }),
+      expectedVersion: t.arg.int({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      const result = await BillingManagementService.approvePaymentProof(
+        userId,
+        args.invoiceId,
+        args.expectedVersion ?? undefined,
+        ctx.locale
+      );
+      return {
+        id: result.invoice.id,
+        parentId: result.invoice.parentId,
+        status: result.invoice.status,
+        paidDate: result.invoice.paidDate,
+        version: result.invoice.version,
+        notificationSummaryUpdated: result.notificationSummaryUpdated,
+      };
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("rejectPaymentProof", t =>
+  t.field({
+    type: MarkInvoicePaidResultRef,
+    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    args: {
+      invoiceId: t.arg.string({ required: true }),
+      rejectionReason: t.arg.string({ required: false }),
+      expectedVersion: t.arg.int({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      const result = await BillingManagementService.rejectPaymentProof(
+        userId,
+        args.invoiceId,
+        args.rejectionReason ?? null,
+        args.expectedVersion ?? undefined,
+        ctx.locale
+      );
+      return {
+        id: result.invoice.id,
+        parentId: result.invoice.parentId,
+        status: result.invoice.status,
+        paidDate: result.invoice.paidDate,
+        version: result.invoice.version,
+        notificationSummaryUpdated: result.notificationSummaryUpdated,
+      };
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
+  t.field({
+    type: MarkInvoicePaidResultRef,
+    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    args: {
+      invoiceId: t.arg.string({ required: true }),
+      expectedVersion: t.arg.int({ required: false }),
+      proofFileId: t.arg.id({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      const result = await BillingManagementService.markInvoicePaid(
+        userId,
+        args.invoiceId,
+        args.proofFileId,
+        args.expectedVersion ?? undefined,
+        ctx.locale
+      );
+      return {
+        id: result.invoice.id,
+        parentId: result.invoice.parentId,
+        status: result.invoice.status,
+        paidDate: result.invoice.paidDate,
+        version: result.invoice.version,
+        notificationSummaryUpdated: result.notificationSummaryUpdated,
+      };
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("invoicePaymentSubmission", t =>
+  t.field({
+    type: InvoicePaymentSubmissionRef,
+    nullable: true,
+    authScopes: { loggedIn: true },
+    args: {
+      invoiceId: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return BillingManagementService.getInvoicePaymentSubmission(userId, args.invoiceId, ctx.locale);
     },
   })
 );

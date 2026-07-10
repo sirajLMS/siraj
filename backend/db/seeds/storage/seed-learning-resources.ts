@@ -1,6 +1,3 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { learningResources } from "@/backend/db/schema/communications/communications";
 import {
   buildResourceDisplayName,
   LEARNING_RESOURCE_SPECS,
@@ -10,6 +7,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
@@ -30,26 +28,18 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
     const bucketPath = `public/resources/${spec.slug}.pdf`;
     const displayName = buildResourceDisplayName(seedConfig, i);
 
-    const [existing] = await db
-      .select()
-      .from(learningResources)
-      .where(eq(learningResources.filePath, bucketPath))
-      .limit(1);
-
+    const existing = await LearningResourceService.findByFilePath(bucketPath);
     if (existing) {
       results.push(existing);
       continue;
     }
 
-    const [inserted] = await db
-      .insert(learningResources)
-      .values({
-        displayName,
-        filePath: bucketPath,
-        uploadedByUserId: uploader.id,
-        createdAt: now,
-      })
-      .returning();
+    const inserted = await LearningResourceService.createSeedResource({
+      displayName,
+      filePath: bucketPath,
+      uploadedByUserId: uploader.id,
+      createdAt: now,
+    });
 
     if (shouldSeedExtendedFiles(seedConfig)) {
       try {

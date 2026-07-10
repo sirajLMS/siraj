@@ -70,7 +70,6 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .insert(teachers)
       .values({
         userId: teacherUser.id,
-        status: "ACTIVATED",
         createdAt: now,
         updatedAt: now,
       })

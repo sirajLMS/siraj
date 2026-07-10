@@ -9,6 +9,7 @@ import {
   parseIanaTimezoneOrNull,
 } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 
@@ -105,6 +106,8 @@ export async function buildClassInstanceDetail(
   const hasTimezoneMismatch =
     teacherTimezone !== null && studentTimezone !== null && teacherTimezone !== studentTimezone;
 
+  const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(instance.id);
+
   const startTime = start.toISOString().split("T")[1].substring(0, 5);
   const endTime = end.toISOString().split("T")[1].substring(0, 5);
   return {
@@ -126,7 +129,8 @@ export async function buildClassInstanceDetail(
     hasTimezoneMismatch,
     studentTimezone,
     teacherTimezone,
-    meetingJoinUrl: instance.meetingJoinUrl ?? null,
+    meetingJoinUrl: effectiveMeeting.joinUrl,
+    effectiveMeeting,
     student: buildStudentParticipant(instance, unknownName),
     teacher: buildTeacherParticipant(instance, unknownName),
     performance: buildPerformanceBlock(perf),

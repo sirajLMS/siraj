@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { ClassMeetingConfigReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type { MeetingConfigDetails, UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type {
   MeetingProviderFieldSchema,
@@ -133,6 +134,55 @@ export const UserMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("Us
     label: t.string({ required: false }),
     isDefault: t.boolean({ required: false }),
     password: t.string({ required: false }),
+    details: t.field({ type: MeetingConfigDetailsInputPothos, required: false }),
+  }),
+});
+
+const ClassMeetingConfigRef = gqlSchemaBuilder.objectRef<ClassMeetingConfigReturnType>("ClassMeetingConfig");
+
+export const ClassMeetingConfigPothosObject = ClassMeetingConfigRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    classInstanceId: t.exposeString("classInstanceId", { nullable: true }),
+    recurringScheduleId: t.exposeString("recurringScheduleId", { nullable: true }),
+    providerId: t.exposeString("providerId"),
+    label: t.exposeString("label", { nullable: true }),
+    isDefault: t.exposeBoolean("isDefault"),
+    details: t.field({ type: MeetingConfigDetailsPothosObject, resolve: parent => parent.details }),
+    hasSecret: t.exposeBoolean("hasSecret", { nullable: true }),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
+    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+    provider: t.field({
+      type: MeetingProviderPothosObject,
+      nullable: true,
+      resolve: async (parent, _args, ctx) => {
+        const { MeetingProviderCatalogService } = await import(
+          "@/backend/services/meeting/meeting-provider-catalog.service"
+        );
+        return MeetingProviderCatalogService.getProviderById(ctx.user?.id ?? "", parent.providerId, ctx.locale);
+      },
+    }),
+  }),
+});
+
+export const ClassMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("ClassMeetingConfigCreateInput", {
+  fields: t => ({
+    classInstanceId: t.string({ required: false }),
+    recurringScheduleId: t.string({ required: false }),
+    providerId: t.string({ required: true }),
+    label: t.string({ required: false }),
+    isDefault: t.boolean({ required: true }),
+    password: t.string({ required: false }),
+    details: t.field({ type: MeetingConfigDetailsInputPothos, required: true }),
+  }),
+});
+
+export const ClassMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("ClassMeetingConfigUpdateInput", {
+  fields: t => ({
+    label: t.string({ required: false }),
+    isDefault: t.boolean({ required: false }),
+    password: t.string({ required: false }),
+    providerId: t.string({ required: false }),
     details: t.field({ type: MeetingConfigDetailsInputPothos, required: false }),
   }),
 });

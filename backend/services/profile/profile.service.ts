@@ -482,9 +482,9 @@ export namespace ProfileService {
   }
 
   type RoleSpecificUpdateInput = {
-    readonly teacher?: UpdateOwnProfileInput["teacher"];
-    readonly parent?: UpdateOwnProfileInput["parent"];
-    readonly staff?: UpdateOwnProfileInput["staff"];
+    readonly teacher?: UpdateOwnProfileInput["teacher"] | UpdateUserProfileInput["teacher"];
+    readonly parent?: UpdateOwnProfileInput["parent"] | UpdateUserProfileInput["parent"];
+    readonly staff?: UpdateOwnProfileInput["staff"] | UpdateUserProfileInput["staff"];
   };
 
   async function applyTeacherUpdate(
@@ -550,7 +550,7 @@ export namespace ProfileService {
     actorUserId: string,
     scope: ProfileScope,
     roleIds: ResolvedRoleIds,
-    staffInput: NonNullable<UpdateOwnProfileInput["staff"]>,
+    staffInput: NonNullable<UpdateOwnProfileInput["staff"] | UpdateUserProfileInput["staff"]>,
     locale?: string
   ): Promise<void> {
     if (!roleIds.staffProfileId) {
@@ -558,11 +558,27 @@ export namespace ProfileService {
     }
 
     if (scope === ProfileScope.OWN) {
-      await ManagerProfileService.updateOwnStaffProfile(actorUserId, roleIds.staffProfileId, staffInput, locale);
+      const ownInput = staffInput as NonNullable<UpdateOwnProfileInput["staff"]>;
+      await ManagerProfileService.updateOwnStaffProfile(
+        actorUserId,
+        roleIds.staffProfileId,
+        {
+          phone: ownInput.phone ?? null,
+        },
+        locale
+      );
       return;
     }
 
-    await ManagerProfileService.updateManagerProfile(actorUserId, roleIds.staffProfileId, staffInput, locale);
+    const adminInput = staffInput as NonNullable<UpdateUserProfileInput["staff"]>;
+    await ManagerProfileService.updateManagerProfile(
+      actorUserId,
+      roleIds.staffProfileId,
+      {
+        status: adminInput.status as import("@/backend/enum").AccountStatus | null | undefined,
+      },
+      locale
+    );
   }
 
   async function applyRoleSpecificUpdates(

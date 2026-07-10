@@ -7,7 +7,7 @@ import { ParentRepository } from "@/backend/db/repo";
 import { parents, users } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import { AccountStatus, CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -34,7 +34,7 @@ describe("ParentRepository — getParentProfile", () => {
       expect(profile?.userId).toBe(user.id);
       expect(profile?.name).toBe("Profile Parent");
       expect(profile?.email).toBe(user.email);
-      expect(typeof profile?.status).toBe("string");
+      expect(typeof profile?.lifecycleStatus).toBe("string");
       expect(profile?.timezone).toBe(IanaTimezone.UTC);
       expect(profile?.createdAt).toBeInstanceOf(Date);
       expect(profile?.updatedAt).toBeInstanceOf(Date);
@@ -136,23 +136,45 @@ describe("ParentRepository — deactivateParent", () => {
       const result = await ParentRepository.deactivateParent(parent.id, tx);
 
       expect(result.id).toBe(parent.id);
-      expect(result.status).toBe("DEACTIVATED");
+      expect(result.accountStatus).toBe(AccountStatus.DEACTIVATED);
       expect(result.userId).toBe(user.id);
 
-      // Verify in DB via tx
-      const updated = await tx
+      const updated = await tx.select({ status: users.status }).from(users).where(eq(users.id, user.id)).limit(1);
+      expect(updated[0]?.status).toBe(AccountStatus.DEACTIVATED);
+
+      const parentRow = await tx
         .select({ status: parents.status })
         .from(parents)
         .where(eq(parents.id, parent.id))
         .limit(1);
-      expect(updated[0]?.status).toBe("DEACTIVATED");
+      expect(parentRow[0]?.status).toBe("REGULAR");
+    });
+  });
+
+  test("deactivates account without changing parent lifecycle status", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Trial Parent", email: `tp-${randomUUID()}@test.com` });
+      const parent = await createTestParent(tx, user.id, { status: "ON_TRIAL" });
+
+      await ParentRepository.deactivateParent(parent.id, tx);
+
+      const parentRow = await tx
+        .select({ status: parents.status })
+        .from(parents)
+        .where(eq(parents.id, parent.id))
+        .limit(1);
+      expect(parentRow[0]?.status).toBe("ON_TRIAL");
     });
   });
 
   test("throws parentAlreadyDeactivated when parent is already DEACTIVATED", async () => {
     await runInRollback(async tx => {
-      const user = await createTestUser(tx, { name: "Deactivated Parent", email: `dp-${randomUUID()}@test.com` });
-      const parent = await createTestParent(tx, user.id, { status: "DEACTIVATED" });
+      const user = await createTestUser(tx, {
+        name: "Deactivated Parent",
+        email: `dp-${randomUUID()}@test.com`,
+        status: AccountStatus.DEACTIVATED,
+      });
+      const parent = await createTestParent(tx, user.id, { status: "REGULAR" });
 
       const error = await expectRepoError(() => ParentRepository.deactivateParent(parent.id, tx));
       expect(error.message).toContain("already deactivated");

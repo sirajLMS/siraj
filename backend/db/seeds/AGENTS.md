@@ -63,3 +63,53 @@ This ensures that we avoid duplicating data (such as permission groups or users)
 3. Add `export { seedOrGet as seedOrGet<Entity> } from "./seed-<entity>";` to the sub-directory's `index.ts`.
 4. Add the import + orchestration call to `backend/db/seeds/index.ts` (the master controller) so the new seeder runs in the correct dependency order.
 5. If a new sub-directory was created, also add its `index.ts` barrel.
+
+## Service-Only Data Access (CRITICAL)
+
+Seeders **must not** import from `@/backend/db/**` (schema, repo, drizzleDb, migrations). ESLint enforces this via `no-restricted-imports` on `backend/db/seeds/**/*.ts`.
+
+### Allowed imports in seeders
+
+| Layer | Path pattern | Purpose |
+|-------|--------------|---------|
+| Services | `@/backend/services/**` | All database writes and reads |
+| Seed lib | `@/backend/db/seeds/lib` | Factories, config, `seedOrGet` helpers |
+| Types | `@/backend/types` | Entity shapes returned to the controller |
+| Enums | `@/backend/enum/**` | Seed data constants |
+| Storage bootstrap | `@/backend/storage/demo/**` | Physical file seeding only (no DB) |
+
+### Forbidden in seeders
+
+- `@/backend/db/drizzleDb`, `@/backend/db/schema/**`, `@/backend/db/repo/**`
+- Direct `drizzle-orm` queries against application tables
+- `batchInsert` (moved to `@/backend/db/repo/shared/bulk-upsert` — use service bootstrap methods instead)
+
+When a bootstrap method is missing on a service, **add it to the service** (and repository if needed) rather than querying the DB from the seeder.
+
+## Stable Key Registry
+
+Use these service bootstrap entry points from seeders. Domain seed data (constants, specs) stays in the seeder or `lib/*-factory.ts`; persistence goes through services.
+
+| Seeder domain | Service | Bootstrap method(s) |
+|---------------|---------|---------------------|
+| `auth/seed-meeting-permissions` | `PermissionManagementService` | `upsertSystemPermissions`, `ensureGroupPermissionsForGroups` |
+| `auth/seed-payment-method-permissions` | `PermissionManagementService` | `upsertSystemPermissions`, `ensureGroupPermissionsForGroups` |
+| `auth/seed-user-permission-overrides` | `PermissionManagementService` | `ensureUserPermissionOverride` |
+| `audit/seed-audit-logs` | `AuditService` | `countAuditLogs`, `listAuditLogs`, `createManyAuditLogs` |
+| `audit/seed-admin-audit-logs` | `AuditService` | `countAdminAuditLogs`, `listAdminAuditLogs`, `createManyAdminAuditLogs` |
+| `complaints/seed-complaints` | `ComplaintService` | `createManySeedComplaints` |
+| `complaints/seed-complaint-responses` | `ComplaintService` | `ensureSeedComplaintResponse` |
+| `notifications/seed-user-notification-preferences` | `NotificationPreferencesService` | `upsertManySeedPreferences` |
+| `notifications/seed-notification-deliveries` | `CommunicationService` | `createManySeedDeliveries` |
+| `parents/seed-suggestions` | `SuggestionService` | `createManySeedSuggestions` |
+| `storage/seed-learning-resources` | `LearningResourceService` | `findByFilePath`, `createSeedResource` |
+| `storage/seed-site-content` | `StorageService` | `upsertManySiteContent` |
+| `meeting/seed-meeting-providers` | `MeetingProviderCatalogService` | `upsertManyProviders` |
+| `shared/timezones` | `ReferenceDataService` | `upsertManyTimezones` |
+| `shared/system-settings` | `SystemSettingsService` | `upsertManySettings`, `uploadHandbook`, `uploadParentHandbook` |
+| File attachments | `StorageService` (via `lib/file-seed-helper`) | `linkFileToEntity` |
+
+### Shared lib exports
+
+- `orchestrateSeedMany` — idempotent many-row seeding helper (re-exported from `lib/index.ts`)
+- `batchInsert` — **removed** from `lib/index.ts`; use repo `bulkInsertOnConflictDoNothing` via services

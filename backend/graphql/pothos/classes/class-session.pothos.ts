@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  EffectiveMeetingPothosObject,
+  resolveEffectiveMeetingForClassInstance,
+} from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
+import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   ClassTypePothosObject,
@@ -96,7 +100,18 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
     studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
     teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
-    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    meetingJoinUrl: t.string({
+      nullable: true,
+      deprecationReason: "Use effectiveMeeting.joinUrl",
+      resolve: async parent => {
+        const meeting = await resolveEffectiveMeetingForClassInstance(parent.id);
+        return meeting.joinUrl;
+      },
+    }),
+    effectiveMeeting: t.field({
+      type: EffectiveMeetingPothosObject,
+      resolve: parent => resolveEffectiveMeetingForClassInstance(parent.id),
+    }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
     isRescheduled: t.exposeBoolean("isRescheduled"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
@@ -167,7 +182,18 @@ export const FutureClassPothosObject = FutureClassRef.implement({
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
-    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    meetingJoinUrl: t.string({
+      nullable: true,
+      deprecationReason: "Use effectiveMeeting.joinUrl",
+      resolve: async parent => {
+        const meeting = await resolveEffectiveMeetingForClassInstance(parent.id);
+        return meeting.joinUrl;
+      },
+    }),
+    effectiveMeeting: t.field({
+      type: EffectiveMeetingPothosObject,
+      resolve: parent => resolveEffectiveMeetingForClassInstance(parent.id),
+    }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
   }),
 });

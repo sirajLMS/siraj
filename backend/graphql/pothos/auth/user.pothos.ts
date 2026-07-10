@@ -1,6 +1,10 @@
 import { UserRepository } from "@/backend/db/repo";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { AppPermissionPothosEnum, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  AccountStatusPothosObject,
+  AppPermissionPothosEnum,
+  CurrencyCodePothosObject,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { UserReturnType } from "@/backend/types/auth/auth.types";
 
@@ -25,6 +29,8 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
+    phone: t.exposeString("phone", { nullable: true }),
+    status: t.expose("status", { type: AccountStatusPothosObject }),
     notificationCount: t.int({ resolve: () => 0 }),
     permissions: t.field({
       type: [AppPermissionPothosEnum],

@@ -192,4 +192,24 @@ export namespace SystemSettingsService {
     logger.info("Deleting teacher handbook from system settings repository...");
     await SystemSettingsRepository.deleteSetting(HANDBOOK_SETTING_KEY);
   }
+
+  export type SystemSettingUpsertInput = {
+    key: string;
+    value: string;
+    dataType?: "string" | "integer";
+    description: string;
+    category: "security" | "system" | "scheduling" | "communication";
+  };
+
+  export async function upsertManySettings(inputs: SystemSettingUpsertInput[], updatedByUserId: string | null = null) {
+    const results = [];
+    for (const input of inputs) {
+      const row = await SystemSettingsRepository.upsertSetting({
+        ...input,
+        updatedByUserId,
+      });
+      results.push(row);
+    }
+    return results;
+  }
 }

@@ -1,10 +1,11 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  ClassMeetingConfigPothosObject,
   MeetingProviderPothosObject,
   UserMeetingConfigPothosObject,
 } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
+import { ClassMeetingConfigService, MeetingConfigService } from "@/backend/services/meeting";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 
 gqlSchemaBuilder.queryField("meetingProviders", t =>
@@ -59,6 +60,34 @@ gqlSchemaBuilder.queryField("userMeetingConfig", t =>
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       return MeetingConfigService.getUserMeetingConfig(actorUserId, args.id, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("classMeetingConfigs", t =>
+  t.field({
+    type: [ClassMeetingConfigPothosObject],
+    args: {
+      classInstanceId: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return ClassMeetingConfigService.listClassMeetingConfigs(actorUserId, args.classInstanceId, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("recurringMeetingConfigs", t =>
+  t.field({
+    type: [ClassMeetingConfigPothosObject],
+    args: {
+      recurringScheduleId: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return ClassMeetingConfigService.listRecurringMeetingConfigs(actorUserId, args.recurringScheduleId, ctx.locale);
     },
   })
 );

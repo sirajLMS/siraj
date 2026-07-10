@@ -1,4 +1,11 @@
-import type { AccountStatus, BookingStatus, ClassExecutionState, ClassOutcome, CurrencyCode, ParentStatus } from "@/backend/enum";
+import type {
+  AccountStatus,
+  BookingStatus,
+  ClassExecutionState,
+  ClassOutcome,
+  CurrencyCode,
+  ParentStatus,
+} from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 

@@ -1,4 +1,10 @@
-import { ParentRepository, SignedUrlRepository, StorageDbRepository, TeacherRepository } from "@/backend/db/repo";
+import {
+  ParentRepository,
+  SignedUrlRepository,
+  SiteContentRepository,
+  StorageDbRepository,
+  TeacherRepository,
+} from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
@@ -9,9 +15,16 @@ import type {
   StorageItemProtectionUpdateInput,
   StorageUploadValidationParams,
 } from "@/backend/types";
+import type { SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
 
 // --- Extended StorageService ---
 export namespace StorageService {
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function upsertManySiteContent(inputs: readonly SiteContentUpsertInput[]) {
+    return SiteContentRepository.upsertMany(inputs);
+  }
+
   /**
    * Require that the user has STORAGE_MANAGE permission.
    * Throws a localized error if the user lacks the permission.
@@ -241,6 +254,25 @@ export namespace StorageService {
     isProtected: boolean;
   } | null> {
     return await StorageDbRepository.fileByPath(filePath);
+  }
+
+  /**
+   * Links an uploaded file path to an entity junction table.
+   */
+  export async function linkFileToEntity(input: {
+    referenceTable: string;
+    referenceId: string;
+    usageType: string;
+    filePath: string;
+  }): Promise<FileOperationResult> {
+    return StorageDbRepository.registerFileUsage({
+      referenceTable: input.referenceTable as Parameters<
+        typeof StorageDbRepository.registerFileUsage
+      >[0]["referenceTable"],
+      referenceId: input.referenceId,
+      usageType: input.usageType,
+      filePath: input.filePath,
+    });
   }
 
   /**

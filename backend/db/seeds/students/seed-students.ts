@@ -1,7 +1,3 @@
-import { and, eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { StorageDbRepository } from "@/backend/db/repo";
-import { students, teacherAssignments } from "@/backend/db/schema/students/students";
 import {
   ALL_STUDENT_STATUSES,
   buildStudentName,
@@ -14,6 +10,8 @@ import {
 } from "@/backend/db/seeds/lib";
 import { StudentStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { StorageService } from "@/backend/services/storage/storage.service";
+import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
@@ -27,68 +25,6 @@ const DEMO_STUDENTS = [
     avatarIndex: 2,
   },
 ] as const;
-
-interface UpsertStudentContext {
-  status: StudentStatus;
-  now: Date;
-}
-
-async function upsertStudent(
-  parentId: string,
-  teacherId: string,
-  name: string,
-  timezoneOverride: string | null,
-  idempotencyKey: string,
-  avatarUrl: string | null,
-  context: UpsertStudentContext
-) {
-  const { status, now } = context;
-  const [result] = await db
-    .insert(students)
-    .values({
-      parentId,
-      primaryTeacherId: teacherId,
-      name,
-      avatarUrl,
-      status,
-      classesTotal: 10,
-      classesRemaining: 5,
-      version: 1,
-      timezoneOverride,
-      idempotencyKey,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: students.idempotencyKey,
-      set: {
-        name,
-        avatarUrl,
-        timezoneOverride,
-        primaryTeacherId: teacherId,
-        parentId,
-        updatedAt: now,
-      },
-    })
-    .returning();
-  return result;
-}
-
-async function ensureTeacherAssignment(studentId: string, teacherId: string, assignedAt: Date) {
-  const existing = await db
-    .select()
-    .from(teacherAssignments)
-    .where(and(eq(teacherAssignments.studentId, studentId), eq(teacherAssignments.teacherId, teacherId)))
-    .limit(1);
-
-  if (existing.length === 0) {
-    await db.insert(teacherAssignments).values({
-      studentId,
-      teacherId,
-      assignedAt,
-    });
-  }
-}
 
 async function seedAvatarAssets(): Promise<Map<string, string | null>> {
   const avatarUrls = new Map<string, string | null>();
@@ -106,7 +42,6 @@ async function seedAvatarAssets(): Promise<Map<string, string | null>> {
       const bucketPath = `public/avatars/students/${fileName}`;
       const localFilePath = resolveAssetPath(`avatars/students/${fileName}`);
 
-      // Check if the file exists locally before seeding
       try {
         await fileSeeder.seedFile({ bucketPath, localFilePath });
         const fileInfo = await storageService.fileInfoByPath(bucketPath);
@@ -127,7 +62,7 @@ async function seedAvatarAssets(): Promise<Map<string, string | null>> {
     logger.info("Student avatar assets seeded successfully.");
   } catch (error) {
     logger.error("Failed to seed student avatars:", error);
-    throw error; // Re-throw to ensure seeding fails visibly
+    throw error;
   }
 
   return avatarUrls;
@@ -140,7 +75,6 @@ function getAvatarUrl(avatarUrls: Map<string, string | null>, index: number): st
 
 export async function seedOrGet(parentsList: ParentEntity[], teachersList: TeacherEntity[], config?: SeedConfig) {
   logger.info("Seeding system students...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   if (!parentsList?.length) {
@@ -177,18 +111,25 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
 
     const status = i === 0 ? StudentStatus.REGULAR : cycleAtIndex(ALL_STUDENT_STATUSES, i);
 
-    const student = await upsertStudent(parent.id, teacher.id, name, timezoneOverride, idempotencyKey, avatarUrl, {
+    const student = await StudentBootstrapService.upsertByIdempotencyKey({
+      parentId: parent.id,
+      primaryTeacherId: teacher.id,
+      name,
+      timezoneOverride,
+      idempotencyKey,
+      avatarUrl,
       status,
-      now,
+      classesTotal: 10,
+      classesRemaining: 5,
     });
     results.push(student);
 
-    await ensureTeacherAssignment(student.id, teacher.id, assignmentDate);
+    await StudentBootstrapService.ensureTeacherAssignment(student.id, teacher.id, assignmentDate);
 
     if (avatarUrl) {
       const fileName = getStudentAvatarFileName(i);
       try {
-        await StorageDbRepository.registerFileUsage({
+        await StorageService.linkFileToEntity({
           referenceTable: "students",
           referenceId: student.id,
           usageType: "avatar",

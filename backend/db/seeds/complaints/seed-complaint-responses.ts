@@ -1,9 +1,7 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { complaintResponses } from "@/backend/db/schema/communications/communications";
 import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ComplaintStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import type { UserSelectType } from "@/backend/types";
 
 type ComplaintRow = {
@@ -13,7 +11,6 @@ type ComplaintRow = {
 
 export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding complaint responses...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   if (!seedConfig.enableCommunications || !complaintsList?.length) {
@@ -27,28 +24,13 @@ export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserS
     const complaint = complaintsList[i];
     if (complaint.status !== ComplaintStatus.ANSWERED) continue;
 
-    const [existing] = await db
-      .select()
-      .from(complaintResponses)
-      .where(eq(complaintResponses.complaintId, complaint.id))
-      .limit(1);
-
-    if (existing) {
-      results.push(existing);
-      continue;
-    }
-
     const faker = getFakerForIndex(seedConfig.fakerSeed, 12000 + i);
-    const [inserted] = await db
-      .insert(complaintResponses)
-      .values({
-        complaintId: complaint.id,
-        responderUserId: adminUser?.id ?? null,
-        body: faker.lorem.paragraph(),
-        emailSent: true,
-        createdAt: now,
-      })
-      .returning();
+    const inserted = await ComplaintService.ensureSeedComplaintResponse({
+      complaintId: complaint.id,
+      responderUserId: adminUser?.id ?? null,
+      body: faker.lorem.paragraph(),
+      emailSent: true,
+    });
     results.push(inserted);
   }
 

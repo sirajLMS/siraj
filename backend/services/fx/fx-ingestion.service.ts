@@ -185,4 +185,20 @@ export namespace FxIngestionService {
       };
     }
   }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function upsertManyExchangeRates(
+    inputs: readonly Types.CurrencyExchangeRateSubmitInput[],
+    tx?: DBTransaction
+  ): Promise<Types.CurrencyExchangeRateSelectType[]> {
+    return BillingRepository.upsertManyExchangeRates(inputs, tx);
+  }
+
+  export async function createManyExchangeAuditLogs(
+    inputs: readonly Types.SeedExchangeAuditLogInput[],
+    tx?: DBTransaction
+  ): Promise<Types.CurrencyExchangeAuditLogInsertType[]> {
+    return BillingRepository.createManyExchangeAuditLogs(inputs, tx);
+  }
 }

@@ -1,6 +1,3 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { leaveRequests } from "@/backend/db/schema/classes/scheduling";
 import {
   ALL_LEAVE_REQUESTER_TYPES,
   cycleAtIndex,
@@ -12,6 +9,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { LeaveRequestService } from "@/backend/services/schedule/leave-request.service";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
 
 function resolveRequesterUserId(
@@ -30,39 +28,6 @@ function resolveRequesterUserId(
   return teacherUserMap.get(instance.teacherId);
 }
 
-async function upsertLeaveRequest(
-  instance: ClassInstanceEntity,
-  values: {
-    requestedByUserId: string;
-    requesterType: LeaveRequesterType;
-    reason: string;
-    status: LeaveRequestStatus;
-    createdAt: Date;
-    processedAt: Date | null;
-    processedByUserId: string | null;
-  }
-) {
-  const [existing] = await db
-    .select()
-    .from(leaveRequests)
-    .where(eq(leaveRequests.classInstanceId, instance.id))
-    .limit(1);
-
-  if (existing) {
-    return existing;
-  }
-
-  const [inserted] = await db
-    .insert(leaveRequests)
-    .values({
-      classInstanceId: instance.id,
-      ...values,
-    })
-    .returning();
-
-  return inserted;
-}
-
 type LeaveRequestContext = {
   teacherUserMap: Map<string, string>;
   studentParentUserMap: Map<string, string>;
@@ -70,8 +35,8 @@ type LeaveRequestContext = {
   fakerSeed: number;
 };
 
-async function seedApprovedLeaves(leaveInstances: ClassInstanceEntity[], maxLeaves: number, ctx: LeaveRequestContext) {
-  const results = [];
+function buildApprovedLeaveInputs(leaveInstances: ClassInstanceEntity[], maxLeaves: number, ctx: LeaveRequestContext) {
+  const inputs = [];
   for (let i = 0; i < maxLeaves; i++) {
     const instance = leaveInstances[i];
     const requesterType = cycleAtIndex(ALL_LEAVE_REQUESTER_TYPES, i);
@@ -85,7 +50,8 @@ async function seedApprovedLeaves(leaveInstances: ClassInstanceEntity[], maxLeav
     if (!actorUserId) continue;
 
     const faker = getFakerForIndex(ctx.fakerSeed, instance.id.length);
-    const inserted = await upsertLeaveRequest(instance, {
+    inputs.push({
+      classInstanceId: instance.id,
       requestedByUserId: actorUserId,
       requesterType,
       reason: faker.lorem.sentence(),
@@ -94,12 +60,11 @@ async function seedApprovedLeaves(leaveInstances: ClassInstanceEntity[], maxLeav
       processedAt: instance.scheduledEndAt,
       processedByUserId: ctx.adminUserId ?? null,
     });
-    results.push(inserted);
   }
-  return results;
+  return inputs;
 }
 
-async function seedSupplementalLeaves(
+function buildSupplementalLeaveInputs(
   pendingFutureInstances: ClassInstanceEntity[],
   supplementalCount: number,
   offsetIndex: number,
@@ -110,7 +75,7 @@ async function seedSupplementalLeaves(
     LeaveRequestStatus.RESCHEDULED,
     LeaveRequestStatus.CANCELLED,
   ] as const;
-  const results = [];
+  const inputs = [];
   for (let i = 0; i < supplementalCount; i++) {
     const instance = pendingFutureInstances[i];
     const status = supplementalStatuses[i];
@@ -126,7 +91,8 @@ async function seedSupplementalLeaves(
 
     const faker = getFakerForIndex(ctx.fakerSeed, 8000 + i);
     const isProcessed = status !== LeaveRequestStatus.PENDING;
-    const inserted = await upsertLeaveRequest(instance, {
+    inputs.push({
+      classInstanceId: instance.id,
       requestedByUserId: actorUserId,
       requesterType,
       reason: faker.lorem.sentence(),
@@ -135,9 +101,8 @@ async function seedSupplementalLeaves(
       processedAt: isProcessed ? instance.scheduledStartAt : null,
       processedByUserId: isProcessed ? (ctx.adminUserId ?? null) : null,
     });
-    results.push(inserted);
   }
-  return results;
+  return inputs;
 }
 
 export async function seedOrGet(
@@ -181,9 +146,9 @@ export async function seedOrGet(
       ? Math.min(3, pendingFutureInstances.length)
       : Math.min(1, pendingFutureInstances.length);
 
-  const approved = await seedApprovedLeaves(leaveInstances, maxLeaves, ctx);
-  const supplemental = await seedSupplementalLeaves(pendingFutureInstances, supplementalCount, maxLeaves, ctx);
-  const results = [...approved, ...supplemental];
+  const approvedInputs = buildApprovedLeaveInputs(leaveInstances, maxLeaves, ctx);
+  const supplementalInputs = buildSupplementalLeaveInputs(pendingFutureInstances, supplementalCount, maxLeaves, ctx);
+  const results = await LeaveRequestService.createManyIfMissing([...approvedInputs, ...supplementalInputs]);
 
   logger.info(`Leave requests seeded (${results.length} rows).`);
   return results;

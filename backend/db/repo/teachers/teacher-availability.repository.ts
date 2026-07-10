@@ -676,7 +676,7 @@ export namespace TeacherAvailabilityRepository {
   };
 
   function buildTeacherQueryConditions(gender: Gender | null | undefined, teacherNameSearch?: string | null) {
-    const conditions = [eq(teachers.status, "ACTIVATED")];
+    const conditions = [eq(users.status, "ACTIVATED")];
     if (gender) {
       conditions.push(eq(teachers.gender, gender));
     }

@@ -177,7 +177,6 @@ export namespace TestHelperService {
       .insert(teachers)
       .values({
         userId: teacherUserRowId,
-        status: "ACTIVATED",
         createdAt: now,
         updatedAt: now,
       })
@@ -386,7 +385,6 @@ export namespace TestHelperService {
       .insert(staffProfiles)
       .values({
         userId: userRow.id,
-        status: "ACTIVATED",
         createdAt: now,
         updatedAt: now,
       })

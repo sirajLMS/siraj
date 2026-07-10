@@ -1,9 +1,9 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { currencyHedges } from "@/backend/db/schema/billing/billing";
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
+import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import { CurrencyCode } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { CurrencyHedgeService } from "@/backend/services/fx/currency-hedge.service";
+import type { CurrencyHedgeReturnType } from "@/backend/types";
 
 const HEDGE_SPECS = [
   { currency: CurrencyCode.USD, amount: "10000.00", hedgeType: "LONG", notes: "USD exposure hedge" },
@@ -13,42 +13,41 @@ const HEDGE_SPECS = [
 
 export async function seedOrGet(config?: SeedConfig) {
   logger.info("Seeding currency hedges...");
-  const now = new Date();
+
   const seedConfig = config ?? loadSeedConfig();
 
   if (!seedConfig.enableBilling) {
     return [];
   }
 
-  const results = [];
   const specs = seedConfig.profile === "standard" ? HEDGE_SPECS : HEDGE_SPECS.slice(0, 1);
 
-  for (const spec of specs) {
-    const [existing] = await db
-      .select()
-      .from(currencyHedges)
-      .where(eq(currencyHedges.currency, spec.currency))
-      .limit(1);
-
-    if (existing) {
-      results.push(existing);
-      continue;
-    }
-
-    const [inserted] = await db
-      .insert(currencyHedges)
-      .values({
-        currency: spec.currency,
-        amount: spec.amount,
-        hedgeType: spec.hedgeType,
-        notes: spec.notes,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-    results.push(inserted);
-  }
+  const results = await orchestrateSeedMany({
+    specs: [...specs],
+    toKey: spec => spec.currency,
+    findExisting: async currencies => {
+      const existing = await CurrencyHedgeService.findHedgesByCurrencies(currencies);
+      return new Map(
+        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeReturnType])
+      );
+    },
+    createMany: async toCreate =>
+      CurrencyHedgeService.createManyHedges(
+        toCreate.map(spec => ({
+          currency: spec.currency,
+          amount: spec.amount,
+          hedgeType: spec.hedgeType,
+          notes: spec.notes,
+        }))
+      ),
+    refetchOnRace: async currencies => {
+      const existing = await CurrencyHedgeService.findHedgesByCurrencies(currencies);
+      return new Map(
+        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeReturnType])
+      );
+    },
+  });
 
   logger.info(`Currency hedges seeded (${results.length} rows).`);
-  return results;
+  return results as CurrencyHedgeReturnType[];
 }

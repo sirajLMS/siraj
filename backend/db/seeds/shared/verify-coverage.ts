@@ -1,7 +1,6 @@
-import { sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import { loadSeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 
 type TableCategory = "seeded" | "migration" | "excluded";
 
@@ -80,16 +79,6 @@ const TABLE_COVERAGE: TableCoverageEntry[] = [
 
 const STANDARD_PROFILE_TABLES = TABLE_COVERAGE.filter(e => e.category === "seeded").map(e => e.table);
 
-async function getTableCount(tableName: string): Promise<number> {
-  const result = await db.execute(sql.raw(`SELECT COUNT(*)::int AS count FROM "${tableName}"`));
-  if (Array.isArray(result)) {
-    const row = result[0] as { count?: number } | undefined;
-    return Number(row?.count ?? 0);
-  }
-  const rows = (result as unknown as { rows?: { count: number }[] }).rows ?? [];
-  return Number(rows[0]?.count ?? 0);
-}
-
 export async function verifySeedCoverage(): Promise<void> {
   const config = loadSeedConfig();
   if (config.profile !== "standard") {
@@ -97,10 +86,11 @@ export async function verifySeedCoverage(): Promise<void> {
     return;
   }
 
+  const counts = await ReferenceDataService.getTableRowCounts(STANDARD_PROFILE_TABLES);
   const failures: string[] = [];
 
   for (const tableName of STANDARD_PROFILE_TABLES) {
-    const rowCount = await getTableCount(tableName);
+    const rowCount = counts[tableName] ?? 0;
     if (rowCount === 0) {
       failures.push(tableName);
     }

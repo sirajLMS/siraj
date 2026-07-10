@@ -1,7 +1,6 @@
-import { sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import { AppPermission } from "@/backend/enum/permissions/permission.enum";
 import logger from "@/backend/lib/logger";
+import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 
 type MeetingPermissionSeed = {
@@ -43,85 +42,31 @@ const MEETING_PERMISSION_SEEDS: readonly MeetingPermissionSeed[] = [
     },
     category: { en: "Meeting", ar: "الاجتماعات" },
   },
+  {
+    key: AppPermission.MEETING_CONFIGS_MANAGE_CLASS,
+    resource: "meeting_configs",
+    action: "manage_class",
+    description: {
+      en: "Manage class-scoped online meeting configurations",
+      ar: "إدارة إعدادات الاجتماعات على مستوى الحصة",
+    },
+    category: { en: "Meeting", ar: "الاجتماعات" },
+  },
 ] as const;
 
 const ADMIN_GROUP_SLUGS = ["super_admin", "academy_admin"] as const;
 const SELF_SERVICE_GROUP_SLUGS = ["teachers", "parent_default"] as const;
 
-async function disableSystemPermissionTrigger(): Promise<void> {
-  await db.execute(sql`
-    DO $$
-    BEGIN
-      ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
-    EXCEPTION WHEN OTHERS THEN
-      RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
-    END $$;
-  `);
-}
-
-async function enableSystemPermissionTrigger(): Promise<void> {
-  await db.execute(sql`
-    DO $$
-    BEGIN
-      ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
-    EXCEPTION WHEN OTHERS THEN
-      RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
-    END $$;
-  `);
-}
-
-async function assignPermissionsToGroups(groupSlugs: readonly string[], keys: readonly AppPermission[]) {
-  for (const groupSlug of groupSlugs) {
-    for (const key of keys) {
-      await db.execute(sql`
-        INSERT INTO group_permissions (group_id, permission_id)
-        SELECT g.id, p.id
-        FROM permission_groups g, permissions p
-        WHERE g.slug = ${groupSlug}
-          AND p.key = ${key}::app_permission
-        ON CONFLICT DO NOTHING
-      `);
-    }
-  }
-}
-
 export async function seedOrGet() {
   logger.info("Seeding meeting permissions...");
 
-  for (const spec of MEETING_PERMISSION_SEEDS) {
-    await db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${spec.key}';`));
-  }
+  await PermissionManagementService.upsertSystemPermissions(MEETING_PERMISSION_SEEDS);
 
-  await disableSystemPermissionTrigger();
-
-  try {
-    for (const spec of MEETING_PERMISSION_SEEDS) {
-      await db.execute(sql`
-        INSERT INTO permissions (id, key, resource, action, description, category, is_system)
-        VALUES (
-          gen_random_uuid(),
-          ${spec.key}::app_permission,
-          ${spec.resource},
-          ${spec.action},
-          ${JSON.stringify(spec.description)}::jsonb,
-          ${JSON.stringify(spec.category)}::jsonb,
-          true
-        )
-        ON CONFLICT (key) DO UPDATE SET
-          resource = EXCLUDED.resource,
-          action = EXCLUDED.action,
-          description = EXCLUDED.description,
-          category = EXCLUDED.category,
-          is_system = EXCLUDED.is_system
-      `);
-    }
-
-    const allKeys = MEETING_PERMISSION_SEEDS.map(spec => spec.key);
-    await assignPermissionsToGroups(ADMIN_GROUP_SLUGS, allKeys);
-    await assignPermissionsToGroups(SELF_SERVICE_GROUP_SLUGS, [AppPermission.MEETING_CONFIGS_MANAGE_OWN]);
-  } finally {
-    await enableSystemPermissionTrigger();
-  }
+  const allKeys = MEETING_PERMISSION_SEEDS.map(spec => spec.key);
+  await PermissionManagementService.ensureGroupPermissionsForGroups(ADMIN_GROUP_SLUGS, allKeys);
+  await PermissionManagementService.ensureGroupPermissionsForGroups(SELF_SERVICE_GROUP_SLUGS, [
+    AppPermission.MEETING_CONFIGS_MANAGE_OWN,
+  ]);
 
   logger.info(`Meeting permissions seeded (${MEETING_PERMISSION_SEEDS.length} keys).`);
   return MEETING_PERMISSION_SEEDS.map(spec => spec.key);

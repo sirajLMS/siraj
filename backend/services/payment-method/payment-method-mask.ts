@@ -89,6 +89,8 @@ function maskDetails(
     }
     case PaymentMethodType.CASH:
       return details;
+    case PaymentMethodType.PROOF_UPLOAD:
+      throw new Error("Proof upload snapshots are not masked via maskDetails");
     default: {
       const exhaustive: never = type;
       return exhaustive;

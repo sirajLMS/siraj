@@ -1,7 +1,7 @@
 import * as path from "node:path";
-import { StorageDbRepository } from "@/backend/db/repo";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import logger from "@/backend/lib/logger";
+import { StorageService } from "@/backend/services/storage/storage.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ValidReferenceTable } from "@/backend/types";
@@ -42,7 +42,7 @@ export async function seedEntityFile(input: SeedEntityFileInput): Promise<{ url:
   });
 
   const fileInfo = await storageService.fileInfoByPath(input.bucketPath);
-  const result = await StorageDbRepository.registerFileUsage({
+  const result = await StorageService.linkFileToEntity({
     referenceTable: input.referenceTable,
     referenceId: input.referenceId,
     usageType: input.usageType,

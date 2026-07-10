@@ -1,8 +1,7 @@
-import { db } from "@/backend/db/drizzleDb";
-import { studentProgress } from "@/backend/db/schema/students/students";
 import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
 import type { ClassInstanceEntity } from "@/backend/types";
 
 export async function seedOrGet(classInstancesList: ClassInstanceEntity[], config?: SeedConfig) {
@@ -16,7 +15,7 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
 
   const takenInstances = classInstancesList.filter(ci => ci.outcome === ClassOutcome.TAKEN);
   const sampleRate = seedConfig.profile === "standard" ? 10 : 50;
-  const results = [];
+  const inputs = [];
 
   for (let i = 0; i < takenInstances.length; i++) {
     if (i % sampleRate !== 0) continue;
@@ -24,28 +23,20 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
     const instance = takenInstances[i];
     const faker = getFakerForIndex(seedConfig.fakerSeed, instance.id.length);
 
-    const [inserted] = await db
-      .insert(studentProgress)
-      .values({
-        studentId: instance.studentId,
-        classInstanceId: instance.id,
-        teacherId: instance.teacherId,
-        topicsCovered: faker.lorem.sentence(),
-        homeworkAssigned: faker.lorem.sentence(),
-        notes: faker.lorem.paragraph(),
-        parentVisible: true,
-        createdAt: instance.actualEndAt ?? instance.scheduledEndAt,
-        updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: [studentProgress.studentId, studentProgress.classInstanceId],
-        set: { updatedAt: now },
-      })
-      .returning();
-
-    results.push(inserted);
+    inputs.push({
+      studentId: instance.studentId,
+      classInstanceId: instance.id,
+      teacherId: instance.teacherId,
+      topicsCovered: faker.lorem.sentence(),
+      homeworkAssigned: faker.lorem.sentence(),
+      notes: faker.lorem.paragraph(),
+      parentVisible: true,
+      createdAt: instance.actualEndAt ?? instance.scheduledEndAt,
+      updatedAt: now,
+    });
   }
 
+  const results = await StudentBootstrapService.upsertManyStudentProgress(inputs);
   logger.info(`Student progress seeded (${results.length} rows).`);
   return results;
 }

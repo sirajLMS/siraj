@@ -1,8 +1,16 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import {
+  type RecurringScheduleDaySeedUpsertInput,
+  RecurringScheduleRepository,
+  type RecurringScheduleSeedUpsertInput,
+  type ScheduleDayKey,
+} from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { AppPermission, type IanaTimezone } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
 
 export interface CreateRecurringClassInput {
   studentId: string;
@@ -75,5 +83,33 @@ export namespace RecurringClassService {
       logger.error("Error creating recurring class", { userId, input, error });
       throw error;
     }
+  }
+
+  export async function listRecurringSchedulesByStudentIds(
+    studentIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<RecurringScheduleEntity[]> {
+    return RecurringScheduleRepository.listByStudentIds(studentIds, tx);
+  }
+
+  export async function upsertManyRecurringSchedules(
+    inputs: readonly RecurringScheduleSeedUpsertInput[],
+    tx?: DBTransaction
+  ): Promise<RecurringScheduleEntity[]> {
+    return RecurringScheduleRepository.upsertManyForSeed(inputs, tx);
+  }
+
+  export async function findScheduleDaysByKeys(
+    keys: readonly { recurringScheduleId: string; dayOfWeek: RecurringScheduleDaySeedUpsertInput["dayOfWeek"] }[],
+    tx?: DBTransaction
+  ): Promise<Map<ScheduleDayKey, RecurringScheduleDayEntity>> {
+    return RecurringScheduleRepository.findDaysByKeys(keys, tx);
+  }
+
+  export async function upsertManyScheduleDays(
+    inputs: readonly RecurringScheduleDaySeedUpsertInput[],
+    tx?: DBTransaction
+  ): Promise<RecurringScheduleDayEntity[]> {
+    return RecurringScheduleRepository.upsertManyDays(inputs, tx);
   }
 }

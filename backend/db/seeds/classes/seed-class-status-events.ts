@@ -1,10 +1,19 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { classStatusEvents } from "@/backend/db/schema/classes/scheduling";
-import type { SeedConfig } from "@/backend/db/seeds/lib";
+import { orchestrateSeedMany, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
+import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type { ClassInstanceEntity, TeacherEntity } from "@/backend/types";
+import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
+
+type StatusEventSpec = {
+  classInstanceId: string;
+  eventType: string;
+  fromState: { executionState: ClassExecutionState; outcome: ClassOutcome };
+  toState: { executionState: ClassInstanceEntity["executionState"]; outcome: ClassInstanceEntity["outcome"] };
+  description: string;
+  actorUserId: string;
+  createdAt: Date;
+};
 
 export async function seedOrGet(
   classInstancesList: ClassInstanceEntity[],
@@ -20,7 +29,7 @@ export async function seedOrGet(
   }
 
   const teacherUserIdMap = new Map(teachersList.map(t => [t.id, t.userId]));
-  const results = [];
+  const specs: StatusEventSpec[] = [];
 
   for (const instance of classInstancesList) {
     if (instance.outcome === ClassOutcome.PENDING && instance.executionState === ClassExecutionState.NOT_ACTIVATED) {
@@ -30,31 +39,24 @@ export async function seedOrGet(
     const actorUserId = teacherUserIdMap.get(instance.teacherId);
     if (!actorUserId) continue;
 
-    const [existing] = await db
-      .select({ id: classStatusEvents.id })
-      .from(classStatusEvents)
-      .where(eq(classStatusEvents.classInstanceId, instance.id))
-      .limit(1);
-
-    if (existing) continue;
-
-    const eventCreatedAt = instance.actualEndAt ?? instance.scheduledEndAt;
-
-    const [inserted] = await db
-      .insert(classStatusEvents)
-      .values({
-        classInstanceId: instance.id,
-        eventType: "STATE_CHANGE",
-        fromState: { executionState: ClassExecutionState.NOT_ACTIVATED, outcome: ClassOutcome.PENDING },
-        toState: { executionState: instance.executionState, outcome: instance.outcome },
-        description: "Status changed by system seeder",
-        actorUserId,
-        createdAt: eventCreatedAt,
-      })
-      .returning();
-
-    results.push(inserted);
+    specs.push({
+      classInstanceId: instance.id,
+      eventType: "STATE_CHANGE",
+      fromState: { executionState: ClassExecutionState.NOT_ACTIVATED, outcome: ClassOutcome.PENDING },
+      toState: { executionState: instance.executionState, outcome: instance.outcome },
+      description: "Status changed by system seeder",
+      actorUserId,
+      createdAt: instance.actualEndAt ?? instance.scheduledEndAt,
+    });
   }
+
+  const results = await orchestrateSeedMany<StatusEventSpec, ClassStatusEventSelectType, string>({
+    specs,
+    toKey: spec => spec.classInstanceId,
+    findExisting: async keys => ClassSessionService.findStatusEventsByClassInstanceIds(keys),
+    createMany: async toCreate => ClassSessionService.createManyStatusEvents(toCreate),
+    refetchOnRace: async keys => ClassSessionService.findStatusEventsByClassInstanceIds(keys),
+  });
 
   logger.info(`System class status events seeded (${results.length} rows).`);
   return results;

@@ -72,6 +72,7 @@ export type CreateAuditLogInput = {
   ipAddress?: string | null;
   userAgent?: string | null;
   metadata?: Record<string, unknown> | null;
+  createdAt?: Date;
 };
 
 /**
@@ -96,4 +97,16 @@ export type AuditLogQueryResult = {
   logs: AuditLogReturnType[];
   total: number;
   hasMore: boolean;
+};
+
+/** Input for creating admin audit log entries (append-only). */
+export type CreateAdminAuditLogInput = {
+  readonly actorUserId: string;
+  readonly targetUserId?: string | null;
+  readonly action: string;
+  readonly description?: string | null;
+  readonly previousState?: Record<string, unknown> | null;
+  readonly newState?: Record<string, unknown> | null;
+  readonly ipAddress?: string | null;
+  readonly createdAt?: Date;
 };

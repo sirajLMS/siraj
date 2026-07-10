@@ -1,51 +1,32 @@
-import { db } from "@/backend/db/drizzleDb";
-import { currencyExchangeRates } from "@/backend/db/schema/billing/billing";
 import { EXCHANGE_PAIRS, iterateInvoiceMonths, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import type { CurrencyExchangeRateInsertType } from "@/backend/types";
+import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
+import type { CurrencyExchangeRateSubmitInput } from "@/backend/types";
 
 export async function seedOrGet(config?: SeedConfig) {
   logger.info("Seeding currency exchange rates...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   if (!seedConfig.enableBilling) {
     return [];
   }
 
-  const results = [];
   const months = [...iterateInvoiceMonths(seedConfig)];
+  const inputs: CurrencyExchangeRateSubmitInput[] = [];
 
   for (const pair of EXCHANGE_PAIRS) {
     for (const monthSpec of months.slice(0, seedConfig.profile === "standard" ? months.length : 1)) {
-      const effectiveDate = new Date(`${monthSpec.issueDate}T00:00:00.000Z`);
-
-      const row: CurrencyExchangeRateInsertType = {
+      inputs.push({
         fromCurrency: pair.from,
         toCurrency: pair.to,
         rate: pair.baseRate,
         source: "seed",
-        effectiveDate,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      const [inserted] = await db
-        .insert(currencyExchangeRates)
-        .values(row)
-        .onConflictDoUpdate({
-          target: [
-            currencyExchangeRates.fromCurrency,
-            currencyExchangeRates.toCurrency,
-            currencyExchangeRates.effectiveDate,
-          ],
-          set: { rate: pair.baseRate, updatedAt: now },
-        })
-        .returning();
-      results.push(inserted);
+        effectiveDate: new Date(`${monthSpec.issueDate}T00:00:00.000Z`),
+      });
     }
   }
 
+  const results = await FxIngestionService.upsertManyExchangeRates(inputs);
   logger.info(`Currency exchange rates seeded (${results.length} rows).`);
   return results;
 }

@@ -98,6 +98,7 @@ export enum AppPermission {
   //Invoice Generation & Processing
   BILLING_CREATE_INVOICE = "billing.create_invoice",
   BILLING_UPDATE_STATUS_PAID = "billing.update_status_paid",
+  BILLING_SUBMIT_PAYMENT_PROOF = "billing.submit_payment_proof",
   BILLING_DELETE_INVOICE = "billing.delete_invoice",
   // Student Metadata & Lifecycle Management
   STUDENT_REASSIGN_TEACHER = "student.reassign_teacher",
@@ -133,6 +134,9 @@ export enum AppPermission {
   // FX Rate Ingestion
   BILLING_VIEW_EXCHANGE_RATES = "billing.view_exchange_rates",
   BILLING_REFRESH_EXCHANGE_RATES = "billing.refresh_exchange_rates",
+  BILLING_MANAGE_FX_PROVIDER = "billing.manage_fx_provider",
+  BILLING_OVERRIDE_EXCHANGE_RATES = "billing.override_exchange_rates",
+  BILLING_MANAGE_CURRENCY_HEDGES = "billing.manage_currency_hedges",
   // Payment Method Catalog Admin
   PAYMENT_METHODS_MANAGE_CATALOGS = "payment_methods.manage_catalogs",
   PAYMENT_METHODS_VERIFY_BANK_TRANSFER = "payment_methods.verify_bank_transfer",
@@ -140,4 +144,5 @@ export enum AppPermission {
   MEETING_PROVIDERS_MANAGE_CATALOG = "meeting_providers.manage_catalog",
   MEETING_CONFIGS_MANAGE_OWN = "meeting_configs.manage_own",
   MEETING_CONFIGS_MANAGE_OTHER = "meeting_configs.manage_other",
+  MEETING_CONFIGS_MANAGE_CLASS = "meeting_configs.manage_class",
 }

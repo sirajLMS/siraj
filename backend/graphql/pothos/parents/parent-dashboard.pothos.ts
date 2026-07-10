@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  EffectiveMeetingPothosObject,
+  resolveEffectiveMeetingForClassInstance,
+} from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
+import {
   BookingStatusPothosObject,
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
@@ -33,7 +37,18 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
     bookingStatus: t.expose("bookingStatus", { type: BookingStatusPothosObject }),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
-    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    meetingJoinUrl: t.string({
+      nullable: true,
+      deprecationReason: "Use effectiveMeeting.joinUrl",
+      resolve: async parent => {
+        const meeting = await resolveEffectiveMeetingForClassInstance(parent.id);
+        return meeting.joinUrl;
+      },
+    }),
+    effectiveMeeting: t.field({
+      type: EffectiveMeetingPothosObject,
+      resolve: parent => resolveEffectiveMeetingForClassInstance(parent.id),
+    }),
     classTimeFormatted: t.exposeString("classTimeFormatted"),
   }),
 });

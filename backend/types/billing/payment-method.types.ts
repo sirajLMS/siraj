@@ -56,6 +56,20 @@ export type PaymentMethodCatalogSnapshot = {
   readonly catalogName: LocalizedString;
 };
 
+export type PaymentProofSnapshot = {
+  readonly fileId: string;
+  readonly filePath: string;
+  readonly mimeType: string;
+  readonly submittedByUserId: string;
+  readonly submittedAt: string;
+};
+
+export type PaymentProofTransactionSnapshot = {
+  readonly type: PaymentMethodType.PROOF_UPLOAD;
+  readonly proof: PaymentProofSnapshot;
+  readonly snapshottedAt: string;
+};
+
 export type PaymentMethodTransactionSnapshot = {
   readonly userPaymentMethodId: string | null;
   readonly type: PaymentMethodType;

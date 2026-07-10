@@ -1,7 +1,5 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { db } from "@/backend/db/drizzleDb";
-import { systemSettings } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
@@ -104,7 +102,6 @@ export async function seedOrGet() {
     throw error;
   }
 
-  // Seed the teacher handbook using SystemSettingsService
   logger.info("Seeding teacher handbook...");
   const handbookFileName = "teacher-handbook.pdf";
   const handbookPath = path.join(__dirname, "assets", "teacher_handbook", handbookFileName);
@@ -128,28 +125,7 @@ export async function seedOrGet() {
   }
 
   logger.info("Seeding system settings...");
-  const now = new Date();
-  const results = [];
-
-  for (const setting of SYSTEM_SETTINGS_DATA) {
-    const [inserted] = await db
-      .insert(systemSettings)
-      .values({
-        ...setting,
-        updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: systemSettings.key,
-        set: {
-          value: setting.value,
-          updatedAt: now,
-        },
-      })
-      .returning();
-
-    results.push(inserted);
-  }
-
+  const results = await SystemSettingsService.upsertManySettings([...SYSTEM_SETTINGS_DATA]);
   logger.info("System settings seeded.");
   return results;
 }

@@ -1,6 +1,3 @@
-import { count } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { adminAuditLogs } from "@/backend/db/schema/audit/audit";
 import {
   ADMIN_AUDIT_ACTIONS,
   buildAdminAuditDescription,
@@ -9,7 +6,8 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import type { UserSelectType } from "@/backend/types";
+import { AuditService } from "@/backend/services/system/audit.service";
+import type { CreateAdminAuditLogInput, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding admin audit logs...");
@@ -21,34 +19,30 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
   }
 
   const targetCount = seedConfig.profile === "standard" ? 20 : 3;
-  const [countRow] = await db.select({ value: count() }).from(adminAuditLogs);
-  if (Number(countRow?.value ?? 0) >= targetCount) {
+  const existingCount = await AuditService.countAdminAuditLogs();
+  if (existingCount >= targetCount) {
     logger.info("Admin audit logs already seeded; skipping.");
-    return db.select().from(adminAuditLogs).limit(targetCount);
+    return AuditService.listAdminAuditLogs(targetCount);
   }
 
   const adminUser = findAdminUser(usersList);
   const targetUser = usersList.find(u => u.email === "teacher@siraj.local");
   if (!adminUser) return [];
 
-  const results = [];
-
+  const inputs: CreateAdminAuditLogInput[] = [];
   for (let i = 0; i < targetCount; i++) {
-    const [inserted] = await db
-      .insert(adminAuditLogs)
-      .values({
-        actorUserId: adminUser.id,
-        targetUserId: targetUser?.id ?? null,
-        action: ADMIN_AUDIT_ACTIONS[i % ADMIN_AUDIT_ACTIONS.length],
-        description: buildAdminAuditDescription(seedConfig, i),
-        previousState: { role: "teacher_default" },
-        newState: { role: "teacher_default" },
-        createdAt: now,
-      })
-      .returning();
-    results.push(inserted);
+    inputs.push({
+      actorUserId: adminUser.id,
+      targetUserId: targetUser?.id ?? null,
+      action: ADMIN_AUDIT_ACTIONS[i % ADMIN_AUDIT_ACTIONS.length],
+      description: buildAdminAuditDescription(seedConfig, i),
+      previousState: { role: "teacher_default" },
+      newState: { role: "teacher_default" },
+      createdAt: now,
+    });
   }
 
+  const results = await AuditService.createManyAdminAuditLogs(inputs);
   logger.info(`Admin audit logs seeded (${results.length} rows).`);
-  return results;
+  return results.length > 0 ? results : AuditService.listAdminAuditLogs(targetCount);
 }

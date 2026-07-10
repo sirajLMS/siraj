@@ -1,13 +1,24 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { groupClasses } from "@/backend/db/schema/classes/group-class";
-import type { SeedConfig } from "@/backend/db/seeds/lib";
+import { orchestrateSeedMany, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import type { ClassInstanceEntity, StudentEntity } from "@/backend/types";
+import { GroupClassService } from "@/backend/services/group-class/group-class.service";
+import type { ClassInstanceEntity, GroupClassSelectType } from "@/backend/types";
+
+type GroupClassSpec = {
+  classInstanceId: string;
+  courseName: string;
+  teacherName: string;
+  classType: string;
+  originalDate: Date | null;
+  rescheduledDate: Date | null;
+  timeSlot: string;
+  status: string;
+  auditRemark: string | null;
+  auditLoggedAt: Date;
+};
 
 export async function seedOrGet(
   classInstancesList: ClassInstanceEntity[],
-  studentsList: StudentEntity[],
+  studentsList: { id: string }[],
   _config?: SeedConfig
 ) {
   logger.info("Seeding system group classes...");
@@ -18,43 +29,33 @@ export async function seedOrGet(
     throw new Error("No students available for group class enrollments.");
   }
 
-  const results = [];
+  const now = new Date();
+  const specs: GroupClassSpec[] = classInstancesList.slice(0, 5).map(instance => ({
+    classInstanceId: instance.id,
+    courseName: `Course-${instance.id.slice(0, 8)}`,
+    teacherName: "Seeded Teacher",
+    classType: instance.classType,
+    originalDate: instance.isRescheduled ? instance.scheduledStartAt : null,
+    rescheduledDate: instance.isRescheduled ? now : null,
+    timeSlot: `${instance.scheduledStartAt.toISOString().slice(11, 16)} - ${instance.scheduledEndAt.toISOString().slice(11, 16)}`,
+    status: instance.executionState ?? "NOT_ACTIVATED",
+    auditRemark: instance.isRescheduled ? "Class rescheduled by system" : null,
+    auditLoggedAt: now,
+  }));
 
-  for (const instance of classInstancesList.slice(0, 5)) {
-    const [existing] = await db
-      .select({
-        id: groupClasses.id,
-        classInstanceId: groupClasses.classInstanceId,
-        courseName: groupClasses.courseName,
-      })
-      .from(groupClasses)
-      .where(eq(groupClasses.classInstanceId, instance.id))
-      .limit(1);
-
-    if (existing) {
-      results.push(existing);
-      continue;
-    }
-
-    const now = new Date();
-    const [inserted] = await db
-      .insert(groupClasses)
-      .values({
-        classInstanceId: instance.id,
-        courseName: `Course-${instance.id.slice(0, 8)}`,
-        teacherName: "Seeded Teacher",
-        classType: instance.classType,
-        originalDate: instance.isRescheduled ? instance.scheduledStartAt : null,
-        rescheduledDate: instance.isRescheduled ? now : null,
-        timeSlot: `${instance.scheduledStartAt.toISOString().slice(11, 16)} - ${instance.scheduledEndAt.toISOString().slice(11, 16)}`,
-        status: instance.executionState ?? "NOT_ACTIVATED",
-        auditRemark: instance.isRescheduled ? "Class rescheduled by system" : null,
-        auditLoggedAt: now,
-      })
-      .returning();
-
-    results.push(inserted);
-  }
+  const results = await orchestrateSeedMany<GroupClassSpec, GroupClassSelectType, string>({
+    specs,
+    toKey: spec => spec.classInstanceId,
+    findExisting: async keys => {
+      const rows = await GroupClassService.listGroupClassesByClassInstanceIds(keys);
+      return new Map(rows.map(row => [row.classInstanceId, row]));
+    },
+    createMany: async toCreate => GroupClassService.createManyGroupClasses(toCreate),
+    refetchOnRace: async keys => {
+      const rows = await GroupClassService.listGroupClassesByClassInstanceIds(keys);
+      return new Map(rows.map(row => [row.classInstanceId, row]));
+    },
+  });
 
   logger.info(`System group classes seeded (${results.length} rows).`);
   return results;

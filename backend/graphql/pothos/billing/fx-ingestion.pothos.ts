@@ -8,18 +8,27 @@ import {
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
+import { FxProviderConfigService } from "@/backend/services/fx/fx-provider-config.service";
+import { FxRateAdminService } from "@/backend/services/fx/fx-rate-admin.service";
 import { FxRateLimitService } from "@/backend/services/fx/fx-rate-limit.service";
 import { FxRateQueryService } from "@/backend/services/fx/fx-rate-query.service";
 import type {
   CurrencyExchangeRateReturnType,
   ExchangeRateHistoryPaginatedResult,
   ExchangeRateHistoryRow,
+  FxProviderConfigReturnType,
+  FxSyncHealthReturnType,
   FxSyncRunReturnType,
   PaginationArgs,
   PaginationInput,
   RefreshExchangeRatesResult,
+  UpsertManualExchangeRateResult,
 } from "@/backend/types";
 import { PaginationArgs as PaginationArgsClass } from "@/backend/types";
+
+const FxProviderConfigSourceEnum = gqlSchemaBuilder.enumType("FxProviderConfigSource", {
+  values: ["env", "database"] as const,
+});
 
 function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
   if (!input) {
@@ -119,6 +128,38 @@ export const RefreshExchangeRatesResultPothosObject = RefreshExchangeRatesResult
   }),
 });
 
+const FxSyncHealthRef = gqlSchemaBuilder.objectRef<FxSyncHealthReturnType>("FxSyncHealth");
+
+export const FxSyncHealthPothosObject = FxSyncHealthRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    isStale: t.exposeBoolean("isStale"),
+    status: t.expose("status", { type: FxSyncStatusPothosEnum, nullable: true }),
+    finishedAt: t.expose("finishedAt", { type: "DateTime", nullable: true }),
+  }),
+});
+
+const FxProviderConfigRef = gqlSchemaBuilder.objectRef<FxProviderConfigReturnType>("FxProviderConfig");
+
+export const FxProviderConfigPothosObject = FxProviderConfigRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    activeProvider: t.expose("activeProvider", { type: FxProviderPothosEnum }),
+    source: t.expose("source", { type: FxProviderConfigSourceEnum }),
+  }),
+});
+
+const UpsertManualExchangeRateResultRef = gqlSchemaBuilder.objectRef<UpsertManualExchangeRateResult>(
+  "UpsertManualExchangeRateResult"
+);
+
+export const UpsertManualExchangeRateResultPothosObject = UpsertManualExchangeRateResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    rate: t.expose("rate", { type: ExchangeRatePothosObject }),
+  }),
+});
+
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 gqlSchemaBuilder.queryField("latestExchangeRates", t =>
@@ -183,6 +224,22 @@ gqlSchemaBuilder.queryField("latestFxSyncRun", t =>
   })
 );
 
+gqlSchemaBuilder.queryField("fxSyncHealth", t =>
+  t.field({
+    type: FxSyncHealthPothosObject,
+    authScopes: { loggedIn: true },
+    resolve: async () => FxRateQueryService.getSyncHealth(),
+  })
+);
+
+gqlSchemaBuilder.queryField("fxProviderConfig", t =>
+  t.field({
+    type: FxProviderConfigPothosObject,
+    authScopes: { permission: AppPermission.BILLING_VIEW_EXCHANGE_RATES },
+    resolve: async () => FxProviderConfigService.getConfig(),
+  })
+);
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 gqlSchemaBuilder.mutationField("refreshExchangeRates", t =>
@@ -201,6 +258,46 @@ gqlSchemaBuilder.mutationField("refreshExchangeRates", t =>
         force: args.force ?? false,
         locale: ctx.locale,
       });
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("updateFxProvider", t =>
+  t.field({
+    type: FxProviderConfigPothosObject,
+    authScopes: { permission: AppPermission.BILLING_MANAGE_FX_PROVIDER, notImpersonating: true },
+    args: {
+      provider: t.arg({ type: FxProviderPothosEnum, required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return FxProviderConfigService.updateProvider(userId, args.provider, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("upsertManualExchangeRate", t =>
+  t.field({
+    type: UpsertManualExchangeRateResultPothosObject,
+    authScopes: { permission: AppPermission.BILLING_OVERRIDE_EXCHANGE_RATES, notImpersonating: true },
+    args: {
+      fromCurrency: t.arg({ type: CurrencyCodePothosObject, required: true }),
+      toCurrency: t.arg({ type: CurrencyCodePothosObject, required: true }),
+      rate: t.arg.string({ required: true }),
+      effectiveDate: t.arg({ type: "DateTime", required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return FxRateAdminService.upsertManualRate(
+        userId,
+        {
+          fromCurrency: args.fromCurrency,
+          toCurrency: args.toCurrency,
+          rate: args.rate,
+          effectiveDate: args.effectiveDate?.toISOString() ?? null,
+        },
+        ctx.locale
+      );
     },
   })
 );

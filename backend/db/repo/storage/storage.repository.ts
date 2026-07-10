@@ -720,6 +720,28 @@ export namespace StorageDbRepository {
     return result;
   };
 
+  export const linkFileToInvoice = async (
+    invoiceId: string,
+    fileId: string,
+    usageType: string,
+    tx?: DBTransaction,
+    createdAt: Date = new Date()
+  ): Promise<{ id: string; fileId: string; invoiceId: string; usageType: string; createdAt: Date }> => {
+    const queryDb = tx ?? db;
+
+    const [result] = await queryDb
+      .insert(invoiceFiles)
+      .values({
+        fileId,
+        invoiceId,
+        usageType,
+        createdAt,
+      })
+      .returning();
+
+    return result;
+  };
+
   /**
    * Validate upload parameters (path, size, contentType).
    * Returns an error message if validation fails, or null if valid.

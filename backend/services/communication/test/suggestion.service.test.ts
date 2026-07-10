@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository } from "@/backend/db/repo";
-import { AppPermission, SuggestionStatus } from "@/backend/enum";
+import { AccountStatus, AppPermission, SuggestionStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
@@ -66,7 +66,9 @@ const mockTargetSuggestionRow = {
 const mockParent = {
   id: MOCK_PARENT_ID,
   userId: MOCK_ACTOR_ID,
-  status: "ACTIVE",
+  status: "REGULAR",
+  lifecycleStatus: "REGULAR",
+  accountStatus: AccountStatus.ACTIVATED,
   phone: null,
   nationality: null,
   address: null,
@@ -88,7 +90,8 @@ const mockParentProfile = {
   name: "Test Parent",
   email: "parent@test.com",
   avatarUrl: null,
-  status: "ACTIVE",
+  lifecycleStatus: "REGULAR",
+  accountStatus: AccountStatus.ACTIVATED,
   phone: null,
   nationality: null,
   address: null,

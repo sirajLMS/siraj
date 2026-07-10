@@ -74,4 +74,13 @@ export namespace NotificationPreferencesService {
     const stored = await NotificationPreferencesRepository.getByUserId(actorUserId);
     return mergeWithDefaults(stored);
   }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function upsertManySeedPreferences(
+    userId: string,
+    inputs: NotificationPreferenceUpdateInput[]
+  ): Promise<UserNotificationPreferenceSelectType[]> {
+    return NotificationPreferencesRepository.batchUpsert(userId, inputs);
+  }
 }

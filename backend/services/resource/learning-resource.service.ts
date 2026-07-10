@@ -166,4 +166,19 @@ export namespace LearningResourceService {
       throw new Error(t("resourceDeleteFailed"), { cause: error });
     }
   }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function findByFilePath(filePath: string) {
+    return LearningResourceRepository.findByFilePath(filePath);
+  }
+
+  export async function createSeedResource(input: {
+    displayName: string;
+    filePath: string;
+    uploadedByUserId: string;
+    createdAt?: Date;
+  }) {
+    return LearningResourceRepository.createSeedResource(input);
+  }
 }

@@ -28,6 +28,46 @@ const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
 };
 
 export namespace NotificationRepository {
+  export type SeedNotificationDeliveryInput = CreateNotificationDeliveryInput & {
+    status: NotificationDeliveryStatus;
+    sentAt?: Date | null;
+    deliveredAt?: Date | null;
+    failedAt?: Date | null;
+    failureReason?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  };
+
+  export const createManySeedDeliveries = async (
+    inputs: SeedNotificationDeliveryInput[],
+    tx?: DBTransaction
+  ): Promise<NotificationDeliverySelectType[]> => {
+    if (inputs.length === 0) return [];
+
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+      const values = inputs.map(input => ({
+        userId: input.userId,
+        deviceTokenId: input.deviceTokenId ?? null,
+        channel: input.channel,
+        eventType: input.eventType,
+        status: input.status,
+        title: input.title ?? null,
+        body: input.body ?? null,
+        sentAt: input.sentAt ?? null,
+        deliveredAt: input.deliveredAt ?? null,
+        failedAt: input.failedAt ?? null,
+        failureReason: input.failureReason ?? null,
+        createdAt: input.createdAt ?? now,
+        updatedAt: input.updatedAt ?? now,
+      }));
+
+      return t.insert(notificationDeliveries).values(values).returning();
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
   async function acquireDeviceTokenLock(tx: DBTransaction, userId: string): Promise<void> {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('device_token_user_' || ${userId}::text))`);
   }

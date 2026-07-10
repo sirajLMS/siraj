@@ -1,9 +1,11 @@
+import { NotificationRepository } from "@/backend/db/repo";
 import { logger } from "@/backend/lib";
 import { OnAppChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
 import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
+import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
 
 export namespace CommunicationService {
   async function dispatchOnApp(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
@@ -153,5 +155,13 @@ export namespace CommunicationService {
     });
 
     return dispatchResults;
+  }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function createManySeedDeliveries(
+    inputs: Parameters<typeof NotificationRepository.createManySeedDeliveries>[0]
+  ): Promise<NotificationDeliverySelectType[]> {
+    return NotificationRepository.createManySeedDeliveries(inputs);
   }
 }

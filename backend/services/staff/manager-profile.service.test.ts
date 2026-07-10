@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
+import { StaffProfileRepository, UserRepository } from "@/backend/db/repo";
 import { AccountStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
@@ -39,24 +39,28 @@ describe("ManagerProfileService admin update", () => {
       totalCount: 1,
       pageInfo: null,
     });
+    spyOn(StaffProfileRepository, "findByStaffProfileId").mockResolvedValue(updatedRow);
   });
 
-  test("passes status to repository on admin staff profile update", async () => {
-    const updateSpy = spyOn(StaffProfileRepository, "updateManagerProfile").mockResolvedValue(updatedRow);
+  test("routes phone and status updates through UserRepository", async () => {
+    const updateProfileFieldsSpy = spyOn(UserRepository, "updateProfileFields").mockResolvedValue({
+      id: targetRow.id,
+      name: targetRow.name,
+      email: targetRow.email,
+      status: AccountStatus.DEACTIVATED,
+    } as never);
+    const updateStatusSpy = spyOn(UserRepository, "updateStatus").mockResolvedValue({
+      id: targetRow.id,
+      status: AccountStatus.DEACTIVATED,
+    } as never);
 
     const result = await ManagerProfileService.updateManagerProfile("actor-user-1", "staff-profile-1", {
       phone: "+966500000000",
       status: AccountStatus.DEACTIVATED,
     });
 
-    expect(updateSpy).toHaveBeenCalledWith(
-      "staff-profile-1",
-      expect.objectContaining({
-        status: AccountStatus.DEACTIVATED,
-        statusIsSet: true,
-      }),
-      undefined
-    );
+    expect(updateProfileFieldsSpy).toHaveBeenCalledWith(targetRow.id, { phone: "+966500000000" }, undefined);
+    expect(updateStatusSpy).toHaveBeenCalledWith(targetRow.id, AccountStatus.DEACTIVATED, undefined, undefined);
     expect(result.status).toBe(AccountStatus.DEACTIVATED);
   });
 });

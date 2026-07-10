@@ -9,7 +9,7 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import { MeetingClassFieldsService } from "@/backend/services/meeting/meeting-class-fields";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
 
 export async function acquireLocks(tx: DBTransaction, teacherId: string, studentId: string) {
@@ -114,16 +114,18 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
       .from(classInstances)
       .where(
         and(
-          eq(classInstances.meetingJoinUrl, meetingJoinUrl),
           isNull(classInstances.deletedAt),
           overlapCondition,
           excludeId ? ne(classInstances.id, excludeId) : undefined
         )
-      )
-      .limit(1);
-    if (meetingUrlOverlaps.length > 0) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("meetingUrlInUse"));
+      );
+
+    for (const row of meetingUrlOverlaps) {
+      const resolved = await EffectiveMeetingService.resolveForClassInstance(row.id, tx);
+      if (resolved.joinUrl === meetingJoinUrl) {
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("meetingUrlInUse"));
+      }
     }
   }
 }
@@ -167,6 +169,10 @@ export async function createRescheduledSuccessor(
 
   const successorIdempotencyKey = `leave-reschedule-${existing.id}-${newScheduledStartAt.toISOString()}`;
 
+  const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(existing.teacherId, {
+    recurringScheduleId: existing.recurringScheduleId,
+    tx: t,
+  });
   const successorInput = {
     studentId: existing.studentId,
     teacherId: existing.teacherId,
@@ -187,11 +193,9 @@ export async function createRescheduledSuccessor(
     idempotencyKey: successorIdempotencyKey,
   };
 
-  const meetingFields = await MeetingClassFieldsService.resolveForTeacher(existing.teacherId, { tx: t });
   const successorWithMeeting = {
     ...successorInput,
-    meetingJoinUrl: meetingFields.meetingJoinUrl,
-    meetingConfigSnapshot: meetingFields.meetingConfigSnapshot,
+    meetingJoinUrl: effectiveMeeting.joinUrl,
   };
 
   await performRescheduleValidations(t, successorWithMeeting, locale);
@@ -199,7 +203,7 @@ export async function createRescheduledSuccessor(
   const [successor] = await t
     .insert(classInstances)
     .values({
-      ...successorWithMeeting,
+      ...successorInput,
       createdAt: new Date(),
       updatedAt: new Date(),
     })

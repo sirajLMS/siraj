@@ -1,4 +1,7 @@
-export { MeetingClassFieldsService } from "@/backend/services/meeting/meeting-class-fields";
+export {
+  ClassMeetingConfigService,
+  EffectiveMeetingService,
+} from "@/backend/services/meeting/class-meeting-config.service";
 export { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 export { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
 export { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";

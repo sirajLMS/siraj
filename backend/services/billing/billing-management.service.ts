@@ -1,13 +1,19 @@
 import { createHash } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { BillingRepository, ParentRepository, UserPaymentMethodRepository } from "@/backend/db/repo";
+import { BillingRepository, InvoicePaymentSubmissionRepository, ParentRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode } from "@/backend/enum";
-import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { ForbiddenError, getBackendTranslations, logger, NotFoundError } from "@/backend/lib";
 import { parseInvoiceStatus, parseInvoiceType } from "@/backend/lib/enum";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import {
+  assertInvoiceBelongsToParentUser,
+  buildProofSnapshot,
+  linkProofToInvoice,
+  mapSubmissionToReturnType,
+  recordProofPayment,
+  validateProofFile,
+} from "@/backend/services/billing/billing-payment-proof.helpers";
 import type * as Types from "@/backend/types";
 
 function deriveIdempotencyKey(input: {
@@ -89,31 +95,61 @@ async function syncNotificationAfterCreate(
   }
 }
 
-async function validatePayinMethodForParent(
-  userPaymentMethodId: string,
-  parentId: string,
+async function syncNotificationsAfterPaymentChange(locale?: string): Promise<boolean> {
+  const syncResult = await NotificationSyncService.syncUnpaidNotifications(locale).catch(err => {
+    logger.error("Notification sync failed after payment change", { err });
+    return null;
+  });
+  return syncResult !== null;
+}
+
+function mapMarkPaidResult(
+  invoice: Types.InvoiceSelectType,
+  notificationSummaryUpdated: boolean
+): Types.MarkInvoicePaidResult {
+  return {
+    invoice: {
+      id: invoice.id,
+      parentId: invoice.parentId,
+      status: parseInvoiceStatus(invoice.status),
+      paidDate: invoice.paidDate ?? null,
+      version: invoice.version,
+    },
+    notificationSummaryUpdated,
+  };
+}
+
+async function finalizeInvoicePaid(
+  actorUserId: string,
+  invoiceId: string,
+  proofFileId: string,
+  submittedByUserId: string,
+  expectedVersion: number | undefined,
   tx: DBTransaction,
   locale?: string
-): Promise<void> {
-  const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-  const parent = await ParentRepository.getParentProfile(parentId, tx);
-  if (!parent) {
-    throw new NotFoundError("PARENT", tFunc("parentNotFound", { id: parentId }));
+): Promise<Types.InvoiceSelectType> {
+  const existingInvoice = await BillingRepository.getInvoiceById(invoiceId, tx);
+  if (!existingInvoice) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
   }
 
-  const method = await UserPaymentMethodRepository.getById(userPaymentMethodId, tx);
-  if (!method) {
-    throw new Error(tFunc("recordNotFound", { tableName: "user_payment_methods", entityId: userPaymentMethodId }));
-  }
+  const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx, locale);
+  await linkProofToInvoice(invoiceId, proofFileId, tx);
 
-  if (method.userId !== parent.userId) {
-    throw new Error(tFunc("insufficientPermissions"));
-  }
+  const submittedAt = new Date();
+  const proof = buildProofSnapshot(proofFileId, filePath, mimeType, submittedByUserId, submittedAt);
+  const invoice = await BillingRepository.markInvoiceAsPaid(invoiceId, expectedVersion, tx, locale);
+  await recordProofPayment(invoice, proof, tx, locale);
 
-  const direction = method.direction as PaymentDirection;
-  if (direction !== PaymentDirection.PAYIN && direction !== PaymentDirection.BOTH) {
-    throw new Error(tFunc("insufficientPermissions"));
-  }
+  logger.info("Invoice marked as paid with proof", {
+    actorUserId,
+    invoiceId: invoice.id,
+    parentId: invoice.parentId,
+    proofFileId,
+  });
+
+  return invoice;
 }
 
 export namespace BillingManagementService {
@@ -147,22 +183,187 @@ export namespace BillingManagementService {
     }
   }
 
-  export async function markInvoicePaid(
+  export async function submitPaymentProof(
     actorUserId: string,
     invoiceId: string,
-    userPaymentMethodId: string,
+    proofFileId: string,
     expectedVersion?: number,
     locale?: string
   ): Promise<Types.MarkInvoicePaidResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
-    if (!hasPermission) {
+    await requirePermission(actorUserId, AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, locale);
+
+    const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
+    if (!existingInvoice) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
     }
 
+    await assertInvoiceBelongsToParentUser(actorUserId, existingInvoice, locale);
+
+    if (existingInvoice.status !== "UNPAID") {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invoiceAlreadyPaid", { id: invoiceId, status: existingInvoice.status }));
+    }
+
+    try {
+      const updated = await db.transaction(async tx => {
+        const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx, locale);
+        await linkProofToInvoice(invoiceId, proofFileId, tx);
+
+        const submittedAt = new Date();
+        await InvoicePaymentSubmissionRepository.createSubmission(
+          {
+            invoiceId,
+            fileId: proofFileId,
+            submittedByUserId: actorUserId,
+            submittedAt,
+            status: "pending",
+            reviewedByUserId: null,
+            reviewedAt: null,
+            rejectionReason: null,
+          },
+          tx
+        );
+
+        const invoice = await BillingRepository.setInvoicePaymentPending(invoiceId, expectedVersion, tx, locale);
+        logger.info("Payment proof submitted", {
+          actorUserId,
+          invoiceId,
+          proofFileId,
+          filePath,
+          mimeType,
+        });
+        return invoice;
+      });
+
+      const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
+      return mapMarkPaidResult(updated, notificationSummaryUpdated);
+    } catch (error) {
+      logger.error("Failed to submit payment proof", { actorUserId, invoiceId, error });
+      throw error;
+    }
+  }
+
+  export async function approvePaymentProof(
+    actorUserId: string,
+    invoiceId: string,
+    expectedVersion?: number,
+    locale?: string
+  ): Promise<Types.MarkInvoicePaidResult> {
+    await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, locale);
+
+    const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
+    if (!existingInvoice) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
+    }
+
+    if (existingInvoice.status !== "PAYMENT_PENDING") {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invoiceNotPendingReview", { id: invoiceId }));
+    }
+
+    const pending = await InvoicePaymentSubmissionRepository.getPendingByInvoiceId(invoiceId);
+    if (!pending) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invoicePaymentProofNotFound", { id: invoiceId }));
+    }
+
+    try {
+      const updated = await db.transaction(async tx => {
+        const invoice = await finalizeInvoicePaid(
+          actorUserId,
+          invoiceId,
+          pending.fileId,
+          pending.submittedByUserId,
+          expectedVersion,
+          tx,
+          locale
+        );
+        await InvoicePaymentSubmissionRepository.updateSubmissionStatus(
+          pending.id,
+          "approved",
+          actorUserId,
+          null,
+          tx,
+          locale
+        );
+        return invoice;
+      });
+
+      const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
+      return mapMarkPaidResult(updated, notificationSummaryUpdated);
+    } catch (error) {
+      logger.error("Failed to approve payment proof", { actorUserId, invoiceId, error });
+      throw error;
+    }
+  }
+
+  export async function rejectPaymentProof(
+    actorUserId: string,
+    invoiceId: string,
+    rejectionReason?: string | null,
+    expectedVersion?: number,
+    locale?: string
+  ): Promise<Types.MarkInvoicePaidResult> {
+    await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, locale);
+
+    const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
+    if (!existingInvoice) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
+    }
+
+    if (existingInvoice.status !== "PAYMENT_PENDING") {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invoiceNotPendingReview", { id: invoiceId }));
+    }
+
+    try {
+      const updated = await db.transaction(async tx => {
+        await InvoicePaymentSubmissionRepository.rejectPendingForInvoice(
+          invoiceId,
+          actorUserId,
+          rejectionReason ?? null,
+          tx,
+          locale
+        );
+        return BillingRepository.updateInvoiceStatus(invoiceId, "UNPAID", null, expectedVersion, tx, locale);
+      });
+
+      const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
+      return mapMarkPaidResult(updated, notificationSummaryUpdated);
+    } catch (error) {
+      logger.error("Failed to reject payment proof", { actorUserId, invoiceId, error });
+      throw error;
+    }
+  }
+
+  export async function getInvoicePaymentSubmission(
+    actorUserId: string,
+    invoiceId: string,
+    locale?: string
+  ): Promise<Types.InvoicePaymentSubmissionReturnType | null> {
+    await verifyInvoiceAccess(actorUserId, invoiceId, null, locale);
+    const submission = await InvoicePaymentSubmissionRepository.getLatestByInvoiceId(invoiceId);
+    if (!submission) {
+      return null;
+    }
+    return mapSubmissionToReturnType(submission);
+  }
+
+  export async function markInvoicePaid(
+    actorUserId: string,
+    invoiceId: string,
+    proofFileId: string,
+    expectedVersion?: number,
+    locale?: string
+  ): Promise<Types.MarkInvoicePaidResult> {
+    await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, locale);
+
     const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    if (!userPaymentMethodId.trim()) {
-      throw new Error(tFunc("noActiveBankingDetails", { id: "payin" }));
+    if (!proofFileId.trim()) {
+      throw new Error(tFunc("paymentProofRequired"));
     }
 
     const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
@@ -170,58 +371,17 @@ export namespace BillingManagementService {
       throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
     }
 
+    if (existingInvoice.status !== "UNPAID") {
+      throw new Error(tFunc("invoiceAlreadyPaid", { id: invoiceId, status: existingInvoice.status }));
+    }
+
     try {
-      const updated = await db.transaction(async tx => {
-        await validatePayinMethodForParent(userPaymentMethodId, existingInvoice.parentId, tx, locale);
+      const updated = await db.transaction(async tx =>
+        finalizeInvoicePaid(actorUserId, invoiceId, proofFileId, actorUserId, expectedVersion, tx, locale)
+      );
 
-        const invoice = await BillingRepository.markInvoiceAsPaid(invoiceId, expectedVersion, tx, locale);
-
-        await PaymentMethodService.recordPayin(
-          {
-            invoiceId: invoice.id,
-            amount: invoice.amount,
-            currency: invoice.currency,
-            paymentDate: new Date(),
-            userPaymentMethodId,
-            transactionId: null,
-            gatewayResponse: null,
-            exchangeRateSnapshot: invoice.exchangeRateSnapshot,
-            exchangeRateSource: invoice.exchangeRateSource,
-            idempotencyKey: `payin:${invoice.id}`,
-          },
-          tx,
-          locale
-        );
-
-        return invoice;
-      });
-
-      logger.info("Invoice marked as paid", {
-        actorUserId,
-        invoiceId: updated.id,
-        parentId: updated.parentId,
-        paidDate: updated.paidDate,
-        userPaymentMethodId,
-      });
-
-      const syncResult = await NotificationSyncService.syncUnpaidNotifications(locale).catch(err => {
-        logger.error("Notification sync failed after markInvoicePaid", {
-          invoiceId,
-          err,
-        });
-        return null;
-      });
-
-      return {
-        invoice: {
-          id: updated.id,
-          parentId: updated.parentId,
-          status: parseInvoiceStatus(updated.status),
-          paidDate: updated.paidDate ?? null,
-          version: updated.version,
-        },
-        notificationSummaryUpdated: syncResult !== null,
-      };
+      const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
+      return mapMarkPaidResult(updated, notificationSummaryUpdated);
     } catch (error) {
       logger.error("Failed to mark invoice as paid", { actorUserId, invoiceId, error });
       throw error;
@@ -244,7 +404,7 @@ export namespace BillingManagementService {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
     }
-    if (invoice.status === "PAID") {
+    if (invoice.status === "PAID" || invoice.status === "PAYMENT_PENDING") {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("cannotDeletePaidInvoice", { id: invoiceId }));
     }
@@ -334,5 +494,35 @@ export namespace BillingManagementService {
       logger.error("Failed to send payment reminder", { actorUserId, studentId, error });
       throw error;
     }
+  }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  export async function findInvoicesByIdempotencyKeys(
+    keys: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceSelectType[]> {
+    return BillingRepository.findInvoicesByIdempotencyKeys(keys, tx);
+  }
+
+  export async function createManyManualInvoices(
+    inputs: readonly Types.SeedInvoiceInput[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceSelectType[]> {
+    return BillingRepository.upsertManyInvoices(inputs, tx);
+  }
+
+  export async function findInvoiceCoverageMonthsByInvoiceIds(
+    invoiceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceCoverageMonthSelectType[]> {
+    return BillingRepository.findInvoiceCoverageMonthsByInvoiceIds(invoiceIds, tx);
+  }
+
+  export async function createManyInvoiceCoverageMonths(
+    inputs: readonly Types.SeedInvoiceCoverageMonthInput[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceCoverageMonthSelectType[]> {
+    return BillingRepository.createManyInvoiceCoverageMonths(inputs, tx);
   }
 }

@@ -2,11 +2,11 @@ import { AppPermission } from "@/backend/enum";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   DisplayAmountPothosObject,
   resolveDisplayAmountField,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionsService } from "@/backend/services";
 import { buildMaskedTransactionSnapshot } from "@/backend/services/payment-method/payment-method-mask";
@@ -42,6 +42,7 @@ export const PaymentPothosObject = PaymentRef.implement({
       nullable: true,
       resolve: async (parent, _args, ctx) => {
         if (!parent.paymentMethodSnapshot) return null;
+        if (parent.paymentMethodType === PaymentMethodType.PROOF_UPLOAD) return null;
         const revealSensitive = await shouldRevealPaymentSnapshot(ctx);
         return buildMaskedTransactionSnapshot(parent.paymentMethodSnapshot, revealSensitive);
       },
@@ -68,6 +69,8 @@ export const TeacherPaymentPothosObject = TeacherPaymentRef.implement({
     paymentMethodSnapshot: t.field({
       type: PaymentMethodTransactionSnapshotPothosObject,
       resolve: async (parent, _args, ctx) => {
+        if (!parent.paymentMethodSnapshot) return null;
+        if (parent.paymentMethodType === PaymentMethodType.PROOF_UPLOAD) return null;
         const revealSensitive = await shouldRevealPaymentSnapshot(ctx);
         return buildMaskedTransactionSnapshot(parent.paymentMethodSnapshot, revealSensitive);
       },

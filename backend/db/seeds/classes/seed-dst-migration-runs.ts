@@ -1,13 +1,10 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { dstMigrationRuns } from "@/backend/db/schema/classes/scheduling";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding DST migration runs...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   if (!seedConfig.enableExtendedScheduling) {
@@ -20,26 +17,13 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
     return [];
   }
 
-  const [existing] = await db
-    .select()
-    .from(dstMigrationRuns)
-    .where(eq(dstMigrationRuns.runByUserId, adminUser.id))
-    .limit(1);
-
+  const existing = await DstMigrationService.findMigrationRunByUserId(adminUser.id);
   if (existing) {
     logger.info("DST migration run already seeded.");
     return [existing];
   }
 
-  const [inserted] = await db
-    .insert(dstMigrationRuns)
-    .values({
-      runByUserId: adminUser.id,
-      offsetMinutes: 60,
-      description: "Seed DST migration demo run",
-      createdAt: now,
-    })
-    .returning();
+  const inserted = await DstMigrationService.createSeedMigrationRun(adminUser.id, 60, "Seed DST migration demo run");
 
   logger.info("DST migration runs seeded.");
   return [inserted];

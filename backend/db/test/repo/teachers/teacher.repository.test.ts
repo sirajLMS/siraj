@@ -14,8 +14,8 @@ import { PaginationArgs } from "@/backend/types";
 describe("TeacherRepository", () => {
   it("getTeacherDirectory returns all non-deleted teachers sorted by name", async () => {
     await runInRollback(async tx => {
-      await setupTeacher(tx, { name: "Zack Teacher", email: "zack@example.com" }, { status: "ACTIVATED" });
-      const t2 = await setupTeacher(tx, { name: "Alice Teacher", email: "alice@example.com" }, { status: "ACTIVATED" });
+      await setupTeacher(tx, { name: "Zack Teacher", email: "zack@example.com" }, {});
+      const t2 = await setupTeacher(tx, { name: "Alice Teacher", email: "alice@example.com" }, {});
 
       const { rows: directory } = await TeacherRepository.getTeacherDirectory(null, undefined, tx);
       expect(directory.length).toBeGreaterThanOrEqual(2);
@@ -37,16 +37,8 @@ describe("TeacherRepository", () => {
 
   it("getTeacherDirectory supports search filters by name or email", async () => {
     await runInRollback(async tx => {
-      const t1 = await setupTeacher(
-        tx,
-        { name: "SearchName Teacher", email: "search1@example.com" },
-        { status: "ACTIVATED" }
-      );
-      const t2 = await setupTeacher(
-        tx,
-        { name: "Unique Teacher", email: "searchemail@example.com" },
-        { status: "ACTIVATED" }
-      );
+      const t1 = await setupTeacher(tx, { name: "SearchName Teacher", email: "search1@example.com" }, {});
+      const t2 = await setupTeacher(tx, { name: "Unique Teacher", email: "searchemail@example.com" }, {});
 
       const nameSearchResult = await TeacherRepository.getTeacherDirectory(null, "SearchName", tx);
       expect(nameSearchResult.rows).toHaveLength(1);
@@ -60,9 +52,9 @@ describe("TeacherRepository", () => {
 
   it("getTeacherDirectory supports pagination via PaginationArgs", async () => {
     await runInRollback(async tx => {
-      await setupTeacher(tx, { name: "Teacher A" }, { status: "ACTIVATED" });
-      await setupTeacher(tx, { name: "Teacher B" }, { status: "ACTIVATED" });
-      await setupTeacher(tx, { name: "Teacher C" }, { status: "ACTIVATED" });
+      await setupTeacher(tx, { name: "Teacher A" }, {});
+      await setupTeacher(tx, { name: "Teacher B" }, {});
+      await setupTeacher(tx, { name: "Teacher C" }, {});
 
       const firstPageArgs = new PaginationArgs({ first: 1, page: 1 });
       const limited = await TeacherRepository.getTeacherDirectory(firstPageArgs, undefined, tx);
@@ -79,8 +71,8 @@ describe("TeacherRepository", () => {
     await runInRollback(async tx => {
       const initialMetrics = await TeacherRepository.getTeacherDirectoryMetrics(tx);
 
-      await setupTeacher(tx, { name: "Active T1" }, { status: "ACTIVATED" });
-      await setupTeacher(tx, { name: "Active T2" }, { status: "ACTIVATED" });
+      await setupTeacher(tx, { name: "Active T1" }, {});
+      await setupTeacher(tx, { name: "Active T2" }, {});
       await setupTeacher(tx, { name: "Inactive T1" }, { status: "DEACTIVATED" });
 
       const newMetrics = await TeacherRepository.getTeacherDirectoryMetrics(tx);
@@ -91,7 +83,7 @@ describe("TeacherRepository", () => {
 
   it("getTeacherDirectory filters out soft-deleted teachers", async () => {
     await runInRollback(async tx => {
-      const t1 = await setupTeacher(tx, { name: "SoftDeleted Teacher" }, { status: "ACTIVATED" });
+      const t1 = await setupTeacher(tx, { name: "SoftDeleted Teacher" }, {});
 
       const beforeDelete = await TeacherRepository.getTeacherDirectory(null, "SoftDeleted", tx);
       expect(beforeDelete.rows).toHaveLength(1);
@@ -156,7 +148,6 @@ describe("TeacherRepository", () => {
         const result = await TeacherRepository.create(
           {
             userId: user.id,
-            status: "ACTIVATED",
             nationality: "US",
             phone: "+1234567890",
             gender: "MALE",
@@ -170,7 +161,7 @@ describe("TeacherRepository", () => {
 
         expect(result.id).toBeDefined();
         expect(result.userId).toBe(user.id);
-        expect(result.status).toBe("ACTIVATED");
+        expect(result.status).toBe(AccountStatus.ACTIVATED);
         expect(result.timezone).toBe(IanaTimezone.America_New_York);
         expect(result.createdAt).toBeInstanceOf(Date);
       });
@@ -180,17 +171,11 @@ describe("TeacherRepository", () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, { name: "Dup Teacher", email: "dup@test.com" });
 
-        await TeacherRepository.create(
-          { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
-          tx
-        );
+        await TeacherRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
 
         let error: unknown = null;
         try {
-          await TeacherRepository.create(
-            { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
-            tx
-          );
+          await TeacherRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
         } catch (e) {
           error = e;
         }
@@ -222,7 +207,6 @@ describe("TeacherRepository", () => {
         const result = await TeacherRepository.create(
           {
             userId: user.id,
-            status: "ACTIVATED",
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -303,7 +287,6 @@ describe("TeacherRepository", () => {
         const teacher = await TeacherRepository.create(
           {
             userId: user.id,
-            status: "ACTIVATED",
             dateOfBirth: dateOfBirthStr,
             createdAt: now,
             updatedAt: now,
@@ -325,7 +308,6 @@ describe("TeacherRepository", () => {
         const teacher = await TeacherRepository.create(
           {
             userId: user.id,
-            status: "ACTIVATED",
             dateOfBirth: null,
             createdAt: now,
             updatedAt: now,
@@ -377,10 +359,7 @@ describe("TeacherRepository", () => {
 
       let error: unknown = null;
       try {
-        await TeacherRepository.create(
-          { userId: randomUUID(), status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
-          mockTx
-        );
+        await TeacherRepository.create({ userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() }, mockTx);
       } catch (e) {
         error = e;
       }
@@ -396,7 +375,7 @@ describe("TeacherRepository", () => {
       await runInRollback(async tx => {
         const u = await createTestUser(tx, { name: "Rollback User", email: `rb-${randomUUID()}@test.com` });
         const teacher = await TeacherRepository.create(
-          { userId: u.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+          { userId: u.id, createdAt: new Date(), updatedAt: new Date() },
           tx
         );
         createdTeacherId = teacher.id;

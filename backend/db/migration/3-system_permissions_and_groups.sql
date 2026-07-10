@@ -805,6 +805,15 @@ VALUES (
     ),
     (
         gen_random_uuid (),
+        'billing.submit_payment_proof'::app_permission,
+        'billing',
+        'submit_payment_proof',
+        '{"ar": "Submit payment proof for an outstanding invoice on the parent account", "en": "Submit payment proof for an outstanding invoice on the parent account"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
+        true
+    ),
+    (
+        gen_random_uuid (),
         'billing.delete_invoice'::app_permission,
         'billing',
         'delete_invoice',
@@ -1377,6 +1386,7 @@ WHERE
         'support.view_history',
         'communication.submit_suggestion',
         'billing.view_history',
+        'billing.submit_payment_proof',
         'parent.view_students',
         'parent.view_own_profile'
     );

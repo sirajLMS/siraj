@@ -132,4 +132,60 @@ export namespace SupportedPaymentLinkRepository {
       .where(inArray(supportedPaymentLinks.id, [...ids]))
       .then(rows => rows.map(toSelectType));
   }
+
+  export async function upsertMany(
+    inputs: readonly SupportedPaymentLinkInsertType[],
+    tx?: DBTransaction
+  ): Promise<SupportedPaymentLinkSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<SupportedPaymentLinkSelectType[]> => {
+      const now = new Date();
+      const results: SupportedPaymentLinkSelectType[] = [];
+
+      for (const input of inputs) {
+        const [row] = await t
+          .insert(supportedPaymentLinks)
+          .values({
+            slug: input.slug,
+            name: input.name,
+            description: input.description ?? null,
+            instructions: input.instructions ?? null,
+            urlAllowlist: input.urlAllowlist,
+            urlExample: input.urlExample ?? null,
+            supportedDirections: input.supportedDirections ?? "BOTH",
+            logoUrl: input.logoUrl ?? null,
+            isActive: input.isActive ?? true,
+            createdAt: input.createdAt ?? now,
+            updatedAt: input.updatedAt ?? now,
+          })
+          .onConflictDoUpdate({
+            target: supportedPaymentLinks.slug,
+            set: {
+              name: input.name,
+              description: input.description ?? null,
+              instructions: input.instructions ?? null,
+              urlAllowlist: input.urlAllowlist,
+              urlExample: input.urlExample ?? null,
+              supportedDirections: input.supportedDirections ?? "BOTH",
+              logoUrl: input.logoUrl ?? null,
+              isActive: input.isActive ?? true,
+              updatedAt: now,
+            },
+          })
+          .returning();
+
+        if (row) {
+          results.push(toSelectType(row));
+        }
+      }
+
+      return results;
+    };
+
+    if (tx) {
+      return run(tx);
+    }
+    return db.transaction(run);
+  }
 }

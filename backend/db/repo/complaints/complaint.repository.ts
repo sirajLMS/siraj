@@ -104,6 +104,41 @@ function mapComplaintQueueRow(r: {
 }
 
 export namespace ComplaintRepository {
+  export type SeedComplaintInput = ComplaintSubmitInput & {
+    parentId: string;
+    status: ComplaintStatus;
+    createdAt?: Date;
+    updatedAt?: Date;
+  };
+
+  export const createSeedComplaint = async (
+    input: SeedComplaintInput,
+    tx?: DBTransaction
+  ): Promise<ComplaintSelectType> => {
+    const queryDb = tx ?? db;
+    const now = new Date();
+
+    const [created] = await queryDb
+      .insert(complaints)
+      .values({
+        parentId: input.parentId,
+        studentId: input.studentId ?? null,
+        category: input.category,
+        submitterEmail: input.submitterEmail,
+        body: input.body,
+        status: input.status,
+        createdAt: input.createdAt ?? now,
+        updatedAt: input.updatedAt ?? now,
+      })
+      .returning();
+
+    if (!created) {
+      throw new Error("Failed to create seed complaint");
+    }
+
+    return created;
+  };
+
   export const submitComplaint = async (
     input: ComplaintSubmitInput,
     parentId: string,

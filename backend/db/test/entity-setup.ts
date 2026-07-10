@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import {
   classInstances,
+  classMeetingConfigs,
   meetingProviders,
   parents,
   permissions,
@@ -11,10 +12,11 @@ import {
   userMeetingConfigs,
   users,
 } from "@/backend/db/schema";
-import type { AppPermission } from "@/backend/enum";
+import { AccountStatus, type AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   ClassInstanceEntity,
+  ClassMeetingConfigSelectType,
   MeetingProviderSelectType,
   ParentEntity,
   StudentEntity,
@@ -78,7 +80,6 @@ export async function createTestTeacher(
     .insert(teachers)
     .values({
       userId,
-      status: "ACTIVATED",
       createdAt: now,
       updatedAt: now,
       ...overrides,
@@ -127,13 +128,21 @@ export async function createTestStudent(
   return student;
 }
 
+type TeacherSetupOverrides = Partial<typeof teachers.$inferInsert> & {
+  status?: (typeof users.$inferInsert)["status"];
+};
+
 export async function setupTeacher(
   tx: DBTransaction,
   userOverrides: Partial<typeof users.$inferInsert> = {},
-  teacherOverrides: Partial<typeof teachers.$inferInsert> = {}
+  teacherOverrides: TeacherSetupOverrides = {}
 ): Promise<{ user: UserSelectType; teacher: TeacherEntity }> {
-  const user = await createTestUser(tx, userOverrides);
-  const teacher = await createTestTeacher(tx, user.id, teacherOverrides);
+  const { status: accountStatus, ...teacherOnly } = teacherOverrides;
+  const user = await createTestUser(tx, {
+    ...userOverrides,
+    status: userOverrides.status ?? accountStatus ?? AccountStatus.ACTIVATED,
+  });
+  const teacher = await createTestTeacher(tx, user.id, teacherOnly);
   return { user, teacher };
 }
 
@@ -281,6 +290,35 @@ export async function createTestMeetingConfig(
 
   if (!config) {
     throw new Error("Failed to create test meeting config");
+  }
+
+  return config;
+}
+
+export async function createTestClassMeetingConfig(
+  tx: DBTransaction,
+  scope: { classInstanceId: string } | { recurringScheduleId: string },
+  providerId: string,
+  overrides: Partial<typeof classMeetingConfigs.$inferInsert> = {}
+): Promise<ClassMeetingConfigSelectType> {
+  const now = new Date();
+  const [config] = await tx
+    .insert(classMeetingConfigs)
+    .values({
+      classInstanceId: "classInstanceId" in scope ? scope.classInstanceId : null,
+      recurringScheduleId: "recurringScheduleId" in scope ? scope.recurringScheduleId : null,
+      providerId,
+      label: "Test Class Meeting Config",
+      isDefault: false,
+      details: { meetingUrl: "https://zoom.us/j/class-override" },
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!config) {
+    throw new Error("Failed to create test class meeting config");
   }
 
   return config;

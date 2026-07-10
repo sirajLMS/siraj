@@ -11,7 +11,7 @@ import { classInstances, classStatusEvents, leaveRequests, parents, students, te
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { MeetingClassFieldsService } from "@/backend/services/meeting/meeting-class-fields";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
 
 export async function updateInstanceState(
@@ -571,14 +571,21 @@ export const rescheduleClassInstance = async (
     await validateRescheduleState(original, input, locale);
 
     const newInstanceInput = buildRescheduledClassInput(original, input, originalClassId);
-    const instanceWithMeeting = await MeetingClassFieldsService.applyToInsertInput(newInstanceInput, t);
+    const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(newInstanceInput.teacherId, {
+      recurringScheduleId: newInstanceInput.recurringScheduleId,
+      tx: t,
+    });
+    const instanceWithMeeting = {
+      ...newInstanceInput,
+      meetingJoinUrl: effectiveMeeting.joinUrl,
+    };
 
     await performRescheduleValidations(t, instanceWithMeeting, locale);
 
     const [created] = await t
       .insert(classInstances)
       .values({
-        ...instanceWithMeeting,
+        ...newInstanceInput,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

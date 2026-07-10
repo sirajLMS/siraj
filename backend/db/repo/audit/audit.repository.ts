@@ -1,7 +1,8 @@
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs } from "@/backend/db/schema";
+import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared/bulk-upsert";
+import { adminAuditLogs, auditLogs } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
 import type * as Types from "@/backend/types";
 
@@ -51,6 +52,160 @@ export namespace AuditRepository {
 
       return created;
     });
+  };
+
+  /**
+   * Bulk-insert audit log entries. Chunks large batches and returns inserted rows.
+   */
+  export const createManyAuditLogs = async (
+    inputs: readonly Types.CreateAuditLogInput[],
+    tx?: DBTransaction
+  ): Promise<Types.AuditLogEntity[]> => {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<Types.AuditLogEntity[]> => {
+      const now = new Date();
+      const rows = inputs.map(input => ({
+        actorUserId: input.actorUserId ?? null,
+        actorType: input.actorType,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        action: input.action,
+        description: input.description ?? null,
+        previousState: input.previousState ?? null,
+        newState: input.newState ?? null,
+        changes: input.changes ?? null,
+        ipAddress: sanitizeIpAddress(input.ipAddress),
+        userAgent: input.userAgent ?? null,
+        metadata: input.metadata ?? null,
+        createdAt: input.createdAt ?? now,
+      }));
+
+      const results: Types.AuditLogEntity[] = [];
+      for (let i = 0; i < rows.length; i += DEFAULT_BULK_CHUNK_SIZE) {
+        const chunk = rows.slice(i, i + DEFAULT_BULK_CHUNK_SIZE);
+        const inserted = await t.insert(auditLogs).values(chunk).returning();
+        results.push(...inserted);
+      }
+      return results;
+    };
+
+    return runInTransaction(tx, run);
+  };
+
+  /**
+   * Idempotent bulk-insert for audit logs (conflict-safe, no returning).
+   */
+  export const upsertManyAuditLogs = async (
+    inputs: readonly Types.CreateAuditLogInput[],
+    tx?: DBTransaction
+  ): Promise<void> => {
+    if (inputs.length === 0) return;
+
+    const run = async (t: DBTransaction): Promise<void> => {
+      const now = new Date();
+      const rows = inputs.map(input => ({
+        actorUserId: input.actorUserId ?? null,
+        actorType: input.actorType,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        action: input.action,
+        description: input.description ?? null,
+        previousState: input.previousState ?? null,
+        newState: input.newState ?? null,
+        changes: input.changes ?? null,
+        ipAddress: sanitizeIpAddress(input.ipAddress),
+        userAgent: input.userAgent ?? null,
+        metadata: input.metadata ?? null,
+        createdAt: input.createdAt ?? now,
+      }));
+
+      await bulkInsertOnConflictDoNothing(auditLogs, rows, { tx: t });
+    };
+
+    return runInTransaction(tx, run);
+  };
+
+  /**
+   * Bulk-insert admin audit log entries.
+   */
+  export const createManyAdminAuditLogs = async (
+    inputs: readonly Types.CreateAdminAuditLogInput[],
+    tx?: DBTransaction
+  ): Promise<Types.AdminAuditLogSelectType[]> => {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<Types.AdminAuditLogSelectType[]> => {
+      const now = new Date();
+      const rows = inputs.map(input => ({
+        actorUserId: input.actorUserId,
+        targetUserId: input.targetUserId ?? null,
+        action: input.action,
+        description: input.description ?? null,
+        previousState: input.previousState ?? null,
+        newState: input.newState ?? null,
+        ipAddress: sanitizeIpAddress(input.ipAddress),
+        createdAt: input.createdAt ?? now,
+      }));
+
+      const results: Types.AdminAuditLogSelectType[] = [];
+      for (let i = 0; i < rows.length; i += DEFAULT_BULK_CHUNK_SIZE) {
+        const chunk = rows.slice(i, i + DEFAULT_BULK_CHUNK_SIZE);
+        const inserted = await t.insert(adminAuditLogs).values(chunk).returning();
+        results.push(...inserted);
+      }
+      return results;
+    };
+
+    return runInTransaction(tx, run);
+  };
+
+  /**
+   * Idempotent bulk-insert for admin audit logs (conflict-safe, no returning).
+   */
+  export const upsertManyAdminAuditLogs = async (
+    inputs: readonly Types.CreateAdminAuditLogInput[],
+    tx?: DBTransaction
+  ): Promise<void> => {
+    if (inputs.length === 0) return;
+
+    const run = async (t: DBTransaction): Promise<void> => {
+      const now = new Date();
+      const rows = inputs.map(input => ({
+        actorUserId: input.actorUserId,
+        targetUserId: input.targetUserId ?? null,
+        action: input.action,
+        description: input.description ?? null,
+        previousState: input.previousState ?? null,
+        newState: input.newState ?? null,
+        ipAddress: sanitizeIpAddress(input.ipAddress),
+        createdAt: input.createdAt ?? now,
+      }));
+
+      await bulkInsertOnConflictDoNothing(adminAuditLogs, rows, { tx: t });
+    };
+
+    return runInTransaction(tx, run);
+  };
+
+  export const countAuditLogs = async (tx?: DBTransaction): Promise<number> => {
+    const client = tx ?? db;
+    const [row] = await client.select({ value: count() }).from(auditLogs);
+    return Number(row?.value ?? 0);
+  };
+
+  export const countAdminAuditLogs = async (tx?: DBTransaction): Promise<number> => {
+    const client = tx ?? db;
+    const [row] = await client.select({ value: count() }).from(adminAuditLogs);
+    return Number(row?.value ?? 0);
+  };
+
+  export const getRecentAdminAuditLogs = async (
+    limit: number = 100,
+    tx?: DBTransaction
+  ): Promise<Types.AdminAuditLogSelectType[]> => {
+    const client = tx ?? db;
+    return client.select().from(adminAuditLogs).orderBy(desc(adminAuditLogs.createdAt)).limit(limit);
   };
 
   /**

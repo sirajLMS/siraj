@@ -29,10 +29,7 @@ async function setupTestData(
     .returning();
 
   const tUser = await createTestUser(tx, `${prefix} Teacher`, `${prefix}-t-${randomUUID()}@example.com`, now);
-  const [teacher] = await tx
-    .insert(teachers)
-    .values({ userId: tUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now })
-    .returning();
+  const [teacher] = await tx.insert(teachers).values({ userId: tUser.id, createdAt: now, updatedAt: now }).returning();
 
   const [student] = await tx
     .insert(students)

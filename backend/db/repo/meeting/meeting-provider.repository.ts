@@ -136,6 +136,62 @@ export namespace MeetingProviderRepository {
     return db.transaction(run);
   }
 
+  export async function upsertMany(
+    inputs: readonly MeetingProviderSubmitInput[],
+    tx?: DBTransaction
+  ): Promise<MeetingProviderSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<MeetingProviderSelectType[]> => {
+      const now = new Date();
+      const results: MeetingProviderSelectType[] = [];
+
+      for (const input of inputs) {
+        const [row] = await t
+          .insert(meetingProviders)
+          .values({
+            slug: input.slug,
+            name: input.name,
+            description: input.description ?? null,
+            instructions: input.instructions ?? null,
+            urlAllowlist: input.urlAllowlist,
+            urlExample: input.urlExample ?? null,
+            logoUrl: input.logoUrl ?? null,
+            fieldSchema: input.fieldSchema,
+            isActive: input.isActive ?? true,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: meetingProviders.slug,
+            set: {
+              name: input.name,
+              description: input.description ?? null,
+              instructions: input.instructions ?? null,
+              urlAllowlist: input.urlAllowlist,
+              urlExample: input.urlExample ?? null,
+              logoUrl: input.logoUrl ?? null,
+              fieldSchema: input.fieldSchema,
+              isActive: input.isActive ?? true,
+              updatedAt: now,
+            },
+          })
+          .returning();
+
+        if (row) {
+          results.push(row);
+        }
+      }
+
+      return results;
+    };
+
+    if (tx) {
+      return run(tx);
+    }
+    return db.transaction(run);
+  }
+
   export async function deleteProvider(id: string, tx?: DBTransaction, locale?: string): Promise<void> {
     const run = async (t: DBTransaction): Promise<void> => {
       await getByIdOrThrow(id, t, locale);

@@ -1,5 +1,3 @@
-import { db } from "@/backend/db/drizzleDb";
-import { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
 import {
   ALL_FOCUS_LEVELS,
   ALL_GRADES,
@@ -13,9 +11,15 @@ import {
 } from "@/backend/db/seeds/lib";
 import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
-import type { ClassInstanceEntity } from "@/backend/types";
+import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
+import type { ClassInstanceEntity, ClassInstancePerformanceInsertType } from "@/backend/types";
 
-function buildPerformanceRow(instance: ClassInstanceEntity, config: SeedConfig, rowIndex: number, now: Date) {
+function buildPerformanceRow(
+  instance: ClassInstanceEntity,
+  config: SeedConfig,
+  rowIndex: number,
+  now: Date
+): ClassInstancePerformanceInsertType {
   const faker = getFakerForIndex(config.fakerSeed, instance.id.length);
 
   return {
@@ -44,40 +48,15 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
     throw new Error("No class instances available to link to performance metrics.");
   }
 
-  const results = [];
-
+  const specs: ClassInstancePerformanceInsertType[] = [];
   let rowIndex = 0;
   for (const instance of classInstancesList) {
-    if (instance.outcome !== ClassOutcome.TAKEN) {
-      continue;
-    }
-
-    const row = buildPerformanceRow(instance, seedConfig, rowIndex, now);
+    if (instance.outcome !== ClassOutcome.TAKEN) continue;
+    specs.push(buildPerformanceRow(instance, seedConfig, rowIndex, now));
     rowIndex++;
-
-    const [inserted] = await db
-      .insert(classInstancePerformance)
-      .values(row)
-      .onConflictDoUpdate({
-        target: classInstancePerformance.classInstanceId,
-        set: {
-          engagementScore: row.engagementScore,
-          assessmentProgress: row.assessmentProgress,
-          focusLevel: row.focusLevel,
-          sessionHealth: row.sessionHealth,
-          heatmapData: row.heatmapData,
-          latencyMs: row.latencyMs,
-          attendanceRate: row.attendanceRate,
-          avgGrade: row.avgGrade,
-          lastClassDaysAgo: row.lastClassDaysAgo,
-          updatedAt: now,
-        },
-      })
-      .returning();
-
-    results.push(inserted);
   }
 
+  const results = await ClassPerformanceService.upsertManyPerformance(specs);
   logger.info(`System class performance seeded (${results.length} rows).`);
   return results;
 }

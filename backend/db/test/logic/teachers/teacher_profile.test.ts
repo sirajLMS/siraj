@@ -47,7 +47,6 @@ describe("StaffProfileService Permission Gating", () => {
       .insert(teachers)
       .values({
         userId: teacherUser.id,
-        status: "ACTIVATED",
         createdAt: now,
         updatedAt: now,
       })

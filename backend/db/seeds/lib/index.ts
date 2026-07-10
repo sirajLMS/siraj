@@ -16,7 +16,6 @@ export {
   getAvailabilityEffectiveRange,
   shouldSeedLunchBlock,
 } from "./availability-factory";
-export { batchInsert } from "./batch-insert";
 export {
   buildInvoiceAmount,
   DEFAULT_INVOICE_CURRENCY,
@@ -76,6 +75,7 @@ export {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "./file-seed-helper";
+export { type OrchestrateSeedManyOptions, orchestrateSeedMany } from "./orchestrate-seed-many";
 export {
   buildExtraParentUserSpecs,
   buildExtraTeacherUserSpecs,

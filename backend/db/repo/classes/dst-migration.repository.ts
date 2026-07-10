@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -116,5 +116,37 @@ export namespace DstMigrationRepository {
 
   export const runTransaction = async <T>(cb: (tx: DBTransaction) => Promise<T>): Promise<T> => {
     return await db.transaction(cb);
+  };
+  export const findRunByUserId = async (runByUserId: string, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const [run] = await queryDb
+      .select()
+      .from(dstMigrationRuns)
+      .where(eq(dstMigrationRuns.runByUserId, runByUserId))
+      .limit(1);
+    return run ?? null;
+  };
+
+  export const findEntriesByScheduleIds = async (scheduleIds: readonly string[], tx?: DBTransaction) => {
+    if (scheduleIds.length === 0) return [];
+    const queryDb = tx ?? db;
+    return queryDb
+      .select()
+      .from(dstMigrationEntries)
+      .where(inArray(dstMigrationEntries.recurringScheduleId, [...scheduleIds]));
+  };
+
+  export const createManyEntries = async (
+    inputs: {
+      runId: string;
+      recurringScheduleId: string;
+      result: "UPDATED" | "CONFLICT" | "UNCHANGED";
+      conflictDetail: string | null;
+    }[],
+    tx?: DBTransaction
+  ) => {
+    if (inputs.length === 0) return [];
+    const queryDb = tx ?? db;
+    return queryDb.insert(dstMigrationEntries).values(inputs).returning();
   };
 }

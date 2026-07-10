@@ -1,5 +1,5 @@
 import { ParentRepository } from "@/backend/db/repo";
-import { AccountStatus, AppPermission, ParentStatus } from "@/backend/enum";
+import { AppPermission, ParentStatus } from "@/backend/enum";
 import { parseAccountStatus, parseParentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

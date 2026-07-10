@@ -1,3 +1,4 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
@@ -12,12 +13,19 @@ import { parseClassExecutionState } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { extractMeetingId } from "@/backend/services/meeting/meeting-url-parser";
 import type {
+  ClassCommunicationInsertType,
+  ClassCommunicationSelectType,
   GroupClassAdminNoteReturnType,
   GroupClassAuditReturnType,
   GroupClassCommunicationLogEntryReturnType,
+  GroupClassEnrollmentInsertType,
+  GroupClassEnrollmentSelectType,
+  GroupClassInsertType,
   GroupClassOnlineMeetingInfoReturnType,
+  GroupClassSelectType,
   GroupClassStudentReturnType,
 } from "@/backend/types";
 
@@ -81,13 +89,14 @@ export namespace GroupClassService {
       timestamp: c.timestamp ? c.timestamp.toISOString() : null,
     }));
 
-    const snapshot = classInstance.meetingConfigSnapshot;
-    const joinUrl = classInstance.meetingJoinUrl ?? snapshot?.details.meetingUrl ?? null;
-    const providerSlug = snapshot?.provider.catalogSlug ?? null;
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId);
+    const joinUrl = effectiveMeeting.joinUrl;
+    const providerSlug = effectiveMeeting.providerSlug;
 
     const meetingInfo: GroupClassOnlineMeetingInfoReturnType = {
       platform: providerSlug ?? "unknown",
-      meetingId: joinUrl && providerSlug ? extractMeetingId(providerSlug, joinUrl) : null,
+      meetingId:
+        effectiveMeeting.meetingId ?? (joinUrl && providerSlug ? extractMeetingId(providerSlug, joinUrl) : null),
       joinUrl,
     };
 
@@ -182,6 +191,54 @@ export namespace GroupClassService {
     }
 
     return { id: classInstanceId, success: true };
+  }
+  export async function listGroupClassesByClassInstanceIds(
+    classInstanceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<GroupClassSelectType[]> {
+    return GroupClassRepository.listByClassInstanceIds(classInstanceIds, tx);
+  }
+
+  export async function createManyGroupClasses(
+    inputs: Omit<GroupClassInsertType, "id" | "createdAt" | "updatedAt">[],
+    tx?: DBTransaction
+  ): Promise<GroupClassSelectType[]> {
+    return GroupClassRepository.createMany(inputs, tx);
+  }
+
+  export async function findEnrollmentKeys(
+    keys: readonly { groupClassId: string; studentId: string }[],
+    tx?: DBTransaction
+  ): Promise<Set<string>> {
+    return GroupClassRepository.findEnrollmentKeys(keys, tx);
+  }
+
+  export async function createManyEnrollments(
+    inputs: Omit<GroupClassEnrollmentInsertType, "id" | "createdAt" | "updatedAt">[],
+    tx?: DBTransaction
+  ): Promise<GroupClassEnrollmentSelectType[]> {
+    return GroupClassRepository.createManyEnrollments(inputs, tx);
+  }
+
+  export async function listGroupClassIdsWithCommunications(
+    groupClassIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Set<string>> {
+    return GroupClassRepository.listGroupClassIdsWithCommunications(groupClassIds, tx);
+  }
+
+  export async function createManyCommunications(
+    inputs: Omit<ClassCommunicationInsertType, "id" | "createdAt">[],
+    tx?: DBTransaction
+  ): Promise<ClassCommunicationSelectType[]> {
+    return GroupClassRepository.createManyCommunications(inputs, tx);
+  }
+
+  export async function findEnrollmentsByKeys(
+    keys: readonly { groupClassId: string; studentId: string }[],
+    tx?: DBTransaction
+  ): Promise<Map<string, GroupClassEnrollmentSelectType>> {
+    return GroupClassRepository.findEnrollmentsByKeys(keys, tx);
   }
 }
 

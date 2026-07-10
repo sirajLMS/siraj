@@ -40,7 +40,6 @@ async function createTestTeachers(tx: DBTransaction, now: Date) {
       .insert(teachers)
       .values({
         userId: user.id,
-        status: "ACTIVATED",
         createdAt: now,
         updatedAt: now,
       })

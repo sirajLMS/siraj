@@ -2,6 +2,7 @@ import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL, sq
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
+import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import {
   classInstancePerformance,
   classInstances,
@@ -13,9 +14,15 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import { BookingStatus, ClassOutcome, type CurrencyCode, type ParentStatus } from "@/backend/enum";
+import { AccountStatus, BookingStatus, ClassOutcome, type CurrencyCode, type ParentStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { parseClassExecutionState, parseClassOutcome, parseCurrencyCode, parseIanaTimezone } from "@/backend/lib/enum";
+import {
+  parseAccountStatus,
+  parseClassExecutionState,
+  parseClassOutcome,
+  parseCurrencyCode,
+  parseIanaTimezone,
+} from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
@@ -24,6 +31,7 @@ import type {
   ParentDashboardScheduleRow,
   ParentDirectoryRawMetrics,
   ParentDirectoryRawRow,
+  ParentEntity,
   ParentEntityInput,
   ParentProfileUpdateInput,
   StudentProgressReturnType,
@@ -253,7 +261,8 @@ export namespace ParentRepository {
     name: string;
     email: string;
     avatarUrl: string | null;
-    status: string;
+    lifecycleStatus: string;
+    accountStatus: AccountStatus;
     phone: string | null;
     nationality: string | null;
     address: string | null;
@@ -279,7 +288,8 @@ export namespace ParentRepository {
         name: users.name,
         email: users.email,
         avatarUrl: users.avatarUrl,
-        status: parents.status,
+        lifecycleStatus: parents.status,
+        accountStatus: users.status,
         phone: parents.phone,
         nationality: parents.nationality,
         address: parents.address,
@@ -303,6 +313,7 @@ export namespace ParentRepository {
 
     return {
       ...results[0],
+      accountStatus: parseAccountStatus(results[0].accountStatus),
       timezone: parseIanaTimezone(results[0].timezone),
       displayCurrency: parseCurrencyCode(results[0].displayCurrency),
     };
@@ -354,7 +365,7 @@ export namespace ParentRepository {
   export type DeactivatedParentResult = {
     id: string;
     userId: string;
-    status: string;
+    accountStatus: AccountStatus;
     updatedAt: Date;
   };
 
@@ -365,10 +376,10 @@ export namespace ParentRepository {
   ): Promise<DeactivatedParentResult> => {
     const queryDb = tx ?? db;
 
-    // Fetch current record first to confirm existence
     const existing = await queryDb
-      .select({ id: parents.id, userId: parents.userId, status: parents.status })
+      .select({ id: parents.id, userId: parents.userId, accountStatus: users.status })
       .from(parents)
+      .innerJoin(users, eq(parents.userId, users.id))
       .where(eq(parents.id, parentId))
       .limit(1);
 
@@ -378,23 +389,29 @@ export namespace ParentRepository {
     }
 
     const current = existing[0];
-    if (current.status === "DEACTIVATED") {
+    if (parseAccountStatus(current.accountStatus) === AccountStatus.DEACTIVATED) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("parentAlreadyDeactivated", { id: parentId }));
     }
 
-    const [updated] = await queryDb
+    const updatedUser = await UserRepository.updateStatus(current.userId, AccountStatus.DEACTIVATED, tx, locale);
+
+    const [updatedParent] = await queryDb
       .update(parents)
-      .set({ status: "DEACTIVATED", updatedAt: new Date() })
+      .set({ updatedAt: new Date() })
       .where(eq(parents.id, parentId))
       .returning({
         id: parents.id,
         userId: parents.userId,
-        status: parents.status,
         updatedAt: parents.updatedAt,
       });
 
-    return updated;
+    return {
+      id: updatedParent.id,
+      userId: updatedParent.userId,
+      accountStatus: parseAccountStatus(updatedUser.status),
+      updatedAt: updatedParent.updatedAt,
+    };
   };
 
   export type AssociatedStudentRow = {
@@ -809,5 +826,21 @@ export namespace ParentRepository {
       description: row.body,
       imageUrl: "",
     };
+  };
+  export const upsertByUserId = async (userId: string, status: string, tx?: DBTransaction): Promise<ParentEntity> => {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [row] = await queryDb
+      .insert(parents)
+      .values({ userId, status, createdAt: now, updatedAt: now })
+      .onConflictDoUpdate({
+        target: parents.userId,
+        set: { status, updatedAt: now },
+      })
+      .returning();
+    if (!row) {
+      throw new Error("Parent upsert failed");
+    }
+    return row;
   };
 }

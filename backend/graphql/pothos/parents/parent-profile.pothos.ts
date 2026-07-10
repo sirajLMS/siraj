@@ -3,15 +3,23 @@ import {
   DisplayAmountPothosObject,
   resolveDisplayAmountField,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
-import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  AccountStatusPothosObject,
+  CurrencyCodePothosObject,
+  IanaTimezonePothosObject,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
 import type { EditQuotaResult } from "@/backend/services/student/student-management.service";
 import { StudentManagementService } from "@/backend/services/student/student-management.service";
-import type { AssociatedStudentResult, DeactivateParentResult, ParentProfileResult } from "@/backend/types";
+import type { AssociatedStudentResult, DeactivateParentResult } from "@/backend/types";
+import type { ParentProfileResult } from "@/backend/types/parents/parent.types";
+
+/** Pothos object shape (decoupled from barrel re-exports). */
+type ParentProfileGraphQLShape = ParentProfileResult;
 
 // ─── ParentProfile Object ───────────────────────────────────────────────────
 
-const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileResult>("ParentProfile");
+const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileGraphQLShape>("ParentProfile");
 
 export const ParentProfilePothosObject = ParentProfileRef.implement({
   fields: t => ({
@@ -20,7 +28,8 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
-    status: t.exposeString("status"),
+    lifecycleStatus: t.exposeString("lifecycleStatus"),
+    accountStatus: t.expose("accountStatus", { type: AccountStatusPothosObject }),
     phone: t.exposeString("phone", { nullable: true }),
     nationality: t.exposeString("nationality", { nullable: true }),
     address: t.exposeString("address", { nullable: true }),
@@ -70,7 +79,8 @@ const DeactivateParentResultRef = gqlSchemaBuilder.objectRef<DeactivateParentRes
 export const DeactivateParentResultPothosObject = DeactivateParentResultRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
-    status: t.exposeString("status"),
+    userId: t.exposeString("userId"),
+    accountStatus: t.expose("accountStatus", { type: AccountStatusPothosObject }),
   }),
 });
 

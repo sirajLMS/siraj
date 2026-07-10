@@ -11,6 +11,7 @@ import type {
   TeacherCreateResult,
   TeacherDirectoryMetrics,
   TeacherDirectoryRow,
+  TeacherEntity,
   TeacherEntityInput,
   TeacherProfileReturnType,
   TeacherProfileUpdateInputType,
@@ -293,5 +294,21 @@ export namespace TeacherRepository {
       .where(eq(teachers.id, teacherId))
       .returning({ id: teachers.id });
     return !!updated;
+  };
+  export const upsertByUserId = async (userId: string, tx?: DBTransaction): Promise<TeacherEntity> => {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [row] = await queryDb
+      .insert(teachers)
+      .values({ userId, createdAt: now, updatedAt: now })
+      .onConflictDoUpdate({
+        target: teachers.userId,
+        set: { updatedAt: now },
+      })
+      .returning();
+    if (!row) {
+      throw new Error("Teacher upsert failed");
+    }
+    return row;
   };
 }

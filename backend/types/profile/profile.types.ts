@@ -63,7 +63,9 @@ export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {
   readonly timezone?: IanaTimezone | null;
 };
 
-export type StaffOwnProfileUpdateInput = Record<string, never>;
+export type StaffOwnProfileUpdateInput = {
+  readonly phone?: string | null;
+};
 
 export type StaffAdminProfileUpdateInput = {
   readonly status?: string | null;

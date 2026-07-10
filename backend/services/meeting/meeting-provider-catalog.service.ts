@@ -1,3 +1,4 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -6,6 +7,7 @@ import {
   parseUpdateMeetingProviderInput,
 } from "@/backend/lib/meeting-provider.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
   MeetingProviderReturnType,
   MeetingProviderSubmitInput,
@@ -70,5 +72,36 @@ export namespace MeetingProviderCatalogService {
     await assertManageCatalog(userId, locale);
     await MeetingProviderRepository.deleteProvider(id, undefined, locale);
     return { id };
+  }
+
+  /** List all providers without auth (seed / bootstrap use). */
+  export async function listAllProviders(tx?: DBTransaction): Promise<MeetingProviderReturnType[]> {
+    return MeetingProviderRepository.listAll(tx);
+  }
+
+  /** Upsert many providers by slug without auth (seed / bootstrap use). */
+  export async function upsertManyProviders(
+    inputs: readonly MeetingProviderSubmitInput[],
+    tx?: DBTransaction
+  ): Promise<MeetingProviderReturnType[]> {
+    if (inputs.length === 0) return [];
+
+    try {
+      return await MeetingProviderRepository.upsertMany(inputs, tx);
+    } catch (error) {
+      if (isDuplicateError(error)) {
+        const results: MeetingProviderReturnType[] = [];
+        for (const input of inputs) {
+          const existing = await MeetingProviderRepository.getBySlug(input.slug, tx);
+          if (existing) {
+            results.push(
+              await MeetingProviderRepository.update(existing.id, { ...input, isActive: input.isActive ?? true }, tx)
+            );
+          }
+        }
+        return results;
+      }
+      throw error;
+    }
   }
 }

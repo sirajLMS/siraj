@@ -1,6 +1,7 @@
 import type { classInstances } from "@/backend/db/schema/classes/scheduling";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 // Foundation types from schema
 export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertType = typeof classInstances.$inferInsert;
@@ -52,6 +53,7 @@ export type ClassInstanceDetailReturnType = Omit<
   studentTimezone: IanaTimezone | null;
   teacherTimezone: IanaTimezone | null;
   meetingJoinUrl: string | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
   payrollCredited: boolean;
   isRescheduled: boolean;
   executionState: ClassExecutionState | null;

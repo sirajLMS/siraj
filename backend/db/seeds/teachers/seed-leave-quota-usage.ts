@@ -1,8 +1,6 @@
-import { and, eq, isNull } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { leaveQuotaUsage } from "@/backend/db/schema/classes/scheduling";
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { LeaveRequestService } from "@/backend/services/schedule/leave-request.service";
 import type { StudentEntity } from "@/backend/types";
 
 type LeaveRequestRow = {
@@ -37,40 +35,13 @@ export async function seedOrGet(
     const year = Number(yearStr);
     const month = Number(monthStr);
 
-    const [existing] = await db
-      .select()
-      .from(leaveQuotaUsage)
-      .where(
-        and(
-          eq(leaveQuotaUsage.studentId, student.id),
-          eq(leaveQuotaUsage.periodYear, year),
-          eq(leaveQuotaUsage.periodMonth, month),
-          isNull(leaveQuotaUsage.teacherId)
-        )
-      )
-      .limit(1);
-
-    if (existing) {
-      const [updated] = await db
-        .update(leaveQuotaUsage)
-        .set({ usedCount: count })
-        .where(eq(leaveQuotaUsage.id, existing.id))
-        .returning();
-      results.push(updated);
-      continue;
-    }
-
-    const [inserted] = await db
-      .insert(leaveQuotaUsage)
-      .values({
-        studentId: student.id,
-        teacherId: null,
-        periodYear: year,
-        periodMonth: month,
-        usedCount: count,
-      })
-      .returning();
-    results.push(inserted);
+    const row = await LeaveRequestService.upsertStudentLeaveQuota({
+      studentId: student.id,
+      periodYear: year,
+      periodMonth: month,
+      usedCount: count,
+    });
+    results.push(row);
   }
 
   logger.info(`Leave quota usage seeded (${results.length} rows).`);

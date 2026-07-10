@@ -4,10 +4,11 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { users } from "@/backend/db/schema";
+import type { AccountStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { AccountStatus } from "@/backend/enum";
 import { PaginationArgsDefault } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
+import { parseAccountStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
@@ -45,9 +46,10 @@ export namespace UserRepository {
     return findOne(eq(users.id, id));
   };
 
-  export const findSafeById = async (id: string): Promise<UserSelectType | null> => {
+  export const findSafeById = async (id: string, tx?: DBTransaction): Promise<UserSelectType | null> => {
+    const queryDb = tx ?? db;
     try {
-      const results = await db
+      const results = await queryDb
         .select({
           id: users.id,
           name: users.name,
@@ -92,7 +94,7 @@ export namespace UserRepository {
   export const findAll = async (): Promise<
     Pick<UserReturnType, "id" | "name" | "email" | "status" | "createdAt">[]
   > => {
-    return await db
+    const rows = await db
       .select({
         id: users.id,
         name: users.name,
@@ -102,6 +104,10 @@ export namespace UserRepository {
       })
       .from(users)
       .limit(500);
+    return rows.map(row => ({
+      ...row,
+      status: parseAccountStatus(row.status),
+    }));
   };
 
   export const findUsers = async (opts: { limit: number; offset: number }): Promise<UserReturnType[]> => {
@@ -213,7 +219,7 @@ export namespace UserRepository {
     const queryDb = tx ?? db;
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
-    const existing = await findSafeById(userId);
+    const existing = await findSafeById(userId, tx);
     if (!existing) {
       throw new Error(t("userNotFound", { id: userId }));
     }
@@ -326,5 +332,41 @@ export namespace UserRepository {
     }
 
     return updated;
+  };
+
+  export type BootstrapUserUpsertInput = {
+    name: string;
+    email: string;
+    hashedPassword: string;
+    isSuperAdmin?: boolean;
+  };
+
+  export const upsertBootstrapUser = async (
+    input: BootstrapUserUpsertInput,
+    tx?: DBTransaction
+  ): Promise<UserSelectType> => {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [user] = await queryDb
+      .insert(users)
+      .values({
+        name: input.name,
+        email: input.email,
+        password: input.hashedPassword,
+        isSuperAdmin: input.isSuperAdmin ?? false,
+        displayCurrency: null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: users.email,
+        set: {
+          name: input.name,
+          isSuperAdmin: input.isSuperAdmin ?? false,
+          updatedAt: now,
+        },
+      })
+      .returning();
+    return user;
   };
 }

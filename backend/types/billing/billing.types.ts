@@ -1,6 +1,14 @@
-import type { currencyExchangeRates, fxSyncRuns, invoices, payments } from "@/backend/db/schema";
+import type {
+  currencyExchangeAuditLogs,
+  currencyExchangeRates,
+  currencyHedges,
+  fxSyncRuns,
+  invoiceCoverageMonths,
+  invoicePaymentSubmissions,
+  invoices,
+  payments,
+} from "@/backend/db/schema";
 import type { CurrencyCode, FxProvider, FxSyncStatus, FxSyncTrigger, InvoiceStatus, InvoiceType } from "@/backend/enum";
-import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -92,6 +100,44 @@ export type RefreshExchangeRatesResult = {
   readonly errorMessage?: string;
 };
 
+export type FxSyncHealthReturnType = {
+  readonly id: string;
+  readonly isStale: boolean;
+  readonly status: FxSyncStatus | null;
+  readonly finishedAt: Date | null;
+};
+
+export type FxProviderConfigSource = "env" | "database";
+
+export type FxProviderConfigReturnType = {
+  readonly id: string;
+  readonly activeProvider: FxProvider;
+  readonly source: FxProviderConfigSource;
+};
+
+export type UpsertManualExchangeRateInput = {
+  readonly fromCurrency: CurrencyCode;
+  readonly toCurrency: CurrencyCode;
+  readonly rate: string;
+  readonly effectiveDate?: string | null;
+};
+
+export type UpsertManualExchangeRateResult = {
+  readonly id: string;
+  readonly rate: CurrencyExchangeRateReturnType;
+};
+
+export type CurrencyHedgeSelectType = typeof currencyHedges.$inferSelect;
+export type CurrencyHedgeInsertType = typeof currencyHedges.$inferInsert;
+
+export type CurrencyHedgeReturnType = CurrencyHedgeSelectType;
+
+export type CurrencyHedgeSubmitInput = Omit<CurrencyHedgeInsertType, "id" | "createdAt" | "updatedAt">;
+
+export type CurrencyHedgeUpdateInput = Partial<
+  Pick<CurrencyHedgeInsertType, "currency" | "amount" | "hedgeType" | "notes">
+>;
+
 export type ExchangeRateHistoryRow = {
   readonly id: string;
   readonly fromCurrency: CurrencyCode;
@@ -135,6 +181,24 @@ export type InvoiceHistoryPaginatedResult = {
   readonly pageInfo: PageInfo | null;
 };
 
+export type InvoicePaymentSubmissionSelectType = typeof invoicePaymentSubmissions.$inferSelect;
+export type InvoicePaymentSubmissionInsertType = typeof invoicePaymentSubmissions.$inferInsert;
+export type InvoicePaymentSubmissionStatus = InvoicePaymentSubmissionSelectType["status"];
+
+export type InvoicePaymentSubmissionReturnType = {
+  readonly id: string;
+  readonly invoiceId: string;
+  readonly fileId: string;
+  readonly filePath: string;
+  readonly mimeType: string;
+  readonly status: InvoicePaymentSubmissionStatus;
+  readonly submittedByUserId: string;
+  readonly submittedAt: string;
+  readonly reviewedByUserId: string | null;
+  readonly reviewedAt: string | null;
+  readonly rejectionReason: string | null;
+};
+
 export type InvoiceHistoryRow = {
   readonly id: string;
   readonly issueDate: string;
@@ -148,8 +212,7 @@ export type InvoiceHistoryRow = {
   readonly studentName: string | null;
   readonly parentId: string;
   readonly parentUserId: string | null;
-  readonly latestPaymentMethodType: PaymentMethodType | null;
-  readonly latestPaymentMethodLabel: string | null;
+  readonly hasPaymentProof: boolean;
 };
 
 export type BillingCurrencyTotal = {
@@ -251,6 +314,18 @@ export type CreateManualInvoiceInput = {
   readonly sendEmail?: boolean | null;
   readonly idempotencyKey?: string;
 };
+
+export type SeedInvoiceInput = Omit<InvoiceInsertType, "id" | "createdAt" | "updatedAt">;
+
+export type InvoiceCoverageMonthSelectType = typeof invoiceCoverageMonths.$inferSelect;
+
+export type SeedInvoiceCoverageMonthInput = Pick<InvoiceCoverageMonthSelectType, "invoiceId" | "year" | "month">;
+
+export type SeedPaymentInput = PaymentRecordInput;
+
+export type CurrencyExchangeAuditLogInsertType = typeof currencyExchangeAuditLogs.$inferInsert;
+
+export type SeedExchangeAuditLogInput = Omit<CurrencyExchangeAuditLogInsertType, "id">;
 
 export type MarkInvoicePaidReturnType = {
   readonly id: string;

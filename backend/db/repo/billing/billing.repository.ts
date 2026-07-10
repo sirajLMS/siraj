@@ -14,7 +14,6 @@ import {
   users,
 } from "@/backend/db/schema";
 import { CurrencyCode, StudentStatus } from "@/backend/enum";
-import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
@@ -581,9 +580,8 @@ export namespace BillingRepository {
   function buildSummaryItems(
     groupedByParent: Map<string, OverdueInvoiceRow[]>,
     parentMap: Map<string, ParentUserRow>
-  ): { items: Types.UnpaidInvoiceSummaryItem[]; totalAmount: number } {
+  ): Types.UnpaidInvoiceSummaryItem[] {
     const items: Types.UnpaidInvoiceSummaryItem[] = [];
-    let totalAmount = 0;
 
     for (const [parentId, invs] of groupedByParent) {
       const parent = parentMap.get(parentId);
@@ -593,10 +591,6 @@ export namespace BillingRepository {
       const sortedInvs = [...invs].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
       const primaryCurrency = amountsByCurrency[0]?.currency ?? sortedInvs[0]?.currency;
       const primaryAmount = amountsByCurrency.find(bucket => bucket.currency === primaryCurrency)?.amount ?? "0.00";
-
-      for (const bucket of amountsByCurrency) {
-        totalAmount += Number.parseFloat(bucket.amount);
-      }
 
       items.push({
         id: parentId,
@@ -611,7 +605,7 @@ export namespace BillingRepository {
       });
     }
 
-    return { items, totalAmount };
+    return items;
   }
 
   export const getUnpaidInvoicesSummary = async (tx?: DBTransaction): Promise<Types.UnpaidInvoicesSummaryResult> => {
@@ -630,13 +624,14 @@ export namespace BillingRepository {
 
     const parentMap = await fetchParentUsers(t, parentIds);
     const groupedByParent = groupInvoicesByParent(overdueInvoices);
-    const { items, totalAmount } = buildSummaryItems(groupedByParent, parentMap);
+    const items = buildSummaryItems(groupedByParent, parentMap);
     const overdueAmountsByCurrency = groupAmountsByCurrency(overdueInvoices, "overdue-global");
+    const primaryGlobalAmount = overdueAmountsByCurrency[0]?.amount ?? "0.00";
 
     return {
       id: "unpaid-invoices-summary",
       totalOverdueInvoices: overdueInvoices.length,
-      totalOverdueAmount: totalAmount.toFixed(2),
+      totalOverdueAmount: primaryGlobalAmount,
       overdueAmountsByCurrency,
       items,
     };
@@ -655,20 +650,12 @@ export namespace BillingRepository {
     studentName: students.name,
     parentId: invoices.parentId,
     parentUserId: parents.userId,
-    latestPaymentMethodType: sql<string | null>`(
-      SELECT p.payment_method_type
-      FROM payments p
-      WHERE p.invoice_id = ${invoices.id}
-      ORDER BY p.payment_date DESC
-      LIMIT 1
-    )`.as("latest_payment_method_type"),
-    latestPaymentMethodLabel: sql<string | null>`(
-      SELECT p.payment_method_snapshot->>'label'
-      FROM payments p
-      WHERE p.invoice_id = ${invoices.id}
-      ORDER BY p.payment_date DESC
-      LIMIT 1
-    )`.as("latest_payment_method_label"),
+    hasPaymentProof: sql<boolean>`EXISTS (
+      SELECT 1
+      FROM invoice_files inf
+      WHERE inf.invoice_id = ${invoices.id}
+        AND inf.usage_type = 'payment_proof'
+    )`.as("has_payment_proof"),
   };
 
   function mapInvoiceRow(r: {
@@ -684,10 +671,8 @@ export namespace BillingRepository {
     studentName: string | null;
     parentId: string;
     parentUserId: string | null;
-    latestPaymentMethodType: string | null;
-    latestPaymentMethodLabel: string | null;
+    hasPaymentProof: boolean;
   }): Types.InvoiceHistoryRow {
-    const latestType = r.latestPaymentMethodType;
     return {
       id: r.id,
       issueDate: r.issueDate,
@@ -701,11 +686,7 @@ export namespace BillingRepository {
       studentName: r.studentName ?? null,
       parentId: r.parentId,
       parentUserId: r.parentUserId ?? null,
-      latestPaymentMethodType:
-        latestType && Object.values(PaymentMethodType).includes(latestType as PaymentMethodType)
-          ? (latestType as PaymentMethodType)
-          : null,
-      latestPaymentMethodLabel: r.latestPaymentMethodLabel ?? null,
+      hasPaymentProof: r.hasPaymentProof,
     };
   }
 
@@ -1062,6 +1043,15 @@ export namespace BillingRepository {
     return results[0] ?? null;
   };
 
+  export const setInvoicePaymentPending = async (
+    invoiceId: string,
+    expectedVersion?: number,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<Types.InvoiceSelectType> => {
+    return updateInvoiceStatus(invoiceId, "PAYMENT_PENDING", null, expectedVersion, tx, locale);
+  };
+
   export const markInvoiceAsPaid = async (
     invoiceId: string,
     expectedVersion?: number,
@@ -1071,7 +1061,7 @@ export namespace BillingRepository {
     const runner = async (t: DBTransaction) => {
       const current = await getExistingInvoiceOrThrow(t, invoiceId, locale);
 
-      if (current.status !== "UNPAID") {
+      if (current.status !== "UNPAID" && current.status !== "PAYMENT_PENDING") {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(tFunc("invoiceAlreadyPaid", { id: invoiceId, status: current.status }));
       }
@@ -1103,5 +1093,155 @@ export namespace BillingRepository {
     };
 
     return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const findInvoicesByIdempotencyKeys = async (
+    keys: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceSelectType[]> => {
+    if (keys.length === 0) return [];
+    const t = tx ?? db;
+    return t
+      .select()
+      .from(invoices)
+      .where(inArray(invoices.idempotencyKey, [...keys]));
+  };
+
+  export const upsertManyInvoices = async (
+    inputs: readonly InvoiceCreateInput[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceSelectType[]> => {
+    if (inputs.length === 0) return [];
+    const now = new Date();
+
+    const runner = async (t: DBTransaction) => {
+      const results: Types.InvoiceSelectType[] = [];
+      for (const input of inputs) {
+        const [row] = await t
+          .insert(invoices)
+          .values({
+            ...input,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: invoices.idempotencyKey,
+            set: {
+              status: input.status,
+              paidDate: input.paidDate ?? null,
+              updatedAt: now,
+            },
+          })
+          .returning();
+        if (row) results.push(row);
+      }
+      return results;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const findPaymentsByIdempotencyKeys = async (
+    keys: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Types.PaymentSelectType[]> => {
+    if (keys.length === 0) return [];
+    const t = tx ?? db;
+    return t
+      .select()
+      .from(payments)
+      .where(inArray(payments.idempotencyKey, [...keys]));
+  };
+
+  export const upsertManyPayments = async (
+    inputs: readonly PaymentRecordInput[],
+    tx?: DBTransaction
+  ): Promise<Types.PaymentSelectType[]> => {
+    if (inputs.length === 0) return [];
+    const now = new Date();
+
+    const runner = async (t: DBTransaction) => {
+      const results: Types.PaymentSelectType[] = [];
+      for (const input of inputs) {
+        const [row] = await t
+          .insert(payments)
+          .values({
+            ...input,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: payments.idempotencyKey,
+            set: { updatedAt: now },
+          })
+          .returning();
+        if (row) results.push(row);
+      }
+      return results;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const upsertManyExchangeRates = async (
+    inputs: readonly CurrencyExchangeRateUpdateInput[],
+    tx?: DBTransaction
+  ): Promise<Types.CurrencyExchangeRateSelectType[]> => {
+    if (inputs.length === 0) return [];
+    const now = new Date();
+    const t = tx ?? db;
+    const results: Types.CurrencyExchangeRateSelectType[] = [];
+
+    for (const input of inputs) {
+      const [row] = await t
+        .insert(currencyExchangeRates)
+        .values({
+          ...input,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: [
+            currencyExchangeRates.fromCurrency,
+            currencyExchangeRates.toCurrency,
+            currencyExchangeRates.effectiveDate,
+          ],
+          set: { rate: input.rate, updatedAt: now },
+        })
+        .returning();
+      if (row) results.push(row);
+    }
+
+    return results;
+  };
+
+  export const createManyExchangeAuditLogs = async (
+    inputs: readonly Omit<Types.CurrencyExchangeAuditLogInsertType, "id">[],
+    tx?: DBTransaction
+  ): Promise<Types.CurrencyExchangeAuditLogInsertType[]> => {
+    if (inputs.length === 0) return [];
+    const t = tx ?? db;
+    return t.insert(currencyExchangeAuditLogs).values([...inputs]).returning();
+  };
+
+  export const findInvoiceCoverageMonthsByInvoiceIds = async (
+    invoiceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceCoverageMonthSelectType[]> => {
+    if (invoiceIds.length === 0) return [];
+    const t = tx ?? db;
+    return t
+      .select()
+      .from(invoiceCoverageMonths)
+      .where(inArray(invoiceCoverageMonths.invoiceId, [...invoiceIds]));
+  };
+
+  export const createManyInvoiceCoverageMonths = async (
+    inputs: readonly Types.SeedInvoiceCoverageMonthInput[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceCoverageMonthSelectType[]> => {
+    if (inputs.length === 0) return [];
+    const t = tx ?? db;
+    return t.insert(invoiceCoverageMonths).values([...inputs]).onConflictDoNothing().returning();
   };
 }

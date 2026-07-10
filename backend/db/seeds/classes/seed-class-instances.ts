@@ -1,5 +1,3 @@
-import { db } from "@/backend/db/drizzleDb";
-import { classInstances } from "@/backend/db/schema/classes/scheduling";
 import {
   buildScheduleDaysForStudent,
   buildShowcaseInstancesForToday,
@@ -9,38 +7,10 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import type { RecurringScheduleEntity, StudentEntity, TeacherEntity } from "@/backend/types";
+import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import type { ClassInstanceInsertInput, RecurringScheduleEntity, StudentEntity, TeacherEntity } from "@/backend/types";
 
 const CHUNK_SIZE = 100;
-
-async function upsertInstancesChunk(
-  instances: (typeof classInstances.$inferInsert)[],
-  now: Date
-): Promise<(typeof classInstances.$inferSelect)[]> {
-  const results: (typeof classInstances.$inferSelect)[] = [];
-
-  for (const instance of instances) {
-    const [inserted] = await db
-      .insert(classInstances)
-      .values(instance)
-      .onConflictDoUpdate({
-        target: classInstances.idempotencyKey,
-        set: {
-          scheduledStartAt: instance.scheduledStartAt,
-          scheduledEndAt: instance.scheduledEndAt,
-          executionState: instance.executionState,
-          outcome: instance.outcome,
-          actualStartAt: instance.actualStartAt,
-          actualEndAt: instance.actualEndAt,
-          updatedAt: now,
-        },
-      })
-      .returning();
-    results.push(inserted);
-  }
-
-  return results;
-}
 
 export async function seedOrGet(
   classesList: RecurringScheduleEntity[],
@@ -59,7 +29,7 @@ export async function seedOrGet(
   const studentById = new Map(studentsList.map(s => [s.id, s]));
   const teacherById = new Map(teachersList.map(t => [t.id, t]));
   const demoStudent = studentsList[0];
-  const allInstances: (typeof classInstances.$inferInsert)[] = [];
+  const allInstances: ClassInstanceInsertInput[] = [];
 
   for (let i = 0; i < classesList.length; i++) {
     const schedule = classesList[i];
@@ -90,7 +60,10 @@ export async function seedOrGet(
   const results = [];
   for (let i = 0; i < allInstances.length; i += CHUNK_SIZE) {
     const chunk = allInstances.slice(i, i + CHUNK_SIZE);
-    const inserted = await upsertInstancesChunk(chunk, now);
+    const inserted = await ClassSessionService.upsertManyClassInstances(chunk, {
+      chunkSize: CHUNK_SIZE,
+      updatedAt: now,
+    });
     results.push(...inserted);
     logger.info(`Class instances progress: ${Math.min(i + CHUNK_SIZE, allInstances.length)}/${allInstances.length}`);
   }

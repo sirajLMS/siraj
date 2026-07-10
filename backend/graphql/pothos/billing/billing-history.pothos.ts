@@ -8,7 +8,6 @@ import {
   CurrencyCodePothosObject,
   InvoiceStatusPothosObject,
   InvoiceTypePothosObject,
-  PaymentMethodTypePothosEnum,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
@@ -56,11 +55,7 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     studentName: t.exposeString("studentName", { nullable: true }),
     parentId: t.exposeString("parentId"),
     parentUserId: t.exposeString("parentUserId", { nullable: true }),
-    latestPaymentMethodType: t.expose("latestPaymentMethodType", {
-      type: PaymentMethodTypePothosEnum,
-      nullable: true,
-    }),
-    latestPaymentMethodLabel: t.exposeString("latestPaymentMethodLabel", { nullable: true }),
+    hasPaymentProof: t.exposeBoolean("hasPaymentProof"),
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,

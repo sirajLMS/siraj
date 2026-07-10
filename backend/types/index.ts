@@ -18,12 +18,14 @@ export type {
   AuditLogQueryResult,
   AuditLogReturnType as AuditLogEntity,
   AuditLogSubmitInput,
+  CreateAdminAuditLogInput,
   CreateAuditLogInput,
 } from "@/backend/types/audit/audit.types";
 export * from "@/backend/types/audit/audit.types";
 export * from "@/backend/types/audit/soft-delete.types";
 // Auth types (includes session, permission, and user-related types)
 export type {
+  AdminAuditLogSelectType,
   AuthRateLimitSelectType as AuthRateLimitEntityInput,
   CurrentUserProfile,
   DemoLoginInput,
@@ -147,6 +149,7 @@ export * from "@/backend/types/scheduling/scheduling.types";
 export * from "@/backend/types/shared";
 export * from "@/backend/types/staff/staff-profile.types";
 export * from "@/backend/types/storage/learning-resources.types";
+export type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
 export * from "@/backend/types/storage/storage.types";
 export * from "@/backend/types/students/student.types";
 export * from "@/backend/types/students/student-lifecycle.types";

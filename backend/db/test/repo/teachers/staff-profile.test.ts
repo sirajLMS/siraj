@@ -5,7 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { StaffProfileRepository } from "@/backend/db/repo";
 import type { ManagerProfileUpdateInput } from "@/backend/db/repo/teachers/staff-profile.repository";
-import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
+import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus } from "@/backend/enum";
@@ -42,14 +42,14 @@ async function createStaffUser(tx: DBTransaction, name: string, overrides: { pho
   const user = await createTestUser(tx, {
     name,
     email: `staff-${name.toLowerCase()}-${randomUUID()}@t.com`,
+    phone: overrides.phone ?? null,
+    status: AccountStatus.ACTIVATED,
   });
 
   const profiles = await tx
     .insert(staffProfiles)
     .values({
       userId: user.id,
-      phone: overrides.phone ?? null,
-      status: AccountStatus.ACTIVATED,
       createdAt: now,
       updatedAt: now,
     })
@@ -100,9 +100,9 @@ async function createStaffAndGroup(tx: DBTransaction, staffName: string, groupNa
 
 async function insertStaffProfile(tx: DBTransaction, userId: string, status: string) {
   const now = new Date();
+  await tx.update(users).set({ status, updatedAt: now }).where(eq(users.id, userId));
   await tx.insert(staffProfiles).values({
     userId,
-    status,
     createdAt: now,
     updatedAt: now,
   });
@@ -330,8 +330,9 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
     await updateProfile(tx, profile.id, { phone: "+1234500000", phoneIsSet: true });
 
     const [updated] = await tx
-      .select({ phone: staffProfiles.phone })
+      .select({ phone: users.phone })
       .from(staffProfiles)
+      .innerJoin(users, eq(staffProfiles.userId, users.id))
       .where(eq(staffProfiles.id, profile.id));
     expect(updated?.phone).toBe("+1234500000");
   });
@@ -405,13 +406,15 @@ describe("StaffProfileRepository — getOnboardingMetrics", () => {
 
 describe("StaffProfileRepository — create", () => {
   staffTest("creates staff profile successfully", async tx => {
-    const user = await createTestUser(tx, { name: "Test Staff", email: `staff-${randomUUID()}@test.com` });
+    const user = await createTestUser(tx, {
+      name: "Test Staff",
+      email: `staff-${randomUUID()}@test.com`,
+      phone: "+1234567890",
+    });
 
     const result = await StaffProfileRepository.create(
       {
         userId: user.id,
-        status: AccountStatus.ACTIVATED,
-        phone: "+1234567890",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -427,17 +430,11 @@ describe("StaffProfileRepository — create", () => {
   staffTest("rejects duplicate staff profile for same user", async tx => {
     const user = await createTestUser(tx, { name: "Dup Staff", email: `dups-${randomUUID()}@test.com` });
 
-    await StaffProfileRepository.create(
-      { userId: user.id, status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
-      tx
-    );
+    await StaffProfileRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
 
     let error: unknown = null;
     try {
-      await StaffProfileRepository.create(
-        { userId: user.id, status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
-        tx
-      );
+      await StaffProfileRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
     } catch (e) {
       error = e;
     }
@@ -459,7 +456,7 @@ describe("StaffProfileRepository — create", () => {
     let error: unknown = null;
     try {
       await StaffProfileRepository.create(
-        { userId: randomUUID(), status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
+        { userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() },
         mockTx
       );
     } catch (e) {
@@ -474,7 +471,7 @@ describe("StaffProfileRepository — create", () => {
     let callCount = 0;
     const limitHandler = () => {
       callCount++;
-      if (callCount === 1) return [{ id: "some-id" }];
+      if (callCount === 1) return [{ id: "some-id", userId: "some-user-id" }];
       return [];
     };
     const deepWhere = () => ({ limit: limitHandler });
@@ -484,7 +481,9 @@ describe("StaffProfileRepository — create", () => {
     const outerWhere = () => ({ limit: limitHandler });
     const fromFn = () => ({ innerJoin, where: outerWhere });
     const selectFn = () => ({ from: fromFn });
-    const updateSetWhere = () => Promise.resolve();
+    const updateSetWhere = () => ({
+      returning: () => Promise.resolve([{ id: "some-user-id" }]),
+    });
     const updateSet = () => ({ where: updateSetWhere });
     const updateFn = () => ({ set: updateSet });
     const mockTx = { select: selectFn, update: updateFn } as unknown as DBTransaction;
@@ -493,7 +492,7 @@ describe("StaffProfileRepository — create", () => {
     try {
       await StaffProfileRepository.updateManagerProfile(
         "some-id",
-        { phone: "+123", phoneIsSet: true },
+        { status: AccountStatus.DEACTIVATED, statusIsSet: true },
         undefined,
         mockTx
       );
@@ -519,7 +518,7 @@ describe("StaffProfileRepository — create", () => {
     await runInRollback(async outerTx => {
       const u = await createTestUser(outerTx, { name: "Rollback User", email: `rb-${randomUUID()}@test.com` });
       const profile = await StaffProfileRepository.create(
-        { userId: u.id, status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
+        { userId: u.id, createdAt: new Date(), updatedAt: new Date() },
         outerTx
       );
       createdStaffId = profile.id;

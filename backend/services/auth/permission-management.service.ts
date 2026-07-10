@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
@@ -10,6 +10,7 @@ import type {
   GroupWithPermissionIds,
   LocalizedString,
   PermissionEntity,
+  SystemPermissionUpsertInput,
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
@@ -363,5 +364,128 @@ export namespace PermissionManagementService {
     }
 
     return [...effectiveSet];
+  }
+
+  // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
+
+  async function disableSystemPermissionTrigger(): Promise<void> {
+    await db.execute(sql`
+      DO $$
+      BEGIN
+        ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
+      EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
+      END $$;
+    `);
+  }
+
+  async function enableSystemPermissionTrigger(): Promise<void> {
+    await db.execute(sql`
+      DO $$
+      BEGIN
+        ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
+      EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
+      END $$;
+    `);
+  }
+
+  /**
+   * Ensures app_permission enum values exist before inserting system permissions.
+   */
+  export async function ensurePermissionEnumValues(keys: readonly AppPermission[]): Promise<void> {
+    for (const key of keys) {
+      await db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`));
+    }
+  }
+
+  /**
+   * Upserts immutable system permissions (disables protection trigger during write).
+   */
+  export async function upsertSystemPermissions(
+    inputs: readonly SystemPermissionUpsertInput[]
+  ): Promise<AppPermission[]> {
+    if (inputs.length === 0) return [];
+
+    await ensurePermissionEnumValues(inputs.map(spec => spec.key));
+    await disableSystemPermissionTrigger();
+
+    try {
+      for (const spec of inputs) {
+        await db.execute(sql`
+          INSERT INTO permissions (id, key, resource, action, description, category, is_system)
+          VALUES (
+            gen_random_uuid(),
+            ${spec.key}::app_permission,
+            ${spec.resource},
+            ${spec.action},
+            ${JSON.stringify(spec.description)}::jsonb,
+            ${JSON.stringify(spec.category)}::jsonb,
+            true
+          )
+          ON CONFLICT (key) DO UPDATE SET
+            resource = EXCLUDED.resource,
+            action = EXCLUDED.action,
+            description = EXCLUDED.description,
+            category = EXCLUDED.category,
+            is_system = EXCLUDED.is_system
+        `);
+      }
+      return inputs.map(spec => spec.key);
+    } finally {
+      await enableSystemPermissionTrigger();
+    }
+  }
+
+  /**
+   * Assigns permissions to a group by slug (idempotent).
+   */
+  export async function ensureGroupPermissions(
+    groupSlug: string,
+    permissionKeys: readonly AppPermission[]
+  ): Promise<void> {
+    if (permissionKeys.length === 0) return;
+
+    for (const key of permissionKeys) {
+      await db.execute(sql`
+        INSERT INTO group_permissions (group_id, permission_id)
+        SELECT g.id, p.id
+        FROM permission_groups g, permissions p
+        WHERE g.slug = ${groupSlug}
+          AND p.key = ${key}::app_permission
+        ON CONFLICT DO NOTHING
+      `);
+    }
+  }
+
+  /**
+   * Assigns permissions to multiple groups by slug (idempotent).
+   */
+  export async function ensureGroupPermissionsForGroups(
+    groupSlugs: readonly string[],
+    permissionKeys: readonly AppPermission[]
+  ): Promise<void> {
+    for (const groupSlug of groupSlugs) {
+      await ensureGroupPermissions(groupSlug, permissionKeys);
+    }
+  }
+  /**
+   * Idempotent single user permission override (seed / bootstrap use).
+   */
+  export async function ensureUserPermissionOverride(input: {
+    userId: string;
+    permissionKey: AppPermission;
+    state: UserOverrideInput["state"];
+    assignedByUserId: string | null;
+  }): Promise<UserOverrideEntity | null> {
+    const permissionId = await PermissionManagementRepository.getPermissionIdByKey(input.permissionKey);
+    if (!permissionId) return null;
+
+    return PermissionManagementRepository.upsertUserPermissionOverride({
+      userId: input.userId,
+      permissionId,
+      state: input.state,
+      assignedByUserId: input.assignedByUserId,
+    });
   }
 }

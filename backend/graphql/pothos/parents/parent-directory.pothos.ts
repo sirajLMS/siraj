@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { AccountStatusPothosObject, ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type { ParentDirectoryMetrics, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
 
@@ -8,8 +8,6 @@ const ParentDirectoryMetricsRef = gqlSchemaBuilder.objectRef<ParentDirectoryMetr
 export const ParentDirectoryMetricsPothosObject = ParentDirectoryMetricsRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
-    activated: t.exposeInt("activated"),
-    deactivated: t.exposeInt("deactivated"),
     regular: t.exposeInt("regular"),
     onLeave: t.exposeInt("onLeave"),
     suspended: t.exposeInt("suspended"),
@@ -29,7 +27,8 @@ export const ParentDirectoryRowPothosObject = ParentDirectoryRowRef.implement({
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     guardianOf: t.exposeString("guardianOf"),
     time: t.exposeString("time"),
-    accountStatus: t.expose("accountStatus", { type: ParentStatusPothosEnum }),
+    lifecycleStatus: t.expose("lifecycleStatus", { type: ParentStatusPothosEnum }),
+    accountStatus: t.expose("accountStatus", { type: AccountStatusPothosObject }),
     unpaidInvoices: t.exposeInt("unpaidInvoices"),
   }),
 });

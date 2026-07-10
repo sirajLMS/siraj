@@ -8,6 +8,40 @@ import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmit
 import { escapeLikeWildcards } from "@/backend/utils";
 
 export namespace SuggestionRepository {
+  export type SeedSuggestionInput = {
+    parentId: string;
+    submitterName: string;
+    body: string;
+    status: SuggestionStatus;
+    adminResponse?: string | null;
+    reviewedByUserId?: string | null;
+    reviewedAt?: Date | null;
+    createdAt?: Date;
+  };
+
+  export const createSeedSuggestion = async (input: SeedSuggestionInput, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [created] = await queryDb
+      .insert(suggestions)
+      .values({
+        parentId: input.parentId,
+        submitterName: input.submitterName,
+        body: input.body,
+        status: input.status,
+        adminResponse: input.adminResponse ?? null,
+        reviewedByUserId: input.reviewedByUserId ?? null,
+        reviewedAt: input.reviewedAt ?? null,
+        createdAt: input.createdAt ?? now,
+      })
+      .returning();
+    if (!created) {
+      const t = await getBackendTranslations({ namespace: "errors" });
+      throw new Error(t("suggestion.createFailed"));
+    }
+    return created;
+  };
+
   export const submitSuggestion = async (
     input: SuggestionSubmitInput & { parentId: string },
     tx?: DBTransaction,

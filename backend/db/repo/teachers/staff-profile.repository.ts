@@ -90,6 +90,19 @@ export namespace StaffProfileRepository {
     };
   }
 
+  export async function ensureForUser(userId: string, tx?: DBTransaction): Promise<void> {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    await queryDb
+      .insert(staffProfiles)
+      .values({
+        userId,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoNothing();
+  }
+
   const MANAGER_DIRECTORY_SELECT = {
     id: users.id,
     staffProfileId: staffProfiles.id,
@@ -232,8 +245,9 @@ export namespace StaffProfileRepository {
           sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${permissionGroups.slug} NOT ILIKE '%admin%')`.mapWith(
             Number
           ),
-        activeNow:
-          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${users.status} = 'ACTIVATED')`.mapWith(Number),
+        activeNow: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${users.status} = 'ACTIVATED')`.mapWith(
+          Number
+        ),
         alerts: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${users.status} != 'ACTIVATED')`.mapWith(Number),
       })
       .from(staffProfiles)
@@ -331,12 +345,7 @@ export namespace StaffProfileRepository {
       const hasUserFieldUpdate = input.phoneIsSet || input.statusIsSet;
 
       if (input.phoneIsSet) {
-        await UserRepository.updateProfileFields(
-          profile.userId,
-          { phone: input.phone ?? null },
-          locale,
-          t
-        );
+        await UserRepository.updateProfileFields(profile.userId, { phone: input.phone ?? null }, locale, t);
       }
 
       if (input.statusIsSet) {

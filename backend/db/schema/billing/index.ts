@@ -2,6 +2,7 @@
 
 export * from "./billing";
 export * from "./fx-sync";
+export * from "./invoice-payment-submissions";
 export * from "./supported-mobile-wallets";
 export * from "./supported-online-accounts";
 export * from "./supported-payment-links";

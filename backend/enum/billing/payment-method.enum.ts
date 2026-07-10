@@ -4,6 +4,7 @@ export enum PaymentMethodType {
   ONLINE_ACCOUNT = "ONLINE_ACCOUNT",
   BANK_TRANSFER = "BANK_TRANSFER",
   CASH = "CASH",
+  PROOF_UPLOAD = "PROOF_UPLOAD",
 }
 
 export enum PaymentDirection {

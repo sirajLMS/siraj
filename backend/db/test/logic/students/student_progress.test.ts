@@ -44,7 +44,7 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
     .returning();
   const [teacher] = (await tx
     .insert(teachers)
-    .values({ userId: userT.id, status: "ACTIVATED", createdAt: now, updatedAt: now })
+    .values({ userId: userT.id, createdAt: now, updatedAt: now })
     .returning()) as [TeacherEntity];
   const [student] = (await tx
     .insert(students)

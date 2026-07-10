@@ -1,4 +1,5 @@
 import type { permissions } from "@/backend/db/schema/permissions/permissions";
+import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 
 // Canonical: {Entity}SelectType and {Entity}InsertType must be derived from Drizzle
 //--------------------------------------------------------------------------------
@@ -24,4 +25,13 @@ export type PermissionSubmitInput = Omit<PermissionInsertType, "id" | "createdAt
 export type PermissionFilterInput = {
   key?: string | string[];
   groupId?: string | string[];
+};
+
+/** Input for bootstrapping immutable system permissions (seed / migration use). */
+export type SystemPermissionUpsertInput = {
+  readonly key: PermissionSelectType["key"];
+  readonly resource: string;
+  readonly action: string;
+  readonly description: LocalizedString;
+  readonly category: LocalizedString;
 };

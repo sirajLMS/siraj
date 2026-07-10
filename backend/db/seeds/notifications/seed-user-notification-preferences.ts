@@ -1,5 +1,3 @@
-import { db } from "@/backend/db/drizzleDb";
-import { userNotificationPreferences } from "@/backend/db/schema/communications/communications";
 import {
   ALL_NOTIFICATION_CHANNELS,
   ALL_NOTIFICATION_EVENT_TYPES,
@@ -8,11 +6,11 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding user notification preferences...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   if (!seedConfig.enableCommunications || !usersList?.length) {
@@ -31,26 +29,14 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
     const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
     const eventType = cycleAtIndex(ALL_NOTIFICATION_EVENT_TYPES, userIndex);
 
-    const [inserted] = await db
-      .insert(userNotificationPreferences)
-      .values({
-        userId: user.id,
+    const inserted = await NotificationPreferencesService.upsertManySeedPreferences(user.id, [
+      {
         channel,
         eventType,
         enabled: userIndex % 5 !== 0,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: [
-          userNotificationPreferences.userId,
-          userNotificationPreferences.channel,
-          userNotificationPreferences.eventType,
-        ],
-        set: { enabled: userIndex % 5 !== 0, updatedAt: now },
-      })
-      .returning();
-    results.push(inserted);
+      },
+    ]);
+    results.push(...inserted);
   }
 
   logger.info(`User notification preferences seeded (${results.length} rows).`);

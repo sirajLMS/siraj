@@ -55,7 +55,6 @@ describe("Timezone Handling & DST Adjustment", () => {
       .insert(teachers)
       .values({
         userId: testUser.id,
-        status: "ACTIVATED",
         createdAt: new Date(),
         updatedAt: new Date(),
       })

@@ -1,5 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  ClassMeetingConfigCreateInputPothos,
+  ClassMeetingConfigPothosObject,
+  ClassMeetingConfigUpdateInputPothos,
   MeetingProviderCreateInputPothos,
   MeetingProviderPothosObject,
   MeetingProviderUpdateInputPothos,
@@ -8,7 +11,7 @@ import {
   UserMeetingConfigUpdateInputPothos,
 } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
+import { ClassMeetingConfigService, MeetingConfigService } from "@/backend/services/meeting";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
@@ -219,6 +222,84 @@ gqlSchemaBuilder.mutationField("setDefaultMeetingConfig", t =>
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       return MeetingConfigService.setDefaultMeetingConfig(actorUserId, args.id, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("createClassMeetingConfig", t =>
+  t.field({
+    type: ClassMeetingConfigPothosObject,
+    args: {
+      input: t.arg({ type: ClassMeetingConfigCreateInputPothos, required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return ClassMeetingConfigService.createClassMeetingConfig(
+        actorUserId,
+        {
+          classInstanceId: args.input.classInstanceId,
+          recurringScheduleId: args.input.recurringScheduleId,
+          providerId: args.input.providerId,
+          label: args.input.label,
+          isDefault: args.input.isDefault,
+          password: args.input.password,
+          details: normalizeMeetingConfigDetails(args.input.details),
+        },
+        ctx.locale
+      );
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("updateClassMeetingConfig", t =>
+  t.field({
+    type: ClassMeetingConfigPothosObject,
+    args: {
+      id: t.arg.id({ required: true }),
+      input: t.arg({ type: ClassMeetingConfigUpdateInputPothos, required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return ClassMeetingConfigService.updateClassMeetingConfig(
+        actorUserId,
+        args.id,
+        {
+          ...normalizeConfigUpdateInput(args.input),
+          ...(args.input.providerId != null ? { providerId: args.input.providerId } : {}),
+        },
+        ctx.locale
+      );
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("deleteClassMeetingConfig", t =>
+  t.field({
+    type: "Boolean",
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      await ClassMeetingConfigService.deleteClassMeetingConfig(actorUserId, args.id, ctx.locale);
+      return true;
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("setDefaultClassMeetingConfig", t =>
+  t.field({
+    type: ClassMeetingConfigPothosObject,
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return ClassMeetingConfigService.setDefaultClassMeetingConfig(actorUserId, args.id, ctx.locale);
     },
   })
 );

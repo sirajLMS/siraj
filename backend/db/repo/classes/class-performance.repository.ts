@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
@@ -50,5 +50,61 @@ export namespace ClassPerformanceRepository {
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  }
+
+  export async function listByClassInstanceIds(
+    classInstanceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, ClassInstancePerformanceSelectType>> {
+    const map = new Map<string, ClassInstancePerformanceSelectType>();
+    if (classInstanceIds.length === 0) return map;
+
+    const queryDb = tx ?? db;
+    const rows = await queryDb
+      .select()
+      .from(classInstancePerformance)
+      .where(inArray(classInstancePerformance.classInstanceId, [...classInstanceIds]));
+
+    for (const row of rows) {
+      map.set(row.classInstanceId, row);
+    }
+    return map;
+  }
+
+  export async function upsertManyForSeed(
+    inputs: readonly ClassInstancePerformanceInsertType[],
+    tx?: DBTransaction
+  ): Promise<ClassInstancePerformanceSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const runner = async (t: DBTransaction): Promise<ClassInstancePerformanceSelectType[]> => {
+      const results: ClassInstancePerformanceSelectType[] = [];
+      for (const input of inputs) {
+        const [upserted] = await t
+          .insert(classInstancePerformance)
+          .values(input)
+          .onConflictDoUpdate({
+            target: classInstancePerformance.classInstanceId,
+            set: {
+              engagementScore: input.engagementScore,
+              assessmentProgress: input.assessmentProgress,
+              assessmentTotal: input.assessmentTotal,
+              focusLevel: input.focusLevel,
+              sessionHealth: input.sessionHealth,
+              heatmapData: input.heatmapData,
+              latencyMs: input.latencyMs,
+              attendanceRate: input.attendanceRate,
+              avgGrade: input.avgGrade,
+              lastClassDaysAgo: input.lastClassDaysAgo,
+              updatedAt: input.updatedAt,
+            },
+          })
+          .returning();
+        results.push(upserted);
+      }
+      return results;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
   }
 }

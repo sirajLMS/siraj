@@ -1,4 +1,4 @@
-import { AccountStatus, UserRole } from "@/backend/enum";
+import { UserRole } from "@/backend/enum";
 import { parseAccountStatus, parseIanaTimezone } from "@/backend/lib/enum";
 import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
 

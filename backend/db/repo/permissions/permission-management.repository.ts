@@ -10,6 +10,7 @@ import {
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { localeJsonKey, omitEmptyLocalized, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
+import type { AppPermission } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import type {
   CreateGroupInput,
@@ -69,6 +70,44 @@ function localizedOrderExpr(column: typeof permissions.category | typeof permiss
 }
 
 export namespace PermissionManagementRepository {
+  export async function getPermissionIdByKey(key: AppPermission, tx?: DBTransaction): Promise<string | null> {
+    const client = tx ?? db;
+    const [row] = await client
+      .select({ id: permissions.id })
+      .from(permissions)
+      .where(eq(permissions.key, key))
+      .limit(1);
+    return row?.id ?? null;
+  }
+
+  export async function upsertUserPermissionOverride(
+    input: {
+      userId: string;
+      permissionId: string;
+      state: UserOverrideInput["state"];
+      assignedByUserId: string | null;
+    },
+    tx?: DBTransaction
+  ): Promise<UserOverrideEntity> {
+    const client = tx ?? db;
+    const now = new Date();
+    const [row] = await client
+      .insert(userPermissionOverrides)
+      .values({
+        userId: input.userId,
+        permissionId: input.permissionId,
+        state: input.state,
+        assignedByUserId: input.assignedByUserId,
+        createdAt: now,
+      })
+      .onConflictDoUpdate({
+        target: [userPermissionOverrides.userId, userPermissionOverrides.permissionId],
+        set: { state: input.state },
+      })
+      .returning();
+    return row;
+  }
+
   /**
    * List all permission catalog entries.
    * NOTE: The is_system field for permissions is protected by a database trigger (trg_protect_system_permissions).

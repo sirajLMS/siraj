@@ -1,3 +1,4 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { DstMigrationRepository } from "@/backend/db/repo";
 import { AppPermission, DstMigrationResult, type MigrationStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -6,7 +7,9 @@ import type {
   DstCheckedEmptyItemReturnType,
   DstConflictGroupReturnType,
   DstConflictItemReturnType,
+  DstMigrationEntrySelectType,
   DstMigrationReportReturnType,
+  DstMigrationRunSelectType,
   DstUpdatedSessionReturnType,
 } from "@/backend/types";
 
@@ -156,5 +159,39 @@ export namespace DstMigrationService {
         status: "complete" as MigrationStatus,
       };
     });
+  }
+  export async function findMigrationRunByUserId(
+    runByUserId: string,
+    tx?: DBTransaction
+  ): Promise<DstMigrationRunSelectType | null> {
+    return DstMigrationRepository.findRunByUserId(runByUserId, tx);
+  }
+
+  export async function createSeedMigrationRun(
+    runByUserId: string,
+    offsetMinutes: number,
+    description: string,
+    tx?: DBTransaction
+  ): Promise<DstMigrationRunSelectType> {
+    return DstMigrationRepository.createMigrationRun(runByUserId, offsetMinutes, description, tx);
+  }
+
+  export async function findMigrationEntriesByScheduleIds(
+    scheduleIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<DstMigrationEntrySelectType[]> {
+    return DstMigrationRepository.findEntriesByScheduleIds(scheduleIds, tx);
+  }
+
+  export async function createManyMigrationEntries(
+    inputs: {
+      runId: string;
+      recurringScheduleId: string;
+      result: DstMigrationResult;
+      conflictDetail: string | null;
+    }[],
+    tx?: DBTransaction
+  ): Promise<DstMigrationEntrySelectType[]> {
+    return DstMigrationRepository.createManyEntries(inputs, tx);
   }
 }

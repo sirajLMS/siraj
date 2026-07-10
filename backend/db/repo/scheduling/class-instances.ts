@@ -13,7 +13,7 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import { MeetingClassFieldsService } from "@/backend/services/meeting/meeting-class-fields";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type * as Types from "@/backend/types";
 
 export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
@@ -75,7 +75,10 @@ export const createClassInstance = async (
       t
     );
 
-    const meetingFields = await MeetingClassFieldsService.applyToInsertInput(input, t);
+    const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(input.teacherId, {
+      recurringScheduleId: input.recurringScheduleId,
+      tx: t,
+    });
 
     await checkOverlaps(
       t,
@@ -84,7 +87,7 @@ export const createClassInstance = async (
         teacherId: input.teacherId,
         startTime: input.scheduledStartAt,
         endTime: input.scheduledEndAt,
-        meetingJoinUrl: meetingFields.meetingJoinUrl,
+        meetingJoinUrl: effectiveMeeting.joinUrl,
       },
       locale
     );
@@ -110,7 +113,7 @@ export const createClassInstance = async (
     const [created] = await t
       .insert(classInstances)
       .values({
-        ...meetingFields,
+        ...input,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -135,8 +138,8 @@ export const updateClassInstance = async (
     const teacherId = input.teacherId ?? existing.teacherId;
     const startTime = input.scheduledStartAt ?? existing.scheduledStartAt;
     const endTime = input.scheduledEndAt ?? existing.scheduledEndAt;
-    const meetingJoinUrl = input.meetingJoinUrl === undefined ? existing.meetingJoinUrl : input.meetingJoinUrl;
     const isBeingSoftDeleted = Boolean(input.deletedAt);
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(id, t);
 
     await acquireLocks(t, teacherId, studentId);
 
@@ -150,7 +153,7 @@ export const updateClassInstance = async (
           teacherId,
           startTime,
           endTime,
-          meetingJoinUrl,
+          meetingJoinUrl: effectiveMeeting.joinUrl,
           excludeId: id,
         },
         locale
@@ -221,3 +224,60 @@ export const softDeleteClassInstance = async (id: string, actorUserId: string, t
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
+
+export async function listByIdempotencyKeys(
+  keys: readonly string[],
+  tx?: DBTransaction
+): Promise<Map<string, Types.ClassInstanceEntity>> {
+  const map = new Map<string, Types.ClassInstanceEntity>();
+  if (keys.length === 0) return map;
+
+  const queryDb = tx ?? db;
+  const rows = await queryDb
+    .select()
+    .from(classInstances)
+    .where(inArray(classInstances.idempotencyKey, [...keys]));
+  for (const row of rows) {
+    map.set(row.idempotencyKey, row);
+  }
+  return map;
+}
+
+export async function upsertManyForSeed(
+  instances: Types.ClassInstanceInsertInput[],
+  options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
+): Promise<Types.ClassInstanceEntity[]> {
+  if (instances.length === 0) return [];
+
+  const chunkSize = options?.chunkSize ?? 100;
+  const updatedAt = options?.updatedAt ?? new Date();
+
+  const runner = async (t: DBTransaction): Promise<Types.ClassInstanceEntity[]> => {
+    const results: Types.ClassInstanceEntity[] = [];
+    for (let i = 0; i < instances.length; i += chunkSize) {
+      const chunk = instances.slice(i, i + chunkSize);
+      for (const instance of chunk) {
+        const [inserted] = await t
+          .insert(classInstances)
+          .values(instance)
+          .onConflictDoUpdate({
+            target: classInstances.idempotencyKey,
+            set: {
+              scheduledStartAt: instance.scheduledStartAt,
+              scheduledEndAt: instance.scheduledEndAt,
+              executionState: instance.executionState,
+              outcome: instance.outcome,
+              actualStartAt: instance.actualStartAt,
+              actualEndAt: instance.actualEndAt,
+              updatedAt,
+            },
+          })
+          .returning();
+        results.push(inserted);
+      }
+    }
+    return results;
+  };
+
+  return options?.tx ? runner(options.tx) : db.transaction(runner);
+}

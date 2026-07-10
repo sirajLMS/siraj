@@ -19,7 +19,10 @@ import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
 import type { CurrencyCode } from "@/backend/enum";
-import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
+import type {
+  PaymentMethodTransactionSnapshot,
+  PaymentProofTransactionSnapshot,
+} from "@/backend/types/billing/payment-method.types";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
@@ -82,7 +85,9 @@ export const payments = pgTable(
       onDelete: "set null",
     }),
     paymentMethodType: paymentMethodTypeEnum("payment_method_type").notNull(),
-    paymentMethodSnapshot: jsonb("payment_method_snapshot").$type<PaymentMethodTransactionSnapshot>().notNull(),
+    paymentMethodSnapshot: jsonb("payment_method_snapshot")
+      .$type<PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot>()
+      .notNull(),
     transactionId: varchar("transaction_id", { length: 255 }),
     gatewayResponse: text("gateway_response"),
     refundedAmount: numeric("refunded_amount", { precision: 12, scale: 2 }).notNull().default("0.00"),

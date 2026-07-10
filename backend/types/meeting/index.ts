@@ -1,4 +1,13 @@
 export type {
+  ClassMeetingConfigInsertType,
+  ClassMeetingConfigReturnType,
+  ClassMeetingConfigSelectType,
+  ClassMeetingConfigSubmitInput,
+  EffectiveMeetingReturnType,
+  EffectiveMeetingSource,
+  UpdateClassMeetingConfigInput,
+} from "@/backend/types/meeting/class-meeting-config.types";
+export type {
   MeetingConfigDetails,
   MeetingConfigSnapshot,
   MeetingProviderCatalogSnapshot,

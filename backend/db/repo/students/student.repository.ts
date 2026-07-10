@@ -538,4 +538,83 @@ export namespace StudentRepository {
       totalCount: rows.length,
     };
   };
+  export const findByIdempotencyKeys = async (keys: string[], tx?: DBTransaction): Promise<Types.StudentEntity[]> => {
+    if (keys.length === 0) return [];
+    const executor = tx ?? db;
+    return executor.select().from(students).where(inArray(students.idempotencyKey, keys));
+  };
+
+  export const upsertByIdempotencyKey = async (
+    input: {
+      parentId: string;
+      primaryTeacherId: string;
+      name: string;
+      avatarUrl: string | null;
+      status: StudentStatus;
+      classesTotal: number;
+      classesRemaining: number;
+      timezoneOverride: string | null;
+      idempotencyKey: string;
+    },
+    tx?: DBTransaction
+  ): Promise<Types.StudentEntity> => {
+    const executor = tx ?? db;
+    const now = new Date();
+    const [row] = await executor
+      .insert(students)
+      .values({
+        parentId: input.parentId,
+        primaryTeacherId: input.primaryTeacherId,
+        name: input.name,
+        avatarUrl: input.avatarUrl,
+        status: input.status,
+        classesTotal: input.classesTotal,
+        classesRemaining: input.classesRemaining,
+        version: 1,
+        timezoneOverride: input.timezoneOverride,
+        idempotencyKey: input.idempotencyKey,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: students.idempotencyKey,
+        set: {
+          name: input.name,
+          avatarUrl: input.avatarUrl,
+          timezoneOverride: input.timezoneOverride,
+          primaryTeacherId: input.primaryTeacherId,
+          parentId: input.parentId,
+          updatedAt: now,
+        },
+      })
+      .returning();
+    if (!row) throw new Error("Student upsert failed");
+    return row;
+  };
+
+  export const hasTeacherAssignment = async (
+    studentId: string,
+    teacherId: string,
+    tx?: DBTransaction
+  ): Promise<boolean> => {
+    const executor = tx ?? db;
+    const [row] = await executor
+      .select({ id: teacherAssignments.id })
+      .from(teacherAssignments)
+      .where(and(eq(teacherAssignments.studentId, studentId), eq(teacherAssignments.teacherId, teacherId)))
+      .limit(1);
+    return !!row;
+  };
+
+  export const ensureTeacherAssignment = async (
+    studentId: string,
+    teacherId: string,
+    assignedAt: Date,
+    tx?: DBTransaction
+  ): Promise<void> => {
+    const exists = await hasTeacherAssignment(studentId, teacherId, tx);
+    if (exists) return;
+    const executor = tx ?? db;
+    await executor.insert(teacherAssignments).values({ studentId, teacherId, assignedAt });
+  };
 }

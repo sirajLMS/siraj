@@ -1,28 +1,56 @@
+import { SystemSettingsRepository } from "@/backend/db/repo";
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
-import type { FxProviderFetchResult } from "@/backend/types";
+import type { FxProviderConfigSource, FxProviderFetchResult } from "@/backend/types";
+
+const FX_PROVIDER_SETTING_KEY = "fx_provider";
 
 let instance: IFxRateProvider | null = null;
 let initializationPromise: Promise<IFxRateProvider> | null = null;
+let cachedProviderName: FxProvider | null = null;
+
+const validProviders: FxProvider[] = [FxProvider.OpenExchangeRates, FxProvider.Fixer];
+
+function normalizeProvider(raw: string): FxProvider | null {
+  const normalized = raw.toLowerCase();
+  if (!validProviders.includes(normalized as FxProvider)) {
+    return null;
+  }
+  return normalized as FxProvider;
+}
 
 /**
  * Read the configured FX provider from the environment. Defaults to
  * OpenExchangeRates when unset or unrecognised.
  */
-function getFxProvider(): FxProvider {
+function getFxProviderFromEnv(): FxProvider {
   const raw = (getStringEnv("FX_PROVIDER") ?? "openexchangerates").toLowerCase();
+  const provider = normalizeProvider(raw);
 
-  const validProviders: FxProvider[] = [FxProvider.OpenExchangeRates, FxProvider.Fixer];
-  if (!validProviders.includes(raw as FxProvider)) {
+  if (!provider) {
     logger.warn(
       `Invalid FX_PROVIDER: ${raw}. Must be one of ${validProviders.join(", ")}. Defaulting to ${FxProvider.OpenExchangeRates}.`
     );
     return FxProvider.OpenExchangeRates;
   }
 
-  return raw as FxProvider;
+  return provider;
+}
+
+export async function getResolvedFxProviderConfig(): Promise<{
+  readonly provider: FxProvider;
+  readonly source: FxProviderConfigSource;
+}> {
+  const dbValue = await SystemSettingsRepository.getStringValue(FX_PROVIDER_SETTING_KEY, "");
+  const dbProvider = dbValue ? normalizeProvider(dbValue) : null;
+
+  if (dbProvider) {
+    return { provider: dbProvider, source: "database" };
+  }
+
+  return { provider: getFxProviderFromEnv(), source: "env" };
 }
 
 /**
@@ -49,20 +77,25 @@ const adapterFactories: Record<FxProvider, () => Promise<IFxRateProvider>> = {
  * cached and reset on failure so subsequent callers can retry.
  */
 export const getFxRateProvider = async (): Promise<IFxRateProvider> => {
-  if (instance) {
+  const { provider } = await getResolvedFxProviderConfig();
+
+  if (instance && cachedProviderName === provider) {
     return instance;
+  }
+
+  if (cachedProviderName !== provider) {
+    resetFxRateProvider();
   }
 
   initializationPromise ??= (async () => {
     try {
-      const provider = getFxProvider();
       logger.info(`Initializing FX rate provider: ${provider}`);
       const factory = adapterFactories[provider];
       const adapter = await factory();
       instance = adapter;
+      cachedProviderName = provider;
       return instance;
     } catch (error) {
-      // Reset promise on failure so subsequent calls can try again.
       initializationPromise = null;
       logger.error("Failed to initialize FX rate provider", error);
       throw error;
@@ -79,6 +112,7 @@ export const getFxRateProvider = async (): Promise<IFxRateProvider> => {
 export const resetFxRateProvider = (): void => {
   instance = null;
   initializationPromise = null;
+  cachedProviderName = null;
 };
 
 /**

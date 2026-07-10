@@ -1,5 +1,3 @@
-import { db } from "@/backend/db/drizzleDb";
-import { recurringScheduleDays } from "@/backend/db/schema/classes/scheduling";
 import {
   buildScheduleDaysForStudent,
   isScheduleDayActive,
@@ -7,7 +5,15 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
-import type { RecurringScheduleEntity } from "@/backend/types";
+import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
+import type { RecurringScheduleDayInsertInput, RecurringScheduleEntity } from "@/backend/types";
+
+type ScheduleDaySpec = {
+  recurringScheduleId: string;
+  dayOfWeek: RecurringScheduleDayInsertInput["dayOfWeek"];
+  startTime: string;
+  isActive: boolean;
+};
 
 export async function seedOrGet(classesList: RecurringScheduleEntity[], config?: SeedConfig) {
   logger.info("Seeding recurring schedule days...");
@@ -17,35 +23,23 @@ export async function seedOrGet(classesList: RecurringScheduleEntity[], config?:
     throw new Error("No recurring schedules available for schedule days seeding.");
   }
 
-  const results = [];
-
+  const specs: ScheduleDaySpec[] = [];
   for (let i = 0; i < classesList.length; i++) {
     const schedule = classesList[i];
     const daySpecs = buildScheduleDaysForStudent(seedConfig, i);
 
     for (let dayIndex = 0; dayIndex < daySpecs.length; dayIndex++) {
       const daySpec = daySpecs[dayIndex];
-      const [inserted] = await db
-        .insert(recurringScheduleDays)
-        .values({
-          recurringScheduleId: schedule.id,
-          dayOfWeek: daySpec.dayOfWeek,
-          startTime: daySpec.startTime,
-          isActive: isScheduleDayActive(i, dayIndex),
-        })
-        .onConflictDoUpdate({
-          target: [recurringScheduleDays.recurringScheduleId, recurringScheduleDays.dayOfWeek],
-          set: {
-            startTime: daySpec.startTime,
-            isActive: isScheduleDayActive(i, dayIndex),
-          },
-        })
-        .returning();
-
-      results.push(inserted);
+      specs.push({
+        recurringScheduleId: schedule.id,
+        dayOfWeek: daySpec.dayOfWeek,
+        startTime: daySpec.startTime,
+        isActive: isScheduleDayActive(i, dayIndex),
+      });
     }
   }
 
+  const results = await RecurringClassService.upsertManyScheduleDays(specs);
   logger.info(`Recurring schedule days seeded (${results.length} rows).`);
   return results;
 }

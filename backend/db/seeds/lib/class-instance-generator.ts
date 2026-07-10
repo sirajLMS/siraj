@@ -1,4 +1,3 @@
-import type { classInstances } from "@/backend/db/schema/classes/scheduling";
 import {
   createTimestampOnDate,
   daysBetween,
@@ -13,8 +12,9 @@ import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
 import { parseTimeToHoursMinutes, type ScheduleDaySpec } from "@/backend/db/seeds/lib/schedule-factory";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
+import type { ClassInstanceInsertInput } from "@/backend/types";
 
-type ClassInstanceInsert = typeof classInstances.$inferInsert;
+type ClassInstanceInsert = ClassInstanceInsertInput;
 
 export interface ScheduleContext {
   scheduleId: string;

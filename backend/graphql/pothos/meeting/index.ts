@@ -1,4 +1,8 @@
+export { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 export {
+  ClassMeetingConfigCreateInputPothos,
+  ClassMeetingConfigPothosObject,
+  ClassMeetingConfigUpdateInputPothos,
   MeetingConfigDetailsPothosObject,
   MeetingProviderCreateInputPothos,
   MeetingProviderFieldSchemaInputPothos,
