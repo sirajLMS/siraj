@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/graphql/generated/gql/graphql";
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
+import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/availability-search.documents";
 import { logger } from "@/frontend/utils/logger";
 import { TeacherAvailabilityView } from "@/frontend/views/dashboard/teachers/availability/TeacherAvailabilityView";
 import type {

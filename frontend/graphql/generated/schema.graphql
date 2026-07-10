@@ -3289,19 +3289,6 @@ type TeacherAvailabilityGap {
   timezone: IanaTimezone
 }
 
-type TeacherBankingSummary {
-  accountNumber: String
-  bankName: String
-  beneficiaryName: String
-  iban: String
-  id: String
-  routingNumber: String
-  swiftBic: String
-  verifiedAt: String
-  verifiedByName: String
-  verifiedByUserId: String
-}
-
 type TeacherDashboard {
   id: String
   metrics: TeacherDashboardMetrics
@@ -3579,10 +3566,10 @@ type UnifiedProfile {
   associatedStudents: ParentAssignedStudentsResult
   audience: ProfileAudience
   avatarUrl: String
-  bankingSummary: TeacherBankingSummary
   displayCurrency: CurrencyCode
   email: String
   id: String
+  meetingConfigs: [UserMeetingConfig!]
   name: String
   parentAdminProfile: ParentProfile
   parentId: String

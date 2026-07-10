@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/recurring-class.documents";
+import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-class.documents";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

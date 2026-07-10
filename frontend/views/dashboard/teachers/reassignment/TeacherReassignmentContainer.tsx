@@ -9,12 +9,12 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
-import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
+import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
-import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
+} from "@/frontend/graphql/sharedDocuments/students/student-lifecycle.documents";
+import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher.documents";
 import { logger } from "@/frontend/utils/logger";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/admin/parents/students/types";
 import { TeacherReassignmentView } from "@/frontend/views/dashboard/teachers/reassignment/TeacherReassignmentView";

@@ -3,7 +3,7 @@ import { NotificationChannel, NotificationEventType } from "@/frontend/graphql/g
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/notification-preferences.documents";
+} from "@/frontend/graphql/sharedDocuments/notifications/notification-preferences.documents";
 import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { clearCookies, testClient } from "@/frontend/graphql/test/testClient";

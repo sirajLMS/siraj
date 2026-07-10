@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   translatedMessageQueryDocument,
   welcomeMessageQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/translation.documents";
+} from "@/frontend/graphql/sharedDocuments/shared/translation.documents";
 import { loginDemoUser } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";

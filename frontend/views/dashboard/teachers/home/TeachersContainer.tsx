@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
+import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { useTeacherDirectoryStore } from "@/frontend/stores/teacherDirectoryStore";
 import { TeachersView } from "@/frontend/views/dashboard/teachers/home/TeachersView";
 

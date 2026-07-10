@@ -6,7 +6,7 @@ import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing-alerts.documents";
+import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-alerts.documents";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function UnpaidInvoicesSection() {

@@ -137,7 +137,7 @@ const meta: Meta<typeof ParentComplaintsDesktopStoryRenderer> = {
         updatedAt: new Date().toISOString(),
         emailVerifiedAt: new Date().toISOString(),
         email: "sarah.j@example.com",
-        displayCurrency: "USD" as CurrencyCode,
+        displayCurrency: CurrencyCode.Usd,
         __typename: "User" as const,
       };
       useUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });

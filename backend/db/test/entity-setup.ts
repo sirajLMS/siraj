@@ -2,16 +2,26 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import {
   classInstances,
+  meetingProviders,
   parents,
   permissions,
   students,
   teacherAssignments,
   teachers,
+  userMeetingConfigs,
   users,
 } from "@/backend/db/schema";
 import type { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
+import type {
+  ClassInstanceEntity,
+  MeetingProviderSelectType,
+  ParentEntity,
+  StudentEntity,
+  TeacherEntity,
+  UserMeetingConfigSelectType,
+  UserSelectType,
+} from "@/backend/types";
 
 /** LocalizedString helper for permission/group JSONB columns in tests. */
 export function loc(en: string, ar?: string): { ar: string; en: string } {
@@ -218,3 +228,61 @@ export async function setupTestEntities(
 
   return { parentUser, parent, student, teacherUser, teacher, assignment, instance, now };
 }
+
+export async function createTestMeetingProvider(
+  tx: DBTransaction,
+  overrides: Partial<typeof meetingProviders.$inferInsert> = {}
+): Promise<MeetingProviderSelectType> {
+  const now = new Date();
+  const slug = overrides.slug ?? `zoom-${randomUUID().slice(0, 8)}`;
+  const [provider] = await tx
+    .insert(meetingProviders)
+    .values({
+      slug,
+      name: loc("Zoom"),
+      description: loc("Zoom video conferencing"),
+      urlAllowlist: ["zoom.us", "*.zoom.us"],
+      urlExample: "https://zoom.us/j/123456789",
+      fieldSchema: { requiresMeetingUrl: true, supportsPassword: true },
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!provider) {
+    throw new Error("Failed to create test meeting provider");
+  }
+
+  return provider;
+}
+
+export async function createTestMeetingConfig(
+  tx: DBTransaction,
+  userId: string,
+  providerId: string,
+  overrides: Partial<typeof userMeetingConfigs.$inferInsert> = {}
+): Promise<UserMeetingConfigSelectType> {
+  const now = new Date();
+  const [config] = await tx
+    .insert(userMeetingConfigs)
+    .values({
+      userId,
+      providerId,
+      label: "Test Meeting Config",
+      isDefault: false,
+      details: { meetingUrl: "https://zoom.us/j/123456789" },
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!config) {
+    throw new Error("Failed to create test meeting config");
+  }
+
+  return config;
+}
+

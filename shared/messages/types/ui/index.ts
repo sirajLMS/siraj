@@ -1,4 +1,4 @@
-import type { CatalogImageUploadLabels } from "./catalog-image-upload";
+import type { MeetingConfigLabels } from "./meeting-config";
 import type { CountrySelectLabels } from "./country-select";
 import type { CurrencySelectLabels } from "./currency-select";
 import type { GenderSelectorLabels } from "./gender-selector";
@@ -9,7 +9,7 @@ import type { TagInputLabels } from "./tag-input";
 import type { TimezoneSelectLabels } from "./timezone-select";
 
 export type {
-  CatalogImageUploadLabels,
+  MeetingConfigLabels,
   CountrySelectLabels,
   CurrencySelectLabels,
   GenderSelectorLabels,
@@ -30,4 +30,5 @@ export interface UiLabels {
   readonly phoneInput: PhoneInputLabels;
   readonly tagInput: TagInputLabels;
   readonly timezoneSelect: TimezoneSelectLabels;
+  readonly meetingConfig: MeetingConfigLabels;
 }

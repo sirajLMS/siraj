@@ -7,7 +7,7 @@ import {
   parentProfileQueryDocument,
   updateStudentQuotaMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
+import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-directory.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,

@@ -8,7 +8,7 @@ import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher-portal.documents";
+import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher-portal.documents";
 
 export function TeacherOwnProfileContainer() {
   const t = useTranslations("dashboard.teacherOwnProfile");

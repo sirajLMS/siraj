@@ -23,7 +23,7 @@ import { cleanup, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing-alerts.documents";
+import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-alerts.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { UnpaidInvoicesSection } from "@/frontend/views/dashboard/components/navbar/UnpaidInvoicesSection";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";

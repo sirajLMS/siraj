@@ -11,12 +11,12 @@ import {
   createClassCategoryMutationDocument,
   deleteClassCategoryMutationDocument,
   updateClassCategoryMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/class-category.documents";
+} from "@/frontend/graphql/sharedDocuments/classes/class-category.documents";
 import {
   createClassSubjectMutationDocument,
   deleteClassSubjectMutationDocument,
   updateClassSubjectMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/class-subject.documents";
+} from "@/frontend/graphql/sharedDocuments/classes/class-subject.documents";
 import { useSubjectManagementStore } from "@/frontend/stores/subjectManagementStore";
 import { logger } from "@/frontend/utils/logger";
 import { getErrorMessage } from "@/shared/utils/error";

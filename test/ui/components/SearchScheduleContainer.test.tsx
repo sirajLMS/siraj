@@ -24,7 +24,7 @@ import { addDays, format } from "date-fns";
 expect.extend(matchers);
 
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
+import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/availability-search.documents";
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { SearchScheduleContainer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleContainer";

@@ -7,6 +7,7 @@ export interface ProfileLabels {
     readonly tabs: {
       readonly profile: string;
       readonly banking: string;
+      readonly meeting: string;
       readonly students: string;
       readonly notifications: string;
       readonly permissions: string;

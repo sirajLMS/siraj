@@ -18,6 +18,26 @@ const PARENT_PAYMENT_LINK_SLUG = "instapay_eg";
 const DEMO_PARENT_WALLET_PHONE = "01012345678";
 const DEMO_PARENT_INSTAPAY_URL = "https://instapay.com.eg/demo-parent";
 
+function toUserPaymentMethodSelectType(row: {
+  id: string;
+  userId: string;
+  type: string;
+  direction: string;
+  isDefault: boolean;
+  label: string | null;
+  details: UserPaymentMethodSelectType["details"];
+  verifiedAt: Date | null;
+  verifiedByUserId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): UserPaymentMethodSelectType {
+  return {
+    ...row,
+    type: row.type as PaymentMethodType,
+    direction: row.direction as PaymentDirection,
+  };
+}
+
 const DEMO_TEACHER_BANK = {
   beneficiaryName: "Default Teacher",
   bankName: "National Bank of Egypt",
@@ -77,7 +97,7 @@ async function findExistingDefault(
     )
     .limit(1);
 
-  return existing;
+  return existing ? toUserPaymentMethodSelectType(existing) : undefined;
 }
 
 async function seedDemoParentPayinDefault(parentUser: UserSelectType, now: Date): Promise<UserPaymentMethodSelectType> {
@@ -114,7 +134,7 @@ async function seedDemoParentPayinDefault(parentUser: UserSelectType, now: Date)
       })
       .returning();
 
-    return inserted;
+    return toUserPaymentMethodSelectType(inserted);
   }
 
   const paymentLinkId = await findCatalogPaymentLinkId(PARENT_PAYMENT_LINK_SLUG);
@@ -135,7 +155,7 @@ async function seedDemoParentPayinDefault(parentUser: UserSelectType, now: Date)
     })
     .returning();
 
-  return inserted;
+  return toUserPaymentMethodSelectType(inserted);
 }
 
 async function seedDemoTeacherPayoutDefault(
@@ -155,9 +175,9 @@ async function seedDemoTeacherPayoutDefault(
         })
         .where(eq(userPaymentMethods.id, existing.id))
         .returning();
-      return verified;
+      return toUserPaymentMethodSelectType(verified);
     }
-    return existing;
+    return toUserPaymentMethodSelectType(existing);
   }
 
   const encryptedDetails = encryptBankTransferDetails({
@@ -182,7 +202,7 @@ async function seedDemoTeacherPayoutDefault(
     })
     .returning();
 
-  return inserted;
+  return toUserPaymentMethodSelectType(inserted);
 }
 
 export async function seedOrGet(

@@ -6,7 +6,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
+import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { logger } from "@/frontend/utils/logger";
 import { StatusTrackingView } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingView";

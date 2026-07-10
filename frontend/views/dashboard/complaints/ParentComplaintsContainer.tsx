@@ -11,8 +11,8 @@ import type { ParentAssignedStudentsQuery, ParentComplaintsQuery } from "@/front
 import {
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/complaint.documents";
-import { parentAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
+} from "@/frontend/graphql/sharedDocuments/complaints/complaint.documents";
+import { parentAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-portal.documents";
 import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentComplaintsView } from "@/frontend/views/dashboard/complaints/ParentComplaintsView";

@@ -15,7 +15,8 @@ import {
   StaffProfileService,
   TeacherPortalService,
 } from "@/backend/services";
-import { loadTeacherBankingSummary } from "@/backend/services/profile/banking-summary";
+import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
+import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type {
   ParentAdminProfileUpdateInput,
   ParentOwnProfileUpdateInput,
@@ -416,12 +417,12 @@ export namespace ProfileService {
       assignedStudents,
     } = await loadRoleProfiles(actorUserId, targetUserId, scope, roleIds, locale);
 
-    const bankingSummary = await loadTeacherBankingSummary(
-      actorUserId,
-      scope,
-      roleIds.audience,
-      roleIds.teacherId ?? null
-    );
+    let meetingConfigs: UserMeetingConfigReturnType[] | null = null;
+    try {
+      meetingConfigs = await MeetingConfigService.listUserMeetingConfigs(actorUserId, targetUserId, locale);
+    } catch {
+      meetingConfigs = null;
+    }
 
     return {
       id: targetUserId,
@@ -442,7 +443,9 @@ export namespace ProfileService {
       staffProfile,
       staffPermissionGroups,
       staffPermissionOverrides,
-      bankingSummary,
+      meetingConfigs,
+      paymentMethods: null,
+      paymentMethodDefaults: null,
       assignedStudents,
       displayCurrency: user.displayCurrency,
     };

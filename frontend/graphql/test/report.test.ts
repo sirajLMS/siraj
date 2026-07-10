@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { ReportGroupingMode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
+import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
 import {
   assignPermissionGroupToUserMutationDocument,
   createPermissionGroupMutationDocument,
   deletePermissionGroupMutationDocument,
   permissionsQueryDocument,
   revokePermissionGroupFromUserMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/permission-management.documents";
-import { generateAttendanceReportQueryDocument } from "@/frontend/graphql/sharedDocuments/report.documents";
+} from "@/frontend/graphql/sharedDocuments/permissions/permission-management.documents";
+import { generateAttendanceReportQueryDocument } from "@/frontend/graphql/sharedDocuments/reports/report.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,

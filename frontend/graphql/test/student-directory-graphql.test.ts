@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
+import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-directory.documents";
 import {
   authenticatedRequest,
   cleanupTestEntities,

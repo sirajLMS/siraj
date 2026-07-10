@@ -1,0 +1,79 @@
+import { describe, expect, test } from "bun:test";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { SupportedMobileWalletRepository } from "@/backend/db/repo";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import { getErrorMessage } from "@/shared/utils/error";
+
+function loc(en: string) {
+  return { en, ar: en };
+}
+
+function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
+  test(name, async () => {
+    await runInRollback(fn);
+  });
+}
+
+const badTx = {
+  select: () => {
+    throw new Error("Mock database error");
+  },
+  insert: () => {
+    throw new Error("Mock database error");
+  },
+  update: () => {
+    throw new Error("Mock database error");
+  },
+} as unknown as DBTransaction;
+
+describe("SupportedMobileWalletRepository", () => {
+  testRepo("creates, lists active, updates, and deactivates wallets", async tx => {
+    const slug = `test-wallet-${crypto.randomUUID().slice(0, 8)}`;
+    const created = await SupportedMobileWalletRepository.create(
+      {
+        slug,
+        name: loc("Test Wallet"),
+        supportedDirections: PaymentDirection.PAYIN,
+        isActive: true,
+      },
+      tx
+    );
+
+    expect(created.slug).toBe(slug);
+
+    const bySlug = await SupportedMobileWalletRepository.getBySlug(slug, tx);
+    expect(bySlug?.id).toBe(created.id);
+
+    const active = await SupportedMobileWalletRepository.listActive({ direction: PaymentDirection.PAYIN }, tx);
+    expect(active.some(row => row.id === created.id)).toBe(true);
+
+    const updated = await SupportedMobileWalletRepository.update(created.id, { phoneRegion: "EG" }, tx);
+    expect(updated.phoneRegion).toBe("EG");
+
+    const deactivated = await SupportedMobileWalletRepository.deactivate(created.id, tx);
+    expect(deactivated.isActive).toBe(false);
+  });
+
+  testRepo("update throws when wallet is missing", async tx => {
+    let errorThrown: unknown = null;
+    try {
+      await SupportedMobileWalletRepository.update("recordNotFound", { isActive: false }, tx);
+    } catch (error) {
+      errorThrown = error;
+    }
+    expect(errorThrown).not.toBeNull();
+    expect(getErrorMessage(errorThrown)).toContain("recordNotFound");
+  });
+
+  test("listAll throws on database error", async () => {
+    let errorThrown: unknown = null;
+    try {
+      await SupportedMobileWalletRepository.listAll(badTx);
+    } catch (error) {
+      errorThrown = error;
+    }
+    expect(errorThrown).not.toBeNull();
+    expect(getErrorMessage(errorThrown)).toContain("Mock database error");
+  });
+});

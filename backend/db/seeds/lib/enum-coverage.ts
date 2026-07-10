@@ -9,7 +9,6 @@ import {
   NotificationDeliveryStatus,
   NotificationEventType,
   ParentStatus,
-  PaymentMethod,
   StudentStatus,
 } from "@/backend/enum";
 /**
@@ -87,7 +86,6 @@ export const ALL_NOTIFICATION_DELIVERY_STATUSES = [
 
 export const ALL_INVOICE_TYPES = [InvoiceType.MONTHLY, InvoiceType.PER_CLASSES] as const;
 
-export const ALL_PAYMENT_METHODS = [PaymentMethod.PAYPAL, PaymentMethod.BANK_ACCOUNT] as const;
 
 export const ALL_FOCUS_LEVELS = ["LOW", "MEDIUM", "HIGH"] as const;
 export const ALL_SESSION_HEALTH = ["POOR", "FAIR", "GOOD", "EXCELLENT"] as const;

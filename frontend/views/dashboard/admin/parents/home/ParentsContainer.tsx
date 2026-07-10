@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
+import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-directory.documents";
 import { useParentsStore } from "@/frontend/stores/parentsStore";
 import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { classInstanceQueryDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
-import { createTeacherManualClassEntryMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-dashboard.documents";
+import { classInstanceQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/class-session.documents";
+import { createTeacherManualClassEntryMutationDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,

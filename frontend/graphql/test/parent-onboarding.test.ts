@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { CurrencyCode, IanaTimezone, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parent-onboarding.documents";
+import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-onboarding.documents";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,

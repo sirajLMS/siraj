@@ -3,7 +3,7 @@ import {
   parentAssignedStudentsQueryDocument,
   parentHandbookUrlQueryDocument,
   parentOwnProfileQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
+} from "@/frontend/graphql/sharedDocuments/parents/parent-portal.documents";
 import { loginDemoUser } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";

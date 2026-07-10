@@ -7,8 +7,8 @@ import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWat
 import { Controller } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
-import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
-import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
+import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
+import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher.documents";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { DaysScheduleSection } from "@/frontend/views/dashboard/classes/recurring/DaysScheduleSection";
 import { DurationInput } from "@/frontend/views/dashboard/classes/recurring/DurationInput";

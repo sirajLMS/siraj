@@ -7,7 +7,7 @@ import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
+import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/stores/studentDirectoryStore";
 import { StudentsView } from "@/frontend/views/dashboard/admin/parents/students/StudentsView";
 import {

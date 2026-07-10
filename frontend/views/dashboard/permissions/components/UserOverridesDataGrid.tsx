@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
-import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
+import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permissions/permission-management.documents";
 import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/utils/profileHref";
 

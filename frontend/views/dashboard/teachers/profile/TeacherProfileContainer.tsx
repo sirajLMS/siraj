@@ -14,7 +14,7 @@ import {
 import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/staff-profile.documents";
+} from "@/frontend/graphql/sharedDocuments/teachers/staff-profile.documents";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { logger } from "@/frontend/utils/logger";
 import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
@@ -73,7 +73,7 @@ export function TeacherProfileContainer() {
         timezone: data.teacherProfileForEdit.timezone ?? "",
         address: data.teacherProfileForEdit.address ?? "",
         baseSalary: Number.parseFloat(data.teacherProfileForEdit.hourlyRate ?? "0"),
-        currency: (data.teacherProfileForEdit.rateCurrency as CurrencyCode) ?? CurrencyCode.Usd,
+        currency: data.teacherProfileForEdit.rateCurrency ?? CurrencyCode.Usd,
         paymentMethod: data.teacherProfileForEdit.paymentMethod ?? null,
         accountStatus: data.teacherProfileForEdit.status === GqlAccountStatus.Activated,
         updatedAt: data.teacherProfileForEdit.updatedAt ?? "",

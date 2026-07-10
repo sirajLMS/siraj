@@ -11,7 +11,7 @@ import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocume
 import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
+} from "@/frontend/graphql/sharedDocuments/parents/parent-billing-history.documents";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";

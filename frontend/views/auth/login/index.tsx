@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
+import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import logger from "@/frontend/lib/logger";

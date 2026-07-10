@@ -14,6 +14,7 @@ import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds
 import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
 import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";
 import { seedOrGet as seedOrGetUserPaymentMethods } from "@/backend/db/seeds/billing/seed-user-payment-methods";
+import { seedOrGet as seedOrGetMeetingProviders } from "@/backend/db/seeds/meeting/seed-meeting-providers";
 import { seedOrGet as seedOrGetClassCommunications } from "@/backend/db/seeds/classes/seed-class-communications";
 import { seedOrGet as seedOrGetClassInstances } from "@/backend/db/seeds/classes/seed-class-instances";
 import { seedOrGet as seedOrGetClassPerformance } from "@/backend/db/seeds/classes/seed-class-performance";
@@ -42,7 +43,6 @@ import { seedOrGet as seedOrGetStudents } from "@/backend/db/seeds/students/seed
 import { seedOrGet as seedOrGetLeaveQuotaUsage } from "@/backend/db/seeds/teachers/seed-leave-quota-usage";
 import { seedOrGet as seedOrGetLeaveRequests } from "@/backend/db/seeds/teachers/seed-leave-requests";
 import { seedOrGet as seedOrGetTeacherAvailabilityWindows } from "@/backend/db/seeds/teachers/seed-teacher-availability-windows";
-import { seedOrGet as seedOrGetTeacherBankingDetails } from "@/backend/db/seeds/teachers/seed-teacher-banking-details-history";
 import { seedOrGet as seedOrGetTeacherPayments } from "@/backend/db/seeds/teachers/seed-teacher-payments";
 import { seedOrGet as seedOrGetTeacherRecurringUnavailability } from "@/backend/db/seeds/teachers/seed-teacher-recurring-unavailability";
 import { seedOrGet as seedOrGetTeacherVacationRequests } from "@/backend/db/seeds/teachers/seed-teacher-vacation-requests";
@@ -59,7 +59,6 @@ import type {
   RecurringScheduleEntity,
   StudentEntity,
   SystemSettingSelectType,
-  TeacherBankingDetailsHistorySelectType,
   TeacherEntity,
   TimezoneEntity,
   UserSelectType,
@@ -79,7 +78,6 @@ export type SeedContext = {
   classInstances?: ClassInstanceEntity[];
   exchangeRates?: Awaited<ReturnType<typeof seedOrGetCurrencyExchangeRates>>;
   invoices?: InvoiceSelectType[];
-  bankingDetails?: TeacherBankingDetailsHistorySelectType[];
   groupClasses?: { id: string; classInstanceId: string; courseName: string }[];
   groupClassEnrollments?: { id: string }[];
   classCommunications?: { id: string }[];
@@ -113,6 +111,9 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await seedOrGetSupportedPaymentLinks();
   await seedOrGetSupportedOnlineAccounts();
 
+  logger.log("Seeding meeting providers...");
+  await seedOrGetMeetingProviders();
+
   if (!context.permissionGroups) {
     logger.log("Fetching system permission groups...");
     context.permissionGroups = await db.select().from(permissionGroupsSchema);
@@ -132,6 +133,9 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
     logger.log("Seeding system parents...");
     context.parents = await seedOrGetParents(context.users, config);
   }
+
+  logger.log("Seeding demo user payment methods...");
+  await seedOrGetUserPaymentMethods(context.users ?? [], config);
 
   if (!context.students) {
     logger.log("Seeding system students...");
@@ -186,8 +190,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   const dstRuns = await seedOrGetDstMigrationRuns(context.users, config);
   await seedOrGetDstMigrationEntries(dstRuns, context.classes);
 
-  context.bankingDetails = await seedOrGetTeacherBankingDetails(context.teachers, context.users, config);
-  await seedOrGetTeacherPayments(context.bankingDetails, config);
+  await seedOrGetTeacherPayments(context.teachers ?? [], context.users ?? [], config);
 
   if (config.enableBilling) {
     logger.log("Seeding billing domain...");
@@ -198,9 +201,6 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
     await seedOrGetInvoiceCoverageMonths(context.invoices, config);
     await seedOrGetPayments(context.invoices, config);
   }
-
-  // Payment catalog seeds (supported_* tables) must run before demo user payment methods.
-  await seedOrGetUserPaymentMethods(context.users ?? [], config);
 
   if (config.enableCommunications) {
     logger.log("Seeding communications domain...");

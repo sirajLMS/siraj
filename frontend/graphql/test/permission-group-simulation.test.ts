@@ -5,7 +5,7 @@ import {
   permissionGroupSimulationStatusQueryDocument,
   simulatablePermissionGroupsQueryDocument,
   startPermissionGroupSimulationMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/auth.documents";
+} from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,

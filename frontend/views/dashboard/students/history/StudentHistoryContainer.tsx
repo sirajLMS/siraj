@@ -6,7 +6,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
-import { studentClassHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-history.documents";
+import { studentClassHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-history.documents";
 import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
 import { logger } from "@/frontend/utils/logger";
 import { StudentHistoryView } from "@/frontend/views/dashboard/students/history/StudentHistoryView";

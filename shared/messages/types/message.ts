@@ -25,7 +25,7 @@ import type {
   StatusTrackingLabels,
 } from "@/shared/messages/types/dashboard/core";
 
-import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "@/shared/messages/types/dashboard/managers";
+import type { MeetingProvidersLabels } from "@/shared/messages/types/dashboard/meeting-providers";
 import type {
   ParentOnboardingLabels,
   ParentProfileLabels,
@@ -73,7 +73,7 @@ export type {
   DashboardNavigationLabels,
   DstMigrationLabels,
   ManagerOnboardingLabels,
-  ManagersDirectoryLabels,
+  MeetingProvidersLabels,
   ParentDashboardLabels,
   ParentOnboardingLabels,
   ParentProfileLabels,
@@ -152,6 +152,7 @@ export type MessageSchema = {
     readonly complaints: ComplaintsLabels;
     readonly resources: ResourcesLabels;
     readonly subjects: SubjectsLabels;
+    readonly meetingProviders: MeetingProvidersLabels;
     readonly booksAndBags: BooksAndBagsLabels;
     readonly permissions: PermissionsLabels;
     readonly searchSchedule: SearchScheduleLabels;

@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
-import type { AccountStatus, CurrencyCode, Gender, PaymentMethod } from "@/backend/enum";
+import type { AccountStatus, CurrencyCode, Gender } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
@@ -196,7 +196,6 @@ export namespace TeacherRepository {
     timezone: users.timezone,
     hourlyRate: teachers.hourlyRate,
     rateCurrency: teachers.rateCurrency,
-    paymentMethod: teachers.paymentMethod,
     status: teachers.status,
     updatedAt: teachers.updatedAt,
     totalClasses: sql<number>`(
@@ -230,7 +229,6 @@ export namespace TeacherRepository {
     timezone: string;
     hourlyRate: string | null;
     rateCurrency: CurrencyCode | null;
-    paymentMethod: PaymentMethod | null;
     status: AccountStatus;
     updatedAt: Date;
     totalClasses: number;
@@ -248,7 +246,6 @@ export namespace TeacherRepository {
     timezone: teacher.timezone as IanaTimezone,
     hourlyRate: teacher.hourlyRate,
     rateCurrency: teacher.rateCurrency,
-    paymentMethod: teacher.paymentMethod,
     status: teacher.status,
     dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth).toISOString() : null,
     updatedAt: new Date(teacher.updatedAt).toISOString(),
@@ -273,7 +270,6 @@ export namespace TeacherRepository {
     return mapTeacherProfileRow({
       ...teacher,
       gender: teacher.gender as Gender | null,
-      paymentMethod: teacher.paymentMethod as PaymentMethod | null,
       status: teacher.status as AccountStatus,
     });
   };

@@ -69,6 +69,7 @@ export type {
 // Billing types
 export * from "@/backend/types/billing/billing.types";
 export * from "@/backend/types/billing/payment-method.types";
+export * from "@/backend/types/meeting";
 // Book types
 export * from "@/backend/types/books/book.types";
 // Report types

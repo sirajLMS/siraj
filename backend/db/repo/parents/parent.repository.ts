@@ -63,8 +63,8 @@ export namespace ParentRepository {
         twitter: input.twitter ?? null,
         invoiceType: input.invoiceType ?? null,
         feeAmount: input.feeAmount ?? null,
-        paymentMethod: input.paymentMethod ?? null,
         currency: input.currency ?? null,
+        displayCurrency: input.displayCurrency ?? null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -76,7 +76,7 @@ export namespace ParentRepository {
     }
 
     const [userRow] = await queryDb
-      .select({ timezone: users.timezone })
+      .select({ timezone: users.timezone, displayCurrency: users.displayCurrency })
       .from(users)
       .where(eq(users.id, input.userId))
       .limit(1);
@@ -87,8 +87,8 @@ export namespace ParentRepository {
       status: created.status,
       invoiceType: created.invoiceType,
       feeAmount: created.feeAmount,
-      paymentMethod: created.paymentMethod,
       currency: created.currency,
+      displayCurrency: created.displayCurrency,
       timezone: (userRow?.timezone ?? "UTC") as IanaTimezone,
       createdAt: created.createdAt,
     };
@@ -264,7 +264,6 @@ export namespace ParentRepository {
     twitter: string | null;
     invoiceType: string | null;
     feeAmount: string | null;
-    paymentMethod: string | null;
     currency: CurrencyCode | null;
     displayCurrency: CurrencyCode | null;
     timezone: IanaTimezone;
@@ -291,8 +290,8 @@ export namespace ParentRepository {
         twitter: parents.twitter,
         invoiceType: parents.invoiceType,
         feeAmount: parents.feeAmount,
-        paymentMethod: parents.paymentMethod,
         currency: parents.currency,
+        displayCurrency: users.displayCurrency,
         timezone: users.timezone,
         createdAt: parents.createdAt,
         updatedAt: parents.updatedAt,
@@ -306,6 +305,7 @@ export namespace ParentRepository {
       ? {
           ...results[0],
           timezone: results[0].timezone as IanaTimezone,
+          displayCurrency: results[0].displayCurrency as CurrencyCode | null,
         }
       : null;
   };
@@ -335,8 +335,8 @@ export namespace ParentRepository {
     if (input.twitter !== undefined) parentUpdate.twitter = input.twitter;
     if (input.invoiceType !== undefined) parentUpdate.invoiceType = input.invoiceType;
     if (input.feeAmount !== undefined) parentUpdate.feeAmount = input.feeAmount;
-    if (input.paymentMethod !== undefined) parentUpdate.paymentMethod = input.paymentMethod;
     if (input.currency !== undefined) parentUpdate.currency = input.currency;
+    if (input.displayCurrency !== undefined) parentUpdate.displayCurrency = input.displayCurrency;
 
     await queryDb.update(parents).set(parentUpdate).where(eq(parents.id, parentId));
 

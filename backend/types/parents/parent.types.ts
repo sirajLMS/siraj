@@ -8,7 +8,7 @@ export type ParentEntityInput = typeof import("@/backend/db/schema").parents.$in
 
 export type ParentCreateResult = Pick<
   ParentEntity,
-  "id" | "userId" | "status" | "invoiceType" | "feeAmount" | "currency" | "createdAt"
+  "id" | "userId" | "status" | "invoiceType" | "feeAmount" | "currency" | "displayCurrency" | "createdAt"
 > & {
   readonly timezone: IanaTimezone;
 };

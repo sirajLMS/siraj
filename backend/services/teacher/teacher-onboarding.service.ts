@@ -2,7 +2,6 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   PermissionManagementRepository,
-  TeacherBankingRepository,
   TeacherRepository,
   UserRepository,
 } from "@/backend/db/repo";
@@ -113,19 +112,7 @@ export namespace TeacherOnboardingService {
       input.iban;
 
     if (hasBankingDetails) {
-      await TeacherBankingRepository.submitBankingDetails(
-        {
-          teacherId,
-          beneficiaryName: input.beneficiaryName ?? null,
-          bankName: input.bankName ?? null,
-          accountNumber: input.accountNumber ?? null,
-          routingNumber: input.routingNumber ?? null,
-          swiftBic: input.swiftBic ?? null,
-          iban: input.iban ?? null,
-        },
-        txObj,
-        locale
-      );
+      // Banking details are created via user payment methods (BANK_TRANSFER), not teacher_banking_details_history.
     }
   }
 

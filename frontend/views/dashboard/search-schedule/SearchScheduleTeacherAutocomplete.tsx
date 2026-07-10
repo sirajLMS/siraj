@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Autocomplete, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
+import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher.documents";
 import { type SearchScheduleTeacherOption, useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 
 const DEBOUNCE_MS = 300;

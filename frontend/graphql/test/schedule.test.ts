@@ -1,19 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import { ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { executeDstBulkUpdateMutationDocument } from "@/frontend/graphql/sharedDocuments/dst-migration.documents";
+import { executeDstBulkUpdateMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/dst-migration.documents";
 import {
   adminDashboardScheduleQueryDocument,
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/schedule.documents";
+} from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/schedule-deletion.documents";
+} from "@/frontend/graphql/sharedDocuments/scheduling/schedule-deletion.documents";
 import {
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/weekly-schedule.documents";
+} from "@/frontend/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
 import {
   assertRecurringClassDenied,
   authenticatedRequest,

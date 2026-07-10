@@ -1,14 +1,14 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { deleteClassInstanceMutationDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
-import { dailyScheduleListQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
+import { deleteClassInstanceMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/class-session.documents";
+import { dailyScheduleListQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
 import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
   teacherFutureScheduleQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/teacher-dashboard.documents";
-import { cleanupTestEntitiesMutationDocument } from "@/frontend/graphql/sharedDocuments/test-helper.documents";
+} from "@/frontend/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
+import { cleanupTestEntitiesMutationDocument } from "@/frontend/graphql/sharedDocuments/shared/test-helper.documents";
 import { authenticatedRequest, loginAndProvision } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";

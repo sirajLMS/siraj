@@ -11,13 +11,13 @@ import {
   updateSessionStatusAbsentMutationDocument,
   updateSessionStatusLeaveMutationDocument,
   updateSessionStatusStartMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/class-session.documents";
+} from "@/frontend/graphql/sharedDocuments/scheduling/class-session.documents";
 import {
   createTeacherManualClassEntryMutationDocument,
   logTeacherSupportRequestMutationDocument,
   teacherDashboardQueryDocument,
   teacherHandbookUrlQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/teacher-dashboard.documents";
+} from "@/frontend/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

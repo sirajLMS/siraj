@@ -59,7 +59,7 @@ describe("ParentRepository — getParentProfile", () => {
         expect(profile.facebook === null || typeof profile.facebook === "string").toBeTrue();
         expect(profile.whatsapp === null || typeof profile.whatsapp === "string").toBeTrue();
         expect(profile.twitter === null || typeof profile.twitter === "string").toBeTrue();
-        expect(profile. === null || typeof profile. === "string").toBeTrue();
+        expect(profile.displayCurrency === null || typeof profile.displayCurrency === "string").toBeTrue();
       }
     });
   });

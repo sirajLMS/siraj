@@ -5,7 +5,7 @@ import {
   impersonationStatusQueryDocument,
   permissionGroupSimulationStatusQueryDocument,
   simulatablePermissionGroupsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/auth.documents";
+} from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { UserMenuButton } from "@/frontend/views/dashboard/components/navbar/UserMenuButton";
 

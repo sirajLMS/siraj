@@ -117,17 +117,23 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         action
         state
       }
-      bankingSummary {
+      meetingConfigs {
         id
-        beneficiaryName
-        bankName
-        accountNumber
-        routingNumber
-        swiftBic
-        iban
-        verifiedAt
-        verifiedByUserId
-        verifiedByName
+        userId
+        providerId
+        label
+        isDefault
+        hasSecret
+        details {
+          meetingUrl
+          username
+          tenantId
+        }
+        provider {
+          id
+          slug
+          name
+        }
       }
       assignedStudents {
         id

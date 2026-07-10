@@ -7,8 +7,8 @@ import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
-import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
+import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-directory.documents";
+import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-directory.documents";
 import { logger } from "@/frontend/utils/logger";
 import { ManualInvoiceView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceView";
 import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
@@ -95,7 +95,7 @@ export function ManualInvoiceContainer() {
     void createInvoice({
       variables: {
         parentId: data.parentId,
-        studentId: (data as ManualInvoiceFormData & { studentId?: string }).studentId ?? null,
+        studentId: "studentId" in data ? data.studentId : null,
         amount: data.feeAmount,
         currency: data.currency,
         invoiceType: InvoiceType.Manual,

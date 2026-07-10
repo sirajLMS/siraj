@@ -1,3 +1,5 @@
+import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   MeetingProviderCreateInputPothos,
@@ -10,6 +12,79 @@ import {
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
+
+function normalizeFieldSchema(input: {
+  readonly requiresMeetingUrl: boolean;
+  readonly supportsUsername?: boolean | null;
+  readonly supportsPassword?: boolean | null;
+  readonly supportsTenantId?: boolean | null;
+}): MeetingProviderFieldSchema {
+  return {
+    requiresMeetingUrl: input.requiresMeetingUrl,
+    ...(input.supportsUsername != null ? { supportsUsername: input.supportsUsername } : {}),
+    ...(input.supportsPassword != null ? { supportsPassword: input.supportsPassword } : {}),
+    ...(input.supportsTenantId != null ? { supportsTenantId: input.supportsTenantId } : {}),
+  };
+}
+
+function normalizeMeetingConfigDetails(input: {
+  readonly meetingUrl: string;
+  readonly username?: string | null;
+  readonly tenantId?: string | null;
+}): MeetingConfigDetails {
+  return {
+    meetingUrl: input.meetingUrl,
+    ...(input.username != null && input.username !== "" ? { username: input.username } : {}),
+    ...(input.tenantId != null && input.tenantId !== "" ? { tenantId: input.tenantId } : {}),
+  };
+}
+
+function normalizeProviderUpdateInput(input: {
+  readonly slug?: string | null;
+  readonly name?: Partial<Record<"ar" | "en", string>> | null;
+  readonly description?: Partial<Record<"ar" | "en", string>> | null;
+  readonly instructions?: Partial<Record<"ar" | "en", string>> | null;
+  readonly urlAllowlist?: readonly string[] | null;
+  readonly urlExample?: string | null;
+  readonly logoUrl?: string | null;
+  readonly fieldSchema?: {
+    readonly requiresMeetingUrl: boolean;
+    readonly supportsUsername?: boolean | null;
+    readonly supportsPassword?: boolean | null;
+    readonly supportsTenantId?: boolean | null;
+  } | null;
+  readonly isActive?: boolean | null;
+}) {
+  return {
+    ...(input.slug != null ? { slug: input.slug } : {}),
+    ...(input.name != null ? { name: input.name } : {}),
+    ...(input.description !== undefined ? { description: input.description } : {}),
+    ...(input.instructions !== undefined ? { instructions: input.instructions } : {}),
+    ...(input.urlAllowlist != null ? { urlAllowlist: input.urlAllowlist } : {}),
+    ...(input.urlExample !== undefined ? { urlExample: input.urlExample } : {}),
+    ...(input.logoUrl !== undefined ? { logoUrl: input.logoUrl } : {}),
+    ...(input.fieldSchema != null ? { fieldSchema: normalizeFieldSchema(input.fieldSchema) } : {}),
+    ...(input.isActive != null ? { isActive: input.isActive } : {}),
+  };
+}
+
+function normalizeConfigUpdateInput(input: {
+  readonly label?: string | null;
+  readonly isDefault?: boolean | null;
+  readonly password?: string | null;
+  readonly details?: {
+    readonly meetingUrl: string;
+    readonly username?: string | null;
+    readonly tenantId?: string | null;
+  } | null;
+}) {
+  return {
+    ...(input.label !== undefined ? { label: input.label } : {}),
+    ...(input.isDefault != null ? { isDefault: input.isDefault } : {}),
+    ...(input.password !== undefined ? { password: input.password } : {}),
+    ...(input.details != null ? { details: normalizeMeetingConfigDetails(input.details) } : {}),
+  };
+}
 
 gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
   t.field({
@@ -30,7 +105,7 @@ gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
           urlAllowlist: args.input.urlAllowlist,
           urlExample: args.input.urlExample,
           logoUrl: args.input.logoUrl,
-          fieldSchema: args.input.fieldSchema,
+          fieldSchema: normalizeFieldSchema(args.input.fieldSchema),
           isActive: args.input.isActive ?? undefined,
         },
         ctx.locale
@@ -49,7 +124,12 @@ gqlSchemaBuilder.mutationField("updateMeetingProvider", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return MeetingProviderCatalogService.updateProvider(userId, args.id, args.input, ctx.locale);
+      return MeetingProviderCatalogService.updateProvider(
+        userId,
+        args.id,
+        normalizeProviderUpdateInput(args.input),
+        ctx.locale
+      );
     },
   })
 );
@@ -86,7 +166,7 @@ gqlSchemaBuilder.mutationField("createUserMeetingConfig", t =>
           label: args.input.label,
           isDefault: args.input.isDefault,
           password: args.input.password,
-          details: args.input.details,
+          details: normalizeMeetingConfigDetails(args.input.details),
         },
         ctx.locale
       );
@@ -104,7 +184,12 @@ gqlSchemaBuilder.mutationField("updateUserMeetingConfig", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return MeetingConfigService.updateUserMeetingConfig(actorUserId, args.id, args.input, ctx.locale);
+      return MeetingConfigService.updateUserMeetingConfig(
+        actorUserId,
+        args.id,
+        normalizeConfigUpdateInput(args.input),
+        ctx.locale
+      );
     },
   })
 );

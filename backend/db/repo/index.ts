@@ -1,6 +1,12 @@
 export { AuditRepository } from "@/backend/db/repo/audit";
 export { ImpersonationRepository } from "@/backend/db/repo/auth";
-export { BillingRepository } from "@/backend/db/repo/billing/billing.repository";
+export {
+  BillingRepository,
+  SupportedMobileWalletRepository,
+  SupportedOnlineAccountRepository,
+  SupportedPaymentLinkRepository,
+  UserPaymentMethodRepository,
+} from "@/backend/db/repo/billing";
 export { BookRepository } from "@/backend/db/repo/books/book.repository";
 export { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books/report.repository";
 export { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
@@ -44,7 +50,6 @@ export {
 export {
   StaffProfileRepository,
   TeacherAvailabilityRepository,
-  TeacherBankingRepository,
   TeacherNotesRepository,
   TeacherRepository,
 } from "@/backend/db/repo/teachers";

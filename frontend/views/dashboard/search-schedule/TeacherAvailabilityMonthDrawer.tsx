@@ -7,7 +7,7 @@ import { addMonths, parse, subMonths } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import type { AvailabilitySearchInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
+import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/availability-search.documents";
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 import type { SearchScheduleResultItem } from "@/frontend/views/dashboard/search-schedule/SearchScheduleView";
 import { buildTeacherMonthAvailabilityInput } from "@/frontend/views/dashboard/search-schedule/searchScheduleFilterUtils";
@@ -74,11 +74,12 @@ export function TeacherAvailabilityMonthDrawer({
     return buildTeacherMonthAvailabilityInput(draft, { id: teacher.id, name: teacher.name }, currentMonth);
   }, [currentMonth, draft, teacher?.id, teacher?.name]);
 
-  const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {
-    variables: monthInput ? { input: monthInput } : { input: {} as AvailabilitySearchInput },
-    skip: !open || monthInput === null,
-    fetchPolicy: "cache-and-network",
-  });
+      const emptyInput: AvailabilitySearchInput = {};
+      const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {
+        variables: monthInput ? { input: monthInput } : { input: emptyInput },
+        skip: !open || monthInput === null,
+        fetchPolicy: "cache-and-network",
+      });
 
   const monthTeacher = useMemo(() => {
     const teachers = data?.searchTeacherAvailability?.teachers ?? [];

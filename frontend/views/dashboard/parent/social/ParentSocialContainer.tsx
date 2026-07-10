@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PhoneDisplay, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { parentOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
+import { parentOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-portal.documents";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
 
 function SocialLink({ label, value }: { readonly label: string; readonly value: string | null | undefined }) {

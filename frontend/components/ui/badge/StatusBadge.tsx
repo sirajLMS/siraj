@@ -151,19 +151,20 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
         map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant }
       );
     }
-    case "session": {
-      const key = status as "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled";
-      const containerKey = `${key}Container` as keyof typeof theme.palette.status;
-      const onContainerKey =
-        `on${key.charAt(0).toUpperCase()}${key.slice(1)}Container` as keyof typeof theme.palette.status;
+case "session": {
+ const allowedStatuses = ["active", "pending", "blocked", "confirmed", "completed", "cancelled"] as const;
+ const key = allowedStatuses.includes(status as any) ? status : "pending";
+ const containerKey = `${key}Container` as keyof typeof theme.palette.status;
+ const onContainerKey =
+  `on${key.charAt(0).toUpperCase()}${key.slice(1)}Container` as keyof typeof theme.palette.status;
 
-      if (theme.palette.status[containerKey]) {
-        return {
-          backgroundColor: theme.palette.status[containerKey],
-          color: theme.palette.status[onContainerKey],
-        };
-      }
-      return { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
+ if (theme.palette.status[containerKey]) {
+  return {
+   backgroundColor: theme.palette.status[containerKey],
+   color: theme.palette.status[onContainerKey],
+  };
+ }
+ return { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
     }
     case "enrollment": {
       const map: Record<string, { backgroundColor: string; color: string }> = {

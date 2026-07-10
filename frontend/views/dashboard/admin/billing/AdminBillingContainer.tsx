@@ -21,7 +21,7 @@ import {
   adminBillingSummaryQueryDocument,
   adminInvoicesQueryDocument,
   studentCreditStatusQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
+} from "@/frontend/graphql/sharedDocuments/parents/parent-billing-history.documents";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";

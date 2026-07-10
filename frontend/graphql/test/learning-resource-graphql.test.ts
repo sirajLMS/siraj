@@ -5,7 +5,7 @@ import {
   learningResourcesQueryDocument,
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/learning-resource.documents";
+} from "@/frontend/graphql/sharedDocuments/resources/learning-resource.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,

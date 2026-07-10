@@ -33,7 +33,7 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
-import type { TeacherBankingSummaryReturnType } from "@/backend/types/teachers/teacher.types";
+import { UserMeetingConfigPothosObject } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 
 const StaffPermissionGroupRef = gqlSchemaBuilder.objectRef<StaffPermissionGroupReturnType>("StaffPermissionGroup");
 
@@ -57,22 +57,6 @@ export const StaffPermissionOverridePothosObject = StaffPermissionOverrideRef.im
     resource: t.exposeString("resource"),
     action: t.exposeString("action"),
     state: t.expose("state", { type: OverrideStatePothosObject }),
-  }),
-});
-
-const TeacherBankingSummaryRef = gqlSchemaBuilder.objectRef<TeacherBankingSummaryReturnType>("TeacherBankingSummary");
-export const TeacherBankingSummaryPothosObject = TeacherBankingSummaryRef.implement({
-  fields: t => ({
-    id: t.exposeString("id"),
-    beneficiaryName: t.exposeString("beneficiaryName"),
-    bankName: t.exposeString("bankName"),
-    accountNumber: t.exposeString("accountNumber"),
-    routingNumber: t.exposeString("routingNumber", { nullable: true }),
-    swiftBic: t.exposeString("swiftBic"),
-    iban: t.exposeString("iban", { nullable: true }),
-    verifiedAt: t.exposeString("verifiedAt", { nullable: true }),
-    verifiedByUserId: t.exposeString("verifiedByUserId", { nullable: true }),
-    verifiedByName: t.exposeString("verifiedByName", { nullable: true }),
   }),
 });
 
@@ -108,7 +92,7 @@ export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
       type: [StaffPermissionOverridePothosObject],
       nullable: true,
     }),
-    bankingSummary: t.expose("bankingSummary", { type: TeacherBankingSummaryPothosObject, nullable: true }),
+    meetingConfigs: t.expose("meetingConfigs", { type: [UserMeetingConfigPothosObject], nullable: true }),
     assignedStudents: t.expose("assignedStudents", { type: TeacherAssignedStudentsResultPothosObject, nullable: true }),
   }),
 });

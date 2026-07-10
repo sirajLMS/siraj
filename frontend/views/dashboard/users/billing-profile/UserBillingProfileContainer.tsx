@@ -10,7 +10,7 @@ import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocume
 import {
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/user-billing-profile.documents";
+} from "@/frontend/graphql/sharedDocuments/billing/user-billing-profile.documents";
 import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

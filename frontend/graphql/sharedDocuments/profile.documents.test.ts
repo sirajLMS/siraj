@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   profileByUserIdQueryDocument,
   updateUserProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/profile.documents";
+} from "@/frontend/graphql/sharedDocuments/profile/profile.documents";
 
 describe("profileByUserIdQueryDocument", () => {
   test("requests assignedStudents fields for teacher admin tab", () => {

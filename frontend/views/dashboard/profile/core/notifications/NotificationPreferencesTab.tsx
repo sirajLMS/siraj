@@ -9,7 +9,7 @@ import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/notification-preferences.documents";
+} from "@/frontend/graphql/sharedDocuments/notifications/notification-preferences.documents";
 import { logger } from "@/frontend/utils/logger";
 import {
   NOTIFICATION_CHANNELS,

@@ -1,5 +1,10 @@
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderReturnType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+
+type MeetingProviderFieldVisibility = {
+  readonly fieldSchema: MeetingProviderFieldSchema | MeetingProviderFieldsFragment["fieldSchema"];
+};
 
 export function isUrlAllowedByProvider(url: string, allowlist: readonly string[]): boolean {
   try {
@@ -13,15 +18,15 @@ export function isUrlAllowedByProvider(url: string, allowlist: readonly string[]
   }
 }
 
-export function getVisibleMeetingConfigFields(provider: MeetingProviderReturnType): {
+export function getVisibleMeetingConfigFields(provider: MeetingProviderFieldVisibility): {
   showUsername: boolean;
   showPassword: boolean;
   showTenantId: boolean;
 } {
   return {
-    showUsername: provider.fieldSchema.supportsUsername === true,
-    showPassword: provider.fieldSchema.supportsPassword === true,
-    showTenantId: provider.fieldSchema.supportsTenantId === true,
+    showUsername: provider.fieldSchema?.supportsUsername === true,
+    showPassword: provider.fieldSchema?.supportsPassword === true,
+    showTenantId: provider.fieldSchema?.supportsTenantId === true,
   };
 }
 

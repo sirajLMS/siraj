@@ -1,6 +1,6 @@
 import { AppPermission, type ProfileAudience, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 
-export type ProfileTabId = "profile" | "banking" | "students" | "notifications" | "permissions";
+export type ProfileTabId = "profile" | "meeting" | "students" | "notifications" | "permissions";
 
 export type ProfileTabDefinition = {
   readonly id: ProfileTabId;
@@ -11,7 +11,7 @@ type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
 
 const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
   profile: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER", "STAFF-OWN", "STAFF-OTHER"],
-  banking: ["TEACHER-OTHER"],
+  meeting: ["TEACHER-OTHER"],
   students: ["TEACHER-OTHER"],
   notifications: ["TEACHER-OWN", "PARENT-OWN", "STAFF-OWN"],
   permissions: ["TEACHER-OTHER", "PARENT-OTHER", "STAFF-OTHER"],
@@ -19,7 +19,7 @@ const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
 
 export const profileTabs: readonly ProfileTabDefinition[] = [
   { id: "profile", i18nKey: "shell.tabs.profile" },
-  { id: "banking", i18nKey: "shell.tabs.banking" },
+  { id: "meeting", i18nKey: "shell.tabs.meeting" },
   { id: "students", i18nKey: "shell.tabs.students" },
   { id: "notifications", i18nKey: "shell.tabs.notifications" },
   { id: "permissions", i18nKey: "shell.tabs.permissions" },
@@ -45,7 +45,7 @@ export function getVisibleProfileTabs({
       return false;
     }
 
-    if (tab.id === "banking" && !hasPermission(AppPermission.UserEditProfile)) {
+    if (tab.id === "meeting" && !hasPermission(AppPermission.UserEditProfile)) {
       return false;
     }
 

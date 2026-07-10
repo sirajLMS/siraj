@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-onboarding.documents";
+import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher-onboarding.documents";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,

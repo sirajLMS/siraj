@@ -4213,20 +4213,6 @@ export type TeacherAvailabilityGap = {
   timezone: Maybe<IanaTimezone>;
 };
 
-export type TeacherBankingSummary = {
-  __typename?: 'TeacherBankingSummary';
-  accountNumber: Maybe<Scalars['String']['output']>;
-  bankName: Maybe<Scalars['String']['output']>;
-  beneficiaryName: Maybe<Scalars['String']['output']>;
-  iban: Maybe<Scalars['String']['output']>;
-  id: Maybe<Scalars['String']['output']>;
-  routingNumber: Maybe<Scalars['String']['output']>;
-  swiftBic: Maybe<Scalars['String']['output']>;
-  verifiedAt: Maybe<Scalars['String']['output']>;
-  verifiedByName: Maybe<Scalars['String']['output']>;
-  verifiedByUserId: Maybe<Scalars['String']['output']>;
-};
-
 export type TeacherDashboard = {
   __typename?: 'TeacherDashboard';
   id: Maybe<Scalars['String']['output']>;
@@ -4498,10 +4484,10 @@ export type UnifiedProfile = {
   associatedStudents: Maybe<ParentAssignedStudentsResult>;
   audience: Maybe<ProfileAudience>;
   avatarUrl: Maybe<Scalars['String']['output']>;
-  bankingSummary: Maybe<TeacherBankingSummary>;
   displayCurrency: Maybe<CurrencyCode>;
   email: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
+  meetingConfigs: Maybe<Array<UserMeetingConfig>>;
   name: Maybe<Scalars['String']['output']>;
   parentAdminProfile: Maybe<ParentProfile>;
   parentId: Maybe<Scalars['String']['output']>;

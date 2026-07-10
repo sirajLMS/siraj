@@ -45,14 +45,14 @@ export function BillingSection(props: BillingSectionProps) {
             name="currency"
             control={props.control}
             render={({ field, fieldState }) => {
-              const option: CurrencyOption | null = field.value
-                ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
-                : null;
+const option: CurrencyOption | null = field.value
+ ? (getCurrencyByCode(field.value) ?? null)
+ : null;
               return (
                 <CurrencySelect
                   currency={option}
                   setCurrencyAction={selected => {
-                    field.onChange(selected.code as string);
+                    field.onChange(selected.code);
                   }}
                   onBlurAction={field.onBlur}
                   label={t("fields.currency")}

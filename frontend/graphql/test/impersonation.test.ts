@@ -8,7 +8,7 @@ import {
   impersonationStatusQueryDocument,
   meQueryDocument,
   startImpersonationMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/auth.documents";
+} from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
 import {
   authenticatedRequest,
   cleanupTestEntities,

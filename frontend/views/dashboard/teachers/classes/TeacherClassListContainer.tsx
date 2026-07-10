@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherAssignedClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher-portal.documents";
+import { teacherAssignedClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher-portal.documents";
 
 export function TeacherClassListContainer() {
   const t = useTranslations("dashboard.teacherClassList");

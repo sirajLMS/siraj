@@ -24,7 +24,7 @@ import {
   markSuggestionDuplicateMutationDocument,
   markSuggestionReviewedMutationDocument,
   respondToSuggestionMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/suggestion.documents";
+} from "@/frontend/graphql/sharedDocuments/suggestions/suggestion.documents";
 import { useAdminSuggestionsStore } from "@/frontend/stores/adminSuggestionsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

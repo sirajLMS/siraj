@@ -16,7 +16,7 @@ import {
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { notificationAlertsQueryDocument } from "@/frontend/graphql/sharedDocuments/notification-alerts.documents";
+import { notificationAlertsQueryDocument } from "@/frontend/graphql/sharedDocuments/notifications/notification-alerts.documents";
 import { UnpaidInvoicesSection } from "@/frontend/views/dashboard/components/navbar/UnpaidInvoicesSection";
 
 function getSeverityColor(

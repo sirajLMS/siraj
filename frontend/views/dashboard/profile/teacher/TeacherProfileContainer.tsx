@@ -9,10 +9,10 @@ import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/profile.documents";
+} from "@/frontend/graphql/sharedDocuments/profile/profile.documents";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
-import { TeacherBankingTab } from "@/frontend/views/dashboard/profile/teacher/banking/TeacherBankingTab";
+import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { TeacherProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/teacher/sections/TeacherProfileLoadingSkeleton";
 import { isTeacherAdminData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import { AssignedStudentsTab } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsTab";
@@ -120,8 +120,8 @@ function renderActiveTabContent({
     return <NotificationPreferencesTab isActive />;
   }
 
-  if (activeTab === "banking" && scope === ProfileScope.Other) {
-    return <TeacherBankingTab targetUserId={targetUserId} mode={mode} />;
+  if (activeTab === "meeting" && scope === ProfileScope.Other) {
+    return <MeetingConfigsTab targetUserId={targetUserId} />;
   }
 
   if (activeTab === "students" && scope === ProfileScope.Other) {

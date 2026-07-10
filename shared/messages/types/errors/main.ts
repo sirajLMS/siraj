@@ -34,6 +34,14 @@ export interface ErrorsLabels {
   readonly teacherBooked: string;
   readonly studentBooked: string;
   readonly meetingUrlInUse: string;
+  readonly meetingProviderNotFound: string;
+  readonly meetingProviderInactive: string;
+  readonly meetingProviderInUse: string;
+  readonly meetingProviderCreateFailed: string;
+  readonly meetingConfigNotFound: string;
+  readonly meetingConfigCreateFailed: string;
+  readonly meetingProviderUpdateFailed: string;
+  readonly meetingConfigUpdateFailed: string;
   readonly classInstanceNotFound: string;
   readonly originalClassNotFound: string;
   readonly cannotRescheduleToSelf: string;

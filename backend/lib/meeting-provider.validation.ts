@@ -27,10 +27,24 @@ export const meetingProviderSubmitInputSchema = z.object({
   logoUrl: z.string().url().nullable().optional(),
   fieldSchema: meetingProviderFieldSchemaSchema,
   isActive: z.boolean().optional(),
-}) as z.ZodType<MeetingProviderSubmitInput>;
+}) satisfies z.ZodType<MeetingProviderSubmitInput>;
 
-export const updateMeetingProviderInputSchema =
-  meetingProviderSubmitInputSchema.partial() as z.ZodType<UpdateMeetingProviderInput>;
+export const updateMeetingProviderInputSchema = z.object({
+  slug: z
+    .string()
+    .min(1)
+    .max(100)
+    .regex(/^[a-z0-9_]+$/, "slug must be lowercase alphanumeric with underscores")
+    .optional(),
+  name: localizedStringRequiredSchema().optional(),
+  description: localizedStringSchema.nullable().optional(),
+  instructions: localizedStringSchema.nullable().optional(),
+  urlAllowlist: z.array(z.string().min(1)).min(1).optional(),
+  urlExample: z.string().url().nullable().optional(),
+  logoUrl: z.string().url().nullable().optional(),
+  fieldSchema: meetingProviderFieldSchemaSchema.optional(),
+  isActive: z.boolean().optional(),
+}) satisfies z.ZodType<UpdateMeetingProviderInput>;
 
 export function parseMeetingProviderSubmitInput(input: unknown): MeetingProviderSubmitInput {
   return meetingProviderSubmitInputSchema.parse(input);

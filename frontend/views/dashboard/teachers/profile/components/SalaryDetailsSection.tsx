@@ -12,7 +12,7 @@ export function SalaryDetailsSection() {
   const t = useTranslations("dashboard.teacherProfile");
   const { control } = useFormContext<TeacherProfileFormData>();
   const currency = useWatch({ control, name: "currency" });
-  const currencySymbol = getCurrencySymbol((currency as CurrencyCode | undefined) ?? CurrencyCode.Usd);
+  const currencySymbol = getCurrencySymbol(currency ?? CurrencyCode.Usd);
 
   return (
     <Box component="section">
@@ -49,9 +49,9 @@ export function SalaryDetailsSection() {
             name="currency"
             control={control}
             render={({ field, fieldState }) => {
-              const option: CurrencyOption | null = field.value
-                ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
-                : null;
+          const option: CurrencyOption | null = field.value
+            ? (getCurrencyByCode(field.value) ?? null)
+            : null;
               return (
                 <CurrencySelect
                   currency={option}

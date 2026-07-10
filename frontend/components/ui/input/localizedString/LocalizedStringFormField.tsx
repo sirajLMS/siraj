@@ -33,9 +33,16 @@ export function LocalizedStringFormField<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState }) => {
-        const rawValue = field.value as LocalizedString | string | null | undefined;
-        const normalized: LocalizedString =
-          typeof rawValue === "string" ? (rawValue === "" ? {} : { en: rawValue }) : (rawValue ?? {});
+        const rawValue = field.value;
+        let normalized: LocalizedString;
+
+        if (typeof rawValue === "string") {
+          normalized = rawValue === "" ? {} : { en: rawValue };
+        } else if (isLocalizedString(rawValue)) {
+          normalized = rawValue;
+        } else {
+          normalized = {};
+        }
         return (
           <LocalizedStringInput
             {...inputProps}

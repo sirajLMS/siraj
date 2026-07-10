@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { CurrencyCode, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
+import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
 import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/staff-profile.documents";
-import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
+} from "@/frontend/graphql/sharedDocuments/teachers/staff-profile.documents";
+import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher.documents";
 import {
   authenticatedRequest,
   cleanupTestEntities,

@@ -4,12 +4,12 @@ import {
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import { deleteClassInstanceMutationDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
+import { deleteClassInstanceMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/class-session.documents";
 import {
   cleanupTestEntitiesMutationDocument,
   cleanupTestGroupClassMutationDocument,
   createTestGroupClassMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/test-helper.documents";
+} from "@/frontend/graphql/sharedDocuments/shared/test-helper.documents";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,

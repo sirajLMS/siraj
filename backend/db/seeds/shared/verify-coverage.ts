@@ -35,7 +35,6 @@ const TABLE_COVERAGE: TableCoverageEntry[] = [
   { table: "student_status_history", category: "seeded", seeder: "seed-student-status-history.ts" },
   { table: "dst_migration_runs", category: "seeded", seeder: "seed-dst-migration-runs.ts" },
   { table: "dst_migration_entries", category: "seeded", seeder: "seed-dst-migration-entries.ts" },
-  { table: "teacher_banking_details_history", category: "seeded", seeder: "seed-teacher-banking-details-history.ts" },
   { table: "teacher_payments", category: "seeded", seeder: "seed-teacher-payments.ts" },
   { table: "currency_exchange_rates", category: "seeded", seeder: "seed-currency-exchange-rates.ts" },
   { table: "supported_mobile_wallets", category: "seeded", seeder: "seed-supported-mobile-wallets.ts" },

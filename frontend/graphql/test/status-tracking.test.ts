@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { IanaTimezone, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
-import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
+import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
+import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/students/student-lifecycle.documents";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,

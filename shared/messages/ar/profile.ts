@@ -5,6 +5,7 @@ export const profile: ProfileLabels = {
     tabs: {
       profile: "الملف الشخصي",
       banking: "الحسابات البنكية",
+      meeting: "إعدادات الاجتماع",
       students: "الطلاب",
       notifications: "الإشعارات",
       permissions: "الصلاحيات",

@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { classSubjectByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/class-subject.documents";
+import { classSubjectByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/classes/class-subject.documents";
 import { logger } from "@/frontend/utils/logger";
 import { SubjectDetailView } from "@/frontend/views/dashboard/subjects/detail/SubjectDetailView";
 import type {

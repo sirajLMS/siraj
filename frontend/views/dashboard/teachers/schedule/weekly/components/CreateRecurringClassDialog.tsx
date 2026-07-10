@@ -28,8 +28,8 @@ import {
   ClassType as ClassTypeEnum,
   type CreateRecurringClassInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/recurring-class.documents";
-import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
+import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-class.documents";
+import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { logger } from "@/frontend/utils/logger";

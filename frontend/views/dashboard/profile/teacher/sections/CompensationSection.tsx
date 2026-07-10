@@ -45,7 +45,7 @@ function CompensationEditSection({
 }) {
   const t = useTranslations("profile.teacher");
   const rateCurrency = useWatch({ control, name: "rateCurrency" });
-  const currencySymbol = getCurrencySymbol((rateCurrency as CurrencyCode | undefined) ?? CurrencyCode.Usd);
+  const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
 
   return (
     <SectionPanel title={t("sections.compensation")}>
@@ -65,21 +65,21 @@ function CompensationEditSection({
           name="rateCurrency"
           control={control}
           render={({ field, fieldState }) => {
-            const option: CurrencyOption | null = field.value
-              ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
-              : null;
+      const option: CurrencyOption | null = field.value
+      ? (getCurrencyByCode(field.value) ?? null)
+      : null;
             return (
-              <CurrencySelect
-                currency={option}
-                setCurrencyAction={selected => {
-                  field.onChange(selected.code as string);
-                }}
-                onBlurAction={field.onBlur}
-                label={t("fields.currency")}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                fullWidth
-              />
+      <CurrencySelect
+        currency={option}
+        setCurrencyAction={selected => {
+          field.onChange(selected.code);
+        }}
+        onBlurAction={field.onBlur}
+        label={t("fields.currency")}
+        error={Boolean(fieldState.error)}
+        helperText={fieldState.error?.message}
+        fullWidth
+      />
             );
           }}
         />

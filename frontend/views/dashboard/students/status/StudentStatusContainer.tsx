@@ -12,9 +12,9 @@ import {
   ClassExecutionState as GqlClassExecutionState,
   StudentStatus,
 } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
-import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
-import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/student-status.documents";
+import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
+import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/students/student-lifecycle.documents";
+import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-status.documents";
 import { logger } from "@/frontend/utils/logger";
 import { StudentStatusView } from "@/frontend/views/dashboard/students/status/StudentStatusView";
 import type { StudentStatusPageData, UpcomingClassDisplay } from "@/frontend/views/dashboard/students/status/types";

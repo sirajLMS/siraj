@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { managerDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
+import { managerDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { useManagersDirectoryStore } from "@/frontend/stores/managersDirectoryStore";
 import { ManagersView } from "@/frontend/views/dashboard/managers/home/ManagersView";
 import type { Manager, ManagerRole, ManagerStatus } from "@/frontend/views/dashboard/managers/home/types";

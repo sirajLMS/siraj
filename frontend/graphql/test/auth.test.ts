@@ -7,7 +7,7 @@ import {
   refreshTokenMutationDocument,
   userQueryDocument,
   usersQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/auth.documents";
+} from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
 import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { clearCookies, testClient } from "@/frontend/graphql/test/testClient";
