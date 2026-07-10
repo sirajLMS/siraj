@@ -30,6 +30,7 @@ export const profile: TeacherProfileLabels = {
     accountStatusDesc: "منح حق الوصول إلى الأنظمة الداخلية",
     active: "نشط",
     inactive: "غير نشط",
+    displayCurrency: "عملة العرض",
   },
   actions: {
     saveProfile: "حفظ الملف الشخصي",

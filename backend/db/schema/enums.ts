@@ -25,11 +25,11 @@ import {
   NotificationDeliveryStatus,
   NotificationEventType,
   ParentStatus,
-  PaymentMethod,
   StudentStatus,
   SuggestionStatus,
   VacationRequestStatus,
 } from "@/backend/enum";
+import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { createPgEnumFromEnum } from "@/backend/utils/db.utils";
 
 export const appLanguageEnum = createPgEnumFromEnum("app_language", AppLanguage);
@@ -56,7 +56,11 @@ export const invoiceStatusEnum = createPgEnumFromEnum("invoice_status", InvoiceS
 
 export const invoiceTypeEnum = createPgEnumFromEnum("invoice_type", InvoiceType);
 
-export const paymentMethodEnum = createPgEnumFromEnum("payment_method", PaymentMethod);
+export const paymentMethodTypeEnum = createPgEnumFromEnum("payment_method_type", PaymentMethodType);
+
+export const paymentDirectionEnum = createPgEnumFromEnum("payment_direction", PaymentDirection);
+
+export const identifierKindEnum = createPgEnumFromEnum("identifier_kind", IdentifierKind);
 
 export const complaintCategoryEnum = createPgEnumFromEnum("complaint_category", ComplaintCategory);
 

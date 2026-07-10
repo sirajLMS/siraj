@@ -2,6 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups as permissionGroupsSchema } from "@/backend/db/schema";
 import { seedOrGet as seedOrGetAdminAuditLogs } from "@/backend/db/seeds/audit/seed-admin-audit-logs";
 import { seedOrGet as seedOrGetAuditLogs } from "@/backend/db/seeds/audit/seed-audit-logs";
+import { seedOrGet as seedOrGetPaymentMethodPermissions } from "@/backend/db/seeds/auth/seed-payment-method-permissions";
 import { seedOrGet as seedOrGetUserPermissionOverrides } from "@/backend/db/seeds/auth/seed-user-permission-overrides";
 import { seedOrGet as seedOrGetCurrencyExchangeAuditLogs } from "@/backend/db/seeds/billing/seed-currency-exchange-audit-logs";
 import { seedOrGet as seedOrGetCurrencyExchangeRates } from "@/backend/db/seeds/billing/seed-currency-exchange-rates";
@@ -9,6 +10,10 @@ import { seedOrGet as seedOrGetCurrencyHedges } from "@/backend/db/seeds/billing
 import { seedOrGet as seedOrGetInvoiceCoverageMonths } from "@/backend/db/seeds/billing/seed-invoice-coverage-months";
 import { seedOrGet as seedOrGetInvoices } from "@/backend/db/seeds/billing/seed-invoices";
 import { seedOrGet as seedOrGetPayments } from "@/backend/db/seeds/billing/seed-payments";
+import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds/billing/seed-supported-mobile-wallets";
+import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
+import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";
+import { seedOrGet as seedOrGetUserPaymentMethods } from "@/backend/db/seeds/billing/seed-user-payment-methods";
 import { seedOrGet as seedOrGetClassCommunications } from "@/backend/db/seeds/classes/seed-class-communications";
 import { seedOrGet as seedOrGetClassInstances } from "@/backend/db/seeds/classes/seed-class-instances";
 import { seedOrGet as seedOrGetClassPerformance } from "@/backend/db/seeds/classes/seed-class-performance";
@@ -100,6 +105,14 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
     context.timezones = await seedOrGetTimezones();
   }
 
+  logger.log("Seeding payment method permissions...");
+  await seedOrGetPaymentMethodPermissions();
+
+  logger.log("Seeding payment method catalogs...");
+  await seedOrGetSupportedMobileWallets();
+  await seedOrGetSupportedPaymentLinks();
+  await seedOrGetSupportedOnlineAccounts();
+
   if (!context.permissionGroups) {
     logger.log("Fetching system permission groups...");
     context.permissionGroups = await db.select().from(permissionGroupsSchema);
@@ -185,6 +198,9 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
     await seedOrGetInvoiceCoverageMonths(context.invoices, config);
     await seedOrGetPayments(context.invoices, config);
   }
+
+  // Payment catalog seeds (supported_* tables) must run before demo user payment methods.
+  await seedOrGetUserPaymentMethods(context.users ?? [], config);
 
   if (config.enableCommunications) {
     logger.log("Seeding communications domain...");

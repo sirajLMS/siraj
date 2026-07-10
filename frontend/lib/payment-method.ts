@@ -253,7 +253,7 @@ export function resolveLocalizedCatalogName(name: LocalizedString, slug: string,
  */
 export function toPaymentMethodCatalogOption<T extends PaymentMethodCatalogRow>(
   row: T,
-  locale: string,
+  locale: string
 ): PaymentMethodCatalogOption {
   return {
     id: row.id,
@@ -272,7 +272,7 @@ export function toPaymentMethodCatalogOption<T extends PaymentMethodCatalogRow>(
  */
 export function toPaymentMethodCatalogOptions<T extends PaymentMethodCatalogRow>(
   rows: readonly T[],
-  locale: string,
+  locale: string
 ): readonly PaymentMethodCatalogOption[] {
   return rows.map(row => toPaymentMethodCatalogOption(row, locale));
 }

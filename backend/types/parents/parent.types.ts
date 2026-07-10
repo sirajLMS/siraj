@@ -167,6 +167,7 @@ export interface ParentProfileResult {
   readonly invoiceType: string | null;
   readonly feeAmount: string | null;
   readonly currency: CurrencyCode | null;
+  readonly displayCurrency: CurrencyCode | null;
   readonly timezone: IanaTimezone;
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -211,6 +212,7 @@ export type ParentProfileUpdateInput = {
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly currency?: CurrencyCode | null;
+  readonly displayCurrency?: CurrencyCode | null;
   readonly timezone?: IanaTimezone | null;
 };
 

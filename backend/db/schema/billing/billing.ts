@@ -13,11 +13,13 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodEnum } from "@/backend/db/schema/enums";
+import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
+import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
 import type { CurrencyCode } from "@/backend/enum";
+import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
@@ -76,7 +78,11 @@ export const payments = pgTable(
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     paymentDate: timestamp("payment_date", { withTimezone: true, precision: 3 }).notNull(),
-    paymentMethod: paymentMethodEnum("payment_method").notNull(),
+    userPaymentMethodId: uuid("user_payment_method_id").references(() => userPaymentMethods.id, {
+      onDelete: "set null",
+    }),
+    paymentMethodType: paymentMethodTypeEnum("payment_method_type").notNull(),
+    paymentMethodSnapshot: jsonb("payment_method_snapshot").$type<PaymentMethodTransactionSnapshot>().notNull(),
     transactionId: varchar("transaction_id", { length: 255 }),
     gatewayResponse: text("gateway_response"),
     refundedAmount: numeric("refunded_amount", { precision: 12, scale: 2 }).notNull().default("0.00"),
@@ -89,6 +95,8 @@ export const payments = pgTable(
   table => [
     index("payments_invoice_id_idx").on(table.invoiceId),
     index("payments_transaction_id_idx").on(table.transactionId),
+    index("payments_user_payment_method_id_idx").on(table.userPaymentMethodId),
+    index("payments_payment_method_type_idx").on(table.paymentMethodType),
     uniqueIndex("payments_idempotency_key_unique_idx").on(table.idempotencyKey),
   ]
 );

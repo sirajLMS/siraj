@@ -232,11 +232,6 @@ export function TeacherProfileContainer({
   }
 
   return (
-    <TeacherAdminEditForm
-      teacherData={editData}
-      avatarUrl={avatarUrl}
-      isSaving={isSaving}
-      onSubmit={onSubmitAdmin}
-    />
+    <TeacherAdminEditForm teacherData={editData} avatarUrl={avatarUrl} isSaving={isSaving} onSubmit={onSubmitAdmin} />
   );
 }

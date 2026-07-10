@@ -101,11 +101,11 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       await createMockClassInstance(tx, student.id, teacher.id, {
         scheduledStartAt: start,
         scheduledEndAt: end,
-        zoomMeetingUrl: zoomUrl,
+        meetingJoinUrl: zoomUrl,
       });
       const { student: s2, teacher: t2 } = await setupTestEntities(tx, "CreateZoom2");
       await SchedulingRepository.createClassInstance(
-        getCreatePayload(s2.id, t2.id, start, end, { zoomMeetingUrl: zoomUrl }),
+        getCreatePayload(s2.id, t2.id, start, end, { meetingJoinUrl: zoomUrl }),
         tx
       );
     });

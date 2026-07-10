@@ -7,6 +7,14 @@ export const relations = defineRelations(schema, r => ({
       from: r.users.id,
       to: r.sessions.userId,
     }),
+    userPaymentMethods: r.many.userPaymentMethods({
+      from: r.users.id,
+      to: r.userPaymentMethods.userId,
+    }),
+    verifiedPaymentMethods: r.many.userPaymentMethods({
+      from: r.users.id,
+      to: r.userPaymentMethods.verifiedByUserId,
+    }),
     userPermissionGroups: r.many.userPermissionGroups({
       from: r.users.id,
       to: r.userPermissionGroups.userId,
@@ -122,10 +130,6 @@ export const relations = defineRelations(schema, r => ({
     leaveQuotaUsage: r.many.leaveQuotaUsage({
       from: r.teachers.id,
       to: r.leaveQuotaUsage.teacherId,
-    }),
-    bankingDetails: r.many.teacherBankingDetailsHistory({
-      from: r.teachers.id,
-      to: r.teacherBankingDetailsHistory.teacherId,
     }),
     payments: r.many.teacherPayments({
       from: r.teachers.id,
@@ -389,6 +393,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.payments.invoiceId,
       to: r.invoices.id,
     }),
+    userPaymentMethod: r.one.userPaymentMethods({
+      from: r.payments.userPaymentMethodId,
+      to: r.userPaymentMethods.id,
+    }),
   },
   complaints: {
     parent: r.one.parents({
@@ -450,28 +458,14 @@ export const relations = defineRelations(schema, r => ({
       to: r.users.id,
     }),
   },
-  teacherBankingDetailsHistory: {
-    teacher: r.one.teachers({
-      from: r.teacherBankingDetailsHistory.teacherId,
-      to: r.teachers.id,
-    }),
-    verifiedBy: r.one.users({
-      from: r.teacherBankingDetailsHistory.verifiedByUserId,
-      to: r.users.id,
-    }),
-    payments: r.many.teacherPayments({
-      from: r.teacherBankingDetailsHistory.id,
-      to: r.teacherPayments.bankingDetailsHistoryId,
-    }),
-  },
   teacherPayments: {
     teacher: r.one.teachers({
       from: r.teacherPayments.teacherId,
       to: r.teachers.id,
     }),
-    bankingDetails: r.one.teacherBankingDetailsHistory({
-      from: r.teacherPayments.bankingDetailsHistoryId,
-      to: r.teacherBankingDetailsHistory.id,
+    userPaymentMethod: r.one.userPaymentMethods({
+      from: r.teacherPayments.userPaymentMethodId,
+      to: r.userPaymentMethods.id,
     }),
   },
   teacherAvailabilityWindows: {
@@ -514,6 +508,24 @@ export const relations = defineRelations(schema, r => ({
     changedBy: r.one.users({
       from: r.currencyExchangeAuditLogs.changedByUserId,
       to: r.users.id,
+    }),
+  },
+  userPaymentMethods: {
+    user: r.one.users({
+      from: r.userPaymentMethods.userId,
+      to: r.users.id,
+    }),
+    verifiedBy: r.one.users({
+      from: r.userPaymentMethods.verifiedByUserId,
+      to: r.users.id,
+    }),
+    payments: r.many.payments({
+      from: r.userPaymentMethods.id,
+      to: r.payments.userPaymentMethodId,
+    }),
+    teacherPayments: r.many.teacherPayments({
+      from: r.userPaymentMethods.id,
+      to: r.teacherPayments.userPaymentMethodId,
     }),
   },
 }));

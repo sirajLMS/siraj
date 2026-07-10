@@ -6,7 +6,7 @@ import {
   AppPermission,
   ComplaintCategory,
   ComplaintStatus,
-  CurrencyCode,
+  type CurrencyCode,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
@@ -137,7 +137,7 @@ const meta: Meta<typeof ParentComplaintsDesktopStoryRenderer> = {
         updatedAt: new Date().toISOString(),
         emailVerifiedAt: new Date().toISOString(),
         email: "sarah.j@example.com",
-        displayCurrency: CurrencyCode.Usd,
+        displayCurrency: "USD" as CurrencyCode,
         __typename: "User" as const,
       };
       useUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });

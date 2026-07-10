@@ -26,7 +26,7 @@ describe("StudentHistoryRepository", () => {
           idempotencyKey: randomUUID(),
           createdAt: new Date(),
           updatedAt: new Date(),
-          zoomMeetingUrl: "https://zoom.us/j/123",
+          meetingJoinUrl: "https://zoom.us/j/123",
           remarks: "Good class",
         })
         .returning()
@@ -63,7 +63,7 @@ describe("StudentHistoryRepository", () => {
     });
   });
 
-  it("getMonthlyCalendar handles null zoomMeetingUrl by returning null room", async () => {
+  it("getMonthlyCalendar handles null meetingJoinUrl by returning null room", async () => {
     await runInRollback(async tx => {
       const { student, teacher } = await setupTestEntities(tx, "cal2", { skipInstance: true });
 
@@ -83,7 +83,7 @@ describe("StudentHistoryRepository", () => {
           idempotencyKey: randomUUID(),
           createdAt: new Date(),
           updatedAt: new Date(),
-          zoomMeetingUrl: null,
+          meetingJoinUrl: null,
           remarks: "No zoom url",
         })
         .returning()

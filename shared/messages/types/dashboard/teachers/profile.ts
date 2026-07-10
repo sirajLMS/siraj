@@ -28,6 +28,7 @@ export interface TeacherProfileLabels {
     readonly accountStatusDesc: string;
     readonly active: string;
     readonly inactive: string;
+    readonly displayCurrency: string;
   };
   readonly actions: {
     readonly saveProfile: string;

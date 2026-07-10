@@ -72,6 +72,7 @@ export const profile: ProfileLabels = {
       currency: "العملة",
       paymentMethod: "طريقة الدفع",
       status: "حالة الحساب",
+      displayCurrency: "عملة العرض",
     },
     gender: {
       male: "ذكر",

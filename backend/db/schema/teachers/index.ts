@@ -2,6 +2,6 @@
 
 export * from "./staff";
 export * from "./teacher-availability";
-export * from "./teacher-banking";
 export * from "./teacher-notes";
+export * from "./teacher-payments";
 export * from "./teachers";

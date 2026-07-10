@@ -266,6 +266,7 @@ export namespace ParentRepository {
     feeAmount: string | null;
     paymentMethod: string | null;
     currency: CurrencyCode | null;
+    displayCurrency: CurrencyCode | null;
     timezone: IanaTimezone;
     createdAt: Date;
     updatedAt: Date;

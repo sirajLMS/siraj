@@ -278,6 +278,7 @@ const en: MessageSchema = {
         currency: "Currency",
         paymentMethod: "Payment Method",
         status: "Account Status",
+        displayCurrency: "Display Currency",
       },
       gender: {
         male: "Male",
@@ -314,6 +315,7 @@ const en: MessageSchema = {
         feeAmount: "Base Fee Amount",
         paymentMethod: "Default Payment Method",
         currency: "Currency",
+        displayCurrency: "Display Currency",
         timezone: "Timezone",
         status: "Status",
       },

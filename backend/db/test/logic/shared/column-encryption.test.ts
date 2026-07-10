@@ -33,7 +33,6 @@ async function insertTeacherDetails(args: {
   const teacherInput: TeacherEntityInput = {
     userId,
     status: "ACTIVATED",
-    zoomPassword: plainZoomPassword,
     nationalId: plainNationalId,
     createdAt: now,
     updatedAt: now,
@@ -71,12 +70,7 @@ function verifyCiphertext(value: unknown, plaintext: string) {
   expect(valStr.split(":")).toHaveLength(3);
 }
 
-async function verifyRawEncryption(
-  tx: DBTransaction,
-  teacherId: string,
-  bankingId: string,
-  plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }
-) {
+async function verifyRawEncryption(tx: DBTransaction, teacherId: string, bankingId: string) {
   // Verify teacher encryption
   const rawTeacherResult = await tx.execute(
     sql`SELECT zoom_password, national_id FROM teachers WHERE id = ${teacherId}`
@@ -86,7 +80,6 @@ async function verifyRawEncryption(
   const rawTeacherRow = teacherRows[0];
   expect(rawTeacherRow).toBeDefined();
 
-  verifyCiphertext(rawTeacherRow.zoom_password, plainValues.zoomPassword);
   verifyCiphertext(rawTeacherRow.national_id, plainValues.nationalId);
 
   // Verify banking encryption
@@ -102,15 +95,9 @@ async function verifyRawEncryption(
   verifyCiphertext(rawBankingRow.iban, plainValues.iban);
 }
 
-async function verifyDrizzleDecryption(
-  tx: DBTransaction,
-  teacherId: string,
-  bankingId: string,
-  plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }
-) {
+async function verifyDrizzleDecryption(tx: DBTransaction, teacherId: string, bankingId: string) {
   const [drizzleTeacher] = await tx.select().from(teachers).where(sql`id = ${teacherId}`);
   expect(drizzleTeacher).toBeDefined();
-  expect(drizzleTeacher.zoomPassword).toBe(plainValues.zoomPassword);
   expect(drizzleTeacher.nationalId).toBe(plainValues.nationalId);
 
   const [drizzleBanking] = await tx.select().from(teacherBankingDetailsHistory).where(sql`id = ${bankingId}`);
@@ -127,7 +114,6 @@ describe("Column-Level Encryption", () => {
       const uniqueSuffix = randomUUID();
 
       const plainValues = {
-        zoomPassword: randomUUID(),
         nationalId: "NID-999-888-777",
         beneficiaryName: "Teacher Beneficiary Name",
         iban: "US12345678901234567890",
@@ -140,7 +126,6 @@ describe("Column-Level Encryption", () => {
       const teacher = await insertTeacherDetails({
         tx,
         userId: user.id,
-        plainZoomPassword: plainValues.zoomPassword,
         plainNationalId: plainValues.nationalId,
         now,
       });

@@ -45,6 +45,7 @@ export interface ParentProfileLabels {
     readonly feeAmount: string;
     readonly paymentMethod: string;
     readonly currency: string;
+    readonly displayCurrency: string;
   };
   readonly table: {
     readonly studentName: string;

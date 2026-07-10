@@ -48,6 +48,7 @@ export const profile: ParentProfileLabels = {
     feeAmount: "مبلغ الرسوم",
     paymentMethod: "طريقة الدفع",
     currency: "العملة",
+    displayCurrency: "عملة العرض",
   },
   table: {
     studentName: "اسم الطالب",

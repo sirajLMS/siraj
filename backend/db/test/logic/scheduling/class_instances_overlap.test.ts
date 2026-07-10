@@ -189,7 +189,7 @@ async function testZoomUrlOverlap(args: {
       scheduledEndAt: new Date("2026-06-21T11:00:00Z"),
       durationMinutes: 60,
       classType: "REGULAR",
-      zoomMeetingUrl: zoomUrl,
+      meetingJoinUrl: zoomUrl,
       idempotencyKey: randomUUID(),
     },
     tx
@@ -204,7 +204,7 @@ async function testZoomUrlOverlap(args: {
         scheduledEndAt: new Date("2026-06-21T11:30:00Z"),
         durationMinutes: 60,
         classType: "REGULAR",
-        zoomMeetingUrl: zoomUrl,
+        meetingJoinUrl: zoomUrl,
         idempotencyKey: randomUUID(),
       },
       tx

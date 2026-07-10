@@ -86,6 +86,9 @@ enum AppPermission {
   INVOICES_EDIT
   INVOICES_LIST
   INVOICES_MARK_PAID
+  MEETING_CONFIGS_MANAGE_OTHER
+  MEETING_CONFIGS_MANAGE_OWN
+  MEETING_PROVIDERS_MANAGE_CATALOG
   NOTES_CREATE
   NOTES_DELETE
   NOTES_LIST
@@ -380,6 +383,7 @@ type ClassInstanceDetail {
   id: String
   instanceId: String
   isRescheduled: Boolean
+  meetingJoinUrl: String
   outcome: ClassOutcome
   payrollCredited: Boolean
   performance: ClassInstancePerformance
@@ -391,7 +395,6 @@ type ClassInstanceDetail {
   studentTimezone: IanaTimezone
   teacher: ClassInstanceTeacherInfo
   teacherTimezone: IanaTimezone
-  zoomMeetingUrl: String
 }
 
 type ClassInstancePerformance {
@@ -1225,12 +1228,12 @@ type FutureClass {
   leaveRequestDisabled: Boolean
   leaveRequestDisabledReason: String
   location: String
+  meetingJoinUrl: String
   scheduledDate: String
   startTime: String
   studentCount: Int
   subjectId: String
   subjectName: String
-  zoomMeetingUrl: String
 }
 
 enum FxProvider {
@@ -1919,6 +1922,71 @@ input MarkSuggestionDuplicateInput {
   suggestionId: String!
 }
 
+type MeetingConfigDetails {
+  meetingUrl: String
+  tenantId: String
+  username: String
+}
+
+input MeetingConfigDetailsInput {
+  meetingUrl: String!
+  tenantId: String
+  username: String
+}
+
+type MeetingProvider {
+  createdAt: DateTime
+  description: LocalizedString
+  fieldSchema: MeetingProviderFieldSchema
+  id: String
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  slug: String
+  updatedAt: DateTime
+  urlAllowlist: [String!]
+  urlExample: String
+}
+
+input MeetingProviderCreateInput {
+  description: LocalizedString
+  fieldSchema: MeetingProviderFieldSchemaInput!
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString!
+  slug: String!
+  urlAllowlist: [String!]!
+  urlExample: String
+}
+
+type MeetingProviderFieldSchema {
+  requiresMeetingUrl: Boolean
+  supportsPassword: Boolean
+  supportsTenantId: Boolean
+  supportsUsername: Boolean
+}
+
+input MeetingProviderFieldSchemaInput {
+  requiresMeetingUrl: Boolean!
+  supportsPassword: Boolean
+  supportsTenantId: Boolean
+  supportsUsername: Boolean
+}
+
+input MeetingProviderUpdateInput {
+  description: LocalizedString
+  fieldSchema: MeetingProviderFieldSchemaInput
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  slug: String
+  urlAllowlist: [String!]
+  urlExample: String
+}
+
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
@@ -1940,6 +2008,7 @@ type Mutation {
   """Create a new manager/staff account (System Admin only)"""
   createManager(input: ManagerOnboardingInput!): ManagerOnboardingResult
   createManualInvoice(amount: String!, billingMonths: [BillingMonthInput!], currency: CurrencyCode!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: InvoiceType!, issueDate: String!, parentId: String!, sendEmail: Boolean, studentId: String): ManualInvoiceResult
+  createMeetingProvider(input: MeetingProviderCreateInput!): MeetingProvider
 
   """Create a new parent account with billing configuration"""
   createParent(input: ParentOnboardingInput!): ParentOnboardingResult
@@ -1956,6 +2025,7 @@ type Mutation {
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
   createTestSuperAdmin(prefix: String!): TestSuperAdmin
+  createUserMeetingConfig(input: UserMeetingConfigCreateInput!): UserMeetingConfig
   deactivateParent(parentId: String!): DeactivateParentResult
 
   """Soft-deletes a book by marking it as deleted."""
@@ -1979,6 +2049,7 @@ type Mutation {
     """The UUID of the resource to delete"""
     id: ID!
   ): Boolean
+  deleteMeetingProvider(id: ID!): Boolean
   deletePermissionGroup(groupId: String!): Boolean
   deleteRecurringClass(classInstanceId: ID!): Boolean
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
@@ -1987,6 +2058,7 @@ type Mutation {
   """Soft-deletes a suggestion (super admin only). Returns true on success."""
   deleteSuggestion(suggestionId: String!): Boolean
   deleteTeacherImportantNote(id: ID!): Boolean
+  deleteUserMeetingConfig(id: ID!): Boolean
 
   """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
@@ -2025,6 +2097,7 @@ type Mutation {
   respondToSuggestion(input: RespondToSuggestionInput!): Suggestion
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   sendPaymentReminder(studentId: String!): SendPaymentReminderResult
+  setDefaultMeetingConfig(id: ID!): UserMeetingConfig
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
   startImpersonation(reason: String, targetUserId: String!): StartImpersonationResponse
   startPermissionGroupSimulation(groupSlug: String!): StartPermissionGroupSimulationResponse
@@ -2042,6 +2115,7 @@ type Mutation {
 
   """Updates a manager's profile fields."""
   updateManagerProfile(input: UpdateManagerProfileInput!, staffProfileId: ID!): ManagerDirectoryRow
+  updateMeetingProvider(id: ID!, input: MeetingProviderUpdateInput!): MeetingProvider
   updateNotificationPreferences(input: [NotificationPreferenceInput!]!): [NotificationPreference!]
   updateOwnProfile(input: UpdateOwnProfileInput!): UnifiedProfile
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
@@ -2051,6 +2125,7 @@ type Mutation {
   updateStudentQuota(expectedVersion: Int, newClassesRemaining: Int!, studentId: String!): EditQuotaResult
   updateTeacherImportantNote(id: ID!, input: UpdateTeacherNoteInput!): TeacherImportantNote
   updateTeacherProfile(input: TeacherProfileUpdateInput!, teacherId: ID!): TeacherProfileResult
+  updateUserMeetingConfig(id: ID!, input: UserMeetingConfigUpdateInput!): UserMeetingConfig
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
   updateUserProfile(input: UpdateUserProfileInput!, userId: String!): UnifiedProfile
 
@@ -2146,7 +2221,6 @@ input PaginationArgs {
 input ParentAdminProfileUpdateInput {
   address: String
   currency: CurrencyCode
-  defaultZoomLink: String
   facebook: String
   feeAmount: String
   invoiceType: String
@@ -2225,6 +2299,7 @@ type ParentDashboardScheduleRow {
   durationMinutes: Int
   executionState: ClassExecutionState
   id: String
+  meetingJoinUrl: String
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
@@ -2235,7 +2310,6 @@ type ParentDashboardScheduleRow {
   teacherAvatarUrl: String
   teacherId: String
   teacherName: String
-  zoomMeetingUrl: String
 }
 
 type ParentDirectory {
@@ -2307,7 +2381,6 @@ type ParentInvoiceRow {
 input ParentOnboardingInput {
   address: String
   currency: CurrencyCode
-  defaultZoomLink: String
   email: Email!
   facebook: String
   feeAmount: String
@@ -2334,7 +2407,6 @@ type ParentOnboardingResult {
 }
 
 type ParentOwnProfile {
-  defaultZoomLink: String
   email: String
   facebook: String
   id: String
@@ -2345,7 +2417,6 @@ type ParentOwnProfile {
 }
 
 input ParentOwnProfileUpdateInput {
-  defaultZoomLink: String
   facebook: String
   phone: String
   twitter: String
@@ -2357,7 +2428,6 @@ type ParentProfile {
   avatarUrl: String
   createdAt: DateTime
   currency: CurrencyCode
-  defaultZoomLink: String
   email: String
   facebook: String
   feeAmount: String
@@ -2510,6 +2580,8 @@ type Query {
   """Lists all staff members with administrative access."""
   managerDirectory(paginationArgs: PaginationArgs, roleFilter: String, statusFilter: String): ManagerDirectoryResult
   me: User
+  meetingProvider(id: ID!): MeetingProvider
+  meetingProviders(activeOnly: Boolean = true): [MeetingProvider!]
   notificationAlerts: NotificationAlertsResult
   notificationPreferences: [NotificationPreference!]
 
@@ -2603,6 +2675,8 @@ type Query {
   translatedMessage(key: String!, namespace: String!): String
   unpaidInvoicesAlert: UnpaidInvoicesSummary
   user(id: String!): User
+  userMeetingConfig(id: ID!): UserMeetingConfig
+  userMeetingConfigs(userId: ID!): [UserMeetingConfig!]
 
   """List overrides for a user."""
   userOverrides(userId: String!): [UserOverride!]
@@ -2997,12 +3071,12 @@ type StudentSessionDetail {
   durationMinutes: Int
   executionState: String
   id: String
+  meetingJoinUrl: String
   outcome: String
   remarks: String
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
   teacherName: String
-  zoomMeetingUrl: String
 }
 
 enum StudentStatus {
@@ -3256,13 +3330,13 @@ type TeacherDashboardScheduleRow {
   durationMinutes: Int
   executionState: ClassExecutionState
   id: String
+  meetingJoinUrl: String
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
   studentId: String
   studentName: String
   yourTimeFormatted: String
-  zoomMeetingUrl: String
 }
 
 type TeacherDirectory {
@@ -3287,7 +3361,6 @@ type TeacherDirectoryRow {
   name: String
   status: AccountStatus
   userId: String
-  zoomLink: String
 }
 
 type TeacherFutureSchedule {
@@ -3399,15 +3472,6 @@ input TeacherOnboardingInput {
   """SWIFT/BIC code"""
   swiftBic: String
   timezone: IanaTimezone!
-
-  """Teacher Zoom meeting link"""
-  zoomLink: String
-
-  """Teacher Zoom password (encrypted)"""
-  zoomPassword: String
-
-  """Teacher Zoom username"""
-  zoomUsername: String
 }
 
 type TeacherOwnProfile {
@@ -3420,12 +3484,10 @@ type TeacherOwnProfile {
   rateCurrency: CurrencyCode
   timezone: IanaTimezone
   totalClasses: Int
-  zoomLink: String
 }
 
 input TeacherOwnProfileUpdateInput {
   phone: String
-  zoomLink: String
 }
 
 type TeacherProfileResult {
@@ -3434,7 +3496,6 @@ type TeacherProfileResult {
   dateOfBirth: String
   email: String
   gender: Gender
-  hasZoomPassword: Boolean
   hourlyRate: String
   id: String
   name: String
@@ -3448,8 +3509,6 @@ type TeacherProfileResult {
   totalClasses: Int
   updatedAt: String
   userId: String
-  zoomLink: String
-  zoomUsername: String
 }
 
 input TeacherProfileUpdateInput {
@@ -3464,9 +3523,6 @@ input TeacherProfileUpdateInput {
   rateCurrency: CurrencyCode
   status: AccountStatus
   timezone: IanaTimezone
-  zoomLink: String
-  zoomPassword: String
-  zoomUsername: String
 }
 
 enum TeacherProgressFeedEventKind {
@@ -3628,6 +3684,35 @@ type User {
   role: String
   teacherId: String
   updatedAt: DateTime
+}
+
+type UserMeetingConfig {
+  createdAt: DateTime
+  details: MeetingConfigDetails
+  hasSecret: Boolean
+  id: String
+  isDefault: Boolean
+  label: String
+  provider: MeetingProvider
+  providerId: String
+  updatedAt: DateTime
+  userId: String
+}
+
+input UserMeetingConfigCreateInput {
+  details: MeetingConfigDetailsInput!
+  isDefault: Boolean!
+  label: String
+  password: String
+  providerId: String!
+  userId: String!
+}
+
+input UserMeetingConfigUpdateInput {
+  details: MeetingConfigDetailsInput
+  isDefault: Boolean
+  label: String
+  password: String
 }
 
 type UserOverride {

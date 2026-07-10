@@ -70,6 +70,7 @@ export interface ProfileLabels {
       readonly currency: string;
       readonly paymentMethod: string;
       readonly status: string;
+      readonly displayCurrency: string;
     };
     readonly gender: {
       readonly male: string;
