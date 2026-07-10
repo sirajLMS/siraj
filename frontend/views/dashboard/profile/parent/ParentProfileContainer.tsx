@@ -18,8 +18,8 @@ import {
 } from "@/frontend/views/dashboard/profile/parent/ParentProfileEditForm";
 import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
 import { ParentProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/parent/sections/ParentProfileLoadingSkeleton";
-import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { PaymentMethodsTab } from "@/frontend/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
+import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { useRouter } from "@/shared/i18n/routing";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;

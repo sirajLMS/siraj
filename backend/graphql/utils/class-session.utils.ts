@@ -1,5 +1,5 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -89,7 +89,10 @@ export async function buildClassInstanceDetail(
   const t = await getBackendTranslations({ locale, namespace: "session" });
   const tErrors = await getBackendTranslations({ locale, namespace: "errors" });
   const unknownName = tErrors("unknownName");
-  const classType = instance.classType as ClassType;
+  const validClassTypes = Object.values(ClassType);
+  const classType = validClassTypes.includes(instance.classType as ClassType)
+    ? (instance.classType as ClassType)
+    : ClassType.REGULAR;
   const courseName = t(`classTypes.${classType}`);
 
   const start = instance.scheduledStartAt;

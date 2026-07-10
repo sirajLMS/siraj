@@ -10,11 +10,12 @@ import {
   supportedPaymentLinksQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
 import { toPaymentMethodCatalogOptions } from "@/frontend/lib/payment-method";
+import type { LocalizedString } from "@/shared/types/localized-string";
 
-function isPaymentMethodCatalogRow<T extends { id: string | null; slug: string | null }>(
+function isPaymentMethodCatalogRow<T extends { id: string | null; slug: string | null; name: LocalizedString | null }>(
   row: T
-): row is T & { id: string; slug: string } {
-  return row.id != null && row.slug != null;
+): row is T & { id: string; slug: string; name: LocalizedString } {
+  return row.id != null && row.slug != null && row.name != null;
 }
 
 export function usePaymentMethodCatalogs(direction: PaymentDirection | null) {
@@ -40,10 +41,7 @@ export function usePaymentMethodCatalogs(direction: PaymentDirection | null) {
   );
   const paymentLinkOptions = useMemo(
     () =>
-      toPaymentMethodCatalogOptions(
-        (linkData?.supportedPaymentLinks ?? []).filter(isPaymentMethodCatalogRow),
-        locale
-      ),
+      toPaymentMethodCatalogOptions((linkData?.supportedPaymentLinks ?? []).filter(isPaymentMethodCatalogRow), locale),
     [linkData?.supportedPaymentLinks, locale]
   );
   const onlineAccountOptions = useMemo(

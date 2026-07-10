@@ -1,8 +1,7 @@
 export interface PaymentComponentLabels {
   readonly paymentMethodSelector: {
-    readonly bank_account: string;
-    readonly paypal: string;
     readonly label: string;
+    readonly placeholder: string;
   };
   readonly paymentStatusBadge: {
     readonly paid: string;

@@ -7,7 +7,10 @@ import { Button, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ErrorState } from "@/frontend/components/ui";
-import { PaymentMethodList, type PaymentMethodRow } from "@/frontend/components/ui/display/paymentMethod/PaymentMethodList";
+import {
+  PaymentMethodList,
+  type PaymentMethodRow,
+} from "@/frontend/components/ui/display/paymentMethod/PaymentMethodList";
 import { AppPermission, PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import {

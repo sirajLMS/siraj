@@ -247,8 +247,8 @@ describe("Audit Trail System", () => {
 
     expect(auditLog.entityType).toBe("STUDENT");
     expect(auditLog.action).toBe("STATUS_CHANGE");
-    expect(auditLog.previousState).toEqual({ status: "ACTIVE" });
-    expect(auditLog.newState).toEqual({ status: "INACTIVE" });
+    expect(auditLog.previousState).toEqual({ status: "REGULAR" });
+    expect(auditLog.newState).toEqual({ status: "SUSPENDED" });
     testLogger.info("Student status change logged", { auditLogId: auditLog.id });
   });
 

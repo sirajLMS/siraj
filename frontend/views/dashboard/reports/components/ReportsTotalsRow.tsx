@@ -20,9 +20,7 @@ export function ReportsTotalsRow({ summary, totalsLabel }: Readonly<ReportsTotal
 
   const totalsText =
     summary.currencyDistribution.length > 0
-      ? summary.currencyDistribution
-          .map(slice => `${formatCurrencyAmount(slice.amount)} ${slice.currency}`)
-          .join(", ")
+      ? summary.currencyDistribution.map(slice => `${formatCurrencyAmount(slice.amount)} ${slice.currency}`).join(", ")
       : "—";
 
   return (

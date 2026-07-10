@@ -90,7 +90,9 @@ export function FinancialDistributionCard({
             />
           ))
         ) : (
-          <Box sx={theme => ({ width: "100%", backgroundColor: theme.palette.surfaceContainerHighest, height: "100%" })} />
+          <Box
+            sx={theme => ({ width: "100%", backgroundColor: theme.palette.surfaceContainerHighest, height: "100%" })}
+          />
         )}
       </Box>
 

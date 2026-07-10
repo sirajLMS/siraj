@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import { onboardingPaymentMethodSchema } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { CountryCode, Gender } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
 export type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/types";

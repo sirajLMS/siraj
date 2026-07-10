@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
-import { onboardingPaymentMethodSchema } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 import { InvoiceType } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
+import { onboardingPaymentMethodSchema } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 export type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 

@@ -1,0 +1,86 @@
+import type { CurrencyCode } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  PaymentPothosObject,
+  TeacherPaymentPothosObject,
+} from "@/backend/graphql/pothos/billing/billing-payments.pothos";
+import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { getBackendTranslations } from "@/backend/lib";
+import { PermissionsService } from "@/backend/services";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+
+gqlSchemaBuilder.mutationField("recordPayment", t =>
+  t.field({
+    type: PaymentPothosObject,
+    authScopes: { loggedIn: true },
+    args: {
+      invoiceId: t.arg.id({ required: true }),
+      amount: t.arg.string({ required: true }),
+      currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
+      userPaymentMethodId: t.arg.id({ required: true }),
+      transactionId: t.arg.string({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      const hasPermission = await PermissionsService.hasPermission(
+        actorUserId,
+        AppPermission.BILLING_UPDATE_STATUS_PAID
+      );
+      if (!hasPermission) {
+        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+        throw new Error(tFunc("insufficientPermissions"));
+      }
+
+      const payment = await PaymentMethodService.recordPayin(
+        {
+          invoiceId: args.invoiceId,
+          amount: args.amount,
+          currency: args.currency as CurrencyCode,
+          paymentDate: new Date(),
+          userPaymentMethodId: args.userPaymentMethodId,
+          transactionId: args.transactionId ?? null,
+          gatewayResponse: null,
+          exchangeRateSnapshot: null,
+          exchangeRateSource: null,
+          idempotencyKey: `payin:${args.invoiceId}:${args.userPaymentMethodId}:${Date.now()}`,
+        },
+        undefined,
+        ctx.locale
+      );
+
+      return payment;
+    },
+  })
+);
+
+gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
+  t.field({
+    type: TeacherPaymentPothosObject,
+    authScopes: { superAdmin: true, notImpersonating: true },
+    args: {
+      teacherId: t.arg.id({ required: true }),
+      amount: t.arg.string({ required: true }),
+      currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
+      userPaymentMethodId: t.arg.id({ required: true }),
+      paymentDate: t.arg.string({ required: false }),
+      isTestPayment: t.arg.boolean({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      await requireAuth(ctx);
+      return PaymentMethodService.recordPayout(
+        {
+          teacherId: args.teacherId,
+          amount: args.amount,
+          currency: args.currency as CurrencyCode,
+          paymentDate: args.paymentDate ? new Date(args.paymentDate) : new Date(),
+          userPaymentMethodId: args.userPaymentMethodId,
+          isTestPayment: args.isTestPayment ?? false,
+        },
+        undefined,
+        ctx.locale
+      );
+    },
+  })
+);

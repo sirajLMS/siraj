@@ -28,12 +28,25 @@ function killPort(port: number) {
       ]);
     } else {
       testLogger.info(`Killing any process on port ${port} (Unix)...`);
+      try {
+        const lsof = spawnSync(["lsof", "-ti", `:${port}`], { stdout: "pipe", stderr: "ignore" });
+        const pids = lsof.stdout?.toString().trim().split("\n").filter(Boolean) ?? [];
+        for (const pid of pids) {
+          try {
+            process.kill(Number(pid), "SIGKILL");
+          } catch {
+            /* dead */
+          }
+        }
+      } catch {
+        /* lsof unavailable */
+      }
       // Try fuser first (works without sudo), fall back to pgrep+kill
       try {
         spawnSync(["fuser", "-k", "-9", `${port}/tcp`], { stdout: "ignore", stderr: "ignore" });
       } catch {
         try {
-          const result = spawnSync(["pgrep", "-f", `next-server.*${port}`], { stdout: "pipe", stderr: "ignore" });
+          const result = spawnSync(["pgrep", "-f", `next dev -p ${port}|next-server`], { stdout: "pipe", stderr: "ignore" });
           const pids = result.stdout?.toString().trim().split("\n").filter(Boolean) || [];
           for (const pid of pids) {
             try {

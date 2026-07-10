@@ -5,12 +5,12 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";
 import { FeesContractSection } from "@/frontend/views/dashboard/admin/parents/onboarding/FeesContractSection";
 import { ParentInfoSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentInfoSection";
 import { SocialCommsSection } from "@/frontend/views/dashboard/admin/parents/onboarding/SocialCommsSection";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import type { ParentProfileEditFormData } from "@/frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema";
+import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";
 
 interface Props {
   readonly userId: string;

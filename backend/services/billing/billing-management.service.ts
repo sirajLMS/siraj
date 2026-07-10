@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
+import { db } from "@/backend/db/drizzleDb";
 import { BillingRepository, ParentRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, type InvoiceStatus, type InvoiceType } from "@/backend/enum";
 import { ForbiddenError, getBackendTranslations, logger, NotFoundError } from "@/backend/lib";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type * as Types from "@/backend/types";
 
 function deriveIdempotencyKey(input: {
@@ -119,6 +121,7 @@ export namespace BillingManagementService {
     actorUserId: string,
     invoiceId: string,
     expectedVersion?: number,
+    userPaymentMethodId?: string | null,
     locale?: string
   ): Promise<Types.MarkInvoicePaidResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
@@ -128,13 +131,37 @@ export namespace BillingManagementService {
     }
 
     try {
-      const updated = await BillingRepository.markInvoiceAsPaid(invoiceId, expectedVersion, undefined, locale);
+      const updated = await db.transaction(async tx => {
+        const invoice = await BillingRepository.markInvoiceAsPaid(invoiceId, expectedVersion, tx, locale);
+
+        if (userPaymentMethodId) {
+          await PaymentMethodService.recordPayin(
+            {
+              invoiceId: invoice.id,
+              amount: invoice.amount,
+              currency: invoice.currency,
+              paymentDate: new Date(),
+              userPaymentMethodId,
+              transactionId: null,
+              gatewayResponse: null,
+              exchangeRateSnapshot: invoice.exchangeRateSnapshot,
+              exchangeRateSource: invoice.exchangeRateSource,
+              idempotencyKey: `payin:${invoice.id}`,
+            },
+            tx,
+            locale
+          );
+        }
+
+        return invoice;
+      });
 
       logger.info("Invoice marked as paid", {
         actorUserId,
         invoiceId: updated.id,
         parentId: updated.parentId,
         paidDate: updated.paidDate,
+        userPaymentMethodId: userPaymentMethodId ?? null,
       });
 
       const syncResult = await NotificationSyncService.syncUnpaidNotifications(locale).catch(err => {

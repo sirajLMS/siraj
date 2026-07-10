@@ -166,7 +166,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
 
   const handlePayNow = (invoiceId: string) => {
-    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null } });
+    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null, userPaymentMethodId: null } });
   };
 
   const handleDownloadPdf = (invoiceId: string) => {

@@ -136,7 +136,7 @@ async function runSingleTestFile(file: string): Promise<void> {
     const proc = Bun.spawn(["bun", "test", file, "--timeout=60000"], {
       stdout: "pipe",
       stderr: "pipe",
-      env: { ...process.env, FORCE_COLOR: "1" },
+      env: { ...process.env, FORCE_COLOR: "1", NODE_ENV: "test" },
     });
 
     const stdoutText = await new Response(proc.stdout).text();

@@ -157,7 +157,7 @@ export function ParentBillingContainer() {
   }
 
   const handlePayNow = (invoiceId: string) => {
-    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null } });
+    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null, userPaymentMethodId: null } });
   };
 
   const viewProps: ParentBillingViewProps = {

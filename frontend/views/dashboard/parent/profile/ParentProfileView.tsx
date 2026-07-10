@@ -12,11 +12,11 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
 import { AvatarUploadDialog } from "@/frontend/views/dashboard/parent/profile/AvatarUploadDialog";
 import ParentProfileActions from "@/frontend/views/dashboard/parent/profile/ParentProfileActions";
-import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";
 import ParentProfileDetails from "@/frontend/views/dashboard/parent/profile/ParentProfileDetails";
 import ParentProfileHeader from "@/frontend/views/dashboard/parent/profile/ParentProfileHeader";
 import ParentStudentsDataGrid from "@/frontend/views/dashboard/parent/profile/ParentStudentsDataGrid";
 import type { ParentProfileData } from "@/frontend/views/dashboard/parent/types/profile";
+import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface ParentProfileViewProps {

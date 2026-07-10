@@ -20,6 +20,25 @@ export const PAYMENT_METHOD_DETAILS_FIELDS = gql`
   }
 `;
 
+export const PAYMENT_METHOD_TRANSACTION_SNAPSHOT_FIELDS = gql`
+  fragment PaymentMethodTransactionSnapshotFields on PaymentMethodTransactionSnapshot {
+    userPaymentMethodId
+    type
+    direction
+    label
+    details {
+      ...PaymentMethodDetailsFields
+    }
+    catalog {
+      catalogId
+      catalogSlug
+      catalogName
+    }
+    snapshottedAt
+  }
+  ${PAYMENT_METHOD_DETAILS_FIELDS}
+`;
+
 export const USER_PAYMENT_METHOD_FIELDS = gql`
   fragment UserPaymentMethodFields on UserPaymentMethod {
     id

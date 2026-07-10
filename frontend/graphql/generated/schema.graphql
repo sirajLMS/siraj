@@ -2046,6 +2046,7 @@ type Mutation {
   createTeacher(input: TeacherOnboardingInput!): TeacherOnboarding
   createTeacherImportantNote(input: CreateTeacherNoteInput!): TeacherImportantNote
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
+  createTeacherPayment(amount: String!, currency: CurrencyCode!, isTestPayment: Boolean, paymentDate: String, teacherId: ID!, userPaymentMethodId: ID!): TeacherPayment
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
   createTestSuperAdmin(prefix: String!): TestSuperAdmin
@@ -2101,7 +2102,7 @@ type Mutation {
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
-  markInvoicePaid(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
+  markInvoicePaid(expectedVersion: Int, invoiceId: String!, userPaymentMethodId: ID): MarkInvoicePaidResult
 
   """Marks a suggestion as a duplicate of another suggestion (admin only)."""
   markSuggestionDuplicate(input: MarkSuggestionDuplicateInput!): Suggestion
@@ -2112,6 +2113,7 @@ type Mutation {
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
   reassignStudentTeacher(expectedVersion: Int, newTeacherId: String!, studentId: String!): ReassignStudentTeacherResult
+  recordPayment(amount: String!, currency: CurrencyCode!, invoiceId: ID!, transactionId: String, userPaymentMethodId: ID!): Payment
   refreshExchangeRates(force: Boolean = false): RefreshExchangeRatesResult
   refreshToken: RefreshTokenResponse
   renameFile(input: FileRenameInput!): FileOperationResult
@@ -2508,6 +2510,19 @@ input PartialStudentUpdateInput {
   status: StudentStatus
 }
 
+type Payment {
+  amount: String
+  createdAt: DateTime
+  currency: CurrencyCode
+  id: String
+  invoiceId: String
+  paymentDate: DateTime
+  paymentMethodSnapshot: PaymentMethodTransactionSnapshot
+  paymentMethodType: PaymentMethodType
+  transactionId: String
+  userPaymentMethodId: String
+}
+
 enum PaymentDirection {
   BOTH
   PAYIN
@@ -2667,6 +2682,7 @@ type Query {
   generateAttendanceReport(filters: AttendanceReportFiltersInput!): AttendanceReportPayload
   groupClassAudit(classInstanceId: String!): GroupClassAudit
   impersonationStatus: ImpersonationStatus
+  invoicePayments(invoiceId: ID!): [Payment!]
   latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
   latestFxSyncRun: FxSyncRun
 
@@ -3682,6 +3698,19 @@ type TeacherOwnProfile {
 
 input TeacherOwnProfileUpdateInput {
   phone: String
+}
+
+type TeacherPayment {
+  amount: String
+  createdAt: DateTime
+  currency: CurrencyCode
+  id: String
+  isTestPayment: Boolean
+  paymentDate: DateTime
+  paymentMethodSnapshot: PaymentMethodTransactionSnapshot
+  paymentMethodType: PaymentMethodType
+  teacherId: String
+  userPaymentMethodId: String
 }
 
 type TeacherProfileResult {

@@ -412,6 +412,14 @@ export namespace BillingRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
+  export const getPaymentsByInvoiceId = async (
+    invoiceId: string,
+    tx?: DBTransaction
+  ): Promise<Types.PaymentSelectType[]> => {
+    const t = tx ?? db;
+    return t.select().from(payments).where(eq(payments.invoiceId, invoiceId));
+  };
+
   /**
    * Fetches rounding rules from system settings.
    */

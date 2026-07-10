@@ -15,9 +15,9 @@ import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
-import { authenticatedRequest, createManualClassEntry, loginAndProvision } from "./helpers";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
+import { authenticatedRequest, createManualClassEntry, loginAndProvision } from "../helpers";
+import { setupTestServerLifecycle } from "../lifecycle";
+import { testClient } from "../testClient";
 
 const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 

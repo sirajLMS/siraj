@@ -1,8 +1,8 @@
-import { useMutation, useApolloClient } from "@apollo/client/react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import {
   PaymentDirection,
   type PaymentMethodDetailsInput,
-  PaymentMethodType,
+  type PaymentMethodType,
   type TeacherOnboardingInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";

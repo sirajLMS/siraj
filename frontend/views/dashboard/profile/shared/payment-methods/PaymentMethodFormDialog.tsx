@@ -19,26 +19,26 @@ import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import {
   createUserPaymentMethodMutationDocument,
   updateUserPaymentMethodMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
 import {
+  getPaymentDirectionOptions,
   getPaymentMethodCatalogOptionById,
-  getPaymentMethodDirectionOptions,
   type PaymentMethodCatalogOption,
 } from "@/frontend/lib/payment-method";
+import {
+  formDetailsToInput,
+  fragmentToFormValues,
+} from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 import {
   createEmptyPaymentMethodFormValues,
   type PaymentMethodFormValues,
   paymentMethodFormSchema,
 } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
-import {
-  formDetailsToInput,
-  fragmentToFormValues,
-} from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 import { usePaymentMethodCatalogs } from "@/frontend/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 
 export type PaymentMethodFormDialogProps = {
@@ -83,7 +83,7 @@ export function PaymentMethodFormDialog({
 
   const directionOptions = useMemo(
     () =>
-      getPaymentMethodDirectionOptions(key => tDir(key as never)).filter(option =>
+      getPaymentDirectionOptions((key: Parameters<typeof tDir>[0]) => tDir(key)).filter(option =>
         allowedDirections.includes(option.value)
       ),
     [allowedDirections, tDir]
@@ -114,15 +114,7 @@ export function PaymentMethodFormDialog({
     setSelectedWallet(null);
     setSelectedPaymentLink(null);
     setSelectedOnlineAccount(null);
-  }, [
-    defaultDirection,
-    editMethod,
-    form,
-    onlineAccountOptions,
-    open,
-    paymentLinkOptions,
-    walletOptions,
-  ]);
+  }, [defaultDirection, editMethod, form, onlineAccountOptions, open, paymentLinkOptions, walletOptions]);
 
   const [createMethod, { loading: creating }] = useMutation(createUserPaymentMethodMutationDocument);
   const [updateMethod, { loading: updating }] = useMutation(updateUserPaymentMethodMutationDocument);
@@ -203,13 +195,7 @@ export function PaymentMethodFormDialog({
             name="label"
             control={form.control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                label={t("label")}
-                fullWidth
-                size="small"
-                value={field.value ?? ""}
-              />
+              <TextField {...field} label={t("label")} fullWidth size="small" value={field.value ?? ""} />
             )}
           />
 

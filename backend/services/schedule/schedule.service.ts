@@ -3,7 +3,7 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
+import { AppPermission, type ClassExecutionState, type ClassOutcome, ClassType } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -303,7 +303,7 @@ export namespace ScheduleService {
         });
 
       const validClassTypes = Object.values(ClassType);
-      let resolvedClassType: ClassType | null | undefined = cls.classType;
+      let resolvedClassType: ClassType | null | undefined = cls.classType as ClassType | null | undefined;
 
       if (cls.classType !== null && cls.classType !== undefined) {
         if (!validClassTypes.includes(cls.classType as ClassType)) {

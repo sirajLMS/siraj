@@ -1,6 +1,6 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books/report.repository";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, CurrencyCode } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ReportService } from "@/backend/services/report/report.service";
 
@@ -21,8 +21,7 @@ describe("ReportService — generateAttendanceReport", () => {
       leaveClasses: 0,
       pendingClasses: 0,
       totalHours: 1,
-      paidEGP: 100,
-      paidUSD: 0,
+      paidAmounts: [{ id: "paid-egp-1", amount: "100", currency: CurrencyCode.EGP }],
       engagementGrowth: null,
     },
   ];
@@ -64,8 +63,7 @@ describe("ReportService — generateAttendanceReport", () => {
     expect(result.rows[0].groupLabel).toBe("2026-05-10");
 
     expect(result.rows[0].totalHours).toBe(0);
-    expect(result.rows[0].paidEGP).toBe(0);
-    expect(result.rows[0].paidUSD).toBe(0);
+    expect(result.rows[0].paidAmounts).toEqual([]);
     expect(result.engagementGrowth).toBeNull();
 
     expect(hasPermissionSpy).toHaveBeenCalledWith(dummyActorId, AppPermission.REPORT_GENERATE_CUSTOM);
@@ -88,8 +86,7 @@ describe("ReportService — generateAttendanceReport", () => {
     expect(result.rows[0].groupLabel).toBe("2026-05-10");
 
     expect(result.rows[0].totalHours).toBe(1);
-    expect(result.rows[0].paidEGP).toBe(100);
-    expect(result.rows[0].paidUSD).toBe(0);
+    expect(result.rows[0].paidAmounts).toEqual(mockRepoResults[0].paidAmounts);
     expect(result.engagementGrowth).toBeCloseTo(5.2, 5);
 
     hasPermissionSpy.mockRestore();

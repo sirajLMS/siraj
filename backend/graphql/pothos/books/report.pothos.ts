@@ -7,6 +7,7 @@ import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.p
 import { ReportGroupingMode, ReportService } from "@/backend/services/report/report.service";
 import type {
   AttendanceReportPaidAmountReturnType,
+  AttendanceReportResult,
   AttendanceReportRowReturnType,
 } from "@/backend/types/books/report.types";
 
@@ -63,10 +64,7 @@ export const AttendanceReportRowObj = AttendanceReportRowRef.implement({
   }),
 });
 
-const AttendanceReportPayloadRef = gqlSchemaBuilder.objectRef<{
-  rows: AttendanceReportRowReturnType[];
-  engagementGrowth: number | null;
-}>("AttendanceReportPayload");
+const AttendanceReportPayloadRef = gqlSchemaBuilder.objectRef<AttendanceReportResult>("AttendanceReportPayload");
 
 export const AttendanceReportPayloadObj = AttendanceReportPayloadRef.implement({
   description: "The full attendance report result including rows and growth metric.",

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
 import { AppPermission, CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -42,16 +42,18 @@ export function ParentOnboardingContainer() {
   const { execute, loading } = useCreateParentOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const form = useForm<ParentOnboardingFormData>({
+    resolver: zodResolver(parentOnboardingSchema),
+    defaultValues,
+  });
+
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
     reset: resetForm,
-  } = useForm<ParentOnboardingFormData>({
-    resolver: zodResolver(parentOnboardingSchema),
-    defaultValues,
-  });
+  } = form;
 
   const onSubmit = async (formData: ParentOnboardingFormData) => {
     try {
@@ -59,7 +61,7 @@ export function ParentOnboardingContainer() {
       await execute(formData);
       logger.info("Parent onboarding form submitted successfully");
       setShowSuccess(true);
-      resetForm();
+      resetForm(defaultValues);
     } catch (error) {
       logger.error("Failed to submit parent onboarding form", { error });
     }
@@ -67,14 +69,16 @@ export function ParentOnboardingContainer() {
 
   return (
     <RequirePermission permissions={[AppPermission.ParentsCreate]}>
-      <ParentOnboardingView
-        register={register}
-        control={control}
-        errors={errors}
-        handleSubmit={handleSubmit}
-        isSubmitting={loading}
-        onSubmit={onSubmit}
-      />
+      <FormProvider {...form}>
+        <ParentOnboardingView
+          register={register}
+          control={control}
+          errors={errors}
+          handleSubmit={handleSubmit}
+          isSubmitting={loading}
+          onSubmit={onSubmit}
+        />
+      </FormProvider>
       <FormSuccessSnackbar
         open={showSuccess}
         message={t("actions.successMessage")}

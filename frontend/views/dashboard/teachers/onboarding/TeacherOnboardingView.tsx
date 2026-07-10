@@ -148,47 +148,49 @@ export function TeacherOnboardingView({
           </Typography>
         }
       />
-      <Box
-        component="form"
-        onSubmit={e => {
-          handleSubmit(onSubmit)(e);
-        }}
-        sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
-      >
-        <OnboardingBanner />
-        <SectionPanel title={labels.sections.teacherInfo}>
-          <TeacherInfoSection register={register} control={control} errors={errors} labels={labels} />
-        </SectionPanel>
-        <SectionPanel title={labels.sections.officialDetails}>
-          <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
-        </SectionPanel>
-        <SectionPanel title={labels.sections.salaryDetails}>
-          <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
-        </SectionPanel>
-        <SectionPanel title={labels.sections.paymentMethod}>
-          <PaymentMethodSection control={control} errors={errors} />
-        </SectionPanel>
-        <SectionPanel title={labels.sections.meetingConfig}>
-          <MeetingConfigOnboardingSection
-            register={register}
-            control={control}
-            errors={errors}
-            labels={{
-              fields: {
-                meetingProvider: labels.fields.meetingProvider,
-                meetingUrl: labels.fields.meetingUrl,
-                meetingLabel: labels.fields.meetingLabel,
-              },
-              placeholders: {
-                meetingUrl: labels.placeholders.meetingUrl,
-                meetingLabel: labels.placeholders.meetingLabel,
-              },
-              optionalHint: labels.optionalHint,
-            }}
-          />
-        </SectionPanel>
-        <FormActions isSubmitting={isSubmitting} labels={labels} />
-      </Box>
+      <FormProvider {...form}>
+        <Box
+          component="form"
+          onSubmit={e => {
+            handleSubmit(onSubmit)(e);
+          }}
+          sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
+        >
+          <OnboardingBanner />
+          <SectionPanel title={labels.sections.teacherInfo}>
+            <TeacherInfoSection register={register} control={control} errors={errors} labels={labels} />
+          </SectionPanel>
+          <SectionPanel title={labels.sections.officialDetails}>
+            <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
+          </SectionPanel>
+          <SectionPanel title={labels.sections.salaryDetails}>
+            <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
+          </SectionPanel>
+          <SectionPanel title={labels.sections.paymentMethod}>
+            <PaymentMethodSection control={control} errors={errors} />
+          </SectionPanel>
+          <SectionPanel title={labels.sections.meetingConfig}>
+            <MeetingConfigOnboardingSection
+              register={register}
+              control={control}
+              errors={errors}
+              labels={{
+                fields: {
+                  meetingProvider: labels.fields.meetingProvider,
+                  meetingUrl: labels.fields.meetingUrl,
+                  meetingLabel: labels.fields.meetingLabel,
+                },
+                placeholders: {
+                  meetingUrl: labels.placeholders.meetingUrl,
+                  meetingLabel: labels.placeholders.meetingLabel,
+                },
+                optionalHint: labels.optionalHint,
+              }}
+            />
+          </SectionPanel>
+          <FormActions isSubmitting={isSubmitting} labels={labels} />
+        </Box>
+      </FormProvider>
       <Snackbar
         open={showSuccess}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}

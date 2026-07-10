@@ -58,8 +58,8 @@ export const markInvoicePaidMutationDocument: TypedDocumentNode<
   Operations.MarkInvoicePaidMutation,
   Types.MutationMarkInvoicePaidArgs
 > = gql`
-  mutation MarkInvoicePaid($invoiceId: String!, $expectedVersion: Int) {
-    markInvoicePaid(invoiceId: $invoiceId, expectedVersion: $expectedVersion) {
+  mutation MarkInvoicePaid($invoiceId: String!, $expectedVersion: Int, $userPaymentMethodId: ID) {
+    markInvoicePaid(invoiceId: $invoiceId, expectedVersion: $expectedVersion, userPaymentMethodId: $userPaymentMethodId) {
       id
       parentId
       status

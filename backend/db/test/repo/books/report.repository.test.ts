@@ -1,10 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo";
+import type { AttendanceReportRow } from "@/backend/db/repo/books/report.repository";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
-import type { AttendanceReportRow } from "@/backend/types/books/report.types";
+import type { AttendanceReportPaidAmountReturnType } from "@/backend/types/books/report.types";
+
+function paidAmountForCurrency(row: AttendanceReportRow, currency: CurrencyCode): number {
+  const entry = row.paidAmounts.find((amount: AttendanceReportPaidAmountReturnType) => amount.currency === currency);
+  return entry ? Number(entry.amount) : 0;
+}
 
 function reportRepoTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
@@ -33,8 +39,8 @@ function expectAllInstancesAggregated(row: AttendanceReportRow) {
   expect(row.leaveClasses).toBe(1);
   expect(row.pendingClasses).toBe(1);
   expect(row.totalHours).toBe(5.5); // 1.0 + 1.5 + 2.0 + 1.0
-  expect(row.paidEGP).toBe(250); // 100 + 150
-  expect(row.paidUSD).toBe(50);
+  expect(paidAmountForCurrency(row, CurrencyCode.EGP)).toBe(250); // 100 + 150
+  expect(paidAmountForCurrency(row, CurrencyCode.USD)).toBe(50);
 }
 
 /**
@@ -143,29 +149,29 @@ describe("ReportRepository — generateAttendanceReport", () => {
     expect(sorted[0].takenClasses).toBe(1);
     expect(sorted[0].absentClasses).toBe(0);
     expect(sorted[0].totalHours).toBe(1);
-    expect(sorted[0].paidEGP).toBe(100);
-    expect(sorted[0].paidUSD).toBe(0);
+    expect(paidAmountForCurrency(sorted[0], CurrencyCode.EGP)).toBe(100);
+    expect(paidAmountForCurrency(sorted[0], CurrencyCode.USD)).toBe(0);
 
     // date2: ABSENT, 1.5 hours, 150 EGP
     expect(sorted[1].takenClasses).toBe(0);
     expect(sorted[1].absentClasses).toBe(1);
     expect(sorted[1].totalHours).toBe(1.5);
-    expect(sorted[1].paidEGP).toBe(150);
-    expect(sorted[1].paidUSD).toBe(0);
+    expect(paidAmountForCurrency(sorted[1], CurrencyCode.EGP)).toBe(150);
+    expect(paidAmountForCurrency(sorted[1], CurrencyCode.USD)).toBe(0);
 
     // date3: LEAVE, 2.0 hours, 50 USD
     expect(sorted[2].takenClasses).toBe(0);
     expect(sorted[2].leaveClasses).toBe(1);
     expect(sorted[2].totalHours).toBe(2);
-    expect(sorted[2].paidEGP).toBe(0);
-    expect(sorted[2].paidUSD).toBe(50);
+    expect(paidAmountForCurrency(sorted[2], CurrencyCode.EGP)).toBe(0);
+    expect(paidAmountForCurrency(sorted[2], CurrencyCode.USD)).toBe(50);
 
     // date4: PENDING, 1.0 hour, 0 EGP
     expect(sorted[3].takenClasses).toBe(0);
     expect(sorted[3].pendingClasses).toBe(1);
     expect(sorted[3].totalHours).toBe(1);
-    expect(sorted[3].paidEGP).toBe(0);
-    expect(sorted[3].paidUSD).toBe(0);
+    expect(paidAmountForCurrency(sorted[3], CurrencyCode.EGP)).toBe(0);
+    expect(paidAmountForCurrency(sorted[3], CurrencyCode.USD)).toBe(0);
   });
 
   reportRepoTest("aggregates and groups correctly by TEACHER", async tx => {
@@ -209,7 +215,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     // Assert
     expect(results).toHaveLength(1);
     expect(results[0].groupKey).toBe(teacher.id);
-    expect(results[0].paidEGP).toBe(250); // only aggregates filtered teacher's records
+    expect(paidAmountForCurrency(results[0], CurrencyCode.EGP)).toBe(250); // only aggregates filtered teacher's records
   });
 
   reportRepoTest("returns empty array if no class instances in date range", async tx => {

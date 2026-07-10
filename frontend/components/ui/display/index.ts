@@ -2,8 +2,8 @@ export * from "@/frontend/components/ui/display/classProfileLink/ClassProfileLin
 export * from "@/frontend/components/ui/display/classProfileLink/ClassProfileLinkCell";
 export * from "@/frontend/components/ui/display/countryDisplay/CountryDisplay";
 export * from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
-export * from "@/frontend/components/ui/display/localeEmoji/LocaleEmoji";
 export * from "@/frontend/components/ui/display/language/LanguageDisplay";
+export * from "@/frontend/components/ui/display/localeEmoji/LocaleEmoji";
 export * from "@/frontend/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
 export * from "@/frontend/components/ui/display/paymentMethod";
 export * from "@/frontend/components/ui/display/personProfileLink/PersonProfileLink";

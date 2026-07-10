@@ -118,9 +118,8 @@ function buildStatusLabels(t: BillingTranslator) {
 function buildPaymentLabels(t: BillingTranslator) {
   return {
     paymentMethodSelector: {
-      bank_account: t("paymentMethodSelector.bank_account"),
-      paypal: t("paymentMethodSelector.paypal"),
       label: t("paymentMethodSelector.label"),
+      placeholder: t("paymentMethodSelector.placeholder"),
     },
     paymentStatusBadge: {
       paid: t("paymentStatusBadge.paid"),

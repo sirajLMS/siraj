@@ -160,9 +160,8 @@ const mockLabels: BillingLabels = {
     invalidId: "Invalid ID",
   },
   paymentMethodSelector: {
-    bank_account: "Bank Account",
-    paypal: "PayPal",
     label: "Payment Method",
+    placeholder: "Select payment method",
   },
   paymentStatusBadge: {
     paid: "Paid",

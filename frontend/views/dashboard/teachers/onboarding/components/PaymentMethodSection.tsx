@@ -20,9 +20,7 @@ export function PaymentMethodSection({ control, errors }: Readonly<PaymentMethod
   const { setValue } = useFormContext<TeacherOnboardingFormData>();
   const methodType = useWatch({ control, name: "payoutMethod.type" }) ?? PaymentMethodType.BankTransfer;
 
-  const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(
-    PaymentDirection.Payout
-  );
+  const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(PaymentDirection.Payout);
 
   const [selectedWallet, setSelectedWallet] = useState<PaymentMethodCatalogOption | null>(null);
   const [selectedPaymentLink, setSelectedPaymentLink] = useState<PaymentMethodCatalogOption | null>(null);

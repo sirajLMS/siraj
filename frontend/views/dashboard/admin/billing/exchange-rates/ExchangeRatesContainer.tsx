@@ -2,13 +2,11 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
-import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   latestExchangeRatesQueryDocument,
@@ -16,26 +14,11 @@ import {
   refreshExchangeRatesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
-
-type ExchangeRateRow = {
-  readonly id: string;
-  readonly fromCurrency: CurrencyCode;
-  readonly toCurrency: CurrencyCode;
-  readonly rate: string;
-  readonly source: string | null;
-  readonly effectiveDate: string;
-};
-
-function formatTimestamp(dateStr: string | null | undefined): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import {
+  buildExchangeRateColumns,
+  formatExchangeRateTimestamp,
+  type ExchangeRateRow,
+} from "@/frontend/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 
 function SyncStatusBadge({
   status,
@@ -47,12 +30,7 @@ function SyncStatusBadge({
   const normalized = (status ?? "unknown").toLowerCase();
   const labelKey = normalized as keyof typeof labels;
   return (
-    <StatusBadge
-      category="syncStatus"
-      status={normalized}
-      label={labels[labelKey] ?? labels.unknown}
-      size="small"
-    />
+    <StatusBadge category="syncStatus" status={normalized} label={labels[labelKey] ?? labels.unknown} size="small" />
   );
 }
 
@@ -92,6 +70,83 @@ function buildLabels(t: ReturnType<typeof useTranslations>) {
       noSyncRuns: t("exchangeRates.noSyncRuns", { defaultValue: "No sync runs yet" }),
     },
   };
+}
+
+function ExchangeRatesSyncPanel({
+  syncRun,
+  syncLoading,
+  labels,
+  statusLabel,
+}: Readonly<{
+  syncRun: {
+    finishedAt?: string | null;
+    startedAt?: string | null;
+    provider?: string | null;
+    pairsWritten?: number | null;
+    pairsFailed?: number | null;
+    status?: string | null;
+    errorMessage?: string | null;
+  } | null;
+  syncLoading: boolean;
+  labels: ReturnType<typeof buildLabels>["syncStatus"] & { common: ReturnType<typeof buildLabels>["common"] };
+  statusLabel: string;
+}>) {
+  if (syncLoading) {
+    return <CircularProgress size={24} />;
+  }
+
+  if (!syncRun) {
+    return (
+      <Typography variant="bodyMd" color="textSecondary">
+        {labels.common.noSyncRuns}
+      </Typography>
+    );
+  }
+
+  return (
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+      <Box>
+        <Typography variant="bodyMd" color="textSecondary">
+          {labels.lastSync}
+        </Typography>
+        <Typography variant="bodyMd">{formatExchangeRateTimestamp(syncRun.finishedAt ?? syncRun.startedAt)}</Typography>
+      </Box>
+      <Box>
+        <Typography variant="bodyMd" color="textSecondary">
+          {labels.provider}
+        </Typography>
+        <Typography variant="bodyMd">{syncRun.provider}</Typography>
+      </Box>
+      <Box>
+        <Typography variant="bodyMd" color="textSecondary">
+          {labels.pairsWritten}
+        </Typography>
+        <Typography variant="bodyMd">{syncRun.pairsWritten}</Typography>
+      </Box>
+      <Box>
+        <Typography variant="bodyMd" color="textSecondary">
+          {labels.pairsFailed}
+        </Typography>
+        <Typography variant="bodyMd">{syncRun.pairsFailed}</Typography>
+      </Box>
+      <Box sx={{ gridColumn: { sm: "span 2" } }}>
+        <Typography variant="bodyMd" color="textSecondary">
+          {statusLabel}
+        </Typography>
+        <SyncStatusBadge status={syncRun.status} labels={labels.statusLabels} />
+      </Box>
+      {syncRun.errorMessage ? (
+        <Box sx={{ gridColumn: { sm: "span 2" } }}>
+          <Typography variant="bodyMd" color="error">
+            {labels.errorMessage}
+          </Typography>
+          <Typography variant="bodyMd" color="error">
+            {syncRun.errorMessage}
+          </Typography>
+        </Box>
+      ) : null}
+    </Box>
+  );
 }
 
 export function ExchangeRatesContainer() {
@@ -137,10 +192,6 @@ export function ExchangeRatesContainer() {
     },
   });
 
-  const handleRefresh = () => {
-    void refreshMutation({ variables: { force: false } });
-  };
-
   const syncRun = syncData?.latestFxSyncRun ?? null;
   const rates: ExchangeRateRow[] = (ratesData?.latestExchangeRates ?? [])
     .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
@@ -153,46 +204,7 @@ export function ExchangeRatesContainer() {
       effectiveDate: rate.effectiveDate ?? "",
     }));
 
-  const columns = useMemo<GridColDef<ExchangeRateRow>[]>(
-    () => [
-      {
-        field: "fromCurrency",
-        headerName: labels.rateTable.fromCurrency,
-        flex: 1,
-        minWidth: 140,
-        renderCell: ({ row }) => <CurrencyDisplay code={row.fromCurrency} showLabel showSymbol />,
-      },
-      {
-        field: "toCurrency",
-        headerName: labels.rateTable.toCurrency,
-        flex: 1,
-        minWidth: 140,
-        renderCell: ({ row }) => <CurrencyDisplay code={row.toCurrency} showLabel showSymbol />,
-      },
-      {
-        field: "rate",
-        headerName: labels.rateTable.rate,
-        width: 120,
-        align: "right",
-        headerAlign: "right",
-      },
-      {
-        field: "source",
-        headerName: labels.rateTable.source,
-        flex: 1,
-        minWidth: 140,
-        valueFormatter: value => value || "—",
-      },
-      {
-        field: "effectiveDate",
-        headerName: labels.rateTable.effectiveDate,
-        flex: 1.2,
-        minWidth: 180,
-        valueFormatter: value => formatTimestamp(String(value ?? "")),
-      },
-    ],
-    [labels.rateTable]
-  );
+  const columns = useMemo(() => buildExchangeRateColumns(labels.rateTable), [labels.rateTable]);
 
   return (
     <PageContainer>
@@ -201,7 +213,7 @@ export function ExchangeRatesContainer() {
         subtitle={labels.pageSubtitle}
         actions={
           <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
-            <PrimaryPageAction onClick={handleRefresh} disabled={refreshing}>
+            <PrimaryPageAction onClick={() => void refreshMutation({ variables: { force: false } })} disabled={refreshing}>
               {refreshing ? labels.common.refreshing : labels.syncStatus.refresh}
             </PrimaryPageAction>
           </RequirePermission>
@@ -210,56 +222,12 @@ export function ExchangeRatesContainer() {
 
       <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
         <SectionPanel title={labels.syncStatus.title}>
-          {syncLoading ? (
-            <CircularProgress size={24} />
-          ) : syncRun ? (
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-              <Box>
-                <Typography variant="bodyMd" color="textSecondary">
-                  {labels.syncStatus.lastSync}
-                </Typography>
-                <Typography variant="bodyMd">{formatTimestamp(syncRun.finishedAt ?? syncRun.startedAt)}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="bodyMd" color="textSecondary">
-                  {labels.syncStatus.provider}
-                </Typography>
-                <Typography variant="bodyMd">{syncRun.provider}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="bodyMd" color="textSecondary">
-                  {labels.syncStatus.pairsWritten}
-                </Typography>
-                <Typography variant="bodyMd">{syncRun.pairsWritten}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="bodyMd" color="textSecondary">
-                  {labels.syncStatus.pairsFailed}
-                </Typography>
-                <Typography variant="bodyMd">{syncRun.pairsFailed}</Typography>
-              </Box>
-              <Box sx={{ gridColumn: { sm: "span 2" } }}>
-                <Typography variant="bodyMd" color="textSecondary">
-                  {t("status", { defaultValue: "Status" })}
-                </Typography>
-                <SyncStatusBadge status={syncRun.status} labels={labels.syncStatus.statusLabels} />
-              </Box>
-              {syncRun.errorMessage ? (
-                <Box sx={{ gridColumn: { sm: "span 2" } }}>
-                  <Typography variant="bodyMd" color="error">
-                    {labels.syncStatus.errorMessage}
-                  </Typography>
-                  <Typography variant="bodyMd" color="error">
-                    {syncRun.errorMessage}
-                  </Typography>
-                </Box>
-              ) : null}
-            </Box>
-          ) : (
-            <Typography variant="bodyMd" color="textSecondary">
-              {labels.common.noSyncRuns}
-            </Typography>
-          )}
+          <ExchangeRatesSyncPanel
+            syncRun={syncRun}
+            syncLoading={syncLoading}
+            labels={{ ...labels.syncStatus, common: labels.common }}
+            statusLabel={t("status", { defaultValue: "Status" })}
+          />
         </SectionPanel>
 
         <SectionPanel title={labels.rateTable.title}>

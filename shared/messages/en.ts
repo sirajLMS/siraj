@@ -2720,9 +2720,8 @@ const en: MessageSchema = {
         invalidId: "Invalid parent ID in billing view.",
       },
       paymentMethodSelector: {
-        bank_account: "Bank Account",
-        paypal: "PayPal",
         label: "Payment Method",
+        placeholder: "Select a saved payment method",
       },
       paymentStatusBadge: {
         paid: "Paid",

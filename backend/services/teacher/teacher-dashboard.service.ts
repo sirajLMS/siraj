@@ -2,7 +2,7 @@ import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/backend/enum";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -35,7 +35,12 @@ export namespace TeacherDashboardService {
     }
 
     const user = await UserRepository.findById(userId);
-    const viewerTimezone = (user?.timezone as IanaTimezone | undefined) ?? IanaTimezone.UTC;
+    const validTimezones = Object.values(IanaTimezone);
+    let viewerTimezone: IanaTimezone = IanaTimezone.UTC;
+
+    if (user?.timezone && validTimezones.includes(user.timezone as IanaTimezone)) {
+      viewerTimezone = user.timezone as IanaTimezone;
+    }
 
     const targetDate = new Date(date);
     const result = await SchedulingRepository.getAdminDashboardSchedule({
@@ -55,11 +60,26 @@ export namespace TeacherDashboardService {
       locale
     );
 
-    const mappedScheduleRows = result.rows.map(r => ({
-      ...r,
-      executionState: r.executionState as ClassExecutionState,
-      outcome: r.outcome as ClassOutcome | null,
-    }));
+    const validExecutionStates = Object.values(ClassExecutionState);
+    const validClassOutcomes = Object.values(ClassOutcome);
+
+    const mappedScheduleRows = result.rows.map(r => {
+      let resolvedExecutionState: ClassExecutionState = ClassExecutionState.NOT_ACTIVATED;
+      let resolvedOutcome: ClassOutcome | null = null;
+
+      if (validExecutionStates.includes(r.executionState as ClassExecutionState)) {
+        resolvedExecutionState = r.executionState as ClassExecutionState;
+      }
+      if (r.outcome !== null && validClassOutcomes.includes(r.outcome as ClassOutcome)) {
+        resolvedOutcome = r.outcome as ClassOutcome;
+      }
+
+      return {
+        ...r,
+        executionState: resolvedExecutionState,
+        outcome: resolvedOutcome,
+      };
+    });
 
     const mappedProgressFeed = progressFeed; // progressFeed items don't need enum casts
 

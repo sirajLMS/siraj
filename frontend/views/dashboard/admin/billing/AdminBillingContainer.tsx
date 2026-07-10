@@ -226,7 +226,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   );
 
   const handleMarkAsPaid = (invoiceId: string) => {
-    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null } });
+    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null, userPaymentMethodId: null } });
   };
 
   const handleDeleteInvoice = (invoiceId: string) => {

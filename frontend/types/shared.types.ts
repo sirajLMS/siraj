@@ -16,7 +16,6 @@ import type {
   InvoiceType,
   ManagerOnboardingInput,
   ParentOnboardingInput,
-  PaymentMethodType,
   TeacherOnboardingInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";

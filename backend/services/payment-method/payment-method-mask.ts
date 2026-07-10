@@ -6,6 +6,7 @@ import type {
   OnlineAccountDetails,
   PaymentLinkDetails,
   PaymentMethodDetails,
+  PaymentMethodTransactionSnapshot,
   UserPaymentMethodReturnType,
   UserPaymentMethodSelectType,
 } from "@/backend/types/billing/payment-method.types";
@@ -112,4 +113,14 @@ export function buildMaskedPaymentMethods(
   revealSensitive: boolean
 ): UserPaymentMethodReturnType[] {
   return methods.map(method => buildMaskedPaymentMethod(method, revealSensitive));
+}
+
+export function buildMaskedTransactionSnapshot(
+  snapshot: PaymentMethodTransactionSnapshot,
+  revealSensitive: boolean
+): PaymentMethodTransactionSnapshot {
+  return {
+    ...snapshot,
+    details: maskDetails(snapshot.type, snapshot.details, revealSensitive),
+  };
 }

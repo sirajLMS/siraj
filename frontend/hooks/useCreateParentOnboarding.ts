@@ -3,14 +3,14 @@ import {
   type ParentOnboardingInput,
   type ParentOnboardingResult,
   PaymentDirection,
-  PaymentMethodType,
+  type PaymentMethodType,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
-import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
+import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);

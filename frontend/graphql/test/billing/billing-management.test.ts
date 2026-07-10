@@ -195,6 +195,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     const data = await authenticatedRequest(state.superAdminToken, "mutate", markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
+      userPaymentMethodId: null,
     });
 
     expect(data.markInvoicePaid?.id).toBe(unpaidInvoiceId);
@@ -206,6 +207,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
+      userPaymentMethodId: null,
     });
     expect(unpaidInvoiceId).toBeTruthy();
   });
@@ -214,6 +216,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     const denied = await assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
+      userPaymentMethodId: null,
     });
     expect(denied).toBe(true);
   });
@@ -222,6 +225,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
+      userPaymentMethodId: null,
     });
     expect(state.superAdminToken).toBeTruthy();
   });

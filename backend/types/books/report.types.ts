@@ -1,5 +1,4 @@
 import type { CurrencyCode } from "@/backend/enum";
-import type { AttendanceReportFilters, ReportGroupingMode } from "@/backend/db/repo/books/report.repository";
 
 export type { AttendanceReportFilters, ReportGroupingMode } from "@/backend/db/repo/books/report.repository";
 

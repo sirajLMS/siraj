@@ -4,7 +4,10 @@ import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import type { AttendanceReportPaidAmountReturnType, AttendanceReportRowReturnType } from "@/backend/types/books/report.types";
+import type {
+  AttendanceReportPaidAmountReturnType,
+  AttendanceReportRowReturnType,
+} from "@/backend/types/books/report.types";
 
 export enum ReportGroupingMode {
   DATE = "DATE",
@@ -19,7 +22,7 @@ export interface AttendanceReportFilters {
   groupBy: ReportGroupingMode;
 }
 
-export interface AttendanceReportRow extends AttendanceReportRowReturnType {}
+export type AttendanceReportRow = AttendanceReportRowReturnType;
 
 function buildPaidAmountId(groupKey: string, currency: CurrencyCode): string {
   return `${groupKey}:${currency}`;

@@ -12,8 +12,8 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
-import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { PaymentMethodsTab } from "@/frontend/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
+import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { TeacherProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/teacher/sections/TeacherProfileLoadingSkeleton";
 import { isTeacherAdminData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import { AssignedStudentsTab } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsTab";

@@ -18,7 +18,7 @@ export type TeacherEntityInput = typeof teachers.$inferInsert;
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
 export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;
 
-// TeacherPaymentReturnType removed — was unused. Re-create from TeacherPaymentSelectType if needed (Omit bankingDetailsHistoryId).
+export type TeacherPaymentReturnType = TeacherPaymentSelectType;
 
 export type CreateTeacherPaymentInput = {
   readonly teacherId: string;

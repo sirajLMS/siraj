@@ -18,9 +18,7 @@ export function PaymentMethodsTab({ targetUserId, scope, slot }: PaymentMethodsT
   const { user, hasPermission } = useUserStore();
 
   const canManage =
-    scope === ProfileScope.Own
-      ? user?.id === targetUserId
-      : hasPermission(AppPermission.UserEditProfile);
+    scope === ProfileScope.Own ? user?.id === targetUserId : hasPermission(AppPermission.UserEditProfile);
 
   return (
     <PageContainer>

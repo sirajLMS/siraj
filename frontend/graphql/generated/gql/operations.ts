@@ -1885,6 +1885,7 @@ export type MarkInvoicePaidMutation_Mutation = { markInvoicePaid: MarkInvoicePai
 export type MarkInvoicePaidMutationVariables = Exact<{
   invoiceId: string;
   expectedVersion: number | null | undefined;
+  userPaymentMethodId: string | number | null | undefined;
 }>;
 
 
@@ -1913,6 +1914,61 @@ export type SendPaymentReminderMutationVariables = Exact<{
 
 
 export type SendPaymentReminderMutation = SendPaymentReminderMutation_Mutation;
+
+export type InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_details_PaymentMethodDetails = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
+
+export type InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot = { catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null };
+
+export type InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot = { userPaymentMethodId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_details_PaymentMethodDetails | null, catalog: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot | null };
+
+export type InvoicePaymentsQuery_invoicePayments_Payment = { id: string | null, invoiceId: string | null, amount: string | null, currency: Types.CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: Types.PaymentMethodType | null, transactionId: string | null, createdAt: string | null, paymentMethodSnapshot: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot | null };
+
+export type InvoicePaymentsQuery_Query = { invoicePayments: Array<InvoicePaymentsQuery_invoicePayments_Payment> | null };
+
+
+export type InvoicePaymentsQueryVariables = Exact<{
+  invoiceId: string | number;
+}>;
+
+
+export type InvoicePaymentsQuery = InvoicePaymentsQuery_Query;
+
+export type RecordPaymentMutation_recordPayment_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot = { userPaymentMethodId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_details_PaymentMethodDetails | null, catalog: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot | null };
+
+export type RecordPaymentMutation_recordPayment_Payment = { id: string | null, invoiceId: string | null, amount: string | null, currency: Types.CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: Types.PaymentMethodType | null, paymentMethodSnapshot: RecordPaymentMutation_recordPayment_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot | null };
+
+export type RecordPaymentMutation_Mutation = { recordPayment: RecordPaymentMutation_recordPayment_Payment | null };
+
+
+export type RecordPaymentMutationVariables = Exact<{
+  invoiceId: string | number;
+  amount: string;
+  currency: Types.CurrencyCode;
+  userPaymentMethodId: string | number;
+  transactionId: string | null | undefined;
+}>;
+
+
+export type RecordPaymentMutation = RecordPaymentMutation_Mutation;
+
+export type CreateTeacherPaymentMutation_createTeacherPayment_TeacherPayment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot = { userPaymentMethodId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_details_PaymentMethodDetails | null, catalog: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot | null };
+
+export type CreateTeacherPaymentMutation_createTeacherPayment_TeacherPayment = { id: string | null, teacherId: string | null, amount: string | null, currency: Types.CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: Types.PaymentMethodType | null, isTestPayment: boolean | null, paymentMethodSnapshot: CreateTeacherPaymentMutation_createTeacherPayment_TeacherPayment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot | null };
+
+export type CreateTeacherPaymentMutation_Mutation = { createTeacherPayment: CreateTeacherPaymentMutation_createTeacherPayment_TeacherPayment | null };
+
+
+export type CreateTeacherPaymentMutationVariables = Exact<{
+  teacherId: string | number;
+  amount: string;
+  currency: Types.CurrencyCode;
+  userPaymentMethodId: string | number;
+  paymentDate: string | null | undefined;
+  isTestPayment: boolean | null | undefined;
+}>;
+
+
+export type CreateTeacherPaymentMutation = CreateTeacherPaymentMutation_Mutation;
 
 export type LatestExchangeRatesQuery_latestExchangeRates_ExchangeRate = { id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null };
 
@@ -1968,6 +2024,8 @@ export type RefreshExchangeRatesMutationVariables = Exact<{
 export type RefreshExchangeRatesMutation = RefreshExchangeRatesMutation_Mutation;
 
 export type PaymentMethodDetailsFieldsFragment = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
+
+export type PaymentMethodTransactionSnapshotFieldsFragment = { userPaymentMethodId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_details_PaymentMethodDetails | null, catalog: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot | null };
 
 export type UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
 

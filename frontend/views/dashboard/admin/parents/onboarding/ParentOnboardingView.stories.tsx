@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ParentOnboardingView } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
@@ -16,29 +16,36 @@ const defaultValues: ParentOnboardingFormData = {
   twitter: "",
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",
-  paymentMethodType: PaymentMethodType.BankTransfer,
+  payinMethod: {
+    type: PaymentMethodType.BankTransfer,
+    label: "",
+    details: {},
+  },
   currency: CurrencyCode.Usd,
   timezone: IanaTimezone.AfricaCairo,
 };
 
 function ParentOnboardingStoryWrapper({ isSubmitting }: Readonly<{ isSubmitting: boolean }>) {
+  const form = useForm<ParentOnboardingFormData>({
+    defaultValues: { ...defaultValues, timezone: IanaTimezone.AfricaCairo },
+  });
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<ParentOnboardingFormData>({
-    defaultValues: { ...defaultValues, timezone: IanaTimezone.AfricaCairo },
-  });
+  } = form;
   return (
-    <ParentOnboardingView
-      register={register}
-      control={control}
-      errors={errors}
-      handleSubmit={handleSubmit}
-      isSubmitting={isSubmitting}
-      onSubmit={() => {}}
-    />
+    <FormProvider {...form}>
+      <ParentOnboardingView
+        register={register}
+        control={control}
+        errors={errors}
+        handleSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        onSubmit={() => {}}
+      />
+    </FormProvider>
   );
 }
 

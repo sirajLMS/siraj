@@ -15,9 +15,9 @@ import { CurrencyCode, PaymentDirection, PaymentMethodType } from "@/frontend/gr
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import type { PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import { usePaymentMethodCatalogs } from "@/frontend/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
+import { usePaymentMethodCatalogs } from "@/frontend/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -94,9 +94,7 @@ function PaymentFields({ control, errors }: Pick<SectionProps, "control" | "erro
   const t = useTranslations("dashboard.parentOnboarding");
   const { setValue } = useFormContext<ParentOnboardingFormData>();
   const methodType = useWatch({ control, name: "payinMethod.type" }) ?? PaymentMethodType.BankTransfer;
-  const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(
-    PaymentDirection.Payin
-  );
+  const { walletOptions, paymentLinkOptions, onlineAccountOptions } = usePaymentMethodCatalogs(PaymentDirection.Payin);
   const [selectedWallet, setSelectedWallet] = useState<PaymentMethodCatalogOption | null>(null);
   const [selectedPaymentLink, setSelectedPaymentLink] = useState<PaymentMethodCatalogOption | null>(null);
   const [selectedOnlineAccount, setSelectedOnlineAccount] = useState<PaymentMethodCatalogOption | null>(null);

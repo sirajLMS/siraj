@@ -2,9 +2,8 @@ import type { PaymentComponentLabels } from "@/shared/messages/types/dashboard/b
 
 export const payment: PaymentComponentLabels = {
   paymentMethodSelector: {
-    bank_account: "حساب بنكي",
-    paypal: "باي بال",
     label: "طريقة الدفع",
+    placeholder: "اختر طريقة دفع محفوظة",
   },
   paymentStatusBadge: {
     paid: "مدفوع",

@@ -1,8 +1,36 @@
 import { and, eq, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { leaveQuotaUsage, teachers } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
+
+function collectErrorMessages(error: unknown): string {
+  const messages: string[] = [];
+  let current: unknown = error;
+  while (current instanceof Error) {
+    messages.push(current.message);
+    current = current.cause;
+  }
+  return messages.join(" ");
+}
+
+function isLeaveQuotaViolation(error: unknown): boolean {
+  const combined = collectErrorMessages(error);
+  if (combined.includes("Leave quota exceeded")) {
+    return true;
+  }
+
+  let current: unknown = error;
+  while (current instanceof Error) {
+    if ((current as { code?: string }).code === "P0001") {
+      return true;
+    }
+    current = current.cause;
+  }
+
+  return false;
+}
 
 export async function getTeacherLeaveQuotaUsage(
   teacherId: string,
@@ -37,6 +65,14 @@ export async function incrementTeacherLeaveQuota(
 
   const queryDb = tx ?? db;
 
+  const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2, tx);
+  const currentUsage = await getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth, tx);
+
+  if (currentUsage >= maxLeaves) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("leaveQuotaExceeded", { maxLeaves: String(maxLeaves) }));
+  }
+
   try {
     const [updated] = await queryDb
       .update(leaveQuotaUsage)
@@ -59,7 +95,7 @@ export async function incrementTeacherLeaveQuota(
       });
     }
   } catch (error) {
-    if (error instanceof Error && (error as { code?: string }).code === "P0001") {
+    if (isLeaveQuotaViolation(error)) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("leaveQuotaExceeded", { maxLeaves: "2" }), { cause: error });
     }

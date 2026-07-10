@@ -2113,6 +2113,7 @@ export type Mutation = {
   createTeacher: Maybe<TeacherOnboarding>;
   createTeacherImportantNote: Maybe<TeacherImportantNote>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
+  createTeacherPayment: Maybe<TeacherPayment>;
   createTestEntities: Maybe<TestEntities>;
   createTestGroupClass: Maybe<TestGroupClass>;
   createTestSuperAdmin: Maybe<TestSuperAdmin>;
@@ -2162,6 +2163,7 @@ export type Mutation = {
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
   reassignStudentTeacher: Maybe<ReassignStudentTeacherResult>;
+  recordPayment: Maybe<Payment>;
   refreshExchangeRates: Maybe<RefreshExchangeRatesResult>;
   refreshToken: Maybe<RefreshTokenResponse>;
   renameFile: Maybe<FileOperationResult>;
@@ -2377,6 +2379,16 @@ export type MutationCreateTeacherManualClassEntryArgs = {
 };
 
 
+export type MutationCreateTeacherPaymentArgs = {
+  amount: Scalars['String']['input'];
+  currency: CurrencyCode;
+  isTestPayment: InputMaybe<Scalars['Boolean']['input']>;
+  paymentDate: InputMaybe<Scalars['String']['input']>;
+  teacherId: Scalars['ID']['input'];
+  userPaymentMethodId: Scalars['ID']['input'];
+};
+
+
 export type MutationCreateTestEntitiesArgs = {
   classesRemaining: InputMaybe<Scalars['Int']['input']>;
   prefix: Scalars['String']['input'];
@@ -2546,6 +2558,7 @@ export type MutationLoginArgs = {
 export type MutationMarkInvoicePaidArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   invoiceId: Scalars['String']['input'];
+  userPaymentMethodId: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2578,6 +2591,15 @@ export type MutationReassignStudentTeacherArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   newTeacherId: Scalars['String']['input'];
   studentId: Scalars['String']['input'];
+};
+
+
+export type MutationRecordPaymentArgs = {
+  amount: Scalars['String']['input'];
+  currency: CurrencyCode;
+  invoiceId: Scalars['ID']['input'];
+  transactionId: InputMaybe<Scalars['String']['input']>;
+  userPaymentMethodId: Scalars['ID']['input'];
 };
 
 
@@ -3167,6 +3189,20 @@ export type PartialStudentUpdateInput = {
   status: InputMaybe<StudentStatus>;
 };
 
+export type Payment = {
+  __typename?: 'Payment';
+  amount: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  currency: Maybe<CurrencyCode>;
+  id: Maybe<Scalars['String']['output']>;
+  invoiceId: Maybe<Scalars['String']['output']>;
+  paymentDate: Maybe<Scalars['DateTime']['output']>;
+  paymentMethodSnapshot: Maybe<PaymentMethodTransactionSnapshot>;
+  paymentMethodType: Maybe<PaymentMethodType>;
+  transactionId: Maybe<Scalars['String']['output']>;
+  userPaymentMethodId: Maybe<Scalars['String']['output']>;
+};
+
 export enum PaymentDirection {
   Both = 'BOTH',
   Payin = 'PAYIN',
@@ -3318,6 +3354,7 @@ export type Query = {
   generateAttendanceReport: Maybe<AttendanceReportPayload>;
   groupClassAudit: Maybe<GroupClassAudit>;
   impersonationStatus: Maybe<ImpersonationStatus>;
+  invoicePayments: Maybe<Array<Payment>>;
   latestExchangeRates: Maybe<Array<ExchangeRate>>;
   latestFxSyncRun: Maybe<FxSyncRun>;
   /** Lists all learning resources available to the academy. */
@@ -3505,6 +3542,11 @@ export type QueryGenerateAttendanceReportArgs = {
 
 export type QueryGroupClassAuditArgs = {
   classInstanceId: Scalars['String']['input'];
+};
+
+
+export type QueryInvoicePaymentsArgs = {
+  invoiceId: Scalars['ID']['input'];
 };
 
 
@@ -4711,6 +4753,20 @@ export type TeacherOwnProfile = {
 
 export type TeacherOwnProfileUpdateInput = {
   phone: InputMaybe<Scalars['String']['input']>;
+};
+
+export type TeacherPayment = {
+  __typename?: 'TeacherPayment';
+  amount: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  currency: Maybe<CurrencyCode>;
+  id: Maybe<Scalars['String']['output']>;
+  isTestPayment: Maybe<Scalars['Boolean']['output']>;
+  paymentDate: Maybe<Scalars['DateTime']['output']>;
+  paymentMethodSnapshot: Maybe<PaymentMethodTransactionSnapshot>;
+  paymentMethodType: Maybe<PaymentMethodType>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  userPaymentMethodId: Maybe<Scalars['String']['output']>;
 };
 
 export type TeacherProfileResult = {
