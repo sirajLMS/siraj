@@ -8,16 +8,14 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
-  updateSessionStatusAbsentMutationDocument,
-  updateSessionStatusLeaveMutationDocument,
-  updateSessionStatusStartMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/scheduling/class-session.documents";
-import {
   createTeacherManualClassEntryMutationDocument,
   logTeacherSupportRequestMutationDocument,
   teacherDashboardQueryDocument,
   teacherHandbookUrlQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
+  updateSessionStatusAbsentMutationDocument,
+  updateSessionStatusLeaveMutationDocument,
+  updateSessionStatusStartMutationDocument,
+} from "@/frontend/graphql/sharedDocuments";
 import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

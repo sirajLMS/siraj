@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher-portal.documents";
+import { teacherAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 
 export function TeacherStudentsContainer() {
   const t = useTranslations("dashboard.teacherStudents");

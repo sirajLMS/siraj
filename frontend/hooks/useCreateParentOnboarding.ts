@@ -1,10 +1,33 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import type { ParentOnboardingInput, ParentOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  type ParentOnboardingInput,
+  type ParentOnboardingResult,
+  PaymentDirection,
+  type PaymentMethodDetailsInput,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
+
+function buildEmptyPaymentDetails(): PaymentMethodDetailsInput {
+  return {
+    accountNumber: null,
+    bankName: null,
+    beneficiaryName: null,
+    iban: null,
+    identifier: null,
+    note: null,
+    onlineAccountId: null,
+    paymentLinkId: null,
+    phone: null,
+    routingNumber: null,
+    swiftBic: null,
+    url: null,
+    walletId: null,
+  };
+}
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);
@@ -26,7 +49,13 @@ export function useCreateParentOnboarding() {
         twitter: formData.twitter || null,
         invoiceType: formData.invoiceType,
         feeAmount: formData.feeAmount,
-        paymentMethod: formData.paymentMethod,
+        initialPayinMethod: {
+          type: formData.paymentMethodType,
+          direction: PaymentDirection.Payin,
+          isDefault: true,
+          label: null,
+          details: buildEmptyPaymentDetails(),
+        },
         currency: formData.currency,
         timezone: toGraphqlIanaTimezone(formData.timezone || null),
         password: "",

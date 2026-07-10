@@ -5,7 +5,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { submitSuggestionMutationDocument } from "@/frontend/graphql/sharedDocuments/suggestions/suggestion.documents";
+import { submitSuggestionMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { useParentSuggestionsStore } from "@/frontend/stores/parentSuggestionsStore";
 import { ParentSuggestionsView } from "@/frontend/views/dashboard/suggestions/ParentSuggestionsView";
 import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";

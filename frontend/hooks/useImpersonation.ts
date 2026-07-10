@@ -6,7 +6,7 @@ import {
   endImpersonationMutationDocument,
   impersonationStatusQueryDocument,
   startImpersonationMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import logger from "@/frontend/lib/logger";
 

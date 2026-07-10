@@ -12,7 +12,7 @@ import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
-import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
+import { InvoiceType, PaymentMethodType } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -93,19 +93,22 @@ function PaymentFields({ register, control, errors }: SectionProps) {
         <FieldWrapper
           label={t("fields.paymentMethod")}
           required
-          error={errors.paymentMethod ? t(`validation.${errors.paymentMethod.message}`) : undefined}
+          error={errors.paymentMethodType ? t(`validation.${errors.paymentMethodType.message}`) : undefined}
         >
           <Select
-            {...register("paymentMethod")}
-            error={!!errors.paymentMethod}
+            {...register("paymentMethodType")}
+            error={!!errors.paymentMethodType}
             fullWidth
             variant="standard"
             sx={standardInputSx}
             defaultValue=""
           >
             <MenuItem value="">{t("placeholders.paymentMethod")}</MenuItem>
-            <MenuItem value={PaymentMethod.BankAccount}>{t("options.paymentMethod.bankTransfer")}</MenuItem>
-            <MenuItem value={PaymentMethod.Paypal}>{t("options.paymentMethod.paypal")}</MenuItem>
+            <MenuItem value={PaymentMethodType.BankTransfer}>{t("options.paymentMethod.bankTransfer")}</MenuItem>
+            <MenuItem value={PaymentMethodType.Cash}>{t("options.paymentMethod.cash")}</MenuItem>
+            <MenuItem value={PaymentMethodType.MobileWallet}>{t("options.paymentMethod.mobileWallet")}</MenuItem>
+            <MenuItem value={PaymentMethodType.PaymentLink}>{t("options.paymentMethod.paymentLink")}</MenuItem>
+            <MenuItem value={PaymentMethodType.OnlineAccount}>{t("options.paymentMethod.onlineAccount")}</MenuItem>
           </Select>
         </FieldWrapper>
       </Grid>

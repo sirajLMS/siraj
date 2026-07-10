@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CurrencyCode, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export const parentProfileEditSchema = z.object({
   name: z.string().min(1, "fullNameRequired"),
@@ -15,10 +15,6 @@ export const parentProfileEditSchema = z.object({
     { message: "invoiceTypeRequired" }
   ),
   feeAmount: z.string().min(1, "feeAmountRequired"),
-  paymentMethod: z.custom<PaymentMethod>(
-    val => typeof val === "string" && Object.values(PaymentMethod).includes(val as PaymentMethod),
-    { message: "paymentMethodRequired" }
-  ),
   currency: z.enum(CurrencyCode).refine(v => !!v, { message: "currencyRequired" }),
 });
 

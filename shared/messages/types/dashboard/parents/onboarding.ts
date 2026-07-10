@@ -51,6 +51,9 @@ export interface ParentOnboardingLabels {
       readonly creditCard: string;
       readonly cash: string;
       readonly paypal: string;
+      readonly mobileWallet: string;
+      readonly paymentLink: string;
+      readonly onlineAccount: string;
     };
   };
   readonly actions: {

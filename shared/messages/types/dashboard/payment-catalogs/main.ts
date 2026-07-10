@@ -1,0 +1,53 @@
+export interface PaymentCatalogsLabels {
+  readonly pageTitle: string;
+  readonly pageSubtitle: string;
+  readonly addEntry: string;
+  readonly createTitle: string;
+  readonly editTitle: string;
+  readonly deleteTitle: string;
+  readonly deleteBody: string;
+  readonly deleteConfirm: string;
+  readonly active: string;
+  readonly inactive: string;
+  readonly cancel: string;
+  readonly save: string;
+  readonly edit: string;
+  readonly delete: string;
+  readonly tabs: {
+    readonly mobileWallets: string;
+    readonly paymentLinks: string;
+    readonly onlineAccounts: string;
+  };
+  readonly columns: {
+    readonly slug: string;
+    readonly name: string;
+    readonly country: string;
+    readonly currency: string;
+    readonly status: string;
+    readonly urlAllowlist: string;
+    readonly identifierKind: string;
+    readonly actions: string;
+  };
+  readonly fields: {
+    readonly slug: string;
+    readonly name: string;
+    readonly description: string;
+    readonly instructions: string;
+    readonly countryCode: string;
+    readonly currencyCode: string;
+    readonly phoneRegion: string;
+    readonly urlAllowlist: string;
+    readonly urlAllowlistHelp: string;
+    readonly urlExample: string;
+    readonly identifierKind: string;
+    readonly identifierLabel: string;
+    readonly supportedDirections: string;
+    readonly logoUrl: string;
+    readonly isActive: string;
+  };
+  readonly identifierKinds: {
+    readonly email: string;
+    readonly handle: string;
+    readonly emailOrHandle: string;
+  };
+}

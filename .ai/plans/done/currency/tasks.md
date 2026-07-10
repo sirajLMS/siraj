@@ -219,29 +219,29 @@ _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop,
 
 ## Phase 14 — `users.displayCurrency` (Decision 3A part 2) — schema → types → repo → service → Pothos → documents → store → UI → seed
 
-- [ ] **T14.1** `backend/db/schema/users.ts` (after line 33) — add `displayCurrency: currencyCodeEnum("display_currency").$type<CurrencyCode>(),` (nullable, no default). NO extra CHECK.
-- [ ] **T14.2** `backend/types/users/user.types.ts:17-30` — `Omit` adds `| "displayCurrency"`; intersection adds `displayCurrency: CurrencyCode | null;` (mirrors `timezone: IanaTimezone`). Import `CurrencyCode` from `@/backend/enum`.
-- [ ] **T14.3** `backend/utils/auth.utils.ts:14-28` — in `toUserReturnType` return add `displayCurrency: user.displayCurrency as CurrencyCode | null,`.
-- [ ] **T14.4** `backend/db/repo/users/user.repository.ts:49-65` — add `users.displayCurrency` to `findSafeById` select list.
-- [ ] **T14.5** `backend/db/repo/users/user.repository.ts:236-252` — add `users.displayCurrency` to `updateProfileFields` returning list.
-- [ ] **T14.6** `backend/db/repo/users/user.repository.ts` after `261-287` — NEW `updateDisplayCurrency(userId, displayCurrency: CurrencyCode, tx?, locale?)` mirroring `updateTimezone` exactly. Export from repo barrel.
-- [ ] **T14.7** `backend/services/profile/profile.service.ts:78` — `updateProfileFields` dispatcher accepts `displayCurrency?: CurrencyCode | null`; when present calls `UserRepository.updateDisplayCurrency(userId, displayCurrency, tx, locale)`.
-- [ ] **T14.8** `backend/graphql/pothos/auth/user.pothos.ts:17-50` — add `displayCurrency: t.expose("displayCurrency", { type: CurrencyCodePothosObject, nullable: true })`.
-- [ ] **T14.9** `backend/graphql/pothos/profile/profile.pothos.ts:114-122` — `CoreUserProfileFieldsInput` adds `displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false })`.
-- [ ] **T14.10** Regenerate: `bun run generate:gqlSchema && bun codegen` — surfaces `displayCurrency: Maybe<CurrencyCode>` on `User`.
-- [ ] **T14.11** `frontend/graphql/sharedDocuments/{user,profile,auth}.documents.ts` — add `displayCurrency` to user query selection; add to `UpdateOwnProfileInput`/`UpdateUserProfileInput.core`. Always include `id`.
-- [ ] **T14.12** `frontend/stores/userStore.ts:4-40` — `UserState` adds `displayCurrency: CurrencyCode | null`; initialize `null`; in `setUser` set `displayCurrency: user?.displayCurrency ?? null`. Mock store mirrors the field.
-- [ ] **T14.13** `shared/messages/types/profile.ts:59, 109` (and `staff.fields` block) — add `readonly displayCurrency: string;`.
-- [ ] **T14.14** `shared/messages/ar/profile.ts:61, 111` — add `displayCurrency: "عملة العرض",`.
-- [ ] **T14.15** `shared/messages/en.ts:265, 315` (+ staff sibling) — add `displayCurrency: "Display Currency",`.
-- [ ] **T14.16** `frontend/views/dashboard/profile/teacher/sections/AccountSection.tsx:27-46` + view branch — **file TODAY has no currency field (verified; only name/email).** Edit branch: add `<Controller name="displayCurrency">` rendering `<CurrencySelect currency={CurrencyOption | null} setCurrencyAction={...} onBlurAction={...} label={t("fields.displayCurrency")} fullWidth />` (import both `Controller` + `<CurrencySelect>` + `getCurrencyByCode` from `@/frontend/components/ui` / `frontend/lib/currency.ts`; same enum↔`CurrencyOption` mapping already used in `SalaryDetailsSection.tsx`). View branch: `<CurrencyDisplay code={userData.displayCurrency} showLabel showSymbol fallback={t("notSet")} />` from `@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay.tsx`.
-- [ ] **T14.17** `frontend/views/dashboard/profile/parent/sections/AccountSection.tsx` — **file TODAY has no currency field (verified).** Same `<CurrencySelect>` edit + `<CurrencyDisplay>` view pattern from `@/frontend/components/ui`.
-- [ ] **T14.18** `frontend/views/dashboard/profile/staff/sections/AccountSection.tsx:27-47` + view branch — **file TODAY has no currency field (verified; has a raw `TextField select` for `status`).** Same; staff users also have a `displayCurrency` (role-agnostic). Add a small view-mode `<CurrencyDisplay code={userData.displayCurrency} showLabel showSymbol fallback={t("notSet")} />` row (staff `AccountSection` today has no per-row display branch).
-- [ ] **T14.19** `frontend/views/dashboard/profile/{teacher,parent,staff}/.../schemas/*.ts` — add `displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional()`.
-- [ ] **T14.20** `backend/db/seeds/seed-users.ts` (or factory) — add `displayCurrency: null` default. NO currency bias.
-- [ ] **T14.21** Per-file verify: `tsgo` → `biome:check` → lint-queue-client on each touched file.
-- [ ] **T14.22** `bun run scripts/run-test/run-test.ts backend/db/test/repo/user.repository.test.ts` — add `updateDisplayCurrency` round-trip test.
-- [ ] **T14.23** `bun test frontend/graphql/test/profile.documents.test.ts` — add `displayCurrency` mutation assertion.
+- [x] **T14.1** `backend/db/schema/users.ts` (after line 33) — add `displayCurrency: currencyCodeEnum("display_currency").$type<CurrencyCode>(),` (nullable, no default). NO extra CHECK.
+- [x] **T14.2** `backend/types/users/user.types.ts:17-30` — `Omit` adds `| "displayCurrency"`; intersection adds `displayCurrency: CurrencyCode | null;` (mirrors `timezone: IanaTimezone`). Import `CurrencyCode` from `@/backend/enum`.
+- [x] **T14.3** `backend/utils/auth.utils.ts:14-28` — in `toUserReturnType` return add `displayCurrency: user.displayCurrency as CurrencyCode | null,`.
+- [x] **T14.4** `backend/db/repo/users/user.repository.ts:49-65` — add `users.displayCurrency` to `findSafeById` select list.
+- [x] **T14.5** `backend/db/repo/users/user.repository.ts:236-252` — add `users.displayCurrency` to `updateProfileFields` returning list.
+- [x] **T14.6** `backend/db/repo/users/user.repository.ts` after `261-287` — NEW `updateDisplayCurrency(userId, displayCurrency: CurrencyCode, tx?, locale?)` mirroring `updateTimezone` exactly. Export from repo barrel.
+- [x] **T14.7** `backend/services/profile/profile.service.ts:78` — `updateProfileFields` dispatcher accepts `displayCurrency?: CurrencyCode | null`; when present calls `UserRepository.updateDisplayCurrency(userId, displayCurrency, tx, locale)`.
+- [x] **T14.8** `backend/graphql/pothos/auth/user.pothos.ts:17-50` — add `displayCurrency: t.expose("displayCurrency", { type: CurrencyCodePothosObject, nullable: true })`.
+- [x] **T14.9** `backend/graphql/pothos/profile/profile.pothos.ts:114-122` — `CoreUserProfileFieldsInput` adds `displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false })`.
+- [x] **T14.10** Regenerate: `bun run generate:gqlSchema && bun codegen` — surfaces `displayCurrency: Maybe<CurrencyCode>` on `User`.
+- [x] **T14.11** `frontend/graphql/sharedDocuments/{user,profile,auth}.documents.ts` — add `displayCurrency` to user query selection; add to `UpdateOwnProfileInput`/`UpdateUserProfileInput.core`. Always include `id`.
+- [x] **T14.12** `frontend/stores/userStore.ts:4-40` — `UserState` adds `displayCurrency: CurrencyCode | null`; initialize `null`; in `setUser` set `displayCurrency: user?.displayCurrency ?? null`. Mock store mirrors the field.
+- [x] **T14.13** `shared/messages/types/profile.ts:59, 109` (and `staff.fields` block) — add `readonly displayCurrency: string;`.
+- [x] **T14.14** `shared/messages/ar/profile.ts:61, 111` — add `displayCurrency: "عملة العرض",`.
+- [x] **T14.15** `shared/messages/en.ts:265, 315` (+ staff sibling) — add `displayCurrency: "Display Currency",`.
+- [x] **T14.16** `frontend/views/dashboard/profile/teacher/sections/AccountSection.tsx:27-46` + view branch — **file TODAY has no currency field (verified; only name/email).** Edit branch: add `<Controller name="displayCurrency">` rendering `<CurrencySelect currency={CurrencyOption | null} setCurrencyAction={...} onBlurAction={...} label={t("fields.displayCurrency")} fullWidth />` (import both `Controller` + `<CurrencySelect>` + `getCurrencyByCode` from `@/frontend/components/ui` / `frontend/lib/currency.ts`; same enum↔`CurrencyOption` mapping already used in `SalaryDetailsSection.tsx`). View branch: `<CurrencyDisplay code={userData.displayCurrency} showLabel showSymbol fallback={t("notSet")} />` from `@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay.tsx`.
+- [x] **T14.17** `frontend/views/dashboard/profile/parent/sections/AccountSection.tsx` — **file TODAY has no currency field (verified).** Same `<CurrencySelect>` edit + `<CurrencyDisplay>` view pattern from `@/frontend/components/ui`.
+- [x] **T14.18** `frontend/views/dashboard/profile/staff/sections/AccountSection.tsx:27-47` + view branch — **file TODAY has no currency field (verified; has a raw `TextField select` for `status`).** Same; staff users also have a `displayCurrency` (role-agnostic). Add a small view-mode `<CurrencyDisplay code={userData.displayCurrency} showLabel showSymbol fallback={t("notSet")} />` row (staff `AccountSection` today has no per-row display branch).
+- [x] **T14.19** `frontend/views/dashboard/profile/{teacher,parent,staff}/.../schemas/*.ts` — add `displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional()`.
+- [x] **T14.20** `backend/db/seeds/seed-users.ts` (or factory) — add `displayCurrency: null` default. NO currency bias.
+- [x] **T14.21** Per-file verify: `tsgo` → `biome:check` → lint-queue-client on each touched file.
+- [x] **T14.22** `bun run scripts/run-test/run-test.ts backend/db/test/repo/user.repository.test.ts` — add `updateDisplayCurrency` round-trip test.
+- [x] **T14.23** `bun test frontend/graphql/test/profile.documents.test.ts` — add `displayCurrency` mutation assertion.
 
 **CROSS-FILE DEPENDENCIES (orchestrator-coordinated):** `User` GraphQL field (T14.8) BEFORE frontend documents (T14.11). Store change (T14.12) BEFORE Phase 15 UI swap reads `useUserStore.displayCurrency`. Staff `AccountSection` (T14.18) needs a NEW view-mode `<CurrencyDisplay>` row.
 

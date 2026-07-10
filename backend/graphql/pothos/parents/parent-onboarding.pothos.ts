@@ -1,6 +1,9 @@
 import type { CurrencyCode, InvoiceType } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { UserPaymentMethodInitialInputPothos, type UserPaymentMethodInitialGqlInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
+import {
+  type UserPaymentMethodInitialGqlInput,
+  UserPaymentMethodInitialInputPothos,
+} from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   CurrencyCodePothosObject,
   IanaTimezonePothosObject,

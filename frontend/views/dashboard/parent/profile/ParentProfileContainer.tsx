@@ -64,7 +64,6 @@ function mapProfileData(
     readonly whatsapp: string | null;
     readonly invoiceType: string | null;
     readonly feeAmount: string | null;
-    readonly paymentMethod: string | null;
     readonly currency: string | null;
   },
   associatedStudents: ReadonlyArray<{
@@ -105,7 +104,6 @@ function mapProfileData(
     whatsapp: profile.whatsapp ?? undefined,
     invoiceType: profile.invoiceType ?? "",
     feeAmount: profile.feeAmount ? Number(profile.feeAmount) : 0,
-    paymentMethod: profile.paymentMethod ?? "",
     currency: (profile.currency as CurrencyCode) ?? CurrencyCode.Usd,
     students,
   };

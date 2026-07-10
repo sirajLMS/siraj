@@ -1,5 +1,10 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import type { TeacherOnboardingInput } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  PaymentDirection,
+  type PaymentMethodDetailsInput,
+  PaymentMethodType,
+  type TeacherOnboardingInput,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useTeacherOnboardingStore } from "@/frontend/stores/teacherOnboardingStore";
@@ -8,6 +13,24 @@ import type {
   TeacherOnboardingCreateResult,
   TeacherOnboardingFormData,
 } from "@/frontend/views/dashboard/teachers/onboarding/types";
+
+function buildBankTransferDetails(formData: TeacherOnboardingFormData): PaymentMethodDetailsInput {
+  return {
+    beneficiaryName: formData.beneficiaryName,
+    bankName: formData.bankName,
+    accountNumber: formData.accountNumber,
+    routingNumber: formData.routingNumber || null,
+    swiftBic: formData.swiftBic || null,
+    iban: formData.iban,
+    identifier: null,
+    note: null,
+    onlineAccountId: null,
+    paymentLinkId: null,
+    phone: null,
+    url: null,
+    walletId: null,
+  };
+}
 
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);
@@ -33,12 +56,13 @@ export function useCreateTeacherOnboarding() {
         timezone: toGraphqlIanaTimezone(formData.timezone),
         hourlyRate: formData.hourlyRate,
         rateCurrency: formData.rateCurrency,
-        beneficiaryName: formData.beneficiaryName,
-        bankName: formData.bankName,
-        accountNumber: formData.accountNumber,
-        routingNumber: formData.routingNumber || null,
-        swiftBic: formData.swiftBic || null,
-        iban: formData.iban,
+        initialPayoutMethod: {
+          type: PaymentMethodType.BankTransfer,
+          direction: PaymentDirection.Payout,
+          isDefault: true,
+          label: null,
+          details: buildBankTransferDetails(formData),
+        },
       };
 
       const result = await mutate({ variables: { input } });

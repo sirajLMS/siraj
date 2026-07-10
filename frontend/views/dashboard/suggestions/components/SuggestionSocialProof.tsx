@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, Typography } from "@mui/material";
 import { UserAvatar } from "@/frontend/components/ui";
-import { suggestionContributorStatsQueryDocument } from "@/frontend/graphql/sharedDocuments/suggestions/suggestion.documents";
+import { suggestionContributorStatsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import type { SuggestionSocialProofProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 const CONTRIBUTOR_AVATAR_LIMIT = 3;

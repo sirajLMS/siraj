@@ -20,7 +20,6 @@ const adminParentData = {
   address: "123 King Fahd Rd, Riyadh",
   invoiceType: "Monthly",
   feeAmount: "500",
-  paymentMethod: "Bank Transfer",
   currency: CurrencyCode.Sar,
   timezone: "Asia/Riyadh" as const,
 };

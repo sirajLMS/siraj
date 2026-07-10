@@ -5,6 +5,7 @@ export * from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay"
 export * from "@/frontend/components/ui/display/LocaleEmoji";
 export * from "@/frontend/components/ui/display/language/LanguageDisplay";
 export * from "@/frontend/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
+export * from "@/frontend/components/ui/display/paymentMethod";
 export * from "@/frontend/components/ui/display/personProfileLink/PersonProfileLink";
 export * from "@/frontend/components/ui/display/personProfileLink/PersonProfileLinkCell";
 export * from "@/frontend/components/ui/display/phoneDisplay/PhoneDisplay";

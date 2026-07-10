@@ -14,7 +14,7 @@ import {
   deleteUserMeetingConfigMutationDocument,
   setDefaultMeetingConfigMutationDocument,
   userMeetingConfigsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+} from "@/frontend/graphql/sharedDocuments";
 
 export type MeetingConfigsSectionProps = {
   readonly userId: string;

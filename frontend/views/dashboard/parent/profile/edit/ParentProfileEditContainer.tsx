@@ -6,7 +6,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { CurrencyCode, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
@@ -43,7 +43,6 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
     twitter: profile?.twitter ?? "",
     invoiceType: (profile?.invoiceType as InvoiceType) ?? InvoiceType.Monthly,
     feeAmount: profile?.feeAmount ?? "",
-    paymentMethod: (profile?.paymentMethod as PaymentMethod) ?? PaymentMethod.Paypal,
     currency: profile?.currency ?? CurrencyCode.Usd,
   };
 
@@ -71,7 +70,6 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
         twitter: profile.twitter ?? "",
         invoiceType: (profile.invoiceType as InvoiceType) ?? InvoiceType.Monthly,
         feeAmount: profile.feeAmount ?? "",
-        paymentMethod: (profile.paymentMethod as PaymentMethod) ?? PaymentMethod.Paypal,
         currency: profile.currency ?? CurrencyCode.Usd,
       });
     }

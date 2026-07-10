@@ -3,7 +3,7 @@ import {
   teacherAssignedClassesQueryDocument,
   teacherAssignedStudentsQueryDocument,
   teacherOwnProfileQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/teachers/teacher-portal.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { assertOperationDenied, loginDemoUser } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";

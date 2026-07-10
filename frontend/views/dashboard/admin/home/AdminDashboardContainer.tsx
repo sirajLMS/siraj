@@ -4,8 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
-import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher.documents";
+import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
@@ -139,7 +138,7 @@ export function AdminDashboardContainer() {
 
   // Type guard to ensure a value is a valid AdminMetricKey
   const isAdminMetricKey = (key: string | null): key is AdminMetricKey => {
-    return ADMIN_METRIC_DEFINITIONS.some(def => def.key === key);
+    return ADMIN_METRIC_DEFINITIONS.some((def: { key: string }) => def.key === key);
   };
 
   const selectedMetricLabel =

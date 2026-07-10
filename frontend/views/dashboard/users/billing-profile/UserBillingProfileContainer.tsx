@@ -6,11 +6,11 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
+  markInvoicePaidMutationDocument,
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/user-billing-profile.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

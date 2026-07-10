@@ -20,7 +20,6 @@ import {
   statusTracking,
 } from "@/shared/messages/ar/dashboard/core";
 import { managerOnboarding, managersDirectory } from "@/shared/messages/ar/dashboard/managers";
-import { meetingProviders as meetingProvidersLabels } from "@/shared/messages/ar/dashboard/meeting-providers/main";
 import {
   directory,
   onboarding,
@@ -29,6 +28,7 @@ import {
   parentStudents,
   profile,
 } from "@/shared/messages/ar/dashboard/parents";
+import { paymentCatalogs as paymentCatalogsLabels } from "@/shared/messages/ar/dashboard/payment-catalogs/main";
 import { permissions as permissionsLabels } from "@/shared/messages/ar/dashboard/permissions";
 import { reports as reportsLabels } from "@/shared/messages/ar/dashboard/reports";
 import {
@@ -68,6 +68,7 @@ import {
   languageSelector,
   localizedString,
   meetingConfig,
+  paymentMethod,
   phoneInput,
   tagInput,
   timezoneSelect,
@@ -113,6 +114,7 @@ export const arTranslations = {
     tagInput,
     timezoneSelect,
     meetingConfig,
+    paymentMethod,
   },
   dashboard: {
     nav,
@@ -160,6 +162,7 @@ export const arTranslations = {
     resources: resourcesLabels,
     subjects: subjectsLabels,
     meetingProviders: meetingProvidersLabels,
+    paymentCatalogs: paymentCatalogsLabels,
     booksAndBags: booksAndBagsLabels,
     permissions: permissionsLabels,
     searchSchedule,

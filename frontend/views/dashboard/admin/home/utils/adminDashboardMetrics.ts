@@ -29,7 +29,7 @@ interface AdminMetricDefinition {
   readonly count: (metrics: RawMetrics) => number;
 }
 
-const ADMIN_METRIC_DEFINITIONS: readonly AdminMetricDefinition[] = [
+export const ADMIN_METRIC_DEFINITIONS: readonly AdminMetricDefinition[] = [
   { key: "total", labelKey: "dashboard.admin.metrics.total", icon: CalendarToday, count: m => m?.total ?? 0 },
   { key: "regular", labelKey: "dashboard.admin.metrics.regular", icon: FaceOutlined, count: m => m?.regular ?? 0 },
   { key: "trial", labelKey: "dashboard.admin.metrics.trial", icon: HeadphonesOutlined, count: m => m?.trial ?? 0 },

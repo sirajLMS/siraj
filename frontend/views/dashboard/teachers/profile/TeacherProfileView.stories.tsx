@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
-import { CurrencyCode, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 import { TeacherProfileView } from "@/frontend/views/dashboard/teachers/profile/TeacherProfileView";
 import type { TeacherProfileData } from "@/frontend/views/dashboard/teachers/profile/types";
@@ -16,7 +16,6 @@ const INITIAL_PROFILE: TeacherProfileData = {
   address: "Nasr City, Cairo",
   baseSalary: 780,
   currency: CurrencyCode.Usd,
-  paymentMethod: PaymentMethod.Paypal,
   accountStatus: true,
   updatedAt: "2026-07-08T12:00:00.000Z",
   totalClasses: 312,
@@ -57,7 +56,6 @@ const useTeacherProfileStoryStore = create<TeacherProfileStoryState>(set => ({
           address: data.address ?? "",
           baseSalary: data.baseSalary,
           currency: data.currency ?? CurrencyCode.Usd,
-          paymentMethod: data.paymentMethod as PaymentMethod,
           accountStatus: data.accountStatus,
           updatedAt: new Date().toISOString(),
         },

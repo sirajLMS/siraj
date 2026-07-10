@@ -13,15 +13,13 @@ import {
   InvoiceStatus,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
+  adminBillingSummaryQueryDocument,
+  adminInvoicesQueryDocument,
   deleteInvoiceMutationDocument,
   markInvoicePaidMutationDocument,
   sendPaymentReminderMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import {
-  adminBillingSummaryQueryDocument,
-  adminInvoicesQueryDocument,
   studentCreditStatusQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/parents/parent-billing-history.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";

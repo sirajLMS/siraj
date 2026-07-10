@@ -253,7 +253,10 @@ export const UserPaymentMethodCreateInputPothos = gqlSchemaBuilder
     }),
   });
 
-export type UserPaymentMethodInitialGqlInput = Omit<UserPaymentMethodSubmitInput, "userId" | "details" | "isDefault"> & {
+export type UserPaymentMethodInitialGqlInput = Omit<
+  UserPaymentMethodSubmitInput,
+  "userId" | "details" | "isDefault"
+> & {
   readonly details: PaymentMethodDetails;
   readonly isDefault?: boolean;
 };

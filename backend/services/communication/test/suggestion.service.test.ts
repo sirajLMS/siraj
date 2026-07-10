@@ -77,7 +77,6 @@ const mockParent = {
   feeAmount: null,
   currency: null,
   displayCurrency: null,
-  displayCurrency: null,
   timezone: IanaTimezone.UTC,
   createdAt: new Date(),
   updatedAt: new Date(),

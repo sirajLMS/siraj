@@ -9,7 +9,7 @@ const mockLabels = {
     teacherInfo: "Teacher Info",
     officialDetails: "Official Details",
     salaryDetails: "Salary Details",
-    bankingLedger: "Banking Ledger",
+    paymentMethod: "Payment Method",
   },
   fields: {
     fullName: "Full Name",

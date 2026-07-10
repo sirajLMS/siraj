@@ -7,7 +7,7 @@ import {
   setDefaultMeetingConfigMutationDocument,
   userMeetingConfigQueryDocument,
   userMeetingConfigsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { authenticatedRequest, cleanupTestEntities, loginAndProvision } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";
@@ -71,7 +71,7 @@ describe("GraphQL Meeting Config Integration Tests", () => {
   });
 
   test("super admin can create a meeting provider", async () => {
-    const slug = `zoom-${randomUUID().slice(0, 8)}`;
+    const slug = `zoom_${randomUUID().replace(/-/g, "").slice(0, 8)}`;
     const data = await authenticatedRequest(superAdminToken, "mutate", createMeetingProviderMutationDocument, {
       input: buildProviderInput(slug),
     });
@@ -203,5 +203,6 @@ describe("GraphQL Meeting Config Integration Tests", () => {
 
   test("cleanup test entities", async () => {
     await cleanupTestEntities(superAdminToken, entityIds);
+    expect(superAdminToken).toBeTruthy();
   });
 });

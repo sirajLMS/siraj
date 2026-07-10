@@ -1,5 +1,4 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { normalizePaymentMethodDetailsInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   ManagerOnboardingInputPothosObject,
   ManagerOnboardingResultPothosObject,
@@ -10,6 +9,7 @@ import {
   TeacherOnboardingInputPothosObject,
   TeacherOnboardingPothosObject,
 } from "@/backend/graphql/pothos";
+import { normalizePaymentMethodDetailsInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
 import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";

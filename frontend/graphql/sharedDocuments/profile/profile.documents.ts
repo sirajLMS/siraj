@@ -1,9 +1,9 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
+import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   PAYMENT_METHOD_DEFAULTS_FIELDS,
   USER_PAYMENT_METHOD_FIELDS,
 } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
 export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileByUserIdQuery> = gql`
   ${USER_PAYMENT_METHOD_FIELDS}

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
-import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
+import { InvoiceType } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
 export type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
@@ -19,8 +19,8 @@ export const parentOnboardingSchema = z.object({
     { message: "invoiceTypeRequired" }
   ),
   feeAmount: z.string().min(1, "feeAmountRequired"),
-  paymentMethod: z.custom<PaymentMethod>(
-    val => typeof val === "string" && Object.values(PaymentMethod).includes(val as PaymentMethod),
+  paymentMethodType: z.custom<PaymentMethodType>(
+    val => typeof val === "string" && Object.values(PaymentMethodType).includes(val as PaymentMethodType),
     { message: "paymentMethodRequired" }
   ),
   currency: z.enum(CurrencyCode).refine(v => !!v, { message: "currencyRequired" }),

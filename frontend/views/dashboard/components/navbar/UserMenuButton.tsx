@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import { UserAvatar } from "@/frontend/components/ui";
 import type { SimulatablePermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { simulatablePermissionGroupsQueryDocument } from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
+import { simulatablePermissionGroupsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useAuth } from "@/frontend/hooks/useAuth";
 import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";

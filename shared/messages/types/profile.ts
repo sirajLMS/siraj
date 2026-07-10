@@ -6,7 +6,7 @@ export interface ProfileLabels {
   readonly shell: {
     readonly tabs: {
       readonly profile: string;
-      readonly banking: string;
+      readonly paymentMethods: string;
       readonly meeting: string;
       readonly students: string;
       readonly notifications: string;
@@ -237,7 +237,7 @@ export interface ProfileLabels {
       readonly CLASS_REMINDER: string;
       readonly INVOICE_GENERATED: string;
       readonly COMPLAINT_RESPONSE: string;
-      readonly BANKING_DETAILS_CHANGED: string;
+      readonly PAYMENT_METHOD_CHANGED: string;
       readonly NEW_COMPLAINT: string;
       readonly NEW_SUGGESTION: string;
       readonly SUGGESTION_ACKNOWLEDGED: string;

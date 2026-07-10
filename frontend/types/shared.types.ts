@@ -14,7 +14,7 @@ import type {
   InvoiceType,
   ManagerOnboardingInput,
   ParentOnboardingInput,
-  PaymentMethod,
+  PaymentMethodType,
   TeacherOnboardingInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 
@@ -184,14 +184,14 @@ export type ManagerOnboardingFormData = CleanInput<ManagerOnboardingInput>;
 
 export type ParentOnboardingFormData = Omit<
   CleanInput<ParentOnboardingInput>,
-  "password" | "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "paymentMethod" | "timezone"
+  "password" | "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "initialPayinMethod" | "timezone"
 > & {
   phone: string;
   address: string;
   feeAmount: string;
   currency: CurrencyCode;
   invoiceType: InvoiceType;
-  paymentMethod: PaymentMethod;
+  paymentMethodType: PaymentMethodType;
   timezone: string;
 };
 
@@ -205,10 +205,7 @@ export type TeacherOnboardingFormData = Omit<
   | "timezone"
   | "hourlyRate"
   | "rateCurrency"
-  | "beneficiaryName"
-  | "bankName"
-  | "accountNumber"
-  | "iban"
+  | "initialPayoutMethod"
   | "gender"
 > & {
   nationalId: string;
@@ -220,6 +217,8 @@ export type TeacherOnboardingFormData = Omit<
   beneficiaryName: string;
   bankName: string;
   accountNumber: string;
+  routingNumber?: string;
+  swiftBic?: string;
   iban: string;
   gender: Gender;
 };

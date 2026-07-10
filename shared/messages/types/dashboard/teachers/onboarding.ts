@@ -6,7 +6,7 @@ export interface TeacherOnboardingLabels {
     readonly teacherInfo: string;
     readonly officialDetails: string;
     readonly salaryDetails: string;
-    readonly bankingLedger: string;
+    readonly paymentMethod: string;
   };
   readonly fields: {
     readonly fullName: string;

@@ -5,7 +5,7 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
-interface BankingLedgerSectionProps {
+interface PaymentMethodSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
   readonly labels: {
@@ -28,7 +28,7 @@ interface BankingLedgerSectionProps {
   };
 }
 
-export function BankingLedgerSection({ register, errors, labels }: Readonly<BankingLedgerSectionProps>) {
+export function PaymentMethodSection({ register, errors, labels }: Readonly<PaymentMethodSectionProps>) {
   return (
     <Grid container spacing={3} sx={theme => ({ p: theme.spacing(3) })}>
       <Grid size={{ xs: 12, md: 8 }}>

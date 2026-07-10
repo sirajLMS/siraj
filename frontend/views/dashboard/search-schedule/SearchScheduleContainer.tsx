@@ -8,7 +8,7 @@ import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission, type AvailabilitySearchInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/availability-search.documents";
+import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
 import { SearchScheduleForm } from "@/frontend/views/dashboard/search-schedule/SearchScheduleForm";
 import { SearchSchedulePaginationFooter } from "@/frontend/views/dashboard/search-schedule/SearchSchedulePaginationFooter";

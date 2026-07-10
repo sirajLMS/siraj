@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createManagerMutationDocument } from "@/frontend/graphql/sharedDocuments/teachers/manager-onboarding.documents";
+import { createManagerMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,

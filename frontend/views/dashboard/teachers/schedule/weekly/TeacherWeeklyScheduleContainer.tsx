@@ -8,12 +8,10 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/scheduling/schedule-deletion.documents";
-import {
+  teacherDirectoryQueryDocument,
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
-import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";

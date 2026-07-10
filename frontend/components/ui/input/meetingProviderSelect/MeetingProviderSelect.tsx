@@ -5,7 +5,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useLocale } from "next-intl";
 import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { meetingProvidersQueryDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+import { meetingProvidersQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 
 export type MeetingProviderSelectProps = {

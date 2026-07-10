@@ -1,12 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import {
-  AccountStatus,
-  CurrencyCode,
-  Gender,
-  IanaTimezone,
-  PaymentMethod,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   TeacherAdminData,
   TeacherOwnData,
@@ -22,7 +16,6 @@ const teacherOwnProfile: TeacherOwnData = {
   timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
   rateCurrency: CurrencyCode.Usd,
-  paymentMethod: PaymentMethod.Paypal,
   totalClasses: 42,
 };
 
@@ -41,7 +34,6 @@ const teacherAdminProfile: TeacherAdminData = {
   rateCurrency: CurrencyCode.Usd,
   status: AccountStatus.Activated,
   updatedAt: "2024-06-01T00:00:00.000Z",
-  paymentMethod: PaymentMethod.Paypal,
   totalClasses: 42,
   avgEngagementScore: 4.2,
 };

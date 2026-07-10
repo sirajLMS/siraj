@@ -8,7 +8,7 @@ export const onboarding: TeacherOnboardingLabels = {
     teacherInfo: "معلومات المعلم",
     officialDetails: "التفاصيل الرسمية",
     salaryDetails: "تفاصيل الراتب",
-    bankingLedger: "السجل المصرفي",
+    paymentMethod: "طريقة الدفع",
   },
   fields: {
     fullName: "الاسم الكامل",

@@ -1,5 +1,5 @@
 import { PaymentsOutlined } from "@mui/icons-material";
-import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, InputAdornment, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
@@ -17,7 +17,7 @@ export function SalaryDetailsSection() {
   return (
     <Box component="section">
       <SectionHeader title={t("sections.salaryDetails")} icon={PaymentsOutlined} />
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, gap: 3 }}>
         <Box>
           <Typography
             variant="labelMd"
@@ -64,27 +64,6 @@ export function SalaryDetailsSection() {
                 />
               );
             }}
-          />
-        </Box>
-
-        <Box>
-          <Typography
-            variant="labelMd"
-            sx={theme => ({ mb: 1, display: "block", color: theme.palette.onSurfaceVariant })}
-          >
-            {t("fields.paymentMethod")}
-          </Typography>
-          <Controller
-            name="paymentMethod"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth>
-                <Select {...field} sx={theme => ({ borderRadius: theme.layout.radius.card })}>
-                  <MenuItem value="BANK_ACCOUNT">Bank Account</MenuItem>
-                  <MenuItem value="PAYPAL">PayPal</MenuItem>
-                </Select>
-              </FormControl>
-            )}
           />
         </Box>
       </Box>

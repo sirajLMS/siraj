@@ -2,9 +2,9 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, Chip, CircularProgress, Stack, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { ErrorState } from "@/frontend/components/ui";
-import type { PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { userPaymentMethodsQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/lib/payment-method";
@@ -13,10 +13,7 @@ type PaymentMethodsViewProps = {
   readonly targetUserId: string;
 };
 
-function formatMethodLabel(
-  method: UserPaymentMethodFieldsFragment,
-  t: (key: string) => string
-): string {
+function formatMethodLabel(method: UserPaymentMethodFieldsFragment, t: (key: string) => string): string {
   if (method.label?.trim()) {
     return method.label;
   }
@@ -29,10 +26,9 @@ function formatMethodLabel(
 export function PaymentMethodsView({ targetUserId }: PaymentMethodsViewProps) {
   const t = useTranslations("profile.banking");
   const tRoot = useTranslations();
-  const locale = useLocale();
 
   const { data, loading, error, refetch } = useQuery(userPaymentMethodsQueryDocument, {
-    variables: { userId: targetUserId },
+    variables: { userId: targetUserId, direction: null },
   });
 
   const methods = data?.userPaymentMethods ?? [];
@@ -71,14 +67,15 @@ export function PaymentMethodsView({ targetUserId }: PaymentMethodsViewProps) {
     <Stack spacing={2}>
       {methods.map(method => {
         if (!method.id) return null;
+        const typedMethod = method as UserPaymentMethodFieldsFragment;
 
-        const directionLabel = method.direction
-          ? getPaymentMethodDirectionLabel(method.direction, key => tRoot(key))
+        const directionLabel = typedMethod.direction
+          ? getPaymentMethodDirectionLabel(typedMethod.direction, key => tRoot(key))
           : null;
 
         return (
           <Box
-            key={method.id}
+            key={typedMethod.id}
             sx={theme => ({
               border: `1px solid ${theme.palette.outlineVariant}`,
               borderRadius: 2,
@@ -88,20 +85,22 @@ export function PaymentMethodsView({ targetUserId }: PaymentMethodsViewProps) {
             <Stack sx={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
               <Stack sx={{ gap: 0.5 }}>
                 <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
-                  <Typography sx={{ typography: "titleMd" }}>{formatMethodLabel(method, key => tRoot(key))}</Typography>
-                  {method.isDefault ? <Chip size="small" label={locale === "ar" ? "افتراضي" : "Default"} color="primary" /> : null}
-                  {method.verifiedAt ? (
+                  <Typography sx={{ typography: "titleMd" }}>
+                    {formatMethodLabel(typedMethod, key => tRoot(key))}
+                  </Typography>
+                  {typedMethod.isDefault ? <Chip size="small" label="Default" color="primary" /> : null}
+                  {typedMethod.verifiedAt ? (
                     <Chip size="small" label={t("verified")} color="success" variant="outlined" />
-                  ) : method.type === "BANK_TRANSFER" ? (
+                  ) : typedMethod.type === PaymentMethodType.BankTransfer ? (
                     <Chip size="small" label={t("notVerified")} variant="outlined" />
                   ) : null}
                 </Stack>
                 {directionLabel ? (
                   <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{directionLabel}</Typography>
                 ) : null}
-                {method.details?.iban ? (
+                {typedMethod.details?.iban ? (
                   <Typography sx={{ typography: "bodySm", color: "text.secondary" }} dir="ltr">
-                    {method.details.iban}
+                    {typedMethod.details.iban}
                   </Typography>
                 ) : null}
               </Stack>

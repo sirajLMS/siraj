@@ -4,7 +4,7 @@ import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-typ
 import {
   managerDirectoryQueryDocument,
   updateManagerProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import {
   authenticatedRequest,
   cleanupTestEntities,

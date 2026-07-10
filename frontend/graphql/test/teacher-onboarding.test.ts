@@ -1,7 +1,13 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher-onboarding.documents";
+import {
+  CountryCode,
+  CurrencyCode,
+  Gender,
+  IanaTimezone,
+  PaymentMethodType,
+} from "@/frontend/graphql/generated/gql/graphql-types";
+import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
@@ -36,6 +42,32 @@ const createMinimalTeacherInput = (
   qualifications: "PhD",
   routingNumber: "123456789",
   swiftBic: "BOFAUS3N",
+  initialPayoutMethod: {
+    type: PaymentMethodType.BankTransfer,
+    direction: PaymentDirection.Payout,
+    isDefault: true,
+    label: "Primary Payout Method",
+    details: {
+      accountNumber: "1234567890",
+      bankName: "Bank of America",
+      beneficiaryName: "John Doe",
+      iban: "US12345678901234567890",
+      routingNumber: "123456789",
+      swiftBic: "BOFAUS3N",
+      identifier: "test-transfer",
+      note: "Test payment method",
+      onlineAccountId: null,
+      paymentLinkId: null,
+      branch: null,
+      branchCode: null,
+      branchName: null,
+      brand: null,
+      city: null,
+      phone: null,
+      url: null,
+      walletId: null,
+    },
+  },
 });
 
 describe("Teacher Onboarding GraphQL API", () => {

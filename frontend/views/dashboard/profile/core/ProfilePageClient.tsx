@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments/profile/profile.documents";
+import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { ProfileActionBar } from "@/frontend/views/dashboard/profile/core/components/ProfileActionBar";
 import { ProfileShell } from "@/frontend/views/dashboard/profile/core/ProfileShell";

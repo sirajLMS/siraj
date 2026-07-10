@@ -11,7 +11,7 @@ export function useTeacherOnboardingLabels(): MessageSchema["dashboard"]["teache
       teacherInfo: t("sections.teacherInfo"),
       officialDetails: t("sections.officialDetails"),
       salaryDetails: t("sections.salaryDetails"),
-      bankingLedger: t("sections.bankingLedger"),
+      paymentMethod: t("sections.paymentMethod"),
     },
     fields: {
       fullName: t("fields.fullName"),

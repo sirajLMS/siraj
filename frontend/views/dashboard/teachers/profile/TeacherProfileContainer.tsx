@@ -9,7 +9,6 @@ import {
   CurrencyCode,
   type Gender,
   AccountStatus as GqlAccountStatus,
-  type PaymentMethod,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   teacherProfileForEditQueryDocument,
@@ -46,7 +45,6 @@ export function TeacherProfileContainer() {
             address: formData.address || null,
             hourlyRate: String(formData.baseSalary),
             rateCurrency: formData.currency ?? CurrencyCode.Usd,
-            paymentMethod: formData.paymentMethod as PaymentMethod,
             status: null,
             dateOfBirth: null,
             nationalId: null,
@@ -74,7 +72,6 @@ export function TeacherProfileContainer() {
         address: data.teacherProfileForEdit.address ?? "",
         baseSalary: Number.parseFloat(data.teacherProfileForEdit.hourlyRate ?? "0"),
         currency: data.teacherProfileForEdit.rateCurrency ?? CurrencyCode.Usd,
-        paymentMethod: data.teacherProfileForEdit.paymentMethod ?? null,
         accountStatus: data.teacherProfileForEdit.status === GqlAccountStatus.Activated,
         updatedAt: data.teacherProfileForEdit.updatedAt ?? "",
         totalClasses: data.teacherProfileForEdit.totalClasses ?? 0,

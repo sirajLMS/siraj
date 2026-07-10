@@ -15,7 +15,7 @@ import {
   parentOnboardingSchema,
 } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
-import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
+import { InvoiceType, PaymentMethodType } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
 const defaultValues: ParentOnboardingFormData = {
   name: "",
@@ -28,7 +28,7 @@ const defaultValues: ParentOnboardingFormData = {
   twitter: "",
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",
-  paymentMethod: PaymentMethod.Paypal,
+  paymentMethodType: PaymentMethodType.BankTransfer,
   currency: CurrencyCode.Usd,
   timezone: IanaTimezone.AfricaCairo,
 };

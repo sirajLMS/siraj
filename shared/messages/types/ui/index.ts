@@ -5,6 +5,7 @@ import type { GenderSelectorLabels } from "./gender-selector";
 import type { LanguageSelectorLabels } from "./language-selector";
 import type { LocalizedStringLabels } from "./localized-string";
 import type { MeetingConfigLabels } from "./meeting-config";
+import type { PaymentMethodLabels } from "./payment-method";
 import type { PhoneInputLabels } from "./phone-input";
 import type { TagInputLabels } from "./tag-input";
 import type { TimezoneSelectLabels } from "./timezone-select";
@@ -17,6 +18,7 @@ export type {
   LanguageSelectorLabels,
   LocalizedStringLabels,
   MeetingConfigLabels,
+  PaymentMethodLabels,
   PhoneInputLabels,
   TagInputLabels,
   TimezoneSelectLabels,
@@ -33,4 +35,5 @@ export interface UiLabels {
   readonly tagInput: TagInputLabels;
   readonly timezoneSelect: TimezoneSelectLabels;
   readonly meetingConfig: MeetingConfigLabels;
+  readonly paymentMethod: PaymentMethodLabels;
 }

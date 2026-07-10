@@ -8,13 +8,9 @@ import SmartphoneOutlinedIcon from "@mui/icons-material/SmartphoneOutlined";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Image from "next/image";
 import type * as React from "react";
 import { PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import {
-  getPaymentMethodCatalogOptionLabel,
-  type PaymentMethodCatalogOption,
-} from "@/frontend/lib/payment-method";
+import { getPaymentMethodCatalogOptionLabel, type PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
 
 export type PaymentMethodOptionRowProps = {
   readonly option: PaymentMethodCatalogOption;
@@ -47,9 +43,7 @@ export function PaymentMethodOptionRow({
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
       {option.logoUrl ? (
-        <Avatar sx={{ width: 24, height: 24 }}>
-          <Image src={option.logoUrl} alt="" width={24} height={24} style={{ objectFit: "contain" }} />
-        </Avatar>
+        <Avatar src={option.logoUrl} alt="" sx={{ width: 24, height: 24 }} />
       ) : (
         <Avatar sx={{ width: 24, height: 24 }}>{resolveTypeIcon(type)}</Avatar>
       )}

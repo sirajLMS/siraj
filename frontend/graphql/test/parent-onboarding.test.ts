@@ -6,8 +6,9 @@ import {
   InvoiceType,
   PaymentDirection,
   PaymentMethodType,
+  type UserPaymentMethodInitialInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-onboarding.documents";
+import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
@@ -44,13 +45,7 @@ const createFullParentInput = (
     email: string;
     invoiceType: InvoiceType | null;
     feeAmount: string | null;
-    initialPayinMethod: {
-      type: PaymentMethodType;
-      direction: PaymentDirection;
-      isDefault?: boolean | null;
-      label?: string | null;
-      details: Record<string, string | null>;
-    } | null;
+    initialPayinMethod: UserPaymentMethodInitialInput | null;
     currency: CurrencyCode | null;
     timezone: IanaTimezone | null;
     address: string | null;

@@ -9,10 +9,10 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ParentAssignedStudentsQuery, ParentComplaintsQuery } from "@/frontend/graphql/generated/gql/operations";
 import {
+  parentAssignedStudentsQueryDocument,
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/complaints/complaint.documents";
-import { parentAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-portal.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentComplaintsView } from "@/frontend/views/dashboard/complaints/ParentComplaintsView";

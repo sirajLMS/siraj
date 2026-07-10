@@ -31,6 +31,7 @@ import type {
   ParentProfileLabels,
   ParentsDirectoryLabels,
 } from "@/shared/messages/types/dashboard/parents";
+import type { PaymentCatalogsLabels } from "@/shared/messages/types/dashboard/payment-catalogs";
 import type { PermissionsLabels } from "@/shared/messages/types/dashboard/permissions";
 import type { ReportsLabels } from "@/shared/messages/types/dashboard/reports";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/messages/types/dashboard/resources";
@@ -154,6 +155,7 @@ export type MessageSchema = {
     readonly resources: ResourcesLabels;
     readonly subjects: SubjectsLabels;
     readonly meetingProviders: MeetingProvidersLabels;
+    readonly paymentCatalogs: PaymentCatalogsLabels;
     readonly booksAndBags: BooksAndBagsLabels;
     readonly permissions: PermissionsLabels;
     readonly searchSchedule: SearchScheduleLabels;

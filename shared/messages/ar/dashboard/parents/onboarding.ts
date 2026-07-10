@@ -53,6 +53,9 @@ export const onboarding: ParentOnboardingLabels = {
       creditCard: "بطاقة ائتمان / مدى",
       cash: "دفع نقدي",
       paypal: "باي بال",
+      mobileWallet: "محفظة إلكترونية",
+      paymentLink: "رابط دفع",
+      onlineAccount: "حساب إلكتروني",
     },
   },
   actions: {

@@ -5,6 +5,7 @@ export { genderSelector } from "./gender-selector";
 export { languageSelector } from "./language-selector";
 export { localizedString } from "./localized-string";
 export { meetingConfig } from "./meeting-config";
+export { paymentMethod } from "./payment-method";
 export { phoneInput } from "./phone-input";
 export { tagInput } from "./tag-input";
 export { timezoneSelect } from "./timezone-select";

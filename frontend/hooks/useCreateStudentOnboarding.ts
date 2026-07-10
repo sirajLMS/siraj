@@ -2,7 +2,7 @@
 
 import { useMutation } from "@apollo/client/react";
 import type { StudentOnboardingInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createStudentMutationDocument } from "@/frontend/graphql/sharedDocuments/students/student-onboarding.documents";
+import { createStudentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 

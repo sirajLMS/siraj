@@ -9,11 +9,7 @@
  * imports so it can be unit-tested and tree-shaken.
  */
 
-import {
-  IdentifierKind,
-  PaymentDirection,
-  PaymentMethodType,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 export { IdentifierKind, PaymentDirection, PaymentMethodType };

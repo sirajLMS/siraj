@@ -22,7 +22,6 @@ const adminTeacherData = {
   timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
   rateCurrency: CurrencyCode.Usd,
-  paymentMethod: null,
   status: null,
 };
 

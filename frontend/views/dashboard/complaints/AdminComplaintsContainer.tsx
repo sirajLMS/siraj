@@ -21,7 +21,7 @@ import {
   adminComplaintQueueQueryDocument,
   deleteComplaintMutationDocument,
   respondToComplaintMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/complaints/complaint.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

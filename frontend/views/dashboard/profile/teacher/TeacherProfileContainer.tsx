@@ -9,7 +9,7 @@ import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/profile/profile.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
@@ -241,12 +241,7 @@ export function TeacherProfileContainer({
 
   if (scope === ProfileScope.Own) {
     return (
-      <TeacherProfileEditForm
-        teacherData={editData}
-        avatarUrl={avatarUrl}
-        isSaving={isSaving}
-        onSubmit={onSubmitOwn}
-      />
+      <TeacherProfileEditForm teacherData={editData} avatarUrl={avatarUrl} isSaving={isSaving} onSubmit={onSubmitOwn} />
     );
   }
 

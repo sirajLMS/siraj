@@ -106,10 +106,10 @@ describe("Payment Idempotency", () => {
       const idempotencyKey = `idemp-${uniqueSuffix}`;
       const paymentMethodSnapshot: PaymentMethodTransactionSnapshot = {
         userPaymentMethodId: null,
-        type: PaymentMethodType.PAYMENT_LINK,
+        type: PaymentMethodType.CASH,
         direction: PaymentDirection.PAYIN,
-        label: "PayPal",
-        details: { url: "https://paypal.me/test" },
+        label: "Cash payment",
+        details: { note: "Test cash payment" },
         catalog: null,
         snapshottedAt: now.toISOString(),
       };
@@ -118,7 +118,7 @@ describe("Payment Idempotency", () => {
         amount: "100.00",
         currency: CurrencyCode.USD,
         paymentDate: now,
-        paymentMethodType: PaymentMethodType.PAYMENT_LINK,
+        paymentMethodType: PaymentMethodType.CASH,
         paymentMethodSnapshot,
         idempotencyKey,
         createdAt: now,
@@ -133,7 +133,7 @@ describe("Payment Idempotency", () => {
         amount: "100.00",
         currency: CurrencyCode.USD,
         paymentDate: now,
-        paymentMethodType: PaymentMethodType.PAYMENT_LINK,
+        paymentMethodType: PaymentMethodType.CASH,
         paymentMethodSnapshot,
         idempotencyKey,
         createdAt: now,

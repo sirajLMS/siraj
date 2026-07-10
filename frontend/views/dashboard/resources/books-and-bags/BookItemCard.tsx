@@ -6,7 +6,7 @@ import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, AvailabilityStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { deleteBookMutationDocument } from "@/frontend/graphql/sharedDocuments/resources/books-and-bags.documents";
+import { deleteBookMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import type {
   BookItemCardProps,
   BooksAndBagsLabels,

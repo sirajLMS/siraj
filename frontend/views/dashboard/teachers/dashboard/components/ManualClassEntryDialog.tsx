@@ -18,7 +18,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { PaginationArgs, StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
+import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 
 interface ManualClassEntryDialogProps {

@@ -144,9 +144,6 @@ function ParentProfileDetails({ parent }: ParentProfileDetailsProps) {
             <DetailItem label={t("fields.feeAmount")} value={parent.feeAmount.toFixed(2)} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <DetailItem label={t("fields.paymentMethod")} value={parent.paymentMethod} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <DetailItem
               label={t("fields.currency")}
               value={<CurrencyDisplay code={parent.currency} fallback={t("notSet")} />}

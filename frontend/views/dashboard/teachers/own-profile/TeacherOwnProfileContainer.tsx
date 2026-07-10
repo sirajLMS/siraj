@@ -8,7 +8,7 @@ import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher-portal.documents";
+import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
 
 export function TeacherOwnProfileContainer() {
   const t = useTranslations("dashboard.teacherOwnProfile");
@@ -56,9 +56,6 @@ export function TeacherOwnProfileContainer() {
                       amount: profile.hourlyRate ?? "0",
                       currency: profile.rateCurrency ?? CurrencyCode.Usd,
                     })}
-                  </Typography>
-                  <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                    {t("paymentMethod", { method: profile.paymentMethod ?? t("notSet") })}
                   </Typography>
                 </Stack>
               </Paper>

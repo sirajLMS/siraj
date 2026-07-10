@@ -88,9 +88,11 @@ function resolveStatusPaletteKey(
       return map[status] ?? "pending";
     }
     case "paymentMethod": {
-      const map: Record<string, "active" | "pending"> = {
+      const map: Record<string, "active" | "pending" | "confirmed" | "cancelled"> = {
         active: "active",
-        inactive: "pending",
+        inactive: "cancelled",
+        verified: "confirmed",
+        unverified: "pending",
       };
       return map[status] ?? "pending";
     }

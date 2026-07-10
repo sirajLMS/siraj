@@ -8,8 +8,8 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import { BankingLedgerSection } from "@/frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection";
 import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
+import { PaymentMethodSection } from "@/frontend/views/dashboard/teachers/onboarding/components/PaymentMethodSection";
 import { SalaryDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
 import { TeacherInfoSection } from "@/frontend/views/dashboard/teachers/onboarding/components/TeacherInfoSection";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
@@ -157,8 +157,8 @@ export function TeacherOnboardingView({
         <SectionPanel title={labels.sections.salaryDetails}>
           <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
         </SectionPanel>
-        <SectionPanel title={labels.sections.bankingLedger}>
-          <BankingLedgerSection register={register} errors={errors} labels={labels} />
+        <SectionPanel title={labels.sections.paymentMethod}>
+          <PaymentMethodSection register={register} errors={errors} labels={labels} />
         </SectionPanel>
         <FormActions isSubmitting={isSubmitting} labels={labels} />
       </Box>

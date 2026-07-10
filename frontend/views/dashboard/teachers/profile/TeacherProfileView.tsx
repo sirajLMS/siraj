@@ -42,7 +42,6 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
       address: "",
       baseSalary: 0,
       currency: CurrencyCode.Usd,
-      paymentMethod: "PAYPAL",
       accountStatus: true,
     },
   });
@@ -52,7 +51,6 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
       methods.reset({
         ...profile,
         gender: profile.gender ?? undefined,
-        paymentMethod: profile.paymentMethod ?? undefined,
       });
     }
   }, [profile, methods]);
@@ -62,7 +60,6 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
       methods.reset({
         ...profile,
         gender: profile.gender ?? undefined,
-        paymentMethod: profile.paymentMethod ?? undefined,
       });
     }
   };

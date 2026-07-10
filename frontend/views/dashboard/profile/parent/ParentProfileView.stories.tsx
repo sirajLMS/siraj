@@ -36,7 +36,6 @@ const parentAdminProfile: ParentAdminData = {
   twitter: "@noor_abdullah",
   invoiceType: "Monthly",
   feeAmount: "500",
-  paymentMethod: "Bank Transfer",
   currency: CurrencyCode.Sar,
   timezone: IanaTimezone.AsiaRiyadh,
   createdAt: "2024-01-15T00:00:00.000Z",

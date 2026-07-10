@@ -11,7 +11,7 @@ import {
   learningResourcesQueryDocument,
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/resources/learning-resource.documents";
+} from "@/frontend/graphql/sharedDocuments";
 import { useLearningResourcesStore } from "@/frontend/stores/learningResourcesStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";

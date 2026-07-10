@@ -32,7 +32,6 @@ export interface ParentProfileData {
   readonly whatsapp?: string;
   readonly invoiceType: string;
   readonly feeAmount: number;
-  readonly paymentMethod: string;
   readonly currency: CurrencyCode;
   readonly students: readonly ParentStudent[];
 }

@@ -4,7 +4,7 @@ export const profile: ProfileLabels = {
   shell: {
     tabs: {
       profile: "الملف الشخصي",
-      banking: "الحسابات البنكية",
+      paymentMethods: "طرق الدفع",
       meeting: "إعدادات الاجتماع",
       students: "الطلاب",
       notifications: "الإشعارات",
@@ -239,7 +239,7 @@ export const profile: ProfileLabels = {
       CLASS_REMINDER: "تذكيرات الحصص",
       INVOICE_GENERATED: "إنشاء الفواتير",
       COMPLAINT_RESPONSE: "ردود الشكاوى",
-      BANKING_DETAILS_CHANGED: "تغيير بيانات الحساب البنكي",
+      PAYMENT_METHOD_CHANGED: "تغيير طريقة الدفع",
       NEW_COMPLAINT: "شكاوى جديدة",
       NEW_SUGGESTION: "اقتراحات جديدة",
       SUGGESTION_ACKNOWLEDGED: "تأكيد استلام الاقتراح",
