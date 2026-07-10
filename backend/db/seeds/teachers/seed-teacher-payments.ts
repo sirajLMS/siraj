@@ -1,7 +1,13 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherPayments } from "@/backend/db/schema/teachers/teacher-banking";
-import { addMonths, loadSeedConfig, type SeedConfig, startOfDay } from "@/backend/db/seeds/lib";
+import {
+  addMonths,
+  DEFAULT_INVOICE_CURRENCY,
+  loadSeedConfig,
+  type SeedConfig,
+  startOfDay,
+} from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types";
 
@@ -39,7 +45,7 @@ export async function seedOrGet(bankingDetailsList: TeacherBankingDetailsHistory
           teacherId: banking.teacherId,
           bankingDetailsHistoryId: banking.id,
           amount: (150 + m * 25).toFixed(2),
-          currency: "USD",
+          currency: DEFAULT_INVOICE_CURRENCY,
           paymentDate,
           isTestPayment: true,
           createdAt: now,

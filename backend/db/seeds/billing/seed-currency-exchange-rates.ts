@@ -2,6 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { currencyExchangeRates } from "@/backend/db/schema/billing/billing";
 import { EXCHANGE_PAIRS, iterateInvoiceMonths, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
+import type { CurrencyExchangeRateInsertType } from "@/backend/types";
 
 export async function seedOrGet(config?: SeedConfig) {
   logger.info("Seeding currency exchange rates...");
@@ -19,17 +20,19 @@ export async function seedOrGet(config?: SeedConfig) {
     for (const monthSpec of months.slice(0, seedConfig.profile === "standard" ? months.length : 1)) {
       const effectiveDate = new Date(`${monthSpec.issueDate}T00:00:00.000Z`);
 
+      const row: CurrencyExchangeRateInsertType = {
+        fromCurrency: pair.from,
+        toCurrency: pair.to,
+        rate: pair.baseRate,
+        source: "seed",
+        effectiveDate,
+        createdAt: now,
+        updatedAt: now,
+      };
+
       const [inserted] = await db
         .insert(currencyExchangeRates)
-        .values({
-          fromCurrency: pair.from,
-          toCurrency: pair.to,
-          rate: pair.baseRate,
-          source: "seed",
-          effectiveDate,
-          createdAt: now,
-          updatedAt: now,
-        })
+        .values(row)
         .onConflictDoUpdate({
           target: [
             currencyExchangeRates.fromCurrency,

@@ -1,6 +1,13 @@
 import { index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { countryCodeEnum, invoiceTypeEnum, parentStatusEnum, paymentMethodEnum } from "@/backend/db/schema/enums";
+import {
+  countryCodeEnum,
+  currencyCodeEnum,
+  invoiceTypeEnum,
+  parentStatusEnum,
+  paymentMethodEnum,
+} from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
+import type { CurrencyCode } from "@/backend/enum";
 
 export const parents = pgTable(
   "parents",
@@ -21,7 +28,7 @@ export const parents = pgTable(
     invoiceType: invoiceTypeEnum("invoice_type"),
     feeAmount: numeric("fee_amount", { precision: 12, scale: 2 }),
     paymentMethod: paymentMethodEnum("payment_method"),
-    currency: varchar("currency", { length: 10 }),
+    currency: currencyCodeEnum("currency").$type<CurrencyCode>(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

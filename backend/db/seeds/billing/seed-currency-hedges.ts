@@ -2,12 +2,13 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { currencyHedges } from "@/backend/db/schema/billing/billing";
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
+import { CurrencyCode } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 
 const HEDGE_SPECS = [
-  { currency: "USD", amount: "10000.00", hedgeType: "LONG", notes: "USD exposure hedge" },
-  { currency: "EGP", amount: "250000.00", hedgeType: "SHORT", notes: "EGP exposure hedge" },
-  { currency: "SAR", amount: "50000.00", hedgeType: "LONG", notes: "SAR exposure hedge" },
+  { currency: CurrencyCode.USD, amount: "10000.00", hedgeType: "LONG", notes: "USD exposure hedge" },
+  { currency: CurrencyCode.EGP, amount: "250000.00", hedgeType: "SHORT", notes: "EGP exposure hedge" },
+  { currency: CurrencyCode.SAR, amount: "50000.00", hedgeType: "LONG", notes: "SAR exposure hedge" },
 ] as const;
 
 export async function seedOrGet(config?: SeedConfig) {

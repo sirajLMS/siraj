@@ -2,6 +2,7 @@ import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs } from "@/backend/db/schema";
+import type { CurrencyCode } from "@/backend/enum";
 import type * as Types from "@/backend/types";
 
 /**
@@ -307,7 +308,7 @@ export namespace AuditRepository {
   export interface PaymentRefundInput {
     paymentId: string;
     refundAmount: number;
-    currency: string;
+    currency: CurrencyCode;
     actorUserId: string | null;
     reason?: string;
   }
@@ -360,8 +361,8 @@ export namespace AuditRepository {
    */
   export interface ExchangeRateUpdateInput {
     rateId: string;
-    fromCurrency: string;
-    toCurrency: string;
+    fromCurrency: CurrencyCode;
+    toCurrency: CurrencyCode;
     oldRate: number | null;
     newRate: number;
     actorUserId: string | null;

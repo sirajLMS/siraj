@@ -1,7 +1,7 @@
 import { addMonths, formatDateKey, getDateWindow, startOfDay } from "@/backend/db/seeds/lib/date-window";
 import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
-import { InvoiceStatus, InvoiceType, PaymentMethod } from "@/backend/enum";
+import { CurrencyCode, InvoiceStatus, InvoiceType, PaymentMethod } from "@/backend/enum";
 
 export interface InvoiceMonthSpec {
   year: number;
@@ -38,12 +38,16 @@ export function buildInvoiceAmount(config: SeedConfig, parentIndex: number, mont
   return faker.number.int({ min: 80, max: 400 }).toFixed(2);
 }
 
-export const DEFAULT_INVOICE_CURRENCY = "USD";
+export const DEFAULT_INVOICE_CURRENCY = CurrencyCode.USD;
 export const DEFAULT_INVOICE_TYPE = InvoiceType.MONTHLY;
 export const DEFAULT_PAYMENT_METHOD = PaymentMethod.PAYPAL;
 
-export const EXCHANGE_PAIRS = [
-  { from: "USD", to: "EGP", baseRate: "48.500000" },
-  { from: "USD", to: "SAR", baseRate: "3.750000" },
-  { from: "EGP", to: "USD", baseRate: "0.020619" },
-] as const;
+export const EXCHANGE_PAIRS: ReadonlyArray<{
+  from: CurrencyCode;
+  to: CurrencyCode;
+  baseRate: string;
+}> = [
+  { from: CurrencyCode.USD, to: CurrencyCode.EGP, baseRate: "48.500000" },
+  { from: CurrencyCode.USD, to: CurrencyCode.SAR, baseRate: "3.750000" },
+  { from: CurrencyCode.EGP, to: CurrencyCode.USD, baseRate: "0.020619" },
+];

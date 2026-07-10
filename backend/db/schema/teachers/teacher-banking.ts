@@ -1,8 +1,10 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, numeric, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, numeric, pgTable, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { encryptedText } from "@/backend/db/schema/custom-types";
+import { currencyCodeEnum } from "@/backend/db/schema/enums";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
+import type { CurrencyCode } from "@/backend/enum";
 
 /**
  * Teacher Banking Details History table.
@@ -60,7 +62,7 @@ export const teacherPayments = pgTable(
       .notNull()
       .references(() => teacherBankingDetailsHistory.id, { onDelete: "restrict" }),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
-    currency: varchar("currency", { length: 10 }).notNull(),
+    currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     paymentDate: timestamp("payment_date", { withTimezone: true, precision: 3 }).notNull(),
     isTestPayment: boolean("is_test_payment").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),

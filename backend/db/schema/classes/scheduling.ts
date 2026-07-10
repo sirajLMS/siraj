@@ -22,6 +22,7 @@ import {
   classExecutionStateEnum,
   classOutcomeEnum,
   classTypeEnum,
+  currencyCodeEnum,
   dayOfWeekEnum,
   dstMigrationResultEnum,
   leaveRequesterTypeEnum,
@@ -31,6 +32,7 @@ import { timezones } from "@/backend/db/schema/shared/timezones";
 import { students } from "@/backend/db/schema/students/students";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
+import type { CurrencyCode } from "@/backend/enum";
 
 /**
  * Recurring Schedules table.
@@ -149,7 +151,7 @@ export const classInstances = pgTable(
     payrollCredited: boolean("payroll_credited").notNull().default(false),
     // Rate snapshot — captured at class completion, overridable by admin
     rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }),
-    rateCurrency: varchar("rate_currency", { length: 10 }),
+    rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
     isRateOverridden: boolean("is_rate_overridden").notNull().default(false),
     remarks: text("remarks"),
     adminNotes: text("admin_notes"),

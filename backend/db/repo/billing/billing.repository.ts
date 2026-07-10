@@ -13,7 +13,7 @@ import {
   systemSettings,
   users,
 } from "@/backend/db/schema";
-import type { InvoiceStatus, InvoiceType, StudentStatus } from "@/backend/enum";
+import { CurrencyCode, type InvoiceStatus, type InvoiceType, type StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
@@ -49,16 +49,16 @@ export namespace BillingRepository {
 
   async function resolveExchangeRateSnapshot(
     t: DBTransaction | typeof db,
-    currency: string,
+    currency: CurrencyCode,
     snapshot?: string | null,
     source?: string | null,
     locale?: string
   ): Promise<{ snapshot: string | null; source: string | null }> {
-    if (snapshot || currency === "USD") {
+    if (snapshot || currency === CurrencyCode.USD) {
       return { snapshot: snapshot ?? null, source: source ?? null };
     }
 
-    const rate = await getLatestExchangeRate(currency, "USD", t as DBTransaction, locale);
+    const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, t as DBTransaction, locale);
     return {
       snapshot: rate.rate,
       source: rate.source || "SYSTEM_AUTO",
@@ -71,10 +71,11 @@ export namespace BillingRepository {
   async function createBillingEntity<R>(
     t: DBTransaction,
     table: PgTable,
-    input: { currency: string; exchangeRateSnapshot?: string | null; exchangeRateSource?: string | null } & Record<
-      string,
-      unknown
-    >,
+    input: {
+      currency: CurrencyCode;
+      exchangeRateSnapshot?: string | null;
+      exchangeRateSource?: string | null;
+    } & Record<string, unknown>,
     locale?: string
   ): Promise<R> {
     const { snapshot, source } = await resolveExchangeRateSnapshot(
@@ -103,8 +104,8 @@ export namespace BillingRepository {
    * Get the latest exchange rate.
    */
   export const getLatestExchangeRate = async (
-    fromCurrency: string,
-    toCurrency: string,
+    fromCurrency: CurrencyCode,
+    toCurrency: CurrencyCode,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
@@ -287,8 +288,8 @@ export namespace BillingRepository {
   }
 
   export const listExchangeRateHistory = async (
-    from: string,
-    to: string,
+    from: CurrencyCode,
+    to: CurrencyCode,
     pagination: Types.PaginationArgs | null = null,
     maxDays = 90,
     tx?: DBTransaction
@@ -453,7 +454,7 @@ export namespace BillingRepository {
     invoiceId: string;
     parentId: string;
     amount: string;
-    currency: string;
+    currency: CurrencyCode;
     dueDate: string;
   };
 
@@ -590,7 +591,7 @@ export namespace BillingRepository {
     dueDate: string;
     paidDate: string | null;
     amount: string;
-    currency: string;
+    currency: CurrencyCode;
     status: string;
     invoiceType: string | null;
     studentId: string | null;

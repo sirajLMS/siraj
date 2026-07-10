@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
-import type { AccountStatus, Gender, PaymentMethod } from "@/backend/enum";
+import type { AccountStatus, CurrencyCode, Gender, PaymentMethod } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
@@ -239,7 +239,7 @@ export namespace TeacherRepository {
     hasZoomPassword: boolean;
     timezone: string;
     hourlyRate: string | null;
-    rateCurrency: string | null;
+    rateCurrency: CurrencyCode | null;
     paymentMethod: PaymentMethod | null;
     status: AccountStatus;
     updatedAt: Date;
@@ -298,7 +298,10 @@ export namespace TeacherRepository {
   ): Promise<boolean> => {
     const queryDb = tx ?? db;
     const now = new Date();
-    const { timezone: _tzInput, status: statusInput, ...restInput } = input;
+    const statusInput = input.status;
+    const restInput = Object.fromEntries(
+      Object.entries(input).filter(([key]) => key !== "timezone" && key !== "status")
+    ) as Omit<TeacherProfileUpdateInputType, "timezone" | "status">;
     const setInput = {
       ...restInput,
       ...(statusInput == null ? {} : { status: statusInput }),

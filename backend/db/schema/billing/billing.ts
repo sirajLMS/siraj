@@ -13,10 +13,11 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { invoiceStatusEnum, invoiceTypeEnum, paymentMethodEnum } from "@/backend/db/schema/enums";
+import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodEnum } from "@/backend/db/schema/enums";
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
+import type { CurrencyCode } from "@/backend/enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
@@ -32,7 +33,7 @@ export const invoices = pgTable(
     dueDate: date("due_date").notNull(),
     paidDate: date("paid_date"),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
-    currency: varchar("currency", { length: 10 }).notNull(),
+    currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     status: invoiceStatusEnum("status").notNull(),
     invoiceType: invoiceTypeEnum("invoice_type").notNull(),
     version: integer("version").notNull().default(0),
@@ -73,7 +74,7 @@ export const payments = pgTable(
       .notNull()
       .references(() => invoices.id, { onDelete: "restrict" }),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
-    currency: varchar("currency", { length: 10 }).notNull(),
+    currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     paymentDate: timestamp("payment_date", { withTimezone: true, precision: 3 }).notNull(),
     paymentMethod: paymentMethodEnum("payment_method").notNull(),
     transactionId: varchar("transaction_id", { length: 255 }),
@@ -96,8 +97,8 @@ export const currencyExchangeRates = pgTable(
   "currency_exchange_rates",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    fromCurrency: varchar("from_currency", { length: 10 }).notNull(),
-    toCurrency: varchar("to_currency", { length: 10 }).notNull(),
+    fromCurrency: currencyCodeEnum("from_currency").notNull().$type<CurrencyCode>(),
+    toCurrency: currencyCodeEnum("to_currency").notNull().$type<CurrencyCode>(),
     rate: numeric("rate", { precision: 12, scale: 6 }).notNull(),
     source: varchar("source", { length: 50 }),
     providerResponse: jsonb("provider_response"),
@@ -123,8 +124,8 @@ export const currencyExchangeAuditLogs = pgTable(
   "currency_exchange_audit_logs",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    fromCurrency: varchar("from_currency", { length: 10 }).notNull(),
-    toCurrency: varchar("to_currency", { length: 10 }).notNull(),
+    fromCurrency: currencyCodeEnum("from_currency").notNull().$type<CurrencyCode>(),
+    toCurrency: currencyCodeEnum("to_currency").notNull().$type<CurrencyCode>(),
     oldRate: numeric("old_rate", { precision: 12, scale: 6 }),
     newRate: numeric("new_rate", { precision: 12, scale: 6 }).notNull(),
     source: varchar("source", { length: 50 }).notNull(),
@@ -142,7 +143,7 @@ export const currencyHedges = pgTable(
   "currency_hedges",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    currency: varchar("currency", { length: 10 }).notNull(),
+    currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     hedgeType: varchar("hedge_type", { length: 20 }).notNull(), // e.g., 'LONG', 'SHORT'
     notes: text("notes"),

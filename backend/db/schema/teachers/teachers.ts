@@ -1,7 +1,14 @@
 import { date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { encryptedText } from "@/backend/db/schema/custom-types";
-import { accountStatusEnum, countryCodeEnum, genderEnum, paymentMethodEnum } from "@/backend/db/schema/enums";
+import {
+  accountStatusEnum,
+  countryCodeEnum,
+  currencyCodeEnum,
+  genderEnum,
+  paymentMethodEnum,
+} from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
+import type { CurrencyCode } from "@/backend/enum";
 
 /**
  * Teachers table.
@@ -29,7 +36,7 @@ export const teachers = pgTable(
     zoomPassword: encryptedText("zoom_password"),
     countryCode: countryCodeEnum("country_code"),
     hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
-    rateCurrency: varchar("rate_currency", { length: 10 }),
+    rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
     paymentMethod: paymentMethodEnum("payment_method"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),

@@ -13,7 +13,7 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
+import type { BookingStatus, ClassExecutionState, ClassOutcome, CurrencyCode, ParentStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
@@ -267,7 +267,7 @@ export namespace ParentRepository {
     invoiceType: string | null;
     feeAmount: string | null;
     paymentMethod: string | null;
-    currency: string | null;
+    currency: CurrencyCode | null;
     timezone: IanaTimezone;
     createdAt: Date;
     updatedAt: Date;
