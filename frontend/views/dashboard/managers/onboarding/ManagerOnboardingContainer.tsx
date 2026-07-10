@@ -12,8 +12,8 @@ import {
   type ManagerOnboardingFormData,
   managerOnboardingSchema,
 } from "@/frontend/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
-import { useRouter } from "@/shared/i18n/routing";
 import { ManagerAccountType } from "@/frontend/views/dashboard/managers/onboarding/types";
+import { useRouter } from "@/shared/i18n/routing";
 
 const defaultValues: ManagerOnboardingFormData = {
   name: "",

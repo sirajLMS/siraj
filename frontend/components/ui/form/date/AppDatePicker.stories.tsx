@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppDatePicker } from "./AppDatePicker";
+import { AppDatePicker } from "@/frontend/components/ui/form/date/AppDatePicker";
 
 const meta: Meta<typeof AppDatePicker> = {
   title: "Form/AppDatePicker",

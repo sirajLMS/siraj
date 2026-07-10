@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Grid, Typography } from "@mui/material";
-import type { ResourceLibraryGridProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 import { ResourceLibraryCard } from "@/frontend/views/dashboard/resources/components/ResourceLibraryCard";
 import { ResourceLibraryHeader } from "@/frontend/views/dashboard/resources/components/ResourceLibraryHeader";
+import type { ResourceLibraryGridProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export function ResourceLibraryGrid({
   resources,

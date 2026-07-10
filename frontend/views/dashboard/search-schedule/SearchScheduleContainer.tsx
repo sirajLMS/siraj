@@ -10,9 +10,9 @@ import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission, type AvailabilitySearchInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
-import { SearchScheduleForm } from "./SearchScheduleForm";
-import { SearchSchedulePaginationFooter } from "./SearchSchedulePaginationFooter";
-import { SearchScheduleView } from "./SearchScheduleView";
+import { SearchScheduleForm } from "@/frontend/views/dashboard/search-schedule/SearchScheduleForm";
+import { SearchSchedulePaginationFooter } from "@/frontend/views/dashboard/search-schedule/SearchSchedulePaginationFooter";
+import { SearchScheduleView } from "@/frontend/views/dashboard/search-schedule/SearchScheduleView";
 
 export function SearchScheduleContainer() {
   const t = useTranslations("dashboard.searchSchedule");

@@ -1,2 +1,2 @@
-export { ExportButton, FilterButton, PrimaryPageAction } from "./ActionButtons";
-export { ActionIconLink } from "./ActionIconLink";
+export { ExportButton, FilterButton, PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
+export { ActionIconLink } from "@/frontend/components/ui/button/ActionIconLink";

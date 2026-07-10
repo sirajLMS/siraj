@@ -9,9 +9,9 @@ import { HorizontalScrollRow } from "@/frontend/components/ui";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
-import type { SearchScheduleResultItem } from "./SearchScheduleView";
-import { TeacherAvailabilityDayPill } from "./TeacherAvailabilityDayPill";
-import { TeacherAvailabilityMonthDrawer } from "./TeacherAvailabilityMonthDrawer";
+import type { SearchScheduleResultItem } from "@/frontend/views/dashboard/search-schedule/SearchScheduleView";
+import { TeacherAvailabilityDayPill } from "@/frontend/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
+import { TeacherAvailabilityMonthDrawer } from "@/frontend/views/dashboard/search-schedule/TeacherAvailabilityMonthDrawer";
 
 interface TeacherAvailabilityGridProps {
   readonly teacher: SearchScheduleResultItem;

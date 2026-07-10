@@ -13,8 +13,12 @@ import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-exp
 import { logger } from "@/frontend/utils/logger";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
+import type {
+  ReportLedgerRow,
+  ReportsSummary,
+  ReportType,
+} from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import type { ReportLedgerRow, ReportsSummary, ReportType } from "./types/reportsTypes";
 
 function formatHours(hours: number): string {
   const h = Math.floor(hours);

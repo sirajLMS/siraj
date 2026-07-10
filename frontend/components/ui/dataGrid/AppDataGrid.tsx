@@ -3,9 +3,9 @@
 import { Box } from "@mui/material";
 import { DataGrid, type DataGridProps, type GridValidRowModel } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { AppDataGridLoadingOverlay } from "@/frontend/components/ui/dataGrid/AppDataGridLoadingOverlay";
+import { AppDataGridNoRowsOverlay } from "@/frontend/components/ui/dataGrid/AppDataGridNoRowsOverlay";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
-import { AppDataGridLoadingOverlay } from "./AppDataGridLoadingOverlay";
-import { AppDataGridNoRowsOverlay } from "./AppDataGridNoRowsOverlay";
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 

@@ -3,8 +3,8 @@
 import { Box, Typography } from "@mui/material";
 import { differenceInCalendarDays, parse } from "date-fns";
 import { useTranslations } from "next-intl";
-import { SearchScheduleResultsSkeleton } from "./SearchScheduleResultsSkeleton";
-import { TeacherAvailabilityGrid } from "./TeacherAvailabilityGrid";
+import { SearchScheduleResultsSkeleton } from "@/frontend/views/dashboard/search-schedule/SearchScheduleResultsSkeleton";
+import { TeacherAvailabilityGrid } from "@/frontend/views/dashboard/search-schedule/TeacherAvailabilityGrid";
 
 export interface SearchScheduleResultItem {
   readonly id?: string | null;

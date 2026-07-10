@@ -6,7 +6,11 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { BooksAndBagsGrid } from "@/frontend/views/dashboard/resources/books-and-bags/BooksAndBagsGrid";
-import type { BookItem, BooksAndBagsClientProps, BooksAndBagsLabels } from "@/frontend/views/dashboard/resources/books-and-bags/booksAndBags.types";
+import type {
+  BookItem,
+  BooksAndBagsClientProps,
+  BooksAndBagsLabels,
+} from "@/frontend/views/dashboard/resources/books-and-bags/booksAndBags.types";
 
 export function BooksAndBagsClient({ initialBooks }: Readonly<BooksAndBagsClientProps>) {
   const t = useTranslations("dashboard.booksAndBags");

@@ -1,4 +1,8 @@
-import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "../types/resourcesTypes";
+import type {
+  LearningResourceRow,
+  ResourceFilterType,
+  ResourceSortBy,
+} from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export function filterResources(
   rows: readonly LearningResourceRow[],

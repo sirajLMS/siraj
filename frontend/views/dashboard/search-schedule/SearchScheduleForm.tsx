@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl";
 import { type SyntheticEvent, useState } from "react";
 import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/components/ui/form";
 import type { SearchScheduleDraftFilters } from "@/frontend/stores/searchScheduleStore";
-import { SearchScheduleFilterDrawer } from "./SearchScheduleFilterDrawer";
-import { SearchScheduleSortMenu } from "./SearchScheduleSortMenu";
-import { SearchScheduleTeacherAutocomplete } from "./SearchScheduleTeacherAutocomplete";
-import { countActiveDrawerFilters } from "./searchScheduleFilterUtils";
+import { SearchScheduleFilterDrawer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleFilterDrawer";
+import { SearchScheduleSortMenu } from "@/frontend/views/dashboard/search-schedule/SearchScheduleSortMenu";
+import { SearchScheduleTeacherAutocomplete } from "@/frontend/views/dashboard/search-schedule/SearchScheduleTeacherAutocomplete";
+import { countActiveDrawerFilters } from "@/frontend/views/dashboard/search-schedule/searchScheduleFilterUtils";
 
 interface SearchScheduleFormProps {
   readonly draft: SearchScheduleDraftFilters;

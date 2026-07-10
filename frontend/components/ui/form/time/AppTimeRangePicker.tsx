@@ -3,7 +3,7 @@
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Popover, TextField } from "@mui/material";
 import { useId, useState } from "react";
-import { AppTimePicker } from "./AppTimePicker";
+import { AppTimePicker } from "@/frontend/components/ui/form/time/AppTimePicker";
 
 export interface AppTimeRangePickerProps {
   readonly fromTime: string;

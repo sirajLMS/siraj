@@ -18,7 +18,7 @@ import {
 import { useTranslations } from "next-intl";
 import { DayOfWeek, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { SearchScheduleDraftFilters } from "@/frontend/stores/searchScheduleStore";
-import { getClearDrawerFiltersPatch } from "./searchScheduleFilterUtils";
+import { getClearDrawerFiltersPatch } from "@/frontend/views/dashboard/search-schedule/searchScheduleFilterUtils";
 
 interface SearchScheduleFilterDrawerProps {
   readonly open: boolean;

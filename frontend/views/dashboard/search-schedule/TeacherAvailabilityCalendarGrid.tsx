@@ -3,12 +3,12 @@
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Chip, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import type { TeacherAvailabilityGapItem } from "@/frontend/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
 import {
   CalendarGridContainer,
   CalendarWeekdayHeader,
   computeCalendarGridLayout,
 } from "@/frontend/views/dashboard/shared/CalendarGridShared";
-import type { TeacherAvailabilityGapItem } from "./TeacherAvailabilityDayPill";
 
 export interface TeacherAvailabilityCalendarDay {
   readonly day: number;

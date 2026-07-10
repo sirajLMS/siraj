@@ -1,2 +1,2 @@
-export * from "./AppTimePicker";
-export * from "./AppTimeRangePicker";
+export * from "@/frontend/components/ui/form/time/AppTimePicker";
+export * from "@/frontend/components/ui/form/time/AppTimeRangePicker";

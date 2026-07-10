@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppTimePicker } from "./AppTimePicker";
+import { AppTimePicker } from "@/frontend/components/ui/form/time/AppTimePicker";
 
 const meta: Meta<typeof AppTimePicker> = {
   title: "Form/AppTimePicker",

@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import { PaginationControls } from "@/frontend/components/ui/filter/PaginationControls";
-import type { SearchSchedulePageInfo } from "./SearchScheduleView";
+import type { SearchSchedulePageInfo } from "@/frontend/views/dashboard/search-schedule/SearchScheduleView";
 
 interface SearchSchedulePaginationFooterProps {
   readonly pageInfo: SearchSchedulePageInfo;

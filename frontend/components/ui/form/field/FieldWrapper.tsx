@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { labelSx } from "./formFieldStyles";
+import { labelSx } from "@/frontend/components/ui/form/field/formFieldStyles";
 
 interface FieldWrapperProps {
   readonly label: string;

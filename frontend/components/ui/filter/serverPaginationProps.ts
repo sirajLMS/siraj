@@ -1,7 +1,7 @@
 "use client";
 
 import type { GridPaginationModel } from "@mui/x-data-grid";
-import { GridPagination } from "./PaginationControls";
+import { GridPagination } from "@/frontend/components/ui/filter/PaginationControls";
 
 export interface ServerPaginationConfig {
   readonly page: number;

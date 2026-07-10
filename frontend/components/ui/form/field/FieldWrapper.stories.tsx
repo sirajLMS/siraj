@@ -1,6 +1,6 @@
 import { TextField } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { FieldWrapper } from "./FieldWrapper";
+import { FieldWrapper } from "@/frontend/components/ui/form/field/FieldWrapper";
 
 const meta: Meta<typeof FieldWrapper> = {
   title: "Form/FieldWrapper",

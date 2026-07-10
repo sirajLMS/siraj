@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { SubjectDetailViewProps, SubjectResourceItem } from "./types";
+import type { SubjectDetailViewProps, SubjectResourceItem } from "@/frontend/views/dashboard/subjects/detail/types";
 
 function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) {
   const t = useTranslations("dashboard.subjects.detail");

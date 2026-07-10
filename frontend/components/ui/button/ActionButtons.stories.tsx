@@ -2,7 +2,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import type { Meta, StoryObj } from "@storybook/react";
-import { ExportButton, FilterButton, PrimaryPageAction } from "./ActionButtons";
+import { ExportButton, FilterButton, PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
 
 const meta: Meta = {
   title: "UI/ActionButtons",

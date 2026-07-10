@@ -6,7 +6,7 @@ import { format, isValid, parse } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useLocale } from "next-intl";
 import { useId, useState } from "react";
-import { AppDatePicker } from "./AppDatePicker";
+import { AppDatePicker } from "@/frontend/components/ui/form/date/AppDatePicker";
 
 const DATE_STORAGE_FORMAT = "yyyy-MM-dd";
 const DATE_DISPLAY_FORMAT = "MMM d, yyyy";

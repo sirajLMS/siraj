@@ -1,2 +1,2 @@
-export * from "./FieldWrapper";
-export * from "./formFieldStyles";
+export * from "@/frontend/components/ui/form/field/FieldWrapper";
+export * from "@/frontend/components/ui/form/field/formFieldStyles";

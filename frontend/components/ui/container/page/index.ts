@@ -1,2 +1,2 @@
-export * from "./PageContainer";
-export * from "./PageHeader";
+export * from "@/frontend/components/ui/container/page/PageContainer";
+export * from "@/frontend/components/ui/container/page/PageHeader";

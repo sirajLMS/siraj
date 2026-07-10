@@ -9,10 +9,10 @@ import { useEffect, useMemo, useState } from "react";
 import type { AvailabilitySearchInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
-import type { SearchScheduleResultItem } from "./SearchScheduleView";
-import { buildTeacherMonthAvailabilityInput } from "./searchScheduleFilterUtils";
-import { TeacherAvailabilityCalendarGrid } from "./TeacherAvailabilityCalendarGrid";
-import type { TeacherAvailabilityGapItem } from "./TeacherAvailabilityDayPill";
+import type { SearchScheduleResultItem } from "@/frontend/views/dashboard/search-schedule/SearchScheduleView";
+import { buildTeacherMonthAvailabilityInput } from "@/frontend/views/dashboard/search-schedule/searchScheduleFilterUtils";
+import { TeacherAvailabilityCalendarGrid } from "@/frontend/views/dashboard/search-schedule/TeacherAvailabilityCalendarGrid";
+import type { TeacherAvailabilityGapItem } from "@/frontend/views/dashboard/search-schedule/TeacherAvailabilityDayPill";
 
 interface TeacherAvailabilityMonthDrawerProps {
   readonly open: boolean;

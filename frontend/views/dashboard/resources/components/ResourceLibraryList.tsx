@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { ResourceLibraryListProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 import { ResourceLibraryCard } from "@/frontend/views/dashboard/resources/components/ResourceLibraryCard";
 import { ResourceLibraryHeader } from "@/frontend/views/dashboard/resources/components/ResourceLibraryHeader";
+import type { ResourceLibraryListProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export function ResourceLibraryList({
   resources,

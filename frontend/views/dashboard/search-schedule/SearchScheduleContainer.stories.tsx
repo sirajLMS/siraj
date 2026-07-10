@@ -6,7 +6,7 @@ import { DayOfWeek, IanaTimezone } from "@/frontend/graphql/generated/gql/graphq
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
-import { SearchScheduleContainer } from "./SearchScheduleContainer";
+import { SearchScheduleContainer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleContainer";
 
 const fromDate = format(new Date(), "yyyy-MM-dd");
 const toDate = format(addDays(new Date(), 7), "yyyy-MM-dd");

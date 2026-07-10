@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { FormSuccessSnackbar } from "./FormSuccessSnackbar";
+import { FormSuccessSnackbar } from "@/frontend/components/ui/form/snackbar/FormSuccessSnackbar";
 
 const meta: Meta<typeof FormSuccessSnackbar> = {
   title: "UI/FormSuccessSnackbar",
