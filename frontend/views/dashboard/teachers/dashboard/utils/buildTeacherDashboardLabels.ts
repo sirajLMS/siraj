@@ -185,7 +185,8 @@ function buildManualClassEntryLabels(t: TeacherDashboardTranslator): TeacherDash
 
 export function buildTeacherDashboardLabels(
   t: TeacherDashboardTranslator,
-  dashboardT: DashboardTranslator
+  dashboardT: DashboardTranslator,
+  joinEmptyTeacher: string
 ): TeacherDashboardViewLabels {
   const instanceStatusLabels = buildClassInstanceStatusLabels(dashboardT);
 
@@ -214,5 +215,6 @@ export function buildTeacherDashboardLabels(
       pageSubtitle: t("rules.pageSubtitle"),
     },
     instanceStatusLabels,
+    meetingLabels: { emptyTeacher: joinEmptyTeacher },
   };
 }

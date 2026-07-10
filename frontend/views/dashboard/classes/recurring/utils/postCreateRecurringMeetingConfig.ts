@@ -31,13 +31,14 @@ export async function postCreateRecurringMeetingConfig(
     return { success: true };
   }
 
+  const isNewMode = !state.selectedConfig;
   const sourceConfig = state.selectedConfig;
   const providerId = sourceConfig?.providerId ?? state.newProvider?.id;
   const meetingUrl = sourceConfig?.details?.meetingUrl?.trim() ?? state.newMeetingUrl.trim();
   const label = sourceConfig?.label?.trim() || state.newLabel.trim() || null;
 
   if (!providerId || !meetingUrl) {
-    return { success: true };
+    return { success: !isNewMode };
   }
 
   try {

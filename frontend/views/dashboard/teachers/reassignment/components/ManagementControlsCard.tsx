@@ -237,7 +237,7 @@ export function ManagementControlsCard({
     if (selectedNewStatus) {
       const input: StatusChangeInput = {
         studentId,
-        newStatus: selectedNewStatus as StudentStatus,
+        newStatus: selectedNewStatus,
         expectedVersion: bothChanged ? undefined : (version ?? undefined),
       };
       await onStatusChange(input);

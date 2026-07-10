@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
@@ -70,10 +71,7 @@ export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<Perform
   const t = useTranslations("dashboard.reports");
   const tErrors = useTranslations("errors");
 
-  const paidLabel = formatReportPaidAmounts(row.paidAmounts, locale, {
-    convertedAmount: values => t("convertedAmount", values),
-    displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-  });
+  const paidLabel = formatReportPaidAmounts(row.paidAmounts, locale, buildFxDisplayMessages(t, tErrors));
 
   return (
     <BaseCard

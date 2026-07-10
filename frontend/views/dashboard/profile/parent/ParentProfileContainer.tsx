@@ -3,9 +3,10 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { ErrorState } from "@/frontend/components/ui";
-import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ParentStatus, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
+  changeParentLifecycleStatusMutationDocument,
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
@@ -39,12 +40,12 @@ function buildCoreInput(formData: ParentAdminEditFormData) {
     name: formData.name.trim(),
     email: formData.email.trim(),
     displayCurrency: formData.displayCurrency ?? null,
+    phone: formData.phone || null,
   };
 }
 
 function buildOwnParentInput(formData: ParentAdminEditFormData) {
   return {
-    phone: formData.phone || null,
     facebook: formData.facebook || null,
     whatsapp: formData.whatsapp || null,
     twitter: formData.twitter || null,
@@ -89,6 +90,7 @@ function buildEditData(
   const adminData = parentData as ParentAdminData;
   return {
     ...base,
+    lifecycleStatus: (adminData.lifecycleStatus as ParentStatus | null | undefined) ?? ParentStatus.Regular,
     nationality: adminData.nationality ?? "",
     address: adminData.address ?? "",
     invoiceType: adminData.invoiceType ?? "",
@@ -116,7 +118,10 @@ export function ParentProfileContainer({
 
   const [updateOwnProfile, { loading: savingOwn }] = useMutation(updateOwnProfileMutationDocument);
   const [updateUserProfile, { loading: savingOther }] = useMutation(updateUserProfileMutationDocument);
-  const isSaving = savingOwn || savingOther;
+  const [changeLifecycleStatus, { loading: savingLifecycle }] = useMutation(
+    changeParentLifecycleStatusMutationDocument
+  );
+  const isSaving = savingOwn || savingOther || savingLifecycle;
   const profile = data?.profileByUserId;
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
@@ -138,6 +143,11 @@ export function ParentProfileContainer({
   const onSubmit = async (formData: ParentAdminEditFormData) => {
     const coreInput = buildCoreInput(formData);
     const parentInput = isAdminScope ? buildAdminParentInput(formData) : buildOwnParentInput(formData);
+    const parentId = profile?.parentId;
+    const originalLifecycle =
+      isAdminScope && profile?.parentAdminProfile?.lifecycleStatus
+        ? (profile.parentAdminProfile.lifecycleStatus as ParentStatus)
+        : null;
 
     if (scope === ProfileScope.Own) {
       const result = await updateOwnProfile({ variables: { input: { core: coreInput, parent: parentInput } } });
@@ -151,6 +161,13 @@ export function ParentProfileContainer({
     await updateUserProfile({
       variables: { userId: targetUserId, input: { core: coreInput, parent: parentInput } },
     });
+
+    if (parentId && formData.lifecycleStatus && originalLifecycle && formData.lifecycleStatus !== originalLifecycle) {
+      await changeLifecycleStatus({
+        variables: { parentId, newStatus: formData.lifecycleStatus },
+      });
+    }
+
     router.push(profileHrefForUser(targetUserId));
   };
 
@@ -194,6 +211,7 @@ export function ParentProfileContainer({
         isAdminScope={isAdminScope}
         studentsLoading={loading}
         targetUserId={targetUserId}
+        parentId={profile.parentId}
         meetingTabHref="?tab=meeting"
       />
     );
@@ -204,6 +222,7 @@ export function ParentProfileContainer({
       parentData={editData}
       avatarUrl={avatarUrl}
       isAdminScope={isAdminScope}
+      targetUserId={isAdminScope ? targetUserId : undefined}
       isSaving={isSaving}
       onSubmit={onSubmit}
     />

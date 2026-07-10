@@ -2,6 +2,7 @@
 
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
+import { useFxLiveRefresh } from "@/frontend/hooks/useFxLiveRefresh";
 import { BottomNavbar } from "@/frontend/views/dashboard/components/BottomNavbar";
 import { FxStaleBanner } from "@/frontend/views/dashboard/components/FxStaleBanner";
 import { Sidebar } from "@/frontend/views/dashboard/components/Sidebar";
@@ -26,6 +27,7 @@ interface DashboardLayoutProps {
 
 function MainScrollArea({ children }: { readonly children: ReactNode }) {
   const mainRef = useRef<HTMLElement>(null);
+  useFxLiveRefresh();
 
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);

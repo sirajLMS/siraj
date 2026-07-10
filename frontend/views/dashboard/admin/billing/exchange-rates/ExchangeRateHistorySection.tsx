@@ -7,6 +7,7 @@ import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { exchangeRateHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { parseCurrencyCode } from "@/frontend/lib/currency";
 import {
   buildExchangeRateColumns,
   type ExchangeRateRow,
@@ -42,8 +43,8 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
     .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
     .map(rate => ({
       id: rate.id ?? "",
-      fromCurrency: (rate.fromCurrency as CurrencyCode) ?? fromCurrency,
-      toCurrency: (rate.toCurrency as CurrencyCode) ?? toCurrency,
+      fromCurrency: parseCurrencyCode(rate.fromCurrency) ?? fromCurrency,
+      toCurrency: parseCurrencyCode(rate.toCurrency) ?? toCurrency,
       rate: rate.rate ?? "0",
       source: rate.source ?? null,
       effectiveDate: rate.effectiveDate ?? "",
@@ -73,7 +74,12 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
             labelId="fx-history-from"
             label={labels.rateTable.fromCurrency}
             value={fromCurrency}
-            onChange={event => setFromCurrency(event.target.value as CurrencyCode)}
+            onChange={event => {
+              const parsed = parseCurrencyCode(event.target.value);
+              if (parsed) {
+                setFromCurrency(parsed);
+              }
+            }}
           >
             {fromOptions.map(currency => (
               <MenuItem key={currency} value={currency}>
@@ -89,7 +95,12 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
             labelId="fx-history-to"
             label={labels.rateTable.toCurrency}
             value={toCurrency}
-            onChange={event => setToCurrency(event.target.value as CurrencyCode)}
+            onChange={event => {
+              const parsed = parseCurrencyCode(event.target.value);
+              if (parsed) {
+                setToCurrency(parsed);
+              }
+            }}
           >
             {(toOptions.length > 0 ? toOptions : [toCurrency]).map(currency => (
               <MenuItem key={currency} value={currency}>

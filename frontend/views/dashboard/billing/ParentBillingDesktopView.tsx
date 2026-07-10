@@ -1,7 +1,7 @@
 "use client";
 
-import { FilterListOutlined } from "@mui/icons-material";
-import { Box, TextField } from "@mui/material";
+import { AddCardOutlined, FilterListOutlined } from "@mui/icons-material";
+import { Box, Button, TextField } from "@mui/material";
 import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
@@ -17,10 +17,14 @@ export function ParentBillingDesktopView({
   loading,
   canView,
   canSubmitProof,
+  canManage = false,
+  billingActionsDisabled = false,
   onSearchChange,
   onPayNow,
+  onMarkAsPaid,
   onViewPaymentDetails,
   onDownloadPdf,
+  onQuickPay,
   page,
   pageSize,
   totalCount,
@@ -34,7 +38,17 @@ export function ParentBillingDesktopView({
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
         actions={
-          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+            {canSubmitProof && !billingActionsDisabled ? (
+              <Button
+                variant="contained"
+                startIcon={<AddCardOutlined />}
+                onClick={onQuickPay}
+                sx={{ textTransform: "uppercase", fontWeight: 700 }}
+              >
+                {labels.quickPay}
+              </Button>
+            ) : null}
             <TextField
               size="small"
               value={searchQuery}
@@ -52,7 +66,10 @@ export function ParentBillingDesktopView({
           rows={invoices}
           canView={canView}
           canSubmitProof={canSubmitProof}
+          canManage={canManage}
+          billingActionsDisabled={billingActionsDisabled}
           onPayNow={onPayNow}
+          onMarkAsPaid={onMarkAsPaid}
           onViewPaymentDetails={onViewPaymentDetails}
           onDownloadPdf={onDownloadPdf}
           labels={{

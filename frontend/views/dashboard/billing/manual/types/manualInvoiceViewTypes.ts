@@ -5,6 +5,7 @@ export type ManualInvoiceLabels = BillingManualLabels;
 
 export interface ParentInvoiceOption {
   readonly id: string;
+  readonly userId: string | null;
   readonly name: string;
   readonly label: string;
 }

@@ -71,6 +71,7 @@ function buildTableLabels(t: BillingTranslator) {
       markAsPaid: t("adminTable.markAsPaid"),
       quickPay: t("adminTable.quickPay"),
       reviewSubmission: t("adminTable.reviewSubmission"),
+      viewRejection: t("adminTable.viewRejection"),
       noEntries: t("adminTable.noEntries"),
     },
     creditTable: {
@@ -182,6 +183,7 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
       student: t("submitProofDialog.student"),
       uploadFailed: t("submitProofDialog.uploadFailed"),
       uploadPrepareFailed: t("submitProofDialog.uploadPrepareFailed"),
+      impersonationBlocked: t("submitProofDialog.impersonationBlocked"),
     },
     paymentDetailsDialog: {
       title: t("paymentDetailsDialog.title"),
@@ -203,6 +205,9 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
       date: t("paymentDetailsDialog.date"),
       submittedAt: t("paymentDetailsDialog.submittedAt"),
       reviewActions: t("paymentDetailsDialog.reviewActions"),
+      tryAgain: t("paymentDetailsDialog.tryAgain"),
+      confirmReject: t("paymentDetailsDialog.confirmReject"),
+      confirmRejectMessage: t("paymentDetailsDialog.confirmRejectMessage"),
     },
     notifications: {
       popupBlocked: t("notifications.popupBlocked"),
@@ -210,6 +215,7 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     },
     errors: {
       invalidId: t("errors.invalidId"),
+      retry: t("errors.retry"),
     },
     exchangeRates: t.raw("exchangeRates") as ExchangeRatesLabels,
     fxStaleBanner: {

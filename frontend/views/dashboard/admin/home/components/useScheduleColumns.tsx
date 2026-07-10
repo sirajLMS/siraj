@@ -1,11 +1,12 @@
 "use client";
 
 import { HistoryOutlined } from "@mui/icons-material";
-import { Stack, Tooltip } from "@mui/material";
+import { Box, Stack, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
@@ -212,6 +213,24 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
         flex: 1,
         minWidth: 140,
         renderCell: ({ row }) => renderStudentCell(row),
+      },
+      {
+        field: "join",
+        headerName: "",
+        width: 56,
+        sortable: false,
+        align: "center",
+        headerAlign: "center",
+        renderCell: ({ row }) => (
+          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
+            <MeetingJoinAction
+              variant="icon"
+              joinUrl={row.meetingJoinUrl}
+              meeting={row.effectiveMeeting}
+              emptyRole="parent"
+            />
+          </Box>
+        ),
       },
       buildActionsColumn(headers, detailsLabel, headers.history),
     ];

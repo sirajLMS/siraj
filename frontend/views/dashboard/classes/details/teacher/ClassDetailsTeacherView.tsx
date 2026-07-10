@@ -12,6 +12,7 @@ import { StudentProfileCard } from "@/frontend/views/dashboard/classes/details/t
 import type { ClassDetailsViewMode } from "@/frontend/views/dashboard/classes/details/types";
 import type { TeacherViewLabels } from "@/frontend/views/dashboard/classes/details/useClassDetailsLabels";
 import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
+import { RecurringSeriesMeetingPanel } from "@/frontend/views/dashboard/profile/shared/meeting-configs/RecurringSeriesMeetingPanel";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 
 const EXECUTION_STATE_TO_STATUS: Record<string, ClassInstanceStatus> = {
@@ -71,10 +72,14 @@ export function ClassDetailsTeacherView({
   const hasPerformance = performance != null;
   const showActionsPanel = viewMode === "teacher";
 
+  const showMeetingConfigs = viewMode !== "parent";
+  const recurringScheduleId = instance.recurringScheduleId ?? undefined;
+
   return (
     <Box sx={classDetailsSectionStackSx}>
       <ClassDetailsToolbarArea
         instance={instance}
+        viewMode={viewMode === "parent" ? "parent" : "teacher"}
         isWarningDismissed={isWarningDismissed}
         onDismissWarning={onDismissWarning}
         labels={labels}
@@ -103,16 +108,18 @@ export function ClassDetailsTeacherView({
               status={status}
               labels={labels.instanceDetails}
             />
-            <ClassMeetingConfigsSection
-              classInstanceId={instance.id ?? undefined}
-              effectiveMeeting={
-                (
-                  instance as {
-                    effectiveMeeting?: import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment;
-                  }
-                ).effectiveMeeting
-              }
-            />
+            {showMeetingConfigs ? (
+              <ClassMeetingConfigsSection
+                classInstanceId={instance.id ?? undefined}
+                effectiveMeeting={instance.effectiveMeeting}
+              />
+            ) : null}
+            {showMeetingConfigs && recurringScheduleId ? (
+              <RecurringSeriesMeetingPanel
+                recurringScheduleId={recurringScheduleId}
+                effectiveMeeting={instance.effectiveMeeting}
+              />
+            ) : null}
             <RemarksCard remarks={instance.remarks ?? ""} labels={labels.remarks} />
             <PerformanceOverviewCard
               attendanceRate={performance?.attendanceRate ?? 0}

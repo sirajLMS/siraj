@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
-import { Box, Button, Fab } from "@mui/material";
+import { Box, Button, Fab, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { AdminInvoicesCardList } from "@/frontend/views/dashboard/admin/billing/components/AdminInvoicesCardList";
@@ -11,6 +11,10 @@ import { StudentCreditCardList } from "@/frontend/views/dashboard/billing/compon
 import type { AdminBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { buildAdminMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { Link } from "@/shared/i18n/routing";
+
+const StyledEmptySubtitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
 
 // Floating action button for creating a manual invoice, fixed at bottom-right with primary colors
 const StyledManualInvoiceFab = styled(Fab)(({ theme }) => ({
@@ -34,6 +38,7 @@ export function AdminBillingMobileView({
   canManage,
   canCreate,
   canViewExchangeRates,
+  billingActionsDisabled = false,
   onSearchChange,
   onMarkAsPaid,
   onViewPaymentDetails,
@@ -43,6 +48,7 @@ export function AdminBillingMobileView({
   pageSize,
   totalCount,
   onPageChange,
+  loading = false,
 }: Readonly<AdminBillingViewProps>) {
   return (
     <>
@@ -69,23 +75,35 @@ export function AdminBillingMobileView({
           onChange={onSearchChange}
         />
         <SectionPanel title={labels.sections.recentInvoices}>
-          <AdminInvoicesCardList
-            rows={invoices}
-            canManage={canManage}
-            onMarkAsPaid={onMarkAsPaid}
-            onViewPaymentDetails={onViewPaymentDetails}
-            labels={{
-              markAsPaid: labels.adminTable.markAsPaid,
-              quickPay: labels.adminTable.quickPay,
-              reviewSubmission: labels.adminTable.reviewSubmission,
-              viewDetails: labels.parentTable.viewDetails,
-              statusLabels: labels.invoiceStatus,
-            }}
-            page={page}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            onPageChange={onPageChange}
-          />
+          {invoices.length === 0 && !loading ? (
+            <Box sx={{ py: 6, textAlign: "center" }}>
+              <Typography variant="headlineMd" sx={{ mb: 1 }}>
+                {labels.parentTable.emptyTitle}
+              </Typography>
+              <StyledEmptySubtitle variant="bodyMd">{labels.adminTable.noEntries}</StyledEmptySubtitle>
+            </Box>
+          ) : (
+            <AdminInvoicesCardList
+              rows={invoices}
+              canManage={canManage}
+              billingActionsDisabled={billingActionsDisabled}
+              loading={loading}
+              onMarkAsPaid={onMarkAsPaid}
+              onViewPaymentDetails={onViewPaymentDetails}
+              labels={{
+                markAsPaid: labels.adminTable.markAsPaid,
+                quickPay: labels.adminTable.quickPay,
+                reviewSubmission: labels.adminTable.reviewSubmission,
+                viewRejection: labels.adminTable.viewRejection,
+                viewDetails: labels.parentTable.viewDetails,
+                statusLabels: labels.invoiceStatus,
+              }}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={onPageChange}
+            />
+          )}
         </SectionPanel>
         {canManage && (
           <SectionPanel title={labels.sections.studentCreditStatus}>

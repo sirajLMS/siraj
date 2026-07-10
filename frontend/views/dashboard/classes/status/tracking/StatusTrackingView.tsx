@@ -58,7 +58,6 @@ function MobileLayout({
   cardListLabels,
   onActivate,
   onVerify,
-  onJoin,
   onNewReport,
   onSeeAll,
 }: MobileLayoutProps) {
@@ -75,7 +74,6 @@ function MobileLayout({
           labels={cardListLabels}
           onActivate={onActivate}
           onVerify={onVerify}
-          onJoin={onJoin}
           onSeeAll={onSeeAll}
         />
 
@@ -97,7 +95,6 @@ function DesktopLayout({
   onActivate,
   onReschedule,
   onVerify,
-  onJoin,
   onNewReport,
   onOpenAuditLogs,
 }: DesktopLayoutProps) {
@@ -151,7 +148,6 @@ function DesktopLayout({
           onActivate={onActivate}
           onReschedule={onReschedule}
           onVerify={onVerify}
-          onJoin={onJoin}
         />
       </SectionPanel>
 

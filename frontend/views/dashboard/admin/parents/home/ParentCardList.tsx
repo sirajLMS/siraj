@@ -7,7 +7,10 @@ import { PaginationControls, PersonProfileLink } from "@/frontend/components/ui"
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
-import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import type {
+  ParentAccountStatusKey,
+  ParentDirectoryRow,
+} from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export interface ParentCardListLabels {
@@ -15,6 +18,7 @@ export interface ParentCardListLabels {
   readonly unpaidCount: (count: number) => string;
   readonly invoicesCleared: string;
   readonly statusLabels: Record<ParentLifecycleStatus, string>;
+  readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
 }
 
 interface ParentCardProps {
@@ -69,11 +73,16 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
           <StatusBadge
             category="studentAccount"
             status={row.lifecycleStatus}
             label={labels.statusLabels[row.lifecycleStatus]}
+          />
+          <StatusBadge
+            category="staffAccount"
+            status={row.accountStatus}
+            label={labels.accountStatusLabels[row.accountStatus]}
           />
           {hasUnpaid ? (
             <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}>

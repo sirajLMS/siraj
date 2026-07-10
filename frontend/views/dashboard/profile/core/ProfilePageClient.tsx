@@ -1,14 +1,18 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import { Stack } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { ProfileActionBar } from "@/frontend/views/dashboard/profile/core/components/ProfileActionBar";
 import { ProfileShell } from "@/frontend/views/dashboard/profile/core/ProfileShell";
+import { ParentAccountActions } from "@/frontend/views/dashboard/profile/parent/ParentAccountActions";
 import { ParentProfileContainer } from "@/frontend/views/dashboard/profile/parent/ParentProfileContainer";
 import { StaffProfileContainer } from "@/frontend/views/dashboard/profile/staff/StaffProfileContainer";
 import { TeacherProfileContainer } from "@/frontend/views/dashboard/profile/teacher/TeacherProfileContainer";
@@ -38,12 +42,23 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
     void refetch();
   }, [refetch]);
 
+  const refetchProfileOnFocus = useCallback(() => {
+    if (mode === ProfileMode.View) {
+      void refetch();
+    }
+  }, [mode, refetch]);
+
+  useRefetchOnWindowFocus(refetchProfileOnFocus);
+
   const activeTab = currentTab || "profile";
 
   const roleLabel =
     audience === ProfileAudience.Staff
       ? (profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined)
       : t(`role.${audience}`);
+
+  const showParentAccountActions =
+    audience === ProfileAudience.Parent && scope === ProfileScope.Other && mode === ProfileMode.View;
 
   const shellProps = {
     audience,
@@ -58,7 +73,16 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
     avatarUrl: profile?.avatarUrl,
     actions:
       mode === ProfileMode.View ? (
-        <ProfileActionBar mode={ProfileMode.View} editHref={editHref} />
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+          <ProfileActionBar mode={ProfileMode.View} editHref={editHref} />
+          {showParentAccountActions && profile?.parentId ? (
+            <ParentAccountActions
+              parentId={profile.parentId}
+              targetUserId={targetUserId}
+              accountStatus={profile.parentAdminProfile?.accountStatus}
+            />
+          ) : null}
+        </Stack>
       ) : (
         <ProfileActionBar mode={ProfileMode.Edit} cancelHref={cancelHref} />
       ),
@@ -98,5 +122,10 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
     return <StaffProfileContainer scope={scope} mode={mode} targetUserId={targetUserId} activeTab={activeTab} />;
   }
 
-  return <ProfileShell {...shellProps}>{renderProfileContainer()}</ProfileShell>;
+  return (
+    <ProfileShell {...shellProps}>
+      {scope === ProfileScope.Own && mode === ProfileMode.View ? <DisplayCurrencyHint /> : null}
+      {renderProfileContainer()}
+    </ProfileShell>
+  );
 }

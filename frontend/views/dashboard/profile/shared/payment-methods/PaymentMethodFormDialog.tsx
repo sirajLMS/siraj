@@ -176,7 +176,15 @@ export function PaymentMethodFormDialog({
                 select
                 label={t("direction")}
                 value={field.value}
-                onChange={event => field.onChange(event.target.value as PaymentDirection)}
+                onChange={event => {
+                  const value = event.target.value;
+                  for (const option of Object.values(PaymentDirection)) {
+                    if (option === value) {
+                      field.onChange(option);
+                      return;
+                    }
+                  }
+                }}
                 error={Boolean(fieldState.error)}
                 helperText={fieldState.error?.message}
                 fullWidth

@@ -3,6 +3,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { AccountSection } from "@/frontend/views/dashboard/profile/parent/sections/AccountSection";
 import { AssociatedStudentsSection } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsSection";
 import { BillingSection } from "@/frontend/views/dashboard/profile/parent/sections/BillingSection";
@@ -24,6 +25,7 @@ export function ParentProfileView({
   isAdminScope,
   studentsLoading = false,
   targetUserId,
+  parentId,
   meetingTabHref,
 }: {
   readonly parentData: ParentViewData;
@@ -33,6 +35,7 @@ export function ParentProfileView({
   readonly isAdminScope: boolean;
   readonly studentsLoading?: boolean;
   readonly targetUserId?: string;
+  readonly parentId?: string | null;
   readonly meetingTabHref?: string;
 }) {
   const t = useTranslations("profile.parent");
@@ -69,7 +72,8 @@ export function ParentProfileView({
         {isAdminScope && adminData ? (
           <>
             <IdentitySection mode="view" adminData={adminData} />
-            <BillingSection mode="view" adminData={adminData} />
+            {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
+            <BillingSection mode="view" adminData={adminData} parentId={parentId ?? adminData.id} />
           </>
         ) : null}
         {targetUserId ? <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} /> : null}

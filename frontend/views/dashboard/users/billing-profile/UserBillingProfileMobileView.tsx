@@ -7,6 +7,7 @@ import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/u
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
 import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";
+import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
 import type { UserBillingProfileMobileViewProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 
 const StyledEmptySubtitle = styled(Typography)(({ theme }) => ({
@@ -34,8 +35,11 @@ export function UserBillingProfileMobileView({
   searchQuery,
   canView,
   canSubmitProof,
+  canManage = false,
+  billingActionsDisabled = false,
   onSearchChange,
   onPayNow,
+  onMarkAsPaid,
   onViewPaymentDetails,
   onDownloadPdf,
   onQuickPay,
@@ -43,8 +47,9 @@ export function UserBillingProfileMobileView({
   pageSize,
   totalCount,
   onPageChange,
+  loading,
 }: Readonly<UserBillingProfileMobileViewProps>) {
-  const showQuickPayFab = canSubmitProof;
+  const showQuickPayFab = canSubmitProof && !billingActionsDisabled;
 
   return (
     <>
@@ -58,7 +63,7 @@ export function UserBillingProfileMobileView({
           onChange={onSearchChange}
         />
         <SectionPanel title={labels.sections.invoiceHistory}>
-          {invoices.length === 0 ? (
+          {invoices.length === 0 && !loading ? (
             <Box sx={{ py: 6, textAlign: "center" }}>
               <Typography variant="headlineMd" sx={{ mb: 1 }}>
                 {labels.parentTable.emptyTitle}
@@ -70,16 +75,16 @@ export function UserBillingProfileMobileView({
               rows={invoices}
               canView={canView}
               canSubmitProof={canSubmitProof}
+              canManage={canManage}
+              billingActionsDisabled={billingActionsDisabled}
+              loading={loading}
               onPayNow={onPayNow}
+              onMarkAsPaid={onMarkAsPaid}
               onViewPaymentDetails={onViewPaymentDetails}
               onDownloadPdf={onDownloadPdf}
               labels={{
-                viewDetails: labels.parentTable.viewDetails,
-                viewSubmission: labels.parentTable.viewSubmission,
-                downloadPdf: labels.parentTable.downloadPdf,
-                payNow: labels.parentTable.payNow,
+                ...getParentInvoiceGridLabels(labels),
                 hasPaymentProofHint: labels.hasPaymentProofHint,
-                statusLabels: labels.invoiceStatus,
               }}
               page={page}
               pageSize={pageSize}

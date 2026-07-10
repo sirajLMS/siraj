@@ -1,4 +1,5 @@
 import type { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
 
 export interface UpcomingClassDisplay {
   readonly id: string;
@@ -9,6 +10,8 @@ export interface UpcomingClassDisplay {
   readonly durationMinutes: number;
   readonly executionState: string;
   readonly isFrozen: boolean;
+  readonly meetingJoinUrl?: string | null;
+  readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 }
 
 export interface StudentStatusPageData {

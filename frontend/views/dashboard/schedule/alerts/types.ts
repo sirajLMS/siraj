@@ -1,4 +1,5 @@
 import type { SvgIconComponent } from "@mui/icons-material";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
 
 export type ScheduleAlertType = "leave_quota_exceeded" | "missed_class_time";
 
@@ -22,6 +23,8 @@ export interface AcademicClassRow {
   readonly room: string;
   readonly action: ClassSessionAction;
   readonly sessionStatus: ClassSessionStatus;
+  readonly meetingJoinUrl?: string | null;
+  readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 }
 
 export interface AlertsMetric {

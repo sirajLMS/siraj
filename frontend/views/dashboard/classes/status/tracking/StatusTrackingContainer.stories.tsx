@@ -59,6 +59,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     studentAvatarUrl: null,
     teacherAvatarUrl: null,
     isFrozen: false,
+    meetingJoinUrl: null,
+    effectiveMeeting: null,
   },
   {
     __typename: "StatusTrackingScheduleRow",
@@ -79,6 +81,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     studentAvatarUrl: null,
     teacherAvatarUrl: null,
     isFrozen: true,
+    meetingJoinUrl: null,
+    effectiveMeeting: null,
   },
   {
     __typename: "StatusTrackingScheduleRow",
@@ -99,6 +103,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     studentAvatarUrl: null,
     teacherAvatarUrl: null,
     isFrozen: false,
+    meetingJoinUrl: null,
+    effectiveMeeting: null,
   },
   {
     __typename: "StatusTrackingScheduleRow",
@@ -119,6 +125,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     studentAvatarUrl: null,
     teacherAvatarUrl: null,
     isFrozen: true,
+    meetingJoinUrl: null,
+    effectiveMeeting: null,
   },
   {
     __typename: "StatusTrackingScheduleRow",
@@ -139,6 +147,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     studentAvatarUrl: null,
     teacherAvatarUrl: null,
     isFrozen: false,
+    meetingJoinUrl: null,
+    effectiveMeeting: null,
   },
 ];
 
@@ -272,10 +282,6 @@ function StoryStatusTrackingContainer() {
     router.push("/reschedule");
   };
 
-  const handleJoin = (id: string) => {
-    router.push(`/classes/${id}`);
-  };
-
   const handleOpenAuditLogs = () => {};
 
   const handleSeeAll = () => {};
@@ -291,7 +297,6 @@ function StoryStatusTrackingContainer() {
       onReschedule={handleReschedule}
       onVerify={verifySession}
       onNewReport={handleNewReport}
-      onJoin={handleJoin}
       onOpenAuditLogs={handleOpenAuditLogs}
       onSeeAll={handleSeeAll}
     />

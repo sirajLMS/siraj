@@ -25,6 +25,7 @@ export interface AdminInvoicesDataGridLabels {
   readonly markAsPaid: string;
   readonly quickPay: string;
   readonly reviewSubmission: string;
+  readonly viewRejection: string;
   readonly viewDetails: string;
   readonly noEntries: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
@@ -34,6 +35,7 @@ interface AdminInvoicesDataGridProps {
   readonly rows: readonly AdminInvoiceRow[];
   readonly labels: AdminInvoicesDataGridLabels;
   readonly canManage: boolean;
+  readonly billingActionsDisabled?: boolean;
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly page?: number;
@@ -60,6 +62,7 @@ function renderInvoiceAction(
   row: AdminInvoiceRow,
   labels: AdminInvoicesDataGridLabels,
   canManage: boolean,
+  billingActionsDisabled: boolean,
   onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void,
   onViewPaymentDetails?: (target: PaymentDetailsTarget) => void
 ) {
@@ -72,7 +75,7 @@ function renderInvoiceAction(
               size="small"
               aria-label={labels.viewDetails}
               onClick={() => {
-                onViewPaymentDetails({ invoiceId: row.id });
+                onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
               }}
             >
               <VisibilityOutlined fontSize="small" />
@@ -85,12 +88,12 @@ function renderInvoiceAction(
     );
   }
 
-  if (row.status === InvoiceStatus.PaymentPending) {
+  if (row.status === InvoiceStatus.PaymentPending && canManage && !billingActionsDisabled) {
     return (
       <Button
         variant="text"
         onClick={() => {
-          onViewPaymentDetails?.({ invoiceId: row.id });
+          onViewPaymentDetails?.({ invoiceId: row.id, parentUserId: row.parentUserId });
         }}
         sx={{ fontWeight: 700, textTransform: "uppercase" }}
       >
@@ -99,8 +102,42 @@ function renderInvoiceAction(
     );
   }
 
-  if (!canManage) {
+  if (!canManage || billingActionsDisabled) {
     return null;
+  }
+
+  const showViewRejection = row.status === InvoiceStatus.Unpaid && row.hasRejectedSubmission && onViewPaymentDetails;
+
+  if (showViewRejection) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
+        <Button
+          variant="text"
+          onClick={() => {
+            onViewPaymentDetails({ invoiceId: row.id });
+          }}
+          sx={{ fontWeight: 700, textTransform: "uppercase" }}
+        >
+          {labels.viewRejection}
+        </Button>
+        <Button
+          variant="text"
+          onClick={() => {
+            onMarkAsPaid({
+              id: row.id,
+              parentUserId: row.parentUserId,
+              amount: row.amount,
+              studentName: row.studentName,
+              dueDate: row.dueDate,
+              invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
+            });
+          }}
+          sx={{ fontWeight: 700, textTransform: "uppercase" }}
+        >
+          {labels.quickPay}
+        </Button>
+      </Box>
+    );
   }
 
   if (row.status === "OVERDUE" || row.status === InvoiceStatus.Unpaid || row.status === "PENDING") {
@@ -131,6 +168,7 @@ export function AdminInvoicesDataGrid({
   rows,
   labels,
   canManage,
+  billingActionsDisabled = false,
   onMarkAsPaid,
   onViewPaymentDetails,
   page = 0,
@@ -201,10 +239,11 @@ export function AdminInvoicesDataGrid({
         sortable: false,
         align: "right",
         headerAlign: "right",
-        renderCell: ({ row }) => renderInvoiceAction(row, labels, canManage, onMarkAsPaid, onViewPaymentDetails),
+        renderCell: ({ row }) =>
+          renderInvoiceAction(row, labels, canManage, billingActionsDisabled, onMarkAsPaid, onViewPaymentDetails),
       },
     ],
-    [canManage, labels, onMarkAsPaid, onViewPaymentDetails]
+    [billingActionsDisabled, canManage, labels, onMarkAsPaid, onViewPaymentDetails]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

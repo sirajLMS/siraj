@@ -134,7 +134,6 @@ export interface StatusTrackingViewProps {
   readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
   readonly onNewReport: () => void;
-  readonly onJoin: (id: string) => void;
   readonly onOpenAuditLogs: () => void;
   readonly onSeeAll: () => void;
 }
@@ -145,7 +144,6 @@ export interface StatusTrackingDataGridProps {
   readonly onActivate: (id: string) => void;
   readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
-  readonly onJoin: (id: string) => void;
   readonly loading?: boolean;
 }
 
@@ -155,7 +153,6 @@ export interface StatusTrackingCardListProps {
   readonly labels: CardListLabels;
   readonly onActivate: (id: string) => void;
   readonly onVerify: (id: string) => void;
-  readonly onJoin: (id: string) => void;
   readonly onSeeAll: () => void;
 }
 
@@ -171,7 +168,6 @@ export interface StatusActionProps {
   readonly onActivate: (id: string) => void;
   readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
-  readonly onJoin: (id: string) => void;
 }
 
 export interface MobileLayoutProps extends Omit<StatusTrackingViewProps, "suspendedCount"> {

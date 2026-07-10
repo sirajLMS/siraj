@@ -1,8 +1,14 @@
-import type { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
+
+export type ParentAccountStatusKey = "activated" | "deactivated";
 
 export function toParentLifecycleStatus(status: ParentStatus): ParentLifecycleStatus {
   return status.toLowerCase() as ParentLifecycleStatus;
+}
+
+export function toParentAccountStatusKey(status: AccountStatus | null | undefined): ParentAccountStatusKey {
+  return status === AccountStatus.Deactivated ? "deactivated" : "activated";
 }
 
 export interface ParentDirectoryRow {
@@ -15,5 +21,6 @@ export interface ParentDirectoryRow {
   readonly guardianOf: string;
   readonly time: string;
   readonly lifecycleStatus: ParentLifecycleStatus;
+  readonly accountStatus: ParentAccountStatusKey;
   readonly unpaidInvoices: number;
 }

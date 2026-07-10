@@ -1,9 +1,11 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
   AppPermission,
@@ -19,16 +21,19 @@ import {
   sendPaymentReminderMutationDocument,
   studentCreditStatusQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useImpersonation } from "@/frontend/hooks/useImpersonation";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";
-import { filterAdminInvoices } from "@/frontend/views/dashboard/admin/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/admin/billing/utils/buildBillingLabels";
+import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
 import { SubmitPaymentProofDialog } from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
+import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import type {
   AdminBillingSummary,
   AdminInvoiceRow,
@@ -37,9 +42,15 @@ import type {
   PaymentDetailsTarget,
   StudentCreditRow,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { formatBillingDate } from "@/frontend/views/dashboard/billing/utils/formatBillingDate";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
+import { BILLING_INVOICE_POLL_INTERVAL_MS } from "@/shared/constants/billing/polling";
 import { useRouter } from "@/shared/i18n/routing";
+
+const StyledErrorTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.error.main,
+}));
 
 interface AdminBillingContainerProps {
   readonly parentId?: string;
@@ -57,13 +68,8 @@ function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): Adm
   return "PENDING";
 }
 
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+function formatDate(dateStr: string | null, locale: string): string {
+  return formatBillingDate(dateStr, locale);
 }
 
 function deriveInitials(name: string | null): string {
@@ -80,21 +86,30 @@ function deriveInitials(name: string | null): string {
 export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
   const tProfile = useTranslations("profile.teacher");
+  const tProfileRoot = useTranslations("profile");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
   const tc = useTranslations("common");
   const router = useRouter();
   const labels = buildBillingLabels(t);
+  const { isImpersonating } = useImpersonation();
+  const billingActionsDisabled = isImpersonating;
   const hasPermission = useUserStore(state => state.hasPermission);
   const canViewExchangeRates = hasPermission(AppPermission.BillingViewExchangeRates);
   const canManage = hasPermission(AppPermission.BillingUpdateStatusPaid);
   const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
+
+  const fxMessages = useMemo(
+    () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
+    [tProfile, tErrors, tProfileRoot]
+  );
 
   const page = useAdminBillingStore(state => state.page);
   const pageSize = useAdminBillingStore(state => state.pageSize);
   const setPage = useAdminBillingStore(state => state.setPage);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [proofTarget, setProofTarget] = useState<MarkPaidInvoiceTarget | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -107,12 +122,24 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     setSnackbarOpen(true);
   };
 
+  const debouncedApplySearch = useDebouncedCallback((value: string) => {
+    setDebouncedSearch(value.trim());
+    setPage(0);
+  }, 300);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    debouncedApplySearch(value);
+  };
+
   const {
     data: invoicesData,
     loading: invoicesLoading,
+    error: invoicesError,
     refetch: refetchInvoices,
   } = useQuery(adminInvoicesQueryDocument, {
     variables: {
+      search: debouncedSearch || null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -124,11 +151,24 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       },
     },
     fetchPolicy: "cache-and-network",
+    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
   });
 
-  const { data: summaryData, refetch: refetchSummary } = useQuery(adminBillingSummaryQueryDocument, {
+  const {
+    data: summaryData,
+    error: summaryError,
+    refetch: refetchSummary,
+  } = useQuery(adminBillingSummaryQueryDocument, {
     fetchPolicy: "cache-and-network",
+    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
   });
+
+  const refreshBillingData = useCallback(() => {
+    void refetchInvoices();
+    void refetchSummary();
+  }, [refetchInvoices, refetchSummary]);
+
+  useRefetchOnWindowFocus(refreshBillingData);
 
   const { data: creditData } = useQuery(studentCreditStatusQueryDocument, {
     fetchPolicy: "cache-and-network",
@@ -165,8 +205,8 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         studentId: inv.studentId ?? null,
         studentName: inv.studentName ?? inv.studentId ?? "Student",
         studentInitials: deriveInitials(inv.studentName),
-        dateIssued: formatDate(inv.issueDate),
-        dueDate: formatDate(inv.dueDate),
+        dateIssued: formatDate(inv.issueDate, locale),
+        dueDate: formatDate(inv.dueDate, locale),
         amount: formatCurrencyForDisplay(
           inv.amount ?? "0",
           inv.currency ?? CurrencyCode.Usd,
@@ -178,36 +218,19 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
               }
             : null,
           locale,
-          {
-            convertedAmount: values => tProfile("convertedAmount", values),
-            displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-          }
+          fxMessages
         ),
         status: mapInvoiceStatus(inv.status, inv.dueDate),
         parentUserId: inv.parentUserId ?? null,
         hasPaymentProof: inv.hasPaymentProof ?? false,
+        hasRejectedSubmission: inv.hasRejectedSubmission ?? false,
       })),
-    [invoicesData?.adminInvoices, locale, tErrors, tProfile]
+    [invoicesData?.adminInvoices, locale, fxMessages]
   );
-
-  const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
 
   const totalCount = invoicesData ? (invoicesData.adminInvoices?.totalCount ?? 0) : undefined;
 
   const summary: AdminBillingSummary = useMemo(() => {
-    const fxMessages = {
-      convertedAmount: (values: {
-        lockedAmount: string;
-        lockedCurrency: string;
-        convertedApprox: string;
-        displayCurrency: string;
-      }) => tProfile("convertedAmount", values),
-      convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) =>
-        tProfile("convertedTotalApprox", values),
-      displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
-        tErrors("displayCurrencyFallback", values),
-    };
-
     const outstandingTotals = formatBillingCurrencyTotals(
       mapBillingCurrencyBuckets(summaryData?.adminBillingSummary?.outstandingByCurrency),
       locale,
@@ -229,7 +252,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       mtdRevenue: mtdRevenueTotals.primary,
       mtdRevenueSubLabel: mtdRevenueTotals.breakdown,
     };
-  }, [summaryData?.adminBillingSummary, locale, tProfile, tErrors, t]);
+  }, [summaryData?.adminBillingSummary, locale, fxMessages, t]);
 
   const creditRows: StudentCreditRow[] = useMemo(
     () =>
@@ -260,10 +283,11 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   );
 
   const handleMarkAsPaid = (invoice: MarkPaidInvoiceTarget) => {
-    setProofTarget({
-      ...invoice,
-      dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : invoice.dueDate,
-    });
+    if (billingActionsDisabled) {
+      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      return;
+    }
+    setProofTarget(invoice);
   };
 
   const handleProofSuccess = () => {
@@ -290,22 +314,48 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     void sendReminderMutation({ variables: { studentId } });
   };
 
+  if (invoicesLoading && !invoicesData) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (invoicesError) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mt: 8 }}>
+        <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>
+        <Button variant="outlined" onClick={refreshBillingData}>
+          {labels.errors.retry}
+        </Button>
+      </Box>
+    );
+  }
+
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
       <DisplayCurrencyHint />
       <FxConversionNote />
+      <BillingImpersonationNotice />
+      {summaryError ? (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {tc("loadFailed")}
+        </Alert>
+      ) : null}
       <AdminBillingView
         labels={labels}
         summary={summary}
-        invoices={filteredInvoices}
+        invoices={invoices}
         creditRows={creditRows}
         searchQuery={searchQuery}
+        billingActionsDisabled={billingActionsDisabled}
         canManage={canManage}
         canSubmitProof={false}
         canView
         canCreate={canCreate}
         canViewExchangeRates={canViewExchangeRates}
-        onSearchChange={setSearchQuery}
+        onSearchChange={handleSearchChange}
         onMarkAsPaid={handleMarkAsPaid}
         onViewPaymentDetails={setDetailsTarget}
         onSendReminder={handleSendReminder}
@@ -335,6 +385,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         onClose={() => setProofTarget(null)}
         invoice={proofTarget}
         mode="markPaid"
+        billingActionsDisabled={billingActionsDisabled}
         onSuccess={handleProofSuccess}
         onError={handleProofError}
       />
@@ -342,7 +393,9 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         open={detailsTarget !== null}
         onClose={() => setDetailsTarget(null)}
         invoiceId={detailsTarget?.invoiceId ?? null}
+        subjectUserId={detailsTarget?.parentUserId}
         canManage={canManage}
+        billingActionsDisabled={billingActionsDisabled}
         onSuccess={handleDetailsSuccess}
       />
     </RequirePermission>

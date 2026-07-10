@@ -1,7 +1,7 @@
 "use client";
 
 import { VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, IconButton, Paper, Typography } from "@mui/material";
+import { Avatar, Box, Button, CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -16,6 +16,7 @@ interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;
   readonly quickPay: string;
   readonly reviewSubmission: string;
+  readonly viewRejection: string;
   readonly viewDetails: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
 }
@@ -24,6 +25,8 @@ interface AdminInvoicesCardListProps {
   readonly rows: readonly AdminInvoiceRow[];
   readonly labels: AdminInvoicesCardListLabels;
   readonly canManage: boolean;
+  readonly billingActionsDisabled?: boolean;
+  readonly loading?: boolean;
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly page?: number;
@@ -58,6 +61,8 @@ export function AdminInvoicesCardList({
   rows,
   labels,
   canManage,
+  billingActionsDisabled = false,
+  loading = false,
   onMarkAsPaid,
   onViewPaymentDetails,
   page = 0,
@@ -68,10 +73,30 @@ export function AdminInvoicesCardList({
   const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+    <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {loading ? (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "action.hover",
+            borderRadius: 1,
+            zIndex: 1,
+          }}
+        >
+          <CircularProgress size={28} />
+        </Box>
+      ) : null}
       {rows.map(row => {
+        const actionsEnabled = canManage && !billingActionsDisabled;
         const isPayable =
-          canManage && (row.status === "OVERDUE" || row.status === InvoiceStatus.Unpaid || row.status === "PENDING");
+          actionsEnabled &&
+          (row.status === "OVERDUE" || row.status === InvoiceStatus.Unpaid || row.status === "PENDING");
+        const showViewRejection =
+          actionsEnabled && row.status === InvoiceStatus.Unpaid && row.hasRejectedSubmission && onViewPaymentDetails;
         const actionLabel = row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay;
 
         return (
@@ -96,6 +121,18 @@ export function AdminInvoicesCardList({
                 {row.amount}
               </Typography>
             </Box>
+            {showViewRejection ? (
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => {
+                  onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
+                }}
+                sx={{ mt: 1.5, textTransform: "uppercase", fontWeight: 700 }}
+              >
+                {labels.viewRejection}
+              </Button>
+            ) : null}
             {isPayable ? (
               <Button
                 fullWidth
@@ -115,12 +152,12 @@ export function AdminInvoicesCardList({
                 {actionLabel}
               </Button>
             ) : null}
-            {row.status === InvoiceStatus.PaymentPending ? (
+            {row.status === InvoiceStatus.PaymentPending && actionsEnabled ? (
               <Button
                 fullWidth
                 variant="outlined"
                 onClick={() => {
-                  onViewPaymentDetails?.({ invoiceId: row.id });
+                  onViewPaymentDetails?.({ invoiceId: row.id, parentUserId: row.parentUserId });
                 }}
                 sx={{ mt: 1.5, textTransform: "uppercase", fontWeight: 700 }}
               >
@@ -133,7 +170,7 @@ export function AdminInvoicesCardList({
                   size="small"
                   aria-label={labels.viewDetails}
                   onClick={() => {
-                    onViewPaymentDetails({ invoiceId: row.id });
+                    onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
                   }}
                 >
                   <VisibilityOutlined fontSize="small" />

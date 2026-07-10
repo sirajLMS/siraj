@@ -43,6 +43,7 @@ const mockInstance: ClassInstanceDetail = {
   teacherTimezone: null,
   meetingJoinUrl: "",
   effectiveMeeting: null,
+  recurringScheduleId: null,
   executionState: ClassExecutionState.NotActivated,
   isRescheduled: false,
   outcome: ClassOutcome.Pending,

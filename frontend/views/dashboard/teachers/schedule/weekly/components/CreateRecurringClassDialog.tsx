@@ -40,11 +40,17 @@ import {
   postCreateRecurringMeetingConfig,
   type RecurringMeetingConfigFormState,
 } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import {
+  getRecurringMeetingConfigErrorKey,
+  isRecurringMeetingConfigValid,
+  resolveRecurringMeetingConfigErrorMessage,
+} from "@/frontend/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import type { CreateRecurringClassDialogProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
   const t = useTranslations("dashboard.teacherCreateRecurringClass");
   const tMeeting = useTranslations("ui.meetingConfig.manager");
+  const tClassScope = useTranslations("ui.meetingConfig.classScope");
   const notifications = useNotifications();
   const client = useApolloClient();
   const { isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =
@@ -106,6 +112,16 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
 
     if (duration <= 0) {
       notifications.show(t("errors.durationMustBePositive"), { severity: "error" });
+      return;
+    }
+
+    if (!isRecurringMeetingConfigValid(meetingConfig)) {
+      const errorKey = getRecurringMeetingConfigErrorKey(meetingConfig);
+      const message = resolveRecurringMeetingConfigErrorMessage(errorKey, {
+        recurringFieldsRequired: tClassScope("recurringFieldsRequired"),
+        urlNotAllowed: tMeeting("urlNotAllowed"),
+      });
+      notifications.show(message ?? tMeeting("urlNotAllowed"), { severity: "error" });
       return;
     }
 

@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  AssignmentTurnedInOutlined,
-  EventRepeatOutlined,
-  LoginOutlined,
-  PowerSettingsNewOutlined,
-} from "@mui/icons-material";
-import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography, useTheme } from "@mui/material";
+import { AssignmentTurnedInOutlined, EventRepeatOutlined, PowerSettingsNewOutlined } from "@mui/icons-material";
+import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography } from "@mui/material";
 import {
   computeSessionStatus,
   SessionStatus,
@@ -94,37 +89,12 @@ const ActionButtonWrapper = ({
   </StyledTooltip>
 );
 
-export function StatusAction({ row, labels, onActivate, onReschedule, onVerify, onJoin }: StatusActionProps) {
-  const theme = useTheme();
+export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }: StatusActionProps) {
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
   const rowId = row.id ?? "";
 
   if (sessionStatus === SessionStatus.REGULAR) {
-    return (
-      <ActionButtonWrapper
-        id={`join-session-${rowId}`}
-        label={labels.joinSession}
-        icon={
-          <LoginOutlined
-            sx={{
-              transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            }}
-          />
-        }
-        tooltipTitle={labels.joinSession}
-        sx={theme => ({
-          backgroundColor: theme.palette.primaryContainer,
-          color: theme.palette.onPrimaryContainer,
-          "&:hover": {
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-          },
-        })}
-        onClick={() => {
-          onJoin(rowId);
-        }}
-      />
-    );
+    return null;
   }
 
   if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {

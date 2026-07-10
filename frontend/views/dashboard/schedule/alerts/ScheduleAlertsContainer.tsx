@@ -90,6 +90,8 @@ export function ScheduleAlertsContainer() {
       room: "",
       action: mapOutcomeToAction(row?.outcome, status),
       sessionStatus: status,
+      meetingJoinUrl: row?.meetingJoinUrl,
+      effectiveMeeting: row?.effectiveMeeting,
     };
   });
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
@@ -144,7 +146,6 @@ export function ScheduleAlertsContainer() {
     setPage(newPage);
   };
 
-  const handleJoin = (_id: string) => {};
   const handleLeave = (_id: string) => {};
 
   return (
@@ -158,7 +159,6 @@ export function ScheduleAlertsContainer() {
         currentPage={page}
         pageSize={pageSize}
         labels={labels}
-        onJoin={handleJoin}
         onLeave={handleLeave}
         onPageChange={handlePageChange}
         loading={loading}

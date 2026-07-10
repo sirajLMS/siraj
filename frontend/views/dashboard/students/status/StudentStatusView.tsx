@@ -46,7 +46,7 @@ export function StudentStatusView({ student, isUpdating, onUpdateStatus }: Reado
   }, [student, methods]);
 
   const handleSubmit = async (data: StatusUpdateFormData) => {
-    await onUpdateStatus(data.status as StudentStatus, data.reason);
+    await onUpdateStatus(data.status, data.reason);
     methods.reset({ status: data.status, reason: "" });
   };
 

@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { StatusAction } from "@/frontend/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
@@ -19,6 +20,7 @@ import {
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/views/dashboard/classes/status/tracking/types";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {
   [SessionStatus.REGULAR]: "regular",
@@ -43,7 +45,6 @@ export function StatusTrackingDataGrid({
   onActivate,
   onReschedule,
   onVerify,
-  onJoin,
   loading = false,
 }: StatusTrackingDataGridProps) {
   const theme = useTheme();
@@ -131,6 +132,32 @@ export function StatusTrackingDataGrid({
         },
       },
       {
+        field: "join",
+        headerName: "",
+        width: 56,
+        sortable: false,
+        align: "center",
+        headerAlign: "center",
+        renderCell: ({ row }) => {
+          const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
+          if (sessionStatus !== SessionStatus.REGULAR) return null;
+          if (!isJoinableByExecutionState(row.executionState, row.outcome)) return null;
+          return (
+            <Box
+              sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
+            >
+              <MeetingJoinAction
+                variant="icon"
+                joinUrl={row.meetingJoinUrl}
+                meeting={row.effectiveMeeting}
+                emptyRole="class"
+                setupHref={`/classes/${row.id}#meeting-configs`}
+              />
+            </Box>
+          );
+        },
+      },
+      {
         field: "actions",
         headerName: labels.actions,
         width: isDesktop ? 200 : 80,
@@ -145,12 +172,11 @@ export function StatusTrackingDataGrid({
             onActivate={onActivate}
             onReschedule={onReschedule}
             onVerify={onVerify}
-            onJoin={onJoin}
           />
         ),
       },
     ];
-  }, [isDesktop, labels, locale, onActivate, onReschedule, onVerify, onJoin]);
+  }, [isDesktop, labels, locale, onActivate, onReschedule, onVerify]);
 
   return (
     <AppDataGrid<StatusTrackingRow>

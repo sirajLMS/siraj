@@ -62,7 +62,6 @@ interface ScheduleAlertsViewProps {
   readonly currentPage: number;
   readonly pageSize: number;
   readonly labels: ScheduleAlertsLabels;
-  readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
   readonly onPageChange: (page: number) => void;
   readonly loading?: boolean;
@@ -130,7 +129,6 @@ const MobileAlertsLayout = ({
   pageSize,
   onFilter,
   onExport,
-  onJoin,
   onLeave,
   onPageChange,
   cardListLabels,
@@ -142,7 +140,6 @@ const MobileAlertsLayout = ({
   pageSize: number;
   onFilter: () => void;
   onExport: () => void;
-  onJoin: (id: string) => void;
   onLeave: (id: string) => void;
   onPageChange: (page: number) => void;
   cardListLabels: CardListLabels;
@@ -190,7 +187,6 @@ const MobileAlertsLayout = ({
         currentPage={currentPage}
         pageSize={pageSize}
         labels={cardListLabels}
-        onJoin={onJoin}
         onLeave={onLeave}
         onPageChange={onPageChange}
       />
@@ -207,7 +203,6 @@ const DesktopAlertsLayout = ({
   loading,
   onFilter,
   onExport,
-  onJoin,
   onLeave,
   onPageChange,
   gridLabels,
@@ -220,7 +215,6 @@ const DesktopAlertsLayout = ({
   loading?: boolean;
   onFilter: () => void;
   onExport: () => void;
-  onJoin: (id: string) => void;
   onLeave: (id: string) => void;
   onPageChange: (page: number) => void;
   gridLabels: AcademicScheduleDataGridLabels;
@@ -246,7 +240,6 @@ const DesktopAlertsLayout = ({
         pageSize={pageSize}
         totalClasses={totalClasses}
         labels={gridLabels}
-        onJoin={onJoin}
         onLeave={onLeave}
         onPageChange={onPageChange}
         loading={loading}
@@ -265,7 +258,6 @@ interface ScheduleBodyProps {
   readonly pageSize: number;
   readonly onFilter: () => void;
   readonly onExport: () => void;
-  readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
   readonly onPageChange: (page: number) => void;
   readonly cardListLabels: CardListLabels;
@@ -298,7 +290,6 @@ function renderScheduleBody(props: ScheduleBodyProps) {
         pageSize={props.pageSize}
         onFilter={props.onFilter}
         onExport={props.onExport}
-        onJoin={props.onJoin}
         onLeave={props.onLeave}
         onPageChange={props.onPageChange}
         cardListLabels={props.cardListLabels}
@@ -314,7 +305,6 @@ function renderScheduleBody(props: ScheduleBodyProps) {
       pageSize={props.pageSize}
       onFilter={props.onFilter}
       onExport={props.onExport}
-      onJoin={props.onJoin}
       onLeave={props.onLeave}
       onPageChange={props.onPageChange}
       gridLabels={props.gridLabels}
@@ -331,7 +321,6 @@ export function ScheduleAlertsView({
   currentPage,
   pageSize,
   labels,
-  onJoin,
   onLeave,
   onPageChange,
   loading = false,
@@ -376,7 +365,6 @@ export function ScheduleAlertsView({
     pageSize,
     onFilter,
     onExport,
-    onJoin,
     onLeave,
     onPageChange,
     cardListLabels,

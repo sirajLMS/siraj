@@ -1,44 +1,45 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parents/parent-billing-history.documents";
+import { useImpersonation } from "@/frontend/hooks/useImpersonation";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
-import { SubmitPaymentProofDialog } from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
+import {
+  SubmitPaymentProofDialog,
+  type SubmitPaymentProofDialogMode,
+} from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
+import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
 import type {
   MarkPaidInvoiceTarget,
   ParentBillingViewProps,
   PaymentDetailsTarget,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
-import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
+import { formatBillingDate, formatBillingMonth } from "@/frontend/views/dashboard/billing/utils/formatBillingDate";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
+import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
+import { BILLING_INVOICE_POLL_INTERVAL_MS } from "@/shared/constants/billing/polling";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 function mapParentInvoiceStatus(status: string | null | undefined): InvoiceStatus {
   if (status === InvoiceStatus.Paid) return InvoiceStatus.Paid;
@@ -50,19 +51,24 @@ function mapParentInvoiceStatus(status: string | null | undefined): InvoiceStatu
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
   const tProfile = useTranslations("profile.teacher");
+  const tProfileRoot = useTranslations("profile");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
   const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
+  const { isImpersonating } = useImpersonation();
+  const billingActionsDisabled = isImpersonating;
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [proofTarget, setProofTarget] = useState<MarkPaidInvoiceTarget | null>(null);
+  const [proofMode, setProofMode] = useState<SubmitPaymentProofDialogMode>("submit");
   const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">("success");
 
-  const showFeedback = (message: string, severity: "success" | "error") => {
+  const showFeedback = (message: string, severity: "success" | "error" | "info") => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
@@ -76,10 +82,21 @@ export function ParentBillingContainer() {
   const hasPermission = useUserStore(state => state.hasPermission);
   const canSubmitProof = hasPermission(AppPermission.BillingSubmitPaymentProof);
 
+  const debouncedApplySearch = useDebouncedCallback((value: string) => {
+    setDebouncedSearch(value.trim());
+    setPage(0);
+  }, 300);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    debouncedApplySearch(value);
+  };
+
   const { data, loading, error, refetch } = useQuery(parentInvoiceHistoryQueryDocument, {
     variables: {
       parentId: null,
       userId: null,
+      search: debouncedSearch || null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -91,25 +108,46 @@ export function ParentBillingContainer() {
       },
     },
     fetchPolicy: "cache-and-network",
+    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
   });
 
-  const { data: summaryData, refetch: refetchSummary } = useQuery(parentBillingSummaryQueryDocument, {
+  const {
+    data: summaryData,
+    error: summaryError,
+    refetch: refetchSummary,
+  } = useQuery(parentBillingSummaryQueryDocument, {
     variables: { parentId: null, userId: null },
     fetchPolicy: "cache-and-network",
+    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
   });
 
-  const handlePayNow = (invoice: MarkPaidInvoiceTarget) => {
+  const refreshBillingData = useCallback(() => {
+    void refetch();
+    void refetchSummary();
+  }, [refetch, refetchSummary]);
+
+  useRefetchOnWindowFocus(refreshBillingData);
+
+  const fxMessages = useMemo(
+    () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
+    [tProfile, tErrors, tProfileRoot]
+  );
+
+  const openProofDialog = (invoice: MarkPaidInvoiceTarget, mode: SubmitPaymentProofDialogMode) => {
+    setProofMode(mode);
     setProofTarget({
       ...invoice,
       parentUserId: parentUserId ?? invoice.parentUserId,
-      dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : invoice.dueDate,
     });
   };
 
+  const handlePayNow = (invoice: MarkPaidInvoiceTarget) => {
+    openProofDialog(invoice, "submit");
+  };
+
   const handleProofSuccess = () => {
-    showFeedback(labels.submitProofSuccess, "success");
-    void refetch();
-    void refetchSummary();
+    showFeedback(proofMode === "markPaid" ? labels.markAsPaidSuccess : labels.submitProofSuccess, "success");
+    refreshBillingData();
   };
 
   const handleProofError = (message: string) => {
@@ -124,8 +162,7 @@ export function ParentBillingContainer() {
   };
 
   const handleDetailsSuccess = () => {
-    void refetch();
-    void refetchSummary();
+    refreshBillingData();
   };
 
   const totalCount = data ? (data.parentInvoiceHistory?.totalCount ?? 0) : undefined;
@@ -137,11 +174,12 @@ export function ParentBillingContainer() {
       invoices.map(inv => ({
         id: inv.id ?? "",
         invoiceNumber: (inv.id ?? "").slice(0, 8).toUpperCase(),
-        month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
-        issueDate: formatDate(inv.issueDate),
-        dueDate: formatDate(inv.dueDate),
-        paidDate: inv.paidDate ? formatDate(inv.paidDate) : t("parentTable.paidDate"),
+        month: formatBillingMonth(inv.issueDate, locale),
+        issueDate: formatBillingDate(inv.issueDate, locale),
+        dueDate: formatBillingDate(inv.dueDate, locale),
+        paidDate: inv.paidDate ? formatBillingDate(inv.paidDate, locale) : "—",
         hasPaymentProof: inv.hasPaymentProof ?? false,
+        hasRejectedSubmission: inv.hasRejectedSubmission ?? false,
         fee: formatCurrencyForDisplay(
           inv.amount ?? "0",
           inv.currency ?? CurrencyCode.Usd,
@@ -153,49 +191,47 @@ export function ParentBillingContainer() {
               }
             : null,
           locale,
-          {
-            convertedAmount: values => tProfile("convertedAmount", values),
-            displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-          }
+          fxMessages
         ),
         status: mapParentInvoiceStatus(inv.status),
       })),
-    [invoices, tProfile, tErrors, locale, t]
+    [invoices, fxMessages, locale]
   );
 
   const handleQuickPay = () => {
-    const firstUnpaid = mappedInvoices.find(inv => inv.status === InvoiceStatus.Unpaid);
-    if (firstUnpaid) {
-      handlePayNow({
-        id: firstUnpaid.id,
-        amount: firstUnpaid.fee,
-        dueDate: firstUnpaid.dueDate,
-        invoiceNumber: firstUnpaid.invoiceNumber,
-      });
-    } else {
-      showFeedback(labels.noUnpaidInvoices, "success");
+    if (billingActionsDisabled) {
+      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      return;
     }
+
+    const nextUnpaid = summaryData?.parentBillingSummary?.nextUnpaidInvoice;
+    if (nextUnpaid?.id) {
+      handlePayNow({
+        id: nextUnpaid.id,
+        amount: formatCurrencyForDisplay(
+          nextUnpaid.amount ?? "0",
+          nextUnpaid.currency ?? CurrencyCode.Usd,
+          null,
+          locale,
+          fxMessages
+        ),
+        dueDate: formatBillingDate(nextUnpaid.dueDate, locale),
+        invoiceNumber: nextUnpaid.id.slice(0, 8).toUpperCase(),
+        studentName: nextUnpaid.studentName,
+      });
+      return;
+    }
+
+    const pendingCount = summaryData?.parentBillingSummary?.pendingPaymentCount ?? 0;
+    if (pendingCount > 0) {
+      showFeedback(labels.notifications.paymentPendingReview, "info");
+      return;
+    }
+
+    showFeedback(labels.noUnpaidInvoices, "info");
   };
 
-  const filteredInvoices = useMemo(
-    () => filterParentInvoices(mappedInvoices, searchQuery),
-    [mappedInvoices, searchQuery]
-  );
-
   const summary = useMemo(() => {
-    const fxMessages = {
-      convertedAmount: (values: {
-        lockedAmount: string;
-        lockedCurrency: string;
-        convertedApprox: string;
-        displayCurrency: string;
-      }) => tProfile("convertedAmount", values),
-      convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) =>
-        tProfile("convertedTotalApprox", values),
-      displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
-        tErrors("displayCurrencyFallback", values),
-    };
-
     const outstandingTotals = formatBillingCurrencyTotals(
       mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.outstandingByCurrency),
       locale,
@@ -212,10 +248,10 @@ export function ParentBillingContainer() {
       outstandingBalanceSubLabel: outstandingTotals.breakdown,
       paidThisTerm: paidThisTermTotals.primary,
       paidThisTermSubLabel: paidThisTermTotals.breakdown,
-      nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
+      nextDueDate: formatBillingDate(summaryData?.parentBillingSummary?.nextDueDate ?? null, locale),
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
     };
-  }, [summaryData?.parentBillingSummary, locale, tProfile, tErrors]);
+  }, [summaryData?.parentBillingSummary, locale, fxMessages]);
 
   if (loading && !data) {
     return (
@@ -225,20 +261,28 @@ export function ParentBillingContainer() {
     );
   }
 
-  if (error) {
-    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
+  if (error || summaryError) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mt: 8 }}>
+        <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>
+        <Button variant="outlined" onClick={refreshBillingData}>
+          {labels.errors.retry}
+        </Button>
+      </Box>
+    );
   }
 
   const viewProps: ParentBillingViewProps = {
     labels,
     summary,
-    invoices: filteredInvoices,
+    invoices: mappedInvoices,
     searchQuery,
     canManage: false,
     canSubmitProof,
     canView: true,
     canCreate: false,
-    onSearchChange: setSearchQuery,
+    billingActionsDisabled,
+    onSearchChange: handleSearchChange,
     onPayNow: handlePayNow,
     onViewPaymentDetails: setDetailsTarget,
     onDownloadPdf: handleDownloadPdf,
@@ -253,6 +297,8 @@ export function ParentBillingContainer() {
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]}>
       <DisplayCurrencyHint />
+      <FxConversionNote />
+      <BillingImpersonationNotice />
       <ParentBillingView {...viewProps} />
       <Snackbar
         open={snackbarOpen}
@@ -268,7 +314,8 @@ export function ParentBillingContainer() {
         open={proofTarget !== null}
         onClose={() => setProofTarget(null)}
         invoice={proofTarget}
-        mode="submit"
+        mode={proofMode}
+        billingActionsDisabled={billingActionsDisabled}
         onSuccess={handleProofSuccess}
         onError={handleProofError}
       />
@@ -276,6 +323,7 @@ export function ParentBillingContainer() {
         open={detailsTarget !== null}
         onClose={() => setDetailsTarget(null)}
         invoiceId={detailsTarget?.invoiceId ?? null}
+        billingActionsDisabled={billingActionsDisabled}
         onSuccess={handleDetailsSuccess}
       />
     </RequirePermission>

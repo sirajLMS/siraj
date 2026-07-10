@@ -77,6 +77,7 @@ export function ClassMeetingConfigFormDialog({
   const [details, setDetails] = useState<MeetingConfigDetailsForm>(emptyDetails);
   const [isDefault, setIsDefault] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [initialProviderId, setInitialProviderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -100,6 +101,7 @@ export function ClassMeetingConfigFormDialog({
     setDetails(emptyDetails());
     setIsDefault(existingCount === 0);
     setUrlError(null);
+    setSaveError(null);
   }, [editConfig, existingCount, open]);
 
   const [createConfig, { loading: creating }] = useMutation(createMutation);
@@ -131,45 +133,51 @@ export function ClassMeetingConfigFormDialog({
     if (!isEdit && !provider?.id) return;
     if (!details.meetingUrl.trim()) return;
 
-    if (isEdit && editConfig?.id) {
-      await updateConfig({
-        variables: {
-          id: editConfig.id,
-          input: {
-            label: label.trim() || null,
-            isDefault,
-            password: details.password.trim() || null,
-            details: {
-              meetingUrl: details.meetingUrl.trim(),
-              username: details.username.trim() || null,
-              tenantId: details.tenantId.trim() || null,
-            },
-            ...(providerChanged && provider?.id ? { providerId: provider.id } : {}),
-          },
-        },
-      });
-    } else if (provider?.id) {
-      await createConfig({
-        variables: {
-          input: {
-            classInstanceId: classInstanceId ?? null,
-            recurringScheduleId: recurringScheduleId ?? null,
-            providerId: provider.id,
-            label: label.trim() || null,
-            isDefault,
-            password: details.password.trim() || null,
-            details: {
-              meetingUrl: details.meetingUrl.trim(),
-              username: details.username.trim() || null,
-              tenantId: details.tenantId.trim() || null,
-            },
-          },
-        },
-      });
-    }
+    setSaveError(null);
 
-    await onSaved();
-    onClose();
+    try {
+      if (isEdit && editConfig?.id) {
+        await updateConfig({
+          variables: {
+            id: editConfig.id,
+            input: {
+              label: label.trim() || null,
+              isDefault,
+              password: details.password.trim() || null,
+              details: {
+                meetingUrl: details.meetingUrl.trim(),
+                username: details.username.trim() || null,
+                tenantId: details.tenantId.trim() || null,
+              },
+              ...(providerChanged && provider?.id ? { providerId: provider.id } : {}),
+            },
+          },
+        });
+      } else if (provider?.id) {
+        await createConfig({
+          variables: {
+            input: {
+              classInstanceId: classInstanceId ?? null,
+              recurringScheduleId: recurringScheduleId ?? null,
+              providerId: provider.id,
+              label: label.trim() || null,
+              isDefault,
+              password: details.password.trim() || null,
+              details: {
+                meetingUrl: details.meetingUrl.trim(),
+                username: details.username.trim() || null,
+                tenantId: details.tenantId.trim() || null,
+              },
+            },
+          },
+        });
+      }
+
+      await onSaved();
+      onClose();
+    } catch {
+      setSaveError(t("saveError"));
+    }
   };
 
   return (
@@ -203,6 +211,7 @@ export function ClassMeetingConfigFormDialog({
             passwordHelperText={isEdit && editConfig?.hasSecret ? t("passwordLeaveBlank") : undefined}
           />
           {urlError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{urlError}</Typography> : null}
+          {saveError ? <Alert severity="error">{saveError}</Alert> : null}
           <FormControlLabel
             control={<Checkbox checked={isDefault} onChange={event => setIsDefault(event.target.checked)} />}
             label={t("setAsDefault")}

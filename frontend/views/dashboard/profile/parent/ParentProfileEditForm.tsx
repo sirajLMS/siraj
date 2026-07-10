@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
+import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import {
   type ParentAdminEditFormData,
   type ParentEditData,
@@ -24,12 +26,14 @@ export function ParentProfileEditForm({
   parentData,
   avatarUrl,
   isAdminScope,
+  targetUserId,
   isSaving,
   onSubmit,
 }: {
   readonly parentData: ParentEditData;
   readonly avatarUrl?: string | null;
   readonly isAdminScope: boolean;
+  readonly targetUserId?: string;
   readonly isSaving: boolean;
   readonly onSubmit: (values: ParentAdminEditFormData) => Promise<void>;
 }) {
@@ -50,6 +54,7 @@ export function ParentProfileEditForm({
       feeAmount: "",
       currency: undefined,
       timezone: "",
+      lifecycleStatus: ParentStatus.Regular,
       displayCurrency: null,
     },
   });
@@ -68,6 +73,7 @@ export function ParentProfileEditForm({
       feeAmount: parentData.feeAmount ?? "",
       currency: parentData.currency ?? undefined,
       timezone: parentData.timezone ?? "",
+      lifecycleStatus: parentData.lifecycleStatus ?? ParentStatus.Regular,
       displayCurrency: parentData.displayCurrency ?? null,
     });
   }, [form, parentData]);
@@ -102,6 +108,7 @@ export function ParentProfileEditForm({
           {isAdminScope ? (
             <>
               <IdentitySection mode="edit" register={form.register} control={form.control} />
+              {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
               <BillingSection mode="edit" register={form.register} control={form.control} />
             </>
           ) : null}

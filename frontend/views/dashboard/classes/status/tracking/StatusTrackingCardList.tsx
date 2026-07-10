@@ -5,6 +5,7 @@ import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/mater
 import { styled, type Theme } from "@mui/material/styles";
 import { useLocale } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import {
   type CardListLabels,
   computeSessionStatus,
@@ -13,6 +14,7 @@ import {
   type StatusTrackingCardListProps,
   type StatusTrackingRow,
 } from "@/frontend/views/dashboard/classes/status/tracking/types";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
   [SessionStatus.REGULAR]: "regular",
@@ -107,23 +109,25 @@ function getCardActionButton(
   sessionStatus: SessionStatus,
   labels: CardListLabels,
   onActivate: (id: string) => void,
-  onVerify: (id: string) => void,
-  onJoin: (id: string) => void
+  onVerify: (id: string) => void
 ) {
   const rowId = row.id ?? "";
 
   if (sessionStatus === SessionStatus.REGULAR) {
+    if (!isJoinableByExecutionState(row.executionState, row.outcome)) {
+      return null;
+    }
     return (
-      <StyledCardActionButtonBase
-        id={`mobile-join-${rowId}`}
-        fullWidth
-        variant="contained"
-        onClick={() => {
-          onJoin(rowId);
-        }}
-      >
-        {labels.joinSession}
-      </StyledCardActionButtonBase>
+      <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+        <MeetingJoinAction
+          variant="icon"
+          joinUrl={row.meetingJoinUrl}
+          meeting={row.effectiveMeeting}
+          emptyRole="class"
+          setupHref={`/classes/${rowId}#meeting-configs`}
+          id={`mobile-join-${rowId}`}
+        />
+      </Box>
     );
   }
 
@@ -194,13 +198,11 @@ function StatusTrackingCard({
   labels,
   onActivate,
   onVerify,
-  onJoin,
 }: {
   readonly row: StatusTrackingRow;
   readonly labels: CardListLabels;
   readonly onActivate: (id: string) => void;
   readonly onVerify: (id: string) => void;
-  readonly onJoin: (id: string) => void;
 }) {
   const theme = useTheme();
   const locale = useLocale();
@@ -251,7 +253,7 @@ function StatusTrackingCard({
           </Box>
         </Box>
 
-        {getCardActionButton(row, sessionStatus, labels, onActivate, onVerify, onJoin)}
+        {getCardActionButton(row, sessionStatus, labels, onActivate, onVerify)}
       </CardContent>
     </Card>
   );
@@ -263,7 +265,6 @@ export function StatusTrackingCardList({
   labels,
   onActivate,
   onVerify,
-  onJoin,
   onSeeAll,
 }: StatusTrackingCardListProps) {
   return (
@@ -295,7 +296,6 @@ export function StatusTrackingCardList({
             labels={labels}
             onActivate={onActivate}
             onVerify={onVerify}
-            onJoin={onJoin}
           />
         ))}
       </Box>

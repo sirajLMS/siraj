@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginOutlined, LogoutOutlined, OndemandVideoOutlined } from "@mui/icons-material";
+import { LogoutOutlined, OndemandVideoOutlined } from "@mui/icons-material";
 import { alpha, Button } from "@mui/material";
 import type { ClassSessionAction } from "@/frontend/views/dashboard/schedule/alerts/types";
 
@@ -12,7 +12,6 @@ interface ClassSessionActionButtonProps {
     readonly leaveClass: string;
     readonly viewRecording: string;
   };
-  readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
   readonly fullWidth?: boolean;
 }
@@ -21,37 +20,11 @@ export function ClassSessionActionButton({
   action,
   classId,
   labels,
-  onJoin,
   onLeave,
   fullWidth = false,
 }: ClassSessionActionButtonProps) {
   if (action === "join_session") {
-    return (
-      <Button
-        id={`join-session-${classId}`}
-        variant="contained"
-        fullWidth={fullWidth}
-        startIcon={<LoginOutlined />}
-        onClick={() => {
-          onJoin(classId);
-        }}
-        sx={theme => ({
-          ...theme.typography.labelUppercase,
-          px: 2,
-          py: 0.75,
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          boxShadow: theme.palette.shadow.button,
-          borderRadius: theme.layout.radius.button,
-          "&:hover": {
-            backgroundColor: theme.palette.primary.dark,
-            boxShadow: theme.palette.shadow.buttonHover,
-          },
-        })}
-      >
-        {labels.joinSession}
-      </Button>
-    );
+    return null;
   }
 
   if (action === "view_recording") {

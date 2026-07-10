@@ -15,6 +15,7 @@ import { MetadataCard } from "@/frontend/views/dashboard/classes/details/admin/M
 import { classDetailsSectionStackSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 import { ClassDetailsToolbarArea } from "@/frontend/views/dashboard/classes/details/components/ClassDetailsToolbarArea";
 import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
+import { RecurringSeriesMeetingPanel } from "@/frontend/views/dashboard/profile/shared/meeting-configs/RecurringSeriesMeetingPanel";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
 
 export interface ClassDetailsAdminViewProps {
@@ -87,11 +88,13 @@ export function ClassDetailsAdminView({
     : [];
 
   const heatmapData = toNumberArray(performance?.heatmapData);
+  const recurringScheduleId = instance.recurringScheduleId ?? undefined;
 
   return (
     <Box sx={classDetailsSectionStackSx}>
       <ClassDetailsToolbarArea
         instance={instance}
+        viewMode="admin"
         isWarningDismissed={isWarningDismissed}
         onDismissWarning={onDismissWarning}
         labels={labels}
@@ -120,14 +123,14 @@ export function ClassDetailsAdminView({
 
       <ClassMeetingConfigsSection
         classInstanceId={instance.id ?? undefined}
-        effectiveMeeting={
-          (
-            instance as {
-              effectiveMeeting?: import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment;
-            }
-          ).effectiveMeeting
-        }
+        effectiveMeeting={instance.effectiveMeeting}
       />
+      {recurringScheduleId ? (
+        <RecurringSeriesMeetingPanel
+          recurringScheduleId={recurringScheduleId}
+          effectiveMeeting={instance.effectiveMeeting}
+        />
+      ) : null}
 
       <Grid container rowSpacing={{ xs: 2, lg: 3 }} columnSpacing={{ xs: 0, lg: 3 }}>
         <Grid size={{ xs: 12, md: 8 }}>

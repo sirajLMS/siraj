@@ -1,4 +1,8 @@
-import type { PaymentMethodDetailsInput, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  PaymentDirection,
+  type PaymentMethodDetailsInput,
+  PaymentMethodType,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import type { PaymentMethodFormValues } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
@@ -41,8 +45,8 @@ export function formDetailsToInput(details: PaymentMethodFormValues["details"]):
 export function fragmentToFormValues(method: UserPaymentMethodFieldsFragment): PaymentMethodFormValues {
   const details = method.details;
   return {
-    type: method.type as PaymentMethodType,
-    direction: method.direction!,
+    type: method.type ?? PaymentMethodType.BankTransfer,
+    direction: method.direction ?? PaymentDirection.Payin,
     label: method.label ?? "",
     isDefault: method.isDefault ?? false,
     details: {

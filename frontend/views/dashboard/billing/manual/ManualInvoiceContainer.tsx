@@ -58,6 +58,7 @@ export function ManualInvoiceContainer() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
+  const [selectedParentUserId, setSelectedParentUserId] = useState<string | null>(null);
 
   const { data: parentData, loading: parentsLoading } = useQuery(parentDirectoryQueryDocument, {
     variables: { search: null, paginationArgs: null, lifecycleStatusFilter: null },
@@ -116,9 +117,20 @@ export function ManualInvoiceContainer() {
     .filter((row): row is { id: string; name: string } & typeof row => row.id !== null && row.name !== null)
     .map(row => ({
       id: row.id,
+      userId: row.userId ?? null,
       name: row.name,
       label: `${row.name} (ID: ${row.id})`,
     }));
+
+  const handleParentChange = (parentId: string | null) => {
+    setSelectedParentId(parentId);
+    if (!parentId) {
+      setSelectedParentUserId(null);
+      return;
+    }
+    const row = parentData?.parentDirectory?.rows?.find(entry => entry.id === parentId);
+    setSelectedParentUserId(row?.userId ?? null);
+  };
 
   const studentOptions: StudentOption[] = useMemo(
     () =>
@@ -134,6 +146,7 @@ export function ManualInvoiceContainer() {
   return (
     <RequirePermission permissions={[AppPermission.BillingCreateInvoice]} fallback={null}>
       <DisplayCurrencyHint />
+      {selectedParentUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={selectedParentUserId} /> : null}
       <ManualInvoiceView
         labels={labels}
         parentOptions={parentOptions}
@@ -145,7 +158,7 @@ export function ManualInvoiceContainer() {
         onBack={handleBack}
         onSubmit={handleSubmit}
         onDismissSuccess={() => setShowSuccess(false)}
-        onParentChange={setSelectedParentId}
+        onParentChange={handleParentChange}
       />
       <Snackbar
         open={snackbarOpen}

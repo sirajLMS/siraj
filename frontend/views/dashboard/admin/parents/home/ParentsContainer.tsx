@@ -5,12 +5,15 @@ import { BlockOutlined, EventBusyOutlined, TimerOutlined, VerifiedUserOutlined }
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type AccountStatus, AppPermission, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-directory.documents";
 import { useParentsStore } from "@/frontend/stores/parentsStore";
 import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
-import { toParentLifecycleStatus } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import {
+  toParentAccountStatusKey,
+  toParentLifecycleStatus,
+} from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentsView } from "@/frontend/views/dashboard/admin/parents/home/ParentsView";
 import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 import { useRouter } from "@/shared/i18n/routing";
@@ -68,6 +71,7 @@ function useDirectoryRows(
           readonly guardianOf?: string | null;
           readonly time?: string | null;
           readonly lifecycleStatus?: ParentStatus | null;
+          readonly accountStatus?: AccountStatus | null;
           readonly unpaidInvoices?: number | null;
         }[]
       | null;
@@ -83,6 +87,7 @@ function useDirectoryRows(
     guardianOf: row.guardianOf ?? "",
     time: row.time ?? "",
     lifecycleStatus: row.lifecycleStatus ? toParentLifecycleStatus(row.lifecycleStatus) : "regular",
+    accountStatus: toParentAccountStatusKey(row.accountStatus),
     unpaidInvoices: row.unpaidInvoices ?? 0,
   }));
 }
@@ -94,6 +99,11 @@ function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.pare
     suspended: t("metrics.suspended"),
     on_trial: t("metrics.onTrial"),
   } as Record<ParentLifecycleStatus, string>;
+
+  const accountStatusLabels = {
+    activated: t("accountStatus.activated"),
+    deactivated: t("accountStatus.deactivated"),
+  };
 
   return {
     pageTitle: t("pageTitle"),
@@ -111,17 +121,21 @@ function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.pare
       email: t("table.email"),
       time: t("table.time"),
       status: t("table.status"),
+      accountStatus: t("table.accountStatus"),
       unpaidInvoices: t("table.unpaidInvoices"),
       options: t("table.options"),
       noEntries: t("noEntries"),
       guardianOf: (name: string) => t("card.guardianOf", { name }),
       statusLabels,
+      accountStatusLabels,
+      manageLifecycle: t("actions.manageLifecycle"),
     },
     card: {
       guardianOf: (name: string) => t("card.guardianOf", { name }),
       unpaidCount: (count: number) => t("card.unpaidCount", { count }),
       invoicesCleared: t("card.invoicesCleared"),
       statusLabels,
+      accountStatusLabels,
     },
   };
 }

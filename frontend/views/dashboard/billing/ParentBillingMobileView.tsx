@@ -9,6 +9,7 @@ import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/compo
 import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";
 import type { ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
+import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
 
 // Subtitle text for the empty state, styled with secondary text color
 const StyledEmptySubtitle = styled(Typography)(({ theme }) => ({
@@ -35,10 +36,14 @@ export function ParentBillingMobileView({
   summary,
   invoices,
   searchQuery,
+  loading,
   canView,
   canSubmitProof,
+  canManage = false,
+  billingActionsDisabled = false,
   onSearchChange,
   onPayNow,
+  onMarkAsPaid,
   onViewPaymentDetails,
   onDownloadPdf,
   onQuickPay,
@@ -47,7 +52,7 @@ export function ParentBillingMobileView({
   totalCount,
   onPageChange,
 }: Readonly<ParentBillingViewProps>) {
-  const showQuickPayFab = canSubmitProof;
+  const showQuickPayFab = canSubmitProof && !billingActionsDisabled;
 
   return (
     <>
@@ -61,7 +66,7 @@ export function ParentBillingMobileView({
           onChange={onSearchChange}
         />
         <Typography variant="titleLg">{labels.sections.invoiceHistory}</Typography>
-        {invoices.length === 0 ? (
+        {invoices.length === 0 && !loading ? (
           <Box sx={{ py: 6, textAlign: "center" }}>
             <Typography variant="headlineMd" sx={{ mb: 1 }}>
               {labels.parentTable.emptyTitle}
@@ -73,16 +78,16 @@ export function ParentBillingMobileView({
             rows={invoices}
             canView={canView}
             canSubmitProof={canSubmitProof}
+            canManage={canManage}
+            billingActionsDisabled={billingActionsDisabled}
+            loading={loading}
             onPayNow={onPayNow}
+            onMarkAsPaid={onMarkAsPaid}
             onViewPaymentDetails={onViewPaymentDetails}
             onDownloadPdf={onDownloadPdf}
             labels={{
-              viewDetails: labels.parentTable.viewDetails,
-              viewSubmission: labels.parentTable.viewSubmission,
-              downloadPdf: labels.parentTable.downloadPdf,
-              payNow: labels.parentTable.payNow,
+              ...getParentInvoiceGridLabels(labels),
               hasPaymentProofHint: labels.hasPaymentProofHint,
-              statusLabels: labels.invoiceStatus,
             }}
             page={page}
             pageSize={pageSize}

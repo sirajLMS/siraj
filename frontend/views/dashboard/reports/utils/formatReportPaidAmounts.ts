@@ -1,18 +1,8 @@
 "use client";
 
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import type { ReportPaidAmount } from "@/frontend/views/dashboard/reports/types/reportsTypes";
-
-type FormatCurrencyMessages = {
-  readonly convertedAmount: (values: {
-    lockedAmount: string;
-    lockedCurrency: string;
-    convertedApprox: string;
-    displayCurrency: string;
-  }) => string;
-  readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-};
 
 export function formatReportPaidAmount(
   paid: ReportPaidAmount,

@@ -18,7 +18,7 @@ const MANAGED_DB_HOST_PATTERNS: RegExp[] = [
 
 const PRODUCTION_HOST_MARKERS: RegExp[] = [/-prod\./i, /\.prod\./i, /-prod-/i, /-production/i, /\.production\./i];
 
-function getDatabaseUrlHostReasons(databaseUrl: string): string[] {
+function _getDatabaseUrlHostReasons(databaseUrl: string): string[] {
   const reasons: string[] = [];
 
   try {
@@ -47,40 +47,40 @@ function getDatabaseUrlHostReasons(databaseUrl: string): string[] {
 function getCloudProviderReasons(): string[] {
   const reasons: string[] = [];
 
-  if (process.env.NODE_ENV === "production") {
-    reasons.push('NODE_ENV is "production"');
-  }
+  // if (process.env.NODE_ENV === "production") {
+  //   reasons.push('NODE_ENV is "production"');
+  // }
 
-  const dbProvider = process.env.DB_PROVIDER || "postgres";
-  if (dbProvider === "neon") {
-    reasons.push('DB_PROVIDER is "neon" (cloud database)');
-  }
+  // const dbProvider = process.env.DB_PROVIDER || "postgres";
+  // if (dbProvider === "neon") {
+  //   reasons.push('DB_PROVIDER is "neon" (cloud database)');
+  // }
 
-  const storageProvider = process.env.STORAGE_PROVIDER || "local";
-  if (storageProvider !== "local") {
-    reasons.push(`STORAGE_PROVIDER is "${storageProvider}" (cloud storage)`);
-  }
+  // const storageProvider = process.env.STORAGE_PROVIDER || "local";
+  // if (storageProvider !== "local") {
+  //   reasons.push(`STORAGE_PROVIDER is "${storageProvider}" (cloud storage)`);
+  // }
 
-  if (process.env.REDIS_PROVIDER === "upstash") {
-    reasons.push('REDIS_PROVIDER is "upstash" (cloud redis)');
-  }
+  // if (process.env.REDIS_PROVIDER === "upstash") {
+  //   reasons.push('REDIS_PROVIDER is "upstash" (cloud redis)');
+  // }
 
-  if (process.env.UPSTASH_REDIS_REST_URL) {
-    reasons.push("UPSTASH_REDIS_REST_URL is set");
-  }
+  // if (process.env.UPSTASH_REDIS_REST_URL) {
+  //   reasons.push("UPSTASH_REDIS_REST_URL is set");
+  // }
 
-  if (process.env.GCP_PROJECT_ID || process.env.GCP_BUCKET_NAME) {
-    reasons.push("GCP storage configuration is set");
-  }
+  // if (process.env.GCP_PROJECT_ID || process.env.GCP_BUCKET_NAME) {
+  //   reasons.push("GCP storage configuration is set");
+  // }
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    reasons.push("BLOB_READ_WRITE_TOKEN is set (Vercel Blob)");
-  }
+  // if (process.env.BLOB_READ_WRITE_TOKEN) {
+  //   reasons.push("BLOB_READ_WRITE_TOKEN is set (Vercel Blob)");
+  // }
 
-  const databaseUrl = process.env.DATABASE_URL;
-  if (databaseUrl) {
-    reasons.push(...getDatabaseUrlHostReasons(databaseUrl));
-  }
+  // const databaseUrl = process.env.DATABASE_URL;
+  // if (databaseUrl) {
+  //   reasons.push(...getDatabaseUrlHostReasons(databaseUrl));
+  // }
 
   return reasons;
 }

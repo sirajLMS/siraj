@@ -7,7 +7,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-alerts.documents";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
+import { useUserStore } from "@/frontend/stores/userStore";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function UnpaidInvoicesSection() {
@@ -16,6 +18,7 @@ export function UnpaidInvoicesSection() {
   const tErrors = useTranslations("errors");
   const locale = useLocale();
   const router = useRouter();
+  const displayCurrency = useUserStore(state => state.displayCurrency);
 
   const { data, loading } = useQuery(unpaidInvoicesAlertQueryDocument);
 
@@ -46,18 +49,7 @@ export function UnpaidInvoicesSection() {
   };
 
   const items = summary.items ?? [];
-  const fxMessages = {
-    convertedAmount: (values: {
-      lockedAmount: string;
-      lockedCurrency: string;
-      convertedApprox: string;
-      displayCurrency: string;
-    }) => tProfile("convertedAmount", values),
-    convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) =>
-      tProfile("convertedTotalApprox", values),
-    displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
-      tErrors("displayCurrencyFallback", values),
-  };
+  const fxMessages = buildFxDisplayMessages(tProfile, tErrors);
 
   const globalTotalLabel = formatBillingCurrencyTotals(
     mapBillingCurrencyBuckets(summary.overdueAmountsByCurrency),
@@ -89,6 +81,14 @@ export function UnpaidInvoicesSection() {
           {t("totalOverdueLabel")}: {globalTotalLabel}
         </Typography>
       </Box>
+      {displayCurrency ? (
+        <Typography
+          variant="caption"
+          sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary })}
+        >
+          {t("unpaidInvoicesFxNote")}
+        </Typography>
+      ) : null}
 
       <List disablePadding dense>
         {items.map(item => {

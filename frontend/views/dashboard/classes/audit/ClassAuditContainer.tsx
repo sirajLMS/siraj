@@ -232,13 +232,6 @@ export function ClassAuditContainer() {
     router.push(`/students/${studentId}/status`);
   };
 
-  const handleJoinMeeting = () => {
-    const url = audit?.meetingInfo?.joinUrl;
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-  };
-
   const handleResendNotifications = () => {
     resendNotifications({ variables: { classInstanceId: id } });
   };
@@ -261,7 +254,6 @@ export function ClassAuditContainer() {
         onEditClass={handleEditClass}
         onExportStudents={handleExportStudents}
         onViewStudent={handleViewStudent}
-        onJoinMeeting={handleJoinMeeting}
         onResendNotifications={handleResendNotifications}
         onUpdateAdminNote={handleOpenNoteDialog}
         onEditAdminNote={handleOpenNoteDialog}

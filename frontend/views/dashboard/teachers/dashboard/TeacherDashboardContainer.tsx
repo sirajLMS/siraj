@@ -181,6 +181,7 @@ function mapProgressFeed(
 export function TeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
   const dashboardT = useTranslations("dashboard");
+  const tJoin = useTranslations("ui.meetingConfig.join");
   const formatter = useFormatter();
   const router = useRouter();
   const permissions = useUserStore(state => state.permissions);
@@ -249,7 +250,7 @@ export function TeacherDashboardContainer() {
   const [createManualEntry] = useMutation(createTeacherManualClassEntryMutationDocument);
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
 
-  const labels = buildTeacherDashboardLabels(t, dashboardT);
+  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
   const canActivate = permissions.includes(Types.AppPermission.SessionActivateClass);
 
   const dashboardId = dashboardData?.teacherDashboard?.id || "";

@@ -13,6 +13,7 @@ import {
   latestFxSyncRunQueryDocument,
   refreshExchangeRatesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { parseCurrencyCode } from "@/frontend/lib/currency";
 import { isFxStale } from "@/frontend/lib/fx-stale";
 import { logger } from "@/frontend/utils/logger";
 import { ExchangeRateHistorySection } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ExchangeRateHistorySection";
@@ -180,8 +181,8 @@ export function ExchangeRatesContainer() {
     .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
     .map(rate => ({
       id: rate.id ?? "",
-      fromCurrency: (rate.fromCurrency as CurrencyCode) ?? CurrencyCode.Usd,
-      toCurrency: (rate.toCurrency as CurrencyCode) ?? CurrencyCode.Sar,
+      fromCurrency: parseCurrencyCode(rate.fromCurrency) ?? CurrencyCode.Usd,
+      toCurrency: parseCurrencyCode(rate.toCurrency) ?? CurrencyCode.Sar,
       rate: rate.rate ?? "0",
       source: rate.source ?? null,
       effectiveDate: rate.effectiveDate ?? "",

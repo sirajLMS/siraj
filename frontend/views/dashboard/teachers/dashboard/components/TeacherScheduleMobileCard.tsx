@@ -11,7 +11,7 @@ import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/uti
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
 import { TeacherActiveSessionControls } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherActiveSessionControls";
 import { TeacherScheduleStatusContent } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleStatusContent";
-import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
 import {
   getStatusLabel,
@@ -54,7 +54,7 @@ const StyledTimeHighlight = styled(Box)(({ theme }) => ({
 
 interface TeacherScheduleMobileCardProps {
   readonly row: TeacherScheduleRow;
-  readonly labels: TeacherDashboardLabels;
+  readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
   readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
@@ -65,7 +65,7 @@ interface TeacherScheduleMobileCardProps {
 
 function renderFooterAction(
   row: TeacherScheduleRow,
-  labels: TeacherDashboardLabels,
+  labels: TeacherDashboardViewLabels,
   canActivate: boolean,
   onActivate?: (id: string) => void,
   onStartSession?: (id: string) => void,
@@ -96,7 +96,7 @@ function renderFooterAction(
   }
 
   if (actions.activate) {
-    const tooltips = resolveTeacherScheduleActionTooltips(row, labels);
+    const tooltips = resolveTeacherScheduleActionTooltips(row, labels, labels.meetingLabels);
     return (
       <SessionActivateButton
         disabled={!row.activateEnabled || row.status === "connecting"}
@@ -110,7 +110,7 @@ function renderFooterAction(
   }
 
   if (actions.start || actions.markAbsent || actions.requestLeave) {
-    const tooltips = resolveTeacherScheduleActionTooltips(row, labels);
+    const tooltips = resolveTeacherScheduleActionTooltips(row, labels, labels.meetingLabels);
     return (
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
         <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
@@ -186,7 +186,7 @@ function CardHeader({
   studentHref,
 }: {
   readonly row: TeacherScheduleRow;
-  readonly labels: TeacherDashboardLabels;
+  readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
   readonly isLive: boolean;
   readonly studentHref?: string;
@@ -225,7 +225,13 @@ function CardHeader({
   );
 }
 
-function TimeHighlight({ row, labels }: { readonly row: TeacherScheduleRow; readonly labels: TeacherDashboardLabels }) {
+function TimeHighlight({
+  row,
+  labels,
+}: {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardViewLabels;
+}) {
   const duration = formatDurationMinutes(row.durationMinutes);
   return (
     <StyledTimeHighlight>
@@ -298,7 +304,13 @@ function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
   );
 }
 
-function VideoButton({ row, labels }: { readonly row: TeacherScheduleRow; readonly labels: TeacherDashboardLabels }) {
+function VideoButton({
+  row,
+  labels,
+}: {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardViewLabels;
+}) {
   return (
     <MeetingJoinAction
       variant="icon"
@@ -324,7 +336,7 @@ function CardFooter({
   onRequestLeave,
 }: {
   readonly row: TeacherScheduleRow;
-  readonly labels: TeacherDashboardLabels;
+  readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
   readonly isCompleted: boolean;
   readonly sessionActions: ReturnType<typeof resolveTeacherScheduleSessionActions>;
@@ -386,7 +398,7 @@ export function TeacherScheduleMobileCard({
 
 interface TeacherScheduleMobileCardListProps {
   readonly rows: readonly TeacherScheduleRow[];
-  readonly labels: TeacherDashboardLabels;
+  readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
   readonly emptyMessage: string;
   readonly onJoinVideo?: (id: string) => void;

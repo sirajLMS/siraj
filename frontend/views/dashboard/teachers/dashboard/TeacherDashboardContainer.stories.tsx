@@ -199,9 +199,10 @@ const useTeacherDashboardStore = create<TeacherDashboardStoryState>(set => ({
 export function MockTeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
   const dashboardT = useTranslations("dashboard");
+  const tJoin = useTranslations("ui.meetingConfig.join");
   const userName = useUserStore(state => state.name);
   const store = useTeacherDashboardStore();
-  const labels = buildTeacherDashboardLabels(t, dashboardT);
+  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
   const metricItems = buildTeacherActiveMetricItems(MOCK_RAW_METRICS, labels.activeMetrics);
 
   return (

@@ -14,7 +14,8 @@ import { buildTeacherDashboardLabels } from "@/frontend/views/dashboard/teachers
 export function TeacherRulesContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
   const dashboardT = useTranslations("dashboard");
-  const labels = buildTeacherDashboardLabels(t, dashboardT);
+  const tJoin = useTranslations("ui.meetingConfig.join");
+  const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
   const [handbookRequested, setHandbookRequested] = useState(false);
   const { data: handbookData, loading: handbookLoading } = useQuery(teacherHandbookUrlQueryDocument, {
     skip: !handbookRequested,

@@ -3,19 +3,26 @@
 import {
   CheckCircleOutlined as CheckIcon,
   ErrorOutlined as ErrorIcon,
+  TuneOutlined as LifecycleIcon,
   SettingsOutlined as SettingsIcon,
 } from "@mui/icons-material";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
-import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import type {
+  ParentAccountStatusKey,
+  ParentDirectoryRow,
+} from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
+import { Link } from "@/shared/i18n/routing";
 
 export interface ParentsDataGridLabels {
   readonly index: string;
@@ -24,11 +31,14 @@ export interface ParentsDataGridLabels {
   readonly email: string;
   readonly time: string;
   readonly status: string;
+  readonly accountStatus: string;
   readonly unpaidInvoices: string;
   readonly options: string;
   readonly noEntries: string;
   readonly guardianOf: (name: string) => string;
   readonly statusLabels: Record<ParentLifecycleStatus, string>;
+  readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
+  readonly manageLifecycle: string;
 }
 
 interface ParentsDataGridProps {
@@ -110,12 +120,24 @@ export function ParentsDataGrid({
       {
         field: "lifecycleStatus",
         headerName: labels.status,
-        width: 140,
+        width: 130,
         renderCell: ({ row }) => (
           <StatusBadge
             category="studentAccount"
             status={row.lifecycleStatus}
             label={labels.statusLabels[row.lifecycleStatus]}
+          />
+        ),
+      },
+      {
+        field: "accountStatus",
+        headerName: labels.accountStatus,
+        width: 120,
+        renderCell: ({ row }) => (
+          <StatusBadge
+            category="staffAccount"
+            status={row.accountStatus}
+            label={labels.accountStatusLabels[row.accountStatus]}
           />
         ),
       },
@@ -149,7 +171,7 @@ export function ParentsDataGrid({
       {
         field: "actions",
         headerName: labels.options,
-        width: 180,
+        width: 220,
         sortable: false,
         align: "center",
         headerAlign: "center",
@@ -158,6 +180,29 @@ export function ParentsDataGrid({
             {row.userId ? (
               <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
             ) : null}
+            <RequirePermission permissions={[AppPermission.ParentManageStatus]}>
+              <Tooltip title={labels.manageLifecycle}>
+                <IconButton
+                  component={Link}
+                  href={`/parents/${row.id}/lifecycle`}
+                  size="small"
+                  onClick={e => {
+                    e.stopPropagation();
+                  }}
+                  sx={theme => ({
+                    backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+                    color: theme.palette.secondary.main,
+                    borderRadius: 1.5,
+                    "&:hover": {
+                      backgroundColor: theme.palette.secondary.main,
+                      color: theme.palette.onSecondary,
+                    },
+                  })}
+                >
+                  <LifecycleIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </RequirePermission>
             <IconButton
               size="small"
               onClick={e => {

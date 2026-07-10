@@ -12,9 +12,12 @@ import { logger } from "@/frontend/utils/logger";
 import { StudentHistoryView } from "@/frontend/views/dashboard/students/history/StudentHistoryView";
 import type { ClassSession, StudentHistoryMetrics } from "@/frontend/views/dashboard/students/history/types";
 import { mapStatusToAttendance } from "@/frontend/views/dashboard/students/history/types";
+import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 
 export function StudentHistoryContainer() {
   const params = useParams<{ id: string }>();
+  const profileContext = useStudentProfileContext();
+  const useUnifiedProfile = profileContext != null;
   const t = useTranslations("dashboard.studentHistory");
   const notifications = useNotifications();
 
@@ -26,35 +29,36 @@ export function StudentHistoryContainer() {
 
   const { data, loading, error } = useQuery(studentClassHistoryQueryDocument, {
     variables: { studentId: params.id, year, month },
-    skip: !params.id,
+    skip: !params.id || useUnifiedProfile,
   });
 
   useEffect(() => {
-    if (error) {
+    if (!useUnifiedProfile && error) {
       logger.error("Error loading student history:", { error });
       notifications.show(t("errors.loadFailed"), {
         severity: "error",
         autoHideDuration: 4000,
       });
     }
-  }, [error, notifications, t]);
+  }, [useUnifiedProfile, error, notifications, t]);
 
-  const studentName = data?.studentClassHistory?.studentName ?? t("common.student");
+  const historyData = useUnifiedProfile ? profileContext?.profile?.classHistory : data?.studentClassHistory;
+  const studentName = historyData?.studentName ?? t("common.student");
 
   const metrics: StudentHistoryMetrics = useMemo(
     () => ({
-      totalClasses: data?.studentClassHistory?.metrics?.totalClasses ?? 0,
-      attendanceRate: data?.studentClassHistory?.metrics?.attendanceRate ?? 0,
-      hoursStudied: data?.studentClassHistory?.metrics?.hoursStudied ?? 0,
-      performance: data?.studentClassHistory?.metrics?.performance ?? 0,
+      totalClasses: historyData?.metrics?.totalClasses ?? 0,
+      attendanceRate: historyData?.metrics?.attendanceRate ?? 0,
+      hoursStudied: historyData?.metrics?.hoursStudied ?? 0,
+      performance: historyData?.metrics?.performance ?? 0,
     }),
-    [data]
+    [historyData]
   );
 
   const classes: Record<number, ClassSession> = useMemo(() => {
     const result: Record<number, ClassSession> = {};
-    if (data?.studentClassHistory?.sessions) {
-      for (const session of data.studentClassHistory.sessions) {
+    if (historyData?.sessions) {
+      for (const session of historyData.sessions) {
         if (session?.dayOfMonth !== null && session.dayOfMonth !== undefined) {
           result[session.dayOfMonth] = {
             id: session.id ?? "",
@@ -63,16 +67,19 @@ export function StudentHistoryContainer() {
             time: session.time ?? "",
             duration: session.duration ?? 0,
             status: mapStatusToAttendance(session.status ?? "present"),
+            executionState: session.status ?? "",
             instructor: session.instructor ?? "",
             timeSlot: session.timeSlot ?? "",
             room: session.room ?? "",
             notes: session.notes ?? "",
+            meetingJoinUrl: session.meetingJoinUrl,
+            effectiveMeeting: session.effectiveMeeting,
           };
         }
       }
     }
     return result;
-  }, [data, t]);
+  }, [historyData, t]);
 
   const handlePrevMonth = useCallback(() => {
     const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
@@ -95,7 +102,7 @@ export function StudentHistoryContainer() {
     [setSelectedDay]
   );
 
-  if (loading && !data) {
+  if ((useUnifiedProfile ? profileContext?.loading : loading) && !historyData) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
         <CircularProgress />

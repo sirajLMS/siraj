@@ -14,11 +14,13 @@ import {
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   MobileScheduleListProps,
   ScheduledClass,
 } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
@@ -63,20 +65,31 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
             {classItem.studentName} ({classItem.duration}m)
           </Typography>
         </Box>
-        <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
-          <Box
-            component="span"
-            className="material-symbols-outlined"
-            sx={theme => ({
-              fontSize: 20,
-              cursor: "pointer",
-              "&:hover": { color: theme.palette.error.light },
-            })}
-            onClick={handleDeleteClick}
-          >
-            delete
-          </Box>
-        </RequirePermission>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isJoinableByExecutionState(classItem.executionState, classItem.outcome) ? (
+            <MeetingJoinAction
+              variant="icon"
+              joinUrl={classItem.meetingJoinUrl}
+              meeting={classItem.effectiveMeeting}
+              emptyRole="teacher"
+              setupHref="/profile?tab=meeting"
+            />
+          ) : null}
+          <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
+            <Box
+              component="span"
+              className="material-symbols-outlined"
+              sx={theme => ({
+                fontSize: 20,
+                cursor: "pointer",
+                "&:hover": { color: theme.palette.error.light },
+              })}
+              onClick={handleDeleteClick}
+            >
+              delete
+            </Box>
+          </RequirePermission>
+        </Box>
       </Box>
 
       <Dialog open={open} onClose={handleCancel}>

@@ -2,8 +2,10 @@ import type { Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ClassSession, ClassSessionListProps } from "@/frontend/views/dashboard/students/history/types";
+import { isJoinableClassSession } from "@/frontend/views/dashboard/students/history/types";
 import { Link } from "@/shared/i18n/routing";
 
 function formatDuration(mins: number): string {
@@ -63,11 +65,10 @@ function ClassSessionCard({
   durationLabel,
 }: Readonly<{ session: ClassSession; statusLabel: string; durationLabel: string }>) {
   const [timeValue, timePeriod] = session.time.split(" ");
+  const showJoin = isJoinableClassSession(session.executionState);
 
   return (
     <Box
-      component={Link}
-      href={`/classes/${session.id}`}
       sx={theme => ({
         backgroundColor: theme.palette.surfaceContainerLowest,
         borderRadius: "xl",
@@ -78,62 +79,81 @@ function ClassSessionCard({
         alignItems: "center",
         gap: 2,
         transition: "transform 0.2s",
-        textDecoration: "none",
-        color: "inherit",
-        "&:hover": { transform: "translateX(4px)" },
-        cursor: "pointer",
       })}
     >
       <Box
-        sx={theme => ({
+        component={Link}
+        href={`/classes/${session.id}`}
+        sx={{
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: alpha(theme.palette.primary.main, 0.1),
-          p: 1,
-          borderRadius: "lg",
-          width: 64,
-          height: 64,
-          flexShrink: 0,
-        })}
+          gap: 2,
+          flexGrow: 1,
+          textDecoration: "none",
+          color: "inherit",
+          "&:hover": { transform: "translateX(4px)" },
+          cursor: "pointer",
+        }}
       >
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {timeValue}
-        </Typography>
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {timePeriod}
-        </Typography>
-      </Box>
-
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
-          {session.title}
-        </Typography>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {session.notes}
-        </Typography>
-      </Box>
-
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
         <Box
           sx={theme => ({
-            ...getStatusColors(session.status, theme),
-            px: 1,
-            py: 0.25,
-            borderRadius: 1,
-            typography: "labelSm",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+            p: 1,
+            borderRadius: "lg",
+            width: 64,
+            height: 64,
+            flexShrink: 0,
           })}
         >
-          {statusLabel}
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+            {timeValue}
+          </Typography>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {timePeriod}
+          </Typography>
         </Box>
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {durationLabel}
-        </Typography>
+
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
+            {session.title}
+          </Typography>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {session.notes}
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+          <Box
+            sx={theme => ({
+              ...getStatusColors(session.status, theme),
+              px: 1,
+              py: 0.25,
+              borderRadius: 1,
+              typography: "labelSm",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            })}
+          >
+            {statusLabel}
+          </Box>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {durationLabel}
+          </Typography>
+        </Box>
       </Box>
+      {showJoin ? (
+        <MeetingJoinAction
+          variant="icon"
+          joinUrl={session.meetingJoinUrl}
+          meeting={session.effectiveMeeting}
+          emptyRole="parent"
+        />
+      ) : null}
     </Box>
   );
 }

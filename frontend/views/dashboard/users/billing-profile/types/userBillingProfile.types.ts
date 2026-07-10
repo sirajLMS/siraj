@@ -26,8 +26,10 @@ export interface UserBillingProfileViewProps {
   readonly canSubmitProof: boolean;
   readonly canView: boolean;
   readonly canCreate: boolean;
+  readonly billingActionsDisabled?: boolean;
   readonly onSearchChange: (value: string) => void;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly onQuickPay: () => void;

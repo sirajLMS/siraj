@@ -11,6 +11,7 @@ export function getAdminInvoiceGridLabels(labels: BillingLabels) {
     markAsPaid: labels.adminTable.markAsPaid,
     quickPay: labels.adminTable.quickPay,
     reviewSubmission: labels.adminTable.reviewSubmission,
+    viewRejection: labels.adminTable.viewRejection,
     viewDetails: labels.parentTable.viewDetails,
     noEntries: labels.adminTable.noEntries,
     statusLabels: labels.invoiceStatus,

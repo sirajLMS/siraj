@@ -19,6 +19,7 @@ export interface MarkPaidInvoiceTarget {
 
 export interface PaymentDetailsTarget {
   readonly invoiceId: string;
+  readonly parentUserId?: string | null;
 }
 
 export interface AdminBillingSummary {
@@ -41,6 +42,7 @@ export interface AdminInvoiceRow {
   readonly status: AdminInvoiceStatus;
   readonly parentUserId: string | null;
   readonly hasPaymentProof: boolean;
+  readonly hasRejectedSubmission: boolean;
 }
 
 export interface StudentCreditRow {
@@ -67,6 +69,7 @@ export interface AdminBillingViewProps extends BillingCapabilityProps {
   readonly invoices: readonly AdminInvoiceRow[];
   readonly creditRows: readonly StudentCreditRow[];
   readonly loading?: boolean;
+  readonly billingActionsDisabled?: boolean;
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;

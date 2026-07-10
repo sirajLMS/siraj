@@ -9,6 +9,7 @@ import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 
@@ -26,10 +27,7 @@ export function TeacherOwnProfileContainer() {
         profile.rateCurrency ?? CurrencyCode.Usd,
         profile.displayAmount,
         locale,
-        {
-          convertedAmount: values => tProfile("convertedAmount", values),
-          displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-        }
+        buildFxDisplayMessages(tProfile, tErrors)
       )
     : "";
 

@@ -73,7 +73,6 @@ interface ClassAuditViewProps {
   readonly onEditClass: () => void;
   readonly onExportStudents: () => void;
   readonly onViewStudent: (id: string) => void;
-  readonly onJoinMeeting: () => void;
   readonly onResendNotifications: () => void;
   readonly onUpdateAdminNote: () => void;
   readonly onEditAdminNote: () => void;
@@ -113,7 +112,6 @@ export function ClassAuditView({
   onEditClass,
   onExportStudents,
   onViewStudent,
-  onJoinMeeting,
   onResendNotifications,
   onUpdateAdminNote,
   onEditAdminNote,
@@ -168,11 +166,7 @@ export function ClassAuditView({
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>
-          <OnlineMeetingCard
-            meetingInfo={audit.meetingInfo}
-            labels={labels.meetingInfo}
-            onJoinMeeting={onJoinMeeting}
-          />
+          <OnlineMeetingCard meetingInfo={audit.meetingInfo} labels={labels.meetingInfo} />
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 3, lg: 4 } }}>

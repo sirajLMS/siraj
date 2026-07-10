@@ -5,6 +5,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, ClassProfileLinkCell, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
@@ -30,7 +31,6 @@ interface AcademicScheduleDataGridProps {
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalClasses?: number;
-  readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
   readonly onPageChange?: (page: number) => void;
   readonly loading?: boolean;
@@ -48,7 +48,6 @@ export function AcademicScheduleDataGrid({
   pageSize = 10,
   totalClasses,
   labels,
-  onJoin,
   onLeave,
   onPageChange,
   loading = false,
@@ -126,18 +125,21 @@ export function AcademicScheduleDataGrid({
               status={row.sessionStatus}
               label={labels[SESSION_STATUS_LABELS[row.sessionStatus]]}
             />
-            <ClassSessionActionButton
-              action={row.action}
-              classId={row.id}
-              labels={actionLabels}
-              onJoin={onJoin}
-              onLeave={onLeave}
-            />
+            {row.sessionStatus === "upcoming" || row.sessionStatus === "active" ? (
+              <MeetingJoinAction
+                variant="icon"
+                joinUrl={row.meetingJoinUrl}
+                meeting={row.effectiveMeeting}
+                emptyRole="parent"
+                id={`join-session-${row.id}`}
+              />
+            ) : null}
+            <ClassSessionActionButton action={row.action} classId={row.id} labels={actionLabels} onLeave={onLeave} />
           </Box>
         ),
       },
     ];
-  }, [labels, onJoin, onLeave]);
+  }, [labels, onLeave]);
 
   const isServerPagination = totalClasses !== undefined && onPageChange !== undefined;
 

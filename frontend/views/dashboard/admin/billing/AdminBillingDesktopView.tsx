@@ -39,6 +39,7 @@ export function AdminBillingDesktopView({
   canManage,
   canCreate,
   canViewExchangeRates,
+  billingActionsDisabled = false,
   onSearchChange,
   onMarkAsPaid,
   onViewPaymentDetails,
@@ -91,6 +92,7 @@ export function AdminBillingDesktopView({
         <AdminInvoicesDataGrid
           rows={invoices}
           canManage={canManage}
+          billingActionsDisabled={billingActionsDisabled}
           onMarkAsPaid={onMarkAsPaid}
           onViewPaymentDetails={onViewPaymentDetails}
           labels={getAdminInvoiceGridLabels(labels)}

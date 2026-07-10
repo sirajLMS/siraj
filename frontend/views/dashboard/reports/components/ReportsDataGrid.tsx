@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { ReportLedgerRow, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
@@ -150,10 +151,7 @@ export function ReportsDataGrid({
           sortable: false,
           renderCell: ({ row }) => (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-              {formatReportPaidAmounts(row.paidAmounts, locale, {
-                convertedAmount: values => t("convertedAmount", values),
-                displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-              })}
+              {formatReportPaidAmounts(row.paidAmounts, locale, buildFxDisplayMessages(t, tErrors))}
             </Typography>
           ),
         }

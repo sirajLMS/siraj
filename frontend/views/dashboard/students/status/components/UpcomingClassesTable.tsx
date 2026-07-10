@@ -6,10 +6,12 @@ import { useCallback } from "react";
 import { PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "@/frontend/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
@@ -114,11 +116,21 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
                   </Typography>
                 </Box>
               </Box>
-              <StatusBadge
-                category="classInstance"
-                status={cls.executionState}
-                label={cls.isFrozen ? t("table.frozen").toUpperCase() : cls.executionState}
-              />
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
+                <StatusBadge
+                  category="classInstance"
+                  status={cls.executionState}
+                  label={cls.isFrozen ? t("table.frozen").toUpperCase() : cls.executionState}
+                />
+                {isJoinableByExecutionState(cls.executionState) ? (
+                  <MeetingJoinAction
+                    variant="icon"
+                    joinUrl={cls.meetingJoinUrl}
+                    meeting={cls.effectiveMeeting}
+                    emptyRole="parent"
+                  />
+                ) : null}
+              </Box>
             </Box>
           ))}
         </Box>
@@ -276,6 +288,23 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
           </Box>
         </Box>
       ),
+    },
+    {
+      field: "join",
+      headerName: "",
+      width: 56,
+      sortable: false,
+      align: "center",
+      headerAlign: "center",
+      renderCell: params =>
+        isJoinableByExecutionState(params.row.executionState) ? (
+          <MeetingJoinAction
+            variant="icon"
+            joinUrl={params.row.meetingJoinUrl}
+            meeting={params.row.effectiveMeeting}
+            emptyRole="parent"
+          />
+        ) : null,
     },
     {
       field: "executionState",

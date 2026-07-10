@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined, CheckCircleOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, Typography } from "@mui/material";
+import { Alert, alpha, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type {
   Control,
@@ -26,6 +26,10 @@ interface RecurringClassFormProps {
   readonly isSubmitting: boolean;
   readonly isMobile: boolean;
   readonly showSuccess: boolean;
+  readonly meetingConfigWarning?: boolean;
+  readonly meetingConfigWarningMessage?: string;
+  readonly goToClassLabel?: string;
+  readonly onGoToCreatedClass?: () => void;
   readonly labels: {
     readonly add: string;
     readonly addClass: string;
@@ -128,6 +132,10 @@ export function RecurringClassForm({
   isSubmitting,
   isMobile,
   showSuccess,
+  meetingConfigWarning = false,
+  meetingConfigWarningMessage,
+  goToClassLabel,
+  onGoToCreatedClass,
   labels,
   onSubmit,
   meetingConfig,
@@ -158,6 +166,21 @@ export function RecurringClassForm({
       </StyledScrollableFormBody>
 
       <StyledFormFooter isMobile={isMobile}>
+        {meetingConfigWarning && meetingConfigWarningMessage ? (
+          <Alert
+            severity="warning"
+            sx={{ mb: 2, width: "100%" }}
+            action={
+              onGoToCreatedClass && goToClassLabel ? (
+                <Button color="inherit" size="small" onClick={onGoToCreatedClass}>
+                  {goToClassLabel}
+                </Button>
+              ) : undefined
+            }
+          >
+            {meetingConfigWarningMessage}
+          </Alert>
+        ) : null}
         <StyledSubmitButton
           type="submit"
           variant="contained"

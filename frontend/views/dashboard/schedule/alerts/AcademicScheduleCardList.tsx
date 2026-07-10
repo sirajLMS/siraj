@@ -10,6 +10,7 @@ import {
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
@@ -28,7 +29,6 @@ interface AcademicScheduleCardListProps {
     readonly missed: string;
     readonly endOfSchedule: string;
   };
-  readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
   readonly onPageChange: (page: number) => void;
 }
@@ -114,12 +114,10 @@ function ClassCardMetadata({ row }: Readonly<{ row: AcademicClassRow }>) {
 function ClassCardActions({
   row,
   labels,
-  onJoin,
   onLeave,
 }: Readonly<{
   row: AcademicClassRow;
   labels: AcademicCardLabels;
-  onJoin: (id: string) => void;
   onLeave: (id: string) => void;
 }>) {
   const actionLabels = {
@@ -134,31 +132,32 @@ function ClassCardActions({
         action="view_recording"
         classId={row.id}
         labels={actionLabels}
-        onJoin={onJoin}
         onLeave={onLeave}
         fullWidth
       />
     );
   }
 
+  const showJoin = row.sessionStatus === "upcoming" || row.sessionStatus === "active";
+
   return (
-    <Box sx={{ display: "flex", gap: 1.5 }}>
+    <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
       <ClassSessionActionButton
         action={row.action === "leave_disabled" ? "leave_disabled" : "leave_enabled"}
         classId={row.id}
         labels={actionLabels}
-        onJoin={onJoin}
         onLeave={onLeave}
         fullWidth
       />
-      <ClassSessionActionButton
-        action="join_session"
-        classId={row.id}
-        labels={actionLabels}
-        onJoin={onJoin}
-        onLeave={onLeave}
-        fullWidth
-      />
+      {showJoin ? (
+        <MeetingJoinAction
+          variant="icon"
+          joinUrl={row.meetingJoinUrl}
+          meeting={row.effectiveMeeting}
+          emptyRole="parent"
+          id={`join-session-${row.id}`}
+        />
+      ) : null}
     </Box>
   );
 }
@@ -166,12 +165,10 @@ function ClassCardActions({
 const AcademicClassCard = ({
   row,
   labels,
-  onJoin,
   onLeave,
 }: {
   row: AcademicClassRow;
   labels: AcademicScheduleCardListProps["labels"];
-  onJoin: (id: string) => void;
   onLeave: (id: string) => void;
 }) => {
   const isMissed = row.sessionStatus === "missed";
@@ -194,7 +191,7 @@ const AcademicClassCard = ({
       <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
         <ClassCardHeader row={row} labels={labels} />
         <ClassCardMetadata row={row} />
-        <ClassCardActions row={row} labels={labels} onJoin={onJoin} onLeave={onLeave} />
+        <ClassCardActions row={row} labels={labels} onLeave={onLeave} />
       </CardContent>
     </Card>
   );
@@ -232,7 +229,6 @@ export function AcademicScheduleCardList({
   currentPage,
   pageSize,
   labels,
-  onJoin,
   onLeave,
   onPageChange,
 }: AcademicScheduleCardListProps) {
@@ -242,7 +238,7 @@ export function AcademicScheduleCardList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {rows.map(row => (
-        <AcademicClassCard key={row.id} row={row} labels={labels} onJoin={onJoin} onLeave={onLeave} />
+        <AcademicClassCard key={row.id} row={row} labels={labels} onLeave={onLeave} />
       ))}
       <EndOfSchedule label={labels.endOfSchedule} />
       {totalCountResolved > 0 && (

@@ -52,10 +52,6 @@ export function StatusTrackingContainer() {
     router.push(`/classes/${id}`);
   };
 
-  const handleJoin = (id: string) => {
-    router.push(`/classes/${id}`);
-  };
-
   const handleVerify = (id: string) => {
     const row = rows.find(session => session.id === id);
     const studentId = row?.studentId;
@@ -103,7 +99,6 @@ export function StatusTrackingContainer() {
         onReschedule={handleReschedule}
         onVerify={handleVerify}
         onNewReport={handleNewReport}
-        onJoin={handleJoin}
         onOpenAuditLogs={handleOpenAuditLogs}
         onSeeAll={handleSeeAll}
       />

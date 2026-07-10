@@ -7,6 +7,7 @@ import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
@@ -99,10 +100,7 @@ export function CompensationSection(props: CompensationSectionProps) {
         }
       : null,
     locale,
-    {
-      convertedAmount: values => t("convertedAmount", values),
-      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-    }
+    buildFxDisplayMessages(t, tErrors)
   );
 
   return (

@@ -22,6 +22,10 @@ interface CreateRecurringClassViewProps {
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
   readonly errorMessage: string | null;
+  readonly meetingConfigWarning?: boolean;
+  readonly meetingConfigWarningMessage?: string;
+  readonly goToClassLabel?: string;
+  readonly onGoToCreatedClass?: () => void;
   readonly labels: CreateRecurringClassLabels;
   readonly onClose: () => void;
   readonly onSubmit: (data: RecurringClassFormData, meetingConfig: RecurringMeetingConfigFormState) => void;
@@ -166,6 +170,10 @@ export function CreateRecurringClassView({
   isSubmitting,
   showSuccess,
   errorMessage,
+  meetingConfigWarning = false,
+  meetingConfigWarningMessage,
+  goToClassLabel,
+  onGoToCreatedClass,
   labels,
   onClose,
   onSubmit,
@@ -203,14 +211,14 @@ export function CreateRecurringClassView({
   });
 
   useEffect(() => {
-    if (!showSuccess) return undefined;
+    if (!showSuccess || meetingConfigWarning) return undefined;
     const timer = setTimeout(() => {
       onDismissSuccess();
     }, 3000);
     return () => {
       clearTimeout(timer);
     };
-  }, [showSuccess, onDismissSuccess]);
+  }, [showSuccess, meetingConfigWarning, onDismissSuccess]);
 
   useEffect(() => {
     if (!errorMessage) return undefined;
@@ -260,6 +268,10 @@ export function CreateRecurringClassView({
             isSubmitting={isSubmitting}
             isMobile={isMobile}
             showSuccess={showSuccess}
+            meetingConfigWarning={meetingConfigWarning}
+            meetingConfigWarningMessage={meetingConfigWarningMessage}
+            goToClassLabel={goToClassLabel}
+            onGoToCreatedClass={onGoToCreatedClass}
             labels={formLabels}
             meetingConfig={meetingConfig}
             onMeetingConfigChangeAction={setMeetingConfig}

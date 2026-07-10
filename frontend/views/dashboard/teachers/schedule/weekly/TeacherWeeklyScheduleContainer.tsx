@@ -110,6 +110,8 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
             outcome: c.outcome,
             subjectName: c.subjectName ?? null,
             classType: c.classType ?? null,
+            meetingJoinUrl: c.meetingJoinUrl,
+            effectiveMeeting: c.effectiveMeeting,
           })),
           lastUpdated: schedule.weekEnd || new Date().toLocaleTimeString(),
         }}

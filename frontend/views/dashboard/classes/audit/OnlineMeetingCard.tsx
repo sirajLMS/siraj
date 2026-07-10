@@ -1,11 +1,14 @@
 "use client";
 
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Avatar, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useLocale } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { OnlineMeetingInfo } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 
 interface OnlineMeetingCardProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;
@@ -18,7 +21,6 @@ interface OnlineMeetingCardProps {
     readonly online: string;
     readonly meetingIdNA: string;
   };
-  readonly onJoinMeeting: () => void;
 }
 
 const StyledSectionTitle = styled(Typography)(({ theme }) => ({
@@ -87,10 +89,18 @@ const StyledOverlayMeetingId = styled(Typography)(({ theme }) => ({
 const StyledMeetingInfoRow = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
+  justifyContent: "space-between",
   gap: theme.spacing(1.5),
   padding: theme.spacing(1.5),
   backgroundColor: theme.palette.primaryContainer,
   borderRadius: 2,
+}));
+
+const StyledMeetingInfoContent = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+  minWidth: 0,
 }));
 
 const StyledMeetingInfoIcon = styled(VideocamOutlinedIcon)(({ theme }) => ({
@@ -106,14 +116,54 @@ const StyledMeetingUrlText = styled(Typography)(({ theme }) => ({
   color: theme.palette.onPrimaryContainer,
 }));
 
-const MobileMeetingCard = ({ meetingInfo, labels, onJoinMeeting }: OnlineMeetingCardProps) => {
-  const platform = meetingInfo?.platform?.trim();
+function resolveProviderDisplayName(meetingInfo: OnlineMeetingInfo | null | undefined, locale: string): string | null {
+  if (!meetingInfo) return null;
+  if (meetingInfo.providerName) {
+    return resolveLocalizedString(meetingInfo.providerName, locale);
+  }
+  return meetingInfo.platform?.trim() || null;
+}
+
+function toEffectiveMeeting(meetingInfo: OnlineMeetingInfo | null | undefined): EffectiveMeetingFieldsFragment | null {
+  if (!meetingInfo) return null;
+  return {
+    joinUrl: meetingInfo.joinUrl,
+    logoUrl: meetingInfo.logoUrl,
+    providerName: meetingInfo.providerName,
+    source: meetingInfo.source,
+    providerSlug: meetingInfo.platform,
+    meetingId: meetingInfo.meetingId,
+    configId: null,
+    providerId: null,
+  };
+}
+
+function MeetingPreviewIcon({
+  logoUrl,
+  variant,
+}: Readonly<{ logoUrl?: string | null; variant: "mobile" | "desktop" }>) {
+  if (logoUrl?.trim()) {
+    return (
+      <Avatar
+        src={logoUrl}
+        alt=""
+        sx={{ width: variant === "mobile" ? 48 : 64, height: variant === "mobile" ? 48 : 64 }}
+      />
+    );
+  }
+  return variant === "mobile" ? <StyledMobileVideoIcon /> : <StyledDesktopVideoIcon />;
+}
+
+const MobileMeetingCard = ({ meetingInfo, labels }: OnlineMeetingCardProps) => {
+  const locale = useLocale();
+  const providerName = resolveProviderDisplayName(meetingInfo, locale);
+  const meeting = toEffectiveMeeting(meetingInfo);
 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden" }}>
       <StyledPreviewContainer sx={{ height: 128 }}>
-        <StyledMobileVideoIcon />
-        {platform ? <StyledPlatformBadge>{platform.toUpperCase()}</StyledPlatformBadge> : null}
+        <MeetingPreviewIcon logoUrl={meetingInfo?.logoUrl} variant="mobile" />
+        {providerName ? <StyledPlatformBadge>{providerName.toUpperCase()}</StyledPlatformBadge> : null}
       </StyledPreviewContainer>
       <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
@@ -126,18 +176,20 @@ const MobileMeetingCard = ({ meetingInfo, labels, onJoinMeeting }: OnlineMeeting
         </Box>
         <MeetingJoinAction
           joinUrl={meetingInfo?.joinUrl}
+          meeting={meeting}
           label={labels.joinMeeting}
           variant="button"
           id="venue-join-meeting-mobile"
-          onJoinAction={onJoinMeeting}
         />
       </Box>
     </BaseCard>
   );
 };
 
-const DesktopMeetingCard = ({ meetingInfo, labels }: Omit<OnlineMeetingCardProps, "onJoinMeeting">) => {
-  const platform = meetingInfo?.platform?.trim();
+const DesktopMeetingCard = ({ meetingInfo, labels }: OnlineMeetingCardProps) => {
+  const locale = useLocale();
+  const providerName = resolveProviderDisplayName(meetingInfo, locale);
+  const meeting = toEffectiveMeeting(meetingInfo);
 
   return (
     <BaseCard>
@@ -152,22 +204,37 @@ const DesktopMeetingCard = ({ meetingInfo, labels }: Omit<OnlineMeetingCardProps
           mb: 2,
         }}
       >
-        <StyledDesktopVideoIcon />
+        <MeetingPreviewIcon logoUrl={meetingInfo?.logoUrl} variant="desktop" />
         <StyledDesktopScrimOverlay>
           <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            {platform ? <StyledOverlayPlatformName variant="bodyLg">{platform}:</StyledOverlayPlatformName> : null}
+            {providerName ? (
+              <StyledOverlayPlatformName variant="bodyLg">{providerName}:</StyledOverlayPlatformName>
+            ) : null}
             <StyledOverlayMeetingId variant="labelMd">{meetingInfo?.meetingId ?? labels.online}</StyledOverlayMeetingId>
           </Box>
         </StyledDesktopScrimOverlay>
       </StyledPreviewContainer>
       <StyledMeetingInfoRow>
-        <StyledMeetingInfoIcon />
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <StyledMeetingIdLabel variant="labelMd">{labels.meetingIdLabel}</StyledMeetingIdLabel>
-          <StyledMeetingUrlText variant="labelUppercase">
-            {meetingInfo?.meetingId ?? labels.meetingIdNA}
-          </StyledMeetingUrlText>
-        </Box>
+        <StyledMeetingInfoContent>
+          {meetingInfo?.logoUrl ? (
+            <Avatar src={meetingInfo.logoUrl} alt="" sx={{ width: 28, height: 28 }} />
+          ) : (
+            <StyledMeetingInfoIcon />
+          )}
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center", minWidth: 0 }}>
+            <StyledMeetingIdLabel variant="labelMd">{labels.meetingIdLabel}</StyledMeetingIdLabel>
+            <StyledMeetingUrlText variant="labelUppercase">
+              {meetingInfo?.meetingId ?? labels.meetingIdNA}
+            </StyledMeetingUrlText>
+          </Box>
+        </StyledMeetingInfoContent>
+        <MeetingJoinAction
+          joinUrl={meetingInfo?.joinUrl}
+          meeting={meeting}
+          label={labels.joinMeeting}
+          variant="button"
+          id="venue-join-meeting-desktop"
+        />
       </StyledMeetingInfoRow>
     </BaseCard>
   );

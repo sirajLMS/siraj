@@ -6,8 +6,10 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export function TeacherClassListContainer() {
   const t = useTranslations("dashboard.teacherClassList");
@@ -54,9 +56,20 @@ export function TeacherClassListContainer() {
                       {row.executionState}
                     </Typography>
                   </Box>
-                  <Button component={Link} href={`/classes/${row.id}`} variant="outlined" size="small">
-                    {t("viewDetails")}
-                  </Button>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    {isJoinableByExecutionState(row.executionState, row.outcome) ? (
+                      <MeetingJoinAction
+                        variant="icon"
+                        joinUrl={row.meetingJoinUrl}
+                        meeting={row.effectiveMeeting}
+                        emptyRole="teacher"
+                        setupHref="/profile?tab=meeting"
+                      />
+                    ) : null}
+                    <Button component={Link} href={`/classes/${row.id}`} variant="outlined" size="small">
+                      {t("viewDetails")}
+                    </Button>
+                  </Box>
                 </Box>
               ))
             )}

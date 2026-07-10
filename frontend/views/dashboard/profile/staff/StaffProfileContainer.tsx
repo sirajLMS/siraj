@@ -14,6 +14,7 @@ import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StaffProfileEditForm } from "@/frontend/views/dashboard/profile/staff/StaffProfileEditForm";
 import { StaffProfileView } from "@/frontend/views/dashboard/profile/staff/StaffProfileView";
+import { PermissionsSection } from "@/frontend/views/dashboard/profile/staff/sections/PermissionsSection";
 import { StaffProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/staff/sections/StaffProfileLoadingSkeleton";
 import type {
   StaffAdminEditFormData,
@@ -71,6 +72,18 @@ export function StaffProfileContainer({
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
+  }
+
+  if (activeTab === "permissions" && isAdminScope) {
+    if (loading && !profile) {
+      return <StaffProfileLoadingSkeleton />;
+    }
+    return (
+      <PermissionsSection
+        permissionGroups={profile?.staffPermissionGroups ?? []}
+        permissionOverrides={profile?.staffPermissionOverrides ?? []}
+      />
+    );
   }
 
   if (activeTab !== "profile") {

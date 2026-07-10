@@ -1,20 +1,52 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
 import { Alert } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { userQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 
-export function FxConversionNote(): React.ReactNode {
-  const displayCurrency = useUserStore(state => state.displayCurrency);
+type FxConversionNoteMode = "viewer" | "subject";
+
+interface FxConversionNoteProps {
+  readonly mode?: FxConversionNoteMode;
+  readonly subjectUserId?: string;
+}
+
+export function FxConversionNote({ mode = "viewer", subjectUserId }: Readonly<FxConversionNoteProps>): React.ReactNode {
+  const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
   const t = useTranslations("dashboard.billing");
 
-  if (!displayCurrency) {
+  const { data: subjectData, loading: subjectLoading } = useQuery(userQueryDocument, {
+    variables: { id: subjectUserId ?? "" },
+    skip: mode !== "subject" || !subjectUserId,
+    fetchPolicy: "cache-first",
+  });
+
+  if (mode === "viewer") {
+    if (!viewerDisplayCurrency) {
+      return null;
+    }
+
+    return (
+      <Alert severity="info" sx={{ mb: 2 }}>
+        {t("fxConversionNote", { code: viewerDisplayCurrency })}
+      </Alert>
+    );
+  }
+
+  if (!subjectUserId || subjectLoading) {
+    return null;
+  }
+
+  const subjectDisplayCurrency = subjectData?.user?.displayCurrency;
+  if (!subjectDisplayCurrency) {
     return null;
   }
 
   return (
     <Alert severity="info" sx={{ mb: 2 }}>
-      {t("fxConversionNote", { code: displayCurrency })}
+      {t("fxConversionNoteSubject", { code: subjectDisplayCurrency })}
     </Alert>
   );
 }

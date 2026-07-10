@@ -9,11 +9,11 @@ import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import { TeacherScheduleSessionActionsCell } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleSessionActionsCell";
 import { TeacherScheduleStudentCell } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleStudentCell";
-import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 interface TeacherScheduleDataGridProps {
   readonly rows: readonly TeacherScheduleRow[];
-  readonly labels: TeacherDashboardLabels;
+  readonly labels: TeacherDashboardViewLabels;
   readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly canActivate: boolean;
   readonly emptyMessage: string;

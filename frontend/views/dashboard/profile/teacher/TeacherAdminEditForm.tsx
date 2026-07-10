@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/views/dashboard/profile/teacher/sections/CompensationSection";
@@ -20,11 +21,13 @@ import {
 export function TeacherAdminEditForm({
   teacherData,
   avatarUrl,
+  targetUserId,
   isSaving,
   onSubmit,
 }: {
   readonly teacherData: TeacherEditData;
   readonly avatarUrl?: string | null;
+  readonly targetUserId?: string;
   readonly isSaving: boolean;
   readonly onSubmit: (values: TeacherAdminEditFormData) => Promise<void>;
 }) {
@@ -91,6 +94,7 @@ export function TeacherAdminEditForm({
             control={form.control}
           />
           <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
+          {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
           <CompensationSection mode="edit" register={form.register} control={form.control} />
           <AdminOnlySection mode="edit" register={form.register} control={form.control} />
         </Box>

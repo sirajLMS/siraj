@@ -4,6 +4,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import {
@@ -25,10 +26,7 @@ function useTotalsText(rows: readonly ReportLedgerRow[]) {
 
   return useMemo(() => {
     const paidTotals = aggregatePaidAmountTotals(rows);
-    return formatReportPaidAmounts(paidTotals, locale, {
-      convertedAmount: values => tProfile("convertedAmount", values),
-      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-    });
+    return formatReportPaidAmounts(paidTotals, locale, buildFxDisplayMessages(tProfile, tErrors));
   }, [rows, locale, tProfile, tErrors]);
 }
 

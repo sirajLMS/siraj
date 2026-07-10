@@ -5,7 +5,7 @@ import { StatusBadge } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
-import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
 import {
   getStatusLabel,
@@ -19,12 +19,12 @@ export function TeacherScheduleStatusContent({
   onActivate,
 }: Readonly<{
   row: TeacherScheduleRow;
-  labels: TeacherDashboardLabels;
+  labels: TeacherDashboardViewLabels;
   canActivate: boolean;
   onActivate?: (id: string) => void;
 }>) {
   if (canActivate && (row.status === "pending" || row.status === "connecting")) {
-    const tooltips = resolveTeacherScheduleActionTooltips(row, labels);
+    const tooltips = resolveTeacherScheduleActionTooltips(row, labels, labels.meetingLabels);
     return (
       <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
         <SessionActivateButton

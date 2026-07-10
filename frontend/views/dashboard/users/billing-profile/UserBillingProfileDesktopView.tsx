@@ -1,7 +1,7 @@
 "use client";
 
-import { FilterListOutlined } from "@mui/icons-material";
-import { Box, CircularProgress, TextField } from "@mui/material";
+import { AddCardOutlined, FilterListOutlined } from "@mui/icons-material";
+import { Box, Button, TextField } from "@mui/material";
 import { useRef } from "react";
 import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
@@ -16,10 +16,14 @@ export function UserBillingProfileDesktopView({
   searchQuery,
   canView,
   canSubmitProof,
+  canManage = false,
+  billingActionsDisabled = false,
   onSearchChange,
   onPayNow,
+  onMarkAsPaid,
   onViewPaymentDetails,
   onDownloadPdf,
+  onQuickPay,
   page,
   pageSize,
   totalCount,
@@ -35,7 +39,17 @@ export function UserBillingProfileDesktopView({
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
         actions={
-          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+            {canSubmitProof && !billingActionsDisabled ? (
+              <Button
+                variant="contained"
+                startIcon={<AddCardOutlined />}
+                onClick={onQuickPay}
+                sx={{ textTransform: "uppercase", fontWeight: 700 }}
+              >
+                {labels.quickPay}
+              </Button>
+            ) : null}
             <TextField
               size="small"
               value={searchQuery}
@@ -56,7 +70,10 @@ export function UserBillingProfileDesktopView({
           rows={invoices}
           canView={canView}
           canSubmitProof={canSubmitProof}
+          canManage={canManage}
+          billingActionsDisabled={billingActionsDisabled}
           onPayNow={onPayNow}
+          onMarkAsPaid={onMarkAsPaid}
           onViewPaymentDetails={onViewPaymentDetails}
           onDownloadPdf={onDownloadPdf}
           labels={{
@@ -67,13 +84,9 @@ export function UserBillingProfileDesktopView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
+          loading={loading}
         />
       </SectionPanel>
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
-      )}
     </PageContainer>
   );
 }

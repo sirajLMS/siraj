@@ -3,6 +3,7 @@
 import { Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import type { MeetingJoinEmptyRole } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -12,8 +13,11 @@ import {
 import { LiveSessionToolbar } from "@/frontend/views/dashboard/classes/details/components/LiveSessionToolbar";
 import { TimezoneWarningBanner } from "@/frontend/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
 
+export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin";
+
 export interface ClassDetailsToolbarAreaProps {
   readonly instance: ClassInstanceDetail;
+  readonly viewMode: ClassDetailsToolbarViewMode;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
   readonly labels: {
@@ -34,8 +38,22 @@ export interface ClassDetailsToolbarAreaProps {
   readonly error: string | null;
 }
 
+function resolveJoinEmptyState(
+  viewMode: ClassDetailsToolbarViewMode,
+  instanceId: string
+): { emptyRole: MeetingJoinEmptyRole; setupHref?: string } {
+  if (viewMode === "parent") {
+    return { emptyRole: "parent" };
+  }
+  if (viewMode === "teacher") {
+    return { emptyRole: "teacher", setupHref: "/profile?tab=meeting" };
+  }
+  return { emptyRole: "class", setupHref: `/classes/${instanceId}#meeting-configs` };
+}
+
 export function ClassDetailsToolbarArea({
   instance,
+  viewMode,
   isWarningDismissed,
   onDismissWarning,
   labels,
@@ -49,10 +67,12 @@ export function ClassDetailsToolbarArea({
   isResetting,
   error,
 }: ClassDetailsToolbarAreaProps) {
-  const t = useTranslations("dashboard.classDetails.liveSession");
-  const meetingJoinUrl = instance.meetingJoinUrl?.trim();
-  const effectiveMeeting = (instance as { effectiveMeeting?: { joinUrl?: string | null } }).effectiveMeeting;
-  const joinUrl = effectiveMeeting?.joinUrl?.trim() || meetingJoinUrl;
+  const tJoin = useTranslations("ui.meetingConfig.join");
+  const meeting = instance.effectiveMeeting;
+  const joinUrl = meeting?.joinUrl?.trim() || instance.meetingJoinUrl?.trim();
+  const joinLabel = tJoin("joinMeeting");
+  const instanceId = instance.id ?? "";
+  const emptyState = resolveJoinEmptyState(viewMode, instanceId);
 
   return (
     <Box sx={classDetailsSectionStackSx}>
@@ -66,36 +86,34 @@ export function ClassDetailsToolbarArea({
         </RequirePermission>
       )}
 
-      {joinUrl ? (
-        <Stack direction="row" sx={classDetailsContentPaddingSx}>
-          <MeetingJoinAction joinUrl={joinUrl} label={t("joinZoom")} id={`join-meeting-${instance.id}`} />
-        </Stack>
-      ) : (
-        <Stack direction="row" sx={classDetailsContentPaddingSx}>
-          <MeetingJoinAction
-            emptyRole="class"
-            setupHref={`/classes/${instance.id}#meeting-configs`}
-            label={t("joinZoom")}
-            id={`join-meeting-${instance.id}`}
-          />
-        </Stack>
-      )}
-
-      <Box sx={classDetailsContentPaddingSx}>
-        <LiveSessionToolbar
-          classInstanceId={instance.id ?? ""}
-          executionState={instance.executionState ?? "NOT_ACTIVATED"}
-          onStart={onStart}
-          onAbsent={onAbsent}
-          onLeave={onLeave}
-          onReset={onReset}
-          isStarting={isStarting}
-          isMarkingAbsent={isMarkingAbsent}
-          isProcessingLeave={isProcessingLeave}
-          isResetting={isResetting}
-          error={error}
+      <Stack direction="row" sx={classDetailsContentPaddingSx}>
+        <MeetingJoinAction
+          joinUrl={joinUrl}
+          meeting={meeting}
+          label={joinLabel}
+          id={`join-meeting-${instanceId}`}
+          emptyRole={emptyState.emptyRole}
+          setupHref={emptyState.setupHref}
         />
-      </Box>
+      </Stack>
+
+      {viewMode !== "parent" ? (
+        <Box sx={classDetailsContentPaddingSx}>
+          <LiveSessionToolbar
+            classInstanceId={instanceId}
+            executionState={instance.executionState ?? "NOT_ACTIVATED"}
+            onStart={onStart}
+            onAbsent={onAbsent}
+            onLeave={onLeave}
+            onReset={onReset}
+            isStarting={isStarting}
+            isMarkingAbsent={isMarkingAbsent}
+            isProcessingLeave={isProcessingLeave}
+            isResetting={isResetting}
+            error={error}
+          />
+        </Box>
+      ) : null}
     </Box>
   );
 }

@@ -16,7 +16,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { DayOfWeek, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { DayOfWeek, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { SearchScheduleDraftFilters } from "@/frontend/stores/searchScheduleStore";
 import { getClearDrawerFiltersPatch } from "@/frontend/views/dashboard/search-schedule/searchScheduleFilterUtils";
 
@@ -91,12 +91,21 @@ function FilterFields({ draft, onDraftChange }: Readonly<FilterFieldsProps>) {
         fullWidth
         onChange={event => {
           const value = event.target.value;
-          onDraftChange({ gender: value ? (value as Gender) : null });
+          let gender: Gender | null = null;
+          if (value) {
+            for (const option of Object.values(Gender)) {
+              if (option === value) {
+                gender = option;
+                break;
+              }
+            }
+          }
+          onDraftChange({ gender });
         }}
       >
         <MenuItem value="">{t("allGenders")}</MenuItem>
-        <MenuItem value="MALE">{t("male")}</MenuItem>
-        <MenuItem value="FEMALE">{t("female")}</MenuItem>
+        <MenuItem value={Gender.Male}>{t("male")}</MenuItem>
+        <MenuItem value={Gender.Female}>{t("female")}</MenuItem>
       </TextField>
 
       <TextField

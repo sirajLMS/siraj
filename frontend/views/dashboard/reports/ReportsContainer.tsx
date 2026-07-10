@@ -7,12 +7,16 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import type { AttendanceReportRow, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission, ReportGroupingMode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { generateAttendanceReportQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { getCurrencyDisplayName } from "@/frontend/lib/currency";
+import type { FormatCurrencyMessages } from "@/frontend/lib/fx-render";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
+import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
 import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
 import type {
   ReportLedgerRow,
@@ -191,6 +195,7 @@ function ReportsMainContent({
   return (
     <>
       {showFinancials ? <DisplayCurrencyHint /> : null}
+      {showFinancials ? <FxConversionNote /> : null}
       <ReportsView
         labels={labels}
         fromDate={fromDate}
@@ -261,15 +266,7 @@ function useReportData(
     readonly groupBy: ReportGroupingMode;
   },
   locale: string,
-  fxMessages: {
-    readonly convertedAmount: (values: {
-      lockedAmount: string;
-      lockedCurrency: string;
-      convertedApprox: string;
-      displayCurrency: string;
-    }) => string;
-    readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-  }
+  fxMessages: FormatCurrencyMessages
 ) {
   const { data: teachersData } = useQuery(teachersQueryDocument, {
     variables: { search: "", limit: 100 },
@@ -284,7 +281,11 @@ function useReportData(
       .map(t => ({ id: t.id, name: t.name }));
   }, [teachersData]);
 
-  const { data: reportData, loading: reportLoading } = useQuery(generateAttendanceReportQueryDocument, {
+  const {
+    data: reportData,
+    loading: reportLoading,
+    refetch: refetchReport,
+  } = useQuery(generateAttendanceReportQueryDocument, {
     variables: { filters: activeFilters },
     fetchPolicy: "network-only",
   });
@@ -332,7 +333,7 @@ function useReportData(
     };
   }, [rows, reportData, locale, fxMessages]);
 
-  return { reportData, reportLoading, teachers, rows, summary };
+  return { reportData, reportLoading, teachers, rows, summary, refetchReport };
 }
 
 function useReportHandlers({
@@ -380,15 +381,7 @@ function useReportHandlers({
       readonly financialDistribution: string;
     };
   };
-  readonly fxMessages: {
-    readonly convertedAmount: (values: {
-      lockedAmount: string;
-      lockedCurrency: string;
-      convertedApprox: string;
-      displayCurrency: string;
-    }) => string;
-    readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
-  };
+  readonly fxMessages: FormatCurrencyMessages;
 }) {
   const router = useRouter();
 
@@ -464,7 +457,6 @@ export function ReportsContainer() {
   const { hasPermission } = useUserStore();
   const locale = useLocale();
   const t = useTranslations("dashboard.reports");
-  const tProfile = useTranslations("profile");
   const tErrors = useTranslations("errors");
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
@@ -482,21 +474,17 @@ export function ReportsContainer() {
     setReportType,
   } = useReportFilters();
 
-  const fxMessages = useMemo(
-    () => ({
-      convertedAmount: (values: {
-        lockedAmount: string;
-        lockedCurrency: string;
-        convertedApprox: string;
-        displayCurrency: string;
-      }) => tProfile("convertedAmount", values),
-      displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
-        tErrors("displayCurrencyFallback", values),
-    }),
-    [tProfile, tErrors]
+  const fxMessages = useMemo(() => buildFxDisplayMessages(t, tErrors), [t, tErrors]);
+
+  const { reportData, reportLoading, teachers, rows, summary, refetchReport } = useReportData(
+    activeFilters,
+    locale,
+    fxMessages
   );
 
-  const { reportData, reportLoading, teachers, rows, summary } = useReportData(activeFilters, locale, fxMessages);
+  useRefetchOnWindowFocus(() => {
+    void refetchReport();
+  });
 
   const { handleSubmit, handleExportCsv, handlePrintReport, handleRowClick } = useReportHandlers({
     fromDate,

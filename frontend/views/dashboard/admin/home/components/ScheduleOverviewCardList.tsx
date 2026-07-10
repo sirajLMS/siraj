@@ -6,6 +6,7 @@ import { alpha, styled } from "@mui/material/styles";
 import { useLocale } from "next-intl";
 import type * as React from "react";
 import { ActionIconLink, TimezoneDisplay } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
@@ -391,6 +392,12 @@ function ScheduleOverviewMobileCard({
         </StyledCardHeaderMain>
 
         <StyledCardActions>
+          <MeetingJoinAction
+            variant="icon"
+            joinUrl={row.meetingJoinUrl}
+            meeting={row.effectiveMeeting}
+            emptyRole="parent"
+          />
           {studentId ? (
             <Tooltip title={headers.history}>
               <ActionIconLink href={`${studentHref(studentId)}/history`} aria-label={headers.history}>

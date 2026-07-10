@@ -80,6 +80,7 @@ export function MeetingConfigFormDialog({
   const [details, setDetails] = useState<MeetingConfigDetailsForm>(emptyDetails);
   const [isDefault, setIsDefault] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [initialProviderId, setInitialProviderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -98,6 +99,7 @@ export function MeetingConfigFormDialog({
     setDetails(emptyDetails());
     setIsDefault(existingCount === 0);
     setUrlError(null);
+    setSaveError(null);
   }, [editConfig, existingCount, open]);
 
   const [createConfig, { loading: creating }] = useMutation(createUserMeetingConfigMutationDocument);
@@ -129,45 +131,51 @@ export function MeetingConfigFormDialog({
     if (!isEdit && !provider?.id) return;
     if (!details.meetingUrl.trim()) return;
 
-    if (isEdit && editConfig?.id) {
-      const updateInput: UserMeetingConfigUpdateInput = {
-        label: label.trim() || null,
-        isDefault,
-        password: details.password.trim() || null,
-        providerId: providerChanged && provider?.id ? provider.id : null,
-        details: {
-          meetingUrl: details.meetingUrl.trim(),
-          username: details.username.trim() || null,
-          tenantId: details.tenantId.trim() || null,
-        },
-      };
-      await updateConfig({
-        variables: {
-          id: editConfig.id,
-          input: updateInput,
-        },
-      });
-    } else if (provider?.id) {
-      await createConfig({
-        variables: {
-          input: {
-            userId,
-            providerId: provider.id,
-            label: label.trim() || null,
-            isDefault,
-            password: details.password.trim() || null,
-            details: {
-              meetingUrl: details.meetingUrl.trim(),
-              username: details.username.trim() || null,
-              tenantId: details.tenantId.trim() || null,
+    setSaveError(null);
+
+    try {
+      if (isEdit && editConfig?.id) {
+        const updateInput: UserMeetingConfigUpdateInput = {
+          label: label.trim() || null,
+          isDefault,
+          password: details.password.trim() || null,
+          providerId: providerChanged && provider?.id ? provider.id : null,
+          details: {
+            meetingUrl: details.meetingUrl.trim(),
+            username: details.username.trim() || null,
+            tenantId: details.tenantId.trim() || null,
+          },
+        };
+        await updateConfig({
+          variables: {
+            id: editConfig.id,
+            input: updateInput,
+          },
+        });
+      } else if (provider?.id) {
+        await createConfig({
+          variables: {
+            input: {
+              userId,
+              providerId: provider.id,
+              label: label.trim() || null,
+              isDefault,
+              password: details.password.trim() || null,
+              details: {
+                meetingUrl: details.meetingUrl.trim(),
+                username: details.username.trim() || null,
+                tenantId: details.tenantId.trim() || null,
+              },
             },
           },
-        },
-      });
-    }
+        });
+      }
 
-    onSaved();
-    onClose();
+      onSaved();
+      onClose();
+    } catch {
+      setSaveError(t("saveError"));
+    }
   };
 
   return (
@@ -201,6 +209,7 @@ export function MeetingConfigFormDialog({
             passwordHelperText={isEdit && editConfig?.hasSecret ? t("passwordLeaveBlank") : undefined}
           />
           {urlError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{urlError}</Typography> : null}
+          {saveError ? <Alert severity="error">{saveError}</Alert> : null}
           <FormControlLabel
             control={<Checkbox checked={isDefault} onChange={event => setIsDefault(event.target.checked)} />}
             label={t("setAsDefault")}

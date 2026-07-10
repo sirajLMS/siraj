@@ -14,8 +14,10 @@ import {
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
 import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/students/student-lifecycle.documents";
+import { studentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-profile.documents";
 import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-status.documents";
 import { logger } from "@/frontend/utils/logger";
+import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 import { StudentStatusView } from "@/frontend/views/dashboard/students/status/StudentStatusView";
 import type { StudentStatusPageData, UpcomingClassDisplay } from "@/frontend/views/dashboard/students/status/types";
 
@@ -23,8 +25,10 @@ export function StudentStatusContainer() {
   const t = useTranslations("dashboard.studentStatus");
   const tc = useTranslations("common");
   const params = useParams();
-  const studentId = typeof params?.id === "string" ? params.id : "";
+  const profileContext = useStudentProfileContext();
+  const studentId = profileContext?.studentId ?? (typeof params?.id === "string" ? params.id : "");
   const notifications = useNotifications();
+  const useUnifiedProfile = profileContext != null;
 
   const {
     data: studentData,
@@ -32,7 +36,7 @@ export function StudentStatusContainer() {
     error: studentError,
   } = useQuery(studentByIdQueryDocument, {
     variables: { studentId },
-    skip: !studentId,
+    skip: !studentId || useUnifiedProfile,
   });
 
   const {
@@ -42,7 +46,7 @@ export function StudentStatusContainer() {
     refetch: refetchUpcoming,
   } = useQuery(studentUpcomingClassesQueryDocument, {
     variables: { studentId },
-    skip: !studentId,
+    skip: !studentId || useUnifiedProfile,
   });
 
   const [changeStatus, { loading: isUpdating }] = useMutation(changeStudentStatusMutationDocument, {
@@ -51,7 +55,11 @@ export function StudentStatusContainer() {
         severity: "success",
         autoHideDuration: 5000,
       });
-      void refetchUpcoming();
+      if (useUnifiedProfile) {
+        void profileContext?.refetch();
+      } else {
+        void refetchUpcoming();
+      }
     },
     onError: error => {
       logger.error("Change student status failed:", { error });
@@ -60,10 +68,44 @@ export function StudentStatusContainer() {
         autoHideDuration: 5000,
       });
     },
-    refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
+    refetchQueries: useUnifiedProfile
+      ? [{ query: studentProfileQueryDocument, variables: { studentId } }]
+      : [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
 
   const student: StudentStatusPageData | null = useMemo(() => {
+    if (useUnifiedProfile) {
+      const profile = profileContext?.profile;
+      if (!profile?.id || !profile.name) return null;
+
+      const upcomingClasses: UpcomingClassDisplay[] = (profile.upcomingClasses?.classes ?? []).map(cls => ({
+        id: cls?.id ?? "",
+        instructor: cls?.instructor ?? "",
+        teacherId: cls?.teacherId ?? null,
+        scheduledStartAt: cls?.scheduledStartAt ?? "",
+        scheduledEndAt: cls?.scheduledEndAt ?? "",
+        durationMinutes: cls?.durationMinutes ?? 0,
+        executionState: cls?.executionState ?? GqlClassExecutionState.NotActivated,
+        isFrozen: cls?.isFrozen ?? false,
+        meetingJoinUrl: cls?.meetingJoinUrl,
+        effectiveMeeting: cls?.effectiveMeeting,
+      }));
+
+      return {
+        id: profile.id,
+        name: profile.name,
+        status: profile.upcomingClasses?.status ?? profile.status ?? StudentStatus.Regular,
+        avatarUrl: profile.avatarUrl ?? null,
+        primaryTeacherId: profile.primaryTeacherId ?? null,
+        teacherName: profile.teacherName ?? null,
+        hoursPerWeek: profile.hoursPerWeek != null ? String(profile.hoursPerWeek) : null,
+        classesRemaining: profile.classesRemaining ?? 0,
+        classesTotal: profile.classesTotal ?? 0,
+        version: profile.version ?? null,
+        upcomingClasses,
+      };
+    }
+
     const s = studentData?.studentById;
     const uc = upcomingData?.studentUpcomingClasses;
     if (!s?.id || !s.name) return null;
@@ -92,7 +134,7 @@ export function StudentStatusContainer() {
       version: s.version ?? null,
       upcomingClasses,
     };
-  }, [studentData, upcomingData]);
+  }, [useUnifiedProfile, profileContext?.profile, studentData, upcomingData]);
 
   const versionRef = useRef(student?.version ?? null);
   useEffect(() => {
@@ -117,7 +159,7 @@ export function StudentStatusContainer() {
     return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
   }
 
-  if (studentLoading || upcomingLoading) {
+  if (useUnifiedProfile ? profileContext?.loading : studentLoading || upcomingLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />
@@ -125,7 +167,7 @@ export function StudentStatusContainer() {
     );
   }
 
-  if (studentError || upcomingError) {
+  if (!useUnifiedProfile && (studentError || upcomingError)) {
     logger.error("Error loading student status:", { studentError, upcomingError });
     return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
   }

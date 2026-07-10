@@ -1,6 +1,6 @@
 "use client";
 
-import { Stack, TextField, Typography } from "@mui/material";
+import { MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
@@ -9,7 +9,8 @@ import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDispla
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
@@ -19,11 +20,13 @@ import {
   type ParentAdminData,
   toDisplayValue,
 } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { Link } from "@/shared/i18n/routing";
 
 type BillingSectionProps =
   | {
       readonly mode: "view";
       readonly adminData: ParentAdminData;
+      readonly parentId?: string | null;
     }
   | {
       readonly mode: "edit";
@@ -51,6 +54,29 @@ export function BillingSection(props: BillingSectionProps) {
     return (
       <SectionPanel title={t("sections.billing")}>
         <Stack spacing={2.5}>
+          <Controller
+            name="lifecycleStatus"
+            control={props.control}
+            render={({ field, fieldState }) => (
+              <Stack spacing={0.5}>
+                <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
+                  {t("fields.lifecycleStatus")}
+                </Typography>
+                <Select
+                  {...field}
+                  value={field.value ?? ParentStatus.Regular}
+                  fullWidth
+                  size="small"
+                  error={Boolean(fieldState.error)}
+                >
+                  <MenuItem value={ParentStatus.Regular}>{t("status.regular")}</MenuItem>
+                  <MenuItem value={ParentStatus.OnTrial}>{t("status.on_trial")}</MenuItem>
+                  <MenuItem value={ParentStatus.OnLeave}>{t("status.on_leave")}</MenuItem>
+                  <MenuItem value={ParentStatus.Suspended}>{t("status.suspended")}</MenuItem>
+                </Select>
+              </Stack>
+            )}
+          />
           <TextField label={t("fields.invoiceType")} fullWidth size="small" {...props.register("invoiceType")} />
           <TextField label={t("fields.feeAmount")} fullWidth size="small" {...props.register("feeAmount")} />
           <Controller
@@ -109,10 +135,7 @@ export function BillingSection(props: BillingSectionProps) {
         }
       : null,
     locale,
-    {
-      convertedAmount: values => t("convertedAmount", values),
-      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-    }
+    buildFxDisplayMessages(t, tErrors)
   );
 
   const lifecycleStatus = resolveLifecycleStatus(props.adminData);
@@ -134,7 +157,19 @@ export function BillingSection(props: BillingSectionProps) {
           <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
             {t("fields.lifecycleStatus")}
           </Typography>
-          <StatusBadge category="studentAccount" status={lifecycleStatus} label={t(`status.${lifecycleStatus}`)} />
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+            <StatusBadge category="studentAccount" status={lifecycleStatus} label={t(`status.${lifecycleStatus}`)} />
+            {props.parentId ? (
+              <Typography
+                component={Link}
+                href={`/parents/${props.parentId}/lifecycle`}
+                variant="labelMd"
+                sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}
+              >
+                {t("actions.manageLifecycle")}
+              </Typography>
+            ) : null}
+          </Stack>
         </Stack>
       </Stack>
     </SectionPanel>

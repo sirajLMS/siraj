@@ -7,13 +7,13 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
 import { TeacherActiveSessionControls } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherActiveSessionControls";
-import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 
 interface TeacherScheduleSessionActionsCellProps {
   readonly row: TeacherScheduleRow;
-  readonly labels: TeacherDashboardLabels;
+  readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
   readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
@@ -40,7 +40,7 @@ export function TeacherScheduleSessionActionsCell({
     isConnecting: row.status === "connecting",
   });
 
-  const tooltips = resolveTeacherScheduleActionTooltips(row, labels);
+  const tooltips = resolveTeacherScheduleActionTooltips(row, labels, labels.meetingLabels);
   const hasSessionControls = actions.start || actions.markAbsent || actions.requestLeave;
   const activateDisabled = !row.activateEnabled || row.status === "connecting";
   const markAbsentDisabled = row.markAbsentEnabled === false;

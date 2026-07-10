@@ -25,7 +25,7 @@ interface SalaryDetailsSectionProps {
 
 export function SalaryDetailsSection({ register, control, errors, labels }: Readonly<SalaryDetailsSectionProps>) {
   const rateCurrency = useWatch({ control, name: "rateCurrency" });
-  const currencySymbol = getCurrencySymbol((rateCurrency as CurrencyCode | undefined) ?? CurrencyCode.Usd);
+  const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
 
   return (
     <Grid
@@ -74,14 +74,12 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
           name="rateCurrency"
           control={control}
           render={({ field }) => {
-            const option: CurrencyOption | null = field.value
-              ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
-              : null;
+            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
             return (
               <CurrencySelect
                 currency={option}
                 setCurrencyAction={selected => {
-                  field.onChange(selected.code as string);
+                  field.onChange(selected.code);
                 }}
                 onBlurAction={field.onBlur}
                 label={labels.fields.currency}
