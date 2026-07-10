@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { useUserStore } from "@/frontend/stores/userStore";
 import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
@@ -104,6 +105,33 @@ export const Default: Story = {
 export const AdminView: Story = {
   args: {
     parentData: parentAdminProfile,
+    associatedStudents,
+    avatarUrl: "/demo/avatars/02.png",
+    isAdminScope: true,
+  },
+};
+
+const parentWithStaleDisplayAmount: ParentAdminData = {
+  ...parentAdminProfile,
+  feeAmount: "500",
+  currency: CurrencyCode.Sar,
+  displayAmount: {
+    id: "displayAmount:parent-admin-1:USD",
+    amount: null,
+    currency: CurrencyCode.Usd,
+    stale: true,
+  },
+};
+
+export const AdminViewWithStaleDisplayAmount: Story = {
+  decorators: [
+    Story => {
+      useUserStore.setState({ displayCurrency: CurrencyCode.Usd });
+      return <Story />;
+    },
+  ],
+  args: {
+    parentData: parentWithStaleDisplayAmount,
     associatedStudents,
     avatarUrl: "/demo/avatars/02.png",
     isAdminScope: true,

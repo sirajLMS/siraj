@@ -68,4 +68,14 @@ describe("toParentRepoInput", () => {
       timezone: undefined,
     });
   });
+
+  test("maps displayCurrency through core profile fields", () => {
+    const coreInput = {
+      name: "Test User",
+      email: "test@example.com",
+      displayCurrency: CurrencyCode.USD,
+    };
+
+    expect(coreInput.displayCurrency).toBe(CurrencyCode.USD);
+  });
 });

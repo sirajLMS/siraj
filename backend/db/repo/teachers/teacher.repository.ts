@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
-import type { AccountStatus, CurrencyCode, Gender } from "@/backend/enum";
+import { AccountStatus, type CurrencyCode, Gender } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
@@ -267,10 +267,22 @@ export namespace TeacherRepository {
 
     if (!teacher) return null;
 
+    const validGenders = Object.values(Gender);
+    const validStatuses = Object.values(AccountStatus);
+    let resolvedGender: Gender | null = null;
+    let resolvedStatus: AccountStatus = AccountStatus.ACTIVATED;
+
+    if (teacher.gender !== null && validGenders.includes(teacher.gender as Gender)) {
+      resolvedGender = teacher.gender as Gender;
+    }
+    if (validStatuses.includes(teacher.status as AccountStatus)) {
+      resolvedStatus = teacher.status as AccountStatus;
+    }
+
     return mapTeacherProfileRow({
       ...teacher,
-      gender: teacher.gender as Gender | null,
-      status: teacher.status as AccountStatus,
+      gender: resolvedGender,
+      status: resolvedStatus,
     });
   };
 

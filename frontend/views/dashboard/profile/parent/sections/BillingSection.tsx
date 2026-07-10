@@ -1,7 +1,7 @@
 "use client";
 
 import { Stack, TextField, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
@@ -9,7 +9,9 @@ import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDispla
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
+import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
@@ -32,6 +34,8 @@ type BillingSectionProps =
 export function BillingSection(props: BillingSectionProps) {
   const t = useTranslations("profile.parent");
   const tc = useTranslations("profile");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
 
   if (props.mode === "edit") {
     return (
@@ -81,11 +85,31 @@ export function BillingSection(props: BillingSectionProps) {
     );
   }
 
+  const lockedAmount = props.adminData.feeAmount ?? "0";
+  const lockedCurrency = props.adminData.currency ?? CurrencyCode.Usd;
+  const displayAmount = props.adminData.displayAmount;
+  const feeLabel = formatCurrencyForDisplay(
+    lockedAmount,
+    lockedCurrency,
+    displayAmount
+      ? {
+          amount: displayAmount.amount,
+          currency: displayAmount.currency ?? lockedCurrency,
+          stale: displayAmount.stale ?? true,
+        }
+      : null,
+    locale,
+    {
+      convertedAmount: values => t("convertedAmount", values),
+      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+    }
+  );
+
   return (
     <SectionPanel title={t("sections.billing")}>
       <Stack spacing={2}>
         <InfoField label={t("fields.invoiceType")} value={toDisplayValue(props.adminData.invoiceType, tc("notSet"))} />
-        <InfoField label={t("fields.feeAmount")} value={toDisplayValue(props.adminData.feeAmount, tc("notSet"))} />
+        <InfoField label={t("fields.feeAmount")} value={feeLabel} />
         <InfoField
           label={t("fields.currency")}
           value={<CurrencyDisplay code={props.adminData.currency} fallback={tc("notSet")} />}

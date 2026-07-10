@@ -7,6 +7,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import type { AdminMetricKey } from "@/frontend/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
@@ -121,7 +122,7 @@ export function AdminDashboardContainer() {
     if (filters.selectedStatus === key) {
       setSelectedStatus(null);
     } else {
-      setSelectedStatus(key);
+      setSelectedStatus(key as AdminMetricKey);
     }
   };
 

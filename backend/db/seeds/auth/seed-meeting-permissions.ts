@@ -46,7 +46,7 @@ const MEETING_PERMISSION_SEEDS: readonly MeetingPermissionSeed[] = [
 ] as const;
 
 const ADMIN_GROUP_SLUGS = ["super_admin", "academy_admin"] as const;
-const TEACHER_GROUP_SLUGS = ["teachers"] as const;
+const SELF_SERVICE_GROUP_SLUGS = ["teachers", "parent_default"] as const;
 
 async function disableSystemPermissionTrigger(): Promise<void> {
   await db.execute(sql`
@@ -118,7 +118,7 @@ export async function seedOrGet() {
 
     const allKeys = MEETING_PERMISSION_SEEDS.map(spec => spec.key);
     await assignPermissionsToGroups(ADMIN_GROUP_SLUGS, allKeys);
-    await assignPermissionsToGroups(TEACHER_GROUP_SLUGS, [AppPermission.MEETING_CONFIGS_MANAGE_OWN]);
+    await assignPermissionsToGroups(SELF_SERVICE_GROUP_SLUGS, [AppPermission.MEETING_CONFIGS_MANAGE_OWN]);
   } finally {
     await enableSystemPermissionTrigger();
   }

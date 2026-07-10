@@ -467,6 +467,14 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.paymentCatalogs,
   },
   {
+    key: "meeting-providers",
+    labelKey: "dashboard.nav.meetingProviders",
+    icon: VideocamOutlined,
+    href: "/meeting-providers",
+    section: "main",
+    permission: PAGE_PERMISSIONS.meetingProviders,
+  },
+  {
     key: "billing-parent",
     labelKey: "dashboard.nav.invoices",
     icon: ReceiptLongOutlined,

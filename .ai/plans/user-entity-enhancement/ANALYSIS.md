@@ -49,6 +49,8 @@ Students do **not** link to `users` (child of parent).
 - Exchange-rate tables exist (`currency_exchange_rates`, hedges, audit) but **no supported-currencies enum/config**
 - UI hardcodes different lists (parent: USD/SAR/AED/EUR; teacher: +EGP)
 
+**Status: ENUM + TYPING + DISPLAY-CURRENCY + FX-READ-PATH LANDED** in [`.ai/plans/done/currency/`](../done/currency/). FX *ingestion* (fetch source, cron cadence) landed in [`.ai/plans/fx-ingestion/`](../fx-ingestion/); everything else in Decision 3A is landed except reports currency-pair columns (see currency plan T21.11 cross-file dependency).
+
 ### 2.4 Timezone
 
 - Lookup table `timezones` (`iana_id`, offset, DST flag)
@@ -253,7 +255,9 @@ Today’s `PAYPAL | BANK_ACCOUNT` on role rows + `teacher_banking_details_histor
 
 ## 7. Currency & timezone as enums with config
 
-### 7.1 Currency (three-layer model — locked)
+### 7.1 Currency (three-layer model — locked) — ✅ Landed
+
+See [`.ai/plans/done/currency/spec.md`](../done/currency/spec.md) for the full landed slice (typing, `users.displayCurrency`, FX-convert-on-render read path with stale-FX fallback).
 
 | Layer | What | Mutated by FX? |
 |-------|------|----------------|
@@ -390,13 +394,22 @@ No prolonged dual-read of old role columns in app code.
 | Phase | Scope |
 |-------|--------|
 | **0** | Lock open questions; write ADR-style decisions in this folder |
-| **1** | Schema: users person fields + CurrencyCode enum + phone custom type |
+| **1** | Schema: users person fields + ~~CurrencyCode enum~~ **✅ landed** + `users.displayCurrency` **✅ landed** + phone custom type |
 | **2** | Data migration + drop role duplicates |
 | **3** | `user_meeting_configs` + remove zoom columns |
 | **4** | User-scoped banking migration |
 | **5** | Payment method model (per decision) |
 | **6** | GraphQL + profile UI (staff finally shows full person form) |
 | **7** | Quality gate, tests, i18n |
+
+### 12.1 Landed slices (do not re-implement)
+
+| Slice | Plan folder | What shipped |
+|-------|-------------|--------------|
+| Currency typing + display preference + FX read path | [`.ai/plans/done/currency/`](../done/currency/) | `currency_code` PG enum on locked money columns; `users.displayCurrency`; `FxDisplayService` + `DisplayAmount` GraphQL field; frontend `formatCurrencyForDisplay`; profile/billing UI wiring |
+| FX rate ingestion | [`.ai/plans/fx-ingestion/`](../fx-ingestion/) | Provider adapters, cron, `currency_exchange_rates` writes, admin exchange-rates UI, permissions |
+
+Future waves should **consume** these slices (e.g. reports `paidEgp`/`paidUsd` → `{ amount, currency }` + `displayAmount`) rather than re-adding enum registration, ingestion, or display-currency plumbing.
 
 ---
 

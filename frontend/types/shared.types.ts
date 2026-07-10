@@ -8,6 +8,8 @@
 
 import type { SvgIconComponent } from "@mui/icons-material";
 import type {
+  ClassExecutionState,
+  ClassOutcome,
   CountryCode,
   CurrencyCode,
   Gender,
@@ -17,6 +19,7 @@ import type {
   PaymentMethodType,
   TeacherOnboardingInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 
 // --- Parent Complaints ---
 
@@ -115,8 +118,8 @@ export interface TeacherScheduleRow {
   readonly studentInitials: string;
   readonly timeRange: string;
   readonly status: TeacherSessionStatus;
-  readonly executionState?: string;
-  readonly outcome?: string;
+  readonly executionState?: ClassExecutionState | null;
+  readonly outcome?: ClassOutcome | null;
   readonly videoEnabled: boolean;
   readonly activateEnabled: boolean;
   readonly activateDisabledReason?: "before_window" | "after_window" | null;
@@ -221,4 +224,7 @@ export type TeacherOnboardingFormData = Omit<
   swiftBic?: string;
   iban: string;
   gender: Gender;
+  meetingProvider?: MeetingProviderFieldsFragment | null;
+  meetingUrl?: string;
+  meetingLabel?: string;
 };

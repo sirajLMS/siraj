@@ -13,8 +13,9 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import type { BookingStatus, ClassExecutionState, ClassOutcome, CurrencyCode, ParentStatus } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
+import { CurrencyCode } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
@@ -299,13 +300,30 @@ export namespace ParentRepository {
       .where(eq(parents.id, parentId))
       .limit(1);
 
-    return results[0]
-      ? {
-          ...results[0],
-          timezone: results[0].timezone as IanaTimezone,
-          displayCurrency: results[0].displayCurrency as CurrencyCode | null,
-        }
-      : null;
+    if (!results[0]) return null;
+
+    const validTimezones = Object.values(IanaTimezone);
+    const validCurrencyCodes = Object.values(CurrencyCode);
+
+    let resolvedTimezone: IanaTimezone = IanaTimezone.UTC;
+    let resolvedDisplayCurrency: CurrencyCode | null = null;
+
+    if (validTimezones.includes(results[0].timezone as IanaTimezone)) {
+      resolvedTimezone = results[0].timezone as IanaTimezone;
+    }
+
+    if (
+      results[0].displayCurrency !== null &&
+      validCurrencyCodes.includes(results[0].displayCurrency as CurrencyCode)
+    ) {
+      resolvedDisplayCurrency = results[0].displayCurrency as CurrencyCode;
+    }
+
+    return {
+      ...results[0],
+      timezone: resolvedTimezone,
+      displayCurrency: resolvedDisplayCurrency,
+    };
   };
 
   export const updateParentProfile = async (

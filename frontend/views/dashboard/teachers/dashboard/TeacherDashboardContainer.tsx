@@ -60,25 +60,25 @@ interface RawFeedItem {
 }
 
 function deriveRowStatus(
-  executionState: string,
-  outcome: string,
+  executionState: Types.ClassExecutionState,
+  outcome: Types.ClassOutcome,
   activateEnabled: boolean,
   now: Date,
   endAt: Date
 ): TeacherScheduleRow["status"] {
-  if (outcome === "TAKEN" || executionState === "COMPLETED") {
+  if (outcome === Types.ClassOutcome.Taken || executionState === Types.ClassExecutionState.Completed) {
     return "completed";
   }
-  if (outcome === "ABSENT" || outcome === "LEAVE") {
+  if (outcome === Types.ClassOutcome.Absent || outcome === Types.ClassOutcome.Leave) {
     return "missed";
   }
-  if (executionState === "ACTIVATED") {
+  if (executionState === Types.ClassExecutionState.Activated) {
     return "activated";
   }
-  if (executionState === "RUNNING") {
+  if (executionState === Types.ClassExecutionState.Running) {
     return "active";
   }
-  if (executionState === "NOT_ACTIVATED" && outcome === "PENDING") {
+  if (executionState === Types.ClassExecutionState.NotActivated && outcome === Types.ClassOutcome.Pending) {
     const missedDeadline = new Date(endAt.getTime() + DEFAULT_MISSED_GRACE_MINUTES * 60000);
     if (now > missedDeadline) {
       return "missed";
@@ -98,17 +98,26 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
     const startWindow = new Date(startAt.getTime() - ACTIVATION_WINDOW_BEFORE_MINUTES * 60000);
     const now = new Date();
 
-    const executionState = row.executionState ?? "NOT_ACTIVATED";
-    const outcome = row.outcome ?? "PENDING";
+    const executionState: Types.ClassExecutionState =
+      (row.executionState as Types.ClassExecutionState | null) ?? Types.ClassExecutionState.NotActivated;
+    const outcome: Types.ClassOutcome = (row.outcome as Types.ClassOutcome | null) ?? Types.ClassOutcome.Pending;
     const activateEnabled =
-      now >= startWindow && now <= endAt && executionState === "NOT_ACTIVATED" && outcome === "PENDING";
+      now >= startWindow &&
+      now <= endAt &&
+      executionState === Types.ClassExecutionState.NotActivated &&
+      outcome === Types.ClassOutcome.Pending;
 
     let activateDisabledReason: TeacherScheduleRow["activateDisabledReason"] = null;
-    if (executionState === "NOT_ACTIVATED" && outcome === "PENDING" && !activateEnabled) {
+    if (
+      executionState === Types.ClassExecutionState.NotActivated &&
+      outcome === Types.ClassOutcome.Pending &&
+      !activateEnabled
+    ) {
       activateDisabledReason = now < startWindow ? "before_window" : "after_window";
     }
 
-    const isLiveSession = executionState === "ACTIVATED" || executionState === "RUNNING";
+    const isLiveSession =
+      executionState === Types.ClassExecutionState.Activated || executionState === Types.ClassExecutionState.Running;
     const absentWaitingDeadline = new Date(startAt.getTime() + ABSENT_WAITING_MINUTES * 60000);
     const markAbsentEnabled = !isLiveSession || now >= absentWaitingDeadline;
 

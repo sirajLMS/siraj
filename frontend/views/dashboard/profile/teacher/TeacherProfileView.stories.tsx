@@ -3,6 +3,7 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AccountStatus, CurrencyCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/stores/userStore";
 import type {
   TeacherAdminData,
   TeacherOwnData,
@@ -67,6 +68,31 @@ export const OwnView: Story = {
 export const AdminView: Story = {
   args: {
     teacherData: teacherAdminProfile,
+    isAdminScope: true,
+  },
+};
+
+const teacherWithLiveDisplayAmount: TeacherAdminData = {
+  ...teacherAdminProfile,
+  hourlyRate: "50",
+  rateCurrency: CurrencyCode.Egp,
+  displayAmount: {
+    id: "displayAmount:teacher-admin-1:USD",
+    amount: "1.62",
+    currency: CurrencyCode.Usd,
+    stale: false,
+  },
+};
+
+export const AdminViewWithLiveDisplayAmount: Story = {
+  decorators: [
+    Story => {
+      useUserStore.setState({ displayCurrency: CurrencyCode.Usd });
+      return <Story />;
+    },
+  ],
+  args: {
+    teacherData: teacherWithLiveDisplayAmount,
     isAdminScope: true,
   },
 };

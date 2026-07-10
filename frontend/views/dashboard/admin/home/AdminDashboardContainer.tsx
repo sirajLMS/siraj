@@ -7,6 +7,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import type { AdminMetricKey } from "@/frontend/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 import {
@@ -124,7 +125,7 @@ export function AdminDashboardContainer() {
     if (filters.selectedStatus === key) {
       setSelectedStatus(null);
     } else {
-      setSelectedStatus(key);
+      setSelectedStatus(key as AdminMetricKey);
     }
   };
 
@@ -132,9 +133,6 @@ export function AdminDashboardContainer() {
   const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null);
   const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
-
-  // Type-safe keys for admin metrics
-  type AdminMetricKey = (typeof ADMIN_METRIC_DEFINITIONS)[number]["key"];
 
   // Type guard to ensure a value is a valid AdminMetricKey
   const isAdminMetricKey = (key: string | null): key is AdminMetricKey => {

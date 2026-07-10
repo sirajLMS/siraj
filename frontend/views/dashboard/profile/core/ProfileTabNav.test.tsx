@@ -32,7 +32,27 @@ afterEach(() => {
 });
 
 describe("ProfileTabNav", () => {
-  test("hides Meeting tab for teacher in own scope", () => {
+  test("shows Meeting tab for teacher in own scope with manage_own permission", () => {
+    mockNavigation();
+    renderWithWrapper(
+      <ProfileTabNav
+        audience={ProfileAudience.Teacher}
+        scope={ProfileScope.Own}
+        currentTab="profile"
+        onTabChange={() => {}}
+      />,
+      {
+        ...enLocale,
+        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.MeetingConfigsManageOwn],
+      }
+    );
+
+    expect(screen.getAllByText("Meeting").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Students")).toBeNull();
+    expect(screen.getAllByText("Notifications").length).toBeGreaterThan(0);
+  });
+
+  test("hides Meeting tab for teacher in own scope without manage_own permission", () => {
     mockNavigation();
     renderWithWrapper(
       <ProfileTabNav
@@ -48,8 +68,6 @@ describe("ProfileTabNav", () => {
     );
 
     expect(screen.queryByText("Meeting")).toBeNull();
-    expect(screen.queryByText("Students")).toBeNull();
-    expect(screen.getAllByText("Notifications").length).toBeGreaterThan(0);
   });
 
   test("hides Students tab for teacher admin without edit permission", () => {
@@ -70,7 +88,7 @@ describe("ProfileTabNav", () => {
     expect(screen.queryByText("Students")).toBeNull();
   });
 
-  test("shows Students tab for teacher admin with edit permission", () => {
+  test("shows Students tab for teacher admin with manage_other permission", () => {
     mockNavigation();
     renderWithWrapper(
       <ProfileTabNav
@@ -81,11 +99,16 @@ describe("ProfileTabNav", () => {
       />,
       {
         ...enLocale,
-        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
+        permissions: [
+          AppPermission.AuthViewOwnProfile,
+          AppPermission.UserEditProfile,
+          AppPermission.MeetingConfigsManageOther,
+        ],
       }
     );
 
     expect(screen.getAllByText("Students").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Meeting").length).toBeGreaterThan(0);
   });
 
   test("shows Permissions tab for staff admin in other scope", () => {

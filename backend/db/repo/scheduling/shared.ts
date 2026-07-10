@@ -9,6 +9,7 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { MeetingClassFieldsService } from "@/backend/services/meeting/meeting-class-fields";
 import type * as Types from "@/backend/types";
 
 export async function acquireLocks(tx: DBTransaction, teacherId: string, studentId: string) {
@@ -186,12 +187,19 @@ export async function createRescheduledSuccessor(
     idempotencyKey: successorIdempotencyKey,
   };
 
-  await performRescheduleValidations(t, successorInput, locale);
+  const meetingFields = await MeetingClassFieldsService.resolveForTeacher(existing.teacherId, { tx: t });
+  const successorWithMeeting = {
+    ...successorInput,
+    meetingJoinUrl: meetingFields.meetingJoinUrl,
+    meetingConfigSnapshot: meetingFields.meetingConfigSnapshot,
+  };
+
+  await performRescheduleValidations(t, successorWithMeeting, locale);
 
   const [successor] = await t
     .insert(classInstances)
     .values({
-      ...successorInput,
+      ...successorWithMeeting,
       createdAt: new Date(),
       updatedAt: new Date(),
     })

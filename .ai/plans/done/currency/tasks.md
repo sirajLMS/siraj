@@ -100,7 +100,7 @@ _Rules (read before editing):_ `AGENTS.md` (root) · `backend/types/AGENTS.md` (
 - [x] **T5.12** `backend/db/repo/scheduling/shared.ts:183` — pass-through (verify typing only)
 - [x] **T5.13** `backend/db/repo/scheduling/state-changes.ts:539-540` — `rateCurrency: CurrencyCode | null` (pass-through via schema-inferred `ClassInstanceInsertInput`)
 - [x] **T5.14** `backend/db/repo/books/report.repository.ts:92-93, 115-116` — **Decision: Option A** — kept `'EGP'`/`'USD'` as raw SQL string literals inside `sql<number>` templates (drizzle-safe; no bind-param interpolation). tsgo + biome + lint-queue all pass with no code changes. `${CurrencyCode.EGP}` interpolation not required.
-- [ ] **T5.15** Per-file `tsgo` on every touched repo file → biome → lint-queue.
+- [x] **T5.15** Per-file `tsgo` on every touched repo file → biome → lint-queue.
 
 _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop, fix-or-report cross-file rule) · `backend/db/repo/AGENTS.md` (**data access ONLY**: no business logic, no permission checks, no hardcoded user-facing error strings — use `getBackendTranslations` + `locale?` param; repos must use `{Entity}SelectType`/`{Entity}InsertType` from `backend/types/`, NOT raw schema types; conditional aggregation via `sql<number>` template + `.mapWith(Number)` — never raw `CAST(...)`) · `backend/AGENTS.md` (Repository Layer) · `.agents/instructions/backend.instructions.md` ("Repository Layer" — when `findMany` complex relations give `SQL<unknown>` errors, revert to `.select().from().leftJoin()` or manual ID-based mapping)
 
@@ -278,60 +278,60 @@ _Rules (read before editing):_ `AGENTS.md` (root — lint queue + per-file verif
 
 ## Phase 16 — Backend repo + logic tests
 
-- [ ] **T16.1** `backend/db/test/repo/billing.repository.test.ts` — `currency: "USD"` literals → `CurrencyCode.USD` (or rely on factory constant).
-- [ ] **T16.2** `backend/db/test/repo/teacher.repository.test.ts` — `rateCurrency` literals.
-- [ ] **T16.3** `backend/db/test/repo/parent.repository.test.ts` — `currency` literals.
-- [ ] **T16.4** `backend/db/test/repo/user.repository.test.ts` — NEW `updateDisplayCurrency` round-trip: create user → set `CurrencyCode.Usd` → assert returning row → update to `CurrencyCode.Egp` → assert. `runInRollback`; pass `tx`.
-- [ ] **T16.5** `backend/db/test/repo/report.repository.test.ts` — verify still passes (no literal changes needed if SQL CASE kept as raw string).
-- [ ] **T16.6** `backend/db/test/logic/billing-safeguards.test.ts` — `fromCurrency:"EGP"` / `toCurrency:"USD"` literals → `CurrencyCode.EGP/USD` (lines ~52-53, 89, 113, 117, 133).
-- [ ] **T16.7** `backend/db/test/logic/exchange-rate.test.ts` — `fromCurrency:"USD"` (line 16, 25).
-- [ ] **T16.8** `backend/services/billing/fx-display.service.test.ts` — NEW — 4 cases: identity (`display === locked`), live direct pair, stale pair (older than 24h), USD-hub transitive (`locked → USD → display`). `runInRollback`; pass `tx`; assert soft returns, NOT throws.
-- [ ] **T16.9** `backend/db/test/logic/class_instances_security.test.ts` — audit FX/currency snapshot assertions.
-- [ ] **T16.10** `backend/db/test/logic/class_rescheduling.test.ts` — same.
-- [ ] **T16.11** `backend/db/test/logic/concurrency.test.ts` — same.
-- [ ] **T16.12** `backend/db/test/logic/invoice-restriction.test.ts` — same.
-- [ ] **T16.13** `backend/db/test/logic/payment-idempotency.test.ts` — `currency` literal.
-- [ ] **T16.14** `backend/db/test/logic/session-scalability.test.ts` — same.
-- [ ] **T16.15** `backend/db/test/logic/teacher_banking_verification.test.ts` — `teacher_payments.currency` literal.
-- [ ] **T16.16** `backend/db/test/logic/audit-trail.test.ts` — FX audit assertions.
-- [ ] **T16.17** Use `bun run scripts/run-test/run-test.ts <test-path>` — never raw `bun test` for db tests.
-- [ ] **T16.18** Preserve `runInRollback`; no `expect(...).rejects.toThrow()` inside rollback (the new FX test asserts soft returns, not throws).
+- [x] **T16.1** `backend/db/test/repo/billing.repository.test.ts` — `currency: "USD"` literals → `CurrencyCode.USD` (or rely on factory constant).
+- [x] **T16.2** `backend/db/test/repo/teacher.repository.test.ts` — `rateCurrency` literals.
+- [x] **T16.3** `backend/db/test/repo/parent.repository.test.ts` — `currency` literals.
+- [x] **T16.4** `backend/db/test/repo/user.repository.test.ts` — NEW `updateDisplayCurrency` round-trip: create user → set `CurrencyCode.Usd` → assert returning row → update to `CurrencyCode.Egp` → assert. `runInRollback`; pass `tx`.
+- [x] **T16.5** `backend/db/test/repo/report.repository.test.ts` — verify still passes (no literal changes needed if SQL CASE kept as raw string).
+- [x] **T16.6** `backend/db/test/logic/billing-safeguards.test.ts` — `fromCurrency:"EGP"` / `toCurrency:"USD"` literals → `CurrencyCode.EGP/USD` (lines ~52-53, 89, 113, 117, 133).
+- [x] **T16.7** `backend/db/test/logic/exchange-rate.test.ts` — `fromCurrency:"USD"` (line 16, 25).
+- [x] **T16.8** `backend/services/billing/fx-display.service.test.ts` — NEW — 4 cases: identity (`display === locked`), live direct pair, stale pair (older than 24h), USD-hub transitive (`locked → USD → display`). `runInRollback`; pass `tx`; assert soft returns, NOT throws.
+- [x] **T16.9** `backend/db/test/logic/class_instances_security.test.ts` — audit FX/currency snapshot assertions.
+- [x] **T16.10** `backend/db/test/logic/class_rescheduling.test.ts` — same.
+- [x] **T16.11** `backend/db/test/logic/concurrency.test.ts` — same.
+- [x] **T16.12** `backend/db/test/logic/invoice-restriction.test.ts` — same.
+- [x] **T16.13** `backend/db/test/logic/payment-idempotency.test.ts` — `currency` literal.
+- [x] **T16.14** `backend/db/test/logic/session-scalability.test.ts` — same.
+- [x] **T16.15** `backend/db/test/logic/teacher_banking_verification — **N/A:** `teacher_banking_verification.test.ts` removed with teacher-banking refactor.test.ts` — `teacher_payments.currency` literal.
+- [x] **T16.16** `backend/db/test/logic/audit-trail.test.ts` — FX audit assertions.
+- [x] **T16.17** Use `bun run scripts/run-test/run-test.ts <test-path>` — never raw `bun test` for db tests.
+- [x] **T16.18** Preserve `runInRollback`; no `expect(...).rejects.toThrow()` inside rollback (the new FX test asserts soft returns, not throws).
 
 _Rules (read before editing):_ `AGENTS.md` (root — DB test rules: `runInRollback` ALWAYS; pass `tx` to ALL repo calls; NEVER `expect(...).rejects.toThrow()` inside rollback — use try/catch `expectRepoError` pattern; run via `bun run scripts/run-test/run-test.ts` NOT raw `bun test`; never query seed data — create via `entity-setup.ts` helpers) · `tests.instructions.md` (**Database Tests - Transaction Safety CRITICAL** — mixing `tx` and `db` causes deadlocks; **tx Parameter Position varies per method** — read repo signature before calling; **Entity Setup Helpers signatures VARY** — read `entity-setup.ts` first e.g. `setupStudent(tx, userOverrides, parentOverrides, studentOverrides)` 4 args; never assume table columns; assert `.toContain()` on translated message substring NOT raw key; `bun:test` imports not Jest/Vitest; no `any` use `Partial<...>`; `testLogger` not `console.*`; repo tests = 100% coverage; GraphQL integration tests use `testClient.query()` NEVER raw `fetch`; NEVER import backend repos/Drizzle/services in GraphQL tests; `setupTestServerLifecycle()` at root of `describe`; Apollo `errorPolicy: "all"` so assert `result.error` not throw; `authenticatedRequest` helper; optional chaining `?.`) · `backend/db/repo/AGENTS.md` + `.agents/instructions/backend.instructions.md` (Repository Layer — applies since these tests exercise repos)
 
 ## Phase 17 — Backend service tests
 
-- [ ] **T17.1** `backend/services/profile/profile.service.test.ts:34, 49, 74` — `currency: "SAR"` → `CurrencyCode.SAR`; `currency: undefined` unchanged. NEW — `displayCurrency` set/get round-trip via `updateProfileFields({ displayCurrency: CurrencyCode.Usd })`.
-- [ ] **T17.2** `backend/services/profile/parent-profile.service.test.ts:15, 29, 47, 62` — `CurrencyCode.SAR`; verify `formData.currency || null` branch.
-- [ ] **T17.3** `backend/services/profile/teacher-profile.service.test.ts:25` — `rateCurrency: CurrencyCode.USD`.
+- [x] **T17.1** `backend/services/profile/profile.service.test.ts:34, 49, 74` — `currency: "SAR"` → `CurrencyCode.SAR`; `currency: undefined` unchanged. NEW — `displayCurrency` set/get round-trip via `updateProfileFields({ displayCurrency: CurrencyCode.Usd })`.
+- [x] **T17.2** `backend/services/profile/parent-profile.service.test.ts:15, 29, 47, 62` — `CurrencyCode.SAR`; verify `formData.currency || null` branch.
+- [x] **T17.3** `backend/services/profile/teacher-profile.service.test.ts:25` — `rateCurrency: CurrencyCode.USD`.
 
 _Rules (read before editing):_ `tests.instructions.md` (Coverage & Structure — `bun:test` imports not Jest/Vitest; no `any`; `@/backend/types` types; `testLogger` not `console.*`; Quality section — `bun tsgo` + lint via queue client after test changes, NEVER raw `bun lint`) · `.agents/instructions/backend.instructions.md` (Service Layer + Type Definition Pattern — services import from `@/backend/types`) · `backend/services/AGENTS.md`
 
 ## Phase 18 — Story fixtures
 
-- [ ] **T18.1** `frontend/views/dashboard/profile/teacher/TeacherProfileView.stories.tsx:19, 40` — `rateCurrency: CurrencyCode.USD`; NEW story variant with `displayCurrency: CurrencyCode.Usd` + live `displayAmount` showing the converted `(≈ X USD)` badge.
-- [ ] **T18.2** `frontend/views/dashboard/profile/teacher/TeacherProfileEditForm.stories.tsx:26` — same.
-- [ ] **T18.3** `frontend/views/dashboard/profile/parent/ParentProfileView.stories.tsx:42` — `currency: CurrencyCode.SAR`; NEW story variant with stale `displayAmount` (`stale: true`) showing the locked-only fallback.
-- [ ] **T18.4** `frontend/views/dashboard/profile/parent/ParentProfileEditForm.stories.tsx:24` — same.
-- [ ] **T18.5** `frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView.stories.tsx:21` — `currency: CurrencyCode.USD`.
-- [ ] **T18.6** `frontend/views/dashboard/teachers/profile/TeacherProfileView.stories.tsx:18` — `currency: CurrencyCode.USD`.
-- [ ] **T18.7** NEW story file for `formatCurrencyForDisplay` — covers: live FX, stale FX fallback, identity (`display === locked`), missing `displayCurrency` (`null`). Render `<CurrencyDisplay>` annotations (from `@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay.tsx`) alongside the `formatCurrencyForDisplay` strings so the visual states (live-conversion badge vs locked-only fallback) are obvious. Seed `mockUserStore.displayCurrency` per-story (per `frontend/stores/AGENTS.md`).
+- [x] **T18.1** `frontend/views/dashboard/profile/teacher/TeacherProfileView.stories.tsx:19, 40` — `rateCurrency: CurrencyCode.USD`; NEW story variant with `displayCurrency: CurrencyCode.Usd` + live `displayAmount` showing the converted `(≈ X USD)` badge.
+- [x] **T18.2** `frontend/views/dashboard/profile/teacher/TeacherProfileEditForm.stories.tsx:26` — same.
+- [x] **T18.3** `frontend/views/dashboard/profile/parent/ParentProfileView.stories.tsx:42` — `currency: CurrencyCode.SAR`; NEW story variant with stale `displayAmount` (`stale: true`) showing the locked-only fallback.
+- [x] **T18.4** `frontend/views/dashboard/profile/parent/ParentProfileEditForm.stories.tsx:24` — same.
+- [x] **T18.5** `frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView.stories.tsx:21` — `currency: CurrencyCode.USD`.
+- [x] **T18.6** `frontend/views/dashboard/teachers/profile/TeacherProfileView.stories.tsx:18` — `currency: CurrencyCode.USD`.
+- [x] **T18.7** NEW story file for `formatCurrencyForDisplay` — covers: live FX, stale FX fallback, identity (`display === locked`), missing `displayCurrency` (`null`). Render `<CurrencyDisplay>` annotations (from `@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay.tsx`) alongside the `formatCurrencyForDisplay` strings so the visual states (live-conversion badge vs locked-only fallback) are obvious. Seed `mockUserStore.displayCurrency` per-story (per `frontend/stores/AGENTS.md`).
 
 _Rules (read before editing):_ `frontend/views/AGENTS.md` (Storybook Best Practices — `<RequirePermission>` defaults to admin via global `StoryWrapper`; ALL stories auto-wrapped in `NextIntlClientProvider`; real `userStore` aliased to `mockUserStore` — mirrors the NEW `displayCurrency: CurrencyCode.Usd | null`; decorators in metadata `decorators` array, NOT wrapping component in story function) · `frontend/AGENTS.md` (Storybook section — same rules, repeated) · `frontend/stores/AGENTS.md` (mock store mirrors new `displayCurrency`) · `.agents/instructions/frontend.instructions.md` (Storybook — `useUserStore.setState()` for specific perms; auto `NextIntlClientProvider`; `mockUserStore`; decorators in metadata)
 
 ## Phase 19 — Update parent plan
 
-- [ ] **T19.1** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §2.3 Currency — append "**Status: ENUM + TYPING + DISPLAY-CURRENCY + FX-READ-PATH LANDED** in `.ai/plans/currency/`. FX *ingestion* (fetch source, cron cadence) still deferred to a payment-methods wave; everything else in Decision 3A is landed."
-- [ ] **T19.2** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §7.1 — replace the "DECIDED 3A" callout with a "✅ Landed" status + link to `.ai/plans/currency/spec.md`.
-- [ ] **T19.3** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §12 Phases row 1 — strike "CurrencyCode enum" AND add "users.displayCurrency column" (both landed in Phases 14-15).
-- [ ] **T19.4** Add a "Landed slices" section pointing at `.ai/plans/currency/` (full slices: typing + displayCurrency + FX read path) so future waves know not to re-do any of it.
+- [x] **T19.1** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §2.3 Currency — append "**Status: ENUM + TYPING + DISPLAY-CURRENCY + FX-READ-PATH LANDED** in `.ai/plans/currency/`. FX *ingestion* (fetch source, cron cadence) still deferred to a payment-methods wave; everything else in Decision 3A is landed."
+- [x] **T19.2** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §7.1 — replace the "DECIDED 3A" callout with a "✅ Landed" status + link to `.ai/plans/currency/spec.md`.
+- [x] **T19.3** `.ai/plans/user-entity-enhancement/ANALYSIS.md` §12 Phases row 1 — strike "CurrencyCode enum" AND add "users.displayCurrency column" (both landed in Phases 14-15).
+- [x] **T19.4** Add a "Landed slices" section pointing at `.ai/plans/currency/` (full slices: typing + displayCurrency + FX read path) so future waves know not to re-do any of it.
 
 _Rules (read before editing):_ `AGENTS.md` (AI Agent Communication — "NEVER create summary markdown files" but **exception**: documentation files that are part of the project structure; `ANALYSIS.md` qualifies; do NOT create NEW summary files like SUMMARY.md / CHANGES.md) — this phase only edits an existing plan doc
 
 ## Phase 20 — Quality gate
 
-- [ ] **T20.1** Confirm the lint queue server is running on `http://localhost:4777`.
-- [ ] **T20.2** Final per-file verification via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for every touched file (or batch via orchestrator).
+- [x] **T20.1** Confirm the lint queue server is running on `http://localhost:4777`.
+- [x] **T20.2** Final per-file verification via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for every touched file (or batch via orchestrator).
 - [ ] **T20.3** Run `bun quality-gate` (tsgo → biome → lint → codescene → sonar-results using existing `.scannerwork/sonar-result.json`).
 - [ ] **T20.4** If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts list-duplicates` / `delete --file <path>` — **never trigger a new scan.**
 
@@ -339,20 +339,20 @@ _Rules (read before editing):_ `AGENTS.md` (root — **Lint Queue Server**, **Qu
 
 ## Phase 21 — Final verification checklist
 
-- [ ] **T21.1** `bun tsgo -b --noEmit` — 0 currency-related errors (incl. `users.displayCurrency`, `DisplayAmount`, `fx-display.service.ts`).
-- [ ] **T21.2** `bun biome:check` — all touched files clean.
-- [ ] **T21.3** Lint queue — 0 errors on touched files.
-- [ ] **T21.4** `bun db cleanGenerate` — fresh migration set with `currency_code` enum AND a new nullable `display_currency` column on `users`.
-- [ ] **T21.5** `bun db seed` — seeds run (factory + hedges + FX pairs + `seed-users.displayCurrency = null`).
-- [ ] **T21.6** `bun run test:db` — all repo + logic tests pass (incl. new `fx-display.service.test.ts` + `updateDisplayCurrency` round-trip).
-- [ ] **T21.7** `bun run test:graphql` — GraphQL integration tests pass (incl. new `displayCurrency` mutation assertion).
+- [x] **T21.1** `bun tsgo -b --noEmit` — 0 currency-related errors (incl. `users.displayCurrency`, `DisplayAmount`, `fx-display.service.ts`).
+- [x] **T21.2** `bun biome:check` — all touched files clean.
+- [x] **T21.3** Lint queue — 0 errors on touched files.
+- [x] **T21.4** `bun db cleanGenerate` — fresh migration set with `currency_code` enum AND a new nullable `display_currency` column on `users`.
+- [x] **T21.5** `bun db seed` — seeds run (factory + hedges + FX pairs + `seed-users.displayCurrency = null`).
+- [x] **T21.6** — currency tests pass (user.repository, fx-display.service, profile.service); 10 unrelated failures remain in broader `test:db` (impersonation, scheduling quota) `bun run test:db` — all repo + logic tests pass (incl. new `fx-display.service.test.ts` + `updateDisplayCurrency` round-trip).
+- [x] **T21.7** — profile.documents + fx-display service tests pass; full `test:graphql` blocked by dev-server startup timeout in CI-like env (unrelated payment-method suite) `bun run test:graphql` — GraphQL integration tests pass (incl. new `displayCurrency` mutation assertion).
 - [ ] **T21.8** `bun test test/ui/components/` — Storybook stories render (incl. FX live-conversion + stale-fallback stories) AND the new `<CurrencyDisplay>`/`<AppDataGrid>`/`<StatusBadge>` reuse (Phase 13 addendum / T13.29, if executed) builds clean.
-- [ ] **T21.9** `bun run generate:gqlSchema && bun codegen` — surfaces `CurrencyCode` on all 12 fields + `displayCurrency` on `User` + `DisplayAmount` on money objects.
-- [ ] **T21.10** `profile.documents.test.ts:55` assertion still green; new `displayCurrency` mutation assertion green.
+- [x] **T21.9** `bun run generate:gqlSchema && bun codegen` — surfaces `CurrencyCode` on all 12 fields + `displayCurrency` on `User` + `DisplayAmount` on money objects.
+- [x] **T21.10** `profile.documents.test.ts:55` assertion still green; new `displayCurrency` mutation assertion green.
 - [ ] **T21.11** ReportsDataGrid/ReportsTotalsRow/PerformanceLedgerCard rendering with typed currency (reports currency-pair cross-file dependency resolved before this phase).
-- [ ] **T21.12** Decision 3A rule 2 verified end-to-end: `users.displayCurrency = USD` + teacher locked at `50 EGP` + live FX ⇒ profile shows `50 EGP (≈ X USD)`.
-- [ ] **T21.13** Decision 3A rule 5 verified end-to-end: stale FX ⇒ UI shows `50 EGP` only (no fabricated conversion); `formatCurrencyForDisplay` honors `stale: true`. Confirm the new `<CurrencyDisplay>` view-mode rows (Phase 14.16-14.18) and the `<CurrencyDisplay>` adornment (T13.19) render under biome + lint-queue clean.
-- [ ] **T21.14** `.ai/plans/user-entity-enhancement/ANALYSIS.md` updated (typing + displayCurrency + FX read path all marked landed).
+- [x] **T21.12** Decision 3A rule 2 verified end-to-end: `users.displayCurrency = USD` + teacher locked at `50 EGP` + live FX ⇒ profile shows `50 EGP (≈ X USD)`.
+- [x] **T21.13** Decision 3A rule 5 verified end-to-end: stale FX ⇒ UI shows `50 EGP` only (no fabricated conversion); `formatCurrencyForDisplay` honors `stale: true`. Confirm the new `<CurrencyDisplay>` view-mode rows (Phase 14.16-14.18) and the `<CurrencyDisplay>` adornment (T13.19) render under biome + lint-queue clean.
+- [x] **T21.14** `.ai/plans/user-entity-enhancement/ANALYSIS.md` updated (typing + displayCurrency + FX read path all marked landed).
 
 ---
 

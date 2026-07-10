@@ -13,6 +13,7 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { MeetingClassFieldsService } from "@/backend/services/meeting/meeting-class-fields";
 import type * as Types from "@/backend/types";
 
 export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
@@ -73,6 +74,9 @@ export const createClassInstance = async (
       input.scheduledEndAt,
       t
     );
+
+    const meetingFields = await MeetingClassFieldsService.applyToInsertInput(input, t);
+
     await checkOverlaps(
       t,
       {
@@ -80,7 +84,7 @@ export const createClassInstance = async (
         teacherId: input.teacherId,
         startTime: input.scheduledStartAt,
         endTime: input.scheduledEndAt,
-        meetingJoinUrl: input.meetingJoinUrl,
+        meetingJoinUrl: meetingFields.meetingJoinUrl,
       },
       locale
     );
@@ -106,7 +110,7 @@ export const createClassInstance = async (
     const [created] = await t
       .insert(classInstances)
       .values({
-        ...input,
+        ...meetingFields,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

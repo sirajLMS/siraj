@@ -1,4 +1,4 @@
-import { AppPermission, type ProfileAudience, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ProfileAudience, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type ProfileTabId = "profile" | "paymentMethods" | "meeting" | "students" | "notifications" | "permissions";
 
@@ -12,7 +12,7 @@ type TabVisibilityKey = `${ProfileAudience}-${ProfileScope}`;
 const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
   profile: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER", "STAFF-OWN", "STAFF-OTHER"],
   paymentMethods: ["TEACHER-OWN", "TEACHER-OTHER"],
-  meeting: ["TEACHER-OTHER"],
+  meeting: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER"],
   students: ["TEACHER-OTHER"],
   notifications: ["TEACHER-OWN", "PARENT-OWN", "STAFF-OWN"],
   permissions: ["TEACHER-OTHER", "PARENT-OTHER", "STAFF-OTHER"],
@@ -47,8 +47,12 @@ export function getVisibleProfileTabs({
       return false;
     }
 
-    if (tab.id === "meeting" && !hasPermission(AppPermission.UserEditProfile)) {
-      return false;
+    if (tab.id === "meeting") {
+      const meetingPermission =
+        scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
+      if (!hasPermission(meetingPermission)) {
+        return false;
+      }
     }
 
     if (tab.id === "students" && !hasPermission(AppPermission.UserEditProfile)) {

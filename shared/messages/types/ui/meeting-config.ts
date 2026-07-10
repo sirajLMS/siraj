@@ -1,6 +1,7 @@
 export type MeetingConfigLabels = {
   readonly sectionTitle: string;
   readonly addConfig: string;
+  readonly editConfig: string;
   readonly label: string;
   readonly provider: string;
   readonly cancel: string;

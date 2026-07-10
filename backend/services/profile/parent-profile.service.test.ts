@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 function buildAdminParentInput(formData: {
@@ -10,7 +11,7 @@ function buildAdminParentInput(formData: {
   address?: string;
   invoiceType?: string;
   feeAmount?: string;
-  currency?: string;
+  currency?: CurrencyCode;
   timezone?: string;
 }) {
   return {
@@ -38,7 +39,7 @@ describe("parent profile admin input builder", () => {
       address: "Riyadh",
       invoiceType: "monthly",
       feeAmount: "500",
-      currency: "SAR",
+      currency: CurrencyCode.SAR,
       timezone: IanaTimezone.Asia_Riyadh,
     });
 
@@ -51,7 +52,7 @@ describe("parent profile admin input builder", () => {
       address: "Riyadh",
       invoiceType: "monthly",
       feeAmount: "500",
-      currency: "SAR",
+      currency: CurrencyCode.SAR,
       timezone: IanaTimezone.Asia_Riyadh,
     });
   });

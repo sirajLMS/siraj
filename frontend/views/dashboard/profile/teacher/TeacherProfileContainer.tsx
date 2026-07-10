@@ -127,7 +127,7 @@ function renderActiveTabContent({
     return <PaymentMethodsTab targetUserId={targetUserId} />;
   }
 
-  if (activeTab === "meeting" && scope === ProfileScope.Other) {
+  if (activeTab === "meeting") {
     return <MeetingConfigsTab targetUserId={targetUserId} />;
   }
 

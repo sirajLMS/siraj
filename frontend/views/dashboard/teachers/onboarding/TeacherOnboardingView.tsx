@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { MeetingConfigOnboardingSection } from "@/frontend/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { PaymentMethodSection } from "@/frontend/views/dashboard/teachers/onboarding/components/PaymentMethodSection";
 import { SalaryDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";
@@ -159,6 +160,25 @@ export function TeacherOnboardingView({
         </SectionPanel>
         <SectionPanel title={labels.sections.paymentMethod}>
           <PaymentMethodSection register={register} errors={errors} labels={labels} />
+        </SectionPanel>
+        <SectionPanel title={labels.sections.meetingConfig}>
+          <MeetingConfigOnboardingSection
+            register={register}
+            control={control}
+            errors={errors}
+            labels={{
+              fields: {
+                meetingProvider: labels.fields.meetingProvider,
+                meetingUrl: labels.fields.meetingUrl,
+                meetingLabel: labels.fields.meetingLabel,
+              },
+              placeholders: {
+                meetingUrl: labels.placeholders.meetingUrl,
+                meetingLabel: labels.placeholders.meetingLabel,
+              },
+              optionalHint: labels.optionalHint,
+            }}
+          />
         </SectionPanel>
         <FormActions isSubmitting={isSubmitting} labels={labels} />
       </Box>

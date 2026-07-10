@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import type { DailyScheduleList } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/types/shared.types";
+import type {
+  AdminMetricKey,
+  DashboardFilters,
+  MetricItem,
+  Pagination,
+  TeacherFilterItem,
+} from "@/frontend/types/shared.types";
 
 export interface DashboardState {
   readonly filters: DashboardFilters;
@@ -8,7 +14,7 @@ export interface DashboardState {
   readonly setTeacherFilter: (teacherId: string) => void;
   readonly setSearchQuery: (query: string) => void;
   readonly setDebouncedSearchQuery: (query: string) => void;
-  readonly setSelectedStatus: (status: string | null) => void;
+  readonly setSelectedStatus: (status: AdminMetricKey | null) => void;
   readonly resetFilters: () => void;
 
   // Mock properties (fully defined in both stores for clean type checking)

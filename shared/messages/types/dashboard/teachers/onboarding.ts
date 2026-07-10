@@ -7,6 +7,7 @@ export interface TeacherOnboardingLabels {
     readonly officialDetails: string;
     readonly salaryDetails: string;
     readonly paymentMethod: string;
+    readonly meetingConfig: string;
   };
   readonly fields: {
     readonly fullName: string;
@@ -30,6 +31,9 @@ export interface TeacherOnboardingLabels {
     readonly routingNumber: string;
     readonly swiftBic: string;
     readonly iban: string;
+    readonly meetingProvider: string;
+    readonly meetingUrl: string;
+    readonly meetingLabel: string;
   };
   readonly placeholders: {
     readonly fullName: string;
@@ -47,6 +51,8 @@ export interface TeacherOnboardingLabels {
     readonly routingNumber: string;
     readonly swiftBic: string;
     readonly iban: string;
+    readonly meetingUrl: string;
+    readonly meetingLabel: string;
   };
   readonly actions: {
     readonly signup: string;
@@ -73,4 +79,5 @@ export interface TeacherOnboardingLabels {
   };
   readonly bannerJoinFaculty: string;
   readonly bannerRegistrationForm: string;
+  readonly optionalHint: string;
 }

@@ -10,6 +10,7 @@ const mockLabels = {
     officialDetails: "Official Details",
     salaryDetails: "Salary Details",
     paymentMethod: "Payment Method",
+    meetingConfig: "Online Meeting",
   },
   fields: {
     fullName: "Full Name",
@@ -33,6 +34,9 @@ const mockLabels = {
     routingNumber: "Routing Number",
     swiftBic: "SWIFT/BIC",
     iban: "IBAN",
+    meetingProvider: "Meeting provider",
+    meetingUrl: "Meeting URL",
+    meetingLabel: "Config label",
   },
   placeholders: {
     fullName: "Enter full name",
@@ -50,6 +54,8 @@ const mockLabels = {
     routingNumber: "Enter routing number",
     swiftBic: "Enter SWIFT/BIC",
     iban: "Enter IBAN",
+    meetingUrl: "https://zoom.us/j/123456789",
+    meetingLabel: "Primary classroom",
   },
   actions: {
     signup: "Sign up",
@@ -76,6 +82,7 @@ const mockLabels = {
   },
   bannerJoinFaculty: "Join our faculty",
   bannerRegistrationForm: "Registration Form",
+  optionalHint: "Optional: set a default online meeting link for scheduled classes.",
 };
 
 const meta: Meta<typeof TeacherOnboardingView> = {

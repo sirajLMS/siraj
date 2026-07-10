@@ -10,6 +10,7 @@ import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { MeetingClassFieldsService } from "@/backend/services/meeting/meeting-class-fields";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;
@@ -136,6 +137,8 @@ async function createSingleRecurringInstance(params: {
 
   const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
 
+  const meetingFields = await MeetingClassFieldsService.resolveForTeacher(input.teacherId, { tx: t });
+
   const [classInstance] = await t
     .insert(classInstances)
     .values({
@@ -151,6 +154,8 @@ async function createSingleRecurringInstance(params: {
       classType: input.classType ?? "REGULAR",
       executionState: "NOT_ACTIVATED",
       outcome: "PENDING",
+      meetingJoinUrl: meetingFields.meetingJoinUrl,
+      meetingConfigSnapshot: meetingFields.meetingConfigSnapshot,
       idempotencyKey,
       createdAt: now,
       updatedAt: now,

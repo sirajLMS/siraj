@@ -12,6 +12,7 @@ export function useTeacherOnboardingLabels(): MessageSchema["dashboard"]["teache
       officialDetails: t("sections.officialDetails"),
       salaryDetails: t("sections.salaryDetails"),
       paymentMethod: t("sections.paymentMethod"),
+      meetingConfig: t("sections.meetingConfig"),
     },
     fields: {
       fullName: t("fields.fullName"),
@@ -35,6 +36,9 @@ export function useTeacherOnboardingLabels(): MessageSchema["dashboard"]["teache
       routingNumber: t("fields.routingNumber"),
       swiftBic: t("fields.swiftBic"),
       iban: t("fields.iban"),
+      meetingProvider: t("fields.meetingProvider"),
+      meetingUrl: t("fields.meetingUrl"),
+      meetingLabel: t("fields.meetingLabel"),
     },
     placeholders: {
       fullName: t("placeholders.fullName"),
@@ -52,6 +56,8 @@ export function useTeacherOnboardingLabels(): MessageSchema["dashboard"]["teache
       routingNumber: t("placeholders.routingNumber"),
       swiftBic: t("placeholders.swiftBic"),
       iban: t("placeholders.iban"),
+      meetingUrl: t("placeholders.meetingUrl"),
+      meetingLabel: t("placeholders.meetingLabel"),
     },
     actions: {
       signup: t("actions.signup"),
@@ -78,5 +84,6 @@ export function useTeacherOnboardingLabels(): MessageSchema["dashboard"]["teache
     },
     bannerJoinFaculty: t("bannerJoinFaculty"),
     bannerRegistrationForm: t("bannerRegistrationForm"),
+    optionalHint: t("optionalHint"),
   };
 }

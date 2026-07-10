@@ -1732,6 +1732,7 @@ const en: MessageSchema = {
         officialDetails: "Official Details",
         salaryDetails: "Salary Details",
         paymentMethod: "Payment Method",
+        meetingConfig: "Online Meeting",
       },
       fields: {
         fullName: "Full Name",
@@ -1755,6 +1756,9 @@ const en: MessageSchema = {
         routingNumber: "Routing Number",
         swiftBic: "SWIFT / BIC",
         iban: "IBAN",
+        meetingProvider: "Meeting provider",
+        meetingUrl: "Meeting URL",
+        meetingLabel: "Config label",
       },
       placeholders: {
         fullName: "e.g. Dr. Ahmed Al-Farid",
@@ -1772,6 +1776,8 @@ const en: MessageSchema = {
         routingNumber: "00112233",
         swiftBic: "CIBAEGXXXX",
         iban: "EG850003001200000001234567890",
+        meetingUrl: "https://zoom.us/j/123456789",
+        meetingLabel: "Primary classroom",
       },
       actions: {
         signup: "SIGNUP",
@@ -1796,6 +1802,7 @@ const en: MessageSchema = {
         ibanRequired: "IBAN is required",
         urlInvalid: "Invalid URL",
       },
+      optionalHint: "Optional: set a default online meeting link for scheduled classes.",
     },
     parentsDirectory: {
       pageTitle: "Parents Directory",
@@ -3267,6 +3274,7 @@ const en: MessageSchema = {
     meetingConfig: {
       sectionTitle: "Online meeting configs",
       addConfig: "Add meeting config",
+      editConfig: "Edit meeting config",
       label: "Label",
       provider: "Provider",
       cancel: "Cancel",

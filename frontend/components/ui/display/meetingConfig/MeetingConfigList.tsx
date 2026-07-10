@@ -1,6 +1,7 @@
 "use client";
 
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { useLocale } from "next-intl";
@@ -10,6 +11,7 @@ import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 export type MeetingConfigListProps = {
   readonly configs: readonly UserMeetingConfigFieldsFragment[];
   readonly onSetDefaultAction?: (id: string) => void;
+  readonly onEditAction?: (config: UserMeetingConfigFieldsFragment) => void;
   readonly onDeleteAction?: (id: string) => void;
   readonly emptyLabel?: string;
 };
@@ -17,6 +19,7 @@ export type MeetingConfigListProps = {
 export function MeetingConfigList({
   configs,
   onSetDefaultAction,
+  onEditAction,
   onDeleteAction,
   emptyLabel = "No meeting configs yet",
 }: MeetingConfigListProps) {
@@ -58,6 +61,11 @@ export function MeetingConfigList({
                 </Typography>
               </Stack>
               <Stack sx={{ flexDirection: "row", gap: 0.5 }}>
+                {onEditAction ? (
+                  <IconButton aria-label="Edit" size="small" onClick={() => onEditAction(config)}>
+                    <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+                ) : null}
                 {!config.isDefault && onSetDefaultAction ? (
                   <IconButton
                     aria-label="Set default"

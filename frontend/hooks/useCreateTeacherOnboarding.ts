@@ -6,6 +6,7 @@ import {
   type TeacherOnboardingInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { createUserMeetingConfigMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useTeacherOnboardingStore } from "@/frontend/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
@@ -34,7 +35,8 @@ function buildBankTransferDetails(formData: TeacherOnboardingFormData): PaymentM
 
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);
-  const { cache } = useApolloClient();
+  const client = useApolloClient();
+  const { cache } = client;
 
   const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboardingCreateResult> => {
     useTeacherOnboardingStore.getState().reset();
@@ -68,10 +70,31 @@ export function useCreateTeacherOnboarding() {
       const result = await mutate({ variables: { input } });
 
       if (result.data?.createTeacher) {
+        const created = result.data.createTeacher;
+        if (formData.meetingProvider?.id && formData.meetingUrl?.trim() && created.userId) {
+          await client.mutate({
+            mutation: createUserMeetingConfigMutationDocument,
+            variables: {
+              input: {
+                userId: created.userId,
+                providerId: formData.meetingProvider.id,
+                label: formData.meetingLabel?.trim() || null,
+                isDefault: true,
+                password: null,
+                details: {
+                  meetingUrl: formData.meetingUrl.trim(),
+                  username: null,
+                  tenantId: null,
+                },
+              },
+            },
+          });
+        }
+
         cache.evict({ id: "ROOT_QUERY", fieldName: "teacherDirectory" });
         cache.gc();
-        useTeacherOnboardingStore.setState({ result: result.data.createTeacher, isSubmitting: false });
-        return result.data.createTeacher;
+        useTeacherOnboardingStore.setState({ result: created, isSubmitting: false });
+        return created;
       }
 
       throw new Error("Mutation returned no data");

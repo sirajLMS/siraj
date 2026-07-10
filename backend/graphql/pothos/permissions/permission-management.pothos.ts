@@ -7,6 +7,7 @@ import type {
   GroupUserEntity,
   GroupWithPermissionIds,
   PermissionEntity,
+  UserOverrideEntity,
   UserOverrideReturnType,
 } from "@/backend/types";
 
@@ -25,7 +26,7 @@ function isOverrideState(state: string): state is OverrideState {
  * @returns Array of user overrides with validated OverrideState values.
  * @throws Error if any state is not a valid OverrideState.
  */
-function mapUserOverridesSafely(overrides: UserOverrideReturnType[]): UserOverrideReturnType[] {
+function mapUserOverridesSafely(overrides: UserOverrideEntity[]): UserOverrideReturnType[] {
   return overrides.map(o => {
     if (!isOverrideState(o.state)) {
       throw new Error(`Invalid OverrideState value: ${o.state}`);

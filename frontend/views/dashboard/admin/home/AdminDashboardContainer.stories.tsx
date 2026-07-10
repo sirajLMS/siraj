@@ -137,7 +137,7 @@ export function MockAdminDashboardContainer() {
     if (filters.selectedStatus === key) {
       setSelectedStatus(null);
     } else {
-      setSelectedStatus(key);
+      setSelectedStatus(key as AdminMetricKey);
     }
   };
 

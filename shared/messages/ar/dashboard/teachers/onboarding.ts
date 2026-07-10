@@ -9,6 +9,7 @@ export const onboarding: TeacherOnboardingLabels = {
     officialDetails: "التفاصيل الرسمية",
     salaryDetails: "تفاصيل الراتب",
     paymentMethod: "طريقة الدفع",
+    meetingConfig: "الاجتماعات عبر الإنترنت",
   },
   fields: {
     fullName: "الاسم الكامل",
@@ -32,6 +33,9 @@ export const onboarding: TeacherOnboardingLabels = {
     routingNumber: "رقم التوجيه",
     swiftBic: "سويفت / بيك",
     iban: "رقم الآيبان (IBAN)",
+    meetingProvider: "مزود الاجتماع",
+    meetingUrl: "رابط الاجتماع",
+    meetingLabel: "تسمية الإعداد",
   },
   placeholders: {
     fullName: "مثال: د. أحمد الفريد",
@@ -49,6 +53,8 @@ export const onboarding: TeacherOnboardingLabels = {
     routingNumber: "00112233",
     swiftBic: "CIBAEGXXXX",
     iban: "EG850003001200000001234567890",
+    meetingUrl: "https://zoom.us/j/123456789",
+    meetingLabel: "الفصل الرئيسي",
   },
   actions: {
     signup: "تسجيل",
@@ -75,4 +81,5 @@ export const onboarding: TeacherOnboardingLabels = {
   },
   bannerJoinFaculty: "انضم لهيئة التدريس",
   bannerRegistrationForm: "نموذج التسجيل",
+  optionalHint: "اختياري: عيّن رابط اجتماع افتراضي للحصص المجدولة.",
 };
