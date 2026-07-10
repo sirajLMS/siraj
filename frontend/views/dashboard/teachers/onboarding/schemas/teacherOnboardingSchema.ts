@@ -46,7 +46,7 @@ export const teacherOnboardingSchema = (validationLabels: {
       .min(1, validationLabels.timezoneRequired)
       .refine(value => isValidIanaTimezoneId(value), { message: validationLabels.timezoneRequired }),
     hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
-    rateCurrency: z.nativeEnum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired }),
+    rateCurrency: z.enum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired }),
     beneficiaryName: z.string().min(1, validationLabels.beneficiaryNameRequired),
     bankName: z.string().min(1, validationLabels.bankNameRequired),
     accountNumber: z.string().min(1, validationLabels.accountNumberRequired),

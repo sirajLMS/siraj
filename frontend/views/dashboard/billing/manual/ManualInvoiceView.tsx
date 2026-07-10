@@ -5,6 +5,7 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ManualInvoiceDesktopView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceDesktopView";
 import { ManualInvoiceMobileView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceMobileView";
 import { manualInvoiceSchema } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
@@ -39,6 +40,7 @@ export function ManualInvoiceView({
       parentId: "",
       studentId: "",
       feeAmount: "",
+      currency: CurrencyCode.Usd,
       issueDate: "",
       dueDate: "",
       billingMonths: [],
@@ -47,6 +49,7 @@ export function ManualInvoiceView({
 
   const feeAmount = useWatch({ control, name: "feeAmount" });
   const billingMonths = useWatch({ control, name: "billingMonths" });
+  const draftCurrency = useWatch({ control, name: "currency" }) ?? CurrencyCode.Usd;
   const currentParentId = useWatch({ control, name: "parentId" });
   const monthCount = billingMonths.length;
   const totalFormatted = formatDraftTotal(feeAmount, monthCount);
@@ -94,6 +97,7 @@ export function ManualInvoiceView({
     control,
     errors,
     totalFormatted,
+    draftCurrency,
     canCreate,
     canSendEmail,
     isSubmitting,

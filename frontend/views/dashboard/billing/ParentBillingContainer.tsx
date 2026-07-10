@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   parentBillingSummaryQueryDocument,
@@ -23,7 +23,7 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
 
-function formatCurrency(amount: string, currency: string): string {
+function formatCurrency(amount: string, currency: CurrencyCode | string): string {
   const numAmount = Number(amount);
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(numAmount);
 }
@@ -113,8 +113,11 @@ export function ParentBillingContainer() {
 
   const summary = useMemo(
     () => ({
-      outstandingBalance: formatCurrency(summaryData?.parentBillingSummary?.outstandingBalance ?? "0.00", "USD"),
-      paidThisTerm: formatCurrency(summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00", "USD"),
+      outstandingBalance: formatCurrency(
+        summaryData?.parentBillingSummary?.outstandingBalance ?? "0.00",
+        CurrencyCode.Usd
+      ),
+      paidThisTerm: formatCurrency(summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00", CurrencyCode.Usd),
       nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
     }),

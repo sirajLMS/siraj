@@ -48,7 +48,7 @@ export function TeacherAdminEditForm({
       zoomPassword: "",
       timezone: "",
       hourlyRate: "",
-      rateCurrency: "",
+      rateCurrency: undefined,
       paymentMethod: null,
       status: AccountStatus.Activated,
     },
@@ -69,7 +69,7 @@ export function TeacherAdminEditForm({
       zoomPassword: "",
       timezone: teacherData.timezone ?? "",
       hourlyRate: teacherData.hourlyRate ?? "",
-      rateCurrency: teacherData.rateCurrency ?? "",
+      rateCurrency: teacherData.rateCurrency ?? undefined,
       paymentMethod: teacherData.paymentMethod ?? null,
       status: teacherData.status ?? AccountStatus.Activated,
     });

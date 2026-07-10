@@ -1,16 +1,18 @@
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import { SectionHeader } from "@/frontend/views/dashboard/teachers/profile/components/SectionHeader";
 import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 
 export function SalaryDetailsSection() {
   const t = useTranslations("dashboard.teacherProfile");
   const { control } = useFormContext<TeacherProfileFormData>();
+  const currency = useWatch({ control, name: "currency" });
+  const currencySymbol = getCurrencySymbol((currency as CurrencyCode | undefined) ?? CurrencyCode.Usd);
 
   return (
     <Box component="section">
@@ -34,7 +36,7 @@ export function SalaryDetailsSection() {
                 slotProps={{
                   input: {
                     sx: theme => ({ borderRadius: theme.layout.radius.card }),
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>,
                   },
                 }}
               />

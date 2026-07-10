@@ -50,7 +50,7 @@ export function ParentProfileEditForm({
       invoiceType: "",
       feeAmount: "",
       paymentMethod: "",
-      currency: "",
+      currency: undefined,
       timezone: "",
     },
   });
@@ -69,7 +69,7 @@ export function ParentProfileEditForm({
       invoiceType: parentData.invoiceType ?? "",
       feeAmount: parentData.feeAmount ?? "",
       paymentMethod: parentData.paymentMethod ?? "",
-      currency: parentData.currency ?? "",
+      currency: parentData.currency ?? undefined,
       timezone: parentData.timezone ?? "",
     });
   }, [form, parentData]);

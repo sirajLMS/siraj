@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
@@ -25,8 +25,13 @@ interface PerformanceLedgerCardProps {
   readonly onClick?: (row: ReportLedgerRow) => void;
 }
 
-function formatCurrency(value: number): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function formatMoney(value: number, currency: CurrencyCode): string {
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function getStatusBadgeStatus(status: LedgerStatus): string {
@@ -153,10 +158,10 @@ export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<Perform
               {labels.paid}
             </Typography>
             <Typography variant="bodyMd" sx={{ color: theme => theme.palette.primary.main, fontWeight: 700 }}>
-              {formatCurrency(row.paidEgp)} EGP
+              {formatMoney(row.paidEgp, CurrencyCode.Egp)}
             </Typography>
             <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.secondary }}>
-              ${formatCurrency(row.paidUsd)}
+              {formatMoney(row.paidUsd, CurrencyCode.Usd)}
             </Typography>
           </Box>
         )}

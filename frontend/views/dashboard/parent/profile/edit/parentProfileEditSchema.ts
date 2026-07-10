@@ -20,7 +20,7 @@ export const parentProfileEditSchema = z.object({
     val => typeof val === "string" && Object.values(PaymentMethod).includes(val as PaymentMethod),
     { message: "paymentMethodRequired" }
   ),
-  currency: z.nativeEnum(CurrencyCode).refine(v => !!v, { message: "currencyRequired" }),
+  currency: z.enum(CurrencyCode).refine(v => !!v, { message: "currencyRequired" }),
 });
 
 export type ParentProfileEditFormData = z.infer<typeof parentProfileEditSchema>;

@@ -1,8 +1,12 @@
 "use client";
 
 import { Autocomplete, Box, TextField } from "@mui/material";
+import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { ManualInvoiceDateField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceDateField";
 import { ManualInvoiceFeeField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceFeeField";
 import {
@@ -23,7 +27,41 @@ interface ManualInvoiceFormFieldsProps {
   readonly labels: BillingManualLabels;
   readonly parentOptions: readonly ParentInvoiceOption[];
   readonly studentOptions: readonly StudentOption[];
+  readonly draftCurrency: CurrencyCode;
   readonly variant: "desktop" | "mobile";
+}
+
+function CurrencyField({
+  control,
+  label,
+}: {
+  readonly control: Control<ManualInvoiceFormData>;
+  readonly label: string;
+}) {
+  return (
+    <Controller
+      name="currency"
+      control={control}
+      render={({ field, fieldState }) => {
+        const option: CurrencyOption | null = field.value
+          ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
+          : null;
+        return (
+          <CurrencySelect
+            currency={option}
+            setCurrencyAction={selected => {
+              field.onChange(selected.code as CurrencyCode);
+            }}
+            onBlurAction={field.onBlur}
+            label={label}
+            error={Boolean(fieldState.error)}
+            helperText={fieldState.error?.message}
+            fullWidth
+          />
+        );
+      }}
+    />
+  );
 }
 
 function StudentSelectorField({
@@ -76,9 +114,12 @@ export function ManualInvoiceFormFields({
   labels,
   parentOptions,
   studentOptions,
+  draftCurrency,
   variant,
 }: Readonly<ManualInvoiceFormFieldsProps>) {
   const isMobile = variant === "mobile";
+  const tProfile = useTranslations("profile.parent");
+  const currencyLabel = tProfile("fields.currency");
 
   if (isMobile) {
     return (
@@ -90,7 +131,16 @@ export function ManualInvoiceFormFields({
           <StudentSelectorField control={control} studentOptions={studentOptions} labels={labels} />
         </MobileFieldCard>
         <MobileFieldCard label={labels.feeAmount}>
-          <ManualInvoiceFeeField control={control} errors={errors} labels={labels} variant={variant} />
+          <ManualInvoiceFeeField
+            control={control}
+            errors={errors}
+            labels={labels}
+            draftCurrency={draftCurrency}
+            variant={variant}
+          />
+        </MobileFieldCard>
+        <MobileFieldCard label={currencyLabel}>
+          <CurrencyField control={control} label={currencyLabel} />
         </MobileFieldCard>
         <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
           <MobileFieldCard label={labels.issueDate}>
@@ -134,7 +184,16 @@ export function ManualInvoiceFormFields({
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <FieldLabel>{labels.feeAmount}</FieldLabel>
-        <ManualInvoiceFeeField control={control} errors={errors} labels={labels} variant={variant} />
+        <ManualInvoiceFeeField
+          control={control}
+          errors={errors}
+          labels={labels}
+          draftCurrency={draftCurrency}
+          variant={variant}
+        />
+      </Box>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <CurrencyField control={control} label={currencyLabel} />
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <FieldLabel>{labels.issueDate}</FieldLabel>

@@ -8,7 +8,7 @@ export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"][
     fullName: z.string().min(1, messages.nameRequired),
     email: z.email({ message: messages.emailInvalid }),
     phone: z.string().optional(),
-    gender: z.nativeEnum(Gender),
+    gender: z.enum(Gender),
     timezone: z
       .string()
       .min(1, messages.timezoneRequired)

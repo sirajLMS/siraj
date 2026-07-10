@@ -25,7 +25,7 @@ const adminTeacherSchema = ownTeacherSchema.extend({
     .optional()
     .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
   hourlyRate: z.string().optional(),
-  rateCurrency: z.nativeEnum(CurrencyCode).optional(),
+  rateCurrency: z.enum(CurrencyCode).optional(),
   paymentMethod: z.enum(PaymentMethod).optional().nullable(),
   status: z.enum(AccountStatus).optional().nullable(),
 });

@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
   AppPermission,
+  CurrencyCode,
   type InvoiceType as GqlInvoiceType,
   type StudentStatus as GqlStudentStatus,
   InvoiceStatus,
@@ -44,9 +45,9 @@ function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): Adm
   return "PENDING";
 }
 
-function formatCurrency(amount: string | null, currency: string | null): string {
+function formatCurrency(amount: string | null, currency: CurrencyCode | string | null): string {
   const numAmount = Number(amount ?? 0);
-  const curr = currency ?? "USD";
+  const curr = currency ?? CurrencyCode.Usd;
   return new Intl.NumberFormat("en-US", { style: "currency", currency: curr }).format(numAmount);
 }
 
@@ -172,10 +173,10 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   const summary: AdminBillingSummary = useMemo(
     () => ({
-      totalOutstanding: formatCurrency(summaryData?.adminBillingSummary?.totalOutstanding ?? "0.00", "USD"),
+      totalOutstanding: formatCurrency(summaryData?.adminBillingSummary?.totalOutstanding ?? "0.00", CurrencyCode.Usd),
       pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
       negativeBalanceCount: `${summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0} Students`,
-      mtdRevenue: formatCurrency(summaryData?.adminBillingSummary?.mtdRevenue ?? "0.00", "USD"),
+      mtdRevenue: formatCurrency(summaryData?.adminBillingSummary?.mtdRevenue ?? "0.00", CurrencyCode.Usd),
     }),
     [summaryData?.adminBillingSummary]
   );

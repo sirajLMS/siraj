@@ -1,11 +1,11 @@
 "use client";
 
 import { Box, Grid, Input, InputAdornment, Typography } from "@mui/material";
-import { type Control, Controller, type FieldErrors, type UseFormRegister } from "react-hook-form";
+import { type Control, Controller, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 interface SalaryDetailsSectionProps {
@@ -24,6 +24,9 @@ interface SalaryDetailsSectionProps {
 }
 
 export function SalaryDetailsSection({ register, control, errors, labels }: Readonly<SalaryDetailsSectionProps>) {
+  const rateCurrency = useWatch({ control, name: "rateCurrency" });
+  const currencySymbol = getCurrencySymbol((rateCurrency as CurrencyCode | undefined) ?? CurrencyCode.Usd);
+
   return (
     <Grid
       container
@@ -55,7 +58,7 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
                   color: theme.palette.onSurfaceVariant,
                 })}
               >
-                $
+                {currencySymbol}
               </Typography>
             </InputAdornment>
           }

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { SectionPanel } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
+import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
 import type { ParentProfileData } from "@/frontend/views/dashboard/parent/types/profile";
 
@@ -149,7 +150,10 @@ function ParentProfileDetails({ parent }: ParentProfileDetailsProps) {
             <DetailItem label={t("fields.paymentMethod")} value={parent.paymentMethod} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <DetailItem label={t("fields.currency")} value={parent.currency} />
+            <DetailItem
+              label={t("fields.currency")}
+              value={<CurrencyDisplay code={parent.currency} fallback={t("notSet")} />}
+            />
           </Grid>
         </Grid>
       </SectionPanel>

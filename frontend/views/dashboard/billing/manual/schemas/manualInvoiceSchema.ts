@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { BILLING_MONTH_IDS } from "@/frontend/views/dashboard/billing/manual/constants/billingMonths";
 import type { BillingManualValidationLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
@@ -14,6 +15,7 @@ export const manualInvoiceSchema = (labels: BillingManualValidationLabels) =>
           const parsed = Number(value);
           return !Number.isNaN(parsed) && parsed > 0;
         }, labels.feeAmountPositive),
+      currency: z.nativeEnum(CurrencyCode),
       issueDate: z.string().min(1, labels.issueDateRequired),
       dueDate: z.string().min(1, labels.dueDateRequired),
       billingMonths: z.array(z.enum(BILLING_MONTH_IDS)).min(1, labels.billingMonthsRequired),

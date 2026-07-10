@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
+import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
@@ -93,7 +94,10 @@ export function BillingSection(props: BillingSectionProps) {
           label={t("fields.paymentMethod")}
           value={toDisplayValue(props.adminData.paymentMethod, tc("notSet"))}
         />
-        <InfoField label={t("fields.currency")} value={toDisplayValue(props.adminData.currency, tc("notSet"))} />
+        <InfoField
+          label={t("fields.currency")}
+          value={<CurrencyDisplay code={props.adminData.currency} fallback={tc("notSet")} />}
+        />
         <InfoField
           label={t("fields.timezone")}
           value={<TimezoneDisplay timezone={props.adminData.timezone} fallback={tc("notSet")} />}

@@ -6,6 +6,7 @@ import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { BillingMonthSelector } from "@/frontend/views/dashboard/billing/manual/components/BillingMonthSelector";
 import { InvoiceDraftSummaryCard } from "@/frontend/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
 import { ManualInvoiceActions } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceActions";
@@ -30,6 +31,7 @@ interface ManualInvoiceDesktopViewProps {
   readonly control: Control<ManualInvoiceFormData>;
   readonly errors: FieldErrors<ManualInvoiceFormData>;
   readonly totalFormatted: string;
+  readonly draftCurrency: CurrencyCode;
   readonly canCreate: boolean;
   readonly canSendEmail: boolean;
   readonly isSubmitting: boolean;
@@ -45,6 +47,7 @@ export function ManualInvoiceDesktopView({
   control,
   errors,
   totalFormatted,
+  draftCurrency,
   canCreate,
   canSendEmail,
   isSubmitting,
@@ -79,10 +82,16 @@ export function ManualInvoiceDesktopView({
               labels={labels}
               parentOptions={parentOptions}
               studentOptions={studentOptions}
+              draftCurrency={draftCurrency}
               variant="desktop"
             />
             <BillingMonthSelector control={control} errors={errors} labels={labels} variant="desktop" />
-            <InvoiceDraftSummaryCard labels={labels} totalFormatted={totalFormatted} currency="USD" variant="desktop" />
+            <InvoiceDraftSummaryCard
+              labels={labels}
+              totalFormatted={totalFormatted}
+              currency={draftCurrency}
+              variant="desktop"
+            />
             <ManualInvoiceActions
               labels={labels}
               canCreate={canCreate}

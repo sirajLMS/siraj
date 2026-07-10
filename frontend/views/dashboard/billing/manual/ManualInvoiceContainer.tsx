@@ -97,7 +97,7 @@ export function ManualInvoiceContainer() {
         parentId: data.parentId,
         studentId: (data as ManualInvoiceFormData & { studentId?: string }).studentId ?? null,
         amount: data.feeAmount,
-        currency: "USD",
+        currency: data.currency,
         invoiceType: InvoiceType.Manual,
         issueDate: data.issueDate,
         dueDate: data.dueDate,

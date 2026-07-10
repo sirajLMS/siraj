@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { ReportLedgerRow, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
@@ -42,8 +42,13 @@ function nameHrefForRow(row: ReportLedgerRow, reportType: ReportType): string | 
   return undefined;
 }
 
-function formatCurrency(value: number): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function formatMoney(value: number, currency: CurrencyCode): string {
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function renderCountCell(value: number, tone: "default" | "error" | "primary" = "default") {
@@ -148,7 +153,7 @@ export function ReportsDataGrid({
           headerAlign: "right",
           renderCell: ({ row }) => (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-              {formatCurrency(row.paidEgp)}
+              {formatMoney(row.paidEgp, CurrencyCode.Egp)}
             </Typography>
           ),
         },
@@ -160,7 +165,7 @@ export function ReportsDataGrid({
           headerAlign: "right",
           renderCell: ({ row }) => (
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-              {formatCurrency(row.paidUsd)}
+              {formatMoney(row.paidUsd, CurrencyCode.Usd)}
             </Typography>
           ),
         }

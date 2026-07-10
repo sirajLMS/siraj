@@ -61,6 +61,26 @@ async function expectIsRecentSuccess(
   return FxSyncRepository.isRecentSuccess(30, tx);
 }
 
+type IsRecentSuccessCase = {
+  name: string;
+  startedAt: Date;
+  transition: SyncRunTransition;
+  expected: boolean;
+};
+
+function _testIsRecentSuccessCase(c: IsRecentSuccessCase): void {
+  test(c.name, async () => {
+    await runInRollback(async tx => {
+      const created = await insertSyncRun(tx, {
+        status: FxSyncStatus.Running,
+        startedAt: c.startedAt,
+      });
+      const result = await expectIsRecentSuccess(tx, created.id, c.transition);
+      expect(result).toBe(c.expected);
+    });
+  });
+}
+
 describe("FxSyncRepository — createSyncRun", () => {
   test("inserts a running row with zero pair counters", async () => {
     await runInRollback(async tx => {
@@ -250,53 +270,38 @@ describe("FxSyncRepository — getRunningSyncRun", () => {
 });
 
 describe("FxSyncRepository — isRecentSuccess", () => {
-  test("returns true when a success finished within the last 30 minutes", async () => {
-    await runInRollback(async tx => {
-      const created = await insertSyncRun(tx, {
-        status: FxSyncStatus.Running,
-        startedAt: new Date(Date.now() - 5 * 60_000),
-      });
-
-      const result = await expectIsRecentSuccess(tx, created.id, {
-        status: FxSyncStatus.Success,
-        pairsWritten: "10",
-        pairsFailed: "0",
-      });
-      expect(result).toBe(true);
-    });
-  });
-
-  test("returns false when the only success finished more than 30 minutes ago", async () => {
-    await runInRollback(async tx => {
-      const created = await insertSyncRun(tx, {
-        status: FxSyncStatus.Running,
-        startedAt: new Date(Date.now() - 120 * 60_000),
-      });
-
-      const result = await expectIsRecentSuccess(tx, created.id, {
+  const isRecentSuccessCases: IsRecentSuccessCase[] = [
+    {
+      name: "returns true when a success finished within the last 30 minutes",
+      startedAt: new Date(Date.now() - 5 * 60_000),
+      transition: { status: FxSyncStatus.Success, pairsWritten: "10", pairsFailed: "0" },
+      expected: true,
+    },
+    {
+      name: "returns false when the only success finished more than 30 minutes ago",
+      startedAt: new Date(Date.now() - 120 * 60_000),
+      transition: {
         status: FxSyncStatus.Success,
         pairsWritten: "10",
         pairsFailed: "0",
         finishedAt: new Date(Date.now() - 90 * 60_000),
-      });
-      expect(result).toBe(false);
-    });
-  });
-
-  test("returns false when only non-success runs exist", async () => {
-    await runInRollback(async tx => {
-      const created = await insertSyncRun(tx, {
-        status: FxSyncStatus.Running,
-        startedAt: new Date(Date.now() - 5 * 60_000),
-      });
-
-      const result = await expectIsRecentSuccess(tx, created.id, {
+      },
+      expected: false,
+    },
+    {
+      name: "returns false when only non-success runs exist",
+      startedAt: new Date(Date.now() - 5 * 60_000),
+      transition: {
         status: FxSyncStatus.Failed,
         pairsWritten: "0",
         pairsFailed: "10",
         errorMessage: "boom",
-      });
-      expect(result).toBe(false);
-    });
-  });
+      },
+      expected: false,
+    },
+  ];
+
+  for (const c of isRecentSuccessCases) {
+    testIsRecentSuccessCase(c);
+  }
 });

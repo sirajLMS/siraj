@@ -114,9 +114,7 @@ export type UserPaymentMethodSubmitInput = Omit<
   "id" | "createdAt" | "updatedAt" | "verifiedAt" | "verifiedByUserId"
 >;
 
-export type UpdateUserPaymentMethodInput = Partial<
-  Omit<UserPaymentMethodSubmitInput, "userId" | "type">
->;
+export type UpdateUserPaymentMethodInput = Partial<Omit<UserPaymentMethodSubmitInput, "userId" | "type">>;
 
 // ============================================================================
 // `PaymentMethodDefaults` — computed per-user default slots
@@ -179,10 +177,7 @@ export type SupportedMobileWalletReturnType = Omit<SupportedMobileWalletSelectTy
   supportedDirections: PaymentDirection;
 };
 
-export type SupportedMobileWalletSubmitInput = Omit<
-  SupportedMobileWalletInsertType,
-  "id" | "createdAt" | "updatedAt"
->;
+export type SupportedMobileWalletSubmitInput = Omit<SupportedMobileWalletInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type UpdateSupportedMobileWalletInput = Partial<SupportedMobileWalletSubmitInput>;
 
@@ -224,10 +219,7 @@ export type SupportedPaymentLinkReturnType = Omit<SupportedPaymentLinkSelectType
   supportedDirections: PaymentDirection;
 };
 
-export type SupportedPaymentLinkSubmitInput = Omit<
-  SupportedPaymentLinkInsertType,
-  "id" | "createdAt" | "updatedAt"
->;
+export type SupportedPaymentLinkSubmitInput = Omit<SupportedPaymentLinkInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type UpdateSupportedPaymentLinkInput = Partial<SupportedPaymentLinkSubmitInput>;
 

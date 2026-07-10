@@ -5,6 +5,8 @@ import { InputAdornment, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { getCurrencySymbol } from "@/frontend/lib/currency";
 import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
@@ -12,6 +14,7 @@ interface ManualInvoiceFeeFieldProps {
   readonly control: Control<ManualInvoiceFormData>;
   readonly errors: FieldErrors<ManualInvoiceFormData>;
   readonly labels: BillingManualLabels;
+  readonly draftCurrency: CurrencyCode;
   readonly variant: "desktop" | "mobile";
 }
 
@@ -26,8 +29,15 @@ const StyledPaymentsIcon = styled(PaymentsOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-export function ManualInvoiceFeeField({ control, errors, labels, variant }: Readonly<ManualInvoiceFeeFieldProps>) {
+export function ManualInvoiceFeeField({
+  control,
+  errors,
+  labels,
+  draftCurrency,
+  variant,
+}: Readonly<ManualInvoiceFeeFieldProps>) {
   const isMobile = variant === "mobile";
+  const currencySymbol = getCurrencySymbol(draftCurrency);
 
   return (
     <Controller
@@ -45,7 +55,7 @@ export function ManualInvoiceFeeField({ control, errors, labels, variant }: Read
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  {isMobile ? <StyledCurrencyLabel>AED</StyledCurrencyLabel> : <StyledPaymentsIcon />}
+                  {isMobile ? <StyledCurrencyLabel>{currencySymbol}</StyledCurrencyLabel> : <StyledPaymentsIcon />}
                 </InputAdornment>
               ),
               inputProps: { step: "0.01", min: "0" },

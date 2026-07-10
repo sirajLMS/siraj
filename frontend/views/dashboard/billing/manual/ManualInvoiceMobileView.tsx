@@ -3,6 +3,7 @@
 import { Box } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { BillingMonthSelector } from "@/frontend/views/dashboard/billing/manual/components/BillingMonthSelector";
 import { InvoiceDraftSummaryCard } from "@/frontend/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
 import { ManualInvoiceActions } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceActions";
@@ -21,6 +22,7 @@ interface ManualInvoiceMobileViewProps {
   readonly control: Control<ManualInvoiceFormData>;
   readonly errors: FieldErrors<ManualInvoiceFormData>;
   readonly totalFormatted: string;
+  readonly draftCurrency: CurrencyCode;
   readonly canCreate: boolean;
   readonly canSendEmail: boolean;
   readonly isSubmitting: boolean;
@@ -35,6 +37,7 @@ export function ManualInvoiceMobileView({
   control,
   errors,
   totalFormatted,
+  draftCurrency,
   canCreate,
   canSendEmail,
   isSubmitting,
@@ -58,6 +61,7 @@ export function ManualInvoiceMobileView({
           labels={labels}
           parentOptions={parentOptions}
           studentOptions={studentOptions}
+          draftCurrency={draftCurrency}
           variant="mobile"
         />
 
@@ -65,7 +69,12 @@ export function ManualInvoiceMobileView({
           <BillingMonthSelector control={control} errors={errors} labels={labels} variant="mobile" />
         </BaseCard>
 
-        <InvoiceDraftSummaryCard labels={labels} totalFormatted={totalFormatted} currency="USD" variant="mobile" />
+        <InvoiceDraftSummaryCard
+          labels={labels}
+          totalFormatted={totalFormatted}
+          currency={draftCurrency}
+          variant="mobile"
+        />
 
         <ManualInvoiceActions
           labels={labels}

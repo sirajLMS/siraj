@@ -3,13 +3,13 @@
 import { Box, Grid, Input, MenuItem, Select } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
@@ -22,11 +22,14 @@ interface SectionProps {
 
 interface InvoiceFieldsProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
+  readonly control: Control<ParentOnboardingFormData>;
   readonly errors: FieldErrors<ParentOnboardingFormData>;
 }
 
-function InvoiceFields({ register, errors }: InvoiceFieldsProps) {
+function InvoiceFields({ register, control, errors }: InvoiceFieldsProps) {
   const t = useTranslations("dashboard.parentOnboarding");
+  const currency = useWatch({ control, name: "currency" });
+  const currencySymbol = getCurrencySymbol((currency as CurrencyCode | undefined) ?? CurrencyCode.Usd);
   return (
     <>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -72,7 +75,7 @@ function InvoiceFields({ register, errors }: InvoiceFieldsProps) {
                   opacity: 0.6,
                 })}
               >
-                $
+                {currencySymbol}
               </Box>
             }
           />
@@ -161,7 +164,7 @@ export function FeesContractSection({ register, control, errors }: SectionProps)
   return (
     <SectionPanel title={t("sections.feesContract")}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-        <InvoiceFields register={register} errors={errors} />
+        <InvoiceFields register={register} control={control} errors={errors} />
         <PaymentFields register={register} control={control} errors={errors} />
       </Grid>
     </SectionPanel>
