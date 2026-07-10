@@ -1,0 +1,65 @@
+import { TeacherBankingRepository } from "@/backend/db/repo/teachers/teacher-banking.repository";
+import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
+import logger from "@/backend/lib/logger";
+import type { TeacherEntity, UserSelectType } from "@/backend/types";
+
+export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserSelectType[], config?: SeedConfig) {
+  logger.info("Seeding teacher banking details...");
+  const seedConfig = config ?? loadSeedConfig();
+
+  if (!seedConfig.enableExtendedScheduling || !teachersList?.length) {
+    return [];
+  }
+
+  const adminUser = findAdminUser(usersList);
+  const results = [];
+
+  for (let i = 0; i < teachersList.length; i++) {
+    const teacher = teachersList[i];
+    const existing = await TeacherBankingRepository.getActiveBankingDetails(teacher.id);
+    if (existing) {
+      if (existing.verifiedAt === null && adminUser) {
+        const verified = await TeacherBankingRepository.verifyBankingDetails(
+          {
+            bankingDetailsId: existing.id,
+          },
+          undefined,
+          undefined,
+          adminUser.id
+        );
+        results.push(verified);
+      } else {
+        results.push(existing);
+      }
+      continue;
+    }
+
+    const faker = getFakerForIndex(seedConfig.fakerSeed, 9000 + i);
+    const created = await TeacherBankingRepository.submitBankingDetails({
+      teacherId: teacher.id,
+      beneficiaryName: faker.person.fullName(),
+      bankName: faker.company.name(),
+      accountNumber: faker.finance.accountNumber(),
+      routingNumber: faker.finance.routingNumber(),
+      swiftBic: faker.finance.bic(),
+      iban: faker.finance.iban(),
+    });
+
+    if (adminUser) {
+      const verified = await TeacherBankingRepository.verifyBankingDetails(
+        {
+          bankingDetailsId: created.id,
+        },
+        undefined,
+        undefined,
+        adminUser.id
+      );
+      results.push(verified);
+    } else {
+      results.push(created);
+    }
+  }
+
+  logger.info(`Teacher banking details seeded (${results.length} rows).`);
+  return results;
+}
