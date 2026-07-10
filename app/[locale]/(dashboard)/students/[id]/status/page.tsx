@@ -1,5 +1,10 @@
-import { StudentStatusContainer } from "@/frontend/views/dashboard/students/status/StudentStatusContainer";
+import { redirect } from "@/shared/i18n/routing";
 
-export default function StudentStatusPage() {
-  return <StudentStatusContainer />;
+export default async function StudentStatusRedirectPage({
+  params,
+}: {
+  params: Promise<{ id: string; locale: string }>;
+}) {
+  const { id, locale } = await params;
+  redirect({ href: `/students/${id}/profile?tab=status`, locale });
 }
