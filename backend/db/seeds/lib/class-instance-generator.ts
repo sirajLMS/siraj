@@ -1,4 +1,4 @@
-import type { classInstances } from "@/backend/db/schema/scheduling";
+import type { classInstances } from "@/backend/db/schema/classes/scheduling";
 import {
   createTimestampOnDate,
   daysBetween,

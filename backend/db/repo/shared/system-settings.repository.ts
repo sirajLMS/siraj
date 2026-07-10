@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { systemSettings } from "@/backend/db/schema/settings";
+import { systemSettings } from "@/backend/db/schema/shared/settings";
 import type { SystemSettingSelectType } from "@/backend/types";
 
 export namespace SystemSettingsRepository {

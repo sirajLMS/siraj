@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { currencyExchangeAuditLogs } from "@/backend/db/schema/billing";
+import { currencyExchangeAuditLogs } from "@/backend/db/schema/billing/billing";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";

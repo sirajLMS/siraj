@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { groupClasses } from "@/backend/db/schema/group-class";
+import { groupClasses } from "@/backend/db/schema/classes/group-class";
 import type { SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { ClassInstanceEntity, StudentEntity } from "@/backend/types";

@@ -64,6 +64,58 @@ export namespace FxIngestionService {
     return value.toFixed(6);
   }
 
+  const SKIPPED_RESULT: Types.RefreshExchangeRatesResult = Object.freeze({
+    id: "fx-refresh-skipped",
+    success: true,
+    pairsWritten: 0,
+    pairsFailed: 0,
+    syncRunId: "",
+  });
+
+  async function maybeSkipForIdempotency(
+    trigger: FxSyncTrigger,
+    force: boolean
+  ): Promise<Types.RefreshExchangeRatesResult | null> {
+    if (force) return null;
+    const recent = await FxSyncRepository.isRecentSuccess(IDEMPOTENCY_WINDOW_MINUTES);
+    if (!recent) return null;
+    logger.info("FX sync skipped — recent success within idempotency window", {
+      withinMinutes: IDEMPOTENCY_WINDOW_MINUTES,
+      trigger,
+    });
+    return SKIPPED_RESULT;
+  }
+
+  async function rejectConcurrentSync(locale?: string): Promise<void> {
+    const running = await FxSyncRepository.getRunningSyncRun();
+    if (!running) return;
+    logger.warn("FX sync already running; rejecting concurrent sync", { runningId: running.id });
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("fxSyncAlreadyRunning"));
+  }
+
+  async function persistPairsInTx(
+    pairs: readonly Types.FxRatePair[],
+    effectiveDate: Date,
+    triggeredByUserId: string | null
+  ): Promise<void> {
+    await db.transaction(async (tx: DBTransaction) => {
+      for (const pair of pairs) {
+        await BillingRepository.updateExchangeRateInTx(
+          {
+            fromCurrency: pair.fromCurrency,
+            toCurrency: pair.toCurrency,
+            rate: pair.rate,
+            source: pair.source,
+            effectiveDate,
+          },
+          triggeredByUserId,
+          tx
+        );
+      }
+    });
+  }
+
   export async function refreshRates(
     input: Types.RefreshExchangeRatesInput
   ): Promise<Types.RefreshExchangeRatesResult> {
@@ -73,29 +125,10 @@ export namespace FxIngestionService {
       await assertRefreshPermission(triggeredByUserId, locale);
     }
 
-    if (!force) {
-      const recent = await FxSyncRepository.isRecentSuccess(IDEMPOTENCY_WINDOW_MINUTES);
-      if (recent) {
-        logger.info("FX sync skipped — recent success within idempotency window", {
-          withinMinutes: IDEMPOTENCY_WINDOW_MINUTES,
-          trigger,
-        });
-        return {
-          id: "fx-refresh-skipped",
-          success: true,
-          pairsWritten: 0,
-          pairsFailed: 0,
-          syncRunId: "",
-        };
-      }
-    }
+    const skipped = await maybeSkipForIdempotency(trigger, force ?? false);
+    if (skipped) return skipped;
 
-    const running = await FxSyncRepository.getRunningSyncRun();
-    if (running) {
-      logger.warn("FX sync already running; rejecting concurrent sync", { runningId: running.id });
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("fxSyncAlreadyRunning"));
-    }
+    await rejectConcurrentSync(locale);
 
     const provider = await getFxRateProvider();
     const syncRun = await FxSyncRepository.createSyncRun({
@@ -108,21 +141,7 @@ export namespace FxIngestionService {
       const fetchResult = await provider.fetchLatestRates(locale);
       const pairs = await expandUsdHubRates(fetchResult.rates);
 
-      await db.transaction(async (tx: DBTransaction) => {
-        for (const pair of pairs) {
-          await BillingRepository.updateExchangeRateInTx(
-            {
-              fromCurrency: pair.fromCurrency,
-              toCurrency: pair.toCurrency,
-              rate: pair.rate,
-              source: pair.source,
-              effectiveDate: fetchResult.timestamp,
-            },
-            triggeredByUserId,
-            tx
-          );
-        }
-      });
+      await persistPairsInTx(pairs, fetchResult.timestamp, triggeredByUserId);
 
       const completed = await FxSyncRepository.completeSyncRun(syncRun.id, {
         status: FxSyncStatus.Success,

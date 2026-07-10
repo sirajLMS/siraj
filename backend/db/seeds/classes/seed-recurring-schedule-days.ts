@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { recurringScheduleDays } from "@/backend/db/schema/scheduling";
+import { recurringScheduleDays } from "@/backend/db/schema/classes/scheduling";
 import {
   buildScheduleDaysForStudent,
   isScheduleDayActive,

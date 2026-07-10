@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { classStatusEvents } from "@/backend/db/schema/scheduling";
+import { classStatusEvents } from "@/backend/db/schema/classes/scheduling";
 import type { SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";

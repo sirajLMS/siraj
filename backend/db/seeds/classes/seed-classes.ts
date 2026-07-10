@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { recurringSchedules } from "@/backend/db/schema/scheduling";
+import { recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import {
   formatDateKey,
   getDateWindow,

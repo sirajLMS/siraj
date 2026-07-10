@@ -1,6 +1,6 @@
 import { boolean, index, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { teachers } from "@/backend/db/schema/teachers";
-import { users } from "@/backend/db/schema/users";
+import { teachers } from "@/backend/db/schema/teachers/teachers";
+import { users } from "@/backend/db/schema/users/users";
 
 export const teacherImportantNotes = pgTable(
   "teacher_important_notes",

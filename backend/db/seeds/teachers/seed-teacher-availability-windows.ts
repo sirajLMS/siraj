@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { teacherAvailabilityWindows } from "@/backend/db/schema/teacher-availability";
+import { teacherAvailabilityWindows } from "@/backend/db/schema/teachers/teacher-availability";
 import {
   buildTeacherAvailabilityWindows,
   getAvailabilityEffectiveRange,

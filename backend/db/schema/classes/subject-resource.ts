@@ -1,6 +1,6 @@
 import { integer, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
-import { classSubjects } from "@/backend/db/schema/class-subject";
-import { learningResources } from "@/backend/db/schema/communications";
+import { classSubjects } from "@/backend/db/schema/classes/class-subject";
+import { learningResources } from "@/backend/db/schema/communications/communications";
 
 export const subjectResources = pgTable(
   "subject_resources",

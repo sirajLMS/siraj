@@ -1,6 +1,6 @@
 import { index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { countryCodeEnum, invoiceTypeEnum, parentStatusEnum, paymentMethodEnum } from "@/backend/db/schema/enums";
-import { users } from "@/backend/db/schema/users";
+import { users } from "@/backend/db/schema/users/users";
 
 export const parents = pgTable(
   "parents",

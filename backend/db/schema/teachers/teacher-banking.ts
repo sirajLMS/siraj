@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import { boolean, index, numeric, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { encryptedText } from "@/backend/db/schema/custom-types";
-import { teachers } from "@/backend/db/schema/teachers";
-import { users } from "@/backend/db/schema/users";
+import { teachers } from "@/backend/db/schema/teachers/teachers";
+import { users } from "@/backend/db/schema/users/users";
 
 /**
  * Teacher Banking Details History table.

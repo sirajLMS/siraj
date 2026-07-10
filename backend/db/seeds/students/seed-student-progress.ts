@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { studentProgress } from "@/backend/db/schema/students";
+import { studentProgress } from "@/backend/db/schema/students/students";
 import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassOutcome } from "@/backend/enum";
 import logger from "@/backend/lib/logger";

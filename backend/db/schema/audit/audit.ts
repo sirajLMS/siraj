@@ -1,5 +1,5 @@
 import { index, inet, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { users } from "@/backend/db/schema/users";
+import { users } from "@/backend/db/schema/users/users";
 
 // NOTE: This table is truly append-only. The following SQL trigger has been deployed via migrations:
 // CREATE FUNCTION prevent_audit_modification() RETURNS trigger AS $$

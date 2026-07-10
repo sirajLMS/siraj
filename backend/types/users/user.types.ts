@@ -1,4 +1,4 @@
-import type { users } from "@/backend/db/schema/users";
+import type { users } from "@/backend/db/schema/users/users";
 import type { AccountStatus, UserRole } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 // Alias AccountStatus as UserStatus for canonical pattern compliance

@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { complaints } from "@/backend/db/schema/communications";
+import { complaints } from "@/backend/db/schema/communications/communications";
 import {
   buildComplaintBody,
   loadSeedConfig,

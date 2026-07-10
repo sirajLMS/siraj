@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { teacherVacationRequests } from "@/backend/db/schema/teacher-availability";
+import { teacherVacationRequests } from "@/backend/db/schema/teachers/teacher-availability";
 import { addMonths, findAdminUser, loadSeedConfig, type SeedConfig, startOfDay } from "@/backend/db/seeds/lib";
 import { VacationRequestStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";

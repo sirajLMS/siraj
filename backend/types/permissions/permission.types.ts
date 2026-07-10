@@ -1,4 +1,4 @@
-import type { permissions } from "@/backend/db/schema/permissions";
+import type { permissions } from "@/backend/db/schema/permissions/permissions";
 
 // Canonical: {Entity}SelectType and {Entity}InsertType must be derived from Drizzle
 //--------------------------------------------------------------------------------

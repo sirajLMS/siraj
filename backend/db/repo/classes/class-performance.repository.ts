@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { classInstancePerformance } from "@/backend/db/schema/scheduling";
+import { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
 import type {
   ClassInstancePerformanceInsertType,
   ClassInstancePerformanceSelectType,

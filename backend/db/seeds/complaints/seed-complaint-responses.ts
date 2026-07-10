@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { complaintResponses } from "@/backend/db/schema/communications";
+import { complaintResponses } from "@/backend/db/schema/communications/communications";
 import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ComplaintStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";

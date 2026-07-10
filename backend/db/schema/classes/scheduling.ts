@@ -17,7 +17,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { classSubjects } from "@/backend/db/schema/class-subject";
+import { classSubjects } from "@/backend/db/schema/classes/class-subject";
 import {
   classExecutionStateEnum,
   classOutcomeEnum,
@@ -27,10 +27,10 @@ import {
   leaveRequesterTypeEnum,
   leaveRequestStatusEnum,
 } from "@/backend/db/schema/enums";
-import { students } from "@/backend/db/schema/students";
-import { teachers } from "@/backend/db/schema/teachers";
-import { timezones } from "@/backend/db/schema/timezones";
-import { users } from "@/backend/db/schema/users";
+import { timezones } from "@/backend/db/schema/shared/timezones";
+import { students } from "@/backend/db/schema/students/students";
+import { teachers } from "@/backend/db/schema/teachers/teachers";
+import { users } from "@/backend/db/schema/users/users";
 
 /**
  * Recurring Schedules table.

@@ -1,6 +1,6 @@
 import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { accountStatusEnum } from "@/backend/db/schema/enums";
-import { users } from "@/backend/db/schema/users";
+import { users } from "@/backend/db/schema/users/users";
 
 export const staffProfiles = pgTable(
   "staff_profiles",

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { learningResources } from "@/backend/db/schema/communications";
+import { learningResources } from "@/backend/db/schema/communications/communications";
 import {
   buildResourceDisplayName,
   LEARNING_RESOURCE_SPECS,

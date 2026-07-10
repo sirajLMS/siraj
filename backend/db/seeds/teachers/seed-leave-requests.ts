@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { leaveRequests } from "@/backend/db/schema/scheduling";
+import { leaveRequests } from "@/backend/db/schema/classes/scheduling";
 import {
   ALL_LEAVE_REQUESTER_TYPES,
   cycleAtIndex,

@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { invoices } from "@/backend/db/schema/billing";
+import { invoices } from "@/backend/db/schema/billing/billing";
 import {
   ALL_INVOICE_TYPES,
   buildInvoiceAmount,

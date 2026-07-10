@@ -20,9 +20,9 @@ import {
   notificationEventTypeEnum,
   suggestionStatusEnum,
 } from "@/backend/db/schema/enums";
-import { parents } from "@/backend/db/schema/parents";
-import { students } from "@/backend/db/schema/students";
-import { users } from "@/backend/db/schema/users";
+import { parents } from "@/backend/db/schema/parents/parents";
+import { students } from "@/backend/db/schema/students/students";
+import { users } from "@/backend/db/schema/users/users";
 
 /**
  * User Notification Preferences table.

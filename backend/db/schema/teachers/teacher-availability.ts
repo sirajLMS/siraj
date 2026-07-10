@@ -1,8 +1,8 @@
 import { date, index, integer, pgTable, text, time, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { dayOfWeekEnum, vacationRequestStatusEnum } from "@/backend/db/schema/enums";
-import { teachers } from "@/backend/db/schema/teachers";
-import { timezones } from "@/backend/db/schema/timezones";
-import { users } from "@/backend/db/schema/users";
+import { timezones } from "@/backend/db/schema/shared/timezones";
+import { teachers } from "@/backend/db/schema/teachers/teachers";
+import { users } from "@/backend/db/schema/users/users";
 
 /**
  * Common columns for teacher availability-related tables.

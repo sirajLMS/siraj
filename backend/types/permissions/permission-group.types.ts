@@ -1,4 +1,4 @@
-import type { permissionGroups } from "@/backend/db/schema/permissions";
+import type { permissionGroups } from "@/backend/db/schema/permissions/permissions";
 import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 
 // Canonical: PermissionGroup types (moved from auth.types.ts)

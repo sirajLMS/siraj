@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { parents } from "@/backend/db/schema/parents";
-import { users } from "@/backend/db/schema/users";
+import { parents } from "@/backend/db/schema/parents/parents";
+import { users } from "@/backend/db/schema/users/users";
 import {
   ALL_PARENT_STATUSES,
   cycleAtIndex,

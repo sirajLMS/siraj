@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { classInstances } from "@/backend/db/schema/scheduling";
+import { classInstances } from "@/backend/db/schema/classes/scheduling";
 import {
   buildScheduleDaysForStudent,
   buildShowcaseInstancesForToday,

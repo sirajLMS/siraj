@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { invoiceCoverageMonths } from "@/backend/db/schema/billing";
+import { invoiceCoverageMonths } from "@/backend/db/schema/billing/billing";
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { InvoiceSelectType } from "@/backend/types";

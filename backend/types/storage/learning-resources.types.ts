@@ -1,4 +1,4 @@
-import type { learningResources } from "@/backend/db/schema/communications";
+import type { learningResources } from "@/backend/db/schema/communications/communications";
 
 export type LearningResourceSelectType = typeof learningResources.$inferSelect;
 export type LearningResourceInsertType = typeof learningResources.$inferInsert;

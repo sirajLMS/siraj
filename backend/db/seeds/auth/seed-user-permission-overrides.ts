@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { permissions, userPermissionOverrides } from "@/backend/db/schema/permissions";
+import { permissions, userPermissionOverrides } from "@/backend/db/schema/permissions/permissions";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { AppPermission } from "@/backend/enum";
 import logger from "@/backend/lib/logger";

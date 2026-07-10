@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { classInstancePerformance } from "@/backend/db/schema/scheduling";
+import { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
 import {
   ALL_FOCUS_LEVELS,
   ALL_GRADES,

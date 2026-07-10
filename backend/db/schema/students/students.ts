@@ -12,11 +12,11 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { classInstances } from "@/backend/db/schema/classes/scheduling";
 import { appLanguageEnum, genderEnum, studentStatusEnum } from "@/backend/db/schema/enums";
-import { parents } from "@/backend/db/schema/parents";
-import { classInstances } from "@/backend/db/schema/scheduling";
-import { teachers } from "@/backend/db/schema/teachers";
-import { users } from "@/backend/db/schema/users";
+import { parents } from "@/backend/db/schema/parents/parents";
+import { teachers } from "@/backend/db/schema/teachers/teachers";
+import { users } from "@/backend/db/schema/users/users";
 
 /**
  * Students table.

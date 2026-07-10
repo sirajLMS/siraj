@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { dstMigrationRuns } from "@/backend/db/schema/scheduling";
+import { dstMigrationRuns } from "@/backend/db/schema/classes/scheduling";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";

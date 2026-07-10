@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { suggestions } from "@/backend/db/schema/communications";
+import { suggestions } from "@/backend/db/schema/communications/communications";
 import {
   buildSuggestionBody,
   findAdminUser,

@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { userDeviceTokens } from "@/backend/db/schema/communications";
+import { userDeviceTokens } from "@/backend/db/schema/communications/communications";
 import {
   ALL_DEVICE_PLATFORMS,
   cycleAtIndex,

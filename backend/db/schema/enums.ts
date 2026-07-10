@@ -10,6 +10,7 @@ import {
   ComplaintCategory,
   ComplaintStatus,
   CountryCode,
+  CurrencyCode,
   DayOfWeek,
   DevicePlatform,
   DstMigrationResult,
@@ -36,6 +37,8 @@ export const appLanguageEnum = createPgEnumFromEnum("app_language", AppLanguage)
 export const genderEnum = createPgEnumFromEnum("gender", Gender);
 
 export const countryCodeEnum = createPgEnumFromEnum("country_code", CountryCode);
+
+export const currencyCodeEnum = createPgEnumFromEnum("currency_code", CurrencyCode);
 
 export const accountStatusEnum = createPgEnumFromEnum("account_status", AccountStatus);
 

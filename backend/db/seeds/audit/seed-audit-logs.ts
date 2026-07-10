@@ -1,6 +1,6 @@
 import { count } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs } from "@/backend/db/schema/audit";
+import { auditLogs } from "@/backend/db/schema/audit/audit";
 import {
   AUDIT_ENTITY_TYPES,
   buildAdminAuditDescription,

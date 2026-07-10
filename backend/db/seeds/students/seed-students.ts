@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { StorageDbRepository } from "@/backend/db/repo";
-import { students, teacherAssignments } from "@/backend/db/schema/students";
+import { students, teacherAssignments } from "@/backend/db/schema/students/students";
 import {
   ALL_STUDENT_STATUSES,
   buildStudentName,

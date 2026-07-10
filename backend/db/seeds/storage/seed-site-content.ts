@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { siteContent } from "@/backend/db/schema/site-content";
+import { siteContent } from "@/backend/db/schema/storage/site-content";
 import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";

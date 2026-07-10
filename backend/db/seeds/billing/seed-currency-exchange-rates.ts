@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { currencyExchangeRates } from "@/backend/db/schema/billing";
+import { currencyExchangeRates } from "@/backend/db/schema/billing/billing";
 import { EXCHANGE_PAIRS, iterateInvoiceMonths, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 

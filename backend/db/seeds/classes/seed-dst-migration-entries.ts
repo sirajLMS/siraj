@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { dstMigrationEntries } from "@/backend/db/schema/scheduling";
+import { dstMigrationEntries } from "@/backend/db/schema/classes/scheduling";
 import { DstMigrationResult } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import type { RecurringScheduleEntity } from "@/backend/types";

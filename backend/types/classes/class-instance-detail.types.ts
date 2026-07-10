@@ -1,4 +1,4 @@
-import type { classInstances } from "@/backend/db/schema/scheduling";
+import type { classInstances } from "@/backend/db/schema/classes/scheduling";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 // Foundation types from schema

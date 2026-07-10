@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { teachers } from "@/backend/db/schema/teachers";
-import { users } from "@/backend/db/schema/users";
+import { teachers } from "@/backend/db/schema/teachers/teachers";
+import { users } from "@/backend/db/schema/users/users";
 import {
   ALL_ACCOUNT_STATUSES,
   cycleAtIndex,

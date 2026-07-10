@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { teacherRecurringUnavailability } from "@/backend/db/schema/teacher-availability";
+import { teacherRecurringUnavailability } from "@/backend/db/schema/teachers/teacher-availability";
 import {
   buildLunchUnavailability,
   getAvailabilityEffectiveRange,

@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { userNotificationPreferences } from "@/backend/db/schema/communications";
+import { userNotificationPreferences } from "@/backend/db/schema/communications/communications";
 import {
   ALL_NOTIFICATION_CHANNELS,
   ALL_NOTIFICATION_EVENT_TYPES,

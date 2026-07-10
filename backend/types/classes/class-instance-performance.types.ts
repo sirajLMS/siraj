@@ -1,4 +1,4 @@
-import type { classInstancePerformance } from "@/backend/db/schema/scheduling";
+import type { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
 
 export type ClassInstancePerformanceSelectType = typeof classInstancePerformance.$inferSelect;
 export type ClassInstancePerformanceInsertType = typeof classInstancePerformance.$inferInsert;

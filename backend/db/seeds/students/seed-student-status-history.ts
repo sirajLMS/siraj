@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { studentStatusHistory } from "@/backend/db/schema/students";
+import { studentStatusHistory } from "@/backend/db/schema/students/students";
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import type { StudentEntity, UserSelectType } from "@/backend/types";

@@ -169,6 +169,25 @@ beforeEach(() => {
   resetMocks();
 });
 
+async function expectRejection(
+  input: Parameters<typeof import("@/backend/services/fx/fx-ingestion.service").FxIngestionService.refreshRates>[0],
+  expectedMessage: string
+): Promise<{ createSyncRunCalls: number; completeSyncRunCalls: number }> {
+  const { FxIngestionService } = await importService();
+  let thrown: unknown = null;
+  try {
+    await FxIngestionService.refreshRates(input);
+  } catch (error) {
+    thrown = error;
+  }
+  expect(thrown).toBeInstanceOf(Error);
+  expect((thrown as Error).message).toBe(expectedMessage);
+  return {
+    createSyncRunCalls: createSyncRunMock.mock.calls.length,
+    completeSyncRunCalls: completeSyncRunMock.mock.calls.length,
+  };
+}
+
 describe("FxIngestionService.refreshRates", () => {
   test("success path: provider rates -> USD-hub expansion -> tx writes -> sync run completed success", async () => {
     const { FxIngestionService } = await importService();
@@ -233,25 +252,13 @@ describe("FxIngestionService.refreshRates", () => {
   test("concurrent reject: getRunningSyncRun returns a run -> throws fxSyncAlreadyRunning", async () => {
     getRunningSyncRunMock.mockResolvedValue(createdSyncRun);
 
-    const { FxIngestionService } = await importService();
+    const calls = await expectRejection(
+      { triggeredByUserId: "user-1", trigger: FxSyncTrigger.Manual, force: true, locale: "en" },
+      "fxSyncAlreadyRunning"
+    );
 
-    let thrown: unknown = null;
-    try {
-      await FxIngestionService.refreshRates({
-        triggeredByUserId: "user-1",
-        trigger: FxSyncTrigger.Manual,
-        force: true,
-        locale: "en",
-      });
-    } catch (error) {
-      thrown = error;
-    }
-
-    expect(thrown).toBeInstanceOf(Error);
-    expect((thrown as Error).message).toBe("fxSyncAlreadyRunning");
-
-    expect(createSyncRunMock).toHaveBeenCalledTimes(0);
-    expect(completeSyncRunMock).toHaveBeenCalledTimes(0);
+    expect(calls.createSyncRunCalls).toBe(0);
+    expect(calls.completeSyncRunCalls).toBe(0);
   });
 
   test("idempotency: isRecentSuccess true and force:false -> skipped result {success:true, pairsWritten:0}", async () => {
@@ -277,25 +284,13 @@ describe("FxIngestionService.refreshRates", () => {
   test("manual trigger without permission -> throws insufficientPermissions", async () => {
     hasPermissionMock.mockResolvedValue(false);
 
-    const { FxIngestionService } = await importService();
+    const calls = await expectRejection(
+      { triggeredByUserId: "user-1", trigger: FxSyncTrigger.Manual, force: true, locale: "en" },
+      "insufficientPermissions"
+    );
 
-    let thrown: unknown = null;
-    try {
-      await FxIngestionService.refreshRates({
-        triggeredByUserId: "user-1",
-        trigger: FxSyncTrigger.Manual,
-        force: true,
-        locale: "en",
-      });
-    } catch (error) {
-      thrown = error;
-    }
-
-    expect(thrown).toBeInstanceOf(Error);
-    expect((thrown as Error).message).toBe("insufficientPermissions");
-
-    expect(createSyncRunMock).toHaveBeenCalledTimes(0);
-    expect(completeSyncRunMock).toHaveBeenCalledTimes(0);
+    expect(calls.createSyncRunCalls).toBe(0);
+    expect(calls.completeSyncRunCalls).toBe(0);
   });
 
   test("cron trigger (triggeredByUserId null) skips permission check", async () => {

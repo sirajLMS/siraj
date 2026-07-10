@@ -1,26 +1,22 @@
+// Drizzle schema definitions — grouped by domain.
+// Each sub-directory has its own index.ts barrel that re-exports every
+// table definition in that sub-directory; this file re-exports them all
+// plus the cross-cutting `enums` and `custom-types` that stay top-level.
+// `import { teachers, users, ... } from "@/backend/db/schema"` resolves
+// every Drizzle table.
+
 export * from "./audit";
+export * from "./auth";
 export * from "./billing";
 export * from "./books";
-export * from "./cache";
-export * from "./class-category";
-export * from "./class-subject";
+export * from "./classes";
 export * from "./communications";
+export * from "./custom-types";
 export * from "./enums";
-export * from "./fx-sync";
-export * from "./group-class";
-export * from "./impersonation";
 export * from "./parents";
 export * from "./permissions";
-export * from "./scheduling";
-export * from "./settings";
-export * from "./site-content";
-export * from "./staff";
+export * from "./shared";
 export * from "./storage";
 export * from "./students";
-export * from "./subject-resource";
-export * from "./teacher-availability";
-export * from "./teacher-banking";
-export * from "./teacher-notes";
 export * from "./teachers";
-export * from "./timezones";
 export * from "./users";

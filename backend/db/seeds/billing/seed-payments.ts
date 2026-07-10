@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { payments } from "@/backend/db/schema/billing";
+import { payments } from "@/backend/db/schema/billing/billing";
 import {
   ALL_PAYMENT_METHODS,
   cycleAtIndex,

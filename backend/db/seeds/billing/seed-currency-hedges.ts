@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { currencyHedges } from "@/backend/db/schema/billing";
+import { currencyHedges } from "@/backend/db/schema/billing/billing";
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 

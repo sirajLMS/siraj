@@ -1,6 +1,6 @@
 import { and, eq, gt, lt, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { rateLimitCache, sessionCache } from "@/backend/db/schema/cache";
+import { rateLimitCache, sessionCache } from "@/backend/db/schema/shared/cache";
 import logger from "@/backend/lib/logger";
 
 export namespace CacheDbRepository {

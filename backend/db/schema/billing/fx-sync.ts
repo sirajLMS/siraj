@@ -1,6 +1,6 @@
 import { index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { fxProviderEnum, fxSyncStatusEnum } from "@/backend/db/schema/enums";
-import { users } from "@/backend/db/schema/users";
+import { users } from "@/backend/db/schema/users/users";
 
 export const fxSyncRuns = pgTable(
   "fx_sync_runs",

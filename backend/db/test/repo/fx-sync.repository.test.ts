@@ -30,6 +30,42 @@ async function insertSyncRun(
   return row;
 }
 
+
+type SyncRunTransition = {
+  status: FxSyncStatus;
+  pairsWritten?: string;
+  pairsFailed?: string;
+  errorMessage?: string | null;
+  finishedAt?: Date;
+};
+
+async function transitionSyncRun(
+  tx: DBTransaction,
+  id: string,
+  patch: SyncRunTransition
+): Promise<void> {
+  await tx
+    .update(fxSyncRuns)
+    .set({
+      status: patch.status,
+      pairsWritten: patch.pairsWritten ?? "0",
+      pairsFailed: patch.pairsFailed ?? "0",
+      errorMessage: patch.errorMessage ?? null,
+      finishedAt: patch.finishedAt ?? new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(fxSyncRuns.id, id));
+}
+
+async function expectIsRecentSuccess(
+  tx: DBTransaction,
+  createdId: string,
+  transition: SyncRunTransition
+): Promise<boolean> {
+  await transitionSyncRun(tx, createdId, transition);
+  return FxSyncRepository.isRecentSuccess(30, tx);
+}
+
 describe("FxSyncRepository — createSyncRun", () => {
   test("inserts a running row with zero pair counters", async () => {
     await runInRollback(async tx => {
@@ -226,18 +262,11 @@ describe("FxSyncRepository — isRecentSuccess", () => {
         startedAt: new Date(Date.now() - 5 * 60_000),
       });
 
-      await tx
-        .update(fxSyncRuns)
-        .set({
-          status: FxSyncStatus.Success,
-          pairsWritten: "10",
-          pairsFailed: "0",
-          finishedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(fxSyncRuns.id, created.id));
-
-      const result = await FxSyncRepository.isRecentSuccess(30, tx);
+      const result = await expectIsRecentSuccess(tx, created.id, {
+        status: FxSyncStatus.Success,
+        pairsWritten: "10",
+        pairsFailed: "0",
+      });
       expect(result).toBe(true);
     });
   });
@@ -249,18 +278,12 @@ describe("FxSyncRepository — isRecentSuccess", () => {
         startedAt: new Date(Date.now() - 120 * 60_000),
       });
 
-      await tx
-        .update(fxSyncRuns)
-        .set({
-          status: FxSyncStatus.Success,
-          pairsWritten: "10",
-          pairsFailed: "0",
-          finishedAt: new Date(Date.now() - 90 * 60_000),
-          updatedAt: new Date(),
-        })
-        .where(eq(fxSyncRuns.id, created.id));
-
-      const result = await FxSyncRepository.isRecentSuccess(30, tx);
+      const result = await expectIsRecentSuccess(tx, created.id, {
+        status: FxSyncStatus.Success,
+        pairsWritten: "10",
+        pairsFailed: "0",
+        finishedAt: new Date(Date.now() - 90 * 60_000),
+      });
       expect(result).toBe(false);
     });
   });
@@ -272,19 +295,12 @@ describe("FxSyncRepository — isRecentSuccess", () => {
         startedAt: new Date(Date.now() - 5 * 60_000),
       });
 
-      await tx
-        .update(fxSyncRuns)
-        .set({
-          status: FxSyncStatus.Failed,
-          pairsWritten: "0",
-          pairsFailed: "10",
-          errorMessage: "boom",
-          finishedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(fxSyncRuns.id, created.id));
-
-      const result = await FxSyncRepository.isRecentSuccess(30, tx);
+      const result = await expectIsRecentSuccess(tx, created.id, {
+        status: FxSyncStatus.Failed,
+        pairsWritten: "0",
+        pairsFailed: "10",
+        errorMessage: "boom",
+      });
       expect(result).toBe(false);
     });
   });

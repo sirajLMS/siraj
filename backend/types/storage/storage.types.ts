@@ -1,4 +1,4 @@
-import type { invoiceFiles, parentFiles, storageDirectories, storageFiles } from "@/backend/db/schema/storage";
+import type { invoiceFiles, parentFiles, storageDirectories, storageFiles } from "@/backend/db/schema/storage/storage";
 import type { OrderSortDirection } from "@/backend/enum";
 // Type aliases to match Kotlin entities
 export type FileEntity = typeof storageFiles.$inferSelect;
