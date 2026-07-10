@@ -57,7 +57,7 @@ export async function seedOrGet(usersList: UserSelectType[], deviceTokensList: D
     });
   }
 
-  const results = await CommunicationService.createManySeedDeliveries(inputs);
+  const results = await CommunicationService.createManyDeliveries(inputs);
   logger.info(`Notification deliveries seeded (${results.length} rows).`);
   return results;
 }

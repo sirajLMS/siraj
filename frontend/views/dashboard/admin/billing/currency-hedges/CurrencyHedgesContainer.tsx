@@ -71,7 +71,7 @@ export function CurrencyHedgesContainer() {
         .filter((row): row is NonNullable<typeof row> => row != null && row.id != null)
         .map(row => ({
           id: row.id ?? "",
-          currency: (row.currency ?? CurrencyCode.Usd) as CurrencyCode,
+          currency: row.currency ?? CurrencyCode.Usd,
           amount: row.amount ?? "0",
           hedgeType: row.hedgeType ?? "",
           notes: row.notes ?? null,

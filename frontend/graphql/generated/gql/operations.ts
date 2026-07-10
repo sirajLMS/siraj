@@ -1685,6 +1685,7 @@ export type UserMeetingConfigUpdateInput = {
   isDefault: boolean | null | undefined;
   label: string | null | undefined;
   password: string | null | undefined;
+  providerId: string | null | undefined;
 };
 
 export type UserOverrideInput = {

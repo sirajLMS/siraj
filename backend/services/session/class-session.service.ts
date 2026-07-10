@@ -262,7 +262,7 @@ export namespace ClassSessionService {
     instances: ClassInstanceInsertInput[],
     options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
   ): Promise<ClassInstanceEntity[]> {
-    return SchedulingRepository.upsertManyForSeed(instances, options);
+    return SchedulingRepository.upsertMany(instances, options);
   }
 
   export async function listClassInstanceIdsWithStatusEvents(

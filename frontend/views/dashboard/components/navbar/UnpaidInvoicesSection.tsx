@@ -86,7 +86,7 @@ export function UnpaidInvoicesSection() {
           {summary.totalOverdueInvoices}
         </Typography>
         <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, ml: "auto" })}>
-          {globalTotalLabel}
+          {t("totalOverdueLabel")}: {globalTotalLabel}
         </Typography>
       </Box>
 

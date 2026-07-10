@@ -73,6 +73,7 @@ storybook-static
 
 .next-test
 .next-test-*
+.graphql-test-ports
 
 .idea
 

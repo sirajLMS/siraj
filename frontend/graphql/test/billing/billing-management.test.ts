@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import crypto from "node:crypto";
-import type { CurrencyCode, InvoiceType as InvoiceTypeEnumType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   CurrencyCode as CurrencyCodeEnum,
   InvoiceStatus,
@@ -32,8 +31,8 @@ function invoiceVars(parentId: string, amount: string) {
     parentId,
     studentId: null as string | null,
     amount,
-    currency: CurrencyCodeEnum.Usd as CurrencyCode,
-    invoiceType: InvoiceTypeEnum.Manual as InvoiceTypeEnumType,
+    currency: CurrencyCodeEnum.Usd,
+    invoiceType: InvoiceTypeEnum.Manual,
     issueDate: "2026-06-22",
     dueDate: "2026-07-22",
     exchangeRateSnapshot: null as string | null,

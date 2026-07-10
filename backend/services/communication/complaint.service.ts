@@ -361,17 +361,17 @@ export namespace ComplaintService {
   }
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
-  export async function createManySeedComplaints(
-    inputs: Parameters<typeof ComplaintRepository.createSeedComplaint>[0][]
+  export async function createManyComplaints(
+    inputs: Parameters<typeof ComplaintRepository.insertComplaint>[0][]
   ): Promise<ComplaintSelectType[]> {
     const results: ComplaintSelectType[] = [];
     for (const input of inputs) {
-      results.push(await ComplaintRepository.createSeedComplaint(input));
+      results.push(await ComplaintRepository.insertComplaint(input));
     }
     return results;
   }
 
-  export async function ensureSeedComplaintResponse(input: {
+  export async function ensureComplaintResponse(input: {
     complaintId: string;
     responderUserId: string | null;
     body: string;
@@ -379,7 +379,7 @@ export namespace ComplaintService {
   }) {
     const existing = await ComplaintResponseRepository.findByComplaintId(input.complaintId);
     if (existing) return existing;
-    return ComplaintResponseRepository.createSeedResponse(input);
+    return ComplaintResponseRepository.insertResponse(input);
   }
 }
 

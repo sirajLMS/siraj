@@ -29,7 +29,7 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
     const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
     const eventType = cycleAtIndex(ALL_NOTIFICATION_EVENT_TYPES, userIndex);
 
-    const inserted = await NotificationPreferencesService.upsertManySeedPreferences(user.id, [
+    const inserted = await NotificationPreferencesService.upsertManyPreferences(user.id, [
       {
         channel,
         eventType,

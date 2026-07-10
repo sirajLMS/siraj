@@ -51,7 +51,7 @@ export async function seedOrGet(parentsList: ParentEntity[], usersList: UserSele
     });
   }
 
-  const results = await SuggestionService.createManySeedSuggestions(inputs);
+  const results = await SuggestionService.createManySuggestions(inputs);
   logger.info(`Suggestions seeded (${results.length} rows).`);
   return results;
 }

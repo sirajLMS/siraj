@@ -131,6 +131,7 @@ export const UserMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("Us
 
 export const UserMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("UserMeetingConfigUpdateInput", {
   fields: t => ({
+    providerId: t.string({ required: false }),
     label: t.string({ required: false }),
     isDefault: t.boolean({ required: false }),
     password: t.string({ required: false }),

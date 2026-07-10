@@ -104,15 +104,15 @@ function mapComplaintQueueRow(r: {
 }
 
 export namespace ComplaintRepository {
-  export type SeedComplaintInput = ComplaintSubmitInput & {
+  export type ComplaintInsertInput = ComplaintSubmitInput & {
     parentId: string;
     status: ComplaintStatus;
     createdAt?: Date;
     updatedAt?: Date;
   };
 
-  export const createSeedComplaint = async (
-    input: SeedComplaintInput,
+  export const insertComplaint = async (
+    input: ComplaintInsertInput,
     tx?: DBTransaction
   ): Promise<ComplaintSelectType> => {
     const queryDb = tx ?? db;

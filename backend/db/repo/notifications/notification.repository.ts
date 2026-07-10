@@ -28,7 +28,7 @@ const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
 };
 
 export namespace NotificationRepository {
-  export type SeedNotificationDeliveryInput = CreateNotificationDeliveryInput & {
+  export type NotificationDeliveryInsertInput = CreateNotificationDeliveryInput & {
     status: NotificationDeliveryStatus;
     sentAt?: Date | null;
     deliveredAt?: Date | null;
@@ -38,8 +38,8 @@ export namespace NotificationRepository {
     updatedAt?: Date;
   };
 
-  export const createManySeedDeliveries = async (
-    inputs: SeedNotificationDeliveryInput[],
+  export const createManyDeliveries = async (
+    inputs: NotificationDeliveryInsertInput[],
     tx?: DBTransaction
   ): Promise<NotificationDeliverySelectType[]> => {
     if (inputs.length === 0) return [];

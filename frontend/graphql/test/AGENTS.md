@@ -72,7 +72,7 @@ When adding a **new** test:
        // ...
      });
      ```
-   - This automatically handles hooking into Bun's `beforeAll` and `afterAll` lifecycles to spawn the Next.js dev server on a **dynamically allocated port** (prefers `3001` when free, otherwise scans `3020–3199`), poll until ready, and kill only this process's server tree upon test suite completion. Each run uses an isolated `NEXT_DIST_DIR` (`.next-test-<port>`) so multiple agents can run tests concurrently without port or build-lock conflicts.
+   - This automatically handles hooking into Bun's `beforeAll` and `afterAll` lifecycles to spawn the Next.js dev server on a **dynamically allocated port** (prefers `3001` when free, otherwise scans `3020–3199` with PID-skewed ordering), poll until ready, and kill only this process's server tree upon test suite completion. Port allocation uses file locks under `.graphql-test-ports/` plus an in-process TCP hold so multiple agents can run `bun test` concurrently without claiming the same port.
    - Optional env override: `GRAPHQL_TEST_PORT=<port>` pins the port for debugging. The harness does **not** kill existing listeners on startup.
    - For REST endpoints outside GraphQL (e.g. storage upload), use `getTestApiUrl("/api/...")` from `testClient.ts` or `testPort.ts` — never hardcode `localhost:3001`.
    - The process logic itself is defined separately in `testServer.ts` and `testPort.ts`.

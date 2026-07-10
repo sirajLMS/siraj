@@ -23,7 +23,7 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
     return [existing];
   }
 
-  const inserted = await DstMigrationService.createSeedMigrationRun(adminUser.id, 60, "Seed DST migration demo run");
+  const inserted = await DstMigrationService.createMigrationRun(adminUser.id, 60, "Seed DST migration demo run");
 
   logger.info("DST migration runs seeded.");
   return [inserted];

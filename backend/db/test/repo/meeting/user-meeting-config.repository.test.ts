@@ -87,6 +87,27 @@ describe("UserMeetingConfigRepository", () => {
     expect(results[1]?.id).toBe(second.id);
   });
 
+  configTest("update modifies providerId", async tx => {
+    const user = await createTestUser(tx, { email: `umc-provider-${randomUUID()}@test.com` });
+    const zoomProvider = await createTestMeetingProvider(tx);
+    const meetProvider = await createTestMeetingProvider(tx, {
+      slug: `meet-${randomUUID().slice(0, 8)}`,
+      urlAllowlist: ["meet.google.com"],
+    });
+    const config = await createTestMeetingConfig(tx, user.id, zoomProvider.id);
+
+    const updated = await UserMeetingConfigRepository.update(
+      config.id,
+      {
+        providerId: meetProvider.id,
+        details: { meetingUrl: "https://meet.google.com/abc-defg-hij" },
+      },
+      tx
+    );
+
+    expect(updated.providerId).toBe(meetProvider.id);
+  });
+
   configTest("update modifies config fields", async tx => {
     const user = await createTestUser(tx, { email: `umc-update-${randomUUID()}@test.com` });
     const provider = await createTestMeetingProvider(tx);

@@ -42,8 +42,8 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
     .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
     .map(rate => ({
       id: rate.id ?? "",
-      fromCurrency: (rate.fromCurrency ?? fromCurrency) as CurrencyCode,
-      toCurrency: (rate.toCurrency ?? toCurrency) as CurrencyCode,
+      fromCurrency: (rate.fromCurrency as CurrencyCode) ?? fromCurrency,
+      toCurrency: (rate.toCurrency as CurrencyCode) ?? toCurrency,
       rate: rate.rate ?? "0",
       source: rate.source ?? null,
       effectiveDate: rate.effectiveDate ?? "",

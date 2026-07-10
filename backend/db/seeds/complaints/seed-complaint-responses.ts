@@ -25,7 +25,7 @@ export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserS
     if (complaint.status !== ComplaintStatus.ANSWERED) continue;
 
     const faker = getFakerForIndex(seedConfig.fakerSeed, 12000 + i);
-    const inserted = await ComplaintService.ensureSeedComplaintResponse({
+    const inserted = await ComplaintService.ensureComplaintResponse({
       complaintId: complaint.id,
       responderUserId: adminUser?.id ?? null,
       body: faker.lorem.paragraph(),

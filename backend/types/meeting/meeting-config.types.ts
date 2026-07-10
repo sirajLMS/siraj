@@ -72,4 +72,4 @@ export type UserMeetingConfigSubmitInput = Omit<
   readonly password?: string | null;
 };
 
-export type UpdateUserMeetingConfigInput = Partial<Omit<UserMeetingConfigSubmitInput, "userId" | "providerId">>;
+export type UpdateUserMeetingConfigInput = Partial<Omit<UserMeetingConfigSubmitInput, "userId">>;

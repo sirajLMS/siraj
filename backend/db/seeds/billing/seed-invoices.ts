@@ -12,9 +12,9 @@ import {
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import logger from "@/backend/lib/logger";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
-import type { ParentEntity, SeedInvoiceInput, StudentEntity, UserSelectType } from "@/backend/types";
+import type { ManualInvoiceInsertInput, ParentEntity, StudentEntity, UserSelectType } from "@/backend/types";
 
-type InvoiceSeedSpec = SeedInvoiceInput & { readonly idempotencyKey: string };
+type InvoiceSeedSpec = ManualInvoiceInsertInput & { readonly idempotencyKey: string };
 
 function buildInvoiceSpecs(
   parentsList: ParentEntity[],

@@ -159,9 +159,9 @@ export namespace CommunicationService {
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
-  export async function createManySeedDeliveries(
-    inputs: Parameters<typeof NotificationRepository.createManySeedDeliveries>[0]
+  export async function createManyDeliveries(
+    inputs: Parameters<typeof NotificationRepository.createManyDeliveries>[0]
   ): Promise<NotificationDeliverySelectType[]> {
-    return NotificationRepository.createManySeedDeliveries(inputs);
+    return NotificationRepository.createManyDeliveries(inputs);
   }
 }

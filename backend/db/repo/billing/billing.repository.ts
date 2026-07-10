@@ -1221,7 +1221,10 @@ export namespace BillingRepository {
   ): Promise<Types.CurrencyExchangeAuditLogInsertType[]> => {
     if (inputs.length === 0) return [];
     const t = tx ?? db;
-    return t.insert(currencyExchangeAuditLogs).values([...inputs]).returning();
+    return t
+      .insert(currencyExchangeAuditLogs)
+      .values([...inputs])
+      .returning();
   };
 
   export const findInvoiceCoverageMonthsByInvoiceIds = async (
@@ -1237,11 +1240,15 @@ export namespace BillingRepository {
   };
 
   export const createManyInvoiceCoverageMonths = async (
-    inputs: readonly Types.SeedInvoiceCoverageMonthInput[],
+    inputs: readonly Types.InvoiceCoverageMonthInput[],
     tx?: DBTransaction
   ): Promise<Types.InvoiceCoverageMonthSelectType[]> => {
     if (inputs.length === 0) return [];
     const t = tx ?? db;
-    return t.insert(invoiceCoverageMonths).values([...inputs]).onConflictDoNothing().returning();
+    return t
+      .insert(invoiceCoverageMonths)
+      .values([...inputs])
+      .onConflictDoNothing()
+      .returning();
   };
 }

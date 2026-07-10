@@ -9,6 +9,8 @@ import {
   getTestGraphqlUrl,
   getTestPort,
   getTestServerLogPath,
+  releaseAllocatedTestPort,
+  releaseTcpPortReservation,
   setTestPort,
 } from "./testPort";
 
@@ -118,6 +120,8 @@ async function spawnServerOnPort(port: number): Promise<ReturnType<typeof spawn>
     // ignore
   }
 
+  await releaseTcpPortReservation();
+
   const proc = spawn(["bun", "run", "next", "dev", "-p", String(port)], {
     stdout: "pipe",
     stderr: "pipe",
@@ -160,6 +164,7 @@ async function startServerWithRetry(): Promise<void> {
     serverRootPid = undefined;
     logFilePath = undefined;
     clearTestPort();
+    await releaseAllocatedTestPort();
     lastError = new Error(
       `Next.js dev server failed to start within 180 seconds on port ${port}. See ${getTestServerLogPath(port)} for details.`
     );
@@ -203,6 +208,7 @@ export function stopTestServer() {
   serverRootPid = undefined;
   logFilePath = undefined;
   clearTestPort();
+  void releaseAllocatedTestPort();
 }
 
 function allocatedPortForShutdown(): number | undefined {

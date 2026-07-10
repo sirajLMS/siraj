@@ -1,5 +1,5 @@
 import { AppPermission } from "@/backend/enum";
-import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
@@ -11,6 +11,7 @@ import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend
 import { PermissionsService } from "@/backend/services";
 import { buildMaskedTransactionSnapshot } from "@/backend/services/payment-method/payment-method-mask";
 import type { PaymentSelectType } from "@/backend/types/billing/billing.types";
+import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 import type { TeacherPaymentSelectType } from "@/backend/types/teachers/teacher.types";
 
 async function shouldRevealPaymentSnapshot(ctx: BaseContext): Promise<boolean> {
@@ -44,7 +45,10 @@ export const PaymentPothosObject = PaymentRef.implement({
         if (!parent.paymentMethodSnapshot) return null;
         if (parent.paymentMethodType === PaymentMethodType.PROOF_UPLOAD) return null;
         const revealSensitive = await shouldRevealPaymentSnapshot(ctx);
-        return buildMaskedTransactionSnapshot(parent.paymentMethodSnapshot, revealSensitive);
+        return buildMaskedTransactionSnapshot(
+          parent.paymentMethodSnapshot as PaymentMethodTransactionSnapshot,
+          revealSensitive
+        );
       },
     }),
     transactionId: t.exposeString("transactionId", { nullable: true }),
@@ -72,7 +76,10 @@ export const TeacherPaymentPothosObject = TeacherPaymentRef.implement({
         if (!parent.paymentMethodSnapshot) return null;
         if (parent.paymentMethodType === PaymentMethodType.PROOF_UPLOAD) return null;
         const revealSensitive = await shouldRevealPaymentSnapshot(ctx);
-        return buildMaskedTransactionSnapshot(parent.paymentMethodSnapshot, revealSensitive);
+        return buildMaskedTransactionSnapshot(
+          parent.paymentMethodSnapshot as PaymentMethodTransactionSnapshot,
+          revealSensitive
+        );
       },
     }),
     isTestPayment: t.exposeBoolean("isTestPayment"),

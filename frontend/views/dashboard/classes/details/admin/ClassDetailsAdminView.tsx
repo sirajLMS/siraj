@@ -8,8 +8,8 @@ import {
   type ClassInstanceDetail,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ActivityHeatmap } from "@/frontend/views/dashboard/classes/details/admin/ActivityHeatmap";
-import { ClassInfoCard } from "@/frontend/views/dashboard/classes/details/admin/ClassInfoCard";
 import { AdminActionsBar } from "@/frontend/views/dashboard/classes/details/admin/AdminActionsBar";
+import { ClassInfoCard } from "@/frontend/views/dashboard/classes/details/admin/ClassInfoCard";
 import { LivePerformanceGrid } from "@/frontend/views/dashboard/classes/details/admin/LivePerformanceGrid";
 import { MetadataCard } from "@/frontend/views/dashboard/classes/details/admin/MetadataCard";
 import { classDetailsSectionStackSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";

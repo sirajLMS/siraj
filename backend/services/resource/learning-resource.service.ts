@@ -173,12 +173,12 @@ export namespace LearningResourceService {
     return LearningResourceRepository.findByFilePath(filePath);
   }
 
-  export async function createSeedResource(input: {
+  export async function insertResource(input: {
     displayName: string;
     filePath: string;
     uploadedByUserId: string;
     createdAt?: Date;
   }) {
-    return LearningResourceRepository.createSeedResource(input);
+    return LearningResourceRepository.insertResource(input);
   }
 }

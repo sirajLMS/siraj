@@ -613,6 +613,7 @@ const en: MessageSchema = {
       noAlerts: "No alerts at this time.",
       errorLoading: "Failed to load notifications.",
       unpaidInvoicesTitle: "Unpaid Invoices",
+      totalOverdueLabel: "Total overdue",
       noUnpaidInvoices: "There is no invoices to be paid.",
       loadingBilling: "Loading billing data...",
       newUnansweredComplaint: "New Unanswered Complaint",
@@ -3468,6 +3469,7 @@ const en: MessageSchema = {
         sourceTeacher: "Teacher default",
         sourceNone: "Not available",
         noMeeting: "No online meeting configured",
+        passwordProtected: "Password protected",
       },
       join: {
         joinMeeting: "Join meeting",
@@ -3477,6 +3479,7 @@ const en: MessageSchema = {
         emptyParent: "Your teacher has not configured a meeting link for this class yet.",
         emptyClass: "Configure a class meeting override to provide a join link.",
         setupLink: "Set up meeting",
+        providerTooltip: "{provider} · {source}",
       },
       manager: {
         add: "Add config",
@@ -3502,6 +3505,8 @@ const en: MessageSchema = {
         setAsDefault: "Set as default meeting config",
         edit: "Edit",
         delete: "Delete",
+        saveError: "Failed to save meeting config",
+        deleteError: "Failed to delete meeting config",
       },
       fields: {
         meetingUrl: "Meeting URL",
@@ -3516,6 +3521,17 @@ const en: MessageSchema = {
         selectPlaceholder: "Select a meeting config",
         useTeacherDefault: "Use teacher default",
         noConfigs: "No meeting configs for this scope",
+        inheritedFromTeacher: "Using teacher default meeting config",
+        overrideActive: "Class override active",
+        effectiveSourceBanner: "Effective meeting source: {source}",
+        recurringSectionTitle: "Recurring schedule meeting",
+        recurringSectionSubtitle: "Optional override for all instances in this recurring schedule.",
+      },
+      providerSelect: {
+        emptyCatalogTitle: "No meeting providers available",
+        emptyCatalogBody: "An administrator must add meeting providers before you can configure meetings.",
+        emptyCatalogAdminLink: "Manage meeting providers",
+        emptyCatalogContactAdmin: "Contact your administrator to add meeting providers.",
       },
       summary: {
         sectionTitle: "Online meeting",

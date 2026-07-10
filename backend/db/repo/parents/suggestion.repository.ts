@@ -8,7 +8,7 @@ import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmit
 import { escapeLikeWildcards } from "@/backend/utils";
 
 export namespace SuggestionRepository {
-  export type SeedSuggestionInput = {
+  export type SuggestionInsertInput = {
     parentId: string;
     submitterName: string;
     body: string;
@@ -19,7 +19,7 @@ export namespace SuggestionRepository {
     createdAt?: Date;
   };
 
-  export const createSeedSuggestion = async (input: SeedSuggestionInput, tx?: DBTransaction) => {
+  export const insertSuggestion = async (input: SuggestionInsertInput, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
     const now = new Date();
     const [created] = await queryDb

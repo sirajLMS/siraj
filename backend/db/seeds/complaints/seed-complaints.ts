@@ -45,7 +45,7 @@ export async function seedOrGet(
     });
   }
 
-  const results = await ComplaintService.createManySeedComplaints(inputs);
+  const results = await ComplaintService.createManyComplaints(inputs);
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     for (let i = 0; i < results.length; i++) {

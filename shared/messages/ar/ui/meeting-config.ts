@@ -24,6 +24,7 @@ export const meetingConfig: MeetingConfigLabels = {
     sourceTeacher: "إعدادات المعلم الافتراضية",
     sourceNone: "غير متوفر",
     noMeeting: "لا يوجد اجتماع عبر الإنترنت",
+    passwordProtected: "محمي بكلمة مرور",
   },
   join: {
     joinMeeting: "انضم للاجتماع",
@@ -33,6 +34,7 @@ export const meetingConfig: MeetingConfigLabels = {
     emptyParent: "لم يقم المعلم بإعداد رابط اجتماع لهذه الحصة بعد.",
     emptyClass: "قم بإعداد اجتماع للحصة لتوفير رابط انضمام.",
     setupLink: "إعداد الاجتماع",
+    providerTooltip: "{provider} · {source}",
   },
   manager: {
     add: "إضافة إعداد",
@@ -58,6 +60,8 @@ export const meetingConfig: MeetingConfigLabels = {
     setAsDefault: "تعيين كإعداد اجتماع افتراضي",
     edit: "تعديل",
     delete: "حذف",
+    saveError: "فشل حفظ إعداد الاجتماع",
+    deleteError: "فشل حذف إعداد الاجتماع",
   },
   fields: {
     meetingUrl: "رابط الاجتماع",
@@ -72,6 +76,17 @@ export const meetingConfig: MeetingConfigLabels = {
     selectPlaceholder: "اختر إعداد اجتماع",
     useTeacherDefault: "استخدام إعداد المعلم الافتراضي",
     noConfigs: "لا توجد إعدادات اجتماع لهذا النطاق",
+    inheritedFromTeacher: "يستخدم إعداد المعلم الافتراضي",
+    overrideActive: "تجاوز الحصة نشط",
+    effectiveSourceBanner: "مصدر الاجتماع الفعلي: {source}",
+    recurringSectionTitle: "اجتماع الجدول المتكرر",
+    recurringSectionSubtitle: "تجاوز اختياري لجميع حصص هذا الجدول المتكرر.",
+  },
+  providerSelect: {
+    emptyCatalogTitle: "لا توجد مزودات اجتماعات",
+    emptyCatalogBody: "يجب على المسؤول إضافة مزودات اجتماعات قبل إعداد الاجتماعات.",
+    emptyCatalogAdminLink: "إدارة مزودات الاجتماعات",
+    emptyCatalogContactAdmin: "تواصل مع المسؤول لإضافة مزودات اجتماعات.",
   },
   summary: {
     sectionTitle: "الاجتماع عبر الإنترنت",

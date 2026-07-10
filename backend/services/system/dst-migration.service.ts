@@ -167,7 +167,7 @@ export namespace DstMigrationService {
     return DstMigrationRepository.findRunByUserId(runByUserId, tx);
   }
 
-  export async function createSeedMigrationRun(
+  export async function createMigrationRun(
     runByUserId: string,
     offsetMinutes: number,
     description: string,

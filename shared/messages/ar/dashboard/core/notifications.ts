@@ -5,6 +5,7 @@ export const notifications: NotificationsLabels = {
   noAlerts: "لا توجد تنبيهات في هذا الوقت.",
   errorLoading: "فشل في تحميل الإشعارات.",
   unpaidInvoicesTitle: "الفواتير غير المدفوعة",
+  totalOverdueLabel: "إجمالي المتأخر",
   noUnpaidInvoices: "لا توجد فواتير بحاجة للدفع.",
   loadingBilling: "جاري تحميل بيانات الفواتير...",
   newUnansweredComplaint: "شكوى جديدة غير مجاب عليها",

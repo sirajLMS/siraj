@@ -41,7 +41,7 @@ export namespace LearningResourceRepository {
     return results[0] ?? null;
   }
 
-  export async function createSeedResource(
+  export async function insertResource(
     input: { displayName: string; filePath: string; uploadedByUserId: string; createdAt?: Date },
     tx?: DBTransaction
   ): Promise<LearningResourceRow> {

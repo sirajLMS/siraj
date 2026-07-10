@@ -2,11 +2,11 @@ import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import logger from "@/backend/lib/logger";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
-import type { InvoiceSelectType, SeedInvoiceCoverageMonthInput } from "@/backend/types";
+import type { InvoiceCoverageMonthInput, InvoiceSelectType } from "@/backend/types";
 
-type CoverageSeedSpec = SeedInvoiceCoverageMonthInput & { readonly key: string };
+type CoverageSeedSpec = InvoiceCoverageMonthInput & { readonly key: string };
 
-function coverageKey(input: Pick<SeedInvoiceCoverageMonthInput, "invoiceId" | "year" | "month">): string {
+function coverageKey(input: Pick<InvoiceCoverageMonthInput, "invoiceId" | "year" | "month">): string {
   return `${input.invoiceId}:${input.year}:${input.month}`;
 }
 

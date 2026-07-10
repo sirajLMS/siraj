@@ -12,6 +12,7 @@ export interface MeetingConfigDisplayLabels {
   readonly sourceTeacher: string;
   readonly sourceNone: string;
   readonly noMeeting: string;
+  readonly passwordProtected: string;
 }
 
 export interface MeetingConfigJoinLabels {
@@ -22,6 +23,7 @@ export interface MeetingConfigJoinLabels {
   readonly emptyParent: string;
   readonly emptyClass: string;
   readonly setupLink: string;
+  readonly providerTooltip: string;
 }
 
 export interface MeetingConfigManagerLabels {
@@ -48,6 +50,8 @@ export interface MeetingConfigManagerLabels {
   readonly setAsDefault: string;
   readonly edit: string;
   readonly delete: string;
+  readonly saveError: string;
+  readonly deleteError: string;
 }
 
 export interface MeetingConfigFieldsLabels {
@@ -64,6 +68,18 @@ export interface MeetingConfigClassScopeLabels {
   readonly selectPlaceholder: string;
   readonly useTeacherDefault: string;
   readonly noConfigs: string;
+  readonly inheritedFromTeacher: string;
+  readonly overrideActive: string;
+  readonly effectiveSourceBanner: string;
+  readonly recurringSectionTitle: string;
+  readonly recurringSectionSubtitle: string;
+}
+
+export interface MeetingConfigProviderSelectLabels {
+  readonly emptyCatalogTitle: string;
+  readonly emptyCatalogBody: string;
+  readonly emptyCatalogAdminLink: string;
+  readonly emptyCatalogContactAdmin: string;
 }
 
 export interface MeetingConfigSummaryLabels {
@@ -88,4 +104,5 @@ export type MeetingConfigLabels = {
   readonly fields: MeetingConfigFieldsLabels;
   readonly classScope: MeetingConfigClassScopeLabels;
   readonly summary: MeetingConfigSummaryLabels;
+  readonly providerSelect: MeetingConfigProviderSelectLabels;
 };

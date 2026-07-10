@@ -24,6 +24,6 @@ export namespace ClassPerformanceService {
     inputs: readonly ClassInstancePerformanceInsertType[],
     tx?: DBTransaction
   ): Promise<ClassInstancePerformanceEntity[]> {
-    return ClassPerformanceRepository.upsertManyForSeed(inputs, tx);
+    return ClassPerformanceRepository.upsertMany(inputs, tx);
   }
 }

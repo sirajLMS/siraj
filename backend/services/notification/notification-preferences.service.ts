@@ -77,7 +77,7 @@ export namespace NotificationPreferencesService {
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
-  export async function upsertManySeedPreferences(
+  export async function upsertManyPreferences(
     userId: string,
     inputs: NotificationPreferenceUpdateInput[]
   ): Promise<UserNotificationPreferenceSelectType[]> {

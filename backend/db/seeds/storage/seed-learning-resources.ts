@@ -34,7 +34,7 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
       continue;
     }
 
-    const inserted = await LearningResourceService.createSeedResource({
+    const inserted = await LearningResourceService.insertResource({
       displayName,
       filePath: bucketPath,
       uploadedByUserId: uploader.id,

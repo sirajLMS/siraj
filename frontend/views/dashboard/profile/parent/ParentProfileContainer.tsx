@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { ErrorState } from "@/frontend/components/ui";
 import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -10,6 +10,7 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import {
@@ -107,6 +108,7 @@ export function ParentProfileContainer({
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
+  const client = useApolloClient();
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
     fetchPolicy: "cache-and-network",
@@ -138,7 +140,10 @@ export function ParentProfileContainer({
     const parentInput = isAdminScope ? buildAdminParentInput(formData) : buildOwnParentInput(formData);
 
     if (scope === ProfileScope.Own) {
-      await updateOwnProfile({ variables: { input: { core: coreInput, parent: parentInput } } });
+      const result = await updateOwnProfile({ variables: { input: { core: coreInput, parent: parentInput } } });
+      syncViewerFromProfile(client, {
+        displayCurrency: result.data?.updateOwnProfile?.displayCurrency,
+      });
       router.push(ownProfileHref());
       return;
     }

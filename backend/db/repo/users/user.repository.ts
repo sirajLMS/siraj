@@ -79,6 +79,23 @@ export namespace UserRepository {
     }
   };
 
+  export const findDisplayCurrenciesByIds = async (ids: string[]): Promise<Map<string, CurrencyCode | null>> => {
+    if (ids.length === 0) {
+      return new Map();
+    }
+
+    const results = await db
+      .select({ id: users.id, displayCurrency: users.displayCurrency })
+      .from(users)
+      .where(inArray(users.id, ids));
+
+    const map = new Map<string, CurrencyCode | null>();
+    for (const row of results) {
+      map.set(row.id, row.displayCurrency ?? null);
+    }
+    return map;
+  };
+
   export const findByEmail = async (email: string): Promise<UserSelectType | null> => {
     return findOne(eq(users.email, email));
   };
@@ -262,24 +279,18 @@ export namespace UserRepository {
     return AuthUtils.toUserReturnType(updated);
   };
 
-  export const updateTimezone = async (
+  async function updateUserColumn(
     userId: string,
-    timezone: string,
+    set: Partial<typeof users.$inferInsert>,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<UserSelectType> => {
+  ): Promise<UserSelectType> {
     const queryDb = tx ?? db;
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
-    const normalizedTimezone = normalizeIanaTimezone(timezone);
-
-    if (!isValidIanaTimezone(normalizedTimezone)) {
-      throw new Error(t("parent.invalidTimezone"));
-    }
-
     const [updated] = await queryDb
       .update(users)
-      .set({ timezone: normalizedTimezone, updatedAt: new Date() })
+      .set({ ...set, updatedAt: new Date() })
       .where(eq(users.id, userId))
       .returning();
 
@@ -288,6 +299,22 @@ export namespace UserRepository {
     }
 
     return updated;
+  }
+
+  export const updateTimezone = async (
+    userId: string,
+    timezone: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<UserSelectType> => {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const normalizedTimezone = normalizeIanaTimezone(timezone);
+
+    if (!isValidIanaTimezone(normalizedTimezone)) {
+      throw new Error(t("parent.invalidTimezone"));
+    }
+
+    return updateUserColumn(userId, { timezone: normalizedTimezone }, tx, locale);
   };
 
   export const updateDisplayCurrency = async (
@@ -296,20 +323,7 @@ export namespace UserRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserSelectType> => {
-    const queryDb = tx ?? db;
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
-    const [updated] = await queryDb
-      .update(users)
-      .set({ displayCurrency, updatedAt: new Date() })
-      .where(eq(users.id, userId))
-      .returning();
-
-    if (!updated) {
-      throw new Error(t("userNotFound", { id: userId }));
-    }
-
-    return updated;
+    return updateUserColumn(userId, { displayCurrency }, tx, locale);
   };
 
   export const updateStatus = async (
@@ -318,20 +332,7 @@ export namespace UserRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserSelectType> => {
-    const queryDb = tx ?? db;
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
-    const [updated] = await queryDb
-      .update(users)
-      .set({ status, updatedAt: new Date() })
-      .where(eq(users.id, userId))
-      .returning();
-
-    if (!updated) {
-      throw new Error(t("userNotFound", { id: userId }));
-    }
-
-    return updated;
+    return updateUserColumn(userId, { status }, tx, locale);
   };
 
   export type BootstrapUserUpsertInput = {

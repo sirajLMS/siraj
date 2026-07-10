@@ -122,6 +122,7 @@ export namespace UserMeetingConfigRepository {
       const [result] = await t
         .update(userMeetingConfigs)
         .set({
+          ...(input.providerId !== undefined ? { providerId: input.providerId } : {}),
           ...(input.label !== undefined ? { label: input.label } : {}),
           ...(input.isDefault !== undefined ? { isDefault: input.isDefault } : {}),
           ...(input.details !== undefined ? { details: input.details } : {}),

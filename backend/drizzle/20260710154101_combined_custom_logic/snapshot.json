@@ -1,9 +1,15 @@
 {
+  "id": "80f8797a-f5e8-45e4-94c2-7f2f742ad3d9",
+  "prevIds": ["c342a30d-70ca-4eab-92b9-d494c80374ba"],
   "version": "8",
   "dialect": "postgres",
-  "id": "00fd87f9-dd39-486a-a2c0-fd3564d1a10b",
-  "prevIds": ["5fe146aa-79d7-4b7d-874e-51e9c729ed3c"],
   "ddl": [
+    {
+      "values": ["pending", "approved", "rejected"],
+      "name": "invoice_payment_submission_status",
+      "entityType": "enums",
+      "schema": "public"
+    },
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
       "name": "account_status",
@@ -112,6 +118,7 @@
         "document.manage_parent_docs",
         "billing.create_invoice",
         "billing.update_status_paid",
+        "billing.submit_payment_proof",
         "billing.delete_invoice",
         "student.reassign_teacher",
         "student.manage_status",
@@ -142,11 +149,15 @@
         "storage.manage",
         "billing.view_exchange_rates",
         "billing.refresh_exchange_rates",
+        "billing.manage_fx_provider",
+        "billing.override_exchange_rates",
+        "billing.manage_currency_hedges",
         "payment_methods.manage_catalogs",
         "payment_methods.verify_bank_transfer",
         "meeting_providers.manage_catalog",
         "meeting_configs.manage_own",
-        "meeting_configs.manage_other"
+        "meeting_configs.manage_other",
+        "meeting_configs.manage_class"
       ],
       "name": "app_permission",
       "entityType": "enums",
@@ -523,7 +534,7 @@
       "schema": "public"
     },
     {
-      "values": ["UNPAID", "PAID", "CANCELLED"],
+      "values": ["UNPAID", "PAYMENT_PENDING", "PAID", "CANCELLED"],
       "name": "invoice_status",
       "entityType": "enums",
       "schema": "public"
@@ -563,7 +574,7 @@
         "CLASS_REMINDER",
         "INVOICE_GENERATED",
         "COMPLAINT_RESPONSE",
-        "BANKING_DETAILS_CHANGED",
+        "PAYMENT_METHOD_CHANGED",
         "NEW_COMPLAINT",
         "NEW_SUGGESTION",
         "SUGGESTION_ACKNOWLEDGED",
@@ -574,7 +585,7 @@
       "schema": "public"
     },
     {
-      "values": ["ACTIVATED", "DEACTIVATED", "REGULAR", "ON_LEAVE", "SUSPENDED", "ON_TRIAL"],
+      "values": ["REGULAR", "ON_LEAVE", "SUSPENDED", "ON_TRIAL"],
       "name": "parent_status",
       "entityType": "enums",
       "schema": "public"
@@ -586,7 +597,7 @@
       "schema": "public"
     },
     {
-      "values": ["MOBILE_WALLET", "PAYMENT_LINK", "ONLINE_ACCOUNT", "BANK_TRANSFER", "CASH"],
+      "values": ["MOBILE_WALLET", "PAYMENT_LINK", "ONLINE_ACCOUNT", "BANK_TRANSFER", "CASH", "PROOF_UPLOAD"],
       "name": "payment_method_type",
       "entityType": "enums",
       "schema": "public"
@@ -666,6 +677,12 @@
     {
       "isRlsEnabled": false,
       "name": "fx_sync_runs",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "invoice_payment_submissions",
       "entityType": "tables",
       "schema": "public"
     },
@@ -828,6 +845,12 @@
     {
       "isRlsEnabled": false,
       "name": "user_notification_preferences",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "class_meeting_configs",
       "entityType": "tables",
       "schema": "public"
     },
@@ -2492,6 +2515,149 @@
       "entityType": "columns",
       "schema": "public",
       "table": "fx_sync_runs"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "invoice_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "file_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "submitted_by_user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "submitted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reviewed_by_user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reviewed_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "invoice_payment_submission_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "rejection_reason",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
     },
     {
       "type": "uuid",
@@ -6183,6 +6349,136 @@
       "name": "id",
       "entityType": "columns",
       "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "class_instance_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "recurring_schedule_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "provider_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "label",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "is_default",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "details",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "encrypted_secret",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
       "table": "meeting_providers"
     },
     {
@@ -8760,32 +9056,6 @@
       "table": "staff_profiles"
     },
     {
-      "type": "varchar(50)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "phone",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "staff_profiles"
-    },
-    {
-      "type": "account_status",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "status",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "staff_profiles"
-    },
-    {
       "type": "timestamp(3) with time zone",
       "typeSchema": null,
       "notNull": true,
@@ -9644,19 +9914,6 @@
       "table": "teachers"
     },
     {
-      "type": "account_status",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "status",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "teachers"
-    },
-    {
       "type": "country_code",
       "typeSchema": "public",
       "notNull": false,
@@ -10359,14 +10616,27 @@
       "table": "users"
     },
     {
-      "type": "boolean",
+      "type": "varchar(50)",
       "typeSchema": null,
-      "notNull": true,
+      "notNull": false,
       "dimensions": 0,
-      "default": "true",
+      "default": null,
       "generated": null,
       "identity": null,
-      "name": "is_active",
+      "name": "phone",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "account_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'ACTIVATED'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
@@ -11147,6 +11417,69 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "fx_sync_runs"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "invoice_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "invoice_payment_submissions_invoice_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "invoice_payment_submissions_status_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "file_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "invoice_payment_submissions_file_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
     },
     {
       "nameExplicit": true,
@@ -12512,6 +12845,111 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "user_notification_preferences"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "class_instance_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "class_meeting_configs_class_instance_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "recurring_schedule_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "class_meeting_configs_recurring_schedule_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "provider_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "class_meeting_configs_provider_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "class_instance_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"is_default\" = true AND \"class_instance_id\" IS NOT NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "class_meeting_configs_one_default_per_instance_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "recurring_schedule_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"is_default\" = true AND \"recurring_schedule_id\" IS NOT NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "class_meeting_configs_one_default_per_recurring_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "class_meeting_configs"
     },
     {
       "nameExplicit": true,
@@ -13990,27 +14428,6 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "status",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "teachers_status_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "teachers"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
           "value": "ip_address",
           "isExpression": false,
           "asc": true,
@@ -14267,6 +14684,27 @@
       "table": "sessions"
     },
     {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "users_status_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "users"
+    },
+    {
       "nameExplicit": false,
       "columns": ["actor_user_id"],
       "schemaTo": "public",
@@ -14434,6 +14872,58 @@
       "entityType": "fks",
       "schema": "public",
       "table": "fx_sync_runs"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["invoice_id"],
+      "schemaTo": "public",
+      "tableTo": "invoices",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "invoice_payment_submissions_invoice_id_invoices_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["file_id"],
+      "schemaTo": "public",
+      "tableTo": "storage_file",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "invoice_payment_submissions_file_id_storage_file_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["submitted_by_user_id"],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "invoice_payment_submissions_submitted_by_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["reviewed_by_user_id"],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "invoice_payment_submissions_reviewed_by_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "invoice_payment_submissions"
     },
     {
       "nameExplicit": false,
@@ -15071,6 +15561,45 @@
       "entityType": "fks",
       "schema": "public",
       "table": "user_notification_preferences"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["class_instance_id"],
+      "schemaTo": "public",
+      "tableTo": "class_instances",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "class_meeting_configs_class_instance_id_class_instances_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["recurring_schedule_id"],
+      "schemaTo": "public",
+      "tableTo": "recurring_schedules",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "class_meeting_configs_hyosSBhez29d_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "class_meeting_configs"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["provider_id"],
+      "schemaTo": "public",
+      "tableTo": "meeting_providers",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "class_meeting_configs_provider_id_meeting_providers_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "class_meeting_configs"
     },
     {
       "nameExplicit": false,
@@ -15959,6 +16488,14 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
+      "name": "invoice_payment_submissions_pkey",
+      "schema": "public",
+      "table": "invoice_payment_submissions",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
       "name": "supported_mobile_wallets_pkey",
       "schema": "public",
       "table": "supported_mobile_wallets",
@@ -16170,6 +16707,14 @@
       "name": "user_notification_preferences_pkey",
       "schema": "public",
       "table": "user_notification_preferences",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "class_meeting_configs_pkey",
+      "schema": "public",
+      "table": "class_meeting_configs",
       "entityType": "pks"
     },
     {
@@ -16704,6 +17249,13 @@
       "entityType": "checks",
       "schema": "public",
       "table": "recurring_schedules"
+    },
+    {
+      "value": "(\n        (\"class_instance_id\" IS NOT NULL AND \"recurring_schedule_id\" IS NULL)\n        OR (\"class_instance_id\" IS NULL AND \"recurring_schedule_id\" IS NOT NULL)\n      )",
+      "name": "class_meeting_configs_scope_chk",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "class_meeting_configs"
     },
     {
       "value": "\"classes_remaining\" >= 0",

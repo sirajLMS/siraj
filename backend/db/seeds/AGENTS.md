@@ -97,12 +97,12 @@ Use these service bootstrap entry points from seeders. Domain seed data (constan
 | `auth/seed-user-permission-overrides` | `PermissionManagementService` | `ensureUserPermissionOverride` |
 | `audit/seed-audit-logs` | `AuditService` | `countAuditLogs`, `listAuditLogs`, `createManyAuditLogs` |
 | `audit/seed-admin-audit-logs` | `AuditService` | `countAdminAuditLogs`, `listAdminAuditLogs`, `createManyAdminAuditLogs` |
-| `complaints/seed-complaints` | `ComplaintService` | `createManySeedComplaints` |
-| `complaints/seed-complaint-responses` | `ComplaintService` | `ensureSeedComplaintResponse` |
-| `notifications/seed-user-notification-preferences` | `NotificationPreferencesService` | `upsertManySeedPreferences` |
-| `notifications/seed-notification-deliveries` | `CommunicationService` | `createManySeedDeliveries` |
-| `parents/seed-suggestions` | `SuggestionService` | `createManySeedSuggestions` |
-| `storage/seed-learning-resources` | `LearningResourceService` | `findByFilePath`, `createSeedResource` |
+| `complaints/seed-complaints` | `ComplaintService` | `createManyComplaints` |
+| `complaints/seed-complaint-responses` | `ComplaintService` | `ensureComplaintResponse` |
+| `notifications/seed-user-notification-preferences` | `NotificationPreferencesService` | `upsertManyPreferences` |
+| `notifications/seed-notification-deliveries` | `CommunicationService` | `createManyDeliveries` |
+| `parents/seed-suggestions` | `SuggestionService` | `createManySuggestions` |
+| `storage/seed-learning-resources` | `LearningResourceService` | `findByFilePath`, `insertResource` |
 | `storage/seed-site-content` | `StorageService` | `upsertManySiteContent` |
 | `meeting/seed-meeting-providers` | `MeetingProviderCatalogService` | `upsertManyProviders` |
 | `shared/timezones` | `ReferenceDataService` | `upsertManyTimezones` |

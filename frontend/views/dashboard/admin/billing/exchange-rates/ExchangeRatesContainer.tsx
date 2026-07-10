@@ -180,8 +180,8 @@ export function ExchangeRatesContainer() {
     .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
     .map(rate => ({
       id: rate.id ?? "",
-      fromCurrency: (rate.fromCurrency ?? CurrencyCode.Usd) as CurrencyCode,
-      toCurrency: (rate.toCurrency ?? CurrencyCode.Sar) as CurrencyCode,
+      fromCurrency: (rate.fromCurrency as CurrencyCode) ?? CurrencyCode.Usd,
+      toCurrency: (rate.toCurrency as CurrencyCode) ?? CurrencyCode.Sar,
       rate: rate.rate ?? "0",
       source: rate.source ?? null,
       effectiveDate: rate.effectiveDate ?? "",

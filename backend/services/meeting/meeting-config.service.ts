@@ -112,13 +112,25 @@ export namespace MeetingConfigService {
   ): Promise<UserMeetingConfigReturnType> {
     const existing = await UserMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
     const { isAdminScope } = await assertCanAccessConfig(actorUserId, existing.userId, locale);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(existing.providerId, undefined, locale);
 
-    const details = input.details !== undefined ? parseMeetingConfigDetails(provider, input.details) : undefined;
+    const nextProviderId = input.providerId ?? existing.providerId;
+    const provider = await MeetingProviderRepository.getByIdOrThrow(nextProviderId, undefined, locale);
+
+    if (input.providerId && input.providerId !== existing.providerId && !provider.isActive) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("meetingProviderInactive"));
+    }
+
+    const detailsSource = input.details ?? existing.details;
+    const details =
+      input.details !== undefined || (input.providerId && input.providerId !== existing.providerId)
+        ? parseMeetingConfigDetails(provider, detailsSource)
+        : undefined;
 
     const updated = await UserMeetingConfigRepository.update(
       id,
       {
+        ...(input.providerId ? { providerId: input.providerId } : {}),
         label: input.label,
         isDefault: input.isDefault,
         details,

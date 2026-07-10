@@ -504,7 +504,7 @@ export namespace PaymentMethodService {
     return BillingRepository.findPaymentsByIdempotencyKeys(keys, tx);
   }
 
-  export async function createManyPayments(inputs: readonly Types.SeedPaymentInput[], tx?: DBTransaction) {
+  export async function createManyPayments(inputs: readonly Types.PaymentRecordInput[], tx?: DBTransaction) {
     return BillingRepository.upsertManyPayments(inputs, tx);
   }
 

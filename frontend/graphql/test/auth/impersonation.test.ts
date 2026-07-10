@@ -1,6 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { CombinedGraphQLErrors } from "@apollo/client";
-import type { InvoiceType as InvoiceTypeEnumType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { InvoiceType as InvoiceTypeEnum } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
@@ -28,7 +27,7 @@ function manualInvoiceVars(parentId: string) {
     studentId: null as string | null,
     amount: "10.00",
     currency: "USD",
-    invoiceType: InvoiceTypeEnum.Manual as InvoiceTypeEnumType,
+    invoiceType: InvoiceTypeEnum.Manual,
     issueDate: "2026-06-22",
     dueDate: "2026-07-22",
     exchangeRateSnapshot: null as string | null,

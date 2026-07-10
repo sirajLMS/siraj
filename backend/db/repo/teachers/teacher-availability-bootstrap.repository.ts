@@ -49,7 +49,7 @@ export type VacationRequestCreateInput = {
   processedByUserId: string | null;
 };
 
-export namespace TeacherAvailabilitySeedRepository {
+export namespace TeacherAvailabilityBootstrapRepository {
   export async function findWindowByTeacherAndDay(
     teacherId: string,
     dayOfWeek: DayOfWeek,

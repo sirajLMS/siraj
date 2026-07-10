@@ -506,7 +506,7 @@ export namespace BillingManagementService {
   }
 
   export async function createManyManualInvoices(
-    inputs: readonly Types.SeedInvoiceInput[],
+    inputs: readonly Types.ManualInvoiceInsertInput[],
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType[]> {
     return BillingRepository.upsertManyInvoices(inputs, tx);
@@ -520,7 +520,7 @@ export namespace BillingManagementService {
   }
 
   export async function createManyInvoiceCoverageMonths(
-    inputs: readonly Types.SeedInvoiceCoverageMonthInput[],
+    inputs: readonly Types.InvoiceCoverageMonthInput[],
     tx?: DBTransaction
   ): Promise<Types.InvoiceCoverageMonthSelectType[]> {
     return BillingRepository.createManyInvoiceCoverageMonths(inputs, tx);

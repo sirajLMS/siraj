@@ -2,9 +2,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import {
   type AvailabilityWindowUpsertInput,
   type RecurringUnavailabilityCreateInput,
-  TeacherAvailabilitySeedRepository,
+  TeacherAvailabilityBootstrapRepository,
   type VacationRequestCreateInput,
-} from "@/backend/db/repo/teachers/teacher-availability-seed.repository";
+} from "@/backend/db/repo/teachers/teacher-availability-bootstrap.repository";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
   TeacherAvailabilityWindowSelectType,
@@ -25,10 +25,10 @@ export namespace TeacherAvailabilityService {
   ): Promise<TeacherAvailabilityWindowSelectType> {
     assertNonProduction();
     try {
-      return await TeacherAvailabilitySeedRepository.upsertAvailabilityWindow(input, tx);
+      return await TeacherAvailabilityBootstrapRepository.upsertAvailabilityWindow(input, tx);
     } catch (error) {
       if (!isDuplicateError(error)) throw error;
-      const existing = await TeacherAvailabilitySeedRepository.findWindowByTeacherAndDay(
+      const existing = await TeacherAvailabilityBootstrapRepository.findWindowByTeacherAndDay(
         input.teacherId,
         input.dayOfWeek,
         tx
@@ -55,10 +55,10 @@ export namespace TeacherAvailabilityService {
   ): Promise<TeacherRecurringUnavailabilitySelectType> {
     assertNonProduction();
     try {
-      return await TeacherAvailabilitySeedRepository.createRecurringIfMissing(input, tx);
+      return await TeacherAvailabilityBootstrapRepository.createRecurringIfMissing(input, tx);
     } catch (error) {
       if (!isDuplicateError(error)) throw error;
-      const existing = await TeacherAvailabilitySeedRepository.findRecurringByTeacherAndDay(
+      const existing = await TeacherAvailabilityBootstrapRepository.findRecurringByTeacherAndDay(
         input.teacherId,
         input.dayOfWeek,
         tx
@@ -74,10 +74,10 @@ export namespace TeacherAvailabilityService {
   ): Promise<TeacherVacationRequestSelectType> {
     assertNonProduction();
     try {
-      return await TeacherAvailabilitySeedRepository.createVacationIfMissing(input, tx);
+      return await TeacherAvailabilityBootstrapRepository.createVacationIfMissing(input, tx);
     } catch (error) {
       if (!isDuplicateError(error)) throw error;
-      const existing = await TeacherAvailabilitySeedRepository.findVacationByTeacherId(input.teacherId, tx);
+      const existing = await TeacherAvailabilityBootstrapRepository.findVacationByTeacherId(input.teacherId, tx);
       if (!existing) throw error;
       return existing;
     }

@@ -36,11 +36,14 @@ function mapPaidAmounts(
   paidAmounts: AttendanceReportRow["paidAmounts"] | null | undefined
 ): readonly ReportPaidAmount[] {
   return (paidAmounts ?? [])
-    .filter((paid): paid is NonNullable<typeof paid> => paid != null && paid.id != null && paid.currency != null)
+    .filter(
+      (paid): paid is NonNullable<typeof paid> & { currency: CurrencyCode } =>
+        paid != null && paid.id != null && paid.currency != null
+    )
     .map(paid => ({
       id: paid.id ?? `${paid.currency}`,
       amount: paid.amount ?? "0",
-      currency: paid.currency as CurrencyCode,
+      currency: paid.currency,
       displayAmount: paid.displayAmount
         ? {
             id: paid.displayAmount.id ?? `display:${paid.id}`,

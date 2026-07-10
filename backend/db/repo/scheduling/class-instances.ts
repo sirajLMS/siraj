@@ -243,7 +243,7 @@ export async function listByIdempotencyKeys(
   return map;
 }
 
-export async function upsertManyForSeed(
+export async function upsertMany(
   instances: Types.ClassInstanceInsertInput[],
   options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
 ): Promise<Types.ClassInstanceEntity[]> {

@@ -315,17 +315,15 @@ export type CreateManualInvoiceInput = {
   readonly idempotencyKey?: string;
 };
 
-export type SeedInvoiceInput = Omit<InvoiceInsertType, "id" | "createdAt" | "updatedAt">;
+export type ManualInvoiceInsertInput = Omit<InvoiceInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type InvoiceCoverageMonthSelectType = typeof invoiceCoverageMonths.$inferSelect;
 
-export type SeedInvoiceCoverageMonthInput = Pick<InvoiceCoverageMonthSelectType, "invoiceId" | "year" | "month">;
-
-export type SeedPaymentInput = PaymentRecordInput;
+export type InvoiceCoverageMonthInput = Pick<InvoiceCoverageMonthSelectType, "invoiceId" | "year" | "month">;
 
 export type CurrencyExchangeAuditLogInsertType = typeof currencyExchangeAuditLogs.$inferInsert;
 
-export type SeedExchangeAuditLogInput = Omit<CurrencyExchangeAuditLogInsertType, "id">;
+export type ExchangeAuditLogInput = Omit<CurrencyExchangeAuditLogInsertType, "id">;
 
 export type MarkInvoicePaidReturnType = {
   readonly id: string;

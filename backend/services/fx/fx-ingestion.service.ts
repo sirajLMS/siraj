@@ -196,7 +196,7 @@ export namespace FxIngestionService {
   }
 
   export async function createManyExchangeAuditLogs(
-    inputs: readonly Types.SeedExchangeAuditLogInput[],
+    inputs: readonly Types.ExchangeAuditLogInput[],
     tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeAuditLogInsertType[]> {
     return BillingRepository.createManyExchangeAuditLogs(inputs, tx);

@@ -71,7 +71,7 @@ export namespace ClassPerformanceRepository {
     return map;
   }
 
-  export async function upsertManyForSeed(
+  export async function upsertMany(
     inputs: readonly ClassInstancePerformanceInsertType[],
     tx?: DBTransaction
   ): Promise<ClassInstancePerformanceSelectType[]> {

@@ -22,7 +22,7 @@ export async function orchestrateSeedMany<TSpec, TEntity, TKey>(
     return [...existingMap.values()];
   }
 
-  let created: TEntity[] = [];
+  let created: TEntity[];
   try {
     created = await createMany(toCreate);
   } catch (error) {

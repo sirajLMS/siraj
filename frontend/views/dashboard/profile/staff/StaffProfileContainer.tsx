@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -9,6 +9,7 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StaffProfileEditForm } from "@/frontend/views/dashboard/profile/staff/StaffProfileEditForm";
@@ -56,6 +57,7 @@ export function StaffProfileContainer({
   const isAdminScope = scope === ProfileScope.Other;
   const activeTab = _activeTab;
   const router = useRouter();
+  const client = useApolloClient();
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
@@ -80,7 +82,10 @@ export function StaffProfileContainer({
     const staffInput = isAdminScope ? buildAdminStaffInput(formData) : buildOwnStaffInput();
 
     if (scope === ProfileScope.Own) {
-      await updateOwnProfile({ variables: { input: { core: coreInput, staff: staffInput } } });
+      const result = await updateOwnProfile({ variables: { input: { core: coreInput, staff: staffInput } } });
+      syncViewerFromProfile(client, {
+        displayCurrency: result.data?.updateOwnProfile?.displayCurrency,
+      });
       router.push(ownProfileHref());
       return;
     }

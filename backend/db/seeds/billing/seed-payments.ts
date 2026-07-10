@@ -4,10 +4,10 @@ import { InvoiceStatus } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import logger from "@/backend/lib/logger";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
-import type { InvoiceSelectType, SeedPaymentInput } from "@/backend/types";
+import type { InvoiceSelectType, PaymentRecordInput } from "@/backend/types";
 import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 
-type PaymentSeedSpec = SeedPaymentInput & { readonly idempotencyKey: string };
+type PaymentSeedSpec = PaymentRecordInput & { readonly idempotencyKey: string };
 
 function buildPaymentSnapshot(
   index: number,

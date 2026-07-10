@@ -25,7 +25,7 @@ export namespace ComplaintResponseRepository {
     return row ?? null;
   };
 
-  export const createSeedResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction) => {
+  export const insertResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
     const now = new Date();
     const [created] = await queryDb

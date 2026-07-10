@@ -72,6 +72,7 @@ function normalizeProviderUpdateInput(input: {
 }
 
 function normalizeConfigUpdateInput(input: {
+  readonly providerId?: string | null;
   readonly label?: string | null;
   readonly isDefault?: boolean | null;
   readonly password?: string | null;
@@ -82,6 +83,7 @@ function normalizeConfigUpdateInput(input: {
   } | null;
 }) {
   return {
+    ...(input.providerId != null ? { providerId: input.providerId } : {}),
     ...(input.label !== undefined ? { label: input.label } : {}),
     ...(input.isDefault != null ? { isDefault: input.isDefault } : {}),
     ...(input.password !== undefined ? { password: input.password } : {}),

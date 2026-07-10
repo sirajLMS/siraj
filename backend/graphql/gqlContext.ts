@@ -24,6 +24,8 @@ export type BaseContext = {
   cookies?: ResponseCookies;
   role: UserRole;
   locale: string;
+  billingFxDisplayCurrency?: CurrencyCode | null;
+  billingFxDisplayCurrencyByUserId?: Map<string, CurrencyCode | null>;
 };
 
 export type AuthContexts = {

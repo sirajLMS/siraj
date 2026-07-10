@@ -1,9 +1,9 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
-  type RecurringScheduleDaySeedUpsertInput,
+  type RecurringScheduleDayUpsertInput,
   RecurringScheduleRepository,
-  type RecurringScheduleSeedUpsertInput,
+  type RecurringScheduleUpsertInput,
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { AppPermission, type IanaTimezone } from "@/backend/enum";
@@ -93,21 +93,21 @@ export namespace RecurringClassService {
   }
 
   export async function upsertManyRecurringSchedules(
-    inputs: readonly RecurringScheduleSeedUpsertInput[],
+    inputs: readonly RecurringScheduleUpsertInput[],
     tx?: DBTransaction
   ): Promise<RecurringScheduleEntity[]> {
-    return RecurringScheduleRepository.upsertManyForSeed(inputs, tx);
+    return RecurringScheduleRepository.upsertMany(inputs, tx);
   }
 
   export async function findScheduleDaysByKeys(
-    keys: readonly { recurringScheduleId: string; dayOfWeek: RecurringScheduleDaySeedUpsertInput["dayOfWeek"] }[],
+    keys: readonly { recurringScheduleId: string; dayOfWeek: RecurringScheduleDayUpsertInput["dayOfWeek"] }[],
     tx?: DBTransaction
   ): Promise<Map<ScheduleDayKey, RecurringScheduleDayEntity>> {
     return RecurringScheduleRepository.findDaysByKeys(keys, tx);
   }
 
   export async function upsertManyScheduleDays(
-    inputs: readonly RecurringScheduleDaySeedUpsertInput[],
+    inputs: readonly RecurringScheduleDayUpsertInput[],
     tx?: DBTransaction
   ): Promise<RecurringScheduleDayEntity[]> {
     return RecurringScheduleRepository.upsertManyDays(inputs, tx);

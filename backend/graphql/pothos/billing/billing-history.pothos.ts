@@ -3,6 +3,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   DisplayAmountPothosObject,
   resolveDisplayAmountField,
+  setBillingFxDisplayCurrencyForSubject,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
   CurrencyCodePothosObject,
@@ -59,7 +60,8 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx),
+      resolve: (parent, _args, ctx) =>
+        resolveDisplayAmountField(parent, ctx, "amount", "currency", parent.parentUserId),
     }),
   }),
 });
@@ -164,11 +166,13 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
+      const callerUserId = await requireAuth(ctx);
       const pagination = parsePaginationArgs(args.paginationArgs);
 
+      await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
+
       return BillingHistoryService.getParentInvoiceHistory(
-        userId,
+        callerUserId,
         args.parentId ?? null,
         args.userId ?? null,
         pagination,
@@ -189,7 +193,12 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
       const userId = await requireAuth(ctx);
       const pagination = parsePaginationArgs(args.paginationArgs);
 
-      return BillingHistoryService.getAdminInvoices(userId, pagination, ctx.locale);
+      const result = await BillingHistoryService.getAdminInvoices(userId, pagination, ctx.locale);
+      await populateBillingFxDisplayCurrencyByUserId(
+        ctx,
+        result.rows.map(row => row.parentUserId)
+      );
+      return result;
     },
   })
 );
@@ -226,6 +235,9 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
     },
     resolve: async (_root, args, ctx) => {
       const callerUserId = await requireAuth(ctx);
+
+      await setBillingFxDisplayCurrencyForSubject(ctx, args.userId ?? null, callerUserId);
+
       return BillingHistoryService.getParentBillingSummary(
         callerUserId,
         args.parentId ?? null,

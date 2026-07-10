@@ -5259,6 +5259,7 @@ export type UserMeetingConfigUpdateInput = {
   isDefault: InputMaybe<Scalars['Boolean']['input']>;
   label: InputMaybe<Scalars['String']['input']>;
   password: InputMaybe<Scalars['String']['input']>;
+  providerId: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserOverride = {

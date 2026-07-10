@@ -2,7 +2,7 @@ import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/see
 import type { CurrencyCode } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
 import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
-import type { SeedExchangeAuditLogInput, UserSelectType } from "@/backend/types";
+import type { ExchangeAuditLogInput, UserSelectType } from "@/backend/types";
 
 type ExchangeRateRow = {
   fromCurrency: CurrencyCode;
@@ -21,7 +21,7 @@ export async function seedOrGet(ratesList: ExchangeRateRow[], usersList: UserSel
 
   const adminUser = findAdminUser(usersList);
   const ratesToSeed = ratesList.slice(0, seedConfig.profile === "standard" ? ratesList.length : 3);
-  const inputs: SeedExchangeAuditLogInput[] = ratesToSeed.map(rate => ({
+  const inputs: ExchangeAuditLogInput[] = ratesToSeed.map(rate => ({
     fromCurrency: rate.fromCurrency,
     toCurrency: rate.toCurrency,
     oldRate: null,

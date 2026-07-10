@@ -434,12 +434,12 @@ export namespace SuggestionService {
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
-  export async function createManySeedSuggestions(
-    inputs: Parameters<typeof SuggestionRepository.createSeedSuggestion>[0][]
+  export async function createManySuggestions(
+    inputs: Parameters<typeof SuggestionRepository.insertSuggestion>[0][]
   ): Promise<SuggestionSelectType[]> {
     const results: SuggestionSelectType[] = [];
     for (const input of inputs) {
-      results.push(await SuggestionRepository.createSeedSuggestion(input));
+      results.push(await SuggestionRepository.insertSuggestion(input));
     }
     return results;
   }

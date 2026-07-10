@@ -18,6 +18,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { InvoicePaymentSubmissionQuery, InvoicePaymentsQuery } from "@/frontend/graphql/generated/gql/operations";
 import {
   approvePaymentProofMutationDocument,
   invoicePaymentSubmissionQueryDocument,
@@ -33,6 +34,19 @@ export type InvoicePaymentDetailsDialogProps = {
   readonly invoiceId: string | null;
   readonly canManage?: boolean;
   readonly onSuccess?: (action: "approve" | "reject") => void;
+};
+
+type SubmissionRow = NonNullable<InvoicePaymentSubmissionQuery["invoicePaymentSubmission"]>;
+type PaymentRow = NonNullable<NonNullable<InvoicePaymentsQuery["invoicePayments"]>[number]>;
+
+type FxMessages = {
+  readonly convertedAmount: (values: {
+    lockedAmount: string;
+    lockedCurrency: string;
+    convertedApprox: string;
+    displayCurrency: string;
+  }) => string;
+  readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
 };
 
 function formatPaymentDate(dateStr: string | null, locale: string): string {
@@ -51,7 +65,203 @@ function proofFileUrl(filePath: string): string {
 }
 
 function isImageMimeType(mimeType: string | null | undefined): boolean {
-  return mimeType != null && mimeType.startsWith("image/");
+  return mimeType?.startsWith("image/");
+}
+
+function PaymentProofPreview({
+  filePath,
+  mimeType,
+  noProofLabel,
+  viewProofLabel,
+}: {
+  readonly filePath: string | null | undefined;
+  readonly mimeType: string | null | undefined;
+  readonly noProofLabel: string;
+  readonly viewProofLabel: string;
+}): React.ReactNode {
+  if (!filePath) {
+    return (
+      <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+        {noProofLabel}
+      </Typography>
+    );
+  }
+
+  const url = proofFileUrl(filePath);
+
+  if (isImageMimeType(mimeType)) {
+    return (
+      <Box
+        component="img"
+        src={url}
+        alt={viewProofLabel}
+        sx={{ maxWidth: "100%", maxHeight: 280, borderRadius: 1, border: 1, borderColor: "outlineVariant" }}
+      />
+    );
+  }
+
+  return (
+    <Link href={url} target="_blank" rel="noopener noreferrer" underline="hover">
+      {viewProofLabel}
+    </Link>
+  );
+}
+
+function SubmissionDetailsSection({
+  submission,
+  locale,
+  labels,
+}: {
+  readonly submission: SubmissionRow;
+  readonly locale: string;
+  readonly labels: {
+    readonly pending: string;
+    readonly submittedAt: string;
+    readonly noProof: string;
+    readonly viewProof: string;
+  };
+}): React.ReactNode {
+  return (
+    <Stack spacing={1.5}>
+      {submission.status === "pending" ? (
+        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          {labels.pending}
+        </Typography>
+      ) : null}
+      <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+        {labels.submittedAt}: {formatPaymentDate(submission.submittedAt ?? null, locale)}
+      </Typography>
+      <PaymentProofPreview
+        filePath={submission.filePath}
+        mimeType={submission.mimeType}
+        noProofLabel={labels.noProof}
+        viewProofLabel={labels.viewProof}
+      />
+      {submission.rejectionReason ? (
+        <Typography variant="bodyMd" sx={{ color: "error.main" }}>
+          {submission.rejectionReason}
+        </Typography>
+      ) : null}
+    </Stack>
+  );
+}
+
+function PaymentProofReviewActions({
+  labels,
+  actionError,
+  rejectionReason,
+  showRejectForm,
+  reviewBusy,
+  rejecting,
+  onRejectionReasonChange,
+  onShowRejectForm,
+  onCancelReject,
+  onApprove,
+  onReject,
+}: {
+  readonly labels: {
+    readonly reviewActions: string;
+    readonly rejectionReason: string;
+    readonly rejectionReasonPlaceholder: string;
+    readonly close: string;
+    readonly reject: string;
+    readonly rejecting: string;
+    readonly approve: string;
+  };
+  readonly actionError: string | null;
+  readonly rejectionReason: string;
+  readonly showRejectForm: boolean;
+  readonly reviewBusy: boolean;
+  readonly rejecting: boolean;
+  readonly onRejectionReasonChange: (value: string) => void;
+  readonly onShowRejectForm: () => void;
+  readonly onCancelReject: () => void;
+  readonly onApprove: () => void;
+  readonly onReject: () => void;
+}): React.ReactNode {
+  return (
+    <Stack spacing={1.5}>
+      <Typography variant="titleLg">{labels.reviewActions}</Typography>
+      {actionError ? (
+        <Typography variant="bodyMd" sx={{ color: "error.main" }}>
+          {actionError}
+        </Typography>
+      ) : null}
+      {showRejectForm ? (
+        <TextField
+          label={labels.rejectionReason}
+          placeholder={labels.rejectionReasonPlaceholder}
+          value={rejectionReason}
+          onChange={event => {
+            onRejectionReasonChange(event.target.value);
+          }}
+          fullWidth
+          multiline
+          minRows={2}
+          disabled={reviewBusy}
+        />
+      ) : null}
+      <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
+        {showRejectForm ? (
+          <>
+            <Button onClick={onCancelReject} disabled={reviewBusy}>
+              {labels.close}
+            </Button>
+            <Button color="error" variant="contained" onClick={onReject} disabled={reviewBusy}>
+              {rejecting ? labels.rejecting : labels.reject}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button color="error" onClick={onShowRejectForm} disabled={reviewBusy}>
+              {labels.reject}
+            </Button>
+            <Button variant="contained" onClick={onApprove} disabled={reviewBusy}>
+              {labels.approve}
+            </Button>
+          </>
+        )}
+      </Stack>
+    </Stack>
+  );
+}
+
+function PaymentRecordsSection({
+  payments,
+  locale,
+  amountLabel,
+  dateLabel,
+  fxMessages,
+}: {
+  readonly payments: readonly PaymentRow[];
+  readonly locale: string;
+  readonly amountLabel: string;
+  readonly dateLabel: string;
+  readonly fxMessages: FxMessages;
+}): React.ReactNode {
+  return (
+    <Stack divider={<Divider />} spacing={2}>
+      {payments.map(payment => (
+        <Box key={payment.id ?? `${payment.paymentDate}-${payment.amount}`}>
+          <Stack spacing={1}>
+            <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+              {amountLabel}:{" "}
+              {formatCurrencyForDisplay(
+                payment.amount ?? "0",
+                payment.currency ?? CurrencyCode.Usd,
+                payment.displayAmount,
+                locale,
+                fxMessages
+              )}
+            </Typography>
+            <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+              {dateLabel}: {formatPaymentDate(payment.paymentDate ?? null, locale)}
+            </Typography>
+          </Stack>
+        </Box>
+      ))}
+    </Stack>
+  );
 }
 
 export function InvoicePaymentDetailsDialog({
@@ -106,15 +316,9 @@ export function InvoicePaymentDetailsDialog({
   const reviewBusy = approving || rejecting;
   const showReviewActions = canManage && submission?.status === "pending";
 
-  const fxMessages = {
-    convertedAmount: (values: {
-      lockedAmount: string;
-      lockedCurrency: string;
-      convertedApprox: string;
-      displayCurrency: string;
-    }) => tProfile("convertedAmount", values),
-    displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
-      tErrors("displayCurrencyFallback", values),
+  const fxMessages: FxMessages = {
+    convertedAmount: values => tProfile("convertedAmount", values),
+    displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
   };
 
   const handleApprove = async () => {
@@ -155,151 +359,72 @@ export function InvoicePaymentDetailsDialog({
     }
   };
 
-  const renderProofPreview = () => {
-    if (!submission?.filePath) {
-      return (
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t("noProof")}
-        </Typography>
-      );
-    }
-
-    const url = proofFileUrl(submission.filePath);
-
-    if (isImageMimeType(submission.mimeType)) {
-      return (
-        <Box
-          component="img"
-          src={url}
-          alt={t("viewProof")}
-          sx={{ maxWidth: "100%", maxHeight: 280, borderRadius: 1, border: 1, borderColor: "outlineVariant" }}
+  const dialogBody = loading ? (
+    <Stack sx={{ alignItems: "center", py: 3 }}>
+      <CircularProgress size={28} />
+    </Stack>
+  ) : (
+    <Stack spacing={2} sx={{ py: 1 }}>
+      {submission ? (
+        <SubmissionDetailsSection
+          submission={submission}
+          locale={locale}
+          labels={{
+            pending: t("pending"),
+            submittedAt: t("submittedAt"),
+            noProof: t("noProof"),
+            viewProof: t("viewProof"),
+          }}
         />
-      );
-    }
+      ) : null}
 
-    return (
-      <Link href={url} target="_blank" rel="noopener noreferrer" underline="hover">
-        {t("viewProof")}
-      </Link>
-    );
-  };
+      {showReviewActions ? (
+        <PaymentProofReviewActions
+          labels={{
+            reviewActions: t("reviewActions"),
+            rejectionReason: t("rejectionReason"),
+            rejectionReasonPlaceholder: t("rejectionReasonPlaceholder"),
+            close: t("close"),
+            reject: t("reject"),
+            rejecting: t("rejecting"),
+            approve: t("approve"),
+          }}
+          actionError={actionError}
+          rejectionReason={rejectionReason}
+          showRejectForm={showRejectForm}
+          reviewBusy={reviewBusy}
+          rejecting={rejecting}
+          onRejectionReasonChange={setRejectionReason}
+          onShowRejectForm={() => setShowRejectForm(true)}
+          onCancelReject={() => {
+            setShowRejectForm(false);
+            setRejectionReason("");
+          }}
+          onApprove={() => void handleApprove()}
+          onReject={() => void handleReject()}
+        />
+      ) : null}
+
+      {payments.length > 0 ? (
+        <PaymentRecordsSection
+          payments={payments}
+          locale={locale}
+          amountLabel={t("amount")}
+          dateLabel={t("date")}
+          fxMessages={fxMessages}
+        />
+      ) : !submission ? (
+        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          {t("empty")}
+        </Typography>
+      ) : null}
+    </Stack>
+  );
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{t("title")}</DialogTitle>
-      <DialogContent>
-        {loading ? (
-          <Stack sx={{ alignItems: "center", py: 3 }}>
-            <CircularProgress size={28} />
-          </Stack>
-        ) : (
-          <Stack spacing={2} sx={{ py: 1 }}>
-            {submission ? (
-              <Stack spacing={1.5}>
-                {submission.status === "pending" ? (
-                  <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-                    {t("pending")}
-                  </Typography>
-                ) : null}
-                <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
-                  {t("submittedAt")}: {formatPaymentDate(submission.submittedAt ?? null, locale)}
-                </Typography>
-                {renderProofPreview()}
-                {submission.rejectionReason ? (
-                  <Typography variant="bodyMd" sx={{ color: "error.main" }}>
-                    {submission.rejectionReason}
-                  </Typography>
-                ) : null}
-              </Stack>
-            ) : null}
-
-            {showReviewActions ? (
-              <Stack spacing={1.5}>
-                <Typography variant="titleLg">{t("reviewActions")}</Typography>
-                {actionError ? (
-                  <Typography variant="bodyMd" sx={{ color: "error.main" }}>
-                    {actionError}
-                  </Typography>
-                ) : null}
-                {showRejectForm ? (
-                  <TextField
-                    label={t("rejectionReason")}
-                    placeholder={t("rejectionReasonPlaceholder")}
-                    value={rejectionReason}
-                    onChange={event => {
-                      setRejectionReason(event.target.value);
-                    }}
-                    fullWidth
-                    multiline
-                    minRows={2}
-                    disabled={reviewBusy}
-                  />
-                ) : null}
-                <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
-                  {showRejectForm ? (
-                    <>
-                      <Button
-                        onClick={() => {
-                          setShowRejectForm(false);
-                          setRejectionReason("");
-                        }}
-                        disabled={reviewBusy}
-                      >
-                        {t("close")}
-                      </Button>
-                      <Button
-                        color="error"
-                        variant="contained"
-                        onClick={() => void handleReject()}
-                        disabled={reviewBusy}
-                      >
-                        {rejecting ? t("rejecting") : t("reject")}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button color="error" onClick={() => setShowRejectForm(true)} disabled={reviewBusy}>
-                        {t("reject")}
-                      </Button>
-                      <Button variant="contained" onClick={() => void handleApprove()} disabled={reviewBusy}>
-                        {t("approve")}
-                      </Button>
-                    </>
-                  )}
-                </Stack>
-              </Stack>
-            ) : null}
-
-            {payments.length > 0 ? (
-              <Stack divider={<Divider />} spacing={2}>
-                {payments.map(payment => (
-                  <Box key={payment.id ?? `${payment.paymentDate}-${payment.amount}`}>
-                    <Stack spacing={1}>
-                      <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
-                        {t("amount")}:{" "}
-                        {formatCurrencyForDisplay(
-                          payment.amount ?? "0",
-                          payment.currency ?? CurrencyCode.Usd,
-                          payment.displayAmount,
-                          locale,
-                          fxMessages
-                        )}
-                      </Typography>
-                      <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
-                        {t("date")}: {formatPaymentDate(payment.paymentDate ?? null, locale)}
-                      </Typography>
-                    </Stack>
-                  </Box>
-                ))}
-              </Stack>
-            ) : !submission ? (
-              <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-                {t("empty")}
-              </Typography>
-            ) : null}
-          </Stack>
-        )}
-      </DialogContent>
+      <DialogContent>{dialogBody}</DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={reviewBusy}>
           {t("close")}

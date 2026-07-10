@@ -9,12 +9,12 @@ import type {
   RecurringScheduleInsertInput,
 } from "@/backend/types";
 
-export type RecurringScheduleSeedUpsertInput = Omit<
+export type RecurringScheduleUpsertInput = Omit<
   RecurringScheduleInsertInput,
   "id" | "createdAt" | "updatedAt" | "deletedAt"
 > & { studentId: string };
 
-export type RecurringScheduleDaySeedUpsertInput = {
+export type RecurringScheduleDayUpsertInput = {
   recurringScheduleId: string;
   dayOfWeek: RecurringScheduleDayInsertInput["dayOfWeek"];
   startTime: string;
@@ -44,8 +44,8 @@ export namespace RecurringScheduleRepository {
       .where(inArray(recurringSchedules.studentId, [...studentIds]));
   }
 
-  export async function upsertManyForSeed(
-    inputs: readonly RecurringScheduleSeedUpsertInput[],
+  export async function upsertMany(
+    inputs: readonly RecurringScheduleUpsertInput[],
     tx?: DBTransaction
   ): Promise<RecurringScheduleEntity[]> {
     if (inputs.length === 0) return [];
@@ -117,7 +117,7 @@ export namespace RecurringScheduleRepository {
   }
 
   export async function upsertManyDays(
-    inputs: readonly RecurringScheduleDaySeedUpsertInput[],
+    inputs: readonly RecurringScheduleDayUpsertInput[],
     tx?: DBTransaction
   ): Promise<RecurringScheduleDayEntity[]> {
     if (inputs.length === 0) return [];
