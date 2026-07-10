@@ -14,7 +14,8 @@ export type StatusBadgeCategory =
   | "classInstance"
   | "sessionTracking"
   | "trackingStatus"
-  | "invoice";
+  | "invoice"
+  | "paymentMethod";
 
 interface StatusBadgeProps {
   readonly category: StatusBadgeCategory;
@@ -83,6 +84,13 @@ function resolveStatusPaletteKey(
         PENDING: "pending",
         UNPAID: "pending",
         OVERDUE: "blocked",
+      };
+      return map[status] ?? "pending";
+    }
+    case "paymentMethod": {
+      const map: Record<string, "active" | "pending"> = {
+        active: "active",
+        inactive: "pending",
       };
       return map[status] ?? "pending";
     }

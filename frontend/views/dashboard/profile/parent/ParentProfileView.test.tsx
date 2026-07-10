@@ -63,7 +63,12 @@ afterEach(() => {
 describe("ParentProfileView admin sections", () => {
   test("hides identity and billing sections for own scope", () => {
     renderWithWrapper(
-      <ParentProfileView parentData={parentOwnProfile} associatedStudents={associatedStudents} isAdminScope={false} />,
+      <ParentProfileView
+        parentData={parentOwnProfile}
+        associatedStudents={associatedStudents}
+        displayCurrency={null}
+        isAdminScope={false}
+      />,
       { locale: "en" }
     );
 
@@ -74,7 +79,12 @@ describe("ParentProfileView admin sections", () => {
 
   test("shows identity and billing sections for admin scope", () => {
     renderWithWrapper(
-      <ParentProfileView parentData={parentAdminProfile} associatedStudents={associatedStudents} isAdminScope={true} />,
+      <ParentProfileView
+        parentData={parentAdminProfile}
+        associatedStudents={associatedStudents}
+        displayCurrency={CurrencyCode.Sar}
+        isAdminScope={true}
+      />,
       { locale: "en" }
     );
 

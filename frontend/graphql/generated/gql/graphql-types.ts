@@ -1819,6 +1819,12 @@ export enum IanaTimezone {
   Utc = 'UTC'
 }
 
+export enum IdentifierKind {
+  Email = 'EMAIL',
+  EmailOrHandle = 'EMAIL_OR_HANDLE',
+  Handle = 'HANDLE'
+}
+
 export type ImpersonationStatus = {
   __typename?: 'ImpersonationStatus';
   actorUser: Maybe<User>;
@@ -2083,6 +2089,9 @@ export type Mutation = {
   createRecurringClass: Maybe<CreateRecurringClassResult>;
   /** Create a new student profile under an existing parent */
   createStudent: Maybe<StudentOnboardingResult>;
+  createSupportedMobileWallet: Maybe<SupportedMobileWallet>;
+  createSupportedOnlineAccount: Maybe<SupportedOnlineAccount>;
+  createSupportedPaymentLink: Maybe<SupportedPaymentLink>;
   /** Create a new teacher account with comprehensive profile */
   createTeacher: Maybe<TeacherOnboarding>;
   createTeacherImportantNote: Maybe<TeacherImportantNote>;
@@ -2091,7 +2100,11 @@ export type Mutation = {
   createTestGroupClass: Maybe<TestGroupClass>;
   createTestSuperAdmin: Maybe<TestSuperAdmin>;
   createUserMeetingConfig: Maybe<UserMeetingConfig>;
+  createUserPaymentMethod: Maybe<UserPaymentMethod>;
   deactivateParent: Maybe<DeactivateParentResult>;
+  deactivateSupportedMobileWallet: Maybe<SupportedMobileWallet>;
+  deactivateSupportedOnlineAccount: Maybe<SupportedOnlineAccount>;
+  deactivateSupportedPaymentLink: Maybe<SupportedPaymentLink>;
   /** Soft-deletes a book by marking it as deleted. */
   deleteBook: Maybe<Scalars['Boolean']['output']>;
   deleteClassCategory: Maybe<Scalars['Boolean']['output']>;
@@ -2112,6 +2125,7 @@ export type Mutation = {
   deleteSuggestion: Maybe<Scalars['Boolean']['output']>;
   deleteTeacherImportantNote: Maybe<Scalars['Boolean']['output']>;
   deleteUserMeetingConfig: Maybe<Scalars['Boolean']['output']>;
+  deleteUserPaymentMethod: Maybe<Scalars['Boolean']['output']>;
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
   detachSubjectResource: Maybe<Scalars['Boolean']['output']>;
@@ -2144,6 +2158,7 @@ export type Mutation = {
   revokePermissionGroupFromUser: Maybe<Scalars['Boolean']['output']>;
   sendPaymentReminder: Maybe<SendPaymentReminderResult>;
   setDefaultMeetingConfig: Maybe<UserMeetingConfig>;
+  setDefaultUserPaymentMethod: Maybe<UserPaymentMethod>;
   setStorageItemProtection: Maybe<FileOperationResult>;
   startImpersonation: Maybe<StartImpersonationResponse>;
   startPermissionGroupSimulation: Maybe<StartPermissionGroupSimulationResponse>;
@@ -2166,13 +2181,18 @@ export type Mutation = {
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
   updateSessionStatusStart: Maybe<ClassInstanceDetail>;
   updateStudentQuota: Maybe<EditQuotaResult>;
+  updateSupportedMobileWallet: Maybe<SupportedMobileWallet>;
+  updateSupportedOnlineAccount: Maybe<SupportedOnlineAccount>;
+  updateSupportedPaymentLink: Maybe<SupportedPaymentLink>;
   updateTeacherImportantNote: Maybe<TeacherImportantNote>;
   updateTeacherProfile: Maybe<TeacherProfileResult>;
   updateUserMeetingConfig: Maybe<UserMeetingConfig>;
   updateUserOverrides: Maybe<Scalars['Boolean']['output']>;
+  updateUserPaymentMethod: Maybe<UserPaymentMethod>;
   updateUserProfile: Maybe<UnifiedProfile>;
   /** Uploads a new learning resource to the academy library. */
   uploadLearningResource: Maybe<LearningResourceRow>;
+  verifyBankTransferPaymentMethod: Maybe<UserPaymentMethod>;
 };
 
 
@@ -2310,6 +2330,21 @@ export type MutationCreateStudentArgs = {
 };
 
 
+export type MutationCreateSupportedMobileWalletArgs = {
+  input: SupportedMobileWalletCreateInput;
+};
+
+
+export type MutationCreateSupportedOnlineAccountArgs = {
+  input: SupportedOnlineAccountCreateInput;
+};
+
+
+export type MutationCreateSupportedPaymentLinkArgs = {
+  input: SupportedPaymentLinkCreateInput;
+};
+
+
 export type MutationCreateTeacherArgs = {
   input: TeacherOnboardingInput;
 };
@@ -2347,8 +2382,28 @@ export type MutationCreateUserMeetingConfigArgs = {
 };
 
 
+export type MutationCreateUserPaymentMethodArgs = {
+  input: UserPaymentMethodCreateInput;
+};
+
+
 export type MutationDeactivateParentArgs = {
   parentId: Scalars['String']['input'];
+};
+
+
+export type MutationDeactivateSupportedMobileWalletArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeactivateSupportedOnlineAccountArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeactivateSupportedPaymentLinkArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2428,6 +2483,11 @@ export type MutationDeleteTeacherImportantNoteArgs = {
 
 
 export type MutationDeleteUserMeetingConfigArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteUserPaymentMethodArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2555,6 +2615,11 @@ export type MutationSetDefaultMeetingConfigArgs = {
 };
 
 
+export type MutationSetDefaultUserPaymentMethodArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationSetStorageItemProtectionArgs = {
   input: StorageItemProtectionUpdateInput;
 };
@@ -2659,6 +2724,24 @@ export type MutationUpdateStudentQuotaArgs = {
 };
 
 
+export type MutationUpdateSupportedMobileWalletArgs = {
+  id: Scalars['ID']['input'];
+  input: SupportedMobileWalletUpdateInput;
+};
+
+
+export type MutationUpdateSupportedOnlineAccountArgs = {
+  id: Scalars['ID']['input'];
+  input: SupportedOnlineAccountUpdateInput;
+};
+
+
+export type MutationUpdateSupportedPaymentLinkArgs = {
+  id: Scalars['ID']['input'];
+  input: SupportedPaymentLinkUpdateInput;
+};
+
+
 export type MutationUpdateTeacherImportantNoteArgs = {
   id: Scalars['ID']['input'];
   input: UpdateTeacherNoteInput;
@@ -2683,6 +2766,12 @@ export type MutationUpdateUserOverridesArgs = {
 };
 
 
+export type MutationUpdateUserPaymentMethodArgs = {
+  id: Scalars['ID']['input'];
+  input: UserPaymentMethodUpdateInput;
+};
+
+
 export type MutationUpdateUserProfileArgs = {
   input: UpdateUserProfileInput;
   userId: Scalars['String']['input'];
@@ -2691,6 +2780,11 @@ export type MutationUpdateUserProfileArgs = {
 
 export type MutationUploadLearningResourceArgs = {
   input: ResourceUploadInput;
+};
+
+
+export type MutationVerifyBankTransferPaymentMethodArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type NotificationAlertsResult = {
@@ -2709,12 +2803,12 @@ export enum NotificationChannel {
 }
 
 export enum NotificationEventType {
-  BankingDetailsChanged = 'BANKING_DETAILS_CHANGED',
   ClassReminder = 'CLASS_REMINDER',
   ComplaintResponse = 'COMPLAINT_RESPONSE',
   InvoiceGenerated = 'INVOICE_GENERATED',
   NewComplaint = 'NEW_COMPLAINT',
   NewSuggestion = 'NEW_SUGGESTION',
+  PaymentMethodChanged = 'PAYMENT_METHOD_CHANGED',
   SuggestionAcknowledged = 'SUGGESTION_ACKNOWLEDGED',
   SuggestionDuplicateMarked = 'SUGGESTION_DUPLICATE_MARKED'
 }
@@ -2790,7 +2884,6 @@ export type ParentAdminProfileUpdateInput = {
   feeAmount: InputMaybe<Scalars['String']['input']>;
   invoiceType: InputMaybe<Scalars['String']['input']>;
   nationality: InputMaybe<Scalars['String']['input']>;
-  paymentMethod: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
   timezone: InputMaybe<IanaTimezone>;
   twitter: InputMaybe<Scalars['String']['input']>;
@@ -2964,11 +3057,11 @@ export type ParentOnboardingInput = {
   email: Scalars['Email']['input'];
   facebook: InputMaybe<Scalars['String']['input']>;
   feeAmount: InputMaybe<Scalars['String']['input']>;
+  initialPayinMethod: InputMaybe<UserPaymentMethodInitialInput>;
   invoiceType: InputMaybe<InvoiceType>;
   name: Scalars['String']['input'];
   nationality: InputMaybe<Scalars['String']['input']>;
   password: Scalars['String']['input'];
-  paymentMethod: InputMaybe<PaymentMethod>;
   phone: InputMaybe<Scalars['String']['input']>;
   timezone: IanaTimezone;
   twitter: InputMaybe<Scalars['String']['input']>;
@@ -3018,7 +3111,6 @@ export type ParentProfile = {
   invoiceType: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   nationality: Maybe<Scalars['String']['output']>;
-  paymentMethod: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
   timezone: Maybe<IanaTimezone>;
@@ -3056,9 +3148,75 @@ export type PartialStudentUpdateInput = {
   status: InputMaybe<StudentStatus>;
 };
 
-export enum PaymentMethod {
-  BankAccount = 'BANK_ACCOUNT',
-  Paypal = 'PAYPAL'
+export enum PaymentDirection {
+  Both = 'BOTH',
+  Payin = 'PAYIN',
+  Payout = 'PAYOUT'
+}
+
+export type PaymentMethodCatalogSnapshot = {
+  __typename?: 'PaymentMethodCatalogSnapshot';
+  catalogId: Maybe<Scalars['String']['output']>;
+  catalogName: Maybe<Scalars['LocalizedString']['output']>;
+  catalogSlug: Maybe<Scalars['String']['output']>;
+};
+
+export type PaymentMethodDefaults = {
+  __typename?: 'PaymentMethodDefaults';
+  payinDefault: Maybe<UserPaymentMethod>;
+  payoutDefault: Maybe<UserPaymentMethod>;
+};
+
+export type PaymentMethodDetails = {
+  __typename?: 'PaymentMethodDetails';
+  accountNumber: Maybe<Scalars['String']['output']>;
+  bankName: Maybe<Scalars['String']['output']>;
+  beneficiaryName: Maybe<Scalars['String']['output']>;
+  iban: Maybe<Scalars['String']['output']>;
+  identifier: Maybe<Scalars['String']['output']>;
+  note: Maybe<Scalars['String']['output']>;
+  onlineAccountId: Maybe<Scalars['String']['output']>;
+  paymentLinkId: Maybe<Scalars['String']['output']>;
+  phone: Maybe<Scalars['String']['output']>;
+  routingNumber: Maybe<Scalars['String']['output']>;
+  swiftBic: Maybe<Scalars['String']['output']>;
+  url: Maybe<Scalars['String']['output']>;
+  walletId: Maybe<Scalars['String']['output']>;
+};
+
+export type PaymentMethodDetailsInput = {
+  accountNumber: InputMaybe<Scalars['String']['input']>;
+  bankName: InputMaybe<Scalars['String']['input']>;
+  beneficiaryName: InputMaybe<Scalars['String']['input']>;
+  iban: InputMaybe<Scalars['String']['input']>;
+  identifier: InputMaybe<Scalars['String']['input']>;
+  note: InputMaybe<Scalars['String']['input']>;
+  onlineAccountId: InputMaybe<Scalars['String']['input']>;
+  paymentLinkId: InputMaybe<Scalars['String']['input']>;
+  phone: InputMaybe<Scalars['String']['input']>;
+  routingNumber: InputMaybe<Scalars['String']['input']>;
+  swiftBic: InputMaybe<Scalars['String']['input']>;
+  url: InputMaybe<Scalars['String']['input']>;
+  walletId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PaymentMethodTransactionSnapshot = {
+  __typename?: 'PaymentMethodTransactionSnapshot';
+  catalog: Maybe<PaymentMethodCatalogSnapshot>;
+  details: Maybe<PaymentMethodDetails>;
+  direction: Maybe<PaymentDirection>;
+  label: Maybe<Scalars['String']['output']>;
+  snapshottedAt: Maybe<Scalars['String']['output']>;
+  type: Maybe<PaymentMethodType>;
+  userPaymentMethodId: Maybe<Scalars['String']['output']>;
+};
+
+export enum PaymentMethodType {
+  BankTransfer = 'BANK_TRANSFER',
+  Cash = 'CASH',
+  MobileWallet = 'MOBILE_WALLET',
+  OnlineAccount = 'ONLINE_ACCOUNT',
+  PaymentLink = 'PAYMENT_LINK'
 }
 
 export type Permission = {
@@ -3198,6 +3356,9 @@ export type Query = {
   students: StudentsWithFiltersResponse;
   /** Returns contributor statistics for the suggestion social proof display. */
   suggestionContributorStats: Maybe<SuggestionContributorStats>;
+  supportedMobileWallets: Maybe<Array<SupportedMobileWallet>>;
+  supportedOnlineAccounts: Maybe<Array<SupportedOnlineAccount>>;
+  supportedPaymentLinks: Maybe<Array<SupportedPaymentLink>>;
   teacherAssignedClasses: Maybe<TeacherAssignedClassesResult>;
   teacherAssignedStudents: Maybe<TeacherAssignedStudentsResult>;
   teacherDashboard: Maybe<TeacherDashboard>;
@@ -3216,6 +3377,8 @@ export type Query = {
   userMeetingConfigs: Maybe<Array<UserMeetingConfig>>;
   /** List overrides for a user. */
   userOverrides: Maybe<Array<UserOverride>>;
+  userPaymentMethod: Maybe<UserPaymentMethod>;
+  userPaymentMethods: Maybe<Array<UserPaymentMethod>>;
   /** Return group IDs assigned to a user. */
   userPermissionGroups: Maybe<Array<Scalars['String']['output']>>;
   users: Maybe<Array<User>>;
@@ -3504,6 +3667,25 @@ export type QuerySuggestionContributorStatsArgs = {
 };
 
 
+export type QuerySupportedMobileWalletsArgs = {
+  activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
+  countryCode: InputMaybe<CountryCode>;
+  direction: InputMaybe<PaymentDirection>;
+};
+
+
+export type QuerySupportedOnlineAccountsArgs = {
+  activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
+  direction: InputMaybe<PaymentDirection>;
+};
+
+
+export type QuerySupportedPaymentLinksArgs = {
+  activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
+  direction: InputMaybe<PaymentDirection>;
+};
+
+
 export type QueryTeacherDashboardArgs = {
   date: Scalars['String']['input'];
   pagination: InputMaybe<PaginationArgs>;
@@ -3567,6 +3749,17 @@ export type QueryUserMeetingConfigsArgs = {
 
 export type QueryUserOverridesArgs = {
   userId: Scalars['String']['input'];
+};
+
+
+export type QueryUserPaymentMethodArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryUserPaymentMethodsArgs = {
+  direction: InputMaybe<PaymentDirection>;
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -4149,6 +4342,129 @@ export type SupportRequestResult = {
   success: Maybe<Scalars['Boolean']['output']>;
 };
 
+export type SupportedMobileWallet = {
+  __typename?: 'SupportedMobileWallet';
+  countryCode: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  currencyCode: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['LocalizedString']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  instructions: Maybe<Scalars['LocalizedString']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  logoUrl: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['LocalizedString']['output']>;
+  phoneRegion: Maybe<Scalars['String']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+  supportedDirections: Maybe<PaymentDirection>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SupportedMobileWalletCreateInput = {
+  countryCode: InputMaybe<CountryCode>;
+  currencyCode: InputMaybe<CurrencyCode>;
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
+  instructions: InputMaybe<Scalars['LocalizedString']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  logoUrl: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['LocalizedString']['input'];
+  phoneRegion: InputMaybe<Scalars['String']['input']>;
+  slug: Scalars['String']['input'];
+  supportedDirections: InputMaybe<PaymentDirection>;
+};
+
+export type SupportedMobileWalletUpdateInput = {
+  countryCode: InputMaybe<CountryCode>;
+  currencyCode: InputMaybe<CurrencyCode>;
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
+  instructions: InputMaybe<Scalars['LocalizedString']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  logoUrl: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['LocalizedString']['input']>;
+  phoneRegion: InputMaybe<Scalars['String']['input']>;
+  slug: InputMaybe<Scalars['String']['input']>;
+  supportedDirections: InputMaybe<PaymentDirection>;
+};
+
+export type SupportedOnlineAccount = {
+  __typename?: 'SupportedOnlineAccount';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  description: Maybe<Scalars['LocalizedString']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  identifierKind: Maybe<IdentifierKind>;
+  identifierLabel: Maybe<Scalars['LocalizedString']['output']>;
+  instructions: Maybe<Scalars['LocalizedString']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  logoUrl: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['LocalizedString']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+  supportedDirections: Maybe<PaymentDirection>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SupportedOnlineAccountCreateInput = {
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
+  identifierKind: IdentifierKind;
+  identifierLabel: InputMaybe<Scalars['LocalizedString']['input']>;
+  instructions: InputMaybe<Scalars['LocalizedString']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  logoUrl: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['LocalizedString']['input'];
+  slug: Scalars['String']['input'];
+  supportedDirections: InputMaybe<PaymentDirection>;
+};
+
+export type SupportedOnlineAccountUpdateInput = {
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
+  identifierKind: InputMaybe<IdentifierKind>;
+  identifierLabel: InputMaybe<Scalars['LocalizedString']['input']>;
+  instructions: InputMaybe<Scalars['LocalizedString']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  logoUrl: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['LocalizedString']['input']>;
+  slug: InputMaybe<Scalars['String']['input']>;
+  supportedDirections: InputMaybe<PaymentDirection>;
+};
+
+export type SupportedPaymentLink = {
+  __typename?: 'SupportedPaymentLink';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  description: Maybe<Scalars['LocalizedString']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  instructions: Maybe<Scalars['LocalizedString']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  logoUrl: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['LocalizedString']['output']>;
+  slug: Maybe<Scalars['String']['output']>;
+  supportedDirections: Maybe<PaymentDirection>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  urlAllowlist: Maybe<Array<Scalars['String']['output']>>;
+  urlExample: Maybe<Scalars['String']['output']>;
+};
+
+export type SupportedPaymentLinkCreateInput = {
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
+  instructions: InputMaybe<Scalars['LocalizedString']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  logoUrl: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['LocalizedString']['input'];
+  slug: Scalars['String']['input'];
+  supportedDirections: InputMaybe<PaymentDirection>;
+  urlAllowlist: Array<Scalars['String']['input']>;
+  urlExample: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SupportedPaymentLinkUpdateInput = {
+  description: InputMaybe<Scalars['LocalizedString']['input']>;
+  instructions: InputMaybe<Scalars['LocalizedString']['input']>;
+  isActive: InputMaybe<Scalars['Boolean']['input']>;
+  logoUrl: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['LocalizedString']['input']>;
+  slug: InputMaybe<Scalars['String']['input']>;
+  supportedDirections: InputMaybe<PaymentDirection>;
+  urlAllowlist: InputMaybe<Array<Scalars['String']['input']>>;
+  urlExample: InputMaybe<Scalars['String']['input']>;
+};
+
 export type SystemAlert = {
   __typename?: 'SystemAlert';
   body: Maybe<Scalars['String']['output']>;
@@ -4330,14 +4646,8 @@ export type TeacherOnboarding = {
 
 /** Input for creating a new teacher account with comprehensive profile */
 export type TeacherOnboardingInput = {
-  /** Bank account number */
-  accountNumber: InputMaybe<Scalars['String']['input']>;
   /** Teacher address */
   address: InputMaybe<Scalars['String']['input']>;
-  /** Bank name */
-  bankName: InputMaybe<Scalars['String']['input']>;
-  /** Banking beneficiary name */
-  beneficiaryName: InputMaybe<Scalars['String']['input']>;
   /** Teacher country code */
   countryCode: InputMaybe<CountryCode>;
   /** Teacher date of birth (ISO date string) */
@@ -4348,8 +4658,8 @@ export type TeacherOnboardingInput = {
   gender: InputMaybe<Gender>;
   /** Teacher hourly rate */
   hourlyRate: InputMaybe<Scalars['String']['input']>;
-  /** IBAN */
-  iban: InputMaybe<Scalars['String']['input']>;
+  /** Optional initial payout payment method for the teacher */
+  initialPayoutMethod: InputMaybe<UserPaymentMethodInitialInput>;
   /** Teacher full name */
   name: Scalars['String']['input'];
   /** Teacher national ID (encrypted) */
@@ -4364,10 +4674,6 @@ export type TeacherOnboardingInput = {
   qualifications: InputMaybe<Scalars['String']['input']>;
   /** Currency for hourly rate */
   rateCurrency: InputMaybe<CurrencyCode>;
-  /** Bank routing number */
-  routingNumber: InputMaybe<Scalars['String']['input']>;
-  /** SWIFT/BIC code */
-  swiftBic: InputMaybe<Scalars['String']['input']>;
   timezone: IanaTimezone;
 };
 
@@ -4377,7 +4683,6 @@ export type TeacherOwnProfile = {
   hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
-  paymentMethod: Maybe<PaymentMethod>;
   phone: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<CurrencyCode>;
   timezone: Maybe<IanaTimezone>;
@@ -4399,7 +4704,6 @@ export type TeacherProfileResult = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   nationalId: Maybe<Scalars['String']['output']>;
-  paymentMethod: Maybe<PaymentMethod>;
   phone: Maybe<Scalars['String']['output']>;
   qualifications: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<CurrencyCode>;
@@ -4416,7 +4720,6 @@ export type TeacherProfileUpdateInput = {
   gender: InputMaybe<Gender>;
   hourlyRate: InputMaybe<Scalars['String']['input']>;
   nationalId: InputMaybe<Scalars['String']['input']>;
-  paymentMethod: InputMaybe<PaymentMethod>;
   phone: InputMaybe<Scalars['String']['input']>;
   qualifications: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<CurrencyCode>;
@@ -4492,6 +4795,8 @@ export type UnifiedProfile = {
   parentAdminProfile: Maybe<ParentProfile>;
   parentId: Maybe<Scalars['String']['output']>;
   parentOwnProfile: Maybe<ParentOwnProfile>;
+  paymentMethodDefaults: Maybe<PaymentMethodDefaults>;
+  paymentMethods: Maybe<Array<UserPaymentMethod>>;
   scope: Maybe<ProfileScope>;
   staffPermissionGroups: Maybe<Array<StaffPermissionGroup>>;
   staffPermissionOverrides: Maybe<Array<StaffPermissionOverride>>;
@@ -4635,6 +4940,45 @@ export type UserOverride = {
 export type UserOverrideInput = {
   permissionId: Scalars['String']['input'];
   state: OverrideState;
+};
+
+export type UserPaymentMethod = {
+  __typename?: 'UserPaymentMethod';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  details: Maybe<PaymentMethodDetails>;
+  direction: Maybe<PaymentDirection>;
+  id: Maybe<Scalars['String']['output']>;
+  isDefault: Maybe<Scalars['Boolean']['output']>;
+  label: Maybe<Scalars['String']['output']>;
+  type: Maybe<PaymentMethodType>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+  verifiedAt: Maybe<Scalars['DateTime']['output']>;
+  verifiedByUserId: Maybe<Scalars['String']['output']>;
+};
+
+export type UserPaymentMethodCreateInput = {
+  details: PaymentMethodDetailsInput;
+  direction: PaymentDirection;
+  isDefault: InputMaybe<Scalars['Boolean']['input']>;
+  label: InputMaybe<Scalars['String']['input']>;
+  type: PaymentMethodType;
+  userId: Scalars['String']['input'];
+};
+
+export type UserPaymentMethodInitialInput = {
+  details: PaymentMethodDetailsInput;
+  direction: PaymentDirection;
+  isDefault: InputMaybe<Scalars['Boolean']['input']>;
+  label: InputMaybe<Scalars['String']['input']>;
+  type: PaymentMethodType;
+};
+
+export type UserPaymentMethodUpdateInput = {
+  details: InputMaybe<PaymentMethodDetailsInput>;
+  direction: InputMaybe<PaymentDirection>;
+  isDefault: InputMaybe<Scalars['Boolean']['input']>;
+  label: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WeeklyScheduleClass = {

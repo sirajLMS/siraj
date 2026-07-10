@@ -2,14 +2,24 @@
 
 import { Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, UseFormRegister } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { SectionPanel, UserAvatar } from "@/frontend/components/ui";
-import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
+import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
+import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
 import {
   type ParentViewData,
   toDisplayValue,
 } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
+
+type ParentAccountFormFields = {
+  name: string;
+  email: string;
+  displayCurrency?: CurrencyCode | null;
+};
 
 type AccountParentData = Pick<ParentViewData, "name" | "email">;
 
@@ -18,12 +28,14 @@ type AccountSectionProps =
       readonly mode: "view";
       readonly parentData: AccountParentData;
       readonly avatarUrl?: string | null;
+      readonly displayCurrency: CurrencyCode | null | undefined;
     }
   | {
       readonly mode: "edit";
       readonly parentData: AccountParentData;
       readonly avatarUrl?: string | null;
-      readonly register: UseFormRegister<ParentAdminEditFormData>;
+      readonly register: UseFormRegister<ParentAccountFormFields>;
+      readonly control: Control<ParentAccountFormFields>;
     };
 
 export function AccountSection(props: AccountSectionProps) {
@@ -43,6 +55,26 @@ export function AccountSection(props: AccountSectionProps) {
             type="email"
             {...props.register("email")}
           />
+          <Controller
+            name="displayCurrency"
+            control={props.control}
+            render={({ field, fieldState }) => {
+              const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
+              return (
+                <CurrencySelect
+                  currency={option}
+                  setCurrencyAction={selected => {
+                    field.onChange(selected.code);
+                  }}
+                  onBlurAction={field.onBlur}
+                  label={t("fields.displayCurrency")}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  fullWidth
+                />
+              );
+            }}
+          />
         </Stack>
       </SectionPanel>
     );
@@ -54,6 +86,10 @@ export function AccountSection(props: AccountSectionProps) {
         <UserAvatar src={props.avatarUrl} label={props.parentData.name ?? t("fields.fullName")} size={64} />
         <InfoField label={t("fields.fullName")} value={toDisplayValue(props.parentData.name, tc("notSet"))} />
         <InfoField label={t("fields.primaryEmail")} value={toDisplayValue(props.parentData.email, tc("notSet"))} />
+        <InfoField
+          label={t("fields.displayCurrency")}
+          value={<CurrencyDisplay code={props.displayCurrency} fallback={tc("notSet")} />}
+        />
       </Stack>
     </SectionPanel>
   );

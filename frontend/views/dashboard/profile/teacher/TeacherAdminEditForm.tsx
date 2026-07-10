@@ -43,8 +43,8 @@ export function TeacherAdminEditForm({
       timezone: "",
       hourlyRate: "",
       rateCurrency: undefined,
-      paymentMethod: null,
       status: AccountStatus.Activated,
+      displayCurrency: null,
     },
   });
 
@@ -61,8 +61,8 @@ export function TeacherAdminEditForm({
       timezone: teacherData.timezone ?? "",
       hourlyRate: teacherData.hourlyRate ?? "",
       rateCurrency: teacherData.rateCurrency ?? undefined,
-      paymentMethod: teacherData.paymentMethod ?? null,
       status: teacherData.status ?? AccountStatus.Activated,
+      displayCurrency: teacherData.displayCurrency ?? null,
     });
   }, [form, teacherData]);
 
@@ -88,6 +88,7 @@ export function TeacherAdminEditForm({
             teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
             avatarUrl={avatarUrl}
             register={form.register}
+            control={form.control}
           />
           <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
           <CompensationSection mode="edit" register={form.register} control={form.control} />

@@ -24,13 +24,13 @@ import {
   OrderSortDirection,
   OverrideState,
   ParentStatus,
-  PaymentMethod,
   ProfileAudience,
   ProfileMode,
   ProfileScope,
   RescheduleDateLabel,
   StudentStatus,
 } from "@/backend/enum";
+import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
@@ -70,8 +70,16 @@ export const InvoiceTypePothosObject = gqlSchemaBuilder.enumType(InvoiceType, {
   name: "InvoiceType",
 });
 
-export const PaymentMethodPothosObject = gqlSchemaBuilder.enumType(PaymentMethod, {
-  name: "PaymentMethod",
+export const PaymentMethodTypePothosEnum = gqlSchemaBuilder.enumType(PaymentMethodType, {
+  name: "PaymentMethodType",
+});
+
+export const PaymentDirectionPothosEnum = gqlSchemaBuilder.enumType(PaymentDirection, {
+  name: "PaymentDirection",
+});
+
+export const IdentifierKindPothosEnum = gqlSchemaBuilder.enumType(IdentifierKind, {
+  name: "IdentifierKind",
 });
 
 export const ClassOutcomePothosObject = gqlSchemaBuilder.enumType(ClassOutcome, {

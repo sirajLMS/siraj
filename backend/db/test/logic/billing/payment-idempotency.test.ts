@@ -6,7 +6,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { invoices, parents, payments, students, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
+import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { InvoiceInsertType, PaymentInsertType } from "@/backend/types";
+import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function createTestParent(args: { tx: DBTransaction; suffix: string; now: Date }) {
@@ -102,12 +104,22 @@ describe("Payment Idempotency", () => {
 
       // 4. Insert first payment record
       const idempotencyKey = `idemp-${uniqueSuffix}`;
+      const paymentMethodSnapshot: PaymentMethodTransactionSnapshot = {
+        userPaymentMethodId: null,
+        type: PaymentMethodType.PAYMENT_LINK,
+        direction: PaymentDirection.PAYIN,
+        label: "PayPal",
+        details: { url: "https://paypal.me/test" },
+        catalog: null,
+        snapshottedAt: now.toISOString(),
+      };
       const paymentInput1: PaymentInsertType = {
         invoiceId: invoiceRecord.id,
         amount: "100.00",
         currency: CurrencyCode.USD,
         paymentDate: now,
-        paymentMethod: "PAYPAL",
+        paymentMethodType: PaymentMethodType.PAYMENT_LINK,
+        paymentMethodSnapshot,
         idempotencyKey,
         createdAt: now,
         updatedAt: now,
@@ -121,7 +133,8 @@ describe("Payment Idempotency", () => {
         amount: "100.00",
         currency: CurrencyCode.USD,
         paymentDate: now,
-        paymentMethod: "PAYPAL",
+        paymentMethodType: PaymentMethodType.PAYMENT_LINK,
+        paymentMethodSnapshot,
         idempotencyKey,
         createdAt: now,
         updatedAt: now,

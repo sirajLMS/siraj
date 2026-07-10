@@ -5,8 +5,8 @@ import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/b
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
 
 export interface ParentOnboardingInput {

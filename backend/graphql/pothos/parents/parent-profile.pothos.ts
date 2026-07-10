@@ -25,7 +25,6 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     twitter: t.exposeString("twitter", { nullable: true }),
     invoiceType: t.exposeString("invoiceType", { nullable: true }),
     feeAmount: t.exposeString("feeAmount", { nullable: true }),
-    paymentMethod: t.exposeString("paymentMethod", { nullable: true }),
     currency: t.expose("currency", { type: CurrencyCodePothosObject, nullable: true }),
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),

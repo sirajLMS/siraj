@@ -360,6 +360,7 @@ const en: MessageSchema = {
         status: "Account Status",
         statusActive: "Active",
         statusInactive: "Inactive",
+        displayCurrency: "Display Currency",
       },
       permissions: {
         inheritedGroups: "Permission Groups",

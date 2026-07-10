@@ -137,6 +137,19 @@ export namespace PaymentMethodService {
     return buildMaskedPaymentMethods(filtered, revealSensitive);
   }
 
+  export async function getUserPaymentMethod(
+    actorUserId: string,
+    id: string,
+    locale?: string
+  ): Promise<UserPaymentMethodReturnType | null> {
+    const existing = await UserPaymentMethodRepository.getById(id);
+    if (!existing) {
+      return null;
+    }
+    const methods = await listUserPaymentMethods(actorUserId, existing.userId, undefined, locale);
+    return methods.find(method => method.id === id) ?? null;
+  }
+
   export async function listForProfile(
     actorUserId: string,
     targetUserId: string,

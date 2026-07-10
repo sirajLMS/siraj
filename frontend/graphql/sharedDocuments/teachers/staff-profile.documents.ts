@@ -22,7 +22,6 @@ export const teacherProfileForEditQueryDocument: TypedDocumentNode<
       rateCurrency
       status
       updatedAt
-      paymentMethod
       totalClasses
       avgEngagementScore
     }
@@ -49,7 +48,6 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
       rateCurrency
       status
       updatedAt
-      paymentMethod
       totalClasses
       avgEngagementScore
     }

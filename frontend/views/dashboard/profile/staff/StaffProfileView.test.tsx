@@ -22,7 +22,9 @@ afterEach(() => {
 
 describe("StaffProfileView", () => {
   test("shows contact information for own scope", () => {
-    renderWithWrapper(<StaffProfileView staffData={staffProfile} isAdminScope={false} />, { locale: "en" });
+    renderWithWrapper(<StaffProfileView staffData={staffProfile} displayCurrency={null} isAdminScope={false} />, {
+      locale: "en",
+    });
 
     expect(screen.getByText("Contact Information")).toBeTruthy();
     expect(screen.getByText("+1 (555) 123-4567")).toBeTruthy();
@@ -31,7 +33,9 @@ describe("StaffProfileView", () => {
   });
 
   test("shows admin banner and account status for admin scope", () => {
-    renderWithWrapper(<StaffProfileView staffData={staffProfile} isAdminScope={true} />, { locale: "en" });
+    renderWithWrapper(<StaffProfileView staffData={staffProfile} displayCurrency={null} isAdminScope={true} />, {
+      locale: "en",
+    });
 
     expect(screen.getByText("Administrative view: status and permissions are visible.")).toBeTruthy();
     expect(screen.getByText("Account Information")).toBeTruthy();

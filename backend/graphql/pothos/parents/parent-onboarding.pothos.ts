@@ -1,10 +1,10 @@
-import type { CurrencyCode, InvoiceType, PaymentMethod } from "@/backend/enum";
+import type { CurrencyCode, InvoiceType } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { UserPaymentMethodInitialInputPothos, type UserPaymentMethodInitialGqlInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   CurrencyCodePothosObject,
   IanaTimezonePothosObject,
   InvoiceTypePothosObject,
-  PaymentMethodPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { safeParseCurrencyCode } from "@/backend/lib/currency.validation";
 import type { Email } from "@/backend/lib/email";
@@ -14,11 +14,11 @@ import type {
 } from "@/backend/services/parent/parent-onboarding.service";
 
 export interface ParentOnboardingGqlInput
-  extends Omit<ParentOnboardingInput, "email" | "invoiceType" | "paymentMethod" | "currency"> {
+  extends Omit<ParentOnboardingInput, "email" | "invoiceType" | "currency" | "initialPayinMethod"> {
   email: Email;
   invoiceType?: InvoiceType | null;
-  paymentMethod?: PaymentMethod | null;
   currency?: CurrencyCode | null;
+  initialPayinMethod?: UserPaymentMethodInitialGqlInput | null;
 }
 
 export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
@@ -37,7 +37,7 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       twitter: t.string({ directives: { constraint: { maxLength: 512 } } }),
       invoiceType: t.field({ type: InvoiceTypePothosObject }),
       feeAmount: t.string({ directives: { constraint: { maxLength: 512 } } }),
-      paymentMethod: t.field({ type: PaymentMethodPothosObject }),
+      initialPayinMethod: t.field({ type: UserPaymentMethodInitialInputPothos }),
       currency: t.field({ type: CurrencyCodePothosObject }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
     }),

@@ -3,13 +3,12 @@ import {
   SupportedOnlineAccountRepository,
   SupportedPaymentLinkRepository,
 } from "@/backend/db/repo";
-import { AppPermission } from "@/backend/enum";
 import type { CountryCode } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
-  SupportedMobileWalletReturnType,
   SupportedMobileWalletSubmitInput,
   SupportedOnlineAccountSubmitInput,
   SupportedPaymentLinkSubmitInput,
@@ -32,11 +31,17 @@ async function assertCatalogAdmin(actorUserId: string, locale?: string): Promise
 export namespace PaymentCatalogService {
   export async function listMobileWallets(
     actorUserId: string,
-    filters?: { countryCode?: CountryCode; direction?: PaymentDirection },
+    filters?: { countryCode?: CountryCode; direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
   ) {
-    await assertCatalogAdmin(actorUserId, locale);
-    return SupportedMobileWalletRepository.listActive(filters ?? {}, undefined);
+    if (filters?.activeOnly === false) {
+      await assertCatalogAdmin(actorUserId, locale);
+      return SupportedMobileWalletRepository.listAll(undefined);
+    }
+    return SupportedMobileWalletRepository.listActive(
+      { countryCode: filters?.countryCode, direction: filters?.direction },
+      undefined
+    );
   }
 
   export async function createMobileWallet(
@@ -65,11 +70,14 @@ export namespace PaymentCatalogService {
 
   export async function listPaymentLinks(
     actorUserId: string,
-    filters?: { direction?: PaymentDirection },
+    filters?: { direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
   ) {
-    await assertCatalogAdmin(actorUserId, locale);
-    return SupportedPaymentLinkRepository.listActive(filters ?? {}, undefined);
+    if (filters?.activeOnly === false) {
+      await assertCatalogAdmin(actorUserId, locale);
+      return SupportedPaymentLinkRepository.listAll(undefined);
+    }
+    return SupportedPaymentLinkRepository.listActive({ direction: filters?.direction }, undefined);
   }
 
   export async function createPaymentLink(
@@ -98,11 +106,14 @@ export namespace PaymentCatalogService {
 
   export async function listOnlineAccounts(
     actorUserId: string,
-    filters?: { direction?: PaymentDirection },
+    filters?: { direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
   ) {
-    await assertCatalogAdmin(actorUserId, locale);
-    return SupportedOnlineAccountRepository.listActive(filters ?? {}, undefined);
+    if (filters?.activeOnly === false) {
+      await assertCatalogAdmin(actorUserId, locale);
+      return SupportedOnlineAccountRepository.listAll(undefined);
+    }
+    return SupportedOnlineAccountRepository.listActive({ direction: filters?.direction }, undefined);
   }
 
   export async function createOnlineAccount(

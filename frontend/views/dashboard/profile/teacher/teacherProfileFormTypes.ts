@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { AccountStatus, CurrencyCode, Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
+  displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
 });
 
 const ownTeacherSchema = z.object({
@@ -23,7 +24,6 @@ const adminTeacherSchema = ownTeacherSchema.extend({
     .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
   hourlyRate: z.string().optional(),
   rateCurrency: z.enum(CurrencyCode).optional(),
-  paymentMethod: z.enum(PaymentMethod).optional().nullable(),
   status: z.enum(AccountStatus).optional().nullable(),
 });
 
@@ -36,6 +36,7 @@ export type TeacherAdminEditFormData = z.infer<typeof teacherAdminEditSchema>;
 export type TeacherEditData = {
   readonly name?: string | null;
   readonly email?: string | null;
+  readonly displayCurrency?: CurrencyCode | null;
   readonly phone?: string | null;
   readonly nationalId?: string | null;
   readonly dateOfBirth?: string | null;
@@ -45,6 +46,5 @@ export type TeacherEditData = {
   readonly timezone?: string | null;
   readonly hourlyRate?: string | null;
   readonly rateCurrency?: CurrencyCode | null;
-  readonly paymentMethod?: PaymentMethod | null;
   readonly status?: AccountStatus | null;
 };

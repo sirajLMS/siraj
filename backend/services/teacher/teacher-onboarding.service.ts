@@ -6,8 +6,8 @@ import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
-import type { TeacherCreateResult } from "@/backend/types/teachers/teacher.types";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
+import type { TeacherCreateResult } from "@/backend/types/teachers/teacher.types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
 
@@ -100,11 +100,7 @@ export namespace TeacherOnboardingService {
       return;
     }
 
-    await PaymentMethodService.createUserPaymentMethodInternal(
-      { ...input.initialPayoutMethod, userId },
-      txObj,
-      locale
-    );
+    await PaymentMethodService.createUserPaymentMethodInternal({ ...input.initialPayoutMethod, userId }, txObj, locale);
   }
 
   export async function createTeacher(

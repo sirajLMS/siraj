@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
+  displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
 });
 
 const ownStaffSchema = z.object({

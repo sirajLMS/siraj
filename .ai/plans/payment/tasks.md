@@ -68,43 +68,42 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ## Phase 4 — Services
 
-- [ ] Create `backend/services/payment-method/payment-method-snapshot.ts` — `buildTransactionSnapshot` (uses `payment-method-jsonb` lib for bank encryption)
-- [ ] Create `backend/services/payment-method/payment-method-snapshot.test.ts`
-- [ ] Create `backend/services/payment-method/payment-method-mask.ts`
-- [ ] Create `backend/services/payment-method/payment-method.service.ts` — CRUD, defaults, `recordPayin`, `recordPayout`
-- [ ] Create `backend/services/payment-method/payment-catalog.service.ts`
-- [ ] Create `backend/services/payment-method/index.ts`
-- [ ] Delete `backend/services/profile/banking-summary.ts`
-- [ ] Rewrite `backend/services/profile/banking-summary.test.ts` → `payment-method-mask.test.ts`
-- [ ] Update `backend/services/profile/profile.service.ts`
-- [ ] Update `backend/services/profile/profile.service.test.ts`
-- [ ] Update `backend/services/profile/parent-profile.service.ts`
-- [ ] Update `backend/services/profile/parent-profile.service.test.ts`
-- [ ] Update `backend/services/profile/teacher-profile.service.test.ts`
-- [ ] Update `backend/services/profile/index.ts`
-- [ ] Update `backend/services/parent/parent-onboarding.service.ts`
-- [ ] Update `backend/services/teacher/teacher-onboarding.service.ts`
-- [ ] Update `backend/services/teacher/teacher-portal.service.ts`
-- [ ] Update `backend/services/staff/staff-profile.service.ts`
-- [ ] Gate: service tests + `bun tsgo`
+- [x] Create `backend/services/payment-method/payment-method-snapshot.ts` — `buildTransactionSnapshot` (uses `payment-method-jsonb` lib for bank encryption)
+- [x] Create `backend/services/payment-method/payment-method-snapshot.test.ts`
+- [x] Create `backend/services/payment-method/payment-method-mask.ts`
+- [x] Create `backend/services/payment-method/payment-method.service.ts` — CRUD, defaults, `recordPayin`, `recordPayout`
+- [x] Create `backend/services/payment-method/payment-catalog.service.ts`
+- [x] Create `backend/services/payment-method/index.ts`
+- [x] Delete `backend/services/profile/banking-summary.ts`
+- [x] Rewrite `backend/services/profile/banking-summary.test.ts` → `payment-method-mask.test.ts`
+- [x] Update `backend/services/profile/profile.service.ts`
+- [x] Update `backend/services/profile/profile.service.test.ts`
+- [x] Update `backend/services/profile/parent-profile.service.ts` (via parent-profile.service in parent/)
+- [x] Update `backend/services/profile/parent-profile.service.test.ts`
+- [x] Update `backend/services/profile/teacher-profile.service.test.ts`
+- [x] Update `backend/services/profile/index.ts`
+- [x] Update `backend/services/parent/parent-onboarding.service.ts`
+- [x] Update `backend/services/teacher/teacher-onboarding.service.ts`
+- [x] Update `backend/services/teacher/teacher-portal.service.ts`
+- [x] Update `backend/services/staff/staff-profile.service.ts` (no paymentMethod references)
+- [x] Gate: service tests + `bun tsgo`
 
 ## Phase 5 — Pothos + GraphQL
 
-- [ ] Create `backend/graphql/pothos/payment-method.pothos.ts` — `PaymentMethodTransactionSnapshot` object
-- [ ] Update `backend/graphql/pothos/billing.pothos.ts` — expose `paymentMethodSnapshot` on `Payment`
-- [ ] Update payout pothos — expose `paymentMethodSnapshot` on `TeacherPayment` (if exposed in GraphQL)
-- [ ] Update `backend/graphql/pothos/enum.pothos.ts` — add new enums; **delete** `PaymentMethodPothosObject`
-- [ ] Update `backend/graphql/pothos/profile.pothos.ts` — **delete** `TeacherBankingSummaryPothosObject`; add payment methods
-- [ ] Update `backend/graphql/pothos/staff-profile.pothos.ts`
-- [ ] Update `backend/graphql/pothos/parent-profile.pothos.ts`
-- [ ] Update `backend/graphql/pothos/parent-onboarding.pothos.ts`
-- [ ] Update `backend/graphql/pothos/teacher-portal.pothos.ts`
-- [ ] Update `backend/graphql/pothos/teacher-onboarding.pothos.ts`
-- [ ] Update `backend/enum/notificationDeliveries.enum.ts` — **delete** `BANKING_DETAILS_CHANGED`; add `PAYMENT_METHOD_CHANGED`
-- [ ] Create `backend/graphql/mutation/payment-method.mutation.ts`
-- [ ] Update `backend/graphql/mutation/onboarding.mutation.ts`
-- [ ] Update `backend/graphql/mutation/staff-profile.mutation.ts`
-- [ ] `bun run generate:gqlSchema` + `bun codegen`
+- [x] Create `backend/graphql/pothos/billing/payment-method.pothos.ts` — `PaymentMethodTransactionSnapshot` object
+- [ ] Update billing/payout pothos for `paymentMethodSnapshot` (N/A — Payment/TeacherPayment not exposed in GraphQL yet)
+- [x] Update `backend/graphql/pothos/shared/enum.pothos.ts` — add new enums; **delete** `PaymentMethodPothosObject`
+- [x] Update `backend/graphql/pothos/profile/profile.pothos.ts` — add `paymentMethods` + `paymentMethodDefaults`
+- [x] Update `backend/graphql/pothos/teachers/staff-profile.pothos.ts`
+- [x] Update `backend/graphql/pothos/parents/parent-profile.pothos.ts`
+- [x] Update `backend/graphql/pothos/parents/parent-onboarding.pothos.ts`
+- [x] Update `backend/graphql/pothos/teachers/teacher-portal.pothos.ts`
+- [x] Update `backend/graphql/pothos/teachers/teacher-onboarding.pothos.ts`
+- [x] Update `backend/enum/notifications/notificationDeliveries.enum.ts` — **delete** `BANKING_DETAILS_CHANGED`; add `PAYMENT_METHOD_CHANGED`
+- [x] Create `backend/graphql/mutation/billing/payment-method.mutation.ts`
+- [x] Update `backend/graphql/mutation/shared/onboarding.mutation.ts`
+- [x] Update `backend/graphql/mutation/teachers/staff-profile.mutation.ts` (no changes needed)
+- [x] `bun run generate:gqlSchema` (schema.graphql updated; full `codegen` blocked until Phase 6 document updates)
 - [ ] Create `frontend/graphql/test/payment-method.test.ts`
 - [ ] Gate: `bun run test:graphql`
 

@@ -18,11 +18,13 @@ import {
 
 export function StaffProfileEditForm({
   staffData,
+  displayCurrency,
   isAdminScope,
   isSaving,
   onSubmit,
 }: {
   readonly staffData: StaffProfileData;
+  readonly displayCurrency: StaffAdminEditFormData["displayCurrency"];
   readonly isAdminScope: boolean;
   readonly isSaving: boolean;
   readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
@@ -35,6 +37,7 @@ export function StaffProfileEditForm({
       email: "",
       phone: "",
       status: AccountStatus.Activated,
+      displayCurrency: null,
     },
   });
 
@@ -44,8 +47,9 @@ export function StaffProfileEditForm({
       email: staffData.email ?? "",
       phone: staffData.phone ?? "",
       status: staffData.status ?? AccountStatus.Activated,
+      displayCurrency: displayCurrency ?? null,
     });
-  }, [form, staffData]);
+  }, [displayCurrency, form, staffData]);
 
   const onValidSubmit = async (values: StaffAdminEditFormData) => {
     await onSubmit(values);
@@ -64,7 +68,13 @@ export function StaffProfileEditForm({
             },
           }}
         >
-          <AccountSection mode="edit" staffData={staffData} isAdminScope={isAdminScope} register={form.register} />
+          <AccountSection
+            mode="edit"
+            staffData={staffData}
+            isAdminScope={isAdminScope}
+            register={form.register}
+            control={form.control}
+          />
           <ContactSection mode="edit" control={form.control} />
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>

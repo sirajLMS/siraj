@@ -39,7 +39,6 @@ export function BillingSection(props: BillingSectionProps) {
         <Stack spacing={2.5}>
           <TextField label={t("fields.invoiceType")} fullWidth size="small" {...props.register("invoiceType")} />
           <TextField label={t("fields.feeAmount")} fullWidth size="small" {...props.register("feeAmount")} />
-          <TextField label={t("fields.paymentMethod")} fullWidth size="small" {...props.register("paymentMethod")} />
           <Controller
             name="currency"
             control={props.control}
@@ -87,10 +86,6 @@ export function BillingSection(props: BillingSectionProps) {
       <Stack spacing={2}>
         <InfoField label={t("fields.invoiceType")} value={toDisplayValue(props.adminData.invoiceType, tc("notSet"))} />
         <InfoField label={t("fields.feeAmount")} value={toDisplayValue(props.adminData.feeAmount, tc("notSet"))} />
-        <InfoField
-          label={t("fields.paymentMethod")}
-          value={toDisplayValue(props.adminData.paymentMethod, tc("notSet"))}
-        />
         <InfoField
           label={t("fields.currency")}
           value={<CurrencyDisplay code={props.adminData.currency} fallback={tc("notSet")} />}

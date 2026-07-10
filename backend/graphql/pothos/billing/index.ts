@@ -2,3 +2,4 @@ export * from "@/backend/graphql/pothos/billing/billing-alerts.pothos";
 export * from "@/backend/graphql/pothos/billing/billing-history.pothos";
 export * from "@/backend/graphql/pothos/billing/billing-management.pothos";
 export * from "@/backend/graphql/pothos/billing/fx-ingestion.pothos";
+export * from "@/backend/graphql/pothos/billing/payment-method.pothos";

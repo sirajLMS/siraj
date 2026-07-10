@@ -178,7 +178,7 @@ describe("ParentRepository — create", () => {
           address: "123 Main St",
           invoiceType: "MONTHLY",
           feeAmount: "500.00",
-          paymentMethod: "BANK_ACCOUNT",
+
           currency: CurrencyCode.USD,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -191,7 +191,6 @@ describe("ParentRepository — create", () => {
       expect(result.status).toBe("REGULAR");
       expect(result.invoiceType).toBe("MONTHLY");
       expect(result.feeAmount).toBe("500.00");
-      expect(result.paymentMethod).toBe("BANK_ACCOUNT");
       expect(result.currency).toBe(CurrencyCode.USD);
       expect(result.timezone).toBe(IanaTimezone.America_Chicago);
     });

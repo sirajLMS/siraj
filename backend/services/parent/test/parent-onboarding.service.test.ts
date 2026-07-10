@@ -1,8 +1,8 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
+import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
 
@@ -15,7 +15,7 @@ describe("ParentOnboardingService.createParent", () => {
       await ParentOnboardingService.createParent("00000000-0000-0000-0000-000000000000", {
         name: "Test",
         email: "test@test.com",
-        password: randomUUID(),
+        password: "TestPassword1!",
       });
     } catch (e) {
       error = e;
@@ -37,11 +37,16 @@ describe("ParentOnboardingService.createParent", () => {
         {
           name: "New Parent",
           email: "newparent@test.com",
-          password: randomUUID(),
+          password: "TestPassword1!",
           phone: "+1234567890",
           invoiceType: "MONTHLY",
           feeAmount: "500.00",
-          paymentMethod: "BANK_ACCOUNT",
+          initialPayinMethod: {
+            type: PaymentMethodType.CASH,
+            direction: PaymentDirection.PAYIN,
+            isDefault: true,
+            details: { note: "Front desk" },
+          },
           currency: CurrencyCode.USD,
           timezone: "America/Chicago",
         },
@@ -68,7 +73,7 @@ describe("ParentOnboardingService.createParent", () => {
       await ParentOnboardingService.createParent("00000000-0000-0000-0000-000000000000", {
         name: "Dup Parent",
         email: "existing@test.com",
-        password: randomUUID(),
+        password: "TestPassword1!",
       });
     } catch (e) {
       error = e;
@@ -95,7 +100,7 @@ describe("ParentOnboardingService.createParent", () => {
       await ParentOnboardingService.createParent("00000000-0000-0000-0000-000000000000", {
         name: "Rollback Parent",
         email: createdEmail,
-        password: randomUUID(),
+        password: "TestPassword1!",
       });
     } catch (e) {
       error = e;
@@ -103,7 +108,6 @@ describe("ParentOnboardingService.createParent", () => {
 
     expect(error).not.toBeNull();
 
-    // Verify user doesn't exist in DB outside transaction
     const exists = await UserRepository.existsByEmail(createdEmail);
     expect(exists).toBeFalse();
 

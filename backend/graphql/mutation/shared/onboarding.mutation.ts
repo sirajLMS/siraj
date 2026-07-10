@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { normalizePaymentMethodDetailsInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   ManagerOnboardingInputPothosObject,
   ManagerOnboardingResultPothosObject,
@@ -14,6 +15,32 @@ import { ParentOnboardingService } from "@/backend/services/parent/parent-onboar
 import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
 import { StudentOnboardingService } from "@/backend/services/student/student-onboarding.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
+import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
+
+function mapInitialPaymentMethodInput(
+  input:
+    | {
+        readonly type: UserPaymentMethodSubmitInput["type"];
+        readonly direction: UserPaymentMethodSubmitInput["direction"];
+        readonly isDefault?: boolean | null;
+        readonly label?: string | null;
+        readonly details: Parameters<typeof normalizePaymentMethodDetailsInput>[0];
+      }
+    | null
+    | undefined
+): Omit<UserPaymentMethodSubmitInput, "userId"> | null {
+  if (!input) {
+    return null;
+  }
+
+  return {
+    type: input.type,
+    direction: input.direction,
+    isDefault: input.isDefault ?? false,
+    label: input.label ?? null,
+    details: normalizePaymentMethodDetailsInput(input.details),
+  };
+}
 
 gqlSchemaBuilder.mutationFields(t => ({
   createTeacher: t.field({
@@ -28,10 +55,21 @@ gqlSchemaBuilder.mutationFields(t => ({
       return await TeacherOnboardingService.createTeacher(
         userId,
         {
-          ...args.input,
+          name: args.input.name,
           email: args.input.email.value,
+          password: args.input.password,
+          nationality: args.input.nationality ?? null,
+          nationalId: args.input.nationalId ?? null,
+          phone: args.input.phone ?? null,
+          dateOfBirth: args.input.dateOfBirth ?? null,
           gender: args.input.gender ?? null,
+          address: args.input.address ?? null,
+          qualifications: args.input.qualifications ?? null,
           countryCode: args.input.countryCode ?? null,
+          timezone: args.input.timezone,
+          hourlyRate: args.input.hourlyRate ?? null,
+          rateCurrency: args.input.rateCurrency ?? null,
+          initialPayoutMethod: mapInitialPaymentMethodInput(args.input.initialPayoutMethod),
         },
         ctx.locale
       );
@@ -50,10 +88,20 @@ gqlSchemaBuilder.mutationFields(t => ({
       return await ParentOnboardingService.createParent(
         userId,
         {
-          ...args.input,
+          name: args.input.name,
           email: args.input.email.value,
+          password: args.input.password,
+          phone: args.input.phone ?? null,
+          nationality: args.input.nationality ?? null,
+          address: args.input.address ?? null,
+          facebook: args.input.facebook ?? null,
+          whatsapp: args.input.whatsapp ?? null,
+          twitter: args.input.twitter ?? null,
           invoiceType: args.input.invoiceType ?? null,
-          paymentMethod: args.input.paymentMethod ?? null,
+          feeAmount: args.input.feeAmount ?? null,
+          currency: args.input.currency ?? null,
+          timezone: args.input.timezone,
+          initialPayinMethod: mapInitialPaymentMethodInput(args.input.initialPayinMethod),
         },
         ctx.locale
       );

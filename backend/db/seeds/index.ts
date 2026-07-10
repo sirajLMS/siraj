@@ -2,6 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups as permissionGroupsSchema } from "@/backend/db/schema";
 import { seedOrGet as seedOrGetAdminAuditLogs } from "@/backend/db/seeds/audit/seed-admin-audit-logs";
 import { seedOrGet as seedOrGetAuditLogs } from "@/backend/db/seeds/audit/seed-audit-logs";
+import { seedOrGet as seedOrGetMeetingPermissions } from "@/backend/db/seeds/auth/seed-meeting-permissions";
 import { seedOrGet as seedOrGetPaymentMethodPermissions } from "@/backend/db/seeds/auth/seed-payment-method-permissions";
 import { seedOrGet as seedOrGetUserPermissionOverrides } from "@/backend/db/seeds/auth/seed-user-permission-overrides";
 import { seedOrGet as seedOrGetCurrencyExchangeAuditLogs } from "@/backend/db/seeds/billing/seed-currency-exchange-audit-logs";
@@ -105,6 +106,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   logger.log("Seeding payment method permissions...");
   await seedOrGetPaymentMethodPermissions();
+  await seedOrGetMeetingPermissions();
 
   logger.log("Seeding payment method catalogs...");
   await seedOrGetSupportedMobileWallets();

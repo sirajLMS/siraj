@@ -58,13 +58,18 @@ export namespace MeetingConfigService {
     return buildMaskedMeetingConfigs(rows, isAdminScope);
   }
 
+  async function loadConfigForActor(actorUserId: string, id: string, locale?: string) {
+    const config = await UserMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
+    const access = await assertCanAccessConfig(actorUserId, config.userId, locale);
+    return { config, ...access };
+  }
+
   export async function getUserMeetingConfig(
     actorUserId: string,
     id: string,
     locale?: string
   ): Promise<UserMeetingConfigReturnType> {
-    const config = await UserMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
-    const { isAdminScope } = await assertCanAccessConfig(actorUserId, config.userId, locale);
+    const { config, isAdminScope } = await loadConfigForActor(actorUserId, id, locale);
     return buildMaskedMeetingConfig(config, isAdminScope);
   }
 
@@ -142,8 +147,7 @@ export namespace MeetingConfigService {
     id: string,
     locale?: string
   ): Promise<UserMeetingConfigReturnType> {
-    const existing = await UserMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
-    const { isAdminScope } = await assertCanAccessConfig(actorUserId, existing.userId, locale);
+    const { isAdminScope } = await loadConfigForActor(actorUserId, id, locale);
     const updated = await UserMeetingConfigRepository.setDefault(id, undefined, locale);
     return buildMaskedMeetingConfig(updated, isAdminScope);
   }

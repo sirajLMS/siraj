@@ -1,0 +1,42 @@
+import { describe, expect, test } from "bun:test";
+import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { users } from "@/backend/db/schema";
+import { UserRepository } from "@/backend/db/repo";
+import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
+import { getErrorMessage } from "@/shared/utils/error";
+
+function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
+  test(name, async () => {
+    await runInRollback(fn);
+  });
+}
+
+describe("UserRepository", () => {
+  testRepo("updateDisplayCurrency persists and returns the updated user", async tx => {
+    const user = await createTestUser(tx);
+    expect(user.displayCurrency).toBeNull();
+
+    const updated = await UserRepository.updateDisplayCurrency(user.id, CurrencyCode.EGP, tx);
+    expect(updated.displayCurrency).toBe(CurrencyCode.EGP);
+
+    const [row] = await tx.select({ displayCurrency: users.displayCurrency }).from(users).where(eq(users.id, user.id));
+    expect(row?.displayCurrency).toBe(CurrencyCode.EGP);
+  });
+
+  testRepo("updateDisplayCurrency throws when user is missing", async tx => {
+    let errorThrown: unknown = null;
+    try {
+      await UserRepository.updateDisplayCurrency(
+        "00000000-0000-0000-0000-000000000000",
+        CurrencyCode.USD,
+        tx
+      );
+    } catch (error) {
+      errorThrown = error;
+    }
+    expect(errorThrown).not.toBeNull();
+    expect(getErrorMessage(errorThrown)).toContain("00000000-0000-0000-0000-000000000000");
+  });
+});

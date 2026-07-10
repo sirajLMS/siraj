@@ -144,6 +144,7 @@ export interface ProfileLabels {
       readonly status: string;
       readonly statusActive: string;
       readonly statusInactive: string;
+      readonly displayCurrency: string;
     };
     readonly permissions: {
       readonly inheritedGroups: string;

@@ -1097,6 +1097,11 @@ export type IanaTimezone =
   | 'Pacific_Wallis'
   | 'UTC';
 
+export type IdentifierKind =
+  | 'EMAIL'
+  | 'EMAIL_OR_HANDLE'
+  | 'HANDLE';
+
 export type InvoiceStatus =
   | 'CANCELLED'
   | 'PAID'
@@ -1186,12 +1191,12 @@ export type NotificationChannel =
   | 'SMS';
 
 export type NotificationEventType =
-  | 'BANKING_DETAILS_CHANGED'
   | 'CLASS_REMINDER'
   | 'COMPLAINT_RESPONSE'
   | 'INVOICE_GENERATED'
   | 'NEW_COMPLAINT'
   | 'NEW_SUGGESTION'
+  | 'PAYMENT_METHOD_CHANGED'
   | 'SUGGESTION_ACKNOWLEDGED'
   | 'SUGGESTION_DUPLICATE_MARKED';
 
@@ -1226,7 +1231,6 @@ export type ParentAdminProfileUpdateInput = {
   feeAmount: string | null | undefined;
   invoiceType: string | null | undefined;
   nationality: string | null | undefined;
-  paymentMethod: string | null | undefined;
   phone: string | null | undefined;
   timezone: IanaTimezone | null | undefined;
   twitter: string | null | undefined;
@@ -1240,11 +1244,11 @@ export type ParentOnboardingInput = {
   email: string;
   facebook: string | null | undefined;
   feeAmount: string | null | undefined;
+  initialPayinMethod: UserPaymentMethodInitialInput | null | undefined;
   invoiceType: InvoiceType | null | undefined;
   name: string;
   nationality: string | null | undefined;
   password: string;
-  paymentMethod: PaymentMethod | null | undefined;
   phone: string | null | undefined;
   timezone: IanaTimezone;
   twitter: string | null | undefined;
@@ -1266,9 +1270,33 @@ export type ParentStatus =
   | 'REGULAR'
   | 'SUSPENDED';
 
-export type PaymentMethod =
-  | 'BANK_ACCOUNT'
-  | 'PAYPAL';
+export type PaymentDirection =
+  | 'BOTH'
+  | 'PAYIN'
+  | 'PAYOUT';
+
+export type PaymentMethodDetailsInput = {
+  accountNumber: string | null | undefined;
+  bankName: string | null | undefined;
+  beneficiaryName: string | null | undefined;
+  iban: string | null | undefined;
+  identifier: string | null | undefined;
+  note: string | null | undefined;
+  onlineAccountId: string | null | undefined;
+  paymentLinkId: string | null | undefined;
+  phone: string | null | undefined;
+  routingNumber: string | null | undefined;
+  swiftBic: string | null | undefined;
+  url: string | null | undefined;
+  walletId: string | null | undefined;
+};
+
+export type PaymentMethodType =
+  | 'BANK_TRANSFER'
+  | 'CASH'
+  | 'MOBILE_WALLET'
+  | 'ONLINE_ACCOUNT'
+  | 'PAYMENT_LINK';
 
 export type ProfileAudience =
   | 'PARENT'
@@ -1426,16 +1454,84 @@ export type SuggestionStatus =
   | 'PENDING'
   | 'REVIEWED';
 
+export type SupportedMobileWalletCreateInput = {
+  countryCode: CountryCode | null | undefined;
+  currencyCode: CurrencyCode | null | undefined;
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  instructions: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  isActive: boolean | null | undefined;
+  logoUrl: string | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>>;
+  phoneRegion: string | null | undefined;
+  slug: string;
+  supportedDirections: PaymentDirection | null | undefined;
+};
+
+export type SupportedMobileWalletUpdateInput = {
+  countryCode: CountryCode | null | undefined;
+  currencyCode: CurrencyCode | null | undefined;
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  instructions: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  isActive: boolean | null | undefined;
+  logoUrl: string | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  phoneRegion: string | null | undefined;
+  slug: string | null | undefined;
+  supportedDirections: PaymentDirection | null | undefined;
+};
+
+export type SupportedOnlineAccountCreateInput = {
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  identifierKind: IdentifierKind;
+  identifierLabel: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  instructions: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  isActive: boolean | null | undefined;
+  logoUrl: string | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>>;
+  slug: string;
+  supportedDirections: PaymentDirection | null | undefined;
+};
+
+export type SupportedOnlineAccountUpdateInput = {
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  identifierKind: IdentifierKind | null | undefined;
+  identifierLabel: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  instructions: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  isActive: boolean | null | undefined;
+  logoUrl: string | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  slug: string | null | undefined;
+  supportedDirections: PaymentDirection | null | undefined;
+};
+
+export type SupportedPaymentLinkCreateInput = {
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  instructions: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  isActive: boolean | null | undefined;
+  logoUrl: string | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>>;
+  slug: string;
+  supportedDirections: PaymentDirection | null | undefined;
+  urlAllowlist: Array<string>;
+  urlExample: string | null | undefined;
+};
+
+export type SupportedPaymentLinkUpdateInput = {
+  description: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  instructions: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  isActive: boolean | null | undefined;
+  logoUrl: string | null | undefined;
+  name: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  slug: string | null | undefined;
+  supportedDirections: PaymentDirection | null | undefined;
+  urlAllowlist: Array<string> | null | undefined;
+  urlExample: string | null | undefined;
+};
+
 /** Input for creating a new teacher account with comprehensive profile */
 export type TeacherOnboardingInput = {
-  /** Bank account number */
-  accountNumber: string | null | undefined;
   /** Teacher address */
   address: string | null | undefined;
-  /** Bank name */
-  bankName: string | null | undefined;
-  /** Banking beneficiary name */
-  beneficiaryName: string | null | undefined;
   /** Teacher country code */
   countryCode: CountryCode | null | undefined;
   /** Teacher date of birth (ISO date string) */
@@ -1446,8 +1542,8 @@ export type TeacherOnboardingInput = {
   gender: Gender | null | undefined;
   /** Teacher hourly rate */
   hourlyRate: string | null | undefined;
-  /** IBAN */
-  iban: string | null | undefined;
+  /** Optional initial payout payment method for the teacher */
+  initialPayoutMethod: UserPaymentMethodInitialInput | null | undefined;
   /** Teacher full name */
   name: string;
   /** Teacher national ID (encrypted) */
@@ -1462,10 +1558,6 @@ export type TeacherOnboardingInput = {
   qualifications: string | null | undefined;
   /** Currency for hourly rate */
   rateCurrency: CurrencyCode | null | undefined;
-  /** Bank routing number */
-  routingNumber: string | null | undefined;
-  /** SWIFT/BIC code */
-  swiftBic: string | null | undefined;
   timezone: IanaTimezone;
 };
 
@@ -1479,7 +1571,6 @@ export type TeacherProfileUpdateInput = {
   gender: Gender | null | undefined;
   hourlyRate: string | null | undefined;
   nationalId: string | null | undefined;
-  paymentMethod: PaymentMethod | null | undefined;
   phone: string | null | undefined;
   qualifications: string | null | undefined;
   rateCurrency: CurrencyCode | null | undefined;
@@ -1561,6 +1652,30 @@ export type UserMeetingConfigUpdateInput = {
 export type UserOverrideInput = {
   permissionId: string;
   state: OverrideState;
+};
+
+export type UserPaymentMethodCreateInput = {
+  details: PaymentMethodDetailsInput;
+  direction: PaymentDirection;
+  isDefault: boolean | null | undefined;
+  label: string | null | undefined;
+  type: PaymentMethodType;
+  userId: string;
+};
+
+export type UserPaymentMethodInitialInput = {
+  details: PaymentMethodDetailsInput;
+  direction: PaymentDirection;
+  isDefault: boolean | null | undefined;
+  label: string | null | undefined;
+  type: PaymentMethodType;
+};
+
+export type UserPaymentMethodUpdateInput = {
+  details: PaymentMethodDetailsInput | null | undefined;
+  direction: PaymentDirection | null | undefined;
+  isDefault: boolean | null | undefined;
+  label: string | null | undefined;
 };
 
 export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
@@ -1847,6 +1962,259 @@ export type RefreshExchangeRatesMutationVariables = Exact<{
 
 
 export type RefreshExchangeRatesMutation = RefreshExchangeRatesMutation_Mutation;
+
+export type PaymentMethodDetailsFieldsFragment = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
+
+export type UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
+
+export type UserPaymentMethodFieldsFragment = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payinDefault_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payoutDefault_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type PaymentMethodDefaultsFieldsFragment = { payinDefault: PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payinDefault_UserPaymentMethod | null, payoutDefault: PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payoutDefault_UserPaymentMethod | null };
+
+export type SupportedMobileWalletFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type SupportedPaymentLinkFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type SupportedOnlineAccountFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: Types.IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type UserPaymentMethodsQuery_userPaymentMethods_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type UserPaymentMethodsQuery_Query = { userPaymentMethods: Array<UserPaymentMethodsQuery_userPaymentMethods_UserPaymentMethod> | null };
+
+
+export type UserPaymentMethodsQueryVariables = Exact<{
+  userId: string | number;
+  direction: Types.PaymentDirection | null | undefined;
+}>;
+
+
+export type UserPaymentMethodsQuery = UserPaymentMethodsQuery_Query;
+
+export type UserPaymentMethodQuery_userPaymentMethod_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type UserPaymentMethodQuery_Query = { userPaymentMethod: UserPaymentMethodQuery_userPaymentMethod_UserPaymentMethod | null };
+
+
+export type UserPaymentMethodQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type UserPaymentMethodQuery = UserPaymentMethodQuery_Query;
+
+export type SupportedMobileWalletsQuery_supportedMobileWallets_SupportedMobileWallet = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type SupportedMobileWalletsQuery_Query = { supportedMobileWallets: Array<SupportedMobileWalletsQuery_supportedMobileWallets_SupportedMobileWallet> | null };
+
+
+export type SupportedMobileWalletsQueryVariables = Exact<{
+  countryCode: Types.CountryCode | null | undefined;
+  direction: Types.PaymentDirection | null | undefined;
+  activeOnly: boolean | null | undefined;
+}>;
+
+
+export type SupportedMobileWalletsQuery = SupportedMobileWalletsQuery_Query;
+
+export type SupportedPaymentLinksQuery_supportedPaymentLinks_SupportedPaymentLink = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type SupportedPaymentLinksQuery_Query = { supportedPaymentLinks: Array<SupportedPaymentLinksQuery_supportedPaymentLinks_SupportedPaymentLink> | null };
+
+
+export type SupportedPaymentLinksQueryVariables = Exact<{
+  direction: Types.PaymentDirection | null | undefined;
+  activeOnly: boolean | null | undefined;
+}>;
+
+
+export type SupportedPaymentLinksQuery = SupportedPaymentLinksQuery_Query;
+
+export type SupportedOnlineAccountsQuery_supportedOnlineAccounts_SupportedOnlineAccount = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: Types.IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type SupportedOnlineAccountsQuery_Query = { supportedOnlineAccounts: Array<SupportedOnlineAccountsQuery_supportedOnlineAccounts_SupportedOnlineAccount> | null };
+
+
+export type SupportedOnlineAccountsQueryVariables = Exact<{
+  direction: Types.PaymentDirection | null | undefined;
+  activeOnly: boolean | null | undefined;
+}>;
+
+
+export type SupportedOnlineAccountsQuery = SupportedOnlineAccountsQuery_Query;
+
+export type CreateUserPaymentMethodMutation_createUserPaymentMethod_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type CreateUserPaymentMethodMutation_Mutation = { createUserPaymentMethod: CreateUserPaymentMethodMutation_createUserPaymentMethod_UserPaymentMethod | null };
+
+
+export type CreateUserPaymentMethodMutationVariables = Exact<{
+  input: Types.UserPaymentMethodCreateInput;
+}>;
+
+
+export type CreateUserPaymentMethodMutation = CreateUserPaymentMethodMutation_Mutation;
+
+export type UpdateUserPaymentMethodMutation_updateUserPaymentMethod_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type UpdateUserPaymentMethodMutation_Mutation = { updateUserPaymentMethod: UpdateUserPaymentMethodMutation_updateUserPaymentMethod_UserPaymentMethod | null };
+
+
+export type UpdateUserPaymentMethodMutationVariables = Exact<{
+  id: string | number;
+  input: Types.UserPaymentMethodUpdateInput;
+}>;
+
+
+export type UpdateUserPaymentMethodMutation = UpdateUserPaymentMethodMutation_Mutation;
+
+export type DeleteUserPaymentMethodMutation_Mutation = { deleteUserPaymentMethod: boolean | null };
+
+
+export type DeleteUserPaymentMethodMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteUserPaymentMethodMutation = DeleteUserPaymentMethodMutation_Mutation;
+
+export type SetDefaultUserPaymentMethodMutation_setDefaultUserPaymentMethod_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type SetDefaultUserPaymentMethodMutation_Mutation = { setDefaultUserPaymentMethod: SetDefaultUserPaymentMethodMutation_setDefaultUserPaymentMethod_UserPaymentMethod | null };
+
+
+export type SetDefaultUserPaymentMethodMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type SetDefaultUserPaymentMethodMutation = SetDefaultUserPaymentMethodMutation_Mutation;
+
+export type VerifyBankTransferPaymentMethodMutation_verifyBankTransferPaymentMethod_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type VerifyBankTransferPaymentMethodMutation_Mutation = { verifyBankTransferPaymentMethod: VerifyBankTransferPaymentMethodMutation_verifyBankTransferPaymentMethod_UserPaymentMethod | null };
+
+
+export type VerifyBankTransferPaymentMethodMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type VerifyBankTransferPaymentMethodMutation = VerifyBankTransferPaymentMethodMutation_Mutation;
+
+export type CreateSupportedMobileWalletMutation_createSupportedMobileWallet_SupportedMobileWallet = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateSupportedMobileWalletMutation_Mutation = { createSupportedMobileWallet: CreateSupportedMobileWalletMutation_createSupportedMobileWallet_SupportedMobileWallet | null };
+
+
+export type CreateSupportedMobileWalletMutationVariables = Exact<{
+  input: Types.SupportedMobileWalletCreateInput;
+}>;
+
+
+export type CreateSupportedMobileWalletMutation = CreateSupportedMobileWalletMutation_Mutation;
+
+export type UpdateSupportedMobileWalletMutation_updateSupportedMobileWallet_SupportedMobileWallet = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateSupportedMobileWalletMutation_Mutation = { updateSupportedMobileWallet: UpdateSupportedMobileWalletMutation_updateSupportedMobileWallet_SupportedMobileWallet | null };
+
+
+export type UpdateSupportedMobileWalletMutationVariables = Exact<{
+  id: string | number;
+  input: Types.SupportedMobileWalletUpdateInput;
+}>;
+
+
+export type UpdateSupportedMobileWalletMutation = UpdateSupportedMobileWalletMutation_Mutation;
+
+export type DeactivateSupportedMobileWalletMutation_deactivateSupportedMobileWallet_SupportedMobileWallet = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type DeactivateSupportedMobileWalletMutation_Mutation = { deactivateSupportedMobileWallet: DeactivateSupportedMobileWalletMutation_deactivateSupportedMobileWallet_SupportedMobileWallet | null };
+
+
+export type DeactivateSupportedMobileWalletMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeactivateSupportedMobileWalletMutation = DeactivateSupportedMobileWalletMutation_Mutation;
+
+export type CreateSupportedPaymentLinkMutation_createSupportedPaymentLink_SupportedPaymentLink = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateSupportedPaymentLinkMutation_Mutation = { createSupportedPaymentLink: CreateSupportedPaymentLinkMutation_createSupportedPaymentLink_SupportedPaymentLink | null };
+
+
+export type CreateSupportedPaymentLinkMutationVariables = Exact<{
+  input: Types.SupportedPaymentLinkCreateInput;
+}>;
+
+
+export type CreateSupportedPaymentLinkMutation = CreateSupportedPaymentLinkMutation_Mutation;
+
+export type UpdateSupportedPaymentLinkMutation_updateSupportedPaymentLink_SupportedPaymentLink = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateSupportedPaymentLinkMutation_Mutation = { updateSupportedPaymentLink: UpdateSupportedPaymentLinkMutation_updateSupportedPaymentLink_SupportedPaymentLink | null };
+
+
+export type UpdateSupportedPaymentLinkMutationVariables = Exact<{
+  id: string | number;
+  input: Types.SupportedPaymentLinkUpdateInput;
+}>;
+
+
+export type UpdateSupportedPaymentLinkMutation = UpdateSupportedPaymentLinkMutation_Mutation;
+
+export type DeactivateSupportedPaymentLinkMutation_deactivateSupportedPaymentLink_SupportedPaymentLink = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type DeactivateSupportedPaymentLinkMutation_Mutation = { deactivateSupportedPaymentLink: DeactivateSupportedPaymentLinkMutation_deactivateSupportedPaymentLink_SupportedPaymentLink | null };
+
+
+export type DeactivateSupportedPaymentLinkMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeactivateSupportedPaymentLinkMutation = DeactivateSupportedPaymentLinkMutation_Mutation;
+
+export type CreateSupportedOnlineAccountMutation_createSupportedOnlineAccount_SupportedOnlineAccount = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: Types.IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type CreateSupportedOnlineAccountMutation_Mutation = { createSupportedOnlineAccount: CreateSupportedOnlineAccountMutation_createSupportedOnlineAccount_SupportedOnlineAccount | null };
+
+
+export type CreateSupportedOnlineAccountMutationVariables = Exact<{
+  input: Types.SupportedOnlineAccountCreateInput;
+}>;
+
+
+export type CreateSupportedOnlineAccountMutation = CreateSupportedOnlineAccountMutation_Mutation;
+
+export type UpdateSupportedOnlineAccountMutation_updateSupportedOnlineAccount_SupportedOnlineAccount = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: Types.IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateSupportedOnlineAccountMutation_Mutation = { updateSupportedOnlineAccount: UpdateSupportedOnlineAccountMutation_updateSupportedOnlineAccount_SupportedOnlineAccount | null };
+
+
+export type UpdateSupportedOnlineAccountMutationVariables = Exact<{
+  id: string | number;
+  input: Types.SupportedOnlineAccountUpdateInput;
+}>;
+
+
+export type UpdateSupportedOnlineAccountMutation = UpdateSupportedOnlineAccountMutation_Mutation;
+
+export type DeactivateSupportedOnlineAccountMutation_deactivateSupportedOnlineAccount_SupportedOnlineAccount = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: Types.IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: Types.PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
+
+export type DeactivateSupportedOnlineAccountMutation_Mutation = { deactivateSupportedOnlineAccount: DeactivateSupportedOnlineAccountMutation_deactivateSupportedOnlineAccount_SupportedOnlineAccount | null };
+
+
+export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeactivateSupportedOnlineAccountMutation = DeactivateSupportedOnlineAccountMutation_Mutation;
 
 export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null };
 
@@ -2509,7 +2877,7 @@ export type ParentHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ParentHandbookUrlQuery = ParentHandbookUrlQuery_Query;
 
-export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
 
 export type ParentProfileQuery_Query = { parentProfile: ParentProfileQuery_parentProfile_ParentProfile | null };
 
@@ -2720,13 +3088,17 @@ export type UpdateUserOverridesMutationVariables = Exact<{
 
 export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethods_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults = { payinDefault: PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payinDefault_UserPaymentMethod | null, payoutDefault: PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payoutDefault_UserPaymentMethod | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent = { id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
 
@@ -2748,7 +3120,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent> | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride> | null, meetingConfigs: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_meetingConfigs_UserMeetingConfig> | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, paymentMethods: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethods_UserPaymentMethod> | null, paymentMethodDefaults: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride> | null, meetingConfigs: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_meetingConfigs_UserMeetingConfig> | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
 
 export type ProfileByUserIdQuery_Query = { profileByUserId: ProfileByUserIdQuery_profileByUserId_UnifiedProfile | null };
 
@@ -2760,7 +3132,7 @@ export type ProfileByUserIdQueryVariables = Exact<{
 
 export type ProfileByUserIdQuery = ProfileByUserIdQuery_Query;
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null };
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
@@ -2778,13 +3150,17 @@ export type UpdateOwnProfileMutationVariables = Exact<{
 
 export type UpdateOwnProfileMutation = UpdateOwnProfileMutation_Mutation;
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, paymentMethod: Types.PaymentMethod | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethods_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults = { payinDefault: PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payinDefault_UserPaymentMethod | null, payoutDefault: PaymentMethodDefaultsFieldsFragment_PaymentMethodDefaults_payoutDefault_UserPaymentMethod | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null };
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile | null, staffProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile | null, paymentMethods: Array<UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethods_UserPaymentMethod> | null, paymentMethodDefaults: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults | null, staffProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 
 export type UpdateUserProfileMutation_Mutation = { updateUserProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile | null };
 
@@ -3617,7 +3993,7 @@ export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OnboardingMetricsQuery = OnboardingMetricsQuery_Query;
 
-export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type TeacherProfileForEditQuery_Query = { teacherProfileForEdit: TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult | null };
 
@@ -3629,7 +4005,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 
@@ -3776,7 +4152,7 @@ export type TeacherAssignedStudentsQueryVariables = Exact<{ [key: string]: never
 
 export type TeacherAssignedStudentsQuery = TeacherAssignedStudentsQuery_Query;
 
-export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, paymentMethod: Types.PaymentMethod | null };
+export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null };
 
 export type TeacherOwnProfileQuery_Query = { teacherOwnProfile: TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile | null };
 

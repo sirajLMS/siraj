@@ -64,7 +64,6 @@ export namespace ParentRepository {
         invoiceType: input.invoiceType ?? null,
         feeAmount: input.feeAmount ?? null,
         currency: input.currency ?? null,
-        displayCurrency: input.displayCurrency ?? null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -76,7 +75,7 @@ export namespace ParentRepository {
     }
 
     const [userRow] = await queryDb
-      .select({ timezone: users.timezone, displayCurrency: users.displayCurrency })
+      .select({ timezone: users.timezone })
       .from(users)
       .where(eq(users.id, input.userId))
       .limit(1);
@@ -88,7 +87,6 @@ export namespace ParentRepository {
       invoiceType: created.invoiceType,
       feeAmount: created.feeAmount,
       currency: created.currency,
-      displayCurrency: created.displayCurrency,
       timezone: (userRow?.timezone ?? "UTC") as IanaTimezone,
       createdAt: created.createdAt,
     };
@@ -336,7 +334,6 @@ export namespace ParentRepository {
     if (input.invoiceType !== undefined) parentUpdate.invoiceType = input.invoiceType;
     if (input.feeAmount !== undefined) parentUpdate.feeAmount = input.feeAmount;
     if (input.currency !== undefined) parentUpdate.currency = input.currency;
-    if (input.displayCurrency !== undefined) parentUpdate.displayCurrency = input.displayCurrency;
 
     await queryDb.update(parents).set(parentUpdate).where(eq(parents.id, parentId));
 

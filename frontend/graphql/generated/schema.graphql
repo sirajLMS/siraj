@@ -1757,6 +1757,12 @@ enum IanaTimezone {
   UTC
 }
 
+enum IdentifierKind {
+  EMAIL
+  EMAIL_OR_HANDLE
+  HANDLE
+}
+
 type ImpersonationStatus {
   actorUser: User
   expiresAt: DateTime
@@ -2017,6 +2023,9 @@ type Mutation {
 
   """Create a new student profile under an existing parent"""
   createStudent(input: StudentOnboardingInput!): StudentOnboardingResult
+  createSupportedMobileWallet(input: SupportedMobileWalletCreateInput!): SupportedMobileWallet
+  createSupportedOnlineAccount(input: SupportedOnlineAccountCreateInput!): SupportedOnlineAccount
+  createSupportedPaymentLink(input: SupportedPaymentLinkCreateInput!): SupportedPaymentLink
 
   """Create a new teacher account with comprehensive profile"""
   createTeacher(input: TeacherOnboardingInput!): TeacherOnboarding
@@ -2026,7 +2035,11 @@ type Mutation {
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
   createTestSuperAdmin(prefix: String!): TestSuperAdmin
   createUserMeetingConfig(input: UserMeetingConfigCreateInput!): UserMeetingConfig
+  createUserPaymentMethod(input: UserPaymentMethodCreateInput!): UserPaymentMethod
   deactivateParent(parentId: String!): DeactivateParentResult
+  deactivateSupportedMobileWallet(id: ID!): SupportedMobileWallet
+  deactivateSupportedOnlineAccount(id: ID!): SupportedOnlineAccount
+  deactivateSupportedPaymentLink(id: ID!): SupportedPaymentLink
 
   """Soft-deletes a book by marking it as deleted."""
   deleteBook(
@@ -2059,6 +2072,7 @@ type Mutation {
   deleteSuggestion(suggestionId: String!): Boolean
   deleteTeacherImportantNote(id: ID!): Boolean
   deleteUserMeetingConfig(id: ID!): Boolean
+  deleteUserPaymentMethod(id: ID!): Boolean
 
   """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
@@ -2098,6 +2112,7 @@ type Mutation {
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   sendPaymentReminder(studentId: String!): SendPaymentReminderResult
   setDefaultMeetingConfig(id: ID!): UserMeetingConfig
+  setDefaultUserPaymentMethod(id: ID!): UserPaymentMethod
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
   startImpersonation(reason: String, targetUserId: String!): StartImpersonationResponse
   startPermissionGroupSimulation(groupSlug: String!): StartPermissionGroupSimulationResponse
@@ -2123,14 +2138,19 @@ type Mutation {
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
   updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
   updateStudentQuota(expectedVersion: Int, newClassesRemaining: Int!, studentId: String!): EditQuotaResult
+  updateSupportedMobileWallet(id: ID!, input: SupportedMobileWalletUpdateInput!): SupportedMobileWallet
+  updateSupportedOnlineAccount(id: ID!, input: SupportedOnlineAccountUpdateInput!): SupportedOnlineAccount
+  updateSupportedPaymentLink(id: ID!, input: SupportedPaymentLinkUpdateInput!): SupportedPaymentLink
   updateTeacherImportantNote(id: ID!, input: UpdateTeacherNoteInput!): TeacherImportantNote
   updateTeacherProfile(input: TeacherProfileUpdateInput!, teacherId: ID!): TeacherProfileResult
   updateUserMeetingConfig(id: ID!, input: UserMeetingConfigUpdateInput!): UserMeetingConfig
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
+  updateUserPaymentMethod(id: ID!, input: UserPaymentMethodUpdateInput!): UserPaymentMethod
   updateUserProfile(input: UpdateUserProfileInput!, userId: String!): UnifiedProfile
 
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
+  verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
 }
 
 type NotificationAlertsResult {
@@ -2148,12 +2168,12 @@ enum NotificationChannel {
 }
 
 enum NotificationEventType {
-  BANKING_DETAILS_CHANGED
   CLASS_REMINDER
   COMPLAINT_RESPONSE
   INVOICE_GENERATED
   NEW_COMPLAINT
   NEW_SUGGESTION
+  PAYMENT_METHOD_CHANGED
   SUGGESTION_ACKNOWLEDGED
   SUGGESTION_DUPLICATE_MARKED
 }
@@ -2225,7 +2245,6 @@ input ParentAdminProfileUpdateInput {
   feeAmount: String
   invoiceType: String
   nationality: String
-  paymentMethod: String
   phone: String
   timezone: IanaTimezone
   twitter: String
@@ -2384,11 +2403,11 @@ input ParentOnboardingInput {
   email: Email!
   facebook: String
   feeAmount: String
+  initialPayinMethod: UserPaymentMethodInitialInput
   invoiceType: InvoiceType
   name: String!
   nationality: String
   password: String!
-  paymentMethod: PaymentMethod
   phone: String
   timezone: IanaTimezone!
   twitter: String
@@ -2435,7 +2454,6 @@ type ParentProfile {
   invoiceType: String
   name: String
   nationality: String
-  paymentMethod: String
   phone: String
   status: String
   timezone: IanaTimezone
@@ -2473,9 +2491,71 @@ input PartialStudentUpdateInput {
   status: StudentStatus
 }
 
-enum PaymentMethod {
-  BANK_ACCOUNT
-  PAYPAL
+enum PaymentDirection {
+  BOTH
+  PAYIN
+  PAYOUT
+}
+
+type PaymentMethodCatalogSnapshot {
+  catalogId: String
+  catalogName: LocalizedString
+  catalogSlug: String
+}
+
+type PaymentMethodDefaults {
+  payinDefault: UserPaymentMethod
+  payoutDefault: UserPaymentMethod
+}
+
+type PaymentMethodDetails {
+  accountNumber: String
+  bankName: String
+  beneficiaryName: String
+  iban: String
+  identifier: String
+  note: String
+  onlineAccountId: String
+  paymentLinkId: String
+  phone: String
+  routingNumber: String
+  swiftBic: String
+  url: String
+  walletId: String
+}
+
+input PaymentMethodDetailsInput {
+  accountNumber: String
+  bankName: String
+  beneficiaryName: String
+  iban: String
+  identifier: String
+  note: String
+  onlineAccountId: String
+  paymentLinkId: String
+  phone: String
+  routingNumber: String
+  swiftBic: String
+  url: String
+  walletId: String
+}
+
+type PaymentMethodTransactionSnapshot {
+  catalog: PaymentMethodCatalogSnapshot
+  details: PaymentMethodDetails
+  direction: PaymentDirection
+  label: String
+  snapshottedAt: String
+  type: PaymentMethodType
+  userPaymentMethodId: String
+}
+
+enum PaymentMethodType {
+  BANK_TRANSFER
+  CASH
+  MOBILE_WALLET
+  ONLINE_ACCOUNT
+  PAYMENT_LINK
 }
 
 type Permission {
@@ -2661,6 +2741,9 @@ type Query {
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
+  supportedMobileWallets(activeOnly: Boolean = true, countryCode: CountryCode, direction: PaymentDirection): [SupportedMobileWallet!]
+  supportedOnlineAccounts(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedOnlineAccount!]
+  supportedPaymentLinks(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedPaymentLink!]
   teacherAssignedClasses: TeacherAssignedClassesResult
   teacherAssignedStudents: TeacherAssignedStudentsResult
   teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
@@ -2680,6 +2763,8 @@ type Query {
 
   """List overrides for a user."""
   userOverrides(userId: String!): [UserOverride!]
+  userPaymentMethod(id: ID!): UserPaymentMethod
+  userPaymentMethods(direction: PaymentDirection, userId: ID!): [UserPaymentMethod!]
 
   """Return group IDs assigned to a user."""
   userPermissionGroups(userId: String!): [String!]
@@ -3231,6 +3316,126 @@ type SupportRequestResult {
   success: Boolean
 }
 
+type SupportedMobileWallet {
+  countryCode: String
+  createdAt: DateTime
+  currencyCode: String
+  description: LocalizedString
+  id: String
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  phoneRegion: String
+  slug: String
+  supportedDirections: PaymentDirection
+  updatedAt: DateTime
+}
+
+input SupportedMobileWalletCreateInput {
+  countryCode: CountryCode
+  currencyCode: CurrencyCode
+  description: LocalizedString
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString!
+  phoneRegion: String
+  slug: String!
+  supportedDirections: PaymentDirection
+}
+
+input SupportedMobileWalletUpdateInput {
+  countryCode: CountryCode
+  currencyCode: CurrencyCode
+  description: LocalizedString
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  phoneRegion: String
+  slug: String
+  supportedDirections: PaymentDirection
+}
+
+type SupportedOnlineAccount {
+  createdAt: DateTime
+  description: LocalizedString
+  id: String
+  identifierKind: IdentifierKind
+  identifierLabel: LocalizedString
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  slug: String
+  supportedDirections: PaymentDirection
+  updatedAt: DateTime
+}
+
+input SupportedOnlineAccountCreateInput {
+  description: LocalizedString
+  identifierKind: IdentifierKind!
+  identifierLabel: LocalizedString
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString!
+  slug: String!
+  supportedDirections: PaymentDirection
+}
+
+input SupportedOnlineAccountUpdateInput {
+  description: LocalizedString
+  identifierKind: IdentifierKind
+  identifierLabel: LocalizedString
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  slug: String
+  supportedDirections: PaymentDirection
+}
+
+type SupportedPaymentLink {
+  createdAt: DateTime
+  description: LocalizedString
+  id: String
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  slug: String
+  supportedDirections: PaymentDirection
+  updatedAt: DateTime
+  urlAllowlist: [String!]
+  urlExample: String
+}
+
+input SupportedPaymentLinkCreateInput {
+  description: LocalizedString
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString!
+  slug: String!
+  supportedDirections: PaymentDirection
+  urlAllowlist: [String!]!
+  urlExample: String
+}
+
+input SupportedPaymentLinkUpdateInput {
+  description: LocalizedString
+  instructions: LocalizedString
+  isActive: Boolean
+  logoUrl: String
+  name: LocalizedString
+  slug: String
+  supportedDirections: PaymentDirection
+  urlAllowlist: [String!]
+  urlExample: String
+}
+
 type SystemAlert {
   body: String
   createdAt: DateTime
@@ -3402,17 +3607,8 @@ type TeacherOnboarding {
 
 """Input for creating a new teacher account with comprehensive profile"""
 input TeacherOnboardingInput {
-  """Bank account number"""
-  accountNumber: String
-
   """Teacher address"""
   address: String
-
-  """Bank name"""
-  bankName: String
-
-  """Banking beneficiary name"""
-  beneficiaryName: String
 
   """Teacher country code"""
   countryCode: CountryCode
@@ -3429,8 +3625,8 @@ input TeacherOnboardingInput {
   """Teacher hourly rate"""
   hourlyRate: String
 
-  """IBAN"""
-  iban: String
+  """Optional initial payout payment method for the teacher"""
+  initialPayoutMethod: UserPaymentMethodInitialInput
 
   """Teacher full name"""
   name: String!
@@ -3452,12 +3648,6 @@ input TeacherOnboardingInput {
 
   """Currency for hourly rate"""
   rateCurrency: CurrencyCode
-
-  """Bank routing number"""
-  routingNumber: String
-
-  """SWIFT/BIC code"""
-  swiftBic: String
   timezone: IanaTimezone!
 }
 
@@ -3466,7 +3656,6 @@ type TeacherOwnProfile {
   hourlyRate: String
   id: String
   name: String
-  paymentMethod: PaymentMethod
   phone: String
   rateCurrency: CurrencyCode
   timezone: IanaTimezone
@@ -3487,7 +3676,6 @@ type TeacherProfileResult {
   id: String
   name: String
   nationalId: String
-  paymentMethod: PaymentMethod
   phone: String
   qualifications: String
   rateCurrency: CurrencyCode
@@ -3504,7 +3692,6 @@ input TeacherProfileUpdateInput {
   gender: Gender
   hourlyRate: String
   nationalId: String
-  paymentMethod: PaymentMethod
   phone: String
   qualifications: String
   rateCurrency: CurrencyCode
@@ -3574,6 +3761,8 @@ type UnifiedProfile {
   parentAdminProfile: ParentProfile
   parentId: String
   parentOwnProfile: ParentOwnProfile
+  paymentMethodDefaults: PaymentMethodDefaults
+  paymentMethods: [UserPaymentMethod!]
   scope: ProfileScope
   staffPermissionGroups: [StaffPermissionGroup!]
   staffPermissionOverrides: [StaffPermissionOverride!]
@@ -3711,6 +3900,44 @@ type UserOverride {
 input UserOverrideInput {
   permissionId: String!
   state: OverrideState!
+}
+
+type UserPaymentMethod {
+  createdAt: DateTime
+  details: PaymentMethodDetails
+  direction: PaymentDirection
+  id: String
+  isDefault: Boolean
+  label: String
+  type: PaymentMethodType
+  updatedAt: DateTime
+  userId: String
+  verifiedAt: DateTime
+  verifiedByUserId: String
+}
+
+input UserPaymentMethodCreateInput {
+  details: PaymentMethodDetailsInput!
+  direction: PaymentDirection!
+  isDefault: Boolean
+  label: String
+  type: PaymentMethodType!
+  userId: String!
+}
+
+input UserPaymentMethodInitialInput {
+  details: PaymentMethodDetailsInput!
+  direction: PaymentDirection!
+  isDefault: Boolean
+  label: String
+  type: PaymentMethodType!
+}
+
+input UserPaymentMethodUpdateInput {
+  details: PaymentMethodDetailsInput
+  direction: PaymentDirection
+  isDefault: Boolean
+  label: String
 }
 
 type WeeklyScheduleClass {

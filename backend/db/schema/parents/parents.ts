@@ -21,7 +21,6 @@ export const parents = pgTable(
     invoiceType: invoiceTypeEnum("invoice_type"),
     feeAmount: numeric("fee_amount", { precision: 12, scale: 2 }),
     currency: currencyCodeEnum("currency").$type<CurrencyCode>(),
-    displayCurrency: currencyCodeEnum("display_currency").$type<CurrencyCode>(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

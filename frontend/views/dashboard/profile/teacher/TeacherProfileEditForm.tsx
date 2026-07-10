@@ -34,6 +34,7 @@ export function TeacherProfileEditForm({
       name: "",
       email: "",
       phone: "",
+      displayCurrency: null,
     },
   });
 
@@ -42,6 +43,7 @@ export function TeacherProfileEditForm({
       name: teacherData.name ?? "",
       email: teacherData.email ?? "",
       phone: teacherData.phone ?? "",
+      displayCurrency: teacherData.displayCurrency ?? null,
     });
   }, [form, teacherData]);
 
@@ -67,6 +69,7 @@ export function TeacherProfileEditForm({
             teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
             avatarUrl={avatarUrl}
             register={form.register}
+            control={form.control}
           />
           <ContactSection mode="edit" isAdminScope={false} register={form.register} control={form.control} />
         </Box>

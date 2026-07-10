@@ -9,5 +9,3 @@ export enum InvoiceType {
   MONTHLY = "MONTHLY",
   MANUAL = "MANUAL",
 }
-
-export { PaymentMethod } from "./payment-method.enum";

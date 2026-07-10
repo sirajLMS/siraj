@@ -2,6 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AccountSection } from "@/frontend/views/dashboard/profile/parent/sections/AccountSection";
 import { AssociatedStudentsSection } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsSection";
 import { BillingSection } from "@/frontend/views/dashboard/profile/parent/sections/BillingSection";
@@ -18,12 +19,14 @@ export function ParentProfileView({
   parentData,
   associatedStudents,
   avatarUrl,
+  displayCurrency,
   isAdminScope,
   studentsLoading = false,
 }: {
   readonly parentData: ParentViewData;
   readonly associatedStudents: AssociatedStudents;
   readonly avatarUrl?: string | null;
+  readonly displayCurrency: CurrencyCode | null | undefined;
   readonly isAdminScope: boolean;
   readonly studentsLoading?: boolean;
 }) {
@@ -48,7 +51,7 @@ export function ParentProfileView({
           },
         }}
       >
-        <AccountSection mode="view" parentData={parentData} avatarUrl={avatarUrl} />
+        <AccountSection mode="view" parentData={parentData} avatarUrl={avatarUrl} displayCurrency={displayCurrency} />
         <ContactSection mode="view" parentData={parentData} />
         <SocialSection mode="view" parentData={parentData} />
 

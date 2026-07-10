@@ -6,9 +6,11 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-directory.documents";
-import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-directory.documents";
+import {
+  createManualInvoiceMutationDocument,
+  parentDirectoryQueryDocument,
+  studentDirectoryQueryDocument,
+} from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import { ManualInvoiceView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceView";
 import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";

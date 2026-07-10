@@ -4,7 +4,6 @@ import {
   ClassOutcomePothosObject,
   CurrencyCodePothosObject,
   IanaTimezonePothosObject,
-  PaymentMethodPothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
@@ -58,7 +57,6 @@ export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
     rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
-    paymentMethod: t.expose("paymentMethod", { type: PaymentMethodPothosObject, nullable: true }),
     totalClasses: t.exposeInt("totalClasses"),
   }),
 });

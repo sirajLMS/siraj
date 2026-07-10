@@ -25,7 +25,6 @@ export const parentProfileQueryDocument: TypedDocumentNode<
       twitter
       invoiceType
       feeAmount
-      paymentMethod
       currency
       timezone
       createdAt

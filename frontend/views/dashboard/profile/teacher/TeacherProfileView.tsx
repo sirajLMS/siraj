@@ -2,6 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/views/dashboard/profile/teacher/sections/CompensationSection";
@@ -15,10 +16,12 @@ import {
 export function TeacherProfileView({
   teacherData,
   avatarUrl,
+  displayCurrency,
   isAdminScope,
 }: {
   readonly teacherData: TeacherViewData;
   readonly avatarUrl?: string | null;
+  readonly displayCurrency: CurrencyCode | null | undefined;
   readonly isAdminScope: boolean;
 }) {
   const t = useTranslations("profile.teacher");
@@ -42,7 +45,7 @@ export function TeacherProfileView({
           },
         }}
       >
-        <AccountSection mode="view" teacherData={teacherData} avatarUrl={avatarUrl} />
+        <AccountSection mode="view" teacherData={teacherData} avatarUrl={avatarUrl} displayCurrency={displayCurrency} />
         <ContactSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
         <CompensationSection mode="view" teacherData={teacherData} />
         {isAdminScope && adminData ? <AdminOnlySection mode="view" adminData={adminData} /> : null}

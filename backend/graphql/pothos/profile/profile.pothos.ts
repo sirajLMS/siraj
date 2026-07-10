@@ -1,4 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  PaymentMethodDefaultsPothosObject,
+  UserPaymentMethodPothosObject,
+} from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { UserMeetingConfigPothosObject } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 import {
   ParentAssignedStudentsResultPothosObject,
@@ -93,6 +97,11 @@ export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
       nullable: true,
     }),
     meetingConfigs: t.expose("meetingConfigs", { type: [UserMeetingConfigPothosObject], nullable: true }),
+    paymentMethods: t.expose("paymentMethods", { type: [UserPaymentMethodPothosObject], nullable: true }),
+    paymentMethodDefaults: t.expose("paymentMethodDefaults", {
+      type: PaymentMethodDefaultsPothosObject,
+      nullable: true,
+    }),
     assignedStudents: t.expose("assignedStudents", { type: TeacherAssignedStudentsResultPothosObject, nullable: true }),
   }),
 });
@@ -139,7 +148,6 @@ export const ParentAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
       twitter: t.string({ required: false }),
       invoiceType: t.string({ required: false }),
       feeAmount: t.string({ required: false }),
-      paymentMethod: t.string({ required: false }),
       currency: t.field({ type: CurrencyCodePothosObject, required: false }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),

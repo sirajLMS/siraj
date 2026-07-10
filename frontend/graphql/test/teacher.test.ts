@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { CurrencyCode, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
 import {
   teacherProfileForEditQueryDocument,
@@ -23,7 +23,6 @@ function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): Teacher
     gender: overrides.gender ?? null,
     hourlyRate: overrides.hourlyRate ?? null,
     nationalId: overrides.nationalId ?? null,
-    paymentMethod: overrides.paymentMethod ?? null,
     phone: overrides.phone ?? null,
     qualifications: overrides.qualifications ?? null,
     rateCurrency: overrides.rateCurrency ?? null,
@@ -210,7 +209,6 @@ describe("GraphQL Teacher Integration Tests", () => {
           gender: Gender.Male,
           hourlyRate: "20",
           nationalId: "12345",
-          paymentMethod: PaymentMethod.BankAccount,
           phone: "+1111111111",
           qualifications: "None",
           rateCurrency: CurrencyCode.Usd,
@@ -242,7 +240,6 @@ describe("GraphQL Teacher Integration Tests", () => {
           gender: Gender.Female,
           hourlyRate: null,
           nationalId: null,
-          paymentMethod: null,
           phone: newTeacherPhoneString,
           qualifications: null,
           rateCurrency: null,
@@ -269,7 +266,6 @@ describe("GraphQL Teacher Integration Tests", () => {
           gender: Gender.Male,
           hourlyRate: "50",
           nationalId: "999888",
-          paymentMethod: PaymentMethod.Paypal,
           phone: null,
           qualifications: "Certified Instructor",
           rateCurrency: CurrencyCode.Usd,

@@ -33,6 +33,7 @@ async function seedUserFromSpec(
       email: spec.email,
       password: hashedPassword,
       isSuperAdmin: spec.isSuperAdmin,
+      displayCurrency: null,
       createdAt: now,
       updatedAt: now,
     })

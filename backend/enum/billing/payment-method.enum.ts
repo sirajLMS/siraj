@@ -1,12 +1,3 @@
-/**
- * Payment method types for invoices and transactions.
- * Aligned with GraphQL PaymentMethod enum: BANK_ACCOUNT, PAYPAL.
- */
-export enum PaymentMethod {
-  BANK_ACCOUNT = "BANK_ACCOUNT",
-  PAYPAL = "PAYPAL",
-}
-
 export enum PaymentMethodType {
   MOBILE_WALLET = "MOBILE_WALLET",
   PAYMENT_LINK = "PAYMENT_LINK",

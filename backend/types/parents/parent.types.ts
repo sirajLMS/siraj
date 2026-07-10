@@ -8,7 +8,7 @@ export type ParentEntityInput = typeof import("@/backend/db/schema").parents.$in
 
 export type ParentCreateResult = Pick<
   ParentEntity,
-  "id" | "userId" | "status" | "invoiceType" | "feeAmount" | "currency" | "displayCurrency" | "createdAt"
+  "id" | "userId" | "status" | "invoiceType" | "feeAmount" | "currency" | "createdAt"
 > & {
   readonly timezone: IanaTimezone;
 };
@@ -212,7 +212,6 @@ export type ParentProfileUpdateInput = {
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly currency?: CurrencyCode | null;
-  readonly displayCurrency?: CurrencyCode | null;
   readonly timezone?: IanaTimezone | null;
 };
 

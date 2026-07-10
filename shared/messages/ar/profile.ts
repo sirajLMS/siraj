@@ -146,6 +146,7 @@ export const profile: ProfileLabels = {
       status: "حالة الحساب",
       statusActive: "نشط",
       statusInactive: "غير نشط",
+      displayCurrency: "عملة العرض",
     },
     permissions: {
       inheritedGroups: "مجموعات الصلاحيات",

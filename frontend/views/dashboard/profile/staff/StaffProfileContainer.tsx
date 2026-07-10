@@ -31,6 +31,7 @@ function buildCoreInput(formData: StaffOwnEditFormData | StaffAdminEditFormData)
   return {
     name: formData.name.trim(),
     email: formData.email.trim(),
+    displayCurrency: formData.displayCurrency ?? null,
   };
 }
 
@@ -123,11 +124,19 @@ export function StaffProfileContainer({
 
   const staffData = profile.staffProfile;
 
+  const displayCurrency = profile.displayCurrency;
+
   if (mode === ProfileMode.View) {
-    return <StaffProfileView staffData={staffData} isAdminScope={isAdminScope} />;
+    return <StaffProfileView staffData={staffData} displayCurrency={displayCurrency} isAdminScope={isAdminScope} />;
   }
 
   return (
-    <StaffProfileEditForm staffData={staffData} isAdminScope={isAdminScope} isSaving={isSaving} onSubmit={onSubmit} />
+    <StaffProfileEditForm
+      staffData={staffData}
+      displayCurrency={displayCurrency}
+      isAdminScope={isAdminScope}
+      isSaving={isSaving}
+      onSubmit={onSubmit}
+    />
   );
 }

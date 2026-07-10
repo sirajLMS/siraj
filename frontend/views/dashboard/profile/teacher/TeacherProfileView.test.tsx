@@ -52,7 +52,10 @@ afterEach(() => {
 
 describe("TeacherProfileView admin sections", () => {
   test("hides AdminOnlySection for own scope", () => {
-    renderWithWrapper(<TeacherProfileView teacherData={teacherOwnProfile} isAdminScope={false} />, { locale: "en" });
+    renderWithWrapper(
+      <TeacherProfileView teacherData={teacherOwnProfile} displayCurrency={null} isAdminScope={false} />,
+      { locale: "en" }
+    );
 
     expect(screen.queryByText("Administrative Details")).toBeNull();
     expect(screen.queryByText("National ID")).toBeNull();
@@ -60,7 +63,10 @@ describe("TeacherProfileView admin sections", () => {
   });
 
   test("shows AdminOnlySection for admin scope", () => {
-    renderWithWrapper(<TeacherProfileView teacherData={teacherAdminProfile} isAdminScope={true} />, { locale: "en" });
+    renderWithWrapper(
+      <TeacherProfileView teacherData={teacherAdminProfile} displayCurrency={CurrencyCode.Usd} isAdminScope={true} />,
+      { locale: "en" }
+    );
 
     expect(screen.getByText("Administrative Details")).toBeTruthy();
     expect(screen.getByText("National ID")).toBeTruthy();

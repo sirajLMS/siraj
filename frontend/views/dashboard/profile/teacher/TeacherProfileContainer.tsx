@@ -13,6 +13,7 @@ import {
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
+import { PaymentMethodsTab } from "@/frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsTab";
 import { TeacherProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/teacher/sections/TeacherProfileLoadingSkeleton";
 import { isTeacherAdminData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import { AssignedStudentsTab } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsTab";
@@ -40,6 +41,7 @@ function buildCoreInput(formData: TeacherOwnEditFormData | TeacherAdminEditFormD
   return {
     name: formData.name.trim(),
     email: formData.email.trim(),
+    displayCurrency: formData.displayCurrency ?? null,
   };
 }
 
@@ -60,7 +62,6 @@ function buildAdminTeacherInput(formData: TeacherAdminEditFormData) {
     timezone: formData.timezone || null,
     hourlyRate: formData.hourlyRate || null,
     rateCurrency: formData.rateCurrency || null,
-    paymentMethod: formData.paymentMethod ?? null,
     status: formData.status ?? null,
   };
 }
@@ -69,12 +70,16 @@ function buildEditSource(scope: ProfileScope, profile: ProfileData): TeacherOwnD
   return scope === ProfileScope.Own ? profile.teacherOwnProfile : profile.teacherAdminProfile;
 }
 
-function buildEditData(teacherData: TeacherOwnData | TeacherAdminData) {
+function buildEditData(
+  teacherData: TeacherOwnData | TeacherAdminData,
+  displayCurrency: ProfileData["displayCurrency"] | undefined
+) {
   const base = {
     name: teacherData.name,
     email: teacherData.email,
     phone: teacherData.phone,
     timezone: teacherData.timezone,
+    displayCurrency: displayCurrency ?? null,
   };
 
   if (!isTeacherAdminData(teacherData)) {
@@ -90,7 +95,6 @@ function buildEditData(teacherData: TeacherOwnData | TeacherAdminData) {
     qualifications: teacherData.qualifications,
     hourlyRate: teacherData.hourlyRate,
     rateCurrency: teacherData.rateCurrency,
-    paymentMethod: teacherData.paymentMethod,
     status: teacherData.status,
   };
 }
@@ -117,6 +121,10 @@ function renderActiveTabContent({
 }: Omit<TabContentProps, "mode">) {
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
+  }
+
+  if (activeTab === "paymentMethods") {
+    return <PaymentMethodsTab targetUserId={targetUserId} />;
   }
 
   if (activeTab === "meeting" && scope === ProfileScope.Other) {
@@ -217,15 +225,28 @@ export function TeacherProfileContainer({
   }
 
   const avatarUrl = profile?.avatarUrl;
-  const editData = buildEditData(teacherData);
+  const editData = buildEditData(teacherData, profile?.displayCurrency);
+  const displayCurrency = profile?.displayCurrency;
 
   if (mode === ProfileMode.View) {
-    return <TeacherProfileView teacherData={teacherData} avatarUrl={avatarUrl} isAdminScope={isAdminScope} />;
+    return (
+      <TeacherProfileView
+        teacherData={teacherData}
+        avatarUrl={avatarUrl}
+        displayCurrency={displayCurrency}
+        isAdminScope={isAdminScope}
+      />
+    );
   }
 
   if (scope === ProfileScope.Own) {
     return (
-      <TeacherProfileEditForm teacherData={editData} avatarUrl={avatarUrl} isSaving={isSaving} onSubmit={onSubmitOwn} />
+      <TeacherProfileEditForm
+        teacherData={editData}
+        avatarUrl={avatarUrl}
+        isSaving={isSaving}
+        onSubmit={onSubmitOwn}
+      />
     );
   }
 

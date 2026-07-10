@@ -50,8 +50,10 @@ describe("profileByUserIdQueryDocument", () => {
     expect(mutationSource).toContain("parentAdminProfile");
     expect(mutationSource).toContain("invoiceType");
     expect(mutationSource).toContain("feeAmount");
-    expect(mutationSource).toContain("paymentMethod");
+    expect(mutationSource).toContain("paymentMethods");
+    expect(mutationSource).toContain("paymentMethodDefaults");
     expect(mutationSource).toContain("currency");
+    expect(mutationSource).toContain("displayCurrency");
     expect(mutationSource).toContain("timezone");
     expect(mutationSource).toContain("status");
     expect(mutationSource).toContain("avatarUrl");

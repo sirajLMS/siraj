@@ -46,6 +46,13 @@ function buildProviderInput(slug: string) {
   };
 }
 
+function expectProviderIdsInclude(results: { id: string }[], expectedIds: string[]) {
+  const ids = results.map(row => row.id);
+  for (const expectedId of expectedIds) {
+    expect(ids).toContain(expectedId);
+  }
+}
+
 describe("MeetingProviderRepository", () => {
   providerTest("create inserts a meeting provider", async tx => {
     const slug = `zoom-${randomUUID().slice(0, 8)}`;
@@ -93,9 +100,7 @@ describe("MeetingProviderRepository", () => {
     });
 
     const results = await MeetingProviderRepository.listActive(tx);
-    const ids = results.map(row => row.id);
-
-    expect(ids).toContain(active.id);
+    expectProviderIdsInclude(results, [active.id]);
     expect(results.every(row => row.isActive)).toBe(true);
   });
 
@@ -107,10 +112,7 @@ describe("MeetingProviderRepository", () => {
     });
 
     const results = await MeetingProviderRepository.listAll(tx);
-    const ids = results.map(row => row.id);
-
-    expect(ids).toContain(active.id);
-    expect(ids).toContain(inactive.id);
+    expectProviderIdsInclude(results, [active.id, inactive.id]);
   });
 
   providerTest("update modifies provider fields", async tx => {

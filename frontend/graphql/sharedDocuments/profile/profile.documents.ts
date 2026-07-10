@@ -1,7 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
+import {
+  PAYMENT_METHOD_DEFAULTS_FIELDS,
+  USER_PAYMENT_METHOD_FIELDS,
+} from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
 export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileByUserIdQuery> = gql`
+  ${USER_PAYMENT_METHOD_FIELDS}
+  ${PAYMENT_METHOD_DEFAULTS_FIELDS}
   query ProfileByUserId($userId: String!) {
     profileByUserId(userId: $userId) {
       id
@@ -23,7 +29,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         timezone
         hourlyRate
         rateCurrency
-        paymentMethod
         totalClasses
       }
       teacherAdminProfile {
@@ -41,7 +46,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         rateCurrency
         status
         updatedAt
-        paymentMethod
         totalClasses
         avgEngagementScore
       }
@@ -69,11 +73,16 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         twitter
         invoiceType
         feeAmount
-        paymentMethod
         currency
         timezone
         createdAt
         updatedAt
+      }
+      paymentMethods {
+        ...UserPaymentMethodFields
+      }
+      paymentMethodDefaults {
+        ...PaymentMethodDefaultsFields
       }
       associatedStudents {
         id
@@ -158,6 +167,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
 `;
 
 export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.UpdateOwnProfileMutation> = gql`
+  ${USER_PAYMENT_METHOD_FIELDS}
   mutation UpdateOwnProfile($input: UpdateOwnProfileInput!) {
     updateOwnProfile(input: $input) {
       id
@@ -179,7 +189,6 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         timezone
         hourlyRate
         rateCurrency
-        paymentMethod
         totalClasses
       }
       parentOwnProfile {
@@ -204,6 +213,8 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
 `;
 
 export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.UpdateUserProfileMutation> = gql`
+  ${USER_PAYMENT_METHOD_FIELDS}
+  ${PAYMENT_METHOD_DEFAULTS_FIELDS}
   mutation UpdateUserProfile($userId: String!, $input: UpdateUserProfileInput!) {
     updateUserProfile(userId: $userId, input: $input) {
       id
@@ -230,7 +241,6 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         timezone
         hourlyRate
         rateCurrency
-        paymentMethod
         status
         updatedAt
         totalClasses
@@ -251,11 +261,16 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         twitter
         invoiceType
         feeAmount
-        paymentMethod
         currency
         timezone
         createdAt
         updatedAt
+      }
+      paymentMethods {
+        ...UserPaymentMethodFields
+      }
+      paymentMethodDefaults {
+        ...PaymentMethodDefaultsFields
       }
       staffProfile {
         id

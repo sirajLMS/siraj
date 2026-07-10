@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 describe("ProfileTabNav", () => {
-  test("hides Banking tab for teacher in own scope", () => {
+  test("hides Meeting tab for teacher in own scope", () => {
     mockNavigation();
     renderWithWrapper(
       <ProfileTabNav
@@ -47,7 +47,7 @@ describe("ProfileTabNav", () => {
       }
     );
 
-    expect(screen.queryByText("Banking")).toBeNull();
+    expect(screen.queryByText("Meeting")).toBeNull();
     expect(screen.queryByText("Students")).toBeNull();
     expect(screen.getAllByText("Notifications").length).toBeGreaterThan(0);
   });

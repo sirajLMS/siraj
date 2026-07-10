@@ -16,7 +16,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   NotificationEventType.ClassReminder,
   NotificationEventType.InvoiceGenerated,
   NotificationEventType.ComplaintResponse,
-  NotificationEventType.BankingDetailsChanged,
+  NotificationEventType.PaymentMethodChanged,
   NotificationEventType.NewComplaint,
   NotificationEventType.NewSuggestion,
   NotificationEventType.SuggestionAcknowledged,

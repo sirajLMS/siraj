@@ -47,12 +47,7 @@ describe("PaymentMethodService profile scope", () => {
     const { PaymentMethodService } = await import("@/backend/services/payment-method/payment-method.service");
     const { ProfileScope } = await import("@/backend/enum");
 
-    const methods = await PaymentMethodService.listForProfile(
-      "actor-1",
-      "actor-2",
-      ProfileScope.OWN,
-      "en"
-    );
+    const methods = await PaymentMethodService.listForProfile("actor-1", "actor-2", ProfileScope.OWN, "en");
     expect(methods).toBeNull();
   });
 });

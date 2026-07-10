@@ -48,9 +48,9 @@ export function ParentProfileEditForm({
       address: "",
       invoiceType: "",
       feeAmount: "",
-      paymentMethod: "",
       currency: undefined,
       timezone: "",
+      displayCurrency: null,
     },
   });
 
@@ -66,9 +66,9 @@ export function ParentProfileEditForm({
       address: parentData.address ?? "",
       invoiceType: parentData.invoiceType ?? "",
       feeAmount: parentData.feeAmount ?? "",
-      paymentMethod: parentData.paymentMethod ?? "",
       currency: parentData.currency ?? undefined,
       timezone: parentData.timezone ?? "",
+      displayCurrency: parentData.displayCurrency ?? null,
     });
   }, [form, parentData]);
 
@@ -94,6 +94,7 @@ export function ParentProfileEditForm({
             parentData={{ name: parentData.name ?? null, email: parentData.email ?? null }}
             avatarUrl={avatarUrl}
             register={form.register}
+            control={form.control}
           />
           <ContactSection mode="edit" control={form.control} />
           <SocialSection mode="edit" register={form.register} control={form.control} />

@@ -35,6 +35,7 @@ function buildCoreInput(formData: ParentAdminEditFormData) {
   return {
     name: formData.name.trim(),
     email: formData.email.trim(),
+    displayCurrency: formData.displayCurrency ?? null,
   };
 }
 
@@ -54,7 +55,6 @@ function buildAdminParentInput(formData: ParentAdminEditFormData) {
     address: formData.address || null,
     invoiceType: formData.invoiceType || null,
     feeAmount: formData.feeAmount || null,
-    paymentMethod: formData.paymentMethod || null,
     currency: formData.currency || null,
     timezone: formData.timezone || null,
   };
@@ -62,6 +62,37 @@ function buildAdminParentInput(formData: ParentAdminEditFormData) {
 
 function buildEditSource(scope: ProfileScope, profile: ProfileData): ParentOwnData | ParentAdminData | null {
   return scope === ProfileScope.Own ? profile.parentOwnProfile : profile.parentAdminProfile;
+}
+
+function buildEditData(
+  scope: ProfileScope,
+  parentData: ParentOwnData | ParentAdminData,
+  displayCurrency: ProfileData["displayCurrency"]
+): ParentAdminEditFormData {
+  const base = {
+    name: parentData.name ?? "",
+    email: parentData.email ?? "",
+    phone: parentData.phone ?? "",
+    facebook: parentData.facebook ?? "",
+    whatsapp: parentData.whatsapp ?? "",
+    twitter: parentData.twitter ?? "",
+    displayCurrency: displayCurrency ?? null,
+  };
+
+  if (scope === ProfileScope.Own) {
+    return base;
+  }
+
+  const adminData = parentData as ParentAdminData;
+  return {
+    ...base,
+    nationality: adminData.nationality ?? "",
+    address: adminData.address ?? "",
+    invoiceType: adminData.invoiceType ?? "",
+    feeAmount: adminData.feeAmount ?? "",
+    currency: adminData.currency ?? undefined,
+    timezone: adminData.timezone ?? "",
+  };
 }
 
 export function ParentProfileContainer({
@@ -135,6 +166,8 @@ export function ParentProfileContainer({
   }
 
   const avatarUrl = profile.avatarUrl ?? ("avatarUrl" in parentData ? parentData.avatarUrl : null);
+  const displayCurrency = profile.displayCurrency;
+  const editData = buildEditData(scope, parentData, displayCurrency);
 
   if (mode === ProfileMode.View) {
     return (
@@ -142,6 +175,7 @@ export function ParentProfileContainer({
         parentData={parentData}
         associatedStudents={profile.associatedStudents}
         avatarUrl={avatarUrl}
+        displayCurrency={displayCurrency}
         isAdminScope={isAdminScope}
         studentsLoading={loading}
       />
@@ -150,7 +184,7 @@ export function ParentProfileContainer({
 
   return (
     <ParentProfileEditForm
-      parentData={parentData}
+      parentData={editData}
       avatarUrl={avatarUrl}
       isAdminScope={isAdminScope}
       isSaving={isSaving}

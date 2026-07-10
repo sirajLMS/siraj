@@ -4,7 +4,6 @@ import {
   CurrencyCodePothosObject,
   GenderPothosObject,
   IanaTimezonePothosObject,
-  PaymentMethodPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 
@@ -31,11 +30,6 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     }),
     status: t.expose("status", { type: AccountStatusPothosObject }),
     updatedAt: t.exposeString("updatedAt"),
-    paymentMethod: t.expose("paymentMethod", {
-      type: PaymentMethodPothosObject,
-      nullable: true,
-      authScopes: { superAdmin: true },
-    }),
     totalClasses: t.exposeInt("totalClasses"),
     avgEngagementScore: t.exposeFloat("avgEngagementScore"),
   }),
@@ -54,7 +48,6 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
       timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
       hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
-      paymentMethod: t.field({ type: PaymentMethodPothosObject, required: false }),
       status: t.field({ type: AccountStatusPothosObject, required: false }),
     }),
   });

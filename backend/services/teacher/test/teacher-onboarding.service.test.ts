@@ -1,8 +1,8 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { CurrencyCode } from "@/backend/enum";
+import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
@@ -16,7 +16,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
       await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
         name: "Test",
         email: "test@test.com",
-        password: randomUUID(),
+        password: "TestPassword1!",
         timezone: "UTC",
       });
     } catch (e) {
@@ -40,17 +40,25 @@ describe("TeacherOnboardingService.createTeacher", () => {
         {
           name: "New Teacher",
           email: "newteacher@test.com",
-          password: randomUUID(),
+          password: "TestPassword1!",
           timezone: IanaTimezone.America_New_York,
           nationality: "US",
           phone: "+1234567890",
           gender: "MALE",
           hourlyRate: "30.00",
           rateCurrency: CurrencyCode.USD,
-          beneficiaryName: "John Doe",
-          bankName: "Test Bank",
-          accountNumber: "123456789",
-          iban: "US123456789",
+          initialPayoutMethod: {
+            type: PaymentMethodType.BANK_TRANSFER,
+            direction: PaymentDirection.PAYOUT,
+            isDefault: true,
+            label: "Primary payout",
+            details: {
+              beneficiaryName: "John Doe",
+              bankName: "Test Bank",
+              accountNumber: "123456789",
+              iban: "US123456789",
+            },
+          },
         },
         "en",
         txContext
@@ -76,7 +84,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
       await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
         name: "Dup Teacher",
         email: "existing@test.com",
-        password: randomUUID(),
+        password: "TestPassword1!",
         timezone: "UTC",
       });
     } catch (e) {
@@ -104,7 +112,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
       await TeacherOnboardingService.createTeacher("00000000-0000-0000-0000-000000000000", {
         name: "Rollback Teacher",
         email: createdEmail,
-        password: randomUUID(),
+        password: "TestPassword1!",
         timezone: "UTC",
       });
     } catch (e) {
@@ -113,7 +121,6 @@ describe("TeacherOnboardingService.createTeacher", () => {
 
     expect(error).not.toBeNull();
 
-    // Verify user doesn't exist in DB outside transaction
     const exists = await UserRepository.existsByEmail(createdEmail);
     expect(exists).toBeFalse();
 

@@ -1,5 +1,6 @@
 import type { CountryCode, Gender } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { UserPaymentMethodInitialInputPothos, type UserPaymentMethodInitialGqlInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   CountryCodePothosObject,
   CurrencyCodePothosObject,
@@ -10,10 +11,12 @@ import type { Email } from "@/backend/lib/email";
 import type { TeacherOnboardingInput } from "@/backend/services/teacher/teacher-onboarding.service";
 import type { TeacherOnboardingReturnType } from "@/backend/types/teachers/teacher-onboarding.types";
 
-export interface TeacherOnboardingGqlInput extends Omit<TeacherOnboardingInput, "email" | "gender" | "countryCode"> {
+export interface TeacherOnboardingGqlInput
+  extends Omit<TeacherOnboardingInput, "email" | "gender" | "countryCode" | "initialPayoutMethod"> {
   email: Email;
   gender?: Gender | null;
   countryCode?: CountryCode | null;
+  initialPayoutMethod?: UserPaymentMethodInitialGqlInput | null;
 }
 
 export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
@@ -64,15 +67,10 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         type: CurrencyCodePothosObject,
         description: "Currency for hourly rate",
       }),
-      beneficiaryName: t.string({
-        description: "Banking beneficiary name",
-        directives: { constraint: { maxLength: 512 } },
+      initialPayoutMethod: t.field({
+        type: UserPaymentMethodInitialInputPothos,
+        description: "Optional initial payout payment method for the teacher",
       }),
-      bankName: t.string({ description: "Bank name", directives: { constraint: { maxLength: 512 } } }),
-      accountNumber: t.string({ description: "Bank account number", directives: { constraint: { maxLength: 512 } } }),
-      routingNumber: t.string({ description: "Bank routing number", directives: { constraint: { maxLength: 512 } } }),
-      swiftBic: t.string({ description: "SWIFT/BIC code", directives: { constraint: { maxLength: 512 } } }),
-      iban: t.string({ description: "IBAN", directives: { constraint: { maxLength: 512 } } }),
     }),
   });
 

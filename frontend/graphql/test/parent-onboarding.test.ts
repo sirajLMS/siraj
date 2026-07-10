@@ -1,6 +1,12 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { CurrencyCode, IanaTimezone, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  CurrencyCode,
+  IanaTimezone,
+  InvoiceType,
+  PaymentDirection,
+  PaymentMethodType,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-onboarding.documents";
 import {
   authenticatedRequest,
@@ -22,7 +28,7 @@ const createMinimalParentInput = (
   phone: null,
   invoiceType: null,
   feeAmount: null,
-  paymentMethod: null,
+  initialPayinMethod: null,
   currency: null,
   timezone: IanaTimezone.Utc,
   address: null,
@@ -38,7 +44,13 @@ const createFullParentInput = (
     email: string;
     invoiceType: InvoiceType | null;
     feeAmount: string | null;
-    paymentMethod: PaymentMethod | null;
+    initialPayinMethod: {
+      type: PaymentMethodType;
+      direction: PaymentDirection;
+      isDefault?: boolean | null;
+      label?: string | null;
+      details: Record<string, string | null>;
+    } | null;
     currency: CurrencyCode | null;
     timezone: IanaTimezone | null;
     address: string | null;
@@ -56,7 +68,27 @@ const createFullParentInput = (
   phone: overrides?.phone ?? "+1234567890",
   invoiceType: overrides?.invoiceType ?? InvoiceType.Monthly,
   feeAmount: overrides?.feeAmount ?? "500.00",
-  paymentMethod: overrides?.paymentMethod ?? PaymentMethod.BankAccount,
+  initialPayinMethod: overrides?.initialPayinMethod ?? {
+    type: PaymentMethodType.BankTransfer,
+    direction: PaymentDirection.Payin,
+    isDefault: true,
+    label: "Primary bank",
+    details: {
+      iban: "EG123456789012345678901234",
+      bankName: "Test Bank",
+      beneficiaryName: "Test Parent",
+      swiftBic: null,
+      accountNumber: null,
+      routingNumber: null,
+      note: null,
+      walletId: null,
+      phone: null,
+      paymentLinkId: null,
+      url: null,
+      onlineAccountId: null,
+      identifier: null,
+    },
+  },
   currency: overrides?.currency ?? CurrencyCode.Usd,
   timezone: overrides?.timezone ?? IanaTimezone.AmericaChicago,
   address: overrides?.address ?? "123 Main St",

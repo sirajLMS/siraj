@@ -28,7 +28,6 @@ export const teacherOwnProfileQueryDocument: TypedDocumentNode<Operations.Teache
       timezone
       hourlyRate
       rateCurrency
-      paymentMethod
     }
   }
 `;

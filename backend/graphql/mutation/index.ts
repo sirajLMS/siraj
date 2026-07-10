@@ -4,6 +4,7 @@
 // `import "@/backend/graphql/mutation"` (from gqlSchema.ts) registers all mutations.
 
 import "./auth";
+import "./billing";
 import "./classes";
 import "./meeting";
 import "./notifications";
