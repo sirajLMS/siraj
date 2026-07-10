@@ -13,9 +13,11 @@ import {
   PrimaryPageAction,
   UserAvatar,
 } from "@/frontend/components/ui";
+import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import { ContextualHelperCards } from "@/frontend/views/dashboard/students/quota/components/ContextualHelperCards";
 import { CourseDetailsSection } from "@/frontend/views/dashboard/students/quota/components/CourseDetailsSection";
 import { StudentInformationSection } from "@/frontend/views/dashboard/students/quota/components/StudentInformationSection";
+import { QuotaFormAccessProvider } from "@/frontend/views/dashboard/students/quota/QuotaFormAccessContext";
 import {
   createStudentQuotaSchema,
   type StudentQuotaFormData,
@@ -28,7 +30,7 @@ import type {
 } from "@/frontend/views/dashboard/students/quota/types";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
-function MobileProfileHeader({ studentData, onEditAvatar }: Readonly<MobileProfileHeaderProps>) {
+function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Readonly<MobileProfileHeaderProps>) {
   const t = useTranslations("dashboard.studentQuota");
   return (
     <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", alignItems: "center", py: 4 }}>
@@ -42,21 +44,23 @@ function MobileProfileHeader({ studentData, onEditAvatar }: Readonly<MobileProfi
             boxShadow: theme.palette.shadow.card,
           })}
         />
-        <IconButton
-          onClick={onEditAvatar}
-          sx={theme => ({
-            position: "absolute",
-            bottom: 0,
-            right: 0,
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            p: 0.75,
-            border: `2px solid ${theme.palette.background.paper}`,
-            "&:hover": { backgroundColor: theme.palette.primary.dark },
-          })}
-        >
-          <EditOutlined sx={{ fontSize: 18 }} />
-        </IconButton>
+        {showAvatarEdit ? (
+          <IconButton
+            onClick={onEditAvatar}
+            sx={theme => ({
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.onPrimary,
+              p: 0.75,
+              border: `2px solid ${theme.palette.background.paper}`,
+              "&:hover": { backgroundColor: theme.palette.primary.dark },
+            })}
+          >
+            <EditOutlined sx={{ fontSize: 18 }} />
+          </IconButton>
+        ) : null}
       </Box>
       <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
         {t("studentId", { id: studentData.id.replace("SRJ-", "") })}
@@ -74,7 +78,14 @@ function DesktopBreadcrumbs(
   ];
 }
 
-function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<FormActionsProps>) {
+function FormActions({
+  isSaving,
+  isSaved,
+  studentData,
+  onCancel,
+  readOnly = false,
+  showCancel = true,
+}: Readonly<FormActionsProps>) {
   const t = useTranslations("dashboard.studentQuota");
 
   let saveIcon = <Save />;
@@ -104,43 +115,47 @@ function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<Form
           width: { xs: "100%", md: "auto" },
         }}
       >
-        <PrimaryPageAction
-          type="submit"
-          disabled={isSaving || isSaved}
-          startIcon={saveIcon}
-          sx={theme => ({
-            height: { xs: 56, md: 48 },
-            px: { xs: 0, md: 5 },
-            backgroundColor: isSaved ? theme.palette.primary.main : theme.palette.success.main,
-            color: isSaved ? theme.palette.onPrimary : theme.palette.onSuccess,
-            "&:hover": { backgroundColor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
-            "&.Mui-disabled": {
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.onPrimary,
-              opacity: 0.8,
-            },
-            width: { xs: "100%", md: "auto" },
-          })}
-        >
-          {saveText}
-        </PrimaryPageAction>
-        <PrimaryPageAction
-          type="button"
-          variant="text"
-          onClick={onCancel}
-          sx={theme => ({
-            height: { xs: 48, md: 48 },
-            px: { xs: 0, md: 4 },
-            color: theme.palette.onSurfaceVariant,
-            "&:hover": {
-              color: theme.palette.error.main,
-              backgroundColor: { xs: theme.palette.surfaceContainerLow, md: "transparent" },
-            },
-            width: { xs: "100%", md: "auto" },
-          })}
-        >
-          {t("actions.cancel")}
-        </PrimaryPageAction>
+        {readOnly ? null : (
+          <PrimaryPageAction
+            type="submit"
+            disabled={isSaving || isSaved}
+            startIcon={saveIcon}
+            sx={theme => ({
+              height: { xs: 56, md: 48 },
+              px: { xs: 0, md: 5 },
+              backgroundColor: isSaved ? theme.palette.primary.main : theme.palette.success.main,
+              color: isSaved ? theme.palette.onPrimary : theme.palette.onSuccess,
+              "&:hover": { backgroundColor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
+              "&.Mui-disabled": {
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.onPrimary,
+                opacity: 0.8,
+              },
+              width: { xs: "100%", md: "auto" },
+            })}
+          >
+            {saveText}
+          </PrimaryPageAction>
+        )}
+        {showCancel ? (
+          <PrimaryPageAction
+            type="button"
+            variant="text"
+            onClick={onCancel}
+            sx={theme => ({
+              height: { xs: 48, md: 48 },
+              px: { xs: 0, md: 4 },
+              color: theme.palette.onSurfaceVariant,
+              "&:hover": {
+                color: theme.palette.error.main,
+                backgroundColor: { xs: theme.palette.surfaceContainerLow, md: "transparent" },
+              },
+              width: { xs: "100%", md: "auto" },
+            })}
+          >
+            {t("actions.cancel")}
+          </PrimaryPageAction>
+        ) : null}
       </Box>
 
       <Box
@@ -165,12 +180,19 @@ export function StudentQuotaView({
   isLoading,
   isSaving,
   isSaved,
+  embedded = false,
+  readOnly = false,
   onSave,
   onCancel,
-  onEditAvatar,
 }: Readonly<StudentQuotaViewProps>) {
   const t = useTranslations("dashboard.studentQuota");
   const validationMessages = useTranslations("dashboard.studentQuota.validation");
+  const { canView, canEdit } = useStudentFieldAccess();
+  const canEditIdentity = canEdit("student_identity");
+  const canEditQuota = canEdit("student_quota_edit");
+  const canViewQuota = canView("student_quota_edit");
+  const canViewTeacher = canView("student_teacher");
+  const showAvatarEdit = !embedded && !readOnly && canEditIdentity;
 
   const schema = createStudentQuotaSchema(
     validationMessages as unknown as MessageSchema["dashboard"]["studentQuota"]["validation"]
@@ -208,57 +230,85 @@ export function StudentQuotaView({
   };
 
   if (isLoading || !studentData) {
-    return (
-      <PageContainer>
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-          <CircularProgress />
-        </Box>
-      </PageContainer>
+    const loadingContent = (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
     );
+    return embedded ? loadingContent : <PageContainer>{loadingContent}</PageContainer>;
   }
 
-  return (
-    <PageContainer>
-      <MobileProfileHeader studentData={studentData} onEditAvatar={onEditAvatar} />
-      <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
-        <PageHeader title={t("breadcrumbs.editProfile")} titleVariant="titleLg" breadcrumbs={DesktopBreadcrumbs(t)} />
-      </Box>
+  const formContent = (
+    <>
+      {!embedded ? <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} /> : null}
+      {!embedded ? (
+        <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
+          <PageHeader title={t("breadcrumbs.editProfile")} titleVariant="titleLg" breadcrumbs={DesktopBreadcrumbs(t)} />
+        </Box>
+      ) : null}
 
       <Box
         sx={theme => ({
-          backgroundColor: { xs: "transparent", md: theme.palette.background.paper },
-          borderRadius: { xs: 0, md: "xl" },
-          boxShadow: { xs: "none", md: theme.palette.shadow.card },
-          border: { xs: "none", md: `1px solid ${theme.palette.border.light}` },
+          backgroundColor: { xs: "transparent", md: embedded ? "transparent" : theme.palette.background.paper },
+          borderRadius: { xs: 0, md: embedded ? 0 : "xl" },
+          boxShadow: { xs: "none", md: embedded ? "none" : theme.palette.shadow.card },
+          border: { xs: "none", md: embedded ? "none" : `1px solid ${theme.palette.border.light}` },
           overflow: "hidden",
           maxWidth: "4xl",
           mx: "auto",
         })}
       >
         <FormProvider {...(methods as unknown as UseFormReturn<StudentQuotaFormData>)}>
-          <Box
-            component="form"
-            onSubmit={e => {
-              e.preventDefault();
-              methods.handleSubmit(onSubmit)(e);
-            }}
-            sx={{
-              p: { xs: 0, md: 4 },
-              display: "flex",
-              flexDirection: "column",
-              gap: { xs: 4, md: 6 },
+          <QuotaFormAccessProvider
+            value={{
+              readOnly,
+              canEditIdentity,
+              canEditQuota,
+              canViewQuota,
+              canViewTeacher,
             }}
           >
-            <StudentInformationSection />
-            <CourseDetailsSection />
-            <FormActions isSaving={isSaving} isSaved={isSaved} studentData={studentData} onCancel={onCancel} />
-          </Box>
+            <Box
+              component="form"
+              onSubmit={e => {
+                e.preventDefault();
+                if (!readOnly) {
+                  methods.handleSubmit(onSubmit)(e);
+                }
+              }}
+              sx={{
+                p: { xs: 0, md: embedded ? 0 : 4 },
+                display: "flex",
+                flexDirection: "column",
+                gap: { xs: 4, md: 6 },
+              }}
+            >
+              <StudentInformationSection />
+              <CourseDetailsSection />
+              <FormActions
+                isSaving={isSaving}
+                isSaved={isSaved}
+                studentData={studentData}
+                onCancel={onCancel}
+                readOnly={readOnly}
+                showCancel={!embedded}
+              />
+            </Box>
+          </QuotaFormAccessProvider>
         </FormProvider>
       </Box>
 
-      <Box sx={{ maxWidth: "4xl", mx: "auto" }}>
-        <ContextualHelperCards />
-      </Box>
-    </PageContainer>
+      {!embedded ? (
+        <Box sx={{ maxWidth: "4xl", mx: "auto" }}>
+          <ContextualHelperCards />
+        </Box>
+      ) : null}
+    </>
   );
+
+  if (embedded) {
+    return formContent;
+  }
+
+  return <PageContainer>{formContent}</PageContainer>;
 }

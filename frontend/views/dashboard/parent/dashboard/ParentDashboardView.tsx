@@ -37,7 +37,6 @@ interface ParentDashboardViewProps {
   readonly onViewFullWeek: () => void;
   readonly onViewAll: () => void;
   readonly onHistory: (id: string) => void;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onDownloadReport: () => void;
   readonly onLearnMore: () => void;
   readonly onSupport: () => void;
@@ -93,7 +92,6 @@ export function ParentDashboardView({
   onViewFullWeek,
   onViewAll,
   onHistory,
-  onJoinVideo,
   onDownloadReport,
   onLearnMore,
   onSupport,
@@ -117,12 +115,7 @@ export function ParentDashboardView({
       {isMobile ? (
         <Box sx={{ mb: 4 }}>
           <MobileScheduleHeader labels={labels} onViewAll={onViewAll} />
-          <ParentScheduleCardList
-            rows={scheduleRows}
-            labels={labels}
-            onJoinVideo={onJoinVideo}
-            pagination={schedulePagination}
-          />
+          <ParentScheduleCardList rows={scheduleRows} labels={labels} pagination={schedulePagination} />
         </Box>
       ) : (
         <SectionPanel
@@ -134,7 +127,6 @@ export function ParentDashboardView({
             rows={scheduleRows}
             labels={labels}
             onHistory={onHistory}
-            onJoinVideo={onJoinVideo}
             pagination={schedulePagination}
           />
         </SectionPanel>

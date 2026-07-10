@@ -3,47 +3,6 @@ export interface DestructiveDbSafetyAssessment {
   reasons: string[];
 }
 
-const MANAGED_DB_HOST_PATTERNS: RegExp[] = [
-  /neon\.tech$/i,
-  /aws\.neon\.tech$/i,
-  /supabase\.co$/i,
-  /supabase\.com$/i,
-  /rds\.amazonaws\.com$/i,
-  /render\.com$/i,
-  /railway\.app$/i,
-  /cockroachlabs\.cloud$/i,
-  /postgres\.database\.azure\.com$/i,
-  /digitalocean\.com$/i,
-];
-
-const PRODUCTION_HOST_MARKERS: RegExp[] = [/-prod\./i, /\.prod\./i, /-prod-/i, /-production/i, /\.production\./i];
-
-function _getDatabaseUrlHostReasons(databaseUrl: string): string[] {
-  const reasons: string[] = [];
-
-  try {
-    const hostname = new URL(databaseUrl).hostname.toLowerCase();
-
-    for (const pattern of MANAGED_DB_HOST_PATTERNS) {
-      if (pattern.test(hostname)) {
-        reasons.push(`DATABASE_URL host matches cloud pattern: ${hostname}`);
-        return reasons;
-      }
-    }
-
-    for (const pattern of PRODUCTION_HOST_MARKERS) {
-      if (pattern.test(hostname)) {
-        reasons.push(`DATABASE_URL host matches production pattern: ${hostname}`);
-        return reasons;
-      }
-    }
-  } catch {
-    // Invalid URL — skip host-based checks
-  }
-
-  return reasons;
-}
-
 function getCloudProviderReasons(): string[] {
   const reasons: string[] = [];
 

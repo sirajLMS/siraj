@@ -1,10 +1,10 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
-import { AppPermission, StudentStatus } from "@/backend/enum";
-import { parseClassExecutionState, parseStudentStatus } from "@/backend/lib/enum";
+import { ClassOutcome, StudentStatus } from "@/backend/enum";
+import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { assertStudentFieldView, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
 
 export namespace StudentStatusService {
@@ -13,8 +13,10 @@ export namespace StudentStatusService {
     studentId: string,
     locale?: string
   ): Promise<StudentUpcomingClassesResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED);
-    if (!hasPermission) {
+    const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
+    try {
+      assertStudentFieldView(fieldCtx, "student_schedule");
+    } catch {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
     }
@@ -33,6 +35,7 @@ export namespace StudentStatusService {
         return {
           ...c,
           executionState: parseClassExecutionState(c.executionState),
+          outcome: parseClassOutcome(c.outcome) ?? ClassOutcome.PENDING,
           meetingJoinUrl: effectiveMeeting.joinUrl,
           effectiveMeeting,
         };

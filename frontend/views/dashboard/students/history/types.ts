@@ -38,6 +38,7 @@ export interface StudentHistoryViewProps {
   readonly classes: Readonly<Partial<Record<number, ClassSession>>>;
   readonly selectedWeek: number;
   readonly selectedDay: number | null;
+  readonly embedded?: boolean;
   readonly onSelectWeek: (week: number) => void;
   readonly onSelectDay: (day: number | null) => void;
   readonly onPrevMonth: () => void;

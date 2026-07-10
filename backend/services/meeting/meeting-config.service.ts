@@ -7,11 +7,14 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
-import type { ClassMeetingConfigSelectType } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
   ClassMeetingConfigInsertType,
+  ClassMeetingConfigSelectType,
+} from "@/backend/types/meeting/class-meeting-config.types";
+import type {
   UpdateUserMeetingConfigInput,
   UserMeetingConfigReturnType,
+  UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
 } from "@/backend/types/meeting/meeting-config.types";
 

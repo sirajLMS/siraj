@@ -9,7 +9,7 @@ export interface ScheduleAlert {
   readonly pulse?: boolean;
 }
 
-export type ClassSessionAction = "join_session" | "leave_disabled" | "leave_enabled" | "view_recording";
+export type ClassSessionAction = "join_session" | "leave_disabled" | "leave_enabled" | "view_class_audit";
 
 export type ClassSessionStatus = "active" | "upcoming" | "missed";
 

@@ -50,4 +50,6 @@ export const reports: ReportsLabels = {
     onBreak: "On break",
   },
   noEntries: "No report data for this range",
+  reportMultiCurrencyNote:
+    "Financial distribution shows amounts in their original currencies. Use the report filter to narrow by teacher for currency-specific totals.",
 };

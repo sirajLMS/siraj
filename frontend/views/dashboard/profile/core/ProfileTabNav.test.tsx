@@ -32,6 +32,24 @@ afterEach(() => {
 });
 
 describe("ProfileTabNav", () => {
+  test("shows Meeting tab for teacher in own scope with view_own permission", () => {
+    mockNavigation();
+    renderWithWrapper(
+      <ProfileTabNav
+        audience={ProfileAudience.Teacher}
+        scope={ProfileScope.Own}
+        currentTab="profile"
+        onTabChange={() => {}}
+      />,
+      {
+        ...enLocale,
+        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfileMeetingConfigsViewOwn],
+      }
+    );
+
+    expect(screen.getAllByText("Meeting").length).toBeGreaterThan(0);
+  });
+
   test("shows Meeting tab for teacher in own scope with manage_own permission", () => {
     mockNavigation();
     renderWithWrapper(
@@ -109,6 +127,60 @@ describe("ProfileTabNav", () => {
 
     expect(screen.getAllByText("Students").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Meeting").length).toBeGreaterThan(0);
+  });
+
+  test("hides Permissions tab for teacher admin with legacy edit only", () => {
+    mockNavigation();
+    renderWithWrapper(
+      <ProfileTabNav
+        audience={ProfileAudience.Teacher}
+        scope={ProfileScope.Other}
+        currentTab="profile"
+        onTabChange={() => {}}
+      />,
+      {
+        ...enLocale,
+        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.UserEditProfile],
+      }
+    );
+
+    expect(screen.queryByText("Permissions")).toBeNull();
+  });
+
+  test("shows Payment Methods tab when view permission granted", () => {
+    mockNavigation();
+    renderWithWrapper(
+      <ProfileTabNav
+        audience={ProfileAudience.Parent}
+        scope={ProfileScope.Own}
+        currentTab="profile"
+        onTabChange={() => {}}
+      />,
+      {
+        ...enLocale,
+        permissions: [AppPermission.AuthViewOwnProfile, AppPermission.ProfilePaymentMethodsViewOwn],
+      }
+    );
+
+    expect(screen.getAllByText("Payment Methods").length).toBeGreaterThan(0);
+  });
+
+  test("hides Payment Methods tab without view permission", () => {
+    mockNavigation();
+    renderWithWrapper(
+      <ProfileTabNav
+        audience={ProfileAudience.Parent}
+        scope={ProfileScope.Own}
+        currentTab="profile"
+        onTabChange={() => {}}
+      />,
+      {
+        ...enLocale,
+        permissions: [AppPermission.AuthViewOwnProfile],
+      }
+    );
+
+    expect(screen.queryByText("Payment Methods")).toBeNull();
   });
 
   test("shows Permissions tab for staff admin in other scope", () => {

@@ -160,10 +160,7 @@ export namespace ClassMeetingConfigRepository {
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
       const existing = await getByIdOrThrow(id, t, locale);
-      const scope =
-        existing.classInstanceId != null
-          ? { classInstanceId: existing.classInstanceId }
-          : { recurringScheduleId: existing.recurringScheduleId! };
+      const scope = resolveScope(existing);
 
       if (input.isDefault === true) {
         await clearDefault(scope, t);
@@ -203,10 +200,7 @@ export namespace ClassMeetingConfigRepository {
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
       const existing = await getByIdOrThrow(id, t, locale);
-      const scope =
-        existing.classInstanceId != null
-          ? { classInstanceId: existing.classInstanceId }
-          : { recurringScheduleId: existing.recurringScheduleId! };
+      const scope = resolveScope(existing);
       await clearDefault(scope, t);
       return update(id, { isDefault: true }, t, locale);
     };

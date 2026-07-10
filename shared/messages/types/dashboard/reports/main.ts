@@ -48,4 +48,5 @@ export interface ReportsLabels {
     readonly onBreak: string;
   };
   readonly noEntries: string;
+  readonly reportMultiCurrencyNote: string;
 }

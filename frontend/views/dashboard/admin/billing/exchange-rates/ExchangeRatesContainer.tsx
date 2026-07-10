@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
@@ -13,8 +13,9 @@ import {
   latestFxSyncRunQueryDocument,
   refreshExchangeRatesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { parseCurrencyCode } from "@/frontend/lib/currency";
-import { isFxStale } from "@/frontend/lib/fx-stale";
+import { shouldShowFxStaleBanner } from "@/frontend/lib/fx-stale";
 import { logger } from "@/frontend/utils/logger";
 import { ExchangeRateHistorySection } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ExchangeRateHistorySection";
 import {
@@ -24,6 +25,7 @@ import {
 } from "@/frontend/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import { ManualOverrideDialog } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
 import { ProviderSettingsSection } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
+import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 
 function SyncStatusBadge({
@@ -130,6 +132,8 @@ function ExchangeRatesSyncPanel({
 export function ExchangeRatesContainer() {
   const t = useTranslations("dashboard.billing");
   const labels = t.raw("exchangeRates") as ExchangeRatesLabels;
+  const { isImpersonating } = useImpersonation();
+  const billingActionsDisabled = isImpersonating;
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -140,6 +144,19 @@ export function ExchangeRatesContainer() {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
+  };
+
+  useEffect(() => {
+    if (billingActionsDisabled) {
+      setManualOverrideOpen(false);
+    }
+  }, [billingActionsDisabled]);
+
+  const handleOpenManualOverride = () => {
+    if (billingActionsDisabled) {
+      return;
+    }
+    setManualOverrideOpen(true);
   };
 
   const {
@@ -191,10 +208,11 @@ export function ExchangeRatesContainer() {
   const availablePairs = useMemo(() => rates.map(rate => ({ from: rate.fromCurrency, to: rate.toCurrency })), [rates]);
 
   const columns = useMemo(() => buildExchangeRateColumns(labels.rateTable), [labels.rateTable]);
-  const showStaleWarning = isFxStale(syncRun?.finishedAt ?? syncRun?.startedAt);
+  const showStaleWarning = shouldShowFxStaleBanner(syncRun) && !refreshing;
 
   return (
     <PageContainer>
+      <BillingImpersonationNotice />
       <PageHeader
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
@@ -202,7 +220,7 @@ export function ExchangeRatesContainer() {
           <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
             <PrimaryPageAction
               onClick={() => void refreshMutation({ variables: { force: false } })}
-              disabled={refreshing}
+              disabled={refreshing || billingActionsDisabled}
             >
               {refreshing ? labels.refreshing : labels.syncStatus.refresh}
             </PrimaryPageAction>
@@ -221,12 +239,16 @@ export function ExchangeRatesContainer() {
           <ExchangeRatesSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
         </SectionPanel>
 
-        <ProviderSettingsSection labels={labels.providerSettings} onFeedback={showFeedback} />
+        <ProviderSettingsSection
+          labels={labels.providerSettings}
+          onFeedback={showFeedback}
+          actionsDisabled={billingActionsDisabled}
+        />
 
         <SectionPanel title={labels.rateTable.title}>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
             <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
-              <Button variant="outlined" onClick={() => setManualOverrideOpen(true)}>
+              <Button variant="outlined" onClick={handleOpenManualOverride} disabled={billingActionsDisabled}>
                 {labels.manualOverride.title}
               </Button>
             </RequirePermission>
@@ -247,7 +269,7 @@ export function ExchangeRatesContainer() {
       </RequirePermission>
 
       <ManualOverrideDialog
-        open={manualOverrideOpen}
+        open={manualOverrideOpen && !billingActionsDisabled}
         labels={labels.manualOverride}
         onClose={() => setManualOverrideOpen(false)}
         onSuccess={() => {

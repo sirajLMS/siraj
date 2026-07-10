@@ -225,6 +225,7 @@ export type UpcomingClassRow = {
   scheduledEndAt: Date;
   durationMinutes: number;
   executionState: string;
+  outcome: string;
   isFrozen: boolean;
 };
 

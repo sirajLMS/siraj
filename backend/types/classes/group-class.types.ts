@@ -1,5 +1,5 @@
 import type { classCommunications, groupClassEnrollments, groupClasses } from "@/backend/db/schema";
-import type { ClassExecutionState, GroupClassAttendanceStatus } from "@/backend/enum";
+import type { ClassExecutionState, ClassOutcome, GroupClassAttendanceStatus } from "@/backend/enum";
 export type GroupClassSelectType = typeof groupClasses.$inferSelect;
 export type GroupClassInsertType = typeof groupClasses.$inferInsert;
 
@@ -19,6 +19,7 @@ export type GroupClassAuditReturnType = {
   timeSlot: string;
   venue: string;
   status: ClassExecutionState;
+  outcome: ClassOutcome;
   auditRemark: string | null;
   auditLoggedAt: string;
   registeredStudentCount: number;

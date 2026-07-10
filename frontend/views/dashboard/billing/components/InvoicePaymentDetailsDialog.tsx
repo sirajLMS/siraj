@@ -420,7 +420,11 @@ function PaymentDetailsDialogContent({
   return (
     <Stack spacing={2} sx={{ py: 1 }}>
       {showDisplayCurrencyHint ? <DisplayCurrencyHint /> : null}
-      {subjectUserId ? <FxConversionNote mode="subject" subjectUserId={subjectUserId} /> : null}
+      {subjectUserId ? (
+        <FxConversionNote mode="subject" subjectUserId={subjectUserId} />
+      ) : displayCurrency ? (
+        <FxConversionNote mode="viewer" />
+      ) : null}
       {submission ? (
         <SubmissionDetailsSection submission={submission} locale={locale} labels={submissionLabels} />
       ) : null}

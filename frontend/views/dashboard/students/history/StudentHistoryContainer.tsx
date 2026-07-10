@@ -119,6 +119,7 @@ export function StudentHistoryContainer() {
       classes={classes}
       selectedWeek={selectedWeek}
       selectedDay={selectedDay}
+      embedded={useUnifiedProfile}
       onSelectWeek={setSelectedWeek}
       onSelectDay={handleSelectDay}
       onPrevMonth={handlePrevMonth}

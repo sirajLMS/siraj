@@ -5,9 +5,9 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { StatusBadge } from "@/frontend/components/ui";
 import { AccountStatus, type CurrencyCode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
-import {
-  type ParentAdminData,
-  type ParentViewData,
+import type {
+  ParentAdminData,
+  ParentViewData,
 } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CoreIdentitySection } from "@/frontend/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";

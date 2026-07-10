@@ -125,13 +125,27 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while SONAR fix s
 
 ### Phase 1: Start Quality Gate
 
-Run the quality gate command and capture its output:
+Run the quality gate command and capture its output.
+
+**ALWAYS use `bun quality-gate:fresh` on the FIRST invocation of a session.** A fresh run discards
+any stale state in `.quality-gate-state.json` (which may reference issues from a previous session
+that have since been fixed, or vice versa) and starts cleanly from the first stage. This avoids
+acting on outdated state and ensures the gate reflects the current working tree.
 
 ```bash
-bun quality-gate
+bun quality-gate:fresh   # FIRST run of a session — always fresh
 ```
 
-Use `bun quality-gate:fresh` if a clean-slate run is requested or if the state file seems corrupted.
+On subsequent invocations within the SAME session (e.g., resuming after a fix wave), use the
+regular command so the state machine resumes from the stage that was just fixed:
+
+```bash
+bun quality-gate         # subsequent runs — resume from last failed stage
+```
+
+Only run `bun quality-gate` (without `:fresh`) on the first invocation if the user explicitly
+asks to resume from existing state, or if you are certain the persisted state is still accurate
+(e.g., you just ran `:fresh` moments ago and only made targeted fixes since).
 
 Read the output carefully. It will indicate:
 - Which stage failed (`BASIC_CHECKS`, `CODESCENE`, `SONAR_SCAN`, or `SONAR_RESULTS`)

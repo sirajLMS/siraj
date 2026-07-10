@@ -9,7 +9,7 @@ import { ActionIconLink, TimezoneDisplay } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import { StyledScheduleNameLink } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
@@ -403,7 +403,7 @@ function ScheduleOverviewMobileCard({
           ) : null}
           {studentId ? (
             <Tooltip title={headers.history}>
-              <ActionIconLink href={`${studentHref(studentId)}/history`} aria-label={headers.history}>
+              <ActionIconLink href={studentProfileTabHref(studentId, "history")} aria-label={headers.history}>
                 <HistoryOutlined fontSize="small" />
               </ActionIconLink>
             </Tooltip>

@@ -5,11 +5,12 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   AppPermission,
   ClassExecutionState,
+  ClassOutcome,
   type GroupClassAttendanceStatus,
   NotificationChannel,
   NotificationEventType,
 } from "@/backend/enum";
-import { parseClassExecutionState } from "@/backend/lib/enum";
+import { parseClassExecutionState, parseClassOutcome } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -121,6 +122,7 @@ export namespace GroupClassService {
       timeSlot: groupClass.timeSlot,
       venue: "Online",
       status: resolveGroupClassStatus(classInstance.executionState),
+      outcome: parseClassOutcome(classInstance.outcome) ?? ClassOutcome.PENDING,
       auditRemark: groupClass.auditRemark ?? null,
       auditLoggedAt: groupClass.auditLoggedAt.toISOString(),
       registeredStudentCount: students.length,

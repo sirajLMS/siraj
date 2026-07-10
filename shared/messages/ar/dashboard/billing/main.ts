@@ -42,7 +42,7 @@ export const billing: BillingLabels = {
   search: {
     invoicesPlaceholder: "البحث في الفواتير...",
     parentPlaceholder: "البحث برقم الفاتورة...",
-    filter: "فلاتر",
+    searching: "جاري البحث…",
   },
   adminTable: {
     invoiceId: "رقم الفاتورة",
@@ -55,6 +55,7 @@ export const billing: BillingLabels = {
     quickPay: "دفع سريع",
     reviewSubmission: "مراجعة",
     viewRejection: "عرض الرفض",
+    deleteInvoice: "حذف الفاتورة",
     noEntries: "لا توجد فواتير مطابقة للبحث",
   },
   creditTable: {
@@ -68,6 +69,8 @@ export const billing: BillingLabels = {
     negativeBalance: "رصيد سالب",
     activeCredit: "رصيد نشط",
     noEntries: "لا توجد سجلات رصيد للطلاب",
+    showingNegativeBalanceOnly: "عرض الطلاب برصيد سالب فقط",
+    clearFilter: "مسح الفلتر",
   },
   parentTable: {
     invoiceNumber: "#",
@@ -106,6 +109,11 @@ export const billing: BillingLabels = {
   rejectProofSuccess: "تم رفض إثبات الدفع",
   noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
   deleteInvoiceSuccess: "تم حذف الفاتورة بنجاح",
+  deleteInvoiceDialog: {
+    title: "حذف الفاتورة",
+    body: "سيؤدي هذا إلى إزالة الفاتورة {invoiceId} نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    confirm: "حذف الفاتورة",
+  },
   hasPaymentProofHint: "إثبات دفع مرفق",
   submitProofDialog: {
     titleSubmit: "إرسال إثبات الدفع",
@@ -178,6 +186,7 @@ export const billing: BillingLabels = {
   },
   fxConversionNote: "تستخدم الإجماليات المحوّلة عملة العرض الخاصة بك ({code})",
   fxConversionNoteSubject: "تستخدم المبالغ المحوّلة عملة عرض هذا المستخدم ({code})",
+  adminBillingFxNote: "تستخدم المقاييس عملة العرض الخاصة بك؛ تستخدم كل فاتورة عملة ولي الأمر",
   currencyHedges,
   supportedCurrencies,
 };

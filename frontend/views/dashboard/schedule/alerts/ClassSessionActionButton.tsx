@@ -1,6 +1,6 @@
 "use client";
 
-import { LogoutOutlined, OndemandVideoOutlined } from "@mui/icons-material";
+import { LogoutOutlined, SummarizeOutlined } from "@mui/icons-material";
 import { alpha, Button } from "@mui/material";
 import type { ClassSessionAction } from "@/frontend/views/dashboard/schedule/alerts/types";
 
@@ -10,10 +10,10 @@ interface ClassSessionActionButtonProps {
   readonly labels: {
     readonly joinSession: string;
     readonly leaveClass: string;
-    readonly viewRecording: string;
+    readonly viewClassAudit: string;
   };
   readonly onLeave: (id: string) => void;
-  readonly onViewRecording: (id: string) => void;
+  readonly onViewClassAudit: (id: string) => void;
   readonly fullWidth?: boolean;
 }
 
@@ -22,22 +22,22 @@ export function ClassSessionActionButton({
   classId,
   labels,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
   fullWidth = false,
 }: ClassSessionActionButtonProps) {
   if (action === "join_session") {
     return null;
   }
 
-  if (action === "view_recording") {
+  if (action === "view_class_audit") {
     return (
       <Button
-        id={`view-recording-${classId}`}
+        id={`view-class-audit-${classId}`}
         variant="outlined"
         fullWidth={fullWidth}
-        startIcon={<OndemandVideoOutlined />}
+        startIcon={<SummarizeOutlined />}
         onClick={() => {
-          onViewRecording(classId);
+          onViewClassAudit(classId);
         }}
         sx={theme => ({
           ...theme.typography.labelUppercase,
@@ -53,7 +53,7 @@ export function ClassSessionActionButton({
           },
         })}
       >
-        {labels.viewRecording}
+        {labels.viewClassAudit}
       </Button>
     );
   }

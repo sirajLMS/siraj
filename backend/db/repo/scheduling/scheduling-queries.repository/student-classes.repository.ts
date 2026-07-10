@@ -110,6 +110,7 @@ export const getUpcomingClassesForStudent = async (
       scheduledEndAt: classInstances.scheduledEndAt,
       durationMinutes: classInstances.durationMinutes,
       executionState: classInstances.executionState,
+      outcome: classInstances.outcome,
       isFrozen: classInstances.isFrozen,
       instructor: users.name,
       teacherId: classInstances.teacherId,

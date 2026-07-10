@@ -12,6 +12,7 @@ import {
 } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 import { LiveSessionToolbar } from "@/frontend/views/dashboard/classes/details/components/LiveSessionToolbar";
 import { TimezoneWarningBanner } from "@/frontend/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin";
 
@@ -73,6 +74,9 @@ export function ClassDetailsToolbarArea({
   const joinLabel = tJoin("joinMeeting");
   const instanceId = instance.id ?? "";
   const emptyState = resolveJoinEmptyState(viewMode, instanceId);
+  const showJoin = isJoinableClassInstance(instance.executionState, instance.outcome, {
+    isFrozen: instance.isFrozen ?? false,
+  });
 
   return (
     <Box sx={classDetailsSectionStackSx}>
@@ -86,16 +90,18 @@ export function ClassDetailsToolbarArea({
         </RequirePermission>
       )}
 
-      <Stack direction="row" sx={classDetailsContentPaddingSx}>
-        <MeetingJoinAction
-          joinUrl={joinUrl}
-          meeting={meeting}
-          label={joinLabel}
-          id={`join-meeting-${instanceId}`}
-          emptyRole={emptyState.emptyRole}
-          setupHref={emptyState.setupHref}
-        />
-      </Stack>
+      {showJoin ? (
+        <Stack direction="row" sx={classDetailsContentPaddingSx}>
+          <MeetingJoinAction
+            joinUrl={joinUrl}
+            meeting={meeting}
+            label={joinLabel}
+            id={`join-meeting-${instanceId}`}
+            emptyRole={emptyState.emptyRole}
+            setupHref={emptyState.setupHref}
+          />
+        </Stack>
+      ) : null}
 
       {viewMode !== "parent" ? (
         <Box sx={classDetailsContentPaddingSx}>

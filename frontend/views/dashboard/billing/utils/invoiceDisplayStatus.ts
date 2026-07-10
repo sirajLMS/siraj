@@ -7,6 +7,10 @@ export function isPayableUnpaidStatus(status: AdminInvoiceStatus | ParentInvoice
   return status === InvoiceStatus.Unpaid || status === "OVERDUE" || status === "PENDING";
 }
 
+export function isDeletableInvoiceStatus(status: AdminInvoiceStatus | ParentInvoiceDisplayStatus): boolean {
+  return status !== InvoiceStatus.Paid && status !== InvoiceStatus.PaymentPending;
+}
+
 export function shouldShowViewRejection(
   status: AdminInvoiceStatus | ParentInvoiceDisplayStatus,
   hasRejectedSubmission: boolean

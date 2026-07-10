@@ -2,6 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SupportRequestResultPothosObject } from "@/backend/graphql/pothos/classes/class-session.pothos";
 import {
   ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
   GroupClassAttendanceStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { GroupClassService } from "@/backend/services/group-class/group-class.service";
@@ -75,6 +76,7 @@ export const GroupClassAuditPothosObject = GroupClassAuditRef.implement({
     timeSlot: t.exposeString("timeSlot"),
     venue: t.exposeString("venue"),
     status: t.expose("status", { type: ClassExecutionStatePothosObject }),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     auditRemark: t.exposeString("auditRemark", { nullable: true }),
     auditLoggedAt: t.exposeString("auditLoggedAt"),
     registeredStudentCount: t.exposeInt("registeredStudentCount"),

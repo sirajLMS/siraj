@@ -1,10 +1,12 @@
 import { type AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
 import {
+  hasProfileGroupEditPermission,
   hasProfileGroupViewPermission,
+  hasStudentGroupEditPermission,
   hasStudentGroupViewPermission,
 } from "@/backend/services/profile/profile-field-filter-bridge";
 import type { ProfileFieldGroupDefinition } from "@/backend/types/profile/profile-field-manifest";
-import { getProfileEditPermission, PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
+import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { StudentFieldGroupDefinition } from "@/backend/types/students/student-field-manifest";
 import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 
@@ -22,10 +24,6 @@ export type StudentFieldFilterContext = {
   readonly isAssociatedViewer: boolean;
   readonly permissions: ReadonlySet<AppPermission>;
 };
-
-function hasPermission(permissions: ReadonlySet<AppPermission>, key: AppPermission): boolean {
-  return permissions.has(key);
-}
 
 function setValueAtPath(target: Record<string, unknown>, path: string, value: unknown): void {
   const segments = path.split(".");
@@ -83,10 +81,6 @@ function getStudentScope(ctx: StudentFieldFilterContext): ProfileScope {
   return ctx.isAssociatedViewer ? ProfileScope.OWN : ProfileScope.OTHER;
 }
 
-function _getStudentViewPermission(group: StudentFieldGroupDefinition, ctx: StudentFieldFilterContext): AppPermission {
-  return getStudentScope(ctx) === ProfileScope.OWN ? group.viewOwn : group.viewOther;
-}
-
 export function getStudentEditPermission(
   group: StudentFieldGroupDefinition,
   ctx: StudentFieldFilterContext
@@ -124,7 +118,23 @@ export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
-  return hasPermission(ctx.permissions, getProfileEditPermission(group, ctx.scope));
+  return hasProfileGroupEditPermission(ctx, group);
+}
+
+export function canViewStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
+  const group = STUDENT_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  if (!group) {
+    return false;
+  }
+  return hasStudentGroupViewPermission(ctx, group);
+}
+
+export function canEditStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
+  const group = STUDENT_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  if (!group) {
+    return false;
+  }
+  return hasStudentGroupEditPermission(ctx, group);
 }
 
 export function assertProfileEditFieldGroups(ctx: FieldFilterContext, submittedGroupKeys: readonly string[]): void {

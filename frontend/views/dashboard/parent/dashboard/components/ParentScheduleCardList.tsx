@@ -8,11 +8,11 @@ import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref
 import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
 import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface ParentScheduleCardListProps {
   readonly rows: readonly ParentScheduleRow[];
   readonly labels: ParentDashboardLabels;
-  readonly onJoinVideo?: (id: string) => void;
   readonly pagination?: SchedulePagination;
 }
 
@@ -96,14 +96,16 @@ function ScheduleCard({ row, labels }: { readonly row: ParentScheduleRow; readon
               emphasizeLink={Boolean(teacherProfileHref)}
             />
           </Stack>
-          <MeetingJoinAction
-            variant="icon"
-            joinUrl={row.meetingJoinUrl}
-            meeting={row.effectiveMeeting}
-            disabled={!row.videoEnabled}
-            label={labels.schedule.joinVideo}
-            emptyRole="parent"
-          />
+          {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
+            <MeetingJoinAction
+              variant="icon"
+              joinUrl={row.meetingJoinUrl}
+              meeting={row.effectiveMeeting}
+              disabled={!row.videoEnabled}
+              label={labels.schedule.joinVideo}
+              emptyRole="parent"
+            />
+          ) : null}
         </Box>
       </CardContent>
     </Card>

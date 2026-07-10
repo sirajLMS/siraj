@@ -16,12 +16,12 @@ export type FieldGroupAction = "view_own" | "view_other" | "edit_own" | "edit_ot
  */
 export function backendPermissionKeyToGraphqlName(backendKey: string): string {
   if (backendKey.startsWith("profile.")) {
-    const suffix = backendKey.slice("profile.".length);
+    const suffix = backendKey.slice("profile.".length).replaceAll(".", "_");
     return `PROFILE_${suffix.toUpperCase()}`;
   }
 
   if (backendKey.startsWith("student.")) {
-    const suffix = backendKey.slice("student.".length);
+    const suffix = backendKey.slice("student.".length).replaceAll(".", "_");
     return suffix.toUpperCase();
   }
 

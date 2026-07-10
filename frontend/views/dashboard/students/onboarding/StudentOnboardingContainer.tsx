@@ -14,6 +14,7 @@ import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher.documents";
 import { useCreateStudentOnboarding } from "@/frontend/hooks/useCreateStudentOnboarding";
 import { logger } from "@/frontend/utils/logger";
+import { studentHref } from "@/frontend/utils/profileHref";
 import type { ParentOption } from "@/frontend/views/dashboard/students/onboarding/ParentAssignmentSection";
 import { StudentOnboardingView } from "@/frontend/views/dashboard/students/onboarding/StudentOnboardingView";
 import {
@@ -109,7 +110,7 @@ export function StudentOnboardingContainer() {
         primaryTeacherId: "",
       });
       if (result.studentId) {
-        router.push(`/students/${result.studentId}`);
+        router.push(studentHref(result.studentId));
       }
     } catch (error) {
       logger.error("Failed to submit student onboarding form", { error });

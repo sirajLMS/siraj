@@ -1,4 +1,5 @@
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface TeacherScheduleSessionActionInput {
   readonly executionState?: string | null;
@@ -24,7 +25,7 @@ export interface TeacherScheduleSessionActions {
  * NOT_ACTIVATED + PENDING → activate control (disabled outside time window), join video
  * ACTIVATED → start, mark absent, request leave
  * RUNNING → mark absent, request leave (start already applied)
- * COMPLETED / terminal outcomes → no session controls (join video if available)
+ * COMPLETED / terminal outcomes → no session controls; join only when joinable by execution state
  */
 export function resolveTeacherScheduleSessionActions(
   input: TeacherScheduleSessionActionInput
@@ -32,9 +33,10 @@ export function resolveTeacherScheduleSessionActions(
   const executionState = input.executionState ?? ClassExecutionState.NOT_ACTIVATED;
   const outcome = input.outcome ?? ClassOutcome.PENDING;
   const none = { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: false };
+  const joinVideo = isJoinableByExecutionState(executionState, outcome);
 
   if (executionState === ClassExecutionState.COMPLETED) {
-    return { ...none, joinVideo: input.videoEnabled };
+    return { ...none, joinVideo };
   }
 
   if (executionState === ClassExecutionState.NOT_ACTIVATED && outcome !== ClassOutcome.PENDING) {
@@ -45,7 +47,7 @@ export function resolveTeacherScheduleSessionActions(
     return {
       ...none,
       activate: input.canActivate && !input.isConnecting,
-      joinVideo: true,
+      joinVideo,
     };
   }
 
@@ -55,7 +57,7 @@ export function resolveTeacherScheduleSessionActions(
       start: true,
       markAbsent: true,
       requestLeave: true,
-      joinVideo: true,
+      joinVideo,
     };
   }
 
@@ -65,7 +67,7 @@ export function resolveTeacherScheduleSessionActions(
       start: false,
       markAbsent: true,
       requestLeave: true,
-      joinVideo: true,
+      joinVideo,
     };
   }
 

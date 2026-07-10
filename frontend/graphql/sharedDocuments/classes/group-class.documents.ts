@@ -17,6 +17,7 @@ export const groupClassAuditQueryDocument: TypedDocumentNode<
       timeSlot
       venue
       status
+      outcome
       auditRemark
       auditLoggedAt
       registeredStudentCount
@@ -69,6 +70,7 @@ export const updateClassAdminNoteMutationDocument: TypedDocumentNode<
       timeSlot
       venue
       status
+      outcome
       auditRemark
       auditLoggedAt
       registeredStudentCount

@@ -223,7 +223,6 @@ export function MockTeacherDashboardContainer() {
       onPrintSchedule={() => globalThis.print()}
       onManualEntry={() => alert("Manual entry clicked")}
       onNewSession={() => alert("New session clicked")}
-      onJoinVideo={id => alert(`Join video for ${id}`)}
       onActivate={id => store.activateSession(id)}
       onStartSession={id => alert(`Start session ${id}`)}
       onMarkAbsent={id => alert(`Mark absent ${id}`)}

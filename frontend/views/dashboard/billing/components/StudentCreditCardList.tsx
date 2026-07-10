@@ -1,7 +1,7 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, Paper, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
 import type { StudentCreditRow, StudentCreditStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
@@ -16,7 +16,9 @@ interface StudentCreditCardListProps {
   readonly rows: readonly StudentCreditRow[];
   readonly labels: StudentCreditCardListLabels;
   readonly canManage: boolean;
+  readonly billingActionsDisabled?: boolean;
   readonly onSendReminder: (id: string) => void;
+  readonly loading?: boolean;
 }
 
 function formatClassesLeft(row: StudentCreditRow): string {
@@ -46,8 +48,18 @@ export function StudentCreditCardList({
   rows,
   labels,
   canManage,
+  billingActionsDisabled = false,
   onSendReminder,
+  loading = false,
 }: Readonly<StudentCreditCardListProps>) {
+  if (loading && rows.length === 0) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+        <CircularProgress size={28} />
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => {
@@ -69,7 +81,7 @@ export function StudentCreditCardList({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                mb: isNegative && canManage ? 1.5 : 0,
+                mb: isNegative && canManage && !billingActionsDisabled ? 1.5 : 0,
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -92,7 +104,7 @@ export function StudentCreditCardList({
                 {labels.creditStatusLabels[row.status]}
               </Typography>
             </Box>
-            {isNegative && canManage && (
+            {isNegative && canManage && !billingActionsDisabled && (
               <Button
                 fullWidth
                 variant="contained"

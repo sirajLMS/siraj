@@ -24,6 +24,17 @@ const StyledBackButton = styled(Button)(({ theme }) => ({
   fontWeight: 700,
 }));
 
+const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
+  border: 0,
+  margin: 0,
+  padding: 0,
+  minWidth: 0,
+  "&:disabled": {
+    opacity: theme.palette.action.disabledOpacity,
+    pointerEvents: "none",
+  },
+}));
+
 interface ManualInvoiceDesktopViewProps {
   readonly labels: BillingManualLabels;
   readonly parentOptions: readonly ParentInvoiceOption[];
@@ -35,6 +46,8 @@ interface ManualInvoiceDesktopViewProps {
   readonly canCreate: boolean;
   readonly canSendEmail: boolean;
   readonly isSubmitting: boolean;
+  readonly parentsLoading: boolean;
+  readonly studentsLoading: boolean;
   readonly onBack: () => void;
   readonly onSubmitClick: () => void;
   readonly onSubmitAndSendEmailClick: () => void;
@@ -51,6 +64,8 @@ export function ManualInvoiceDesktopView({
   canCreate,
   canSendEmail,
   isSubmitting,
+  parentsLoading,
+  studentsLoading,
   onBack,
   onSubmitClick,
   onSubmitAndSendEmailClick,
@@ -75,33 +90,37 @@ export function ManualInvoiceDesktopView({
         sx={{ maxWidth: 960, mx: "auto", width: "100%" }}
       >
         <BaseCard sx={{ p: { xs: 3, md: 5 } }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <ManualInvoiceFormFields
-              control={control}
-              errors={errors}
-              labels={labels}
-              parentOptions={parentOptions}
-              studentOptions={studentOptions}
-              draftCurrency={draftCurrency}
-              variant="desktop"
-            />
-            <BillingMonthSelector control={control} errors={errors} labels={labels} variant="desktop" />
-            <InvoiceDraftSummaryCard
-              labels={labels}
-              totalFormatted={totalFormatted}
-              currency={draftCurrency}
-              variant="desktop"
-            />
-            <ManualInvoiceActions
-              labels={labels}
-              canCreate={canCreate}
-              canSendEmail={canSendEmail}
-              isSubmitting={isSubmitting}
-              variant="desktop"
-              onSubmit={onSubmitClick}
-              onSubmitAndSendEmail={onSubmitAndSendEmailClick}
-            />
-          </Box>
+          <StyledFormFieldset disabled={!canCreate}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <ManualInvoiceFormFields
+                control={control}
+                errors={errors}
+                labels={labels}
+                parentOptions={parentOptions}
+                studentOptions={studentOptions}
+                draftCurrency={draftCurrency}
+                variant="desktop"
+                parentsLoading={parentsLoading}
+                studentsLoading={studentsLoading}
+              />
+              <BillingMonthSelector control={control} errors={errors} labels={labels} variant="desktop" />
+              <InvoiceDraftSummaryCard
+                labels={labels}
+                totalFormatted={totalFormatted}
+                currency={draftCurrency}
+                variant="desktop"
+              />
+              <ManualInvoiceActions
+                labels={labels}
+                canCreate={canCreate}
+                canSendEmail={canSendEmail}
+                isSubmitting={isSubmitting}
+                variant="desktop"
+                onSubmit={onSubmitClick}
+                onSubmitAndSendEmail={onSubmitAndSendEmailClick}
+              />
+            </Box>
+          </StyledFormFieldset>
         </BaseCard>
       </Box>
 

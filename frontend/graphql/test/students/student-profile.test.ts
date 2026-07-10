@@ -12,6 +12,8 @@ describe("GraphQL Student Profile Integration Tests", () => {
 
     const data = await authenticatedRequest(parentToken, "query", studentProfileQueryDocument, {
       studentId: provision.studentId,
+      year: null,
+      month: null,
     });
 
     expect(data.studentProfile?.id).toBe(provision.studentId);

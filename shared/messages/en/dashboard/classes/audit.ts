@@ -49,6 +49,10 @@ export const classAudit: ClassAuditLabels = {
     viewMap: "View",
     capacityBadge: "Capacity {count} students",
   },
+  meeting: {
+    title: "Online meeting",
+    joinMeeting: "Join meeting",
+  },
   communication: {
     title: "Communication Log",
     resendNotifications: "Resend Notifications",

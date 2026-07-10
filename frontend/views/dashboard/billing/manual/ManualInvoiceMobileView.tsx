@@ -1,6 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -15,6 +16,21 @@ import type {
 } from "@/frontend/views/dashboard/billing/manual/types/manualInvoiceViewTypes";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
+const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
+  border: 0,
+  margin: 0,
+  padding: 0,
+  minWidth: 0,
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+  paddingBottom: theme.spacing(12),
+  "&:disabled": {
+    opacity: theme.palette.action.disabledOpacity,
+    pointerEvents: "none",
+  },
+}));
+
 interface ManualInvoiceMobileViewProps {
   readonly labels: BillingManualLabels;
   readonly parentOptions: readonly ParentInvoiceOption[];
@@ -26,6 +42,8 @@ interface ManualInvoiceMobileViewProps {
   readonly canCreate: boolean;
   readonly canSendEmail: boolean;
   readonly isSubmitting: boolean;
+  readonly parentsLoading: boolean;
+  readonly studentsLoading: boolean;
   readonly onSubmitClick: () => void;
   readonly onSubmitAndSendEmailClick: () => void;
 }
@@ -41,6 +59,8 @@ export function ManualInvoiceMobileView({
   canCreate,
   canSendEmail,
   isSubmitting,
+  parentsLoading,
+  studentsLoading,
   onSubmitClick,
   onSubmitAndSendEmailClick,
 }: Readonly<ManualInvoiceMobileViewProps>) {
@@ -53,38 +73,41 @@ export function ManualInvoiceMobileView({
         onSubmit={event => {
           event.preventDefault();
         }}
-        sx={{ display: "flex", flexDirection: "column", gap: 2, pb: 12 }}
       >
-        <ManualInvoiceFormFields
-          control={control}
-          errors={errors}
-          labels={labels}
-          parentOptions={parentOptions}
-          studentOptions={studentOptions}
-          draftCurrency={draftCurrency}
-          variant="mobile"
-        />
+        <StyledFormFieldset disabled={!canCreate}>
+          <ManualInvoiceFormFields
+            control={control}
+            errors={errors}
+            labels={labels}
+            parentOptions={parentOptions}
+            studentOptions={studentOptions}
+            draftCurrency={draftCurrency}
+            variant="mobile"
+            parentsLoading={parentsLoading}
+            studentsLoading={studentsLoading}
+          />
 
-        <BaseCard>
-          <BillingMonthSelector control={control} errors={errors} labels={labels} variant="mobile" />
-        </BaseCard>
+          <BaseCard>
+            <BillingMonthSelector control={control} errors={errors} labels={labels} variant="mobile" />
+          </BaseCard>
 
-        <InvoiceDraftSummaryCard
-          labels={labels}
-          totalFormatted={totalFormatted}
-          currency={draftCurrency}
-          variant="mobile"
-        />
+          <InvoiceDraftSummaryCard
+            labels={labels}
+            totalFormatted={totalFormatted}
+            currency={draftCurrency}
+            variant="mobile"
+          />
 
-        <ManualInvoiceActions
-          labels={labels}
-          canCreate={canCreate}
-          canSendEmail={canSendEmail}
-          isSubmitting={isSubmitting}
-          variant="mobile"
-          onSubmit={onSubmitClick}
-          onSubmitAndSendEmail={onSubmitAndSendEmailClick}
-        />
+          <ManualInvoiceActions
+            labels={labels}
+            canCreate={canCreate}
+            canSendEmail={canSendEmail}
+            isSubmitting={isSubmitting}
+            variant="mobile"
+            onSubmit={onSubmitClick}
+            onSubmitAndSendEmail={onSubmitAndSendEmailClick}
+          />
+        </StyledFormFieldset>
       </Box>
     </PageContainer>
   );

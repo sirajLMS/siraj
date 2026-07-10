@@ -2,7 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ProfileScope, type CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { AccountSection } from "@/frontend/views/dashboard/profile/parent/sections/AccountSection";
 import { AssociatedStudentsSection } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsSection";
@@ -143,7 +143,9 @@ export function ParentProfileView({
             {renderBillingSection()}
           </>
         ) : null}
-        {targetUserId ? <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} /> : null}
+        {targetUserId && canView("meeting_configs") ? (
+          <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} />
+        ) : null}
       </Box>
 
       {renderStudentsSection()}

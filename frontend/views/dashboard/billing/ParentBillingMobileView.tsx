@@ -34,6 +34,7 @@ const StyledQuickPayFab = styled(Fab)(({ theme }) => ({
 export function ParentBillingMobileView({
   labels,
   summary,
+  summaryLoading = false,
   invoices,
   searchQuery,
   loading,
@@ -51,22 +52,26 @@ export function ParentBillingMobileView({
   pageSize,
   totalCount,
   onPageChange,
+  isSearchPending = false,
 }: Readonly<ParentBillingViewProps>) {
   const showQuickPayFab = canSubmitProof && !billingActionsDisabled;
+  const parentMetrics = buildParentMetrics(summary, labels);
+  const listLoading = isSearchPending || (loading && invoices.length === 0);
 
   return (
     <>
       <PageContainer>
         <PageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} titleVariant="headlineMd" />
-        <BillingMetricsRow metrics={buildParentMetrics(summary, labels)} compact />
+        <BillingMetricsRow metrics={parentMetrics} compact loading={summaryLoading} />
         <BillingMobileSearchBar
           value={searchQuery}
           placeholder={labels.search.parentPlaceholder}
-          filterLabel={labels.search.filter}
+          searchingLabel={labels.search.searching}
+          isSearching={isSearchPending}
           onChange={onSearchChange}
         />
         <Typography variant="titleLg">{labels.sections.invoiceHistory}</Typography>
-        {invoices.length === 0 && !loading ? (
+        {invoices.length === 0 && !listLoading ? (
           <Box sx={{ py: 6, textAlign: "center" }}>
             <Typography variant="headlineMd" sx={{ mb: 1 }}>
               {labels.parentTable.emptyTitle}
@@ -80,7 +85,7 @@ export function ParentBillingMobileView({
             canSubmitProof={canSubmitProof}
             canManage={canManage}
             billingActionsDisabled={billingActionsDisabled}
-            loading={loading}
+            loading={listLoading}
             onPayNow={onPayNow}
             onMarkAsPaid={onMarkAsPaid}
             onViewPaymentDetails={onViewPaymentDetails}

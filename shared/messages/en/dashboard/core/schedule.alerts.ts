@@ -35,7 +35,7 @@ export const scheduleAlerts: ScheduleAlertsLabels = {
     export: "Export",
     joinSession: "Join Session",
     leaveClass: "Leave Class",
-    viewRecording: "View Recording",
+    viewClassAudit: "View Class Audit",
   },
   sessionStatus: {
     active: "Active",

@@ -12,6 +12,7 @@ import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 
 interface OnlineMeetingCardProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;
+  readonly showJoin?: boolean;
   readonly labels: {
     readonly title: string;
     readonly joinMeeting: string;
@@ -154,7 +155,7 @@ function MeetingPreviewIcon({
   return variant === "mobile" ? <StyledMobileVideoIcon /> : <StyledDesktopVideoIcon />;
 }
 
-const MobileMeetingCard = ({ meetingInfo, labels }: OnlineMeetingCardProps) => {
+const MobileMeetingCard = ({ meetingInfo, labels, showJoin = false }: OnlineMeetingCardProps) => {
   const locale = useLocale();
   const providerName = resolveProviderDisplayName(meetingInfo, locale);
   const meeting = toEffectiveMeeting(meetingInfo);
@@ -174,19 +175,21 @@ const MobileMeetingCard = ({ meetingInfo, labels }: OnlineMeetingCardProps) => {
             </StyledLocationText>
           ) : null}
         </Box>
-        <MeetingJoinAction
-          joinUrl={meetingInfo?.joinUrl}
-          meeting={meeting}
-          label={labels.joinMeeting}
-          variant="button"
-          id="venue-join-meeting-mobile"
-        />
+        {showJoin ? (
+          <MeetingJoinAction
+            joinUrl={meetingInfo?.joinUrl}
+            meeting={meeting}
+            label={labels.joinMeeting}
+            variant="button"
+            id="venue-join-meeting-mobile"
+          />
+        ) : null}
       </Box>
     </BaseCard>
   );
 };
 
-const DesktopMeetingCard = ({ meetingInfo, labels }: OnlineMeetingCardProps) => {
+const DesktopMeetingCard = ({ meetingInfo, labels, showJoin = false }: OnlineMeetingCardProps) => {
   const locale = useLocale();
   const providerName = resolveProviderDisplayName(meetingInfo, locale);
   const meeting = toEffectiveMeeting(meetingInfo);
@@ -228,13 +231,15 @@ const DesktopMeetingCard = ({ meetingInfo, labels }: OnlineMeetingCardProps) => 
             </StyledMeetingUrlText>
           </Box>
         </StyledMeetingInfoContent>
-        <MeetingJoinAction
-          joinUrl={meetingInfo?.joinUrl}
-          meeting={meeting}
-          label={labels.joinMeeting}
-          variant="button"
-          id="venue-join-meeting-desktop"
-        />
+        {showJoin ? (
+          <MeetingJoinAction
+            joinUrl={meetingInfo?.joinUrl}
+            meeting={meeting}
+            label={labels.joinMeeting}
+            variant="button"
+            id="venue-join-meeting-desktop"
+          />
+        ) : null}
       </StyledMeetingInfoRow>
     </BaseCard>
   );

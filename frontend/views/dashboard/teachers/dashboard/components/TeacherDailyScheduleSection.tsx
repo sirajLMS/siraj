@@ -6,7 +6,7 @@ import { DateNavigator, SectionPanel } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { TeacherScheduleDataGrid } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleDataGrid";
-import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 2,
@@ -30,12 +30,11 @@ interface TeacherDailyScheduleSectionProps {
   readonly dateLabel: string;
   readonly onDateChange: (date: string) => void;
   readonly rows: readonly TeacherScheduleRow[];
-  readonly labels: TeacherDashboardLabels;
+  readonly labels: TeacherDashboardViewLabels;
   readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly canActivate: boolean;
   readonly loading?: boolean;
   readonly emptyMessage: string;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -60,7 +59,6 @@ export function TeacherDailyScheduleSection({
   canActivate,
   loading,
   emptyMessage,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -90,7 +88,6 @@ export function TeacherDailyScheduleSection({
           instanceStatusLabels={instanceStatusLabels}
           canActivate={canActivate}
           emptyMessage={emptyMessage}
-          onJoinVideo={onJoinVideo}
           onActivate={onActivate}
           onStartSession={onStartSession}
           onMarkAbsent={onMarkAbsent}

@@ -1,9 +1,8 @@
 "use client";
 
-import { AddCardOutlined, FilterListOutlined } from "@mui/icons-material";
+import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
-import { useRef } from "react";
-import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
 import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
@@ -12,6 +11,7 @@ import type { UserBillingProfileDesktopViewProps } from "@/frontend/views/dashbo
 export function UserBillingProfileDesktopView({
   labels,
   metrics,
+  summaryLoading = false,
   invoices,
   searchQuery,
   canView,
@@ -29,12 +29,14 @@ export function UserBillingProfileDesktopView({
   totalCount,
   onPageChange,
   loading,
+  isSearchPending = false,
 }: Readonly<UserBillingProfileDesktopViewProps>) {
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const listLoading = isSearchPending || (loading && invoices.length === 0);
+
   return (
     <PageContainer>
       <PageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} />
-      <BillingMetricsRow metrics={metrics} />
+      <BillingMetricsRow metrics={metrics} loading={summaryLoading} />
       <SectionPanel
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
@@ -57,12 +59,9 @@ export function UserBillingProfileDesktopView({
                 onSearchChange(event.target.value);
               }}
               placeholder={labels.search.parentPlaceholder}
+              helperText={isSearchPending ? labels.search.searching : undefined}
               slotProps={{ htmlInput: { autoComplete: "off" } }}
-              inputRef={searchInputRef}
             />
-            <FilterButton startIcon={<FilterListOutlined />} onClick={() => searchInputRef.current?.focus()}>
-              {labels.search.filter}
-            </FilterButton>
           </Box>
         }
       >
@@ -84,7 +83,7 @@ export function UserBillingProfileDesktopView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
-          loading={loading}
+          loading={listLoading}
         />
       </SectionPanel>
     </PageContainer>

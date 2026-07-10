@@ -9,6 +9,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { logger } from "@/frontend/utils/logger";
+import { studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { StatusTrackingView } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingView";
 import type { StatusTrackingRow } from "@/frontend/views/dashboard/classes/status/tracking/types";
 import { useStatusTrackingLabels } from "@/frontend/views/dashboard/classes/status/tracking/useStatusTrackingLabels";
@@ -56,7 +57,7 @@ export function StatusTrackingContainer() {
     const row = rows.find(session => session.id === id);
     const studentId = row?.studentId;
     if (studentId) {
-      router.push(`/students/${studentId}/status`);
+      router.push(studentProfileTabHref(studentId, "status"));
     } else {
       notifications.show(labels.errorNoStudentId, { severity: "warning", autoHideDuration: 4000 });
     }

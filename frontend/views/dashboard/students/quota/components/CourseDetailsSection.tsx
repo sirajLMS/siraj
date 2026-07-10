@@ -19,13 +19,16 @@ import {
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { QuotaFormField } from "@/frontend/views/dashboard/students/quota/components/QuotaFormField";
 import { quotaInputSx } from "@/frontend/views/dashboard/students/quota/components/quotaFieldStyles";
 import { SectionHeader } from "@/frontend/views/dashboard/students/quota/components/SectionHeader";
+import { useQuotaFormAccess } from "@/frontend/views/dashboard/students/quota/QuotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/quota/schemas/studentQuotaSchema";
 
 function TeacherField() {
   const t = useTranslations("dashboard.studentQuota");
+  const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
     formState: { errors },
@@ -33,7 +36,12 @@ function TeacherField() {
 
   const { data, loading } = useQuery(teachersQueryDocument, {
     variables: { search: "", limit: 100 },
+    skip: !canViewTeacher,
   });
+
+  if (!canViewTeacher) {
+    return null;
+  }
 
   const teachers = data?.teachers ?? [];
 
@@ -71,10 +79,16 @@ function TeacherField() {
 
 function TotalClassesField() {
   const t = useTranslations("dashboard.studentQuota");
+  const { canViewTeacher } = useQuotaFormAccess();
   const {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
+
+  if (!canViewTeacher) {
+    return null;
+  }
+
   return (
     <QuotaFormField label={t("fields.totalClasses")}>
       <Controller
@@ -99,44 +113,55 @@ function TotalClassesField() {
 
 function ClassesLeftField() {
   const t = useTranslations("dashboard.studentQuota");
+  const { readOnly, canEditQuota, canViewQuota } = useQuotaFormAccess();
   const {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
+  const fieldDisabled = readOnly || !canEditQuota;
+
+  if (!canViewQuota) {
+    return null;
+  }
+
   return (
     <QuotaFormField
       label={t("fields.classesLeft")}
       extraLabel={
-        <Box
-          sx={theme => ({
-            display: { xs: "flex", md: "none" },
-            alignItems: "center",
-            gap: 0.5,
-            color: theme.palette.tertiary,
-            mb: 0.5,
-          })}
-        >
-          <SyncProblemOutlined sx={{ fontSize: 16 }} />
-          <Typography variant="labelSm" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {t("fields.overrideActive")}
-          </Typography>
-        </Box>
+        fieldDisabled ? null : (
+          <Box
+            sx={theme => ({
+              display: { xs: "flex", md: "none" },
+              alignItems: "center",
+              gap: 0.5,
+              color: theme.palette.tertiary,
+              mb: 0.5,
+            })}
+          >
+            <SyncProblemOutlined sx={{ fontSize: 16 }} />
+            <Typography variant="labelSm" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              {t("fields.overrideActive")}
+            </Typography>
+          </Box>
+        )
       }
       helperText={
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({
-            color: { xs: theme.palette.tertiaryContainer, md: theme.palette.onSurfaceVariant },
-            fontStyle: "italic",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 0.5,
-            mt: { xs: 1, md: 0 },
-          })}
-        >
-          <InfoOutlined sx={{ display: { xs: "block", md: "none" }, fontSize: 14, mt: 0.5 }} />
-          {t("fields.overrideNotice")}
-        </Typography>
+        fieldDisabled ? null : (
+          <Typography
+            variant="bodyMd"
+            sx={theme => ({
+              color: { xs: theme.palette.tertiaryContainer, md: theme.palette.onSurfaceVariant },
+              fontStyle: "italic",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 0.5,
+              mt: { xs: 1, md: 0 },
+            })}
+          >
+            <InfoOutlined sx={{ display: { xs: "block", md: "none" }, fontSize: 14, mt: 0.5 }} />
+            {t("fields.overrideNotice")}
+          </Typography>
+        )
       }
     >
       <Controller
@@ -148,11 +173,12 @@ function ClassesLeftField() {
             type="number"
             variant="outlined"
             fullWidth
+            disabled={fieldDisabled}
             error={!!errors.classesLeft}
             helperText={errors.classesLeft?.message}
             slotProps={{
               input: {
-                endAdornment: (
+                endAdornment: fieldDisabled ? undefined : (
                   <Box
                     sx={theme => ({
                       display: { xs: "none", md: "flex" },
@@ -191,6 +217,11 @@ function ClassesLeftField() {
 
 export function CourseDetailsSection() {
   const t = useTranslations("dashboard.studentQuota");
+  const { canViewTeacher, canViewQuota } = useQuotaFormAccess();
+
+  if (!canViewQuota && !canViewTeacher) {
+    return <ProfileRestrictedSection title={t("sections.courseDetails")} />;
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>

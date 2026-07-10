@@ -47,6 +47,10 @@ export interface ClassAuditLabels {
     readonly viewMap: string;
     readonly capacityBadge: string;
   };
+  readonly meeting: {
+    readonly title: string;
+    readonly joinMeeting: string;
+  };
   readonly communication: {
     readonly title: string;
     readonly resendNotifications: string;

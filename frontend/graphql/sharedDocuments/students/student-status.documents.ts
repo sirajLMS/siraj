@@ -22,6 +22,7 @@ export const studentUpcomingClassesQueryDocument: TypedDocumentNode<
         scheduledEndAt
         durationMinutes
         executionState
+        outcome
         isFrozen
         meetingJoinUrl
         effectiveMeeting {

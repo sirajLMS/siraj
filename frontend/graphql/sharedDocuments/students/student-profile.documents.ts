@@ -1,7 +1,12 @@
-import { gql } from "@apollo/client";
+import { gql, type TypedDocumentNode } from "@apollo/client";
+import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 
-export const studentProfileQueryDocument = gql`
+export const studentProfileQueryDocument: TypedDocumentNode<
+  Operations.StudentProfileQuery,
+  Types.QueryStudentProfileArgs
+> = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query StudentProfile($studentId: String!, $year: Int, $month: Int) {
     studentProfile(studentId: $studentId, year: $year, month: $month) {
@@ -38,6 +43,7 @@ export const studentProfileQueryDocument = gql`
           scheduledEndAt
           durationMinutes
           executionState
+          outcome
           isFrozen
           meetingJoinUrl
           effectiveMeeting {

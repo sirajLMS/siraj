@@ -13,6 +13,7 @@ export function getAdminInvoiceGridLabels(labels: BillingLabels) {
     reviewSubmission: labels.adminTable.reviewSubmission,
     viewRejection: labels.adminTable.viewRejection,
     viewDetails: labels.parentTable.viewDetails,
+    deleteInvoice: labels.adminTable.deleteInvoice,
     noEntries: labels.adminTable.noEntries,
     statusLabels: labels.invoiceStatus,
   };

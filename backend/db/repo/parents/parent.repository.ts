@@ -431,13 +431,11 @@ export namespace ParentRepository {
     };
   };
 
-  export type ReactivatedParentResult = DeactivatedParentResult;
-
   export const reactivateParent = async (
     parentId: string,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<ReactivatedParentResult> => {
+  ): Promise<DeactivatedParentResult> => {
     const queryDb = tx ?? db;
 
     const existing = await queryDb
@@ -680,6 +678,7 @@ export namespace ParentRepository {
         executionState: classInstances.executionState,
         outcome: classInstances.outcome,
         meetingJoinUrl: classInstances.meetingJoinUrl,
+        isFrozen: classInstances.isFrozen,
       })
       .from(classInstances)
       .innerJoin(students, eq(classInstances.studentId, students.id))
@@ -730,6 +729,7 @@ export namespace ParentRepository {
         executionState: parseClassExecutionState(r.executionState),
         outcome: parseClassOutcome(r.outcome) ?? ClassOutcome.PENDING,
         meetingJoinUrl: r.meetingJoinUrl ?? null,
+        isFrozen: r.isFrozen ?? false,
         classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone, locale),
       };
     });

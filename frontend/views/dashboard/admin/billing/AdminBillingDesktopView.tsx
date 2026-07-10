@@ -16,13 +16,11 @@ import {
 } from "@/frontend/views/dashboard/billing/utils/label-mappers";
 import { Link } from "@/shared/i18n/routing";
 
-// Chip indicating items requiring attention, styled with error colors
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.error.main,
   color: theme.palette.onError,
 }));
 
-// Footer box for the student credit section with a top border separator
 const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
@@ -32,24 +30,34 @@ const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
 export function AdminBillingDesktopView({
   labels,
   summary,
+  summaryLoading = false,
   invoices,
   creditRows,
+  creditLoading = false,
   searchQuery,
   loading,
+  isSearchPending = false,
   canManage,
   canCreate,
   canViewExchangeRates,
   billingActionsDisabled = false,
+  creditFilter,
   onSearchChange,
   onMarkAsPaid,
   onViewPaymentDetails,
   onSendReminder,
   onManualInvoice,
+  onViewAllNegativeBalance,
+  onClearCreditFilter,
+  onDeleteInvoice,
+  canDelete = false,
   page,
   pageSize,
   totalCount,
   onPageChange,
 }: Readonly<AdminBillingViewProps>) {
+  const adminMetrics = buildAdminMetrics(summary, labels);
+
   return (
     <PageContainer>
       <PageHeader
@@ -76,7 +84,7 @@ export function AdminBillingDesktopView({
         }
       />
 
-      <BillingMetricsRow metrics={buildAdminMetrics(summary, labels)} />
+      <BillingMetricsRow metrics={adminMetrics} loading={summaryLoading} />
 
       <SectionPanel
         title={labels.sections.recentInvoices}
@@ -84,7 +92,8 @@ export function AdminBillingDesktopView({
           <BillingSearchBar
             value={searchQuery}
             placeholder={labels.search.invoicesPlaceholder}
-            filterLabel={labels.search.filter}
+            searchingLabel={labels.search.searching}
+            isSearching={isSearchPending}
             onChange={onSearchChange}
           />
         }
@@ -92,33 +101,51 @@ export function AdminBillingDesktopView({
         <AdminInvoicesDataGrid
           rows={invoices}
           canManage={canManage}
+          canDelete={canDelete}
           billingActionsDisabled={billingActionsDisabled}
           onMarkAsPaid={onMarkAsPaid}
           onViewPaymentDetails={onViewPaymentDetails}
+          onDeleteInvoice={onDeleteInvoice}
           labels={getAdminInvoiceGridLabels(labels)}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
-          loading={loading}
+          loading={isSearchPending || (loading && invoices.length === 0)}
         />
       </SectionPanel>
 
       {canManage && (
         <SectionPanel
+          id="student-credit-section"
           title={labels.sections.studentCreditStatus}
-          actions={<StyledAttentionChip label={labels.requiresAttention} size="small" />}
+          actions={
+            creditFilter === "negative_balance" ? (
+              <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
+            ) : (
+              <StyledAttentionChip label={labels.requiresAttention} size="small" />
+            )
+          }
+          subTitle={creditFilter === "negative_balance" ? labels.creditTable.showingNegativeBalanceOnly : undefined}
         >
           <StudentCreditDataGrid
             rows={creditRows}
             canManage={canManage}
+            billingActionsDisabled={billingActionsDisabled}
             onSendReminder={onSendReminder}
             labels={getStudentCreditGridLabels(labels)}
+            loading={creditLoading && creditRows.length === 0}
           />
-          <StyledCreditFooterBox sx={{ py: 2 }}>
-            <Button variant="text" sx={{ fontWeight: 700 }}>
-              {labels.viewAllNegativeBalance}
-            </Button>
+          <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
+            {creditFilter === "negative_balance" ? (
+              <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
+                {labels.creditTable.clearFilter}
+              </Button>
+            ) : (
+              <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
+                {labels.viewAllNegativeBalance}
+              </Button>
+            )}
           </StyledCreditFooterBox>
         </SectionPanel>
       )}

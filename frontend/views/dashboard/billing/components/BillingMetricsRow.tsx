@@ -1,7 +1,7 @@
 "use client";
 
 import type { SvgIconComponent } from "@mui/icons-material";
-import { Grid } from "@mui/material";
+import { Grid, Skeleton } from "@mui/material";
 import { MetricCard, type MetricCardVariant } from "@/frontend/components/ui";
 
 export interface BillingMetricItem {
@@ -16,9 +16,25 @@ export interface BillingMetricItem {
 interface BillingMetricsRowProps {
   readonly metrics: readonly BillingMetricItem[];
   readonly compact?: boolean;
+  readonly loading?: boolean;
 }
 
-export function BillingMetricsRow({ metrics, compact = false }: Readonly<BillingMetricsRowProps>) {
+export function BillingMetricsRow({ metrics, compact = false, loading = false }: Readonly<BillingMetricsRowProps>) {
+  if (loading) {
+    const skeletonKeys =
+      metrics.length > 0 ? metrics.map(metric => metric.key) : ["outstanding", "paid", "next-due", "active-students"];
+
+    return (
+      <Grid container spacing={compact ? 1.5 : 2}>
+        {skeletonKeys.map(key => (
+          <Grid key={`billing-metric-skeleton-${key}`} size={{ xs: 6, md: 3 }}>
+            <Skeleton variant="rounded" height={compact ? 88 : 120} sx={{ borderRadius: 2 }} />
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
   return (
     <Grid container spacing={compact ? 1.5 : 2}>
       {metrics.map(metric => (

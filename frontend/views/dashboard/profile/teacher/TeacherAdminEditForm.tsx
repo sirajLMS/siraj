@@ -99,8 +99,8 @@ export function TeacherAdminEditForm({
               control={form.control}
             />
           ) : null}
-          {canEdit("core_contact") ? (
-            <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
+          {canEdit("core_contact") || canEdit("teacher_identity") ? (
+            <ContactSection mode="edit" scope={scope} isAdminScope register={form.register} control={form.control} />
           ) : null}
           {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
           {canEdit("teacher_professional") ? (

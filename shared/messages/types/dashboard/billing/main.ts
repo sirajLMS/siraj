@@ -41,7 +41,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly search: {
     readonly invoicesPlaceholder: string;
     readonly parentPlaceholder: string;
-    readonly filter: string;
+    readonly searching: string;
   };
   readonly adminTable: {
     readonly invoiceId: string;
@@ -54,6 +54,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly quickPay: string;
     readonly reviewSubmission: string;
     readonly viewRejection: string;
+    readonly deleteInvoice: string;
     readonly noEntries: string;
   };
   readonly creditTable: {
@@ -67,6 +68,8 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly negativeBalance: string;
     readonly activeCredit: string;
     readonly noEntries: string;
+    readonly showingNegativeBalanceOnly: string;
+    readonly clearFilter: string;
   };
   readonly parentTable: {
     readonly invoiceNumber: string;
@@ -94,6 +97,11 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly approveProofSuccess: string;
   readonly rejectProofSuccess: string;
   readonly deleteInvoiceSuccess: string;
+  readonly deleteInvoiceDialog: {
+    readonly title: string;
+    readonly body: string;
+    readonly confirm: string;
+  };
   readonly noUnpaidInvoices: string;
   readonly submitProofDialog: {
     readonly titleSubmit: string;
@@ -167,6 +175,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   };
   readonly fxConversionNote: string;
   readonly fxConversionNoteSubject: string;
+  readonly adminBillingFxNote: string;
   readonly currencyHedges: CurrencyHedgesLabels;
   readonly supportedCurrencies: SupportedCurrenciesLabels;
 }

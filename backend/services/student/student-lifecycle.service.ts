@@ -4,6 +4,7 @@ import { parseStudentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
 
 export namespace StudentLifecycleService {
@@ -71,8 +72,10 @@ export namespace StudentLifecycleService {
     expectedVersion?: number,
     locale?: string
   ): Promise<ChangeStudentStatusResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_MANAGE_STATUS);
-    if (!hasPermission) {
+    const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
+    try {
+      assertStudentFieldEdit(fieldCtx, "student_academic");
+    } catch {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
     }

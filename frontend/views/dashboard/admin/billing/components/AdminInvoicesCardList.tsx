@@ -11,6 +11,11 @@ import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import {
+  isDeletableInvoiceStatus,
+  isPayableUnpaidStatus,
+  shouldShowViewRejection,
+} from "@/frontend/views/dashboard/billing/utils/invoiceDisplayStatus";
 
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;
@@ -18,6 +23,7 @@ interface AdminInvoicesCardListLabels {
   readonly reviewSubmission: string;
   readonly viewRejection: string;
   readonly viewDetails: string;
+  readonly deleteInvoice: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
 }
 
@@ -25,10 +31,12 @@ interface AdminInvoicesCardListProps {
   readonly rows: readonly AdminInvoiceRow[];
   readonly labels: AdminInvoicesCardListLabels;
   readonly canManage: boolean;
+  readonly canDelete?: boolean;
   readonly billingActionsDisabled?: boolean;
   readonly loading?: boolean;
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
+  readonly onDeleteInvoice?: (invoiceId: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -61,10 +69,12 @@ export function AdminInvoicesCardList({
   rows,
   labels,
   canManage,
+  canDelete = false,
   billingActionsDisabled = false,
   loading = false,
   onMarkAsPaid,
   onViewPaymentDetails,
+  onDeleteInvoice,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -92,11 +102,11 @@ export function AdminInvoicesCardList({
       ) : null}
       {rows.map(row => {
         const actionsEnabled = canManage && !billingActionsDisabled;
-        const isPayable =
-          actionsEnabled &&
-          (row.status === "OVERDUE" || row.status === InvoiceStatus.Unpaid || row.status === "PENDING");
+        const isPayable = actionsEnabled && isPayableUnpaidStatus(row.status);
         const showViewRejection =
-          actionsEnabled && row.status === InvoiceStatus.Unpaid && row.hasRejectedSubmission && onViewPaymentDetails;
+          actionsEnabled && shouldShowViewRejection(row.status, row.hasRejectedSubmission) && onViewPaymentDetails;
+        const showDelete =
+          canDelete && !billingActionsDisabled && onDeleteInvoice && isDeletableInvoiceStatus(row.status);
         const actionLabel = row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay;
 
         return (
@@ -176,6 +186,17 @@ export function AdminInvoicesCardList({
                   <VisibilityOutlined fontSize="small" />
                 </IconButton>
               </Box>
+            ) : null}
+            {showDelete ? (
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                onClick={() => onDeleteInvoice(row.id)}
+                sx={{ mt: 1.5, textTransform: "uppercase", fontWeight: 700 }}
+              >
+                {labels.deleteInvoice}
+              </Button>
             ) : null}
           </StyledInvoiceCard>
         );

@@ -53,7 +53,7 @@ const mockLabels: BillingLabels = {
   search: {
     invoicesPlaceholder: "Search invoices...",
     parentPlaceholder: "Search by ID...",
-    filter: "Filters",
+    searching: "Searching…",
   },
   adminTable: {
     invoiceId: "Invoice ID",
@@ -66,6 +66,7 @@ const mockLabels: BillingLabels = {
     quickPay: "Quick Pay",
     reviewSubmission: "Review submission",
     viewRejection: "View rejection",
+    deleteInvoice: "Delete Invoice",
     noEntries: "No invoices match your search",
   },
   creditTable: {
@@ -79,6 +80,8 @@ const mockLabels: BillingLabels = {
     negativeBalance: "Negative Balance",
     activeCredit: "Active Credit",
     noEntries: "No student credit records found",
+    showingNegativeBalanceOnly: "Showing students with negative balance only",
+    clearFilter: "Clear filter",
   },
   parentTable: {
     invoiceNumber: "#",
@@ -164,6 +167,11 @@ const mockLabels: BillingLabels = {
   approveProofSuccess: "Payment approved",
   rejectProofSuccess: "Payment rejected",
   deleteInvoiceSuccess: "Invoice deleted",
+  deleteInvoiceDialog: {
+    title: "Delete Invoice",
+    body: "Delete {invoiceId}?",
+    confirm: "Delete",
+  },
   hasPaymentProofHint: "Proof on file",
   submitProofDialog: {
     titleSubmit: "Submit payment proof",
@@ -301,6 +309,7 @@ const mockLabels: BillingLabels = {
     },
   },
   fxConversionNote: "Converted totals use your display currency ({code})",
+  fxConversionNoteSubject: "Converted amounts use this user's display currency ({code})",
   currencyHedges: {
     pageTitle: "Currency Hedges",
     pageSubtitle: "Manage hedges",

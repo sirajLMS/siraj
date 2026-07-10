@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: sonarqube-postgres-cad
+    container_name: sonarqube-postgres
     environment:
       - POSTGRES_USER=sonarqube
       - POSTGRES_PASSWORD=sonarqube
@@ -19,7 +19,7 @@ services:
 
   sonarqube:
     image: sonarqube:community
-    container_name: sonarqube-cad
+    container_name: sonarqube
     depends_on:
       postgres:
         condition: service_healthy

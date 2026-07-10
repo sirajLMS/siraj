@@ -49,6 +49,10 @@ export const classAudit: ClassAuditLabels = {
     viewMap: "عرض",
     capacityBadge: "سعة {count} طالب",
   },
+  meeting: {
+    title: "الاجتماع عبر الإنترنت",
+    joinMeeting: "انضم إلى الاجتماع",
+  },
   communication: {
     title: "سجل التواصل",
     resendNotifications: "إعادة إرسال الإشعارات",

@@ -44,7 +44,7 @@ function mapRowToSessionStatus(
 }
 
 function mapOutcomeToAction(outcome: string | null | undefined, status: ClassSessionStatus): ClassSessionAction {
-  if (status === "missed") return "view_recording";
+  if (status === "missed") return "view_class_audit";
   if (outcome?.toLowerCase() === "taken") return "leave_disabled";
   return "leave_enabled";
 }
@@ -136,7 +136,7 @@ export function ScheduleAlertsContainer() {
     status: t("table.status"),
     joinSession: t("actions.joinSession"),
     leaveClass: t("actions.leaveClass"),
-    viewRecording: t("actions.viewRecording"),
+    viewClassAudit: t("actions.viewClassAudit"),
     showingOf: t.raw("showingOf") as string,
     active: t("sessionStatus.active"),
     upcoming: t("sessionStatus.upcoming"),
@@ -154,7 +154,7 @@ export function ScheduleAlertsContainer() {
     router.push(`/reschedule?classInstanceId=${id}`);
   };
 
-  const handleViewRecording = (id: string) => {
+  const handleViewClassAudit = (id: string) => {
     router.push(`/classes/${id}/audit`);
   };
 
@@ -170,7 +170,7 @@ export function ScheduleAlertsContainer() {
         pageSize={pageSize}
         labels={labels}
         onLeave={handleLeave}
-        onViewRecording={handleViewRecording}
+        onViewClassAudit={handleViewClassAudit}
         onPageChange={handlePageChange}
         loading={loading}
         onDownloadReport={() => {}}

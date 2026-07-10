@@ -2,7 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ProfileScope, type CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { MeetingSummarySection } from "@/frontend/views/dashboard/profile/shared/MeetingSummarySection";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -121,10 +121,12 @@ export function TeacherProfileView({
           avatarUrl={avatarUrl}
           displayCurrency={displayCurrency}
         />
-        <ContactSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
+        <ContactSection mode="view" scope={scope} teacherData={teacherData} isAdminScope={isAdminScope} />
         {renderCompensationSection()}
         {renderAdminOnlySection()}
-        {targetUserId ? <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} /> : null}
+        {targetUserId && canView("meeting_configs") ? (
+          <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} />
+        ) : null}
       </Box>
 
       {renderStatsSection()}

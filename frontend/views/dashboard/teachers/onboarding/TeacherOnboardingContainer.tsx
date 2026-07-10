@@ -1,21 +1,31 @@
 "use client";
 
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Box, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useCreateTeacherOnboarding } from "@/frontend/hooks/useCreateTeacherOnboarding";
+import { useTeacherOnboardingStore } from "@/frontend/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
+import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import { TeacherOnboardingView } from "@/frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView";
 import { useTeacherOnboardingLabels } from "@/frontend/views/dashboard/teachers/onboarding/useTeacherOnboardingLabels";
+import { useRouter } from "@/shared/i18n/routing";
 
 export function TeacherOnboardingContainer() {
   const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();
+  const createdTeacher = useTeacherOnboardingStore(state => state.result);
   const [showSuccess, setShowSuccess] = useState(false);
   const labels = useTeacherOnboardingLabels();
   const tMeeting = useTranslations("ui.meetingConfig.manager");
+  const tJoin = useTranslations("ui.meetingConfig.join");
+  const router = useRouter();
+
+  const meetingSetupHref = createdTeacher
+    ? `${profileHrefForTeacher({ userId: createdTeacher.userId, teacherId: createdTeacher.id })}?tab=meeting`
+    : undefined;
 
   const handleSubmit = async (data: TeacherOnboardingFormData) => {
     logger.info("Submitting teacher onboarding data:", data);
@@ -33,6 +43,23 @@ export function TeacherOnboardingContainer() {
 
   return (
     <RequirePermission permissions={[AppPermission.TeachersCreate]}>
+      {meetingConfigWarning ? (
+        <Box sx={{ px: { xs: 2, md: 3 }, pt: 2 }}>
+          <Alert
+            severity="warning"
+            onClose={() => clearMeetingConfigWarning()}
+            action={
+              meetingSetupHref ? (
+                <Button color="inherit" size="small" onClick={() => router.push(meetingSetupHref)}>
+                  {tJoin("setupLink")}
+                </Button>
+              ) : undefined
+            }
+          >
+            {tMeeting("postCreateFailure")}
+          </Alert>
+        </Box>
+      ) : null}
       <TeacherOnboardingView
         isSubmitting={loading}
         showSuccess={showSuccess}
@@ -40,16 +67,6 @@ export function TeacherOnboardingContainer() {
         onSubmit={handleSubmit}
         onDismissSuccess={handleDismissSuccess}
       />
-      <Snackbar
-        open={meetingConfigWarning}
-        autoHideDuration={8000}
-        onClose={() => clearMeetingConfigWarning()}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity="warning" onClose={() => clearMeetingConfigWarning()}>
-          {tMeeting("postCreateFailure")}
-        </Alert>
-      </Snackbar>
     </RequirePermission>
   );
 }

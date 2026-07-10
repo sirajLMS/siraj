@@ -17,7 +17,6 @@ interface TeacherScheduleDataGridProps {
   readonly instanceStatusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly canActivate: boolean;
   readonly emptyMessage: string;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -46,7 +45,6 @@ export function TeacherScheduleDataGrid({
   instanceStatusLabels,
   canActivate,
   emptyMessage,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -125,7 +123,6 @@ export function TeacherScheduleDataGrid({
             row={row}
             labels={labels}
             canActivate={canActivate}
-            onJoinVideo={onJoinVideo}
             onActivate={onActivate}
             onStartSession={onStartSession}
             onMarkAbsent={onMarkAbsent}
@@ -134,16 +131,7 @@ export function TeacherScheduleDataGrid({
         ),
       },
     ];
-  }, [
-    canActivate,
-    instanceStatusLabels,
-    labels,
-    onActivate,
-    onJoinVideo,
-    onMarkAbsent,
-    onRequestLeave,
-    onStartSession,
-  ]);
+  }, [canActivate, instanceStatusLabels, labels, onActivate, onMarkAbsent, onRequestLeave, onStartSession]);
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 

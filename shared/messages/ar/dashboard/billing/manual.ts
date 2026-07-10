@@ -20,6 +20,8 @@ export const billingManual: BillingManualLabels = {
   submitAndSendEmail: "إرسال وإرسال بريد إلكتروني",
   successMessage: "تم إرسال الفاتورة اليدوية بنجاح.",
   createSuccess: "تم إنشاء الفاتورة {id} بنجاح",
+  manualInvoiceFxNote:
+    "يُخزَّن مبلغ الفاتورة بالعملة المحددة. تظهر التحويلات في صفحات الفوترة بناءً على عملة عرض كل مستخدم.",
   months: {
     jan: "يناير",
     feb: "فبراير",

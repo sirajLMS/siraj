@@ -37,6 +37,7 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
     bookingStatus: t.expose("bookingStatus", { type: BookingStatusPothosObject }),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
+    isFrozen: t.exposeBoolean("isFrozen"),
     meetingJoinUrl: t.string({
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",

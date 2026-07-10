@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/teacher/sections/ContactSection";
 import {
@@ -14,7 +15,6 @@ import {
   type TeacherOwnEditFormData,
   teacherOwnEditSchema,
 } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
-import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 
 export type { TeacherOwnEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
@@ -78,8 +78,14 @@ export function TeacherProfileEditForm({
               control={form.control}
             />
           ) : null}
-          {canEdit("core_contact") ? (
-            <ContactSection mode="edit" isAdminScope={false} register={form.register} control={form.control} />
+          {canEdit("core_contact") || canEdit("teacher_identity") ? (
+            <ContactSection
+              mode="edit"
+              scope={scope}
+              isAdminScope={false}
+              register={form.register}
+              control={form.control}
+            />
           ) : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>

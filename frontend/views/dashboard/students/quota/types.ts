@@ -25,7 +25,8 @@ export interface QuotaFormFieldProps {
 
 export interface MobileProfileHeaderProps {
   readonly studentData: StudentProfileData;
-  readonly onEditAvatar: () => void;
+  readonly onEditAvatar?: () => void;
+  readonly showAvatarEdit?: boolean;
 }
 
 export interface FormActionsProps {
@@ -33,6 +34,8 @@ export interface FormActionsProps {
   readonly isSaved: boolean;
   readonly studentData: StudentProfileData;
   readonly onCancel: () => void;
+  readonly readOnly?: boolean;
+  readonly showCancel?: boolean;
 }
 
 export interface StudentQuotaViewProps {
@@ -41,6 +44,7 @@ export interface StudentQuotaViewProps {
   readonly isSaving: boolean;
   readonly isSaved: boolean;
   readonly embedded?: boolean;
+  readonly readOnly?: boolean;
   readonly onSave: (data: StudentQuotaFormData) => Promise<void>;
   readonly onCancel: () => void;
   readonly onEditAvatar?: () => void;

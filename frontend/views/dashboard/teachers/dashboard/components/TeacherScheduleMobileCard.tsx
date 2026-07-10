@@ -56,7 +56,6 @@ interface TeacherScheduleMobileCardProps {
   readonly row: TeacherScheduleRow;
   readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -328,7 +327,6 @@ function CardFooter({
   row,
   labels,
   canActivate,
-  isCompleted,
   sessionActions,
   onActivate,
   onStartSession,
@@ -338,7 +336,6 @@ function CardFooter({
   readonly row: TeacherScheduleRow;
   readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
-  readonly isCompleted: boolean;
   readonly sessionActions: ReturnType<typeof resolveTeacherScheduleSessionActions>;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
@@ -350,7 +347,7 @@ function CardFooter({
       <Box sx={{ flex: 1, minWidth: 0 }}>
         {renderFooterAction(row, labels, canActivate, onActivate, onStartSession, onMarkAbsent, onRequestLeave)}
       </Box>
-      {!isCompleted && sessionActions.joinVideo ? <VideoButton row={row} labels={labels} /> : null}
+      {sessionActions.joinVideo ? <VideoButton row={row} labels={labels} /> : null}
     </Box>
   );
 }
@@ -385,7 +382,6 @@ export function TeacherScheduleMobileCard({
         row={row}
         labels={labels}
         canActivate={canActivate}
-        isCompleted={isCompleted}
         sessionActions={sessionActions}
         onActivate={onActivate}
         onStartSession={onStartSession}
@@ -401,7 +397,6 @@ interface TeacherScheduleMobileCardListProps {
   readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
   readonly emptyMessage: string;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -413,7 +408,6 @@ export function TeacherScheduleMobileCardList({
   labels,
   canActivate,
   emptyMessage,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -437,7 +431,6 @@ export function TeacherScheduleMobileCardList({
           row={row}
           labels={labels}
           canActivate={canActivate}
-          onJoinVideo={onJoinVideo}
           onActivate={onActivate}
           onStartSession={onStartSession}
           onMarkAbsent={onMarkAbsent}

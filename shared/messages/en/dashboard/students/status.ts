@@ -39,7 +39,7 @@ export const status: StudentStatusLabels = {
   table: {
     subjectInstructor: "Subject / Instructor",
     dateTime: "Date & Time",
-    roomLink: "Hold status",
+    holdStatus: "Hold status",
     status: "Status",
     pendingHolds: "{count} pending holds",
     footerInfo: "End of upcoming classes for {id}",

@@ -48,7 +48,6 @@ interface TeacherDashboardViewProps {
   readonly onPrintSchedule: () => void;
   readonly onManualEntry: () => void;
   readonly onNewSession: () => void;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -106,7 +105,6 @@ interface MobileScheduleSectionProps {
   readonly loading?: boolean;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -126,7 +124,6 @@ function MobileScheduleSection({
   loading,
   dateValue,
   onDateChange,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -163,7 +160,6 @@ function MobileScheduleSection({
           labels={labels}
           canActivate={canActivate}
           emptyMessage={labels.schedule.noEntries}
-          onJoinVideo={onJoinVideo}
           onActivate={onActivate}
           onStartSession={onStartSession}
           onMarkAbsent={onMarkAbsent}
@@ -236,7 +232,6 @@ export function TeacherDashboardView({
   activationError,
   canActivate,
   loading,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -300,7 +295,6 @@ export function TeacherDashboardView({
             loading={loading}
             dateValue={dateValue}
             onDateChange={onDateChange}
-            onJoinVideo={onJoinVideo}
             onActivate={onActivate}
             onStartSession={onStartSession}
             onMarkAbsent={onMarkAbsent}
@@ -327,7 +321,6 @@ export function TeacherDashboardView({
             canActivate={canActivate}
             loading={loading}
             emptyMessage={labels.schedule.noEntries}
-            onJoinVideo={onJoinVideo}
             onActivate={onActivate}
             onStartSession={onStartSession}
             onMarkAbsent={onMarkAbsent}

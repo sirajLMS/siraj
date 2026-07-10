@@ -7,11 +7,12 @@ import { formatDistanceToNow } from "date-fns";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument, updateStudentQuotaMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
+import { canViewStudentProfileTab } from "@/frontend/views/dashboard/students/profile/studentProfileTabs";
+import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import { StudentQuotaView } from "@/frontend/views/dashboard/students/quota/StudentQuotaView";
 import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import type { StudentProfileData } from "@/frontend/views/dashboard/students/quota/types";
@@ -26,6 +27,9 @@ export function StudentQuotaContainer() {
   const useUnifiedProfile = profileContext != null;
   const notifications = useNotifications();
   const router = useRouter();
+  const { canView, canEdit } = useStudentFieldAccess();
+  const canEditQuota = canEdit("student_quota_edit");
+  const hasTabAccess = canViewStudentProfileTab("quota", canView);
 
   const [isSaved, setIsSaved] = useState(false);
 
@@ -54,7 +58,7 @@ export function StudentQuotaContainer() {
   });
 
   const handleSave = async (formData: StudentQuotaFormData) => {
-    if (!studentId) return;
+    if (!studentId || !canEditQuota) return;
     await updateQuota({
       variables: {
         studentId,
@@ -66,6 +70,10 @@ export function StudentQuotaContainer() {
 
   if (!studentId) {
     return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+  }
+
+  if (!hasTabAccess) {
+    return <ProfileRestrictedSection title={t("breadcrumbs.editProfile")} />;
   }
 
   if ((useUnifiedProfile ? profileContext?.loading : loading) && !data && !profileContext?.profile) {
@@ -84,7 +92,7 @@ export function StudentQuotaContainer() {
   const profile = profileContext?.profile;
   const s = useUnifiedProfile ? profile : data?.studentById;
   const studentData: StudentProfileData | null =
-    s && typeof s.id === "string" && s.id.length > 0 && typeof s.name === "string" && s.name.length > 0
+    s && typeof s.id === "string" && s.id.length > 0
       ? {
           id: s.id,
           studentName: s.name ?? tc("notSet"),
@@ -102,24 +110,23 @@ export function StudentQuotaContainer() {
       : null;
 
   const handleCancel = () => {
-    router.back();
-  };
-
-  const handleEditAvatar = () => {
+    if (useUnifiedProfile) {
+      router.replace(`/students/${studentId}/profile?tab=status`);
+      return;
+    }
     router.back();
   };
 
   return (
-    <RequirePermission permissions={[AppPermission.StudentEditQuota]}>
-      <StudentQuotaView
-        studentData={studentData}
-        isLoading={useUnifiedProfile ? Boolean(profileContext?.loading) : loading}
-        isSaving={saving}
-        isSaved={isSaved}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        onEditAvatar={handleEditAvatar}
-      />
-    </RequirePermission>
+    <StudentQuotaView
+      studentData={studentData}
+      isLoading={useUnifiedProfile ? Boolean(profileContext?.loading) : loading}
+      isSaving={saving}
+      isSaved={isSaved}
+      embedded={useUnifiedProfile}
+      readOnly={!canEditQuota}
+      onSave={handleSave}
+      onCancel={handleCancel}
+    />
   );
 }

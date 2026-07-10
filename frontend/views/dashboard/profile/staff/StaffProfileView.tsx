@@ -2,11 +2,11 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ProfileScope, type CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/staff/sections/ContactSection";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
-import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 
 export function StaffProfileView({
   staffData,

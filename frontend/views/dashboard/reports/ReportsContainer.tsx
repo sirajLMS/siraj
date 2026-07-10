@@ -13,7 +13,7 @@ import type { FormatCurrencyMessages } from "@/frontend/lib/fx-render";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
@@ -444,7 +444,7 @@ function useReportHandlers({
           router.push(href);
         }
       } else if (reportType === "by_student") {
-        router.push(`${studentHref(row.entityId)}/status`);
+        router.push(studentProfileTabHref(row.entityId, "status"));
       }
     },
     [reportType, router]

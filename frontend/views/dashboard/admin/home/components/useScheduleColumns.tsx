@@ -9,7 +9,7 @@ import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,
@@ -154,7 +154,7 @@ function buildActionsColumn(
         <StyledActionsCellBox>
           {studentId ? (
             <Tooltip title={historyLabel}>
-              <StyledHistoryIconLink href={`${studentHref(studentId)}/history`} aria-label={historyLabel}>
+              <StyledHistoryIconLink href={studentProfileTabHref(studentId, "history")} aria-label={historyLabel}>
                 <HistoryOutlined fontSize="small" />
               </StyledHistoryIconLink>
             </Tooltip>

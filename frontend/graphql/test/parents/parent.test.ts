@@ -427,6 +427,7 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
     const data = await authenticatedRequest(superAdminToken, "query", parentInvoiceHistoryQueryDocument, {
       parentId,
       userId: null,
+      search: null,
       paginationArgs: null,
     });
 
@@ -437,6 +438,7 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
     const denied = await assertOperationDenied("teacher_default", "query", parentInvoiceHistoryQueryDocument, {
       parentId: "00000000-0000-0000-0000-000000000000",
       userId: null,
+      search: null,
       paginationArgs: null,
     });
     expect(denied).toBe(true);

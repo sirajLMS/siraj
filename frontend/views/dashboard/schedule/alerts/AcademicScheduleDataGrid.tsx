@@ -26,7 +26,7 @@ export interface AcademicScheduleDataGridLabels {
   readonly status: string;
   readonly joinSession: string;
   readonly leaveClass: string;
-  readonly viewRecording: string;
+  readonly viewClassAudit: string;
   readonly active: string;
   readonly upcoming: string;
   readonly missed: string;
@@ -40,7 +40,7 @@ interface AcademicScheduleDataGridProps {
   readonly pageSize?: number;
   readonly totalClasses?: number;
   readonly onLeave: (id: string) => void;
-  readonly onViewRecording: (id: string) => void;
+  readonly onViewClassAudit: (id: string) => void;
   readonly onPageChange?: (page: number) => void;
   readonly loading?: boolean;
 }
@@ -58,7 +58,7 @@ export function AcademicScheduleDataGrid({
   totalClasses,
   labels,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
   onPageChange,
   loading = false,
 }: AcademicScheduleDataGridProps) {
@@ -66,7 +66,7 @@ export function AcademicScheduleDataGrid({
     const actionLabels = {
       joinSession: labels.joinSession,
       leaveClass: labels.leaveClass,
-      viewRecording: labels.viewRecording,
+      viewClassAudit: labels.viewClassAudit,
     };
 
     return [
@@ -149,13 +149,13 @@ export function AcademicScheduleDataGrid({
               classId={row.id}
               labels={actionLabels}
               onLeave={onLeave}
-              onViewRecording={onViewRecording}
+              onViewClassAudit={onViewClassAudit}
             />
           </Box>
         ),
       },
     ];
-  }, [labels, onLeave, onViewRecording]);
+  }, [labels, onLeave, onViewClassAudit]);
 
   const isServerPagination = totalClasses !== undefined && onPageChange !== undefined;
 

@@ -95,6 +95,7 @@ export type ParentDashboardScheduleRow = {
   executionState: ClassExecutionState;
   outcome: ClassOutcome;
   meetingJoinUrl: string | null;
+  isFrozen: boolean;
   classTimeFormatted: string;
 };
 

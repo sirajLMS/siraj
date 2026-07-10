@@ -494,6 +494,7 @@ type ClassInstanceDetail {
   hasTimezoneMismatch: Boolean
   id: String
   instanceId: String
+  isFrozen: Boolean
   isRescheduled: Boolean
   meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
@@ -1492,6 +1493,7 @@ type GroupClassAudit {
   id: String
   meetingInfo: OnlineMeetingInfo
   originalDate: String
+  outcome: ClassOutcome
   registeredStudentCount: Int
   rescheduledDate: String
   status: ClassExecutionState
@@ -2579,6 +2581,7 @@ type ParentDashboardScheduleRow {
   effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  isFrozen: Boolean
   meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
   scheduledEndAt: DateTime
@@ -3525,6 +3528,7 @@ type StudentUpcomingClass {
   instructor: String
   isFrozen: Boolean
   meetingJoinUrl: String
+  outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
   teacherId: String

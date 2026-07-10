@@ -37,7 +37,7 @@ export interface StudentStatusLabels {
   readonly table: {
     readonly subjectInstructor: string;
     readonly dateTime: string;
-    readonly roomLink: string;
+    readonly holdStatus: string;
     readonly status: string;
     readonly pendingHolds: string;
     readonly footerInfo: string;

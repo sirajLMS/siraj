@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
-import { filterProfileByFieldGroups } from "@/backend/services/profile/profile-field-filter";
+import {
+  canEditProfileFieldGroup,
+  canEditStudentFieldGroup,
+  filterProfileByFieldGroups,
+} from "@/backend/services/profile/profile-field-filter";
 
 describe("filterProfileByFieldGroups", () => {
   test("nulls core identity fields when view_own denied", () => {
@@ -63,5 +67,53 @@ describe("filterProfileByFieldGroups", () => {
     });
 
     expect(filtered.assignedStudents).toBeNull();
+  });
+
+  test("legacy USER_EDIT_PROFILE grants edit for applicable other-scope groups", () => {
+    const ctx = {
+      actorUserId: "admin-1",
+      targetUserId: "teacher-1",
+      scope: ProfileScope.OTHER,
+      audience: ProfileAudience.TEACHER,
+      permissions: new Set<AppPermission>([AppPermission.USER_EDIT_PROFILE]),
+    };
+
+    expect(canEditProfileFieldGroup(ctx, "core_identity")).toBe(true);
+    expect(canEditProfileFieldGroup(ctx, "teacher_professional")).toBe(true);
+    expect(canEditProfileFieldGroup(ctx, "staff_permissions")).toBe(false);
+  });
+
+  test("legacy STAFF_EDIT_PROFILE grants staff edit groups only", () => {
+    const ctx = {
+      actorUserId: "admin-1",
+      targetUserId: "staff-1",
+      scope: ProfileScope.OTHER,
+      audience: ProfileAudience.STAFF,
+      permissions: new Set<AppPermission>([AppPermission.STAFF_EDIT_PROFILE]),
+    };
+
+    expect(canEditProfileFieldGroup(ctx, "staff_role")).toBe(true);
+    expect(canEditProfileFieldGroup(ctx, "staff_permissions")).toBe(true);
+    expect(canEditProfileFieldGroup(ctx, "core_identity")).toBe(true);
+    expect(canEditProfileFieldGroup(ctx, "teacher_professional")).toBe(false);
+  });
+
+  test("legacy student permissions grant edit for matching groups", () => {
+    const academicCtx = {
+      actorUserId: "admin-1",
+      studentId: "student-1",
+      isAssociatedViewer: false,
+      permissions: new Set<AppPermission>([AppPermission.STUDENT_MANAGE_STATUS]),
+    };
+    const quotaCtx = {
+      actorUserId: "admin-1",
+      studentId: "student-1",
+      isAssociatedViewer: false,
+      permissions: new Set<AppPermission>([AppPermission.STUDENT_EDIT_QUOTA]),
+    };
+
+    expect(canEditStudentFieldGroup(academicCtx, "student_academic")).toBe(true);
+    expect(canEditStudentFieldGroup(academicCtx, "student_quota_edit")).toBe(false);
+    expect(canEditStudentFieldGroup(quotaCtx, "student_quota_edit")).toBe(true);
   });
 });

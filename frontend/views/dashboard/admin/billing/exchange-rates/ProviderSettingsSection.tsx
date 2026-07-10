@@ -27,6 +27,7 @@ import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/bill
 type ProviderSettingsSectionProps = {
   readonly labels: ExchangeRatesLabels["providerSettings"];
   readonly onFeedback: (message: string, severity: "success" | "error") => void;
+  readonly actionsDisabled?: boolean;
 };
 
 function formatAuditDate(value: string | null | undefined, locale: string): string {
@@ -42,7 +43,7 @@ function formatAuditDate(value: string | null | undefined, locale: string): stri
   });
 }
 
-export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettingsSectionProps) {
+export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = false }: ProviderSettingsSectionProps) {
   const locale = useLocale();
   const [selectedProvider, setSelectedProvider] = useState<FxProvider>(FxProvider.Fixer);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -78,7 +79,7 @@ export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettings
   }, [activeProvider]);
 
   const handleSaveClick = () => {
-    if (selectedProvider === activeProvider) {
+    if (actionsDisabled || selectedProvider === activeProvider) {
       return;
     }
     setPendingProvider(selectedProvider);
@@ -106,7 +107,7 @@ export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettings
               {lastChangedLabel}
             </Typography>
           ) : null}
-          <FormControl fullWidth disabled={loading || saving}>
+          <FormControl fullWidth disabled={loading || saving || actionsDisabled}>
             <InputLabel id="fx-provider-select-label">{labels.activeProvider}</InputLabel>
             <Select
               labelId="fx-provider-select-label"
@@ -122,7 +123,7 @@ export function ProviderSettingsSection({ labels, onFeedback }: ProviderSettings
             <Button
               variant="contained"
               onClick={handleSaveClick}
-              disabled={loading || saving || selectedProvider === activeProvider}
+              disabled={loading || saving || actionsDisabled || selectedProvider === activeProvider}
             >
               {labels.save}
             </Button>

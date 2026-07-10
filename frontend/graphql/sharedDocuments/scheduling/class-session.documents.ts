@@ -31,6 +31,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       }
       payrollCredited
       isRescheduled
+      isFrozen
       executionState
       outcome
       avatarUrl

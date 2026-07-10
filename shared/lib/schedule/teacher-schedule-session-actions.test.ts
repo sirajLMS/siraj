@@ -53,10 +53,10 @@ describe("resolveTeacherScheduleSessionActions", () => {
     );
   });
 
-  test("COMPLETED exposes join video only when available", () => {
+  test("COMPLETED hides join video", () => {
     expectActions(
       { executionState: ClassExecutionState.COMPLETED, outcome: ClassOutcome.TAKEN },
-      { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: true }
+      { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: false }
     );
   });
 

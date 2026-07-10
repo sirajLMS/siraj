@@ -10,7 +10,6 @@ interface TeacherScheduleCardListProps {
   readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
   readonly emptyMessage: string;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -23,7 +22,6 @@ export function TeacherScheduleCardList({
   labels,
   canActivate,
   emptyMessage,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -43,7 +41,6 @@ export function TeacherScheduleCardList({
       labels={labels}
       canActivate={canActivate}
       emptyMessage={emptyMessage}
-      onJoinVideo={onJoinVideo}
       onActivate={onActivate}
       onStartSession={onStartSession}
       onMarkAbsent={onMarkAbsent}

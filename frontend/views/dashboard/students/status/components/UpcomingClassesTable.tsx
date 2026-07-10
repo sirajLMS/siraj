@@ -7,7 +7,9 @@ import { PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/utils/profileHref";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "@/frontend/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
@@ -37,7 +39,7 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
   const router = useRouter();
 
   const handleViewAll = useCallback(() => {
-    router.push(`${studentHref(studentId)}/history`);
+    router.push(studentProfileTabHref(studentId, "history"));
   }, [router, studentId]);
 
   return (
@@ -122,7 +124,7 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
                   status={cls.executionState}
                   label={cls.isFrozen ? t("table.frozen").toUpperCase() : cls.executionState}
                 />
-                {isJoinableClassInstance(cls.executionState, null, { isFrozen: cls.isFrozen }) ? (
+                {isJoinableClassInstance(cls.executionState, cls.outcome, { isFrozen: cls.isFrozen }) ? (
                   <MeetingJoinAction
                     variant="icon"
                     joinUrl={cls.meetingJoinUrl}
@@ -268,7 +270,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
     },
     {
       field: "isFrozen",
-      headerName: t("table.roomLink"),
+      headerName: t("table.holdStatus"),
       flex: 1,
       renderCell: params => (
         <Box sx={{ py: 1.5 }}>
@@ -297,7 +299,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
       align: "center",
       headerAlign: "center",
       renderCell: params =>
-        isJoinableClassInstance(params.row.executionState, null, { isFrozen: params.row.isFrozen }) ? (
+        isJoinableClassInstance(params.row.executionState, params.row.outcome, { isFrozen: params.row.isFrozen }) ? (
           <MeetingJoinAction
             variant="icon"
             joinUrl={params.row.meetingJoinUrl}
@@ -360,6 +362,12 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
 export function UpcomingClassesTable({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const t = useTranslations("dashboard.studentStatus");
+  const { canView } = useStudentFieldAccess();
+
+  if (!canView("student_schedule")) {
+    return <ProfileRestrictedSection title={t("sections.upcomingClasses")} />;
+  }
 
   if (isMobile) {
     return <UpcomingClassesMobile classes={classes} studentId={studentId} />;

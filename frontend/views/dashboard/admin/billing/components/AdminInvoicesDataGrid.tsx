@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { CheckCircleOutlined, DeleteOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/utils/profileHref";
@@ -14,6 +14,11 @@ import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import {
+  isDeletableInvoiceStatus,
+  isPayableUnpaidStatus,
+  shouldShowViewRejection,
+} from "@/frontend/views/dashboard/billing/utils/invoiceDisplayStatus";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;
@@ -27,6 +32,7 @@ export interface AdminInvoicesDataGridLabels {
   readonly reviewSubmission: string;
   readonly viewRejection: string;
   readonly viewDetails: string;
+  readonly deleteInvoice: string;
   readonly noEntries: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
 }
@@ -38,6 +44,8 @@ interface AdminInvoicesDataGridProps {
   readonly billingActionsDisabled?: boolean;
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
+  readonly onDeleteInvoice?: (invoiceId: string) => void;
+  readonly canDelete?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -58,38 +66,73 @@ const StyledPaidCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
   color: theme.palette.outlineVariant,
 }));
 
+function renderDeleteInvoiceButton(
+  row: AdminInvoiceRow,
+  labels: AdminInvoicesDataGridLabels,
+  canDelete: boolean,
+  billingActionsDisabled: boolean,
+  onDeleteInvoice?: (invoiceId: string) => void
+) {
+  if (!canDelete || billingActionsDisabled || !onDeleteInvoice || !isDeletableInvoiceStatus(row.status)) {
+    return null;
+  }
+
+  return (
+    <Tooltip title={labels.deleteInvoice}>
+      <IconButton size="small" aria-label={labels.deleteInvoice} onClick={() => onDeleteInvoice(row.id)}>
+        <DeleteOutlined fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  );
+}
+
+function wrapInvoiceActions(primary: ReactNode, deleteButton: ReactNode) {
+  if (!primary && !deleteButton) {
+    return null;
+  }
+
+  return (
+    <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5, alignItems: "center" }}>
+      {primary}
+      {deleteButton}
+    </Box>
+  );
+}
+
 function renderInvoiceAction(
   row: AdminInvoiceRow,
   labels: AdminInvoicesDataGridLabels,
   canManage: boolean,
+  canDelete: boolean,
   billingActionsDisabled: boolean,
   onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void,
-  onViewPaymentDetails?: (target: PaymentDetailsTarget) => void
+  onViewPaymentDetails?: (target: PaymentDetailsTarget) => void,
+  onDeleteInvoice?: (invoiceId: string) => void
 ) {
+  const deleteButton = renderDeleteInvoiceButton(row, labels, canDelete, billingActionsDisabled, onDeleteInvoice);
+
   if (row.status === InvoiceStatus.Paid) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-        {onViewPaymentDetails ? (
-          <Tooltip title={labels.viewDetails}>
-            <IconButton
-              size="small"
-              aria-label={labels.viewDetails}
-              onClick={() => {
-                onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
-              }}
-            >
-              <VisibilityOutlined fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <StyledPaidCheckIcon />
-        )}
-      </Box>
+    const primary = onViewPaymentDetails ? (
+      <Tooltip title={labels.viewDetails}>
+        <IconButton
+          size="small"
+          aria-label={labels.viewDetails}
+          onClick={() => {
+            onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
+          }}
+        >
+          <VisibilityOutlined fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    ) : (
+      <StyledPaidCheckIcon />
     );
+
+    return wrapInvoiceActions(primary, deleteButton);
   }
 
   if (row.status === InvoiceStatus.PaymentPending && canManage && !billingActionsDisabled) {
-    return (
+    return wrapInvoiceActions(
       <Button
         variant="text"
         onClick={() => {
@@ -98,23 +141,24 @@ function renderInvoiceAction(
         sx={{ fontWeight: 700, textTransform: "uppercase" }}
       >
         {labels.reviewSubmission}
-      </Button>
+      </Button>,
+      deleteButton
     );
   }
 
   if (!canManage || billingActionsDisabled) {
-    return null;
+    return wrapInvoiceActions(null, deleteButton);
   }
 
-  const showViewRejection = row.status === InvoiceStatus.Unpaid && row.hasRejectedSubmission && onViewPaymentDetails;
+  const showViewRejection = shouldShowViewRejection(row.status, row.hasRejectedSubmission) && onViewPaymentDetails;
 
   if (showViewRejection) {
-    return (
+    return wrapInvoiceActions(
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
         <Button
           variant="text"
           onClick={() => {
-            onViewPaymentDetails({ invoiceId: row.id });
+            onViewPaymentDetails({ invoiceId: row.id, parentUserId: row.parentUserId });
           }}
           sx={{ fontWeight: 700, textTransform: "uppercase" }}
         >
@@ -134,14 +178,15 @@ function renderInvoiceAction(
           }}
           sx={{ fontWeight: 700, textTransform: "uppercase" }}
         >
-          {labels.quickPay}
+          {row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay}
         </Button>
-      </Box>
+      </Box>,
+      deleteButton
     );
   }
 
-  if (row.status === "OVERDUE" || row.status === InvoiceStatus.Unpaid || row.status === "PENDING") {
-    return (
+  if (isPayableUnpaidStatus(row.status)) {
+    return wrapInvoiceActions(
       <Button
         variant="text"
         onClick={() => {
@@ -157,20 +202,23 @@ function renderInvoiceAction(
         sx={{ fontWeight: 700, textTransform: "uppercase" }}
       >
         {row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay}
-      </Button>
+      </Button>,
+      deleteButton
     );
   }
 
-  return null;
+  return wrapInvoiceActions(null, deleteButton);
 }
 
 export function AdminInvoicesDataGrid({
   rows,
   labels,
   canManage,
+  canDelete = false,
   billingActionsDisabled = false,
   onMarkAsPaid,
   onViewPaymentDetails,
+  onDeleteInvoice,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -240,10 +288,19 @@ export function AdminInvoicesDataGrid({
         align: "right",
         headerAlign: "right",
         renderCell: ({ row }) =>
-          renderInvoiceAction(row, labels, canManage, billingActionsDisabled, onMarkAsPaid, onViewPaymentDetails),
+          renderInvoiceAction(
+            row,
+            labels,
+            canManage,
+            canDelete,
+            billingActionsDisabled,
+            onMarkAsPaid,
+            onViewPaymentDetails,
+            onDeleteInvoice
+          ),
       },
     ],
-    [billingActionsDisabled, canManage, labels, onMarkAsPaid, onViewPaymentDetails]
+    [billingActionsDisabled, canDelete, canManage, labels, onDeleteInvoice, onMarkAsPaid, onViewPaymentDetails]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

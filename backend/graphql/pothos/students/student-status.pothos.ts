@@ -2,6 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
   ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { StudentUpcomingClass, StudentUpcomingClassesResult } from "@/backend/types";
@@ -17,6 +18,7 @@ export const StudentUpcomingClassPothosObject = StudentUpcomingClassRef.implemen
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     isFrozen: t.exposeBoolean("isFrozen"),
     meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
     effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),

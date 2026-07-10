@@ -31,14 +31,14 @@ interface AcademicScheduleCardListProps {
   readonly labels: {
     readonly joinSession: string;
     readonly leaveClass: string;
-    readonly viewRecording: string;
+    readonly viewClassAudit: string;
     readonly active: string;
     readonly upcoming: string;
     readonly missed: string;
     readonly endOfSchedule: string;
   };
   readonly onLeave: (id: string) => void;
-  readonly onViewRecording: (id: string) => void;
+  readonly onViewClassAudit: (id: string) => void;
   readonly onPageChange: (page: number) => void;
 }
 
@@ -124,27 +124,27 @@ function ClassCardActions({
   row,
   labels,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
 }: Readonly<{
   row: AcademicClassRow;
   labels: AcademicCardLabels;
   onLeave: (id: string) => void;
-  onViewRecording: (id: string) => void;
+  onViewClassAudit: (id: string) => void;
 }>) {
   const actionLabels = {
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
-    viewRecording: labels.viewRecording,
+    viewClassAudit: labels.viewClassAudit,
   };
 
   if (row.sessionStatus === "missed") {
     return (
       <ClassSessionActionButton
-        action="view_recording"
+        action="view_class_audit"
         classId={row.id}
         labels={actionLabels}
         onLeave={onLeave}
-        onViewRecording={onViewRecording}
+        onViewClassAudit={onViewClassAudit}
         fullWidth
       />
     );
@@ -157,7 +157,7 @@ function ClassCardActions({
         classId={row.id}
         labels={actionLabels}
         onLeave={onLeave}
-        onViewRecording={onViewRecording}
+        onViewClassAudit={onViewClassAudit}
         fullWidth
       />
       {shouldShowScheduleAlertJoin(row) ? (
@@ -177,12 +177,12 @@ const AcademicClassCard = ({
   row,
   labels,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
 }: {
   row: AcademicClassRow;
   labels: AcademicScheduleCardListProps["labels"];
   onLeave: (id: string) => void;
-  onViewRecording: (id: string) => void;
+  onViewClassAudit: (id: string) => void;
 }) => {
   const isMissed = row.sessionStatus === "missed";
 
@@ -204,7 +204,7 @@ const AcademicClassCard = ({
       <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
         <ClassCardHeader row={row} labels={labels} />
         <ClassCardMetadata row={row} />
-        <ClassCardActions row={row} labels={labels} onLeave={onLeave} onViewRecording={onViewRecording} />
+        <ClassCardActions row={row} labels={labels} onLeave={onLeave} onViewClassAudit={onViewClassAudit} />
       </CardContent>
     </Card>
   );
@@ -243,7 +243,7 @@ export function AcademicScheduleCardList({
   pageSize,
   labels,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
   onPageChange,
 }: AcademicScheduleCardListProps) {
   const totalCountResolved = totalCount ?? 0;
@@ -252,7 +252,13 @@ export function AcademicScheduleCardList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {rows.map(row => (
-        <AcademicClassCard key={row.id} row={row} labels={labels} onLeave={onLeave} onViewRecording={onViewRecording} />
+        <AcademicClassCard
+          key={row.id}
+          row={row}
+          labels={labels}
+          onLeave={onLeave}
+          onViewClassAudit={onViewClassAudit}
+        />
       ))}
       <EndOfSchedule label={labels.endOfSchedule} />
       {totalCountResolved > 0 && (

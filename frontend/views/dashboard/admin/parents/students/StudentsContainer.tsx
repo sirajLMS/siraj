@@ -9,6 +9,7 @@ import type { StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/stores/studentDirectoryStore";
+import { studentHref, studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { StudentsView } from "@/frontend/views/dashboard/admin/parents/students/StudentsView";
 import {
   buildLabels,
@@ -118,11 +119,11 @@ export function StudentsContainer() {
   const labels = useMemo(() => buildLabels(t), [t]);
 
   const handleViewProfile = (id: string) => {
-    router.push(`/students/${id}`);
+    router.push(studentHref(id));
   };
 
   const handleViewHistory = (id: string) => {
-    router.push(`/students/${id}/history`);
+    router.push(studentProfileTabHref(id, "history"));
   };
 
   const handleAddStudent = () => {

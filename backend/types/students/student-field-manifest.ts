@@ -52,7 +52,7 @@ export const STUDENT_FIELD_GROUPS: readonly StudentFieldGroupDefinition[] = [
   },
   {
     groupKey: "student_parent",
-    paths: ["parentId", "parentName"],
+    paths: ["parentId", "parentName", "parentUserId"],
     viewOwn: studentPerm("student_parent", "view_own"),
     viewOther: studentPerm("student_parent", "view_other"),
     editOwn: studentPerm("student_parent", "edit_own"),

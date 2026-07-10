@@ -42,7 +42,7 @@ export const billing: BillingLabels = {
   search: {
     invoicesPlaceholder: "Search invoices...",
     parentPlaceholder: "Search by invoice number...",
-    filter: "Filters",
+    searching: "Searching…",
   },
   adminTable: {
     invoiceId: "Invoice ID",
@@ -55,6 +55,7 @@ export const billing: BillingLabels = {
     quickPay: "Quick Pay",
     reviewSubmission: "Review",
     viewRejection: "View Rejection",
+    deleteInvoice: "Delete Invoice",
     noEntries: "No matching invoices found",
   },
   creditTable: {
@@ -68,6 +69,8 @@ export const billing: BillingLabels = {
     negativeBalance: "Negative Balance",
     activeCredit: "Active Credit",
     noEntries: "No student credit records found",
+    showingNegativeBalanceOnly: "Showing students with negative balance only",
+    clearFilter: "Clear filter",
   },
   parentTable: {
     invoiceNumber: "#",
@@ -105,6 +108,11 @@ export const billing: BillingLabels = {
   approveProofSuccess: "Payment proof approved",
   rejectProofSuccess: "Payment proof rejected",
   deleteInvoiceSuccess: "Invoice deleted successfully",
+  deleteInvoiceDialog: {
+    title: "Delete Invoice",
+    body: "This will permanently remove invoice {invoiceId}. This action cannot be undone.",
+    confirm: "Delete Invoice",
+  },
   noUnpaidInvoices: "No unpaid invoices available for payment",
   hasPaymentProofHint: "Payment proof attached",
   submitProofDialog: {
@@ -178,6 +186,7 @@ export const billing: BillingLabels = {
   },
   fxConversionNote: "Converted totals use your display currency ({code})",
   fxConversionNoteSubject: "Converted amounts use this user's display currency ({code})",
+  adminBillingFxNote: "Metrics use your display currency; each invoice uses its parent's currency",
   currencyHedges,
   supportedCurrencies,
 };

@@ -531,6 +531,7 @@ export type ClassInstanceDetail = {
   hasTimezoneMismatch: Maybe<Scalars['Boolean']['output']>;
   id: Maybe<Scalars['String']['output']>;
   instanceId: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   isRescheduled: Maybe<Scalars['Boolean']['output']>;
   /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
@@ -1563,6 +1564,7 @@ export type GroupClassAudit = {
   id: Maybe<Scalars['String']['output']>;
   meetingInfo: Maybe<OnlineMeetingInfo>;
   originalDate: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<ClassOutcome>;
   registeredStudentCount: Maybe<Scalars['Int']['output']>;
   rescheduledDate: Maybe<Scalars['String']['output']>;
   status: Maybe<ClassExecutionState>;
@@ -3346,6 +3348,7 @@ export type ParentDashboardScheduleRow = {
   effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
@@ -4703,6 +4706,7 @@ export type StudentUpcomingClass = {
   instructor: Maybe<Scalars['String']['output']>;
   isFrozen: Maybe<Scalars['Boolean']['output']>;
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;

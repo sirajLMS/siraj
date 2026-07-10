@@ -21,6 +21,7 @@ import {
   updateClassAdminNoteMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { ClassAuditView } from "@/frontend/views/dashboard/classes/audit/ClassAuditView";
 import { useRouter } from "@/shared/i18n/routing";
 
@@ -31,12 +32,13 @@ function exportToCsv(
     readonly attendanceStatus?: string | null;
   }[],
   filename: string,
-  id: string
+  id: string,
+  headers: readonly [string, string, string]
 ) {
   try {
     const filtered = students.filter((s): s is NonNullable<typeof s> => s != null);
     const csvRows = [
-      [t("students.studentName"), t("students.idNumber"), t("students.attendanceStatus")].join(","),
+      headers.join(","),
       ...filtered.map(s => [s.name ?? "", s.studentId ?? "", s.attendanceStatus ?? ""].join(",")),
     ];
     const csvContent = csvRows.join("\n");
@@ -96,8 +98,8 @@ function useAuditLabels(
       noEntries: t("students.noEntries"),
     },
     meetingInfo: {
-      title: t("venue.title"),
-      joinMeeting: t("venue.viewMap"),
+      title: t("meeting.title"),
+      joinMeeting: t("meeting.joinMeeting"),
       capacityBadge: t("venue.capacityBadge", { count: 0 }),
       capacity: t("venue.capacity", { count: 0 }),
       meetingIdLabel: t("meetingIdLabel"),
@@ -216,8 +218,10 @@ export function ClassAuditContainer() {
     return <Alert severity="error">{tc("loadFailed")}</Alert>;
   }
 
+  const csvHeaders = [t("students.studentName"), t("students.idNumber"), t("students.attendanceStatus")] as const;
+
   const handleGenerateReport = () => {
-    exportToCsv(audit?.students ?? [], "class-audit", id);
+    exportToCsv(audit?.students ?? [], "class-audit", id, csvHeaders);
   };
 
   const handleEditClass = () => {
@@ -225,11 +229,11 @@ export function ClassAuditContainer() {
   };
 
   const handleExportStudents = () => {
-    exportToCsv(audit?.students ?? [], "students", id);
+    exportToCsv(audit?.students ?? [], "students", id, csvHeaders);
   };
 
   const handleViewStudent = (studentId: string) => {
-    router.push(`/students/${studentId}/status`);
+    router.push(studentProfileTabHref(studentId, "status"));
   };
 
   const handleResendNotifications = () => {

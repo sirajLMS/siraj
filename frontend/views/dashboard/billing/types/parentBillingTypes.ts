@@ -1,6 +1,6 @@
-import type { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ParentInvoiceDisplayStatus } from "@/frontend/views/dashboard/billing/utils/invoiceDisplayStatus";
 
-export type ParentInvoiceStatus = `${InvoiceStatus}`;
+export type ParentInvoiceStatus = ParentInvoiceDisplayStatus;
 
 export interface ParentBillingSummary {
   readonly outstandingBalance: string;
@@ -21,5 +21,5 @@ export interface ParentInvoiceRow {
   readonly hasPaymentProof: boolean;
   readonly hasRejectedSubmission: boolean;
   readonly fee: string;
-  readonly status: InvoiceStatus;
+  readonly status: ParentInvoiceDisplayStatus;
 }

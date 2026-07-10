@@ -1,7 +1,6 @@
 import { StudentRepository } from "@/backend/db/repo";
-import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 
 export interface EditQuotaResult {
   readonly id: string;
@@ -27,8 +26,10 @@ export namespace StudentManagementService {
     expectedVersion?: number,
     locale?: string
   ): Promise<EditQuotaResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_EDIT_QUOTA);
-    if (!hasPermission) {
+    const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
+    try {
+      assertStudentFieldEdit(fieldCtx, "student_quota_edit");
+    } catch {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
     }

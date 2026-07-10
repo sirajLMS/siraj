@@ -9,6 +9,7 @@ export interface UpcomingClassDisplay {
   readonly scheduledEndAt: string;
   readonly durationMinutes: number;
   readonly executionState: string;
+  readonly outcome: string | null;
   readonly isFrozen: boolean;
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
@@ -38,6 +39,7 @@ export interface StudentStatusViewProps {
 
 export interface StudentStatusHeaderProps {
   readonly student: StudentStatusPageData;
+  readonly embedded?: boolean;
 }
 
 export interface UpcomingClassesTableProps {

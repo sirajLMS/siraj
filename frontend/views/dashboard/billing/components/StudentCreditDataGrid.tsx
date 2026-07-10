@@ -27,6 +27,7 @@ interface StudentCreditDataGridProps {
   readonly rows: readonly StudentCreditRow[];
   readonly labels: StudentCreditDataGridLabels;
   readonly canManage: boolean;
+  readonly billingActionsDisabled?: boolean;
   readonly onSendReminder: (id: string) => void;
   readonly loading?: boolean;
 }
@@ -45,6 +46,7 @@ export function StudentCreditDataGrid({
   rows,
   labels,
   canManage,
+  billingActionsDisabled = false,
   onSendReminder,
   loading = false,
 }: Readonly<StudentCreditDataGridProps>) {
@@ -114,7 +116,7 @@ export function StudentCreditDataGrid({
         align: "right",
         headerAlign: "right",
         renderCell: ({ row }) => {
-          if (!canManage || row.status !== "negative_balance") {
+          if (!canManage || billingActionsDisabled || row.status !== "negative_balance") {
             return null;
           }
           return (
@@ -131,7 +133,7 @@ export function StudentCreditDataGrid({
         },
       },
     ],
-    [canManage, labels, onSendReminder]
+    [billingActionsDisabled, canManage, labels, onSendReminder]
   );
 
   return (

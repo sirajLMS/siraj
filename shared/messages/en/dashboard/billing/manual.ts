@@ -20,6 +20,8 @@ export const billingManual: BillingManualLabels = {
   submitAndSendEmail: "Submit & Send Email",
   successMessage: "Manual invoice submitted successfully.",
   createSuccess: "Invoice {id} created successfully",
+  manualInvoiceFxNote:
+    "Invoice amount is stored in the selected currency. Conversions appear on billing pages based on each user's display currency.",
   months: {
     jan: "January",
     feb: "February",

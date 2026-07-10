@@ -6,9 +6,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
-  AppPermission,
   ClassExecutionState as GqlClassExecutionState,
   StudentStatus,
 } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -56,9 +54,9 @@ export function StudentStatusContainer() {
         autoHideDuration: 5000,
       });
       if (useUnifiedProfile) {
-        void profileContext?.refetch();
+        profileContext?.refetch()?.catch(() => undefined);
       } else {
-        void refetchUpcoming();
+        refetchUpcoming()?.catch(() => undefined);
       }
     },
     onError: error => {
@@ -76,7 +74,7 @@ export function StudentStatusContainer() {
   const student: StudentStatusPageData | null = useMemo(() => {
     if (useUnifiedProfile) {
       const profile = profileContext?.profile;
-      if (!profile?.id || !profile.name) return null;
+      if (!profile?.id) return null;
 
       const upcomingClasses: UpcomingClassDisplay[] = (profile.upcomingClasses?.classes ?? []).map(cls => ({
         id: cls?.id ?? "",
@@ -86,6 +84,7 @@ export function StudentStatusContainer() {
         scheduledEndAt: cls?.scheduledEndAt ?? "",
         durationMinutes: cls?.durationMinutes ?? 0,
         executionState: cls?.executionState ?? GqlClassExecutionState.NotActivated,
+        outcome: cls?.outcome ?? null,
         isFrozen: cls?.isFrozen ?? false,
         meetingJoinUrl: cls?.meetingJoinUrl,
         effectiveMeeting: cls?.effectiveMeeting,
@@ -93,11 +92,12 @@ export function StudentStatusContainer() {
 
       return {
         id: profile.id,
-        name: profile.name,
+        name: profile.name ?? "",
         status: profile.upcomingClasses?.status ?? profile.status ?? StudentStatus.Regular,
         avatarUrl: profile.avatarUrl ?? null,
         primaryTeacherId: profile.primaryTeacherId ?? null,
         teacherName: profile.teacherName ?? null,
+        parentUserId: profile.parentUserId ?? null,
         hoursPerWeek: profile.hoursPerWeek != null ? String(profile.hoursPerWeek) : null,
         classesRemaining: profile.classesRemaining ?? 0,
         classesTotal: profile.classesTotal ?? 0,
@@ -118,7 +118,10 @@ export function StudentStatusContainer() {
       scheduledEndAt: cls?.scheduledEndAt ?? "",
       durationMinutes: cls?.durationMinutes ?? 0,
       executionState: cls?.executionState ?? GqlClassExecutionState.NotActivated,
+      outcome: cls?.outcome ?? null,
       isFrozen: cls?.isFrozen ?? false,
+      meetingJoinUrl: cls?.meetingJoinUrl,
+      effectiveMeeting: cls?.effectiveMeeting,
     }));
 
     return {
@@ -177,8 +180,11 @@ export function StudentStatusContainer() {
   }
 
   return (
-    <RequirePermission permissions={[AppPermission.StudentManageStatus]}>
-      <StudentStatusView student={student} isUpdating={isUpdating} onUpdateStatus={handleUpdateStatus} />
-    </RequirePermission>
+    <StudentStatusView
+      student={student}
+      isUpdating={isUpdating}
+      embedded={useUnifiedProfile}
+      onUpdateStatus={handleUpdateStatus}
+    />
   );
 }

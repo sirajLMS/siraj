@@ -55,7 +55,7 @@ async function resolveIsAssociatedViewer(actorUserId: string, studentId: string)
 
 function mapProfileRow(
   row: NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>
-): Omit<StudentProfileReturnType, "upcomingClasses" | "classHistory"> {
+): Omit<StudentProfileReturnType, "upcomingClasses" | "classHistory" | "isAssociatedViewer"> {
   return {
     id: row.id,
     name: row.name,

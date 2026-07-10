@@ -15,7 +15,6 @@ interface TeacherScheduleSessionActionsCellProps {
   readonly row: TeacherScheduleRow;
   readonly labels: TeacherDashboardViewLabels;
   readonly canActivate: boolean;
-  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;

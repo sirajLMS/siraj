@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
@@ -24,6 +24,7 @@ import {
   SubmitPaymentProofDialog,
   type SubmitPaymentProofDialogMode,
 } from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
+import { useBillingPollInterval } from "@/frontend/views/dashboard/billing/hooks/useBillingPollInterval";
 import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
 import type {
@@ -33,20 +34,13 @@ import type {
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
 import { formatBillingDate, formatBillingMonth } from "@/frontend/views/dashboard/billing/utils/formatBillingDate";
+import { deriveParentInvoiceDisplayStatus } from "@/frontend/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
-import { BILLING_INVOICE_POLL_INTERVAL_MS } from "@/shared/constants/billing/polling";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
-
-function mapParentInvoiceStatus(status: string | null | undefined): InvoiceStatus {
-  if (status === InvoiceStatus.Paid) return InvoiceStatus.Paid;
-  if (status === InvoiceStatus.PaymentPending) return InvoiceStatus.PaymentPending;
-  if (status === InvoiceStatus.Cancelled) return InvoiceStatus.Cancelled;
-  return InvoiceStatus.Unpaid;
-}
 
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
@@ -92,6 +86,10 @@ export function ParentBillingContainer() {
     debouncedApplySearch(value);
   };
 
+  const isSearchPending = searchQuery.trim() !== debouncedSearch.trim();
+  const billingDialogsOpen = proofTarget !== null || detailsTarget !== null;
+  const pollInterval = useBillingPollInterval(billingDialogsOpen);
+
   const { data, loading, error, refetch } = useQuery(parentInvoiceHistoryQueryDocument, {
     variables: {
       parentId: null,
@@ -108,17 +106,18 @@ export function ParentBillingContainer() {
       },
     },
     fetchPolicy: "cache-and-network",
-    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
+    pollInterval,
   });
 
   const {
     data: summaryData,
+    loading: summaryLoading,
     error: summaryError,
     refetch: refetchSummary,
   } = useQuery(parentBillingSummaryQueryDocument, {
     variables: { parentId: null, userId: null },
     fetchPolicy: "cache-and-network",
-    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
+    pollInterval,
   });
 
   const refreshBillingData = useCallback(() => {
@@ -127,6 +126,11 @@ export function ParentBillingContainer() {
   }, [refetch, refetchSummary]);
 
   useRefetchOnWindowFocus(refreshBillingData);
+
+  const refreshAfterDialogClose = useCallback(() => {
+    void refetch();
+    void refetchSummary();
+  }, [refetch, refetchSummary]);
 
   const fxMessages = useMemo(
     () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
@@ -193,7 +197,7 @@ export function ParentBillingContainer() {
           locale,
           fxMessages
         ),
-        status: mapParentInvoiceStatus(inv.status),
+        status: deriveParentInvoiceDisplayStatus(inv.status, inv.dueDate),
       })),
     [invoices, fxMessages, locale]
   );
@@ -201,6 +205,11 @@ export function ParentBillingContainer() {
   const handleQuickPay = () => {
     if (billingActionsDisabled) {
       showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      return;
+    }
+
+    if (summaryLoading) {
+      showFeedback(tc("loading"), "info");
       return;
     }
 
@@ -261,7 +270,7 @@ export function ParentBillingContainer() {
     );
   }
 
-  if (error || summaryError) {
+  if (error) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mt: 8 }}>
         <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>
@@ -275,6 +284,7 @@ export function ParentBillingContainer() {
   const viewProps: ParentBillingViewProps = {
     labels,
     summary,
+    summaryLoading,
     invoices: mappedInvoices,
     searchQuery,
     canManage: false,
@@ -282,6 +292,7 @@ export function ParentBillingContainer() {
     canView: true,
     canCreate: false,
     billingActionsDisabled,
+    isSearchPending,
     onSearchChange: handleSearchChange,
     onPayNow: handlePayNow,
     onViewPaymentDetails: setDetailsTarget,
@@ -299,6 +310,19 @@ export function ParentBillingContainer() {
       <DisplayCurrencyHint />
       <FxConversionNote />
       <BillingImpersonationNotice />
+      {summaryError ? (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={() => void refetchSummary()}>
+              {labels.errors.retry}
+            </Button>
+          }
+        >
+          {tc("loadFailed")}
+        </Alert>
+      ) : null}
       <ParentBillingView {...viewProps} />
       <Snackbar
         open={snackbarOpen}
@@ -312,7 +336,10 @@ export function ParentBillingContainer() {
       </Snackbar>
       <SubmitPaymentProofDialog
         open={proofTarget !== null}
-        onClose={() => setProofTarget(null)}
+        onClose={() => {
+          setProofTarget(null);
+          refreshAfterDialogClose();
+        }}
         invoice={proofTarget}
         mode={proofMode}
         billingActionsDisabled={billingActionsDisabled}
@@ -321,7 +348,10 @@ export function ParentBillingContainer() {
       />
       <InvoicePaymentDetailsDialog
         open={detailsTarget !== null}
-        onClose={() => setDetailsTarget(null)}
+        onClose={() => {
+          setDetailsTarget(null);
+          refreshAfterDialogClose();
+        }}
         invoiceId={detailsTarget?.invoiceId ?? null}
         billingActionsDisabled={billingActionsDisabled}
         onSuccess={handleDetailsSuccess}

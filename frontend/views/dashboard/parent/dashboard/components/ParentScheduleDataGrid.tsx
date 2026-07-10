@@ -14,12 +14,12 @@ import type {
   ParentBookingStatus,
   ParentScheduleRow,
 } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface ParentScheduleDataGridProps {
   readonly rows: readonly ParentScheduleRow[];
   readonly labels: ParentDashboardLabels;
   readonly onHistory: (id: string) => void;
-  readonly onJoinVideo?: (id: string) => void;
   readonly pagination?: SchedulePagination;
 }
 
@@ -149,14 +149,16 @@ export function ParentScheduleDataGrid({ rows, labels, onHistory, pagination }: 
         headerAlign: "center",
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
-            <MeetingJoinAction
-              variant="icon"
-              joinUrl={row.meetingJoinUrl}
-              meeting={row.effectiveMeeting}
-              disabled={!row.videoEnabled}
-              label={labels.schedule.joinVideo}
-              emptyRole="parent"
-            />
+            {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen }) ? (
+              <MeetingJoinAction
+                variant="icon"
+                joinUrl={row.meetingJoinUrl}
+                meeting={row.effectiveMeeting}
+                disabled={!row.videoEnabled}
+                label={labels.schedule.joinVideo}
+                emptyRole="parent"
+              />
+            ) : null}
           </Box>
         ),
       },

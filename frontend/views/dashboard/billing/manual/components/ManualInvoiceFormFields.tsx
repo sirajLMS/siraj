@@ -1,6 +1,6 @@
 "use client";
 
-import { Autocomplete, Box, TextField } from "@mui/material";
+import { Autocomplete, Box, Skeleton, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
@@ -29,6 +29,8 @@ interface ManualInvoiceFormFieldsProps {
   readonly studentOptions: readonly StudentOption[];
   readonly draftCurrency: CurrencyCode;
   readonly variant: "desktop" | "mobile";
+  readonly parentsLoading?: boolean;
+  readonly studentsLoading?: boolean;
 }
 
 function CurrencyField({
@@ -114,20 +116,34 @@ export function ManualInvoiceFormFields({
   studentOptions,
   draftCurrency,
   variant,
+  parentsLoading = false,
+  studentsLoading = false,
 }: Readonly<ManualInvoiceFormFieldsProps>) {
   const isMobile = variant === "mobile";
   const tProfile = useTranslations("profile.parent");
   const currencyLabel = tProfile("fields.currency");
 
+  const parentField = (
+    <ManualInvoiceParentField control={control} errors={errors} labels={labels} parentOptions={parentOptions} />
+  );
+  const studentField = <StudentSelectorField control={control} studentOptions={studentOptions} labels={labels} />;
+
+  const parentFieldNode = parentsLoading ? (
+    <Skeleton variant="rounded" height={56} sx={{ borderRadius: 1 }} />
+  ) : (
+    parentField
+  );
+  const studentFieldNode = studentsLoading ? (
+    <Skeleton variant="rounded" height={56} sx={{ borderRadius: 1 }} />
+  ) : (
+    studentField
+  );
+
   if (isMobile) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <MobileFieldCard label={labels.parentSelection}>
-          <ManualInvoiceParentField control={control} errors={errors} labels={labels} parentOptions={parentOptions} />
-        </MobileFieldCard>
-        <MobileFieldCard label={labels.studentSelection}>
-          <StudentSelectorField control={control} studentOptions={studentOptions} labels={labels} />
-        </MobileFieldCard>
+        <MobileFieldCard label={labels.parentSelection}>{parentFieldNode}</MobileFieldCard>
+        <MobileFieldCard label={labels.studentSelection}>{studentFieldNode}</MobileFieldCard>
         <MobileFieldCard label={labels.feeAmount}>
           <ManualInvoiceFeeField
             control={control}
@@ -174,11 +190,11 @@ export function ManualInvoiceFormFields({
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <FieldLabel>{labels.parentSelection}</FieldLabel>
-        <ManualInvoiceParentField control={control} errors={errors} labels={labels} parentOptions={parentOptions} />
+        {parentFieldNode}
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <FieldLabel>{labels.studentSelection}</FieldLabel>
-        <StudentSelectorField control={control} studentOptions={studentOptions} labels={labels} />
+        {studentFieldNode}
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <FieldLabel>{labels.feeAmount}</FieldLabel>

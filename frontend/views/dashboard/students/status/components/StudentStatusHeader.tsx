@@ -6,9 +6,10 @@ import { useCallback } from "react";
 import { UserAvatar } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";
-import { studentProfileTabHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+import { profileHrefForUser, studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
+import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";
+import { useRouter } from "@/shared/i18n/routing";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "success",
@@ -43,8 +44,13 @@ function getBadgeStatusKey(status: StudentStatus): string {
 function StudentAvatar({
   student,
   isMobile,
-}: Readonly<{ student: StudentStatusHeaderProps["student"]; isMobile: boolean }>) {
+  showAvatar,
+}: Readonly<{ student: StudentStatusHeaderProps["student"]; isMobile: boolean; showAvatar: boolean }>) {
   const theme = useTheme();
+  if (!showAvatar) {
+    return null;
+  }
+
   return (
     <Box sx={{ position: "relative" }}>
       <UserAvatar
@@ -56,7 +62,7 @@ function StudentAvatar({
           boxShadow: theme.palette.shadow.card,
         }}
       />
-      {isMobile && (
+      {isMobile ? (
         <Box
           sx={{
             position: "absolute",
@@ -69,44 +75,57 @@ function StudentAvatar({
             backgroundColor: getStatusDotColor(student, theme),
           }}
         />
-      )}
+      ) : null}
     </Box>
   );
 }
 
 function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
   const t = useTranslations("dashboard.studentStatus");
+  const { showField } = useStudentFieldAccess();
+  const showIdentity = showField(student.name, "student_identity");
+  const showTeacher = showField(student.teacherName, "student_teacher");
+
+  if (!showIdentity && !showTeacher) {
+    return null;
+  }
 
   return (
     <Box>
-      <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center", gap: 1.5 }}>
-        <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {student.name}
-        </Typography>
-        <StatusBadge
-          category="studentAccount"
-          status={getBadgeStatusKey(student.status)}
-          label={t(`statusOptions.${student.status}`)}
-        />
-      </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1 }}>
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            justifyContent: { xs: "center", md: "flex-start" },
-            gap: 1,
-            color: theme.palette.onSurfaceVariant,
-          })}
-        >
-          <Fingerprint sx={{ fontSize: 16 }} />
-          <Typography variant="labelMd" sx={{ letterSpacing: "0.05em" }}>
-            {t("studentId", { id: student.id.replace("STU-", "") })}
+      {showIdentity ? (
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center", gap: 1.5 }}>
+          <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+            {student.name}
           </Typography>
+          <StatusBadge
+            category="studentAccount"
+            status={getBadgeStatusKey(student.status)}
+            label={t(`statusOptions.${student.status}`)}
+          />
         </Box>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {student.teacherName}
-        </Typography>
+      ) : null}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1 }}>
+        {showIdentity ? (
+          <Box
+            sx={theme => ({
+              display: "flex",
+              alignItems: "center",
+              justifyContent: { xs: "center", md: "flex-start" },
+              gap: 1,
+              color: theme.palette.onSurfaceVariant,
+            })}
+          >
+            <Fingerprint sx={{ fontSize: 16 }} />
+            <Typography variant="labelMd" sx={{ letterSpacing: "0.05em" }}>
+              {t("studentId", { id: student.id.replace("STU-", "") })}
+            </Typography>
+          </Box>
+        ) : null}
+        {showTeacher ? (
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {student.teacherName}
+          </Typography>
+        ) : null}
       </Box>
     </Box>
   );
@@ -118,58 +137,83 @@ function HeaderActions({
 }: Readonly<{ student: StudentStatusHeaderProps["student"]; isMobile: boolean }>) {
   const t = useTranslations("dashboard.studentStatus");
   const router = useRouter();
+  const { canView } = useStudentFieldAccess();
+
+  const showHistory = canView("student_history");
+  const showContactParent = canView("student_parent") && Boolean(student.parentUserId);
 
   const handleViewHistory = useCallback(() => {
-    router.push(`/students/${student.id}/history`);
+    router.push(studentProfileTabHref(student.id, "history"));
   }, [router, student.id]);
 
   const handleContactParent = useCallback(() => {
-    router.push(`/students/${student.id}/quota`);
-  }, [router, student.id]);
+    if (!student.parentUserId) {
+      return;
+    }
+    router.push(profileHrefForUser(student.parentUserId));
+  }, [router, student.parentUserId]);
+
+  if (!showHistory && !showContactParent) {
+    return null;
+  }
 
   return (
     <Box sx={{ display: "flex", gap: 1.5, width: { xs: "100%", md: "auto" } }}>
-      <Button
-        fullWidth={isMobile}
-        variant="outlined"
-        startIcon={<HistoryOutlined />}
-        onClick={handleViewHistory}
-        sx={theme => ({
-          borderRadius: "button",
-          color: theme.palette.secondary.main,
-          borderColor: theme.palette.border.main,
-          "&:hover": {
-            borderColor: theme.palette.secondary.main,
-            backgroundColor: theme.palette.surfaceContainerHigh,
-          },
-        })}
-      >
-        {t("actions.viewHistory")}
-      </Button>
-      <Button
-        fullWidth={isMobile}
-        variant="outlined"
-        startIcon={<MailOutlineOutlined />}
-        onClick={handleContactParent}
-        sx={theme => ({
-          borderRadius: "button",
-          color: theme.palette.secondary.main,
-          borderColor: theme.palette.border.main,
-          "&:hover": {
-            borderColor: theme.palette.secondary.main,
-            backgroundColor: theme.palette.surfaceContainerHigh,
-          },
-        })}
-      >
-        {t("actions.contactParent")}
-      </Button>
+      {showHistory ? (
+        <Button
+          fullWidth={isMobile}
+          variant="outlined"
+          startIcon={<HistoryOutlined />}
+          onClick={handleViewHistory}
+          sx={theme => ({
+            borderRadius: "button",
+            color: theme.palette.secondary.main,
+            borderColor: theme.palette.border.main,
+            "&:hover": {
+              borderColor: theme.palette.secondary.main,
+              backgroundColor: theme.palette.surfaceContainerHigh,
+            },
+          })}
+        >
+          {t("actions.viewHistory")}
+        </Button>
+      ) : null}
+      {showContactParent ? (
+        <Button
+          fullWidth={isMobile}
+          variant="outlined"
+          startIcon={<MailOutlineOutlined />}
+          onClick={handleContactParent}
+          sx={theme => ({
+            borderRadius: "button",
+            color: theme.palette.secondary.main,
+            borderColor: theme.palette.border.main,
+            "&:hover": {
+              borderColor: theme.palette.secondary.main,
+              backgroundColor: theme.palette.surfaceContainerHigh,
+            },
+          })}
+        >
+          {t("actions.contactParent")}
+        </Button>
+      ) : null}
     </Box>
   );
 }
 
-export function StudentStatusHeader({ student }: Readonly<StudentStatusHeaderProps>) {
+export function StudentStatusHeader({ student, embedded = false }: Readonly<StudentStatusHeaderProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { showField } = useStudentFieldAccess();
+  const showAvatar = showField(student.avatarUrl ?? student.name, "student_identity");
+
+  if (embedded) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+        <HeaderActions student={student} isMobile={isMobile} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -189,7 +233,7 @@ export function StudentStatusHeader({ student }: Readonly<StudentStatusHeaderPro
       })}
     >
       <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center", gap: 3 }}>
-        <StudentAvatar student={student} isMobile={isMobile} />
+        <StudentAvatar student={student} isMobile={isMobile} showAvatar={showAvatar} />
         <StudentInfo student={student} />
       </Box>
       <HeaderActions student={student} isMobile={isMobile} />

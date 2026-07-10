@@ -43,7 +43,7 @@ export interface ScheduleAlertsLabels {
   readonly status: string;
   readonly joinSession: string;
   readonly leaveClass: string;
-  readonly viewRecording: string;
+  readonly viewClassAudit: string;
   readonly showingOf: string;
   readonly active: string;
   readonly upcoming: string;
@@ -63,7 +63,7 @@ interface ScheduleAlertsViewProps {
   readonly pageSize: number;
   readonly labels: ScheduleAlertsLabels;
   readonly onLeave: (id: string) => void;
-  readonly onViewRecording: (id: string) => void;
+  readonly onViewClassAudit: (id: string) => void;
   readonly onPageChange: (page: number) => void;
   readonly loading?: boolean;
   readonly onDownloadReport: () => void;
@@ -74,7 +74,7 @@ interface ScheduleAlertsViewProps {
 type CardListLabels = {
   readonly joinSession: string;
   readonly leaveClass: string;
-  readonly viewRecording: string;
+  readonly viewClassAudit: string;
   readonly active: string;
   readonly upcoming: string;
   readonly missed: string;
@@ -131,7 +131,7 @@ const MobileAlertsLayout = ({
   onFilter,
   onExport,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
   onPageChange,
   cardListLabels,
 }: {
@@ -143,7 +143,7 @@ const MobileAlertsLayout = ({
   onFilter: () => void;
   onExport: () => void;
   onLeave: (id: string) => void;
-  onViewRecording: (id: string) => void;
+  onViewClassAudit: (id: string) => void;
   onPageChange: (page: number) => void;
   cardListLabels: CardListLabels;
 }) => {
@@ -191,7 +191,7 @@ const MobileAlertsLayout = ({
         pageSize={pageSize}
         labels={cardListLabels}
         onLeave={onLeave}
-        onViewRecording={onViewRecording}
+        onViewClassAudit={onViewClassAudit}
         onPageChange={onPageChange}
       />
     </Box>
@@ -208,7 +208,7 @@ const DesktopAlertsLayout = ({
   onFilter,
   onExport,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
   onPageChange,
   gridLabels,
 }: {
@@ -221,7 +221,7 @@ const DesktopAlertsLayout = ({
   onFilter: () => void;
   onExport: () => void;
   onLeave: (id: string) => void;
-  onViewRecording: (id: string) => void;
+  onViewClassAudit: (id: string) => void;
   onPageChange: (page: number) => void;
   gridLabels: AcademicScheduleDataGridLabels;
 }) => {
@@ -247,7 +247,7 @@ const DesktopAlertsLayout = ({
         totalClasses={totalClasses}
         labels={gridLabels}
         onLeave={onLeave}
-        onViewRecording={onViewRecording}
+        onViewClassAudit={onViewClassAudit}
         onPageChange={onPageChange}
         loading={loading}
       />
@@ -266,7 +266,7 @@ interface ScheduleBodyProps {
   readonly onFilter: () => void;
   readonly onExport: () => void;
   readonly onLeave: (id: string) => void;
-  readonly onViewRecording: (id: string) => void;
+  readonly onViewClassAudit: (id: string) => void;
   readonly onPageChange: (page: number) => void;
   readonly cardListLabels: CardListLabels;
   readonly gridLabels: AcademicScheduleDataGridLabels;
@@ -299,7 +299,7 @@ function renderScheduleBody(props: ScheduleBodyProps) {
         onFilter={props.onFilter}
         onExport={props.onExport}
         onLeave={props.onLeave}
-        onViewRecording={props.onViewRecording}
+        onViewClassAudit={props.onViewClassAudit}
         onPageChange={props.onPageChange}
         cardListLabels={props.cardListLabels}
       />
@@ -315,7 +315,7 @@ function renderScheduleBody(props: ScheduleBodyProps) {
       onFilter={props.onFilter}
       onExport={props.onExport}
       onLeave={props.onLeave}
-      onViewRecording={props.onViewRecording}
+      onViewClassAudit={props.onViewClassAudit}
       onPageChange={props.onPageChange}
       gridLabels={props.gridLabels}
     />
@@ -332,7 +332,7 @@ export function ScheduleAlertsView({
   pageSize,
   labels,
   onLeave,
-  onViewRecording,
+  onViewClassAudit,
   onPageChange,
   loading = false,
   onDownloadReport,
@@ -349,7 +349,7 @@ export function ScheduleAlertsView({
     status: labels.status,
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
-    viewRecording: labels.viewRecording,
+    viewClassAudit: labels.viewClassAudit,
     active: labels.active,
     upcoming: labels.upcoming,
     missed: labels.missed,
@@ -359,7 +359,7 @@ export function ScheduleAlertsView({
   const cardListLabels: CardListLabels = {
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
-    viewRecording: labels.viewRecording,
+    viewClassAudit: labels.viewClassAudit,
     active: labels.active,
     upcoming: labels.upcoming,
     missed: labels.missed,
@@ -377,7 +377,7 @@ export function ScheduleAlertsView({
     onFilter,
     onExport,
     onLeave,
-    onViewRecording,
+    onViewClassAudit,
     onPageChange,
     cardListLabels,
     gridLabels,

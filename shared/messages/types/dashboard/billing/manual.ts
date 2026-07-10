@@ -35,6 +35,7 @@ export interface BillingManualLabels {
   readonly submitAndSendEmail: string;
   readonly successMessage: string;
   readonly createSuccess: string;
+  readonly manualInvoiceFxNote: string;
   readonly months: Record<BillingMonthId, string>;
   readonly validation: BillingManualValidationLabels;
   readonly support: {

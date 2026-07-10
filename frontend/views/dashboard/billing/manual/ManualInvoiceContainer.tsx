@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Snackbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -11,7 +11,9 @@ import {
   parentDirectoryQueryDocument,
   studentDirectoryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { logger } from "@/frontend/utils/logger";
+import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import { ManualInvoiceView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceView";
 import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type {
@@ -50,8 +52,11 @@ function billingMonthsToInput(months: string[], year?: number): { year: number; 
 export function ManualInvoiceContainer() {
   const t = useTranslations("dashboard.billing.manual");
   const tc = useTranslations("common");
+  const tErrors = useTranslations("errors");
   const router = useRouter();
   const labels = buildManualInvoiceLabels(t);
+  const { isImpersonating } = useImpersonation();
+  const billingActionsDisabled = isImpersonating;
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -96,6 +101,13 @@ export function ManualInvoiceContainer() {
   };
 
   const handleSubmit = (data: ManualInvoiceFormData, sendEmail: boolean) => {
+    if (billingActionsDisabled) {
+      setSnackbarMessage(tErrors("auth.impersonationNotAllowedDuringSession"));
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      return;
+    }
+
     void createInvoice({
       variables: {
         parentId: data.parentId ?? null,
@@ -146,15 +158,21 @@ export function ManualInvoiceContainer() {
   return (
     <RequirePermission permissions={[AppPermission.BillingCreateInvoice]} fallback={null}>
       <DisplayCurrencyHint />
+      <BillingImpersonationNotice />
       {selectedParentUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={selectedParentUserId} /> : null}
+      <Typography variant="caption" sx={theme => ({ display: "block", mb: 1, color: theme.palette.text.secondary })}>
+        {t("manualInvoiceFxNote")}
+      </Typography>
       <ManualInvoiceView
         labels={labels}
         parentOptions={parentOptions}
         studentOptions={studentOptions}
-        isSubmitting={isSubmitting || parentsLoading || studentsLoading}
+        isSubmitting={isSubmitting}
         showSuccess={showSuccess}
-        canCreate
-        canSendEmail
+        canCreate={!billingActionsDisabled}
+        canSendEmail={!billingActionsDisabled}
+        parentsLoading={parentsLoading}
+        studentsLoading={studentsLoading}
         onBack={handleBack}
         onSubmit={handleSubmit}
         onDismissSuccess={() => setShowSuccess(false)}

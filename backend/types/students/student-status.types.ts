@@ -1,4 +1,4 @@
-import type { ClassExecutionState, StudentStatus } from "@/backend/enum";
+import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 
 export interface StudentUpcomingClass {
@@ -9,6 +9,7 @@ export interface StudentUpcomingClass {
   readonly scheduledEndAt: Date;
   readonly durationMinutes: number;
   readonly executionState: ClassExecutionState;
+  readonly outcome: ClassOutcome;
   readonly isFrozen: boolean;
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: EffectiveMeetingReturnType | null;

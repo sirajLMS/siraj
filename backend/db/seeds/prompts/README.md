@@ -1,34 +1,27 @@
 # Seed Asset Prompts
 
-Human-in-the-loop image generation. **Copy one prompt section at a time** into your image model, generate, save, repeat.
+Copy **one section at a time** into your image generator, save to the path shown, repeat.
 
-## Files
+## On-disk filenames
 
-| File | Images | Save location |
-|------|--------|---------------|
-| `TEACHER_AVATAR_PROMPTS.md` | 8 avatars | `assets/avatars/teachers/01.png` … `04.png` (pool cycles 4) |
-| `STUDENT_AVATAR_PROMPTS.md` | 8 avatars | `assets/avatars/students/01.png` … `08.png` |
-| `PARENT_AVATAR_PROMPTS.md` | 4 avatars | `assets/avatars/parents/01.png` … `04.png` |
-| `MEETING_PROVIDER_LOGO_PROMPTS.md` | 3 logos | `assets/logos/meeting/{slug}.png` |
-| `PAYMENT_CATALOG_LOGO_PROMPTS.md` | 6 logos | `assets/logos/payment/{slug}.png` |
-| `CLASS_SUBJECT_AVATAR_PROMPTS.md` | 4 icons | `assets/logos/subjects/{slug}.png` |
+Avatars use descriptive names (not `01.png`):
 
-Paths are relative to `backend/db/seeds/`.
+| Persona | Files | Directory |
+|---------|-------|-----------|
+| Teachers | `male_1.png` … `male_4.png`, `female_1.png` … `female_3.png` | `assets/avatars/teachers/` |
+| Parents | `male_1.png`, `male_2.png`, `female_1.png`, `female_2.png` | `assets/avatars/parents/` |
+| Students | `male_1.png` … `male_4.png`, `female_1.png` … `female_4.png` (pool of 8) | `assets/avatars/students/` |
+
+Logos: `assets/logos/meeting/{slug}.png`, `assets/logos/payment/{slug}.png`, `assets/logos/subjects/{slug}.png`
+
+Canonical lists live in `backend/db/seeds/lib/avatar-file-registry.ts`.
 
 ## Workflow
 
 1. Open the relevant `*_PROMPTS.md` file.
-2. Copy **one** `## …` section (from the header through the prompt paragraph).
-3. Paste into your image generator and create the image.
-4. Save to the exact path shown in that section (create subfolders if needed).
-5. Repeat for every section in the file.
-6. Run `bun run validate:seed-assets` to confirm required files exist.
-7. Run `bun run db seed` or `bun run db cleanGenerate`.
+2. Copy one `## …` section and generate the image.
+3. Save using the **descriptive filename** from the registry (see above), not necessarily `01.png`.
+4. Run `bun run validate:seed-assets`.
+5. Run `bun --env-file=.env run backend/db/scripts/drizzleSeed.ts` or `bun run db cleanGenerate`.
 
-Set `SEED_SKIP_ASSET_CHECK=true` only if you intentionally want to seed without optional logo assets.
-
-## Conventions
-
-- **Person avatars**: 512×512 or 1024×1024 PNG, solid white background `#FFFFFF`, Pixar/Memoji 3D style, head and shoulders, no photorealistic faces.
-- **Logos**: 512×512 or 1024×1024 PNG, transparent background preferred; stylized originals (not exact trademark copies).
-- **Subject icons**: 512×512 or 1024×1024 PNG, white background, 3D illustration (not human portraits).
+Set `SEED_SKIP_ASSET_CHECK=true` only when intentionally skipping optional logo assets.

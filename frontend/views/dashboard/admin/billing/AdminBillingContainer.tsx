@@ -12,7 +12,6 @@ import {
   CurrencyCode,
   type InvoiceType as GqlInvoiceType,
   type StudentStatus as GqlStudentStatus,
-  InvoiceStatus,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   adminBillingSummaryQueryDocument,
@@ -29,23 +28,25 @@ import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";
+import { DeleteInvoiceDialog } from "@/frontend/views/dashboard/admin/billing/components/DeleteInvoiceDialog";
 import { buildBillingLabels } from "@/frontend/views/dashboard/admin/billing/utils/buildBillingLabels";
 import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
 import { SubmitPaymentProofDialog } from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
+import { useBillingPollInterval } from "@/frontend/views/dashboard/billing/hooks/useBillingPollInterval";
 import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import type {
   AdminBillingSummary,
   AdminInvoiceRow,
-  AdminInvoiceStatus,
+  CreditFilter,
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
   StudentCreditRow,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { formatBillingDate } from "@/frontend/views/dashboard/billing/utils/formatBillingDate";
+import { deriveAdminInvoiceDisplayStatus } from "@/frontend/views/dashboard/billing/utils/invoiceDisplayStatus";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
-import { BILLING_INVOICE_POLL_INTERVAL_MS } from "@/shared/constants/billing/polling";
 import { useRouter } from "@/shared/i18n/routing";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
@@ -54,18 +55,6 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
 
 interface AdminBillingContainerProps {
   readonly parentId?: string;
-}
-
-function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): AdminInvoiceStatus {
-  if (gqlStatus === InvoiceStatus.Paid) return InvoiceStatus.Paid;
-  if (gqlStatus === InvoiceStatus.PaymentPending) return InvoiceStatus.PaymentPending;
-  if (gqlStatus === InvoiceStatus.Cancelled) return InvoiceStatus.Cancelled;
-  if (gqlStatus === InvoiceStatus.Unpaid) {
-    if (dueDate && new Date(dueDate) < new Date()) return "OVERDUE";
-    return InvoiceStatus.Unpaid;
-  }
-  if (dueDate && new Date(dueDate) < new Date()) return "OVERDUE";
-  return "PENDING";
 }
 
 function formatDate(dateStr: string | null, locale: string): string {
@@ -95,9 +84,11 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;
   const hasPermission = useUserStore(state => state.hasPermission);
+  const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
   const canViewExchangeRates = hasPermission(AppPermission.BillingViewExchangeRates);
   const canManage = hasPermission(AppPermission.BillingUpdateStatusPaid);
   const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
+  const canDelete = hasPermission(AppPermission.BillingDeleteInvoice);
 
   const fxMessages = useMemo(
     () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
@@ -110,8 +101,10 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [creditFilter, setCreditFilter] = useState<CreditFilter>("all");
   const [proofTarget, setProofTarget] = useState<MarkPaidInvoiceTarget | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
@@ -132,6 +125,10 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     debouncedApplySearch(value);
   };
 
+  const isSearchPending = searchQuery.trim() !== debouncedSearch.trim();
+  const billingDialogsOpen = proofTarget !== null || detailsTarget !== null || deleteTargetId !== null;
+  const pollInterval = useBillingPollInterval(billingDialogsOpen);
+
   const {
     data: invoicesData,
     loading: invoicesLoading,
@@ -151,16 +148,17 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       },
     },
     fetchPolicy: "cache-and-network",
-    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
+    pollInterval,
   });
 
   const {
     data: summaryData,
+    loading: summaryLoading,
     error: summaryError,
     refetch: refetchSummary,
   } = useQuery(adminBillingSummaryQueryDocument, {
     fetchPolicy: "cache-and-network",
-    pollInterval: BILLING_INVOICE_POLL_INTERVAL_MS,
+    pollInterval,
   });
 
   const refreshBillingData = useCallback(() => {
@@ -170,18 +168,20 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   useRefetchOnWindowFocus(refreshBillingData);
 
-  const { data: creditData } = useQuery(studentCreditStatusQueryDocument, {
+  const { data: creditData, loading: creditLoading } = useQuery(studentCreditStatusQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
 
   const [deleteInvoiceMutation, { loading: deletingInvoice }] = useMutation(deleteInvoiceMutationDocument, {
     onCompleted: () => {
+      setDeleteTargetId(null);
       showFeedback(labels.deleteInvoiceSuccess, "success");
       void refetchInvoices();
       void refetchSummary();
     },
     onError: error => {
       logger.error("Delete invoice failed:", { error });
+      setDeleteTargetId(null);
       showFeedback(tc("operationFailed"), "error");
     },
   });
@@ -220,7 +220,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
           locale,
           fxMessages
         ),
-        status: mapInvoiceStatus(inv.status, inv.dueDate),
+        status: deriveAdminInvoiceDisplayStatus(inv.status, inv.dueDate),
         parentUserId: inv.parentUserId ?? null,
         hasPaymentProof: inv.hasPaymentProof ?? false,
         hasRejectedSubmission: inv.hasRejectedSubmission ?? false,
@@ -282,6 +282,21 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     [creditData?.studentCreditStatus]
   );
 
+  const filteredCreditRows = useMemo(
+    () =>
+      creditFilter === "negative_balance" ? creditRows.filter(row => row.status === "negative_balance") : creditRows,
+    [creditFilter, creditRows]
+  );
+
+  const handleViewAllNegativeBalance = () => {
+    setCreditFilter("negative_balance");
+    document.getElementById("student-credit-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleClearCreditFilter = () => {
+    setCreditFilter("all");
+  };
+
   const handleMarkAsPaid = (invoice: MarkPaidInvoiceTarget) => {
     if (billingActionsDisabled) {
       showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
@@ -306,11 +321,31 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     void refetchSummary();
   };
 
-  const handleDeleteInvoice = (invoiceId: string) => {
-    void deleteInvoiceMutation({ variables: { invoiceId } });
+  const handleRequestDeleteInvoice = (invoiceId: string) => {
+    if (billingActionsDisabled) {
+      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      return;
+    }
+    setDeleteTargetId(invoiceId);
   };
 
+  const handleConfirmDeleteInvoice = () => {
+    if (!deleteTargetId) {
+      return;
+    }
+    void deleteInvoiceMutation({ variables: { invoiceId: deleteTargetId } });
+  };
+
+  const refreshAfterDialogClose = useCallback(() => {
+    void refetchInvoices();
+    void refetchSummary();
+  }, [refetchInvoices, refetchSummary]);
+
   const handleSendReminder = (studentId: string) => {
+    if (billingActionsDisabled) {
+      showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
+      return;
+    }
     void sendReminderMutation({ variables: { studentId } });
   };
 
@@ -337,32 +372,52 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
       <DisplayCurrencyHint />
       <FxConversionNote />
+      {viewerDisplayCurrency ? (
+        <Typography variant="caption" sx={theme => ({ display: "block", mb: 1, color: theme.palette.text.secondary })}>
+          {t("adminBillingFxNote")}
+        </Typography>
+      ) : null}
       <BillingImpersonationNotice />
       {summaryError ? (
-        <Alert severity="warning" sx={{ mb: 2 }}>
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={() => void refetchSummary()}>
+              {labels.errors.retry}
+            </Button>
+          }
+        >
           {tc("loadFailed")}
         </Alert>
       ) : null}
       <AdminBillingView
         labels={labels}
         summary={summary}
+        summaryLoading={summaryLoading}
         invoices={invoices}
-        creditRows={creditRows}
+        creditRows={filteredCreditRows}
         searchQuery={searchQuery}
+        isSearchPending={isSearchPending}
         billingActionsDisabled={billingActionsDisabled}
+        creditFilter={creditFilter}
         canManage={canManage}
         canSubmitProof={false}
         canView
-        canCreate={canCreate}
-        canViewExchangeRates={canViewExchangeRates}
+        canCreate={canCreate && !billingActionsDisabled}
+        canViewExchangeRates={canViewExchangeRates && !billingActionsDisabled}
+        canDelete={canDelete && !billingActionsDisabled}
+        creditLoading={creditLoading}
         onSearchChange={handleSearchChange}
         onMarkAsPaid={handleMarkAsPaid}
         onViewPaymentDetails={setDetailsTarget}
         onSendReminder={handleSendReminder}
+        onViewAllNegativeBalance={handleViewAllNegativeBalance}
+        onClearCreditFilter={handleClearCreditFilter}
         onManualInvoice={() => {
           router.push("/billing/manual");
         }}
-        onDeleteInvoice={handleDeleteInvoice}
+        onDeleteInvoice={canDelete && !billingActionsDisabled ? handleRequestDeleteInvoice : undefined}
         deletingInvoice={deletingInvoice}
         page={page}
         pageSize={pageSize}
@@ -382,7 +437,10 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       </Snackbar>
       <SubmitPaymentProofDialog
         open={proofTarget !== null}
-        onClose={() => setProofTarget(null)}
+        onClose={() => {
+          setProofTarget(null);
+          refreshAfterDialogClose();
+        }}
         invoice={proofTarget}
         mode="markPaid"
         billingActionsDisabled={billingActionsDisabled}
@@ -391,12 +449,22 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       />
       <InvoicePaymentDetailsDialog
         open={detailsTarget !== null}
-        onClose={() => setDetailsTarget(null)}
+        onClose={() => {
+          setDetailsTarget(null);
+          refreshAfterDialogClose();
+        }}
         invoiceId={detailsTarget?.invoiceId ?? null}
         subjectUserId={detailsTarget?.parentUserId}
         canManage={canManage}
         billingActionsDisabled={billingActionsDisabled}
         onSuccess={handleDetailsSuccess}
+      />
+      <DeleteInvoiceDialog
+        open={deleteTargetId !== null}
+        invoiceId={deleteTargetId}
+        isLoading={deletingInvoice}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={handleConfirmDeleteInvoice}
       />
     </RequirePermission>
   );

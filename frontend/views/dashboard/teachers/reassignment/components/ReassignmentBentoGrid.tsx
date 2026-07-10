@@ -5,6 +5,7 @@ import { Box, Grid, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { BaseCard, UserAvatar } from "@/frontend/components/ui";
+import { studentProfileTabHref } from "@/frontend/utils/profileHref";
 import type {
   BentoCardProps,
   ReassignmentBentoGridProps,
@@ -66,7 +67,7 @@ export function ReassignmentBentoGrid({
           icon={HistoryOutlined}
           title={t("changeHistory")}
           subtitle={t("lastUpdated", { date: formattedDate })}
-          onClick={() => router.push(`/students/${studentId}/history`)}
+          onClick={() => router.push(studentProfileTabHref(studentId, "history"))}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>

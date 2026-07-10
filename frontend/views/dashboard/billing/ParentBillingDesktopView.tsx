@@ -1,8 +1,8 @@
 "use client";
 
-import { AddCardOutlined, FilterListOutlined } from "@mui/icons-material";
+import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
-import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
 import type { ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
@@ -12,9 +12,11 @@ import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/u
 export function ParentBillingDesktopView({
   labels,
   summary,
+  summaryLoading = false,
   invoices,
   searchQuery,
   loading,
+  isSearchPending = false,
   canView,
   canSubmitProof,
   canManage = false,
@@ -30,10 +32,13 @@ export function ParentBillingDesktopView({
   totalCount,
   onPageChange,
 }: Readonly<ParentBillingViewProps>) {
+  const parentMetrics = buildParentMetrics(summary, labels);
+  const listLoading = isSearchPending || (loading && invoices.length === 0);
+
   return (
     <PageContainer>
       <PageHeader title={labels.parentPageTitle} subtitle={labels.parentPageSubtitle} />
-      <BillingMetricsRow metrics={buildParentMetrics(summary, labels)} />
+      <BillingMetricsRow metrics={parentMetrics} loading={summaryLoading} />
       <SectionPanel
         title={labels.sections.invoiceHistory}
         subTitle={labels.sections.invoiceHistorySubtitle}
@@ -56,9 +61,9 @@ export function ParentBillingDesktopView({
                 onSearchChange(event.target.value);
               }}
               placeholder={labels.search.parentPlaceholder}
+              helperText={isSearchPending ? labels.search.searching : undefined}
               slotProps={{ htmlInput: { autoComplete: "off" } }}
             />
-            <FilterButton startIcon={<FilterListOutlined />}>{labels.search.filter}</FilterButton>
           </Box>
         }
       >
@@ -80,7 +85,7 @@ export function ParentBillingDesktopView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
-          loading={loading}
+          loading={listLoading}
         />
       </SectionPanel>
     </PageContainer>

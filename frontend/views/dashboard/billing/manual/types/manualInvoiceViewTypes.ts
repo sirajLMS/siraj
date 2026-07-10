@@ -23,6 +23,8 @@ export interface ManualInvoiceViewProps {
   readonly showSuccess: boolean;
   readonly canCreate: boolean;
   readonly canSendEmail: boolean;
+  readonly parentsLoading: boolean;
+  readonly studentsLoading: boolean;
   readonly onBack: () => void;
   readonly onSubmit: (data: ManualInvoiceFormData, sendEmail: boolean) => void;
   readonly onDismissSuccess: () => void;

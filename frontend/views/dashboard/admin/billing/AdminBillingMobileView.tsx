@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
-import { Box, Button, Fab, Typography } from "@mui/material";
+import { Box, Button, Chip, Fab, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { AdminInvoicesCardList } from "@/frontend/views/dashboard/admin/billing/components/AdminInvoicesCardList";
@@ -14,6 +14,12 @@ import { Link } from "@/shared/i18n/routing";
 
 const StyledEmptySubtitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
+}));
+
+const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  borderTop: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
 // Floating action button for creating a manual invoice, fixed at bottom-right with primary colors
@@ -32,18 +38,26 @@ const StyledManualInvoiceFab = styled(Fab)(({ theme }) => ({
 export function AdminBillingMobileView({
   labels,
   summary,
+  summaryLoading = false,
   invoices,
   creditRows,
+  creditLoading = false,
   searchQuery,
   canManage,
   canCreate,
   canViewExchangeRates,
   billingActionsDisabled = false,
+  creditFilter,
+  isSearchPending = false,
   onSearchChange,
   onMarkAsPaid,
   onViewPaymentDetails,
   onSendReminder,
   onManualInvoice,
+  onViewAllNegativeBalance,
+  onClearCreditFilter,
+  onDeleteInvoice,
+  canDelete = false,
   page,
   pageSize,
   totalCount,
@@ -67,11 +81,12 @@ export function AdminBillingMobileView({
             </Button>
           </Box>
         ) : null}
-        <BillingMetricsRow metrics={buildAdminMetrics(summary, labels)} compact />
+        <BillingMetricsRow metrics={buildAdminMetrics(summary, labels)} compact loading={summaryLoading} />
         <BillingMobileSearchBar
           value={searchQuery}
           placeholder={labels.search.invoicesPlaceholder}
-          filterLabel={labels.search.filter}
+          searchingLabel={labels.search.searching}
+          isSearching={isSearchPending}
           onChange={onSearchChange}
         />
         <SectionPanel title={labels.sections.recentInvoices}>
@@ -86,16 +101,19 @@ export function AdminBillingMobileView({
             <AdminInvoicesCardList
               rows={invoices}
               canManage={canManage}
+              canDelete={canDelete}
               billingActionsDisabled={billingActionsDisabled}
-              loading={loading}
+              loading={isSearchPending || (loading && invoices.length === 0)}
               onMarkAsPaid={onMarkAsPaid}
               onViewPaymentDetails={onViewPaymentDetails}
+              onDeleteInvoice={onDeleteInvoice}
               labels={{
                 markAsPaid: labels.adminTable.markAsPaid,
                 quickPay: labels.adminTable.quickPay,
                 reviewSubmission: labels.adminTable.reviewSubmission,
                 viewRejection: labels.adminTable.viewRejection,
                 viewDetails: labels.parentTable.viewDetails,
+                deleteInvoice: labels.adminTable.deleteInvoice,
                 statusLabels: labels.invoiceStatus,
               }}
               page={page}
@@ -106,17 +124,39 @@ export function AdminBillingMobileView({
           )}
         </SectionPanel>
         {canManage && (
-          <SectionPanel title={labels.sections.studentCreditStatus}>
+          <SectionPanel
+            id="student-credit-section"
+            title={labels.sections.studentCreditStatus}
+            subTitle={creditFilter === "negative_balance" ? labels.creditTable.showingNegativeBalanceOnly : undefined}
+            actions={
+              creditFilter === "negative_balance" ? (
+                <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
+              ) : undefined
+            }
+          >
             <StudentCreditCardList
               rows={creditRows}
               canManage={canManage}
+              billingActionsDisabled={billingActionsDisabled}
               onSendReminder={onSendReminder}
+              loading={creditLoading && creditRows.length === 0}
               labels={{
                 classesLeft: labels.creditTable.classesLeft,
                 sendReminder: labels.creditTable.sendReminder,
                 creditStatusLabels: labels.creditStatus,
               }}
             />
+            <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
+              {creditFilter === "negative_balance" ? (
+                <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
+                  {labels.creditTable.clearFilter}
+                </Button>
+              ) : (
+                <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
+                  {labels.viewAllNegativeBalance}
+                </Button>
+              )}
+            </StyledCreditFooterBox>
           </SectionPanel>
         )}
       </PageContainer>

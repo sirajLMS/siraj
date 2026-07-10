@@ -3,13 +3,18 @@
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import type { EffectiveMeeting } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  ClassExecutionState,
+  ClassOutcome,
+  type EffectiveMeeting,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   parentDashboardMetricsQueryDocument,
   parentDashboardScheduleQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { ParentDashboardView } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
 import type {
   ParentDashboardMetrics,
@@ -54,8 +59,9 @@ function useScheduleRows(
                 readonly teacherName?: string | null;
                 readonly teacherAvatarUrl?: string | null;
                 readonly bookingStatus?: string | null;
-                readonly executionState?: string | null;
-                readonly outcome?: string | null;
+                readonly executionState?: ClassExecutionState | null;
+                readonly outcome?: ClassOutcome | null;
+                readonly isFrozen?: boolean | null;
                 readonly meetingJoinUrl?: string | null;
                 readonly effectiveMeeting?: EffectiveMeeting | null;
               }[]
@@ -70,6 +76,8 @@ function useScheduleRows(
     if (!rows) return [];
     return rows.map(r => {
       const joinUrl = resolveMeetingJoinUrl(r.meetingJoinUrl, r.effectiveMeeting);
+      const executionState = r.executionState ?? ClassExecutionState.NotActivated;
+      const outcome = r.outcome ?? ClassOutcome.Pending;
       return {
         id: r.id ?? "",
         rowNumber: 0,
@@ -83,7 +91,10 @@ function useScheduleRows(
         teacherName: r.teacherName ?? "",
         teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
         bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
-        liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),
+        liveClassStatus: mapExecutionStateToLiveClassStatus(executionState, outcome),
+        executionState,
+        outcome,
+        isFrozen: r.isFrozen ?? false,
         videoEnabled: Boolean(joinUrl),
         meetingJoinUrl: joinUrl,
         effectiveMeeting: r.effectiveMeeting ?? null,
@@ -236,7 +247,7 @@ export function ParentDashboardContainer() {
         router.push("/schedule");
       },
       handleHistory: (id: string) => {
-        router.push(`/students/${id}/history`);
+        router.push(studentProfileTabHref(id, "history"));
       },
       handleDownloadReport: () => {
         router.push("/reports");

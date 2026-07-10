@@ -31,6 +31,7 @@ const StyledQuickPayFab = styled(Fab)(({ theme }) => ({
 export function UserBillingProfileMobileView({
   labels,
   metrics,
+  summaryLoading = false,
   invoices,
   searchQuery,
   canView,
@@ -48,22 +49,25 @@ export function UserBillingProfileMobileView({
   totalCount,
   onPageChange,
   loading,
+  isSearchPending = false,
 }: Readonly<UserBillingProfileMobileViewProps>) {
   const showQuickPayFab = canSubmitProof && !billingActionsDisabled;
+  const listLoading = isSearchPending || (loading && invoices.length === 0);
 
   return (
     <>
       <PageContainer>
         <PageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} titleVariant="headlineMd" />
-        <BillingMetricsRow metrics={metrics} compact />
+        <BillingMetricsRow metrics={metrics} compact loading={summaryLoading} />
         <BillingMobileSearchBar
           value={searchQuery}
           placeholder={labels.search.parentPlaceholder}
-          filterLabel={labels.search.filter}
+          searchingLabel={labels.search.searching}
+          isSearching={isSearchPending}
           onChange={onSearchChange}
         />
         <SectionPanel title={labels.sections.invoiceHistory}>
-          {invoices.length === 0 && !loading ? (
+          {invoices.length === 0 && !listLoading ? (
             <Box sx={{ py: 6, textAlign: "center" }}>
               <Typography variant="headlineMd" sx={{ mb: 1 }}>
                 {labels.parentTable.emptyTitle}
@@ -77,7 +81,7 @@ export function UserBillingProfileMobileView({
               canSubmitProof={canSubmitProof}
               canManage={canManage}
               billingActionsDisabled={billingActionsDisabled}
-              loading={loading}
+              loading={listLoading}
               onPayNow={onPayNow}
               onMarkAsPaid={onMarkAsPaid}
               onViewPaymentDetails={onViewPaymentDetails}

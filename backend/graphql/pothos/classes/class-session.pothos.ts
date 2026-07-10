@@ -115,6 +115,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     recurringScheduleId: t.exposeString("recurringScheduleId", { nullable: true }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
     isRescheduled: t.exposeBoolean("isRescheduled"),
+    isFrozen: t.exposeBoolean("isFrozen"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),

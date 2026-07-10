@@ -46,6 +46,7 @@ const mockInstance: ClassInstanceDetail = {
   recurringScheduleId: null,
   executionState: ClassExecutionState.NotActivated,
   isRescheduled: false,
+  isFrozen: false,
   outcome: ClassOutcome.Pending,
   payrollCredited: false,
   avatarUrl: null,

@@ -63,7 +63,7 @@ export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailCont
 
   return (
     <RequirePermission permissions={[AppPermission.SubjectsViewResources]}>
-      <SubjectDetailView subject={subject} resources={resources} breadcrumbs={breadcrumbs} t={t} />
+      <SubjectDetailView subject={subject} resources={resources} breadcrumbs={breadcrumbs} />
     </RequirePermission>
   );
 }

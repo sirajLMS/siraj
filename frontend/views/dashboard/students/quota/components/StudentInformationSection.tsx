@@ -14,6 +14,8 @@ import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { LanguageDisplay } from "@/frontend/components/ui/display";
 import { AppDatePicker } from "@/frontend/components/ui/form";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import { QuotaFormField } from "@/frontend/views/dashboard/students/quota/components/QuotaFormField";
 import { quotaInputSx } from "@/frontend/views/dashboard/students/quota/components/quotaFieldStyles";
 import { SectionHeader } from "@/frontend/views/dashboard/students/quota/components/SectionHeader";
@@ -157,6 +159,11 @@ function GenderField() {
 
 export function StudentInformationSection() {
   const t = useTranslations("dashboard.studentQuota");
+  const { canView } = useStudentFieldAccess();
+
+  if (!canView("student_identity")) {
+    return <ProfileRestrictedSection title={t("sections.studentInfo")} />;
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 3, md: 4 } }}>

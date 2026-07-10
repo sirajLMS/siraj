@@ -19,6 +19,7 @@ export interface UserBillingProfileContainerProps {
 export interface UserBillingProfileViewProps {
   readonly labels: BillingLabels;
   readonly summary: ParentBillingSummary;
+  readonly summaryLoading?: boolean;
   readonly metrics: ReturnType<typeof buildParentMetrics>;
   readonly invoices: readonly ParentInvoiceRow[];
   readonly searchQuery: string;
@@ -27,6 +28,7 @@ export interface UserBillingProfileViewProps {
   readonly canView: boolean;
   readonly canCreate: boolean;
   readonly billingActionsDisabled?: boolean;
+  readonly isSearchPending?: boolean;
   readonly onSearchChange: (value: string) => void;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;

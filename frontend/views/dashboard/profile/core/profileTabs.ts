@@ -15,7 +15,7 @@ const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
   meeting: ["TEACHER-OWN", "TEACHER-OTHER", "PARENT-OWN", "PARENT-OTHER"],
   students: ["TEACHER-OTHER"],
   notifications: ["TEACHER-OWN", "PARENT-OWN", "STAFF-OWN"],
-  permissions: ["TEACHER-OTHER", "PARENT-OTHER", "STAFF-OTHER"],
+  permissions: ["STAFF-OTHER"],
 };
 
 export const profileTabs: readonly ProfileTabDefinition[] = [
@@ -43,20 +43,41 @@ export function getVisibleProfileTabs({
       return false;
     }
 
-    if (tab.id === "permissions" && !hasPermission(AppPermission.UserEditProfile)) {
-      return false;
-    }
-
-    if (tab.id === "meeting") {
-      const meetingPermission =
-        scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
-      if (!hasPermission(meetingPermission)) {
+    if (tab.id === "permissions") {
+      const staffPermissions =
+        audience === "STAFF" && scope === ProfileScope.Other
+          ? hasPermission(AppPermission.ProfileStaffPermissionsViewOther)
+          : false;
+      const legacyEdit = hasPermission(AppPermission.UserEditProfile);
+      if (!staffPermissions && !legacyEdit) {
         return false;
       }
     }
 
-    if (tab.id === "students" && !hasPermission(AppPermission.UserEditProfile)) {
+    if (tab.id === "students" && !hasPermission(AppPermission.ProfileTeacherStudentsViewOther)) {
       return false;
+    }
+
+    if (tab.id === "paymentMethods") {
+      const viewPermission =
+        scope === ProfileScope.Own
+          ? AppPermission.ProfilePaymentMethodsViewOwn
+          : AppPermission.ProfilePaymentMethodsViewOther;
+      if (!hasPermission(viewPermission)) {
+        return false;
+      }
+    }
+
+    if (tab.id === "meeting") {
+      const viewPermission =
+        scope === ProfileScope.Own
+          ? AppPermission.ProfileMeetingConfigsViewOwn
+          : AppPermission.ProfileMeetingConfigsViewOther;
+      const managePermission =
+        scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
+      if (!hasPermission(viewPermission) && !hasPermission(managePermission)) {
+        return false;
+      }
     }
 
     return true;

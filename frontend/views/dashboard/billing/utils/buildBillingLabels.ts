@@ -54,7 +54,7 @@ function buildSectionAndSearchLabels(t: BillingTranslator) {
     search: {
       invoicesPlaceholder: t("search.invoicesPlaceholder"),
       parentPlaceholder: t("search.parentPlaceholder"),
-      filter: t("search.filter"),
+      searching: t("search.searching"),
     },
   };
 }
@@ -72,6 +72,7 @@ function buildTableLabels(t: BillingTranslator) {
       quickPay: t("adminTable.quickPay"),
       reviewSubmission: t("adminTable.reviewSubmission"),
       viewRejection: t("adminTable.viewRejection"),
+      deleteInvoice: t("adminTable.deleteInvoice"),
       noEntries: t("adminTable.noEntries"),
     },
     creditTable: {
@@ -85,6 +86,8 @@ function buildTableLabels(t: BillingTranslator) {
       negativeBalance: t("creditTable.negativeBalance"),
       activeCredit: t("creditTable.activeCredit"),
       noEntries: t("creditTable.noEntries"),
+      showingNegativeBalanceOnly: t("creditTable.showingNegativeBalanceOnly"),
+      clearFilter: t("creditTable.clearFilter"),
     },
     parentTable: {
       invoiceNumber: t("parentTable.invoiceNumber"),
@@ -164,6 +167,11 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     rejectProofSuccess: t("rejectProofSuccess"),
     noUnpaidInvoices: t("noUnpaidInvoices"),
     deleteInvoiceSuccess: t("deleteInvoiceSuccess"),
+    deleteInvoiceDialog: {
+      title: t("deleteInvoiceDialog.title"),
+      body: t.raw("deleteInvoiceDialog.body") as string,
+      confirm: t("deleteInvoiceDialog.confirm"),
+    },
     hasPaymentProofHint: t("hasPaymentProofHint"),
     submitProofDialog: {
       titleSubmit: t("submitProofDialog.titleSubmit"),
@@ -235,6 +243,7 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
       },
     },
     fxConversionNote: t("fxConversionNote"),
+    fxConversionNoteSubject: t("fxConversionNoteSubject"),
     currencyHedges: t.raw("currencyHedges") as CurrencyHedgesLabels,
     supportedCurrencies: t.raw("supportedCurrencies") as SupportedCurrenciesLabels,
   };
