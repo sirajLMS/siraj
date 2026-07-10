@@ -21,6 +21,8 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
         invoiceType
         studentId
         studentName
+        parentId
+        parentUserId
         displayAmount {
           id
           amount
@@ -61,6 +63,8 @@ export const adminInvoicesQueryDocument: TypedDocumentNode<
         invoiceType
         studentId
         studentName
+        parentId
+        parentUserId
         displayAmount {
           id
           amount

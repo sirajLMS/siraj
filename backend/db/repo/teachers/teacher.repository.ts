@@ -4,8 +4,9 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import { AccountStatus, type CurrencyCode, Gender } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import type {
   PaginationArgs,
   TeacherCreateResult,
@@ -71,7 +72,7 @@ export namespace TeacherRepository {
       id: created.id,
       userId: created.userId,
       status: created.status,
-      timezone: (userRow?.timezone ?? "UTC") as IanaTimezone,
+      timezone: parseIanaTimezone(userRow?.timezone),
       createdAt: created.createdAt,
     };
   }
@@ -155,7 +156,7 @@ export namespace TeacherRepository {
 
     const rows = rawRows.map(row => ({
       ...row,
-      status: row.status as AccountStatus,
+      status: parseAccountStatus(row.status),
     }));
 
     const totalCount = countResult[0]?.count ?? 0;
@@ -243,7 +244,7 @@ export namespace TeacherRepository {
     gender: teacher.gender,
     address: teacher.address,
     qualifications: teacher.qualifications,
-    timezone: teacher.timezone as IanaTimezone,
+    timezone: parseIanaTimezone(teacher.timezone),
     hourlyRate: teacher.hourlyRate,
     rateCurrency: teacher.rateCurrency,
     status: teacher.status,
@@ -267,22 +268,10 @@ export namespace TeacherRepository {
 
     if (!teacher) return null;
 
-    const validGenders = Object.values(Gender);
-    const validStatuses = Object.values(AccountStatus);
-    let resolvedGender: Gender | null = null;
-    let resolvedStatus: AccountStatus = AccountStatus.ACTIVATED;
-
-    if (teacher.gender !== null && validGenders.includes(teacher.gender as Gender)) {
-      resolvedGender = teacher.gender as Gender;
-    }
-    if (validStatuses.includes(teacher.status as AccountStatus)) {
-      resolvedStatus = teacher.status as AccountStatus;
-    }
-
     return mapTeacherProfileRow({
       ...teacher,
-      gender: resolvedGender,
-      status: resolvedStatus,
+      gender: parseGender(teacher.gender),
+      status: parseAccountStatus(teacher.status),
     });
   };
 

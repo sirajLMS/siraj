@@ -143,6 +143,8 @@ export type InvoiceHistoryRow = {
   readonly invoiceType: InvoiceType;
   readonly studentId: string | null;
   readonly studentName: string | null;
+  readonly parentId: string;
+  readonly parentUserId: string | null;
 };
 
 export type AdminBillingSummaryResult = {

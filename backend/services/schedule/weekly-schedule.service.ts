@@ -3,9 +3,10 @@ import {
   getWeeklyWorkloadMetrics,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
-import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/backend/enum";
+import { AppPermission, ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
@@ -74,11 +75,11 @@ export namespace WeeklyScheduleService {
             timeZone: IanaTimezone.UTC,
           }),
           day: row.dayOfWeek,
-          executionState: row.executionState as ClassExecutionState,
-          outcome: row.outcome as ClassOutcome,
+          executionState: parseClassExecutionState(row.executionState),
+          outcome: parseClassOutcome(row.outcome),
           subjectId: row.subjectId,
           subjectName: row.subjectName,
-          classType: row.classType as ClassType,
+          classType: parseClassType(row.classType),
         })),
       };
     } catch (error) {

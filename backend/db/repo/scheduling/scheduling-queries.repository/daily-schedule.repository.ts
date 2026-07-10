@@ -5,6 +5,7 @@ import {
   fetchDailyScheduleBaseRows,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository/daily-schedule.utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { parseIanaTimezone } from "@/backend/lib/enum";
 import type {
   AdminDashboardScheduleInput,
   AdminDashboardScheduleResult,
@@ -103,7 +104,7 @@ export const getDailySchedule = async (
       date,
       teacherId,
       search,
-      viewerTimezone: (viewerTimezone || IanaTimezone.UTC) as IanaTimezone,
+      viewerTimezone: parseIanaTimezone(viewerTimezone),
       metricFilter,
     },
     tx

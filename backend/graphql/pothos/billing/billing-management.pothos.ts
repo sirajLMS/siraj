@@ -123,15 +123,15 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
     args: {
       invoiceId: t.arg.string({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
-      userPaymentMethodId: t.arg.id({ required: false }),
+      userPaymentMethodId: t.arg.id({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
       const result = await BillingManagementService.markInvoicePaid(
         userId,
         args.invoiceId,
+        args.userPaymentMethodId,
         args.expectedVersion ?? undefined,
-        args.userPaymentMethodId ?? null,
         ctx.locale
       );
       return {

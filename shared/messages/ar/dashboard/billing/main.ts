@@ -94,6 +94,21 @@ export const billing: BillingLabels = {
   markAsPaidSuccess: "تم تحديد الفاتورة كمدفوعة بنجاح",
   noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
   deleteInvoiceSuccess: "تم حذف الفاتورة بنجاح",
+  markPaidDialog: {
+    title: "تحديد الفاتورة كمدفوعة",
+    confirm: "تأكيد الدفع",
+    selectMethod: "طريقة الدفع",
+    noMethods: "لا توجد طرق دفع واردة مسجلة.",
+    addMethods: "أضف طريقة دفع واردة في الملف الشخصي قبل تسجيل هذا الدفع.",
+    manageMethods: "إدارة طرق الدفع",
+    cancel: "إلغاء",
+  },
+  paymentDetailsDialog: {
+    title: "تفاصيل الدفع",
+    empty: "لا توجد سجلات دفع متاحة لهذه الفاتورة.",
+    amount: "المبلغ",
+    date: "تاريخ الدفع",
+  },
   errors: {
     invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
   },

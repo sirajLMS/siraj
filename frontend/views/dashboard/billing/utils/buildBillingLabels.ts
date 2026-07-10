@@ -152,6 +152,21 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     markAsPaidSuccess: t("markAsPaidSuccess"),
     noUnpaidInvoices: t("noUnpaidInvoices"),
     deleteInvoiceSuccess: t("deleteInvoiceSuccess"),
+    markPaidDialog: {
+      title: t("markPaidDialog.title"),
+      confirm: t("markPaidDialog.confirm"),
+      selectMethod: t("markPaidDialog.selectMethod"),
+      noMethods: t("markPaidDialog.noMethods"),
+      addMethods: t("markPaidDialog.addMethods"),
+      manageMethods: t("markPaidDialog.manageMethods"),
+      cancel: t("markPaidDialog.cancel"),
+    },
+    paymentDetailsDialog: {
+      title: t("paymentDetailsDialog.title"),
+      empty: t("paymentDetailsDialog.empty"),
+      amount: t("paymentDetailsDialog.amount"),
+      date: t("paymentDetailsDialog.date"),
+    },
     errors: {
       invalidId: t("errors.invalidId"),
     },

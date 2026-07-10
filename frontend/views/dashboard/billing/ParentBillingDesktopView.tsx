@@ -18,6 +18,7 @@ export function ParentBillingDesktopView({
   canView,
   onSearchChange,
   onPayNow,
+  onViewPaymentDetails,
   onDownloadPdf,
   page,
   pageSize,
@@ -50,6 +51,7 @@ export function ParentBillingDesktopView({
           rows={invoices}
           canView={canView}
           onPayNow={onPayNow}
+          onViewPaymentDetails={onViewPaymentDetails}
           onDownloadPdf={onDownloadPdf}
           labels={getParentInvoiceGridLabels(labels)}
           page={page}

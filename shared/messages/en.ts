@@ -2716,6 +2716,21 @@ const en: MessageSchema = {
       markAsPaidSuccess: "Invoice marked as paid successfully",
       noUnpaidInvoices: "No unpaid invoices to pay",
       deleteInvoiceSuccess: "Invoice deleted successfully",
+      markPaidDialog: {
+        title: "Mark invoice as paid",
+        confirm: "Confirm payment",
+        selectMethod: "Payment method",
+        noMethods: "No pay-in payment methods on file.",
+        addMethods: "Add a pay-in method in the profile before recording this payment.",
+        manageMethods: "Manage payment methods",
+        cancel: "Cancel",
+      },
+      paymentDetailsDialog: {
+        title: "Payment details",
+        empty: "No payment records are available for this invoice.",
+        amount: "Amount",
+        date: "Payment date",
+      },
       errors: {
         invalidId: "Invalid parent ID in billing view.",
       },

@@ -16,7 +16,6 @@ import {
   adminBillingSummaryQueryDocument,
   adminInvoicesQueryDocument,
   deleteInvoiceMutationDocument,
-  markInvoicePaidMutationDocument,
   sendPaymentReminderMutationDocument,
   studentCreditStatusQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
@@ -25,12 +24,15 @@ import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";
+import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
+import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
 import { filterAdminInvoices } from "@/frontend/views/dashboard/admin/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/admin/billing/utils/buildBillingLabels";
 import type {
   AdminBillingSummary,
   AdminInvoiceRow,
   AdminInvoiceStatus,
+  MarkPaidInvoiceTarget,
   StudentCreditRow,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { useRouter } from "@/shared/i18n/routing";
@@ -79,6 +81,8 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const setPage = useAdminBillingStore(state => state.setPage);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
+  const [detailsInvoiceId, setDetailsInvoiceId] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
@@ -114,17 +118,6 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   const { data: creditData } = useQuery(studentCreditStatusQueryDocument, {
     fetchPolicy: "cache-and-network",
-  });
-
-  const [markAsPaidMutation, { loading: markingPaid }] = useMutation(markInvoicePaidMutationDocument, {
-    onCompleted: () => {
-      showFeedback(labels.markAsPaidSuccess, "success");
-      void refetchInvoices();
-    },
-    onError: error => {
-      logger.error("Mark as paid failed:", { error });
-      showFeedback(tc("operationFailed"), "error");
-    },
   });
 
   const [deleteInvoiceMutation, { loading: deletingInvoice }] = useMutation(deleteInvoiceMutationDocument, {
@@ -175,6 +168,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
           }
         ),
         status: mapInvoiceStatus(inv.status, inv.dueDate),
+        parentUserId: inv.parentUserId ?? null,
       })),
     [invoicesData?.adminInvoices, locale, tErrors, tProfile]
   );
@@ -225,8 +219,13 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     [creditData?.studentCreditStatus]
   );
 
-  const handleMarkAsPaid = (invoiceId: string) => {
-    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null, userPaymentMethodId: null } });
+  const handleMarkAsPaid = (invoice: MarkPaidInvoiceTarget) => {
+    setMarkPaidTarget(invoice);
+  };
+
+  const handleMarkPaidSuccess = () => {
+    showFeedback(labels.markAsPaidSuccess, "success");
+    void refetchInvoices();
   };
 
   const handleDeleteInvoice = (invoiceId: string) => {
@@ -250,12 +249,12 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         canCreate
         onSearchChange={setSearchQuery}
         onMarkAsPaid={handleMarkAsPaid}
+        onViewPaymentDetails={setDetailsInvoiceId}
         onSendReminder={handleSendReminder}
         onManualInvoice={() => {
           router.push("/billing/manual");
         }}
         onDeleteInvoice={handleDeleteInvoice}
-        markingPaid={markingPaid}
         deletingInvoice={deletingInvoice}
         page={page}
         pageSize={pageSize}
@@ -273,6 +272,18 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <MarkInvoicePaidDialog
+        open={markPaidTarget !== null}
+        onClose={() => setMarkPaidTarget(null)}
+        invoiceId={markPaidTarget?.id ?? null}
+        targetUserId={markPaidTarget?.parentUserId ?? null}
+        onSuccess={handleMarkPaidSuccess}
+      />
+      <InvoicePaymentDetailsDialog
+        open={detailsInvoiceId !== null}
+        onClose={() => setDetailsInvoiceId(null)}
+        invoiceId={detailsInvoiceId}
+      />
     </RequirePermission>
   );
 }

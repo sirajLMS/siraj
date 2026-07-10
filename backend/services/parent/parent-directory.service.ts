@@ -1,6 +1,7 @@
 import { ParentRepository } from "@/backend/db/repo";
-import { AppPermission, type ParentStatus } from "@/backend/enum";
+import { AppPermission, ParentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseParentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PaginationArgs, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
 
@@ -53,7 +54,7 @@ export namespace ParentDirectoryService {
         avatarUrl: row.avatarUrl,
         guardianOf,
         time: row.updatedAt.toLocaleTimeString(),
-        accountStatus: row.status as ParentStatus,
+        accountStatus: parseParentStatus(row.status) ?? ParentStatus.REGULAR,
         unpaidInvoices: row.unpaidInvoices,
       });
     }

@@ -10,8 +10,9 @@ import {
   userPermissionOverrides,
   users,
 } from "@/backend/db/schema";
-import type { AccountStatus, OverrideState } from "@/backend/enum";
+import { AccountStatus, OverrideState } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   LocalizedString,
@@ -112,7 +113,7 @@ export namespace StaffProfileRepository {
       email: row.email,
       avatarUrl: row.avatarUrl,
       phone: row.phone,
-      status: row.status as AccountStatus,
+      status: parseAccountStatus(row.status),
       roleSlug: row.roleSlug,
       roleName: row.roleNameMap ? resolveLocalized(row.roleNameMap, locale) : null,
     };
@@ -422,7 +423,7 @@ export namespace StaffProfileRepository {
       permissionKey: row.permissionKey,
       resource: row.resource,
       action: row.action,
-      state: row.state as OverrideState,
+      state: parseOverrideState(row.state) ?? OverrideState.DENIED,
     }));
   }
 }

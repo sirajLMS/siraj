@@ -152,8 +152,8 @@ gqlSchemaBuilder.queryField("exchangeRateHistory", t =>
       const pagination = parsePaginationArgs(args.paginationArgs);
       return FxRateQueryService.listExchangeRateHistory(
         userId,
-        args.from as CurrencyCode,
-        args.to as CurrencyCode,
+        args.from,
+        args.to,
         pagination,
         args.maxDays ?? 90,
         ctx.locale

@@ -10,6 +10,8 @@
  */
 
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { PaymentMethodTransactionSnapshotFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import type { PaymentMethodDisplayData } from "@/frontend/components/ui/display/paymentMethod/PaymentMethodDisplay";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 export { IdentifierKind, PaymentDirection, PaymentMethodType };
@@ -184,6 +186,20 @@ export function getPaymentMethodCatalogOptionBySlug(
   slug: string
 ): PaymentMethodCatalogOption | undefined {
   return options.find(option => option.slug === slug);
+}
+
+export function snapshotToDisplayData(
+  snapshot: PaymentMethodTransactionSnapshotFieldsFragment
+): PaymentMethodDisplayData {
+  return {
+    type: snapshot.type,
+    direction: snapshot.direction,
+    label: snapshot.label,
+    catalogName: snapshot.catalog?.catalogName ?? null,
+    catalogSlug: snapshot.catalog?.catalogSlug ?? null,
+    details: snapshot.details,
+    masked: true,
+  };
 }
 
 export function getPaymentMethodCatalogOptionById(

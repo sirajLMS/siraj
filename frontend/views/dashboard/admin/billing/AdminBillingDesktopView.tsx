@@ -39,6 +39,7 @@ export function AdminBillingDesktopView({
   canCreate,
   onSearchChange,
   onMarkAsPaid,
+  onViewPaymentDetails,
   onSendReminder,
   onManualInvoice,
   page,
@@ -77,6 +78,7 @@ export function AdminBillingDesktopView({
           rows={invoices}
           canManage={canManage}
           onMarkAsPaid={onMarkAsPaid}
+          onViewPaymentDetails={onViewPaymentDetails}
           labels={getAdminInvoiceGridLabels(labels)}
           page={page}
           pageSize={pageSize}

@@ -34,6 +34,7 @@ export function AdminBillingMobileView({
   canCreate,
   onSearchChange,
   onMarkAsPaid,
+  onViewPaymentDetails,
   onSendReminder,
   onManualInvoice,
   page,
@@ -57,9 +58,11 @@ export function AdminBillingMobileView({
             rows={invoices}
             canManage={canManage}
             onMarkAsPaid={onMarkAsPaid}
+            onViewPaymentDetails={onViewPaymentDetails}
             labels={{
               markAsPaid: labels.adminTable.markAsPaid,
               quickPay: labels.adminTable.quickPay,
+              viewDetails: labels.parentTable.viewDetails,
               statusLabels: labels.invoiceStatus,
             }}
             page={page}

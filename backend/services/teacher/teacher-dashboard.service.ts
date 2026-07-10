@@ -5,6 +5,11 @@ import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission, ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import {
+  parseClassExecutionState,
+  parseClassOutcome,
+  parseIanaTimezone,
+} from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
@@ -35,12 +40,7 @@ export namespace TeacherDashboardService {
     }
 
     const user = await UserRepository.findById(userId);
-    const validTimezones = Object.values(IanaTimezone);
-    let viewerTimezone: IanaTimezone = IanaTimezone.UTC;
-
-    if (user?.timezone && validTimezones.includes(user.timezone as IanaTimezone)) {
-      viewerTimezone = user.timezone as IanaTimezone;
-    }
+    const viewerTimezone = parseIanaTimezone(user?.timezone);
 
     const targetDate = new Date(date);
     const result = await SchedulingRepository.getAdminDashboardSchedule({
@@ -60,26 +60,11 @@ export namespace TeacherDashboardService {
       locale
     );
 
-    const validExecutionStates = Object.values(ClassExecutionState);
-    const validClassOutcomes = Object.values(ClassOutcome);
-
-    const mappedScheduleRows = result.rows.map(r => {
-      let resolvedExecutionState: ClassExecutionState = ClassExecutionState.NOT_ACTIVATED;
-      let resolvedOutcome: ClassOutcome | null = null;
-
-      if (validExecutionStates.includes(r.executionState as ClassExecutionState)) {
-        resolvedExecutionState = r.executionState as ClassExecutionState;
-      }
-      if (r.outcome !== null && validClassOutcomes.includes(r.outcome as ClassOutcome)) {
-        resolvedOutcome = r.outcome as ClassOutcome;
-      }
-
-      return {
-        ...r,
-        executionState: resolvedExecutionState,
-        outcome: resolvedOutcome,
-      };
-    });
+    const mappedScheduleRows = result.rows.map(r => ({
+      ...r,
+      executionState: parseClassExecutionState(r.executionState),
+      outcome: parseClassOutcome(r.outcome),
+    }));
 
     const mappedProgressFeed = progressFeed; // progressFeed items don't need enum casts
 

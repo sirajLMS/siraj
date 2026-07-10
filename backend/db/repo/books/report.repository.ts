@@ -2,7 +2,7 @@ import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
-import type { CurrencyCode } from "@/backend/enum";
+import { parseCurrencyCode } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   AttendanceReportPaidAmountReturnType,
@@ -73,13 +73,14 @@ async function fetchPaidAmountsByGroup(
 
   const paidByGroup = new Map<string, AttendanceReportPaidAmountReturnType[]>();
   for (const row of paidRows) {
-    if (!row.groupKey || !row.currency || !row.amount) {
+    const parsedCurrency = parseCurrencyCode(row.currency);
+    if (!row.groupKey || !parsedCurrency || !row.amount) {
       continue;
     }
     const entry: AttendanceReportPaidAmountReturnType = {
-      id: buildPaidAmountId(row.groupKey, row.currency as CurrencyCode),
+      id: buildPaidAmountId(row.groupKey, parsedCurrency),
       amount: row.amount,
-      currency: row.currency as CurrencyCode,
+      currency: parsedCurrency,
     };
     const existing = paidByGroup.get(row.groupKey) ?? [];
     existing.push(entry);

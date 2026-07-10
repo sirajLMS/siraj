@@ -51,6 +51,8 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     invoiceType: t.expose("invoiceType", { type: InvoiceTypePothosObject }),
     studentId: t.exposeString("studentId", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),
+    parentId: t.exposeString("parentId"),
+    parentUserId: t.exposeString("parentUserId", { nullable: true }),
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,

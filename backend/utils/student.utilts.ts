@@ -1,5 +1,6 @@
-import type { AppLanguage, Gender, StudentStatus } from "@/backend/enum";
+import { StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
 import type { Student, StudentEntity } from "@/backend/types";
 
 export namespace StudentUtils {
@@ -17,9 +18,9 @@ export namespace StudentUtils {
     }
     return {
       ...entity,
-      gender: entity.gender ? (entity.gender as Gender) : null,
-      language: entity.language ? (entity.language as AppLanguage) : null,
-      status: entity.status as StudentStatus,
+      gender: parseGender(entity.gender),
+      language: parseAppLanguage(entity.language),
+      status: parseStudentStatus(entity.status) ?? StudentStatus.REGULAR,
       hoursPerWeek: entity.hoursPerWeek ? Number.parseFloat(entity.hoursPerWeek) : 0,
     };
   };

@@ -1,7 +1,7 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
 import { AppPermission } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
+import { parseIanaTimezone } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services";
 import type {
   AssociatedStudentResult,
@@ -56,7 +56,7 @@ export namespace ParentProfileService {
       feeAmount: profile.feeAmount,
       currency: profile.currency,
       displayCurrency: profile.displayCurrency,
-      timezone: profile.timezone as IanaTimezone,
+      timezone: parseIanaTimezone(profile.timezone),
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
     };

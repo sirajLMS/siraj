@@ -10,6 +10,7 @@ export function getAdminInvoiceGridLabels(labels: BillingLabels) {
     actions: labels.adminTable.actions,
     markAsPaid: labels.adminTable.markAsPaid,
     quickPay: labels.adminTable.quickPay,
+    viewDetails: labels.parentTable.viewDetails,
     noEntries: labels.adminTable.noEntries,
     statusLabels: labels.invoiceStatus,
   };

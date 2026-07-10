@@ -7,6 +7,7 @@ export * from "@/frontend/components/ui/input/languageSelector/LanguageSelector"
 export * from "@/frontend/components/ui/input/localizedString";
 export * from "@/frontend/components/ui/input/paymentMethodDefaultsEditor";
 export * from "@/frontend/components/ui/input/paymentMethodSelect";
+export * from "@/frontend/components/ui/input/userPaymentMethodSelect";
 export * from "@/frontend/components/ui/input/paymentMethodTypeFields";
 export * from "@/frontend/components/ui/input/phoneInput/PhoneFormField";
 export * from "@/frontend/components/ui/input/phoneInput/PhoneInput";

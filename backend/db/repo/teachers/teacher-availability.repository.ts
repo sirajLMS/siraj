@@ -9,8 +9,9 @@ import {
   teacherVacationRequests,
   users,
 } from "@/backend/db/schema";
-import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
@@ -705,7 +706,7 @@ export namespace TeacherAvailabilityRepository {
       .then(rows =>
         rows.map(row => ({
           ...row,
-          teacherTimezone: row.teacherTimezone as IanaTimezone,
+          teacherTimezone: parseIanaTimezone(row.teacherTimezone),
         }))
       );
   }
@@ -863,7 +864,7 @@ export namespace TeacherAvailabilityRepository {
         result.push({
           id: teacher.teacherId,
           name: teacher.teacherName ?? "Unknown",
-          gender: teacher.teacherGender as Gender | null,
+          gender: parseGender(teacher.teacherGender),
           timezone: teacher.teacherTimezone,
           availableDaysCount,
           gaps,

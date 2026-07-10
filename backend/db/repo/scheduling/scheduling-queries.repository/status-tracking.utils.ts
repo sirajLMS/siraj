@@ -1,5 +1,6 @@
-import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
+import { StudentStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
+import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/backend/lib/enum";
 import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
 
 export function mapStatusTrackingQueryRow(r: {
@@ -32,7 +33,7 @@ export function mapStatusTrackingQueryRow(r: {
       .map((w: string) => w[0]?.toUpperCase() ?? "")
       .join(""),
     studentAvatarUrl: r.studentAvatarUrl ?? null,
-    studentStatus: r.studentStatus as StudentStatus,
+    studentStatus: parseStudentStatus(r.studentStatus) ?? StudentStatus.REGULAR,
     teacherId: r.teacherId,
     teacherName: r.teacherUserName ?? "",
     teacherAvatarUrl: r.teacherAvatarUrl ?? null,
@@ -41,8 +42,8 @@ export function mapStatusTrackingQueryRow(r: {
     scheduledStartAt: r.scheduledStartAt,
     scheduledEndAt: r.scheduledEndAt,
     durationMinutes: r.durationMinutes,
-    executionState: r.executionState as ClassExecutionState,
-    outcome: r.outcome as ClassOutcome,
+    executionState: parseClassExecutionState(r.executionState),
+    outcome: parseClassOutcome(r.outcome),
     isFrozen: r.isFrozen,
   };
 }

@@ -7,6 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 
 export interface ParentInvoicesDataGridLabels {
@@ -29,7 +30,8 @@ interface ParentInvoicesDataGridProps {
   readonly rows: readonly ParentInvoiceRow[];
   readonly labels: ParentInvoicesDataGridLabels;
   readonly canView: boolean;
-  readonly onPayNow: (id: string) => void;
+  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onViewPaymentDetails?: (invoiceId: string) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
@@ -49,6 +51,7 @@ export function ParentInvoicesDataGrid({
   labels,
   canView,
   onPayNow,
+  onViewPaymentDetails,
   onDownloadPdf,
   page = 0,
   pageSize = 10,
@@ -133,7 +136,7 @@ export function ParentInvoicesDataGrid({
               <PrimaryPageAction
                 size="small"
                 onClick={() => {
-                  onPayNow(row.id);
+                  onPayNow({ id: row.id });
                 }}
               >
                 {labels.payNow}
@@ -144,7 +147,13 @@ export function ParentInvoicesDataGrid({
           return (
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
               <Tooltip title={labels.viewDetails}>
-                <IconButton size="small" aria-label={labels.viewDetails}>
+                <IconButton
+                  size="small"
+                  aria-label={labels.viewDetails}
+                  onClick={() => {
+                    onViewPaymentDetails?.(row.id);
+                  }}
+                >
                   <VisibilityOutlined fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -164,7 +173,7 @@ export function ParentInvoicesDataGrid({
         },
       },
     ],
-    [canView, labels, onDownloadPdf, onPayNow]
+    [canView, labels, onDownloadPdf, onPayNow, onViewPaymentDetails]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

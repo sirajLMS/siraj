@@ -37,7 +37,7 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
         {
           invoiceId: args.invoiceId,
           amount: args.amount,
-          currency: args.currency as CurrencyCode,
+          currency: args.currency,
           paymentDate: new Date(),
           userPaymentMethodId: args.userPaymentMethodId,
           transactionId: args.transactionId ?? null,
@@ -73,7 +73,7 @@ gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
         {
           teacherId: args.teacherId,
           amount: args.amount,
-          currency: args.currency as CurrencyCode,
+          currency: args.currency,
           paymentDate: args.paymentDate ? new Date(args.paymentDate) : new Date(),
           userPaymentMethodId: args.userPaymentMethodId,
           isTestPayment: args.isTestPayment ?? false,

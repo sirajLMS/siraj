@@ -2558,7 +2558,7 @@ export type MutationLoginArgs = {
 export type MutationMarkInvoicePaidArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   invoiceId: Scalars['String']['input'];
-  userPaymentMethodId: InputMaybe<Scalars['ID']['input']>;
+  userPaymentMethodId: Scalars['ID']['input'];
 };
 
 
@@ -3085,6 +3085,8 @@ export type ParentInvoiceRow = {
   invoiceType: Maybe<InvoiceType>;
   issueDate: Maybe<Scalars['String']['output']>;
   paidDate: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  parentUserId: Maybe<Scalars['String']['output']>;
   status: Maybe<InvoiceStatus>;
   studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;

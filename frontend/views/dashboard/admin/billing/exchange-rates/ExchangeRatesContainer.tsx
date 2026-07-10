@@ -16,8 +16,8 @@ import {
 import { logger } from "@/frontend/utils/logger";
 import {
   buildExchangeRateColumns,
-  formatExchangeRateTimestamp,
   type ExchangeRateRow,
+  formatExchangeRateTimestamp,
 } from "@/frontend/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 
 function SyncStatusBadge({
@@ -213,7 +213,10 @@ export function ExchangeRatesContainer() {
         subtitle={labels.pageSubtitle}
         actions={
           <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
-            <PrimaryPageAction onClick={() => void refreshMutation({ variables: { force: false } })} disabled={refreshing}>
+            <PrimaryPageAction
+              onClick={() => void refreshMutation({ variables: { force: false } })}
+              disabled={refreshing}
+            >
               {refreshing ? labels.common.refreshing : labels.syncStatus.refresh}
             </PrimaryPageAction>
           </RequirePermission>

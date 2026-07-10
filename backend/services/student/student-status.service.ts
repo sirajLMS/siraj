@@ -1,6 +1,7 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
-import { AppPermission, type ClassExecutionState, type StudentStatus } from "@/backend/enum";
+import { AppPermission, ClassExecutionState, StudentStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { parseClassExecutionState, parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
@@ -35,8 +36,8 @@ export namespace StudentStatusService {
       id: `upcoming-${studentId}`,
       studentId,
       studentName: student.name,
-      status: student.status as StudentStatus,
-      classes: classes.map(c => ({ ...c, executionState: c.executionState as ClassExecutionState })),
+      status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
+      classes: classes.map(c => ({ ...c, executionState: parseClassExecutionState(c.executionState) })),
     };
   }
 }

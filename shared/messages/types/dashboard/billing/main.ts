@@ -84,6 +84,21 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly markAsPaidSuccess: string;
   readonly deleteInvoiceSuccess: string;
   readonly noUnpaidInvoices: string;
+  readonly markPaidDialog: {
+    readonly title: string;
+    readonly confirm: string;
+    readonly selectMethod: string;
+    readonly noMethods: string;
+    readonly addMethods: string;
+    readonly manageMethods: string;
+    readonly cancel: string;
+  };
+  readonly paymentDetailsDialog: {
+    readonly title: string;
+    readonly empty: string;
+    readonly amount: string;
+    readonly date: string;
+  };
   readonly errors: {
     readonly invalidId: string;
   };

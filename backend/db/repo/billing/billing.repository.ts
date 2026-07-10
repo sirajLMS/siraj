@@ -13,7 +13,8 @@ import {
   systemSettings,
   users,
 } from "@/backend/db/schema";
-import { CurrencyCode, type InvoiceStatus, type InvoiceType, type StudentStatus } from "@/backend/enum";
+import { CurrencyCode, InvoiceStatus, InvoiceType, StudentStatus } from "@/backend/enum";
+import { parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
@@ -624,6 +625,8 @@ export namespace BillingRepository {
     invoiceType: invoices.invoiceType,
     studentId: invoices.studentId,
     studentName: students.name,
+    parentId: invoices.parentId,
+    parentUserId: parents.userId,
   };
 
   function mapInvoiceRow(r: {
@@ -637,6 +640,8 @@ export namespace BillingRepository {
     invoiceType: string | null;
     studentId: string | null;
     studentName: string | null;
+    parentId: string;
+    parentUserId: string | null;
   }): Types.InvoiceHistoryRow {
     return {
       id: r.id,
@@ -649,6 +654,8 @@ export namespace BillingRepository {
       invoiceType: (r.invoiceType ?? "MONTHLY") as InvoiceType,
       studentId: r.studentId ?? null,
       studentName: r.studentName ?? null,
+      parentId: r.parentId,
+      parentUserId: r.parentUserId ?? null,
     };
   }
 
@@ -665,6 +672,7 @@ export namespace BillingRepository {
         .select(invoiceBaseFields)
         .from(invoices)
         .leftJoin(students, eq(invoices.studentId, students.id))
+        .leftJoin(parents, eq(invoices.parentId, parents.id))
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate))
         .limit(200);
@@ -695,6 +703,7 @@ export namespace BillingRepository {
         .select(invoiceBaseFields)
         .from(invoices)
         .leftJoin(students, eq(invoices.studentId, students.id))
+        .leftJoin(parents, eq(invoices.parentId, parents.id))
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate))
         .limit(perPage)
@@ -735,6 +744,7 @@ export namespace BillingRepository {
         .select(invoiceBaseFields)
         .from(invoices)
         .leftJoin(students, eq(invoices.studentId, students.id))
+        .leftJoin(parents, eq(invoices.parentId, parents.id))
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate))
         .limit(200);
@@ -756,6 +766,7 @@ export namespace BillingRepository {
         .select(invoiceBaseFields)
         .from(invoices)
         .leftJoin(students, eq(invoices.studentId, students.id))
+        .leftJoin(parents, eq(invoices.parentId, parents.id))
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate))
         .limit(perPage)
@@ -847,10 +858,10 @@ export namespace BillingRepository {
       id: r.id,
       studentName: r.studentName ?? "Unknown",
       parentEmail: r.parentEmail ?? "",
-      planType: (r.planType ?? "MONTHLY") as InvoiceType,
+      planType: parseInvoiceType(r.planType),
       classesRemaining: r.classesRemaining,
       classesTotal: r.classesTotal,
-      status: (r.status ?? "active") as StudentStatus,
+      status: parseStudentStatus(r.status) ?? StudentStatus.REGULAR,
     }));
   };
 

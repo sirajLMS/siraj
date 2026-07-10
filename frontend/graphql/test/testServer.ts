@@ -46,7 +46,10 @@ function killPort(port: number) {
         spawnSync(["fuser", "-k", "-9", `${port}/tcp`], { stdout: "ignore", stderr: "ignore" });
       } catch {
         try {
-          const result = spawnSync(["pgrep", "-f", `next dev -p ${port}|next-server`], { stdout: "pipe", stderr: "ignore" });
+          const result = spawnSync(["pgrep", "-f", `next dev -p ${port}|next-server`], {
+            stdout: "pipe",
+            stderr: "ignore",
+          });
           const pids = result.stdout?.toString().trim().split("\n").filter(Boolean) || [];
           for (const pid of pids) {
             try {

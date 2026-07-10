@@ -8,6 +8,11 @@ import type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus } from 
 
 export type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus };
 
+export interface MarkPaidInvoiceTarget {
+  readonly id: string;
+  readonly parentUserId?: string | null;
+}
+
 export interface AdminBillingSummary {
   readonly totalOutstanding: string;
   readonly pendingInvoices: number;
@@ -23,6 +28,7 @@ export interface AdminInvoiceRow {
   readonly dateIssued: string;
   readonly amount: string;
   readonly status: AdminInvoiceStatus;
+  readonly parentUserId: string | null;
 }
 
 export interface StudentCreditRow {
@@ -49,7 +55,8 @@ export interface AdminBillingViewProps extends BillingCapabilityProps {
   readonly loading?: boolean;
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
-  readonly onMarkAsPaid: (id: string) => void;
+  readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onViewPaymentDetails?: (invoiceId: string) => void;
   readonly onSendReminder: (id: string) => void;
   readonly onManualInvoice: () => void;
   readonly onDeleteInvoice?: (id: string) => void;
@@ -68,7 +75,8 @@ export interface ParentBillingViewProps extends BillingCapabilityProps {
   readonly loading?: boolean;
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
-  readonly onPayNow: (id: string) => void;
+  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onViewPaymentDetails?: (invoiceId: string) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly onQuickPay: () => void;
   readonly page?: number;

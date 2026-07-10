@@ -1,13 +1,12 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
@@ -15,9 +14,11 @@ import {
 import { formatLockedAmount } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
-import { logger } from "@/frontend/utils/logger";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
+import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
 import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
-import type { ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type { MarkPaidInvoiceTarget, ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
 
@@ -43,6 +44,8 @@ export function ParentBillingContainer() {
   const labels = buildBillingLabels(t);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
+  const [detailsInvoiceId, setDetailsInvoiceId] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
@@ -57,7 +60,9 @@ export function ParentBillingContainer() {
   const pageSize = useParentBillingStore(state => state.pageSize);
   const setPage = useParentBillingStore(state => state.setPage);
 
-  const { data, loading, error } = useQuery(parentInvoiceHistoryQueryDocument, {
+  const parentUserId = useUserStore(state => state.user?.id ?? null);
+
+  const { data, loading, error, refetch } = useQuery(parentInvoiceHistoryQueryDocument, {
     variables: {
       parentId: null,
       userId: null,
@@ -79,15 +84,14 @@ export function ParentBillingContainer() {
     fetchPolicy: "cache-and-network",
   });
 
-  const [markAsPaidMutation] = useMutation(markInvoicePaidMutationDocument, {
-    onCompleted: () => {
-      showFeedback(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), "success");
-    },
-    onError: err => {
-      logger.error("Mark as paid failed:", { err });
-      showFeedback(tc("operationFailed"), "error");
-    },
-  });
+  const handlePayNow = (invoice: MarkPaidInvoiceTarget) => {
+    setMarkPaidTarget({ ...invoice, parentUserId: parentUserId ?? invoice.parentUserId });
+  };
+
+  const handleMarkPaidSuccess = () => {
+    showFeedback(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), "success");
+    void refetch();
+  };
 
   const totalCount = data ? (data.parentInvoiceHistory?.totalCount ?? 0) : undefined;
 
@@ -156,10 +160,6 @@ export function ParentBillingContainer() {
     return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
   }
 
-  const handlePayNow = (invoiceId: string) => {
-    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null, userPaymentMethodId: null } });
-  };
-
   const viewProps: ParentBillingViewProps = {
     labels,
     summary,
@@ -170,6 +170,7 @@ export function ParentBillingContainer() {
     canCreate: false,
     onSearchChange: setSearchQuery,
     onPayNow: handlePayNow,
+    onViewPaymentDetails: setDetailsInvoiceId,
     onDownloadPdf: () => {},
     onQuickPay: () => {},
     page,
@@ -192,6 +193,18 @@ export function ParentBillingContainer() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <MarkInvoicePaidDialog
+        open={markPaidTarget !== null}
+        onClose={() => setMarkPaidTarget(null)}
+        invoiceId={markPaidTarget?.id ?? null}
+        targetUserId={markPaidTarget?.parentUserId ?? parentUserId}
+        onSuccess={handleMarkPaidSuccess}
+      />
+      <InvoicePaymentDetailsDialog
+        open={detailsInvoiceId !== null}
+        onClose={() => setDetailsInvoiceId(null)}
+        invoiceId={detailsInvoiceId}
+      />
     </RequirePermission>
   );
 }

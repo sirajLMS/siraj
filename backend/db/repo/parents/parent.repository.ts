@@ -13,10 +13,16 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
+import { BookingStatus, ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import {
+  parseClassExecutionState,
+  parseClassOutcome,
+  parseCurrencyCode,
+  parseIanaTimezone,
+} from "@/backend/lib/enum";
 import type {
   PaginationArgs,
   ParentCreateResult,
@@ -88,7 +94,7 @@ export namespace ParentRepository {
       invoiceType: created.invoiceType,
       feeAmount: created.feeAmount,
       currency: created.currency,
-      timezone: (userRow?.timezone ?? "UTC") as IanaTimezone,
+      timezone: parseIanaTimezone(userRow?.timezone),
       createdAt: created.createdAt,
     };
   }
@@ -302,27 +308,10 @@ export namespace ParentRepository {
 
     if (!results[0]) return null;
 
-    const validTimezones = Object.values(IanaTimezone);
-    const validCurrencyCodes = Object.values(CurrencyCode);
-
-    let resolvedTimezone: IanaTimezone = IanaTimezone.UTC;
-    let resolvedDisplayCurrency: CurrencyCode | null = null;
-
-    if (validTimezones.includes(results[0].timezone as IanaTimezone)) {
-      resolvedTimezone = results[0].timezone as IanaTimezone;
-    }
-
-    if (
-      results[0].displayCurrency !== null &&
-      validCurrencyCodes.includes(results[0].displayCurrency as CurrencyCode)
-    ) {
-      resolvedDisplayCurrency = results[0].displayCurrency as CurrencyCode;
-    }
-
     return {
       ...results[0],
-      timezone: resolvedTimezone,
-      displayCurrency: resolvedDisplayCurrency,
+      timezone: parseIanaTimezone(results[0].timezone),
+      displayCurrency: parseCurrencyCode(results[0].displayCurrency),
     };
   };
 
@@ -628,9 +617,9 @@ export namespace ParentRepository {
         scheduledStartAt: r.scheduledStartAt,
         scheduledEndAt: r.scheduledEndAt,
         durationMinutes: r.durationMinutes,
-        bookingStatus: r.isRescheduled ? ("rescheduled" as BookingStatus) : ("confirmed" as BookingStatus),
-        executionState: r.executionState as ClassExecutionState,
-        outcome: r.outcome as ClassOutcome,
+        bookingStatus: r.isRescheduled ? BookingStatus.RESCHEDULED : BookingStatus.CONFIRMED,
+        executionState: parseClassExecutionState(r.executionState),
+        outcome: parseClassOutcome(r.outcome),
         meetingJoinUrl: r.meetingJoinUrl ?? null,
         classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone, locale),
       };

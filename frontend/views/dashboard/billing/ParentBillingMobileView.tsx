@@ -39,6 +39,7 @@ export function ParentBillingMobileView({
   canManage,
   onSearchChange,
   onPayNow,
+  onViewPaymentDetails,
   onDownloadPdf,
   onQuickPay,
   page,
@@ -72,6 +73,7 @@ export function ParentBillingMobileView({
             rows={invoices}
             canView={canView}
             onPayNow={onPayNow}
+            onViewPaymentDetails={onViewPaymentDetails}
             onDownloadPdf={onDownloadPdf}
             labels={{
               viewDetails: labels.parentTable.viewDetails,

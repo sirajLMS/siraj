@@ -1,8 +1,5 @@
-import type { CurrencyCode } from "@/backend/enum";
-import type { BaseContext } from "@/backend/graphql/gqlContext";
-import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
+import { parseCurrencyCode } from "@/backend/lib/enum";
 import type { DisplayAmountReturnType } from "@/backend/types";
 
 const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
@@ -29,7 +26,7 @@ export function resolveDisplayAmountField<P extends { id: string }>(
 
   return FxDisplayService.convertForDisplay(
     parent[amountKey] as string | null | undefined,
-    parent[currencyKey] as CurrencyCode | null | undefined,
+    parseCurrencyCode(parent[currencyKey] as string | null | undefined),
     displayCurrency,
     parent.id,
     undefined,

@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
 import { db } from "@/backend/db/drizzleDb";
-import { BillingRepository, ParentRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/db/db.types";
+import { BillingRepository, ParentRepository, UserPaymentMethodRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, type InvoiceStatus, type InvoiceType } from "@/backend/enum";
+import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { ForbiddenError, getBackendTranslations, logger, NotFoundError } from "@/backend/lib";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -86,6 +88,35 @@ async function syncNotificationAfterCreate(
   }
 }
 
+async function validatePayinMethodForParent(
+  userPaymentMethodId: string,
+  parentId: string,
+  tx: DBTransaction,
+  locale?: string
+): Promise<void> {
+  const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+  const parent = await ParentRepository.getParentProfile(parentId, tx);
+  if (!parent) {
+    throw new NotFoundError("PARENT", tFunc("parentNotFound", { id: parentId }));
+  }
+
+  const method = await UserPaymentMethodRepository.getById(userPaymentMethodId, tx);
+  if (!method) {
+    throw new Error(
+      tFunc("recordNotFound", { tableName: "user_payment_methods", entityId: userPaymentMethodId })
+    );
+  }
+
+  if (method.userId !== parent.userId) {
+    throw new Error(tFunc("insufficientPermissions"));
+  }
+
+  const direction = method.direction as PaymentDirection;
+  if (direction !== PaymentDirection.PAYIN && direction !== PaymentDirection.BOTH) {
+    throw new Error(tFunc("insufficientPermissions"));
+  }
+}
+
 export namespace BillingManagementService {
   export async function createManualInvoice(
     actorUserId: string,
@@ -120,8 +151,8 @@ export namespace BillingManagementService {
   export async function markInvoicePaid(
     actorUserId: string,
     invoiceId: string,
+    userPaymentMethodId: string,
     expectedVersion?: number,
-    userPaymentMethodId?: string | null,
     locale?: string
   ): Promise<Types.MarkInvoicePaidResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
@@ -130,28 +161,38 @@ export namespace BillingManagementService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    if (!userPaymentMethodId.trim()) {
+      throw new Error(tFunc("noActiveBankingDetails", { id: "payin" }));
+    }
+
+    const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
+    if (!existingInvoice) {
+      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
+    }
+
     try {
       const updated = await db.transaction(async tx => {
+        await validatePayinMethodForParent(userPaymentMethodId, existingInvoice.parentId, tx, locale);
+
         const invoice = await BillingRepository.markInvoiceAsPaid(invoiceId, expectedVersion, tx, locale);
 
-        if (userPaymentMethodId) {
-          await PaymentMethodService.recordPayin(
-            {
-              invoiceId: invoice.id,
-              amount: invoice.amount,
-              currency: invoice.currency,
-              paymentDate: new Date(),
-              userPaymentMethodId,
-              transactionId: null,
-              gatewayResponse: null,
-              exchangeRateSnapshot: invoice.exchangeRateSnapshot,
-              exchangeRateSource: invoice.exchangeRateSource,
-              idempotencyKey: `payin:${invoice.id}`,
-            },
-            tx,
-            locale
-          );
-        }
+        await PaymentMethodService.recordPayin(
+          {
+            invoiceId: invoice.id,
+            amount: invoice.amount,
+            currency: invoice.currency,
+            paymentDate: new Date(),
+            userPaymentMethodId,
+            transactionId: null,
+            gatewayResponse: null,
+            exchangeRateSnapshot: invoice.exchangeRateSnapshot,
+            exchangeRateSource: invoice.exchangeRateSource,
+            idempotencyKey: `payin:${invoice.id}`,
+          },
+          tx,
+          locale
+        );
 
         return invoice;
       });
@@ -161,7 +202,7 @@ export namespace BillingManagementService {
         invoiceId: updated.id,
         parentId: updated.parentId,
         paidDate: updated.paidDate,
-        userPaymentMethodId: userPaymentMethodId ?? null,
+        userPaymentMethodId,
       });
 
       const syncResult = await NotificationSyncService.syncUnpaidNotifications(locale).catch(err => {

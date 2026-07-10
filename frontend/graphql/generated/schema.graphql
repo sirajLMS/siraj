@@ -2102,7 +2102,7 @@ type Mutation {
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
-  markInvoicePaid(expectedVersion: Int, invoiceId: String!, userPaymentMethodId: ID): MarkInvoicePaidResult
+  markInvoicePaid(expectedVersion: Int, invoiceId: String!, userPaymentMethodId: ID!): MarkInvoicePaidResult
 
   """Marks a suggestion as a duplicate of another suggestion (admin only)."""
   markSuggestionDuplicate(input: MarkSuggestionDuplicateInput!): Suggestion
@@ -2409,6 +2409,8 @@ type ParentInvoiceRow {
   invoiceType: InvoiceType
   issueDate: String
   paidDate: String
+  parentId: String
+  parentUserId: String
   status: InvoiceStatus
   studentId: String
   studentName: String

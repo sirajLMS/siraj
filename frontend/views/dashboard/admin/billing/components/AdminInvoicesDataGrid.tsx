@@ -1,14 +1,14 @@
 "use client";
 
-import { CheckCircleOutlined } from "@mui/icons-material";
-import { Button, Typography } from "@mui/material";
+import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/utils/profileHref";
-import type { AdminInvoiceRow, AdminInvoiceStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type { AdminInvoiceRow, AdminInvoiceStatus, MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;
@@ -19,6 +19,7 @@ export interface AdminInvoicesDataGridLabels {
   readonly actions: string;
   readonly markAsPaid: string;
   readonly quickPay: string;
+  readonly viewDetails: string;
   readonly noEntries: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
 }
@@ -27,7 +28,8 @@ interface AdminInvoicesDataGridProps {
   readonly rows: readonly AdminInvoiceRow[];
   readonly labels: AdminInvoicesDataGridLabels;
   readonly canManage: boolean;
-  readonly onMarkAsPaid: (id: string) => void;
+  readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
+  readonly onViewPaymentDetails?: (invoiceId: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -55,12 +57,32 @@ function renderInvoiceAction(
   row: AdminInvoiceRow,
   labels: AdminInvoicesDataGridLabels,
   canManage: boolean,
-  onMarkAsPaid: (id: string) => void
+  onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void,
+  onViewPaymentDetails?: (invoiceId: string) => void
 ) {
-  if (!canManage || row.status === InvoiceStatus.Paid) {
-    if (row.status === InvoiceStatus.Paid) {
-      return <StyledPaidCheckIcon />;
-    }
+  if (row.status === InvoiceStatus.Paid) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
+        {onViewPaymentDetails ? (
+          <Tooltip title={labels.viewDetails}>
+            <IconButton
+              size="small"
+              aria-label={labels.viewDetails}
+              onClick={() => {
+                onViewPaymentDetails(row.id);
+              }}
+            >
+              <VisibilityOutlined fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <StyledPaidCheckIcon />
+        )}
+      </Box>
+    );
+  }
+
+  if (!canManage) {
     return null;
   }
 
@@ -69,7 +91,7 @@ function renderInvoiceAction(
       <Button
         variant="text"
         onClick={() => {
-          onMarkAsPaid(row.id);
+          onMarkAsPaid({ id: row.id, parentUserId: row.parentUserId });
         }}
         sx={{ fontWeight: 700, textTransform: "uppercase" }}
       >
@@ -82,7 +104,7 @@ function renderInvoiceAction(
     <Button
       variant="text"
       onClick={() => {
-        onMarkAsPaid(row.id);
+        onMarkAsPaid({ id: row.id, parentUserId: row.parentUserId });
       }}
       sx={{ fontWeight: 700, textTransform: "uppercase" }}
     >
@@ -96,6 +118,7 @@ export function AdminInvoicesDataGrid({
   labels,
   canManage,
   onMarkAsPaid,
+  onViewPaymentDetails,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -164,10 +187,10 @@ export function AdminInvoicesDataGrid({
         sortable: false,
         align: "right",
         headerAlign: "right",
-        renderCell: ({ row }) => renderInvoiceAction(row, labels, canManage, onMarkAsPaid),
+        renderCell: ({ row }) => renderInvoiceAction(row, labels, canManage, onMarkAsPaid, onViewPaymentDetails),
       },
     ],
-    [canManage, labels, onMarkAsPaid]
+    [canManage, labels, onMarkAsPaid, onViewPaymentDetails]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

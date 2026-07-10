@@ -1,5 +1,5 @@
 import { AccountStatus, UserRole } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { parseIanaTimezone } from "@/backend/lib/enum";
 import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
 
 type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId" | "displayCurrency">;
@@ -24,7 +24,7 @@ export namespace AuthUtils {
       teacherId: resolved.teacherId ?? null,
       parentId: resolved.parentId ?? null,
       displayCurrency: resolved.displayCurrency ?? null,
-      timezone: user.timezone as IanaTimezone,
+      timezone: parseIanaTimezone(user.timezone),
     };
   };
 

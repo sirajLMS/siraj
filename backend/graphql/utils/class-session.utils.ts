@@ -2,6 +2,13 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
+import {
+  parseClassExecutionState,
+  parseClassOutcome,
+  parseClassType,
+  parseIanaTimezone,
+  parseIanaTimezoneOrNull,
+} from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
@@ -89,20 +96,13 @@ export async function buildClassInstanceDetail(
   const t = await getBackendTranslations({ locale, namespace: "session" });
   const tErrors = await getBackendTranslations({ locale, namespace: "errors" });
   const unknownName = tErrors("unknownName");
-  const validClassTypes = Object.values(ClassType);
-  const classType = validClassTypes.includes(instance.classType as ClassType)
-    ? (instance.classType as ClassType)
-    : ClassType.REGULAR;
+  const classType = parseClassType(instance.classType);
   const courseName = t(`classTypes.${classType}`);
 
   const start = instance.scheduledStartAt;
   const end = instance.scheduledEndAt;
-  const studentTimezone = (await SchedulingRepository.resolveStudentTimezone(instance.studentId)) as IanaTimezone;
-  const teacherTimezone =
-    instance.teacher?.user?.timezone &&
-    Object.values(IanaTimezone).includes(instance.teacher.user.timezone as IanaTimezone)
-      ? (instance.teacher.user.timezone as IanaTimezone)
-      : null;
+  const studentTimezone = parseIanaTimezone(await SchedulingRepository.resolveStudentTimezone(instance.studentId));
+  const teacherTimezone = parseIanaTimezoneOrNull(instance.teacher?.user?.timezone ?? null);
   const hasTimezoneMismatch =
     teacherTimezone !== null && studentTimezone !== null && teacherTimezone !== studentTimezone;
 
@@ -119,11 +119,11 @@ export async function buildClassInstanceDetail(
     endTime,
     remarks: instance.remarks ?? null,
     status: resolveClassInstanceStatus(
-      instance.executionState as ClassExecutionState,
-      instance.outcome as ClassOutcome
+      parseClassExecutionState(instance.executionState),
+      parseClassOutcome(instance.outcome)
     ),
-    executionState: instance.executionState as ClassExecutionState,
-    outcome: instance.outcome as ClassOutcome,
+    executionState: parseClassExecutionState(instance.executionState),
+    outcome: parseClassOutcome(instance.outcome),
     hasTimezoneMismatch,
     studentTimezone,
     teacherTimezone,

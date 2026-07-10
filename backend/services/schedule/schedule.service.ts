@@ -3,9 +3,16 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AppPermission, type ClassExecutionState, type ClassOutcome, ClassType } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { AppPermission, ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
+import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
+import {
+  parseClassExecutionState,
+  parseClassOutcome,
+  parseClassType,
+  parseClassTypeOrNull,
+  parseIanaTimezone,
+} from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -24,10 +31,11 @@ export namespace ScheduleService {
   async function resolveViewerTimezone(userId: string): Promise<IanaTimezone> {
     const user = await UserRepository.findById(userId);
     if (user?.timezone) {
-      return user.timezone as IanaTimezone;
+      return parseIanaTimezone(user.timezone);
     }
 
-    return (await SystemSettingsRepository.getStringValue("default_timezone", "UTC")) as IanaTimezone;
+    const defaultTimezone = await SystemSettingsRepository.getStringValue("default_timezone", "UTC");
+    return parseIanaTimezone(defaultTimezone);
   }
 
   async function mapDailyScheduleListItem(item: DailyScheduleResult, locale?: string) {
@@ -41,9 +49,9 @@ export namespace ScheduleService {
       duration: item.durationMinutes,
       scheduledStartAt: item.scheduledStartAt,
       scheduledEndAt: item.scheduledEndAt,
-      status: (item.outcome || item.executionState) as ClassExecutionState,
-      outcome: item.outcome as ClassOutcome,
-      executionState: item.executionState as ClassExecutionState,
+      status: parseClassExecutionState(item.outcome || item.executionState),
+      outcome: parseClassOutcome(item.outcome),
+      executionState: parseClassExecutionState(item.executionState),
       student: {
         id: item.studentId,
         name: item.student?.name || unknownName,
@@ -302,14 +310,7 @@ export namespace ScheduleService {
           hour12: true,
         });
 
-      const validClassTypes = Object.values(ClassType);
-      let resolvedClassType: ClassType | null | undefined = cls.classType as ClassType | null | undefined;
-
-      if (cls.classType !== null && cls.classType !== undefined) {
-        if (!validClassTypes.includes(cls.classType as ClassType)) {
-          resolvedClassType = null;
-        }
-      }
+      const resolvedClassType = parseClassTypeOrNull(cls.classType);
 
       return {
         id: cls.id,

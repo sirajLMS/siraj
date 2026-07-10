@@ -36,7 +36,7 @@ gqlSchemaBuilder.queryField("parentDirectory", t =>
         userId,
         args.search ?? null,
         pagination,
-        (args.statusFilter as ParentStatus | undefined) ?? null,
+        args.statusFilter ?? null,
         ctx.locale
       );
     },
