@@ -1,0 +1,26 @@
+import type { AppLanguage, Gender, StudentStatus } from "@/backend/enum";
+import type { StudentClassHistory } from "@/backend/types/students/student.types";
+import type { StudentUpcomingClassesResult } from "@/backend/types/students/student-status.types";
+
+export type StudentProfileReturnType = {
+  readonly id: string;
+  readonly name: string;
+  readonly status: StudentStatus;
+  readonly avatarUrl: string | null;
+  readonly dateOfBirth: Date | null;
+  readonly gender: Gender | null;
+  readonly language: AppLanguage | null;
+  readonly parentId: string | null;
+  readonly parentName: string | null;
+  readonly primaryTeacherId: string | null;
+  readonly teacherUserId: string | null;
+  readonly teacherName: string | null;
+  readonly hoursPerWeek: number | null;
+  readonly classesRemaining: number;
+  readonly classesTotal: number;
+  readonly version: number;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly upcomingClasses: StudentUpcomingClassesResult | null;
+  readonly classHistory: StudentClassHistory | null;
+};

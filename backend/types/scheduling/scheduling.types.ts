@@ -211,6 +211,8 @@ export type StatusTrackingRow = {
   executionState: ClassExecutionState;
   outcome: ClassOutcome;
   isFrozen: boolean;
+  meetingJoinUrl?: string | null;
+  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
 };
 
 export type UpcomingClassRow = {

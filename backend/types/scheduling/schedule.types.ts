@@ -1,5 +1,6 @@
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
   SupportContactReturnType,
   TeacherImportantNoteReturnType,
@@ -79,6 +80,8 @@ export type WeeklyScheduleClassReturnType = {
   subjectId?: string | null;
   subjectName?: string | null;
   classType?: ClassType | null;
+  meetingJoinUrl?: string | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
 };
 
 export type WeeklyScheduleGridReturnType = {
@@ -120,6 +123,8 @@ export type DailyScheduleListReturnType = {
   avatarUrl?: string | null;
   teacherTimezone?: IanaTimezone | null;
   studentTimezone?: IanaTimezone | null;
+  meetingJoinUrl?: string | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
 };
 
 export type AdminDashboardScheduleInputType = {
@@ -156,4 +161,6 @@ export type StatusTrackingScheduleRow = {
   executionState: ClassExecutionState;
   outcome: ClassOutcome;
   isFrozen: boolean;
+  meetingJoinUrl?: string | null;
+  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
 };

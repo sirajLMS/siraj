@@ -60,6 +60,7 @@ export type {
   InvoiceSelectType,
   ManualInvoiceResult,
   MarkInvoicePaidReturnType,
+  NextUnpaidInvoiceSummary,
   ParentBillingSummaryResult,
   PaymentInsertType,
   PaymentSelectType,

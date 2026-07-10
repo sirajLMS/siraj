@@ -178,6 +178,8 @@ export type TeacherAssignedClassReturnType = {
   durationMinutes: number;
   executionState: ClassExecutionState;
   outcome: ClassOutcome | null;
+  meetingJoinUrl?: string | null;
+  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
 };
 
 export type TeacherAssignedClassesResult = {

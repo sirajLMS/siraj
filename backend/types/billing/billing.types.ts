@@ -223,6 +223,7 @@ export type BillingCurrencyTotal = {
   readonly id: string;
   readonly currency: CurrencyCode;
   readonly amount: string;
+  readonly subjectUserId?: string | null;
 };
 
 export type AdminBillingSummaryResult = {
@@ -245,12 +246,22 @@ export type StudentCreditRow = {
   readonly status: import("@/backend/enum").StudentStatus;
 };
 
+export type NextUnpaidInvoiceSummary = {
+  readonly id: string;
+  readonly amount: string;
+  readonly currency: CurrencyCode;
+  readonly dueDate: string;
+  readonly studentName: string | null;
+};
+
 export type ParentBillingSummaryResult = {
   readonly id: string;
   readonly outstandingBalance: string;
   readonly paidThisTerm: string;
   readonly nextDueDate: string | null;
   readonly activeStudents: number;
+  readonly nextUnpaidInvoice: NextUnpaidInvoiceSummary | null;
+  readonly pendingPaymentCount: number;
   readonly outstandingByCurrency: readonly BillingCurrencyTotal[];
   readonly paidThisTermByCurrency: readonly BillingCurrencyTotal[];
 };

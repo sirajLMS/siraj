@@ -161,6 +161,8 @@ export type StudentHistorySession = {
   room: string | null;
   notes: string;
   dayOfMonth: number;
+  meetingJoinUrl?: string | null;
+  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
 };
 
 export type StudentClassHistory = {
@@ -177,6 +179,7 @@ export type StudentSessionDetail = {
   outcome: string | null;
   remarks: string | null;
   meetingJoinUrl: string | null;
+  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
   teacherName: string;
   scheduledStartAt: Date | string;
   scheduledEndAt: Date | string;

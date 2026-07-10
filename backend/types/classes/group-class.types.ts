@@ -42,6 +42,9 @@ export type GroupClassOnlineMeetingInfoReturnType = {
   platform: string;
   meetingId: string | null;
   joinUrl: string | null;
+  logoUrl?: string | null;
+  providerName?: import("@/backend/types/shared/localized-string.types").LocalizedString | null;
+  source?: string | null;
 };
 
 export type GroupClassCommunicationLogEntryReturnType = {
