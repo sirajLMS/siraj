@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { ParentProfileEditForm } from "./ParentProfileEditForm";
+import { ParentProfileEditForm } from "@/frontend/views/dashboard/profile/parent/ParentProfileEditForm";
 
 const ownParentData = {
   name: "Noor Abdullah",

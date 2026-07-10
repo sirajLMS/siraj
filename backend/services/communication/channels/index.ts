@@ -1,2 +1,2 @@
-export * from "./email.channel";
-export * from "./on-app.channel";
+export * from "@/backend/services/communication/channels/email.channel";
+export * from "@/backend/services/communication/channels/on-app.channel";

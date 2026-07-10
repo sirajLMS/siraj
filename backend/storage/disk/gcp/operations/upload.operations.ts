@@ -1,10 +1,10 @@
 import crypto from "node:crypto";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import type { GcpContext } from "@/backend/storage/disk/gcp/types";
+import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { STORAGE_CONFIG, StorageValidationError } from "../../storage.service.interface";
-import type { GcpContext } from "../types";
 
 /**
  * Prepares a signed URL for a direct client upload to GCP

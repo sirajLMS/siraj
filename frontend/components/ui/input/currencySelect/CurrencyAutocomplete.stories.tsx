@@ -1,6 +1,6 @@
-import { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react";
+import { useState } from "react";
 import { CurrencyAutocomplete } from "@/frontend/components/ui/input/currencySelect/CurrencyAutocomplete";
 import { type CurrencyOption, getCurrencyOptions } from "@/frontend/lib/currency";
 
@@ -8,22 +8,15 @@ function CurrencyAutocompleteStory({
   initialCurrencyCode,
   onChangeAction: _onChangeAction,
   ...props
-}: Readonly<
-  React.ComponentProps<typeof CurrencyAutocomplete> & { initialCurrencyCode?: string }
->) {
+}: Readonly<React.ComponentProps<typeof CurrencyAutocomplete> & { initialCurrencyCode?: string }>) {
   const options = getCurrencyOptions();
   const [currency, setCurrency] = useState<CurrencyOption | null>(() =>
-    initialCurrencyCode ? options.find(option => option.code === initialCurrencyCode) ?? null : null
+    initialCurrencyCode ? (options.find(option => option.code === initialCurrencyCode) ?? null) : null
   );
 
   return (
     <Box sx={{ width: 400, p: 2 }}>
-      <CurrencyAutocomplete
-        currency={currency}
-        onChangeAction={setCurrency}
-        fullWidth
-        {...props}
-      />
+      <CurrencyAutocomplete currency={currency} onChangeAction={setCurrency} fullWidth {...props} />
     </Box>
   );
 }

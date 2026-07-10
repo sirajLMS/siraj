@@ -10,8 +10,13 @@ import {
 import type { ReactNode } from "react";
 import type { RescheduleTrackingRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+import type {
+  MetricDefinition,
+  RawMetrics,
+  TrackingRow,
+  TrackingStatusLabelMap,
+} from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import type { MetricDefinition, RawMetrics, TrackingRow, TrackingStatusLabelMap } from "./tracking.types";
 
 export function getTrackingStatusLabel(
   status: LeaveRequestStatus | "",

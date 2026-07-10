@@ -6,8 +6,11 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { PaginationControls } from "@/frontend/components/ui";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
-import { AssignedStudentsCardList } from "./AssignedStudentsCardList";
-import { AssignedStudentsDataGrid, type AssignedStudentsRow } from "./AssignedStudentsDataGrid";
+import { AssignedStudentsCardList } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsCardList";
+import {
+  AssignedStudentsDataGrid,
+  type AssignedStudentsRow,
+} from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
 
 type AssignedStudentsResult = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
 type AssignedStudentsItem = NonNullable<NonNullable<AssignedStudentsResult>["rows"]>[number];

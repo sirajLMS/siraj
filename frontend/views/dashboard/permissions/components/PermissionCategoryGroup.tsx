@@ -4,7 +4,7 @@ import { Box, Checkbox, FormControlLabel, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { labelSx } from "@/frontend/components/ui/form";
 import type { Permission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PermissionRow } from "./PermissionRow";
+import { PermissionRow } from "@/frontend/views/dashboard/permissions/components/PermissionRow";
 
 const StyledCategoryContainer = styled(Box)(({ theme }) => ({
   border: `1px solid ${theme.palette.outlineVariant}`,

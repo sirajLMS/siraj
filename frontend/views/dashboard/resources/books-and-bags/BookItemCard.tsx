@@ -7,7 +7,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, AvailabilityStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { deleteBookMutationDocument } from "@/frontend/graphql/sharedDocuments/books-and-bags.documents";
-import type { BookItemCardProps, BooksAndBagsLabels } from "./booksAndBags.types";
+import type { BookItemCardProps, BooksAndBagsLabels } from "@/frontend/views/dashboard/resources/books-and-bags/booksAndBags.types";
 
 const statusLabelMap: Record<AvailabilityStatus, keyof BooksAndBagsLabels> = {
   [AvailabilityStatus.Available]: "statusAvailable",

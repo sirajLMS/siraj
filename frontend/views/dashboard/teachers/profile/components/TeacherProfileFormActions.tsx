@@ -3,7 +3,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 
 import { PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
-import type { TeacherProfileFormActionsProps } from "../types";
+import type { TeacherProfileFormActionsProps } from "@/frontend/views/dashboard/teachers/profile/types";
 
 export function TeacherProfileFormActions({
   isSaving,

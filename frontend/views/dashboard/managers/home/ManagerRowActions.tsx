@@ -22,7 +22,7 @@ import { PhoneInput } from "@/frontend/components/ui/input";
 import type { UpdateManagerProfileInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { updateManagerProfileMutationDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import { logger } from "@/frontend/utils/logger";
-import type { Manager } from "./types";
+import type { Manager } from "@/frontend/views/dashboard/managers/home/types";
 
 interface ManagerRowActionsProps {
   readonly manager: Manager;

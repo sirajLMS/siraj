@@ -15,7 +15,7 @@ import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
-export { resolveStudentTimezone } from "./shared";
+export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
 
 export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
   const queryDb = tx ?? db;

@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { ParentSuggestionsDesktopView } from "./ParentSuggestionsDesktopView";
-import { ParentSuggestionsMobileView } from "./ParentSuggestionsMobileView";
-import { suggestionFormSchema } from "./schemas/suggestionFormSchema";
-import type { ParentSuggestionsViewProps } from "./types/suggestionsView.types";
+import { ParentSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/ParentSuggestionsDesktopView";
+import { ParentSuggestionsMobileView } from "@/frontend/views/dashboard/suggestions/ParentSuggestionsMobileView";
+import { suggestionFormSchema } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
+import type { ParentSuggestionsViewProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 export function ParentSuggestionsView({
   labels,

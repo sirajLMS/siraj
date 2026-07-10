@@ -5,10 +5,10 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ComplaintCategory } from "@/frontend/graphql/generated/gql/graphql-types";
-import { ParentComplaintsDesktopView } from "./ParentComplaintsDesktopView";
-import { ParentComplaintsMobileView } from "./ParentComplaintsMobileView";
-import { complaintFormSchema } from "./schemas/complaintFormSchema";
-import type { ParentComplaintsViewProps } from "./types/complaintsViewTypes";
+import { ParentComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/ParentComplaintsDesktopView";
+import { ParentComplaintsMobileView } from "@/frontend/views/dashboard/complaints/ParentComplaintsMobileView";
+import { complaintFormSchema } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
+import type { ParentComplaintsViewProps } from "@/frontend/views/dashboard/complaints/types/complaintsViewTypes";
 
 export function ParentComplaintsView({
   labels,

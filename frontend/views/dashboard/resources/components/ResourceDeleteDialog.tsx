@@ -1,7 +1,7 @@
 "use client";
 
 import { BaseDeleteDialog } from "@/frontend/components/ui/dialog/BaseDeleteDialog";
-import type { ResourceDeleteDialogProps } from "../types/resourcesTypes";
+import type { ResourceDeleteDialogProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export function ResourceDeleteDialog({
   labels,

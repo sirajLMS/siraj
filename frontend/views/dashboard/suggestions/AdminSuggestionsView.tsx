@@ -1,9 +1,9 @@
 "use client";
 
 import { useMediaQuery, useTheme } from "@mui/material";
-import { AdminSuggestionsDesktopView } from "./AdminSuggestionsDesktopView";
-import { AdminSuggestionsMobileView } from "./AdminSuggestionsMobileView";
-import type { AdminSuggestionsViewProps } from "./types/suggestionsView.types";
+import { AdminSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/AdminSuggestionsDesktopView";
+import { AdminSuggestionsMobileView } from "@/frontend/views/dashboard/suggestions/AdminSuggestionsMobileView";
+import type { AdminSuggestionsViewProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 export function AdminSuggestionsView(props: Readonly<AdminSuggestionsViewProps>) {
   const theme = useTheme();

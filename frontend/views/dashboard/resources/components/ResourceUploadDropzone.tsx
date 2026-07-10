@@ -2,7 +2,7 @@
 
 import { CloudUploadOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import type { ResourceUploadDropzoneProps } from "../types/resourcesTypes";
+import type { ResourceUploadDropzoneProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export function ResourceUploadDropzone({
   labels,

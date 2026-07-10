@@ -3,7 +3,7 @@
 import { BookOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Card, CardActionArea, CardActions, CardContent, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { SubjectCardProps } from "../types";
+import type { SubjectCardProps } from "@/frontend/views/dashboard/subjects/home/types";
 
 export function SubjectCard({ subject, onEdit, onDelete, onClick, canManage }: Readonly<SubjectCardProps>) {
   const t = useTranslations("dashboard.subjects");

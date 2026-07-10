@@ -1,6 +1,6 @@
 import { Box, type Theme, Typography } from "@mui/material";
 
-import type { SectionHeaderProps } from "../types";
+import type { SectionHeaderProps } from "@/frontend/views/dashboard/teachers/profile/types";
 
 export function SectionHeader({ title, icon: Icon }: Readonly<SectionHeaderProps>) {
   return (

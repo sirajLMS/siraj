@@ -3,7 +3,7 @@
 import { ArticleOutlined, PictureAsPdfOutlined, SlideshowOutlined, TableChartOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { ResourceFileTypeIconProps } from "../types/resourcesTypes";
+import type { ResourceFileTypeIconProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 function renderIcon(fileType: ResourceFileTypeIconProps["fileType"]) {
   switch (fileType) {

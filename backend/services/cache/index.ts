@@ -14,8 +14,8 @@
  * ```
  */
 
-export { ApolloCacheAdapter } from "./ApolloCacheAdapter";
-export { cacheService } from "./CacheServiceFactory";
-export type { CacheProvider, ICacheService } from "./ICacheService";
-export { PostgresCacheAdapter } from "./PostgresCacheAdapter";
-export { RedisCacheAdapter } from "./RedisCacheAdapter";
+export { ApolloCacheAdapter } from "@/backend/services/cache/ApolloCacheAdapter";
+export { cacheService } from "@/backend/services/cache/CacheServiceFactory";
+export type { CacheProvider, ICacheService } from "@/backend/services/cache/ICacheService";
+export { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
+export { RedisCacheAdapter } from "@/backend/services/cache/RedisCacheAdapter";

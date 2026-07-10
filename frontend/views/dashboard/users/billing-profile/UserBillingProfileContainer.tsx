@@ -17,8 +17,8 @@ import { logger } from "@/frontend/utils/logger";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
-import type { UserBillingProfileContainerProps } from "./types/userBillingProfile.types";
-import { UserBillingProfileView } from "./UserBillingProfileView";
+import type { UserBillingProfileContainerProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
+import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/UserBillingProfileView";
 
 function formatCurrency(amount: string, currency: string): string {
   const numAmount = Number(amount);

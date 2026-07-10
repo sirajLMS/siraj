@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ParentComplaintsContainer } from "./ParentComplaintsContainer";
+import { ParentComplaintsContainer } from "@/frontend/views/dashboard/complaints/ParentComplaintsContainer";
 
 const meta: Meta<typeof ParentComplaintsContainer> = {
   title: "Views/dashboard/complaints/ParentComplaintsContainer",

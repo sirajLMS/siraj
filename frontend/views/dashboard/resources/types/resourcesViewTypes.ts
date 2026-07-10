@@ -1,5 +1,5 @@
 import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-import type { LearningResourceRow, ResourceFilterType, ResourceSortBy, ResourceUploadFormData } from "./resourcesTypes";
+import type { LearningResourceRow, ResourceFilterType, ResourceSortBy, ResourceUploadFormData } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export interface ResourcesViewProps {
   readonly labels: ResourcesLabels;

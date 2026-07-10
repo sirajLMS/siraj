@@ -7,7 +7,7 @@ import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/u
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
 import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";
-import type { UserBillingProfileMobileViewProps } from "./types/userBillingProfile.types";
+import type { UserBillingProfileMobileViewProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 
 const StyledEmptySubtitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,

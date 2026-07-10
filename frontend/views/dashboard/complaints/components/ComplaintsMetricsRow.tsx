@@ -4,9 +4,9 @@ import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
+import type { AdminComplaintsSummary } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
-import type { AdminComplaintsSummary } from "../types/complaints.types";
 
 const StyledMetricsContainer = styled(Box)(({ theme }) => ({
   display: "flex",

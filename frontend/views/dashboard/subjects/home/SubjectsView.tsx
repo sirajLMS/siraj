@@ -5,9 +5,9 @@ import { Box, Button, Grid, Tab, Tabs, Typography, useMediaQuery, useTheme } fro
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import { CategoriesSection } from "./components/CategoriesSection";
-import { SubjectCard } from "./components/SubjectCard";
-import type { SubjectsViewProps } from "./types";
+import { CategoriesSection } from "@/frontend/views/dashboard/subjects/home/components/CategoriesSection";
+import { SubjectCard } from "@/frontend/views/dashboard/subjects/home/components/SubjectCard";
+import type { SubjectsViewProps } from "@/frontend/views/dashboard/subjects/home/types";
 
 export function SubjectsView({
   categories,

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { StaffProfileView } from "@/frontend/views/dashboard/profile/staff/StaffProfileView";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
-import { StaffProfileView } from "./StaffProfileView";
 
 const staffProfile = {
   id: "user-staff-1",

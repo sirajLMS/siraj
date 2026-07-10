@@ -12,10 +12,13 @@ import { AppPermission, IanaTimezone } from "@/frontend/graphql/generated/gql/gr
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { logger } from "@/frontend/utils/logger";
+import { RescheduleView } from "@/frontend/views/dashboard/reschedule/home/RescheduleView";
+import {
+  type RescheduleFormData,
+  rescheduleSchema,
+} from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
+import { combineDateTime } from "@/frontend/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { useRouter } from "@/shared/i18n/routing";
-import { RescheduleView } from "./RescheduleView";
-import { type RescheduleFormData, rescheduleSchema } from "./schemas/rescheduleSchema";
-import { combineDateTime } from "./utils/rescheduleDateTime";
 
 export function RescheduleContainer() {
   const router = useRouter();

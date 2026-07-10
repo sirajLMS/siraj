@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StaffAdminEditFormData } from "../staffProfileFormTypes";
-import type { StaffProfileData } from "./staffProfileTypes";
+import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
+import type { StaffAdminEditFormData } from "@/frontend/views/dashboard/profile/staff/staffProfileFormTypes";
 
 type AccountSectionProps =
   | {

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef } from "react";
 import type { ProfileAudience, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { getVisibleProfileTabs } from "./profileTabs";
+import { getVisibleProfileTabs } from "@/frontend/views/dashboard/profile/core/profileTabs";
 
 export type ProfileTabNavProps = {
   readonly audience: ProfileAudience;

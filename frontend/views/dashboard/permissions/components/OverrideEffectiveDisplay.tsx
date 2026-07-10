@@ -3,7 +3,7 @@
 import { BlockOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { OverrideState } from "./OverridesTable";
+import type { OverrideState } from "@/frontend/views/dashboard/permissions/components/OverridesTable";
 
 const StyledEffectiveContainer = styled(Box)({
   display: "flex",

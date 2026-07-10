@@ -4,7 +4,7 @@ import { Box, CircularProgress, Table, TableBody, TableCell, TableContainer, Tab
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import { OverridesTableRow } from "./OverridesTableRow";
+import { OverridesTableRow } from "@/frontend/views/dashboard/permissions/components/OverridesTableRow";
 
 const StyledTableWrapper = styled(Box)({
   flex: 1,

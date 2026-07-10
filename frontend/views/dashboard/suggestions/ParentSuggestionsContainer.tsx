@@ -7,9 +7,9 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { submitSuggestionMutationDocument } from "@/frontend/graphql/sharedDocuments/suggestion.documents";
 import { useParentSuggestionsStore } from "@/frontend/stores/parentSuggestionsStore";
-import { ParentSuggestionsView } from "./ParentSuggestionsView";
-import type { SuggestionFormData } from "./schemas/suggestionFormSchema";
-import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
+import { ParentSuggestionsView } from "@/frontend/views/dashboard/suggestions/ParentSuggestionsView";
+import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
+import { buildSuggestionsLabels } from "@/frontend/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 
 export function ParentSuggestionsContainer() {
   const t = useTranslations("dashboard.suggestions");

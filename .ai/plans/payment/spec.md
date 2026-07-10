@@ -337,23 +337,32 @@ Replace scalar `paymentMethod` and inline banking fields:
 
 ## UI components
 
-Mirror [timezone spec](../timezone/spec.md) — shared components under `frontend/components/ui/`:
+Mirror [timezone spec](../timezone/spec.md) — but reuse existing `frontend/components/ui/**` primitives wherever they fit. Net-new code is restricted to (a) thin per-domain wrappers that mirror existing catalog/autocomplete patterns, (b) one `StatusBadge` category extension (~10 lines), and (c) per-catalog admin views that compose `AppDataGrid` + `LocalizedStringDisplay` + `BaseDeleteDialog` + `react-hook-form` dialogs.
 
-| Component | Path | Role |
-|-----------|------|------|
-| `PaymentMethodSelect` | `frontend/components/ui/input/PaymentMethodSelect.tsx` | Type + catalog picker |
-| `PaymentMethodDisplay` | `frontend/components/ui/display/PaymentMethodDisplay.tsx` | Read-only masked display |
-| `PaymentMethodTypeFields` | `frontend/components/ui/input/PaymentMethodTypeFields.tsx` | Dynamic fields by type |
-| `PaymentMethodDefaultsEditor` | `frontend/components/ui/input/PaymentMethodDefaultsEditor.tsx` | Payin/payout default toggles |
-| `PaymentMethodList` | `frontend/components/ui/display/PaymentMethodList.tsx` | List with default badges |
+See the plan's [Component reuse map](./plan.md#component-reuse-map) for the full propose→reuse table. The reference catalog-grid view is `frontend/views/dashboard/permissions/components/PermissionCatalogDataGrid.tsx` (`AppDataGrid` + `LocalizedStringDisplay` columns); the reference CRUD dialog + form-field pattern is `frontend/views/dashboard/subjects/home/components/{Create,Edit,Delete}SubjectDialog.tsx` + `__shared__/{LabeledTextField,EntityFormDialogActions,ActiveToggleField,CategorySelectField}.tsx`.
+
+| Component | Path | Role | Reuses |
+|-----------|------|------|--------|
+| `PaymentMethodSelect` | `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.tsx` | Type + catalog picker | `CurrencySelect` / `CurrencyAutocomplete` / `CurrencyOptionRow` pattern (searchable Autocomplete + option row + `allowedCodes`-style subset filter + popper plumbing) + `frontend/lib/payment-method.ts` (mirror `frontend/lib/currency.ts`) |
+| `PaymentMethodDisplay` | `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.tsx` | Read-only masked display | `LocalizedStringDisplay` (catalog name) + `CurrencyDisplay`/`CountryDisplay` + `PhoneDisplay` (MOBILE_WALLET) + `StatusBadge(category="paymentMethod")` |
+| `PaymentMethodTypeFields` | `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields.tsx` | Dynamic fields by type | `PaymentMethodTypeSelector` (mirror `GenderSelector` `ButtonGroup` over codegen enum) + `PhoneFormField` / `CurrencySelect` / `CountryAutocomplete` / `TagInput` / `LocalizedStringFormField` per type + `react-hook-form` `Controller` (mirror `PhoneFormField` + `LocalizedStringFormField`) |
+| `PaymentMethodDefaultsEditor` | `frontend/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditor.tsx` | Payin/payout default toggles + per-locale instructions | `LocalizedStringDrawer` (per-locale edit with Save/Cancel/autosave) + `CurrencySelect` (`allowedCodes`) + `FieldWrapper` + `FormSuccessSnackbar` |
+| `PaymentMethodList` | `frontend/components/ui/display/paymentMethod/PaymentMethodList.tsx` | List with default badges | `BaseCard` (header) + `AppDataGrid<PaymentMethodRow>` (column defs + row type + default-badge column — mirror `PermissionCatalogDataGrid`); no new list/grid primitive |
+
+**Existing primitives reused as-is (NOT duplicated):** `CurrencyAutocomplete`, `CurrencyOptionRow`, `CurrencySelect`, `CountryAutocomplete`, `CountryOptionRow`, `CountrySelect`, `GenderSelector` (template only), `TagInput`, `PhoneInput`, `PhoneFormField`, `PhoneCountryPicker`, `LocalizedStringInput`, `LocalizedStringDrawer`, `LocalizedStringFormField`, `LocaleAdornmentSwitch`, `EditableTypography`, `CatalogImageUpload` (also add to `input/index.ts` barrel — currently un-barreled), `LocalizedStringDisplay`, `CurrencyDisplay`, `CountryDisplay`, `PhoneDisplay`, `LanguageDisplay`, `TimezoneDisplay`, `BaseCard`, `MetricCard`, `AppDataGrid` (+ `AppDataGridNoRowsOverlay` / `AppDataGridLoadingOverlay`), `BaseDeleteDialog`, `ActionButtons`, `ActionIconLink`, `PageContainer`, `PageHeader`, `SectionPanel`, `HorizontalScrollRow`, `FieldWrapper`, `FormSuccessSnackbar`, `StoryBookPageContainer`, `ErrorState`, `LoadingState`.
+
+**Existing primitive extended (smallest possible delta):** `StatusBadge.tsx` — extend `StatusBadgeCategory` union with `"paymentMethod"`; add `case "paymentMethod":` in `resolveStatusPaletteKey` mapping `verified`/`unverified`/`active`/`inactive` to existing palette keys (~10 lines, self-contained, no theme token additions).
 
 **Admin catalog UI** (new views under `frontend/views/dashboard/admin/payment-catalogs/`):
 
-- `PaymentCatalogAdminContainer` — tabbed wallets / links / online accounts
-- `PaymentCatalogDataGrid` + edit dialog per catalog type
+- `PaymentCatalogAdminContainer` — mirror `frontend/views/dashboard/subjects/home/SubjectsContainer.tsx` (Apollo query + mutation hook + dialog state)
+- `PaymentCatalogAdminView` — `PageContainer` + `PageHeader` + MUI `Tabs` over the three per-catalog `*CatalogGrid` components
+- Per-catalog `*CatalogGrid` (×3) — thin `AppDataGrid<...>` wrappers mirroring `PermissionCatalogDataGrid.tsx`; columns: `LocalizedStringDisplay` (name) + `CountryDisplay` + `CurrencyDisplay` + `StatusBadge(category="paymentMethod", status="active"|"inactive")` + edit/delete row actions; `url_allowlist` renders as read-only `TagInput` chips; `identifier_kind` renders as `StatusBadge`
+- `CatalogEditDialog` — MUI `Dialog` + `react-hook-form` + `LocalizedStringFormField` (name/description/instructions) + `CurrencySelect`/`CountryAutocomplete` + `TagInput` (url allowlist) + `EntityFormDialogActions` (from `subjects/home/components/__shared__/`) + `CatalogImageUpload` (logo)
+- `CatalogDeleteDialog` — thin wrapper over `BaseDeleteDialog` mirroring `DeleteSubjectDialog.tsx`
 - Follow `AdminBillingContainer` / `PageContainer` patterns from [COMPONENT_PATTERNS.md](../../../frontend/COMPONENT_PATTERNS.md)
 
-Use shared components everywhere — no ad-hoc 2-option `Select` in views.
+Use shared components everywhere — no ad-hoc 2-option `Select` in views, and **no new top-level input/display primitives** where an existing one fits.
 
 ## Masking rules
 

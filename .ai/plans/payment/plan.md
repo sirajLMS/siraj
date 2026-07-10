@@ -25,13 +25,18 @@ flowchart TB
     GQLDocs["payment-method.documents.ts"]
     Codegen["graphql-types"]
     Lib["frontend/lib/payment-method.ts"]
-    Input["PaymentMethodSelect + TypeFields"]
-    Display["PaymentMethodDisplay + List"]
+    Select["PaymentMethodSelect → compose CurrencyAutocomplete + CurrencyOptionRow pattern"]
+    Defaults["PaymentMethodDefaultsEditor → compose LocalizedStringDrawer + CurrencySelect + TagInput"]
+    Display["PaymentMethodDisplay/List → compose BaseCard + LocalizedStringDisplay + StatusBadge + AppDataGrid"]
+    AdminGrid["PaymentCatalogAdmin → PageContainer + PageHeader + AppDataGrid + BaseDeleteDialog + EntityFormDialogActions"]
     Views["profiles + onboarding + admin catalogs"]
-    Pothos --> GQLDocs --> Codegen --> Lib --> Input
+    Pothos --> GQLDocs --> Codegen --> Lib --> Select
+    Lib --> Defaults
     Lib --> Display
-    Input --> Views
+    Select --> Views
+    Defaults --> Views
     Display --> Views
+    AdminGrid --> Views
   end
 ```
 
@@ -46,7 +51,7 @@ flowchart TB
 | 4 | Services (CRUD, defaults, masking, verify, billing wire-up) | service tests + `tsgo` |
 | 5 | Pothos + mutations + `generate:gqlSchema` + `codegen` | `test:graphql` |
 | 6 | Frontend GraphQL documents | codegen |
-| 7 | Shared UI components + i18n + Storybook | Vitest Storybook |
+| 7 | Shared UI components (composite of existing `components/ui`) + i18n + Storybook | Vitest Storybook |
 | 8 | Replace view usages + admin catalog UI | manual + component tests |
 | 9 | `bun quality-gate` | full gate |
 
@@ -229,6 +234,46 @@ Read before editing each path prefix:
 
 **Cross-cutting:** `@/` imports only; no `console.*`; MUI `sx`; Apollo from `@apollo/client/react`; **no deprecations** — delete legacy code outright; **every JSONB column** uses `.$type<T>()` + Zod on writes.
 
+## Component reuse map
+
+Phase 7 + 8 build payment-method UI as **compositions of existing `frontend/components/ui/**` primitives** — no new top-level primitives are invented where an existing one fits. The new code is restricted to (a) thin per-domain wrappers that mirror existing catalog/autocomplete/tree patterns, (b) one `StatusBadge` category extension (~10 lines), and (c) per-catalog admin views that mirror existing admin views that already compose `AppDataGrid` + `LocalizedStringDisplay` + `BaseDeleteDialog` + `react-hook-form` dialogs.
+
+### Plan-proposed component → existing primitive(s) to reuse
+
+| Plan-proposed (Phase 7/8) | Reused existing primitive(s) | Why this primitive | Net-new code |
+|---------------------------|--------------------------------|--------------------|--------------|
+| `PaymentMethodSelect` | `CurrencySelect.tsx` + `CurrencyAutocomplete.tsx` + `CurrencyOptionRow.tsx` + `currencyAutocompletePopper.ts` | Already demonstrates searchable Autocomplete + option row + `allowedCodes` subset filter + `listAttached`/`disablePortal` popper plumbing over a catalog. `frontend/lib/currency.ts` is the option-builder template. | `PaymentMethodSelect.tsx` (thin wrapper), `PaymentMethodAutocomplete.tsx`, `PaymentMethodOptionRow.tsx`, `paymentMethodAutocompletePopper.ts`, `frontend/lib/payment-method.ts` (catalog option builders) |
+| `PaymentMethodTypeFields` (method type picker) | `GenderSelector.tsx` | `ButtonGroup` over a small codegen enum with `allowEmpty` + `labels` override — exactly the shape of a `PaymentMethodType` picker. | `PaymentMethodTypeSelector.tsx` (mirror `GenderSelector` body, swap enum) |
+| `PaymentMethodTypeFields` (per-type fields) | `PhoneFormField.tsx` (phone + `react-hook-form` `Controller`), `CurrencySelect.tsx` / `CountryAutocomplete.tsx` (country/currency filter), `TagInput.tsx` (`url_allowlist`), `LocalizedStringFormField.tsx` (per-locale `instructions` / `name`) | Each field type already has a form-field wrapper. `PhoneCountryPicker` shows the composite (Autocomplete embedded inside a field). | `PaymentMethodTypeFields.tsx` — glue that switches on `PaymentMethodType` and renders the right existing field component per type |
+| `PaymentMethodDefaultsEditor` | `LocalizedStringDrawer.tsx` (per-locale multi-locale edit with Save/Cancel/autosave), `CurrencySelect.tsx` (`allowedCodes`), `FieldWrapper.tsx`, `FormSuccessSnackbar.tsx` | The drawer already solves "edit per-locale multi-field value with Save/Cancel and autosave"; `FormSuccessSnackbar` is the save toast. | `PaymentMethodDefaultsEditor.tsx` — composition glue; no new drawer/field/snackbar primitive |
+| `PaymentMethodDisplay` | `LocalizedStringDisplay.tsx` (catalog name), `CurrencyDisplay.tsx` / `CountryDisplay.tsx`, `PhoneDisplay.tsx` (MOBILE_WALLET phone), `StatusBadge` (with new `"paymentMethod"` category) | The display family already covers per-attribute masked rendering. | `PaymentMethodDisplay.tsx` — per-method masked card composing the above; `StatusBadge` extension (~10 lines) |
+| `PaymentMethodList` | `BaseCard.tsx` (header) + `AppDataGrid<R>` (rows + default-badge column + edit/delete row actions) | `AppDataGrid` already supports custom no-rows overlay (`AppDataGridNoRowsOverlay`), loading overlay (`AppDataGridLoadingOverlay`), column defs, row ID, pagination. `BaseCard` is the section header. | `PaymentMethodList.tsx` — column defs + row type only; no new list/grid primitive |
+| `PaymentCatalogAdminView` shell | `PageContainer.tsx` + `PageHeader.tsx` + MUI `Tabs` | `PageContainer` is the dashboard layout shell (per `frontend/AGENTS.md`: "Use `PageContainer` inside views — never add outer `p:`"); `PageHeader` is the title block. | `PaymentCatalogAdminView.tsx` — Tabs composition only |
+| Per-catalog `*CatalogGrid` (×3) | `AppDataGrid<R>` (rows + columns) + `LocalizedStringDisplay.tsx` (name column) + `CurrencyDisplay.tsx` / `CountryDisplay.tsx` + `StatusBadge.tsx` (active/inactive column) + `TagInput.tsx` (read-only `url_allowlist` chips) | `frontend/views/dashboard/permissions/components/PermissionCatalogDataGrid.tsx` is the canonical precedent — composes `AppDataGrid` + `LocalizedStringDisplay` for a catalog grid. | 3 thin files: column defs + row type + `emptyMessage` per catalog. No new grid primitive. |
+| `CatalogEditDialog` | MUI `Dialog` + `react-hook-form` + `LocalizedStringFormField.tsx` (name/description/instructions) + `CurrencySelect.tsx` / `CountryAutocomplete.tsx` + `TagInput.tsx` (url allowlist) + `EntityFormDialogActions` (from `frontend/views/dashboard/subjects/home/components/__shared__/`) + `CatalogImageUpload.tsx` (logo) | `frontend/views/dashboard/subjects/home/components/{Create,Edit}SubjectDialog.tsx` + `__shared__/{LabeledTextField,EntityFormDialogActions,ActiveToggleField,CategorySelectField}.tsx` is the full CRUD-dialog precedent (`react-hook-form` + Zod + permission-aware actions). | `CatalogEditDialog.tsx` — per-catalog field set only; actions footer + `Controller` pattern reused from subjects |
+| `CatalogDeleteDialog` | `BaseDeleteDialog.tsx` | The shared dialog already does confirmation + mutation. | `CatalogDeleteDialog.tsx` — thin wrapper mirroring `frontend/views/dashboard/subjects/home/components/DeleteSubjectDialog.tsx` |
+| `PaymentCatalogAdminContainer` | `frontend/views/dashboard/subjects/home/SubjectsContainer.tsx` (Apollo query + mutation hook + dialog state) | The subjects container already wires Apollo queries/mutations + dialog state + Storybook mock-store pattern. | `PaymentCatalogAdminContainer.tsx` — same shape, swap queries/mutations |
+| Catalog logo upload | `CatalogImageUpload.tsx` (currently NOT exported from `input/index.ts`) | Already supports file upload + URL fallback + `next/image` preview + max-size validation + error state. | Add export to `input/index.ts` (Phase 7) — no new upload component |
+
+### Canonical reference files (read before implementing each)
+
+| Reference | Demonstrates |
+|-----------|--------------|
+| `frontend/components/ui/input/currencySelect/CurrencyAutocomplete.tsx` | Searchable Autocomplete + option-row + `allowedCodes` filter + popper plumbing over a catalog |
+| `frontend/components/ui/input/currencySelect/CurrencySelect.tsx` | Thin wrapper over the autocomplete (the `PaymentMethodSelect` template) |
+| `frontend/lib/currency.ts` | Catalog option builders (`getCurrencyOptions`, `getCurrencyDisplayName`, `getCurrencySymbol`) — the `frontend/lib/payment-method.ts` template |
+| `frontend/components/ui/input/genderSelector/GenderSelector.tsx` | `ButtonGroup` over a small codegen enum — the `PaymentMethodTypeSelector` template |
+| `frontend/components/ui/input/phoneInput/PhoneFormField.tsx` | `react-hook-form` `Controller` wrap pattern — the per-type field form-field template |
+| `frontend/components/ui/input/localizedString/LocalizedStringFormField.tsx` | `react-hook-form` `Controller` for `LocalizedStringInput` — the per-locale field form-field template |
+| `frontend/components/ui/input/localizedString/LocalizedStringDrawer.tsx` | Per-locale drawer with Save/Cancel + autosave + mobile bottom-sheet |
+| `frontend/components/ui/input/catalogImageUpload/CatalogImageUpload.tsx` | File upload + URL fallback + preview (for catalog logos) |
+| `frontend/components/ui/display/localizedStringDisplay/LocalizedStringDisplay.tsx` | Resolved-string-only display for JSONB `LocalizedString` — the catalog-name cell template |
+| `frontend/components/ui/dataGrid/AppDataGrid.tsx` | Generic DataGrid with custom no-rows / loading overlays + server pagination |
+| `frontend/components/ui/badge/StatusBadge.tsx` | Status chip with per-category palette resolver — extend `StatusBadgeCategory` with `"paymentMethod"` (~10 lines) |
+| `frontend/views/dashboard/permissions/components/PermissionCatalogDataGrid.tsx` | Canonical catalog-grid view: `AppDataGrid` + `LocalizedStringDisplay` columns |
+| `frontend/views/dashboard/subjects/home/SubjectsContainer.tsx` + `SubjectsView.tsx` + `SubjectDialogs.tsx` | Canonical admin CRUD: Apollo queries/mutations + dialog state + view layout |
+| `frontend/views/dashboard/subjects/home/components/{Create,Edit}SubjectDialog.tsx` + `__shared__/{LabeledTextField,EntityFormDialogActions,ActiveToggleField,CategorySelectField}.tsx` | Canonical CRUD dialog: MUI `Dialog` + `react-hook-form` + `Controller` + shared footer |
+
 ## Rollback
 
 Early dev only: reset DB and revert schema branch. No production rollback path.
@@ -352,24 +397,40 @@ Grouped by phase. Paths are relative to repo root.
 | `frontend/graphql/sharedDocuments/profile.documents.test.ts` | **Update** |
 | `frontend/graphql/sharedDocuments/index.ts` | **Update** |
 
-### Phase 7 — UI components + i18n
+### Phase 7 — UI composables + i18n
+
+Existing `frontend/components/ui/**` primitives are **reused**, not duplicated. Net-new components are thin composables over `CurrencyAutocomplete` / `LocalizedStringInput` / `AppDataGrid` / `BaseCard` / `StatusBadge`. Reference patterns: `PermissionCatalogDataGrid.tsx` (`AppDataGrid` + `LocalizedStringDisplay`), `subjects/home/components/{Create,Edit,Delete}SubjectDialog.tsx` + `__shared__/{LabeledTextField,EntityFormDialogActions}.tsx` (CRUD dialog + `react-hook-form` `Controller`).
+
+See [Component reuse map](#component-reuse-map) below for the full reuse table.
 
 | File | Action |
 |------|--------|
-| `frontend/components/ui/input/PaymentMethodSelect.tsx` | **Create** |
-| `frontend/components/ui/input/PaymentMethodTypeFields.tsx` | **Create** |
-| `frontend/components/ui/input/PaymentMethodDefaultsEditor.tsx` | **Create** |
-| `frontend/components/ui/input/PaymentMethodSelect.stories.tsx` | **Create** |
-| `frontend/components/ui/display/PaymentMethodDisplay.tsx` | **Create** |
-| `frontend/components/ui/display/PaymentMethodList.tsx` | **Create** |
-| `frontend/components/ui/display/PaymentMethodDisplay.stories.tsx` | **Create** |
-| `frontend/components/ui/input/index.ts` | **Update** |
-| `frontend/components/ui/display/index.ts` | **Update** |
+| `frontend/lib/payment-method.ts` | **Create** — catalog option builders (mirror `frontend/lib/currency.ts`: `getCurrencyOptions`, `getCurrencyDisplayName`, `getCurrencySymbol`) |
+| `frontend/components/ui/input/paymentMethodSelect/index.ts` | **Create** — barrel |
+| `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.tsx` | **Create** — thin wrapper mirroring `CurrencySelect.tsx` (10-29) | 
+| `frontend/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete.tsx` | **Create** — mirror `CurrencyAutocomplete.tsx` (searchable Autocomplete + `allowedCodes`-style subset filter + popper plumbing) |
+| `frontend/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow.tsx` | **Create** — mirror `CurrencyOptionRow.tsx`; type icon + localized name + catalog slug |
+| `frontend/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper.ts` | **Create** — mirror `currencyAutocompletePopper.ts` |
+| `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.stories.tsx` | **Create** — mirror `CurrencySelect.stories.tsx` |
+| `frontend/components/ui/input/paymentMethodTypeFields/index.ts` | **Create** — barrel |
+| `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector.tsx` | **Create** — mirror `GenderSelector.tsx` (`ButtonGroup` over `PaymentMethodType` codegen enum with `allowEmpty` + `labels` override) |
+| `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields.tsx` | **Create** — per-type dynamic fields; composing `PhoneFormField` (MOBILE_WALLET phone), `CurrencySelect`/`CountryAutocomplete` (.catalog country/currency filter), `TagInput` (`url_allowlist`), `LocalizedStringFormField` (`instructions` / `name`), `react-hook-form` `Controller` (mirror `PhoneFormField` + `LocalizedStringFormField`) |
+| `frontend/components/ui/input/paymentMethodDefaultsEditor/index.ts` | **Create** — barrel |
+| `frontend/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditor.tsx` | **Create** — compose `LocalizedStringDrawer` (per-locale instructions), `CurrencySelect` (`allowedCodes`), `FieldWrapper`, `FormSuccessSnackbar` |
+| `frontend/components/ui/input/index.ts` | **Update** — export the three new folders; **add `export * from "@/frontend/components/ui/input/catalogImageUpload/CatalogImageUpload"`** (currently un-barreled, needed for catalog icons) |
+| `frontend/components/ui/display/paymentMethod/index.ts` | **Create** — barrel |
+| `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.tsx` | **Create** — compose `LocalizedStringDisplay` (catalog name) + `CurrencyDisplay` / `CountryDisplay` + `PhoneDisplay` (MOBILE_WALLET) + `StatusBadge(category="paymentMethod")` (per-method masked card — not a `LocalizedStringDisplay` duplicate) |
+| `frontend/components/ui/display/paymentMethod/PaymentMethodList.tsx` | **Create** — compose `BaseCard` + `AppDataGrid<PaymentMethodRow>` (mirror `PermissionCatalogDataGrid`); no new list primitive |
+| `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.stories.tsx` | **Create** |
+| `frontend/components/ui/display/index.ts` | **Update** — re-export `paymentMethod/` |
+| `frontend/components/ui/badge/StatusBadge.tsx` | **Update** — extend `StatusBadgeCategory` union with `"paymentMethod"`; add `case "paymentMethod":` in `resolveStatusPaletteKey` mapping `verified`/`unverified`/`active`/`inactive` to existing `confirmed`/`pending`/`active`/`cancelled` palette keys (~10 lines, self-contained) |
 | `shared/messages/types/ui/payment-method.ts` | **Create** |
 | `shared/messages/ar/ui/payment-method.ts` | **Create** |
 | `shared/messages/en.ts` | **Update** |
 | `shared/messages/types/ui/index.ts` | **Update** |
 | `shared/messages/ar/ui/index.ts` | **Update** |
+
+**Explicitly NOT created (reused as-is):** `CurrencyAutocomplete`, `CurrencyOptionRow`, `CurrencySelect`, `CountryAutocomplete`, `CountryOptionRow`, `CountrySelect`, `LanguageSelector`, `GenderSelector` (template only), `TimezoneSelect`, `TagInput`, `PhoneInput`, `PhoneFormField`, `PhoneCountryPicker`, `LocalizedStringInput`, `LocalizedStringDrawer`, `LocalizedStringFormField`, `LocaleAdornmentSwitch`, `EditableTypography`, `CatalogImageUpload`, `LocalizedStringDisplay`, `CurrencyDisplay`, `CountryDisplay`, `PhoneDisplay`, `LanguageDisplay`, `TimezoneDisplay`, `StatusBadge` (extended only — no new badge primitive), `BaseCard`, `MetricCard`, `AppDataGrid` (+ `AppDataGridNoRowsOverlay` / `AppDataGridLoadingOverlay`), `BaseDeleteDialog`, `ActionButtons`, `ActionIconLink`, `PageContainer`, `PageHeader`, `SectionPanel`, `HorizontalScrollRow`, `FieldWrapper`, `FormSuccessSnackbar`, `StoryBookPageContainer`, `ErrorState`, `LoadingState`.
 
 ### Phase 8 — View usages
 
@@ -416,11 +477,16 @@ Grouped by phase. Paths are relative to repo root.
 - `frontend/hooks/useCreateParentOnboarding.ts`
 - `frontend/types/shared.types.ts`
 
-**Admin catalog (new):**
+**Admin catalog (new — composed from existing primitives):**
 
-- `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer.tsx`
-- `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView.tsx`
-- `frontend/views/dashboard/admin/payment-catalogs/components/*`
+- `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer.tsx` — mirror `frontend/views/dashboard/subjects/home/SubjectsContainer.tsx` (Apollo query + mutation hook + dialog state)
+- `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView.tsx` — compose `PageContainer` + `PageHeader` + MUI `Tabs` over the three per-catalog `*CatalogGrid` components
+- `frontend/views/dashboard/admin/payment-catalogs/components/MobileWalletCatalogGrid.tsx` — thin `AppDataGrid<SupportedMobileWallet>` wrapper mirroring `PermissionCatalogDataGrid.tsx`; columns: `LocalizedStringDisplay` (name) + `CountryDisplay` + `CurrencyDisplay` + `StatusBadge(category="paymentMethod", status="active"|"inactive")` + edit/delete row actions
+- `frontend/views/dashboard/admin/payment-catalogs/components/PaymentLinkCatalogGrid.tsx` — same pattern; `url_allowlist` renders as read-only `TagInput` chips
+- `frontend/views/dashboard/admin/payment-catalogs/components/OnlineAccountCatalogGrid.tsx` — same pattern; `identifier_kind` renders as `StatusBadge`
+- `frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog.tsx` — compose MUI `Dialog` + `react-hook-form` + `LocalizedStringFormField` (name/description/instructions) + `CurrencySelect` / `CountryAutocomplete` + `TagInput` (url allowlist) + `EntityFormDialogActions` (lift from `subjects/home/components/__shared__/` or import per-catalog); reuse `CatalogImageUpload` for logo fields (now barrel-exported — see Phase 7)
+- `frontend/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog.tsx` — thin wrapper over `BaseDeleteDialog` mirroring `DeleteSubjectDialog.tsx`
+- `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdmin.stories.tsx` — mirror `SubjectsContainer.stories.tsx`
 
 **Stories/tests to update:**
 

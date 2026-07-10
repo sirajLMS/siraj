@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import type { ResultOf, DocumentTypeDecoration, TypedDocumentNode } from "@graphql-typed-document-node/core";
 import type { FragmentDefinitionNode } from "graphql";
-import type { Incremental } from "./graphql";
+import type { Incremental } from "@/frontend/graphql/generated/gql/graphql";
 
 export type FragmentType<TDocumentType extends DocumentTypeDecoration<any, any>> =
   TDocumentType extends DocumentTypeDecoration<infer TType, any>

@@ -2,11 +2,11 @@
 
 import { Box } from "@mui/material";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { SuggestionsCardList } from "./components/SuggestionsCardList";
-import { SuggestionsMetricsRow } from "./components/SuggestionsMetricsRow";
-import { SuggestionsSearchBar } from "./components/SuggestionsSearchBar";
-import { SuggestionsTabBar } from "./components/SuggestionsTabBar";
-import type { AdminSuggestionsViewProps } from "./types/suggestionsView.types";
+import { SuggestionsCardList } from "@/frontend/views/dashboard/suggestions/components/SuggestionsCardList";
+import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
+import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";
+import { SuggestionsTabBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsTabBar";
+import type { AdminSuggestionsViewProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 export function AdminSuggestionsMobileView({
   labels,

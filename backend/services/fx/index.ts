@@ -1,5 +1,9 @@
-export * from "./fx-ingestion.service";
-export * from "./fx-rate-limit.service";
-export * from "./fx-rate-query.service";
-export { fxRateProvider, getFxRateProvider, resetFxRateProvider } from "./providers/FxRateProviderFactory";
-export type { IFxRateProvider } from "./providers/IFxRateProvider";
+export * from "@/backend/services/fx/fx-ingestion.service";
+export * from "@/backend/services/fx/fx-rate-limit.service";
+export * from "@/backend/services/fx/fx-rate-query.service";
+export {
+  fxRateProvider,
+  getFxRateProvider,
+  resetFxRateProvider,
+} from "@/backend/services/fx/providers/FxRateProviderFactory";
+export type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";

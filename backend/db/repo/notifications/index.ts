@@ -1,2 +1,2 @@
-export { NotificationRepository } from "./notification.repository";
-export { NotificationPreferencesRepository } from "./notification-preferences.repository";
+export { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
+export { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";

@@ -4,9 +4,9 @@ import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui";
+import { UpdatedSessionsCardList } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
+import { UpdatedSessionsDataGrid } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsDataGrid";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
-import { UpdatedSessionsCardList } from "./UpdatedSessionsCardList";
-import { UpdatedSessionsDataGrid } from "./UpdatedSessionsDataGrid";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];

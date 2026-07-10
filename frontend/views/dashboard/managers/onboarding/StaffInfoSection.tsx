@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { OnboardingIdentityFields } from "@/frontend/views/dashboard/components/onboarding/OnboardingIdentityFields";
-import type { ManagerOnboardingFormData } from "./schemas/managerOnboardingSchema";
+import type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 
 interface Props {
   readonly register: UseFormRegister<ManagerOnboardingFormData>;

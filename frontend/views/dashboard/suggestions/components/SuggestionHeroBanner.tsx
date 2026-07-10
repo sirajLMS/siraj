@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { SuggestionHeroBannerProps } from "../types/suggestionsView.types";
+import type { SuggestionHeroBannerProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 export function SuggestionHeroBanner({ labels, variant }: Readonly<SuggestionHeroBannerProps>) {
   const isMobile = variant === "mobile";

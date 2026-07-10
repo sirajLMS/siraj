@@ -7,10 +7,14 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AccountSection } from "./sections/AccountSection";
-import { ContactSection } from "./sections/ContactSection";
-import type { StaffProfileData } from "./sections/staffProfileTypes";
-import { type StaffAdminEditFormData, staffAdminEditSchema, staffOwnEditSchema } from "./staffProfileFormTypes";
+import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
+import { ContactSection } from "@/frontend/views/dashboard/profile/staff/sections/ContactSection";
+import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
+import {
+  type StaffAdminEditFormData,
+  staffAdminEditSchema,
+  staffOwnEditSchema,
+} from "@/frontend/views/dashboard/profile/staff/staffProfileFormTypes";
 
 export function StaffProfileEditForm({
   staffData,

@@ -5,8 +5,8 @@ import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { BaseCard, PaginationControls, PhoneDisplay, StatusBadge } from "@/frontend/components/ui";
-import { ManagerRowActions } from "./ManagerRowActions";
-import type { Manager } from "./types";
+import { ManagerRowActions } from "@/frontend/views/dashboard/managers/home/ManagerRowActions";
+import type { Manager } from "@/frontend/views/dashboard/managers/home/types";
 
 const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),

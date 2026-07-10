@@ -1,4 +1,4 @@
-import type { ResourceFileType } from "../types/resourcesTypes";
+import type { ResourceFileType } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 const EXTENSION_MAP: Record<string, ResourceFileType> = {
   pdf: "pdf",

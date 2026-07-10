@@ -1,14 +1,14 @@
 "use client";
 
 import { useSubjectManagementStore } from "@/frontend/stores/subjectManagementStore";
-import type { CategoryItem, SubjectItem } from "../types";
-import { useSubjectMutations } from "../useSubjectMutations";
-import { CreateCategoryDialog } from "./CreateCategoryDialog";
-import { CreateSubjectDialog } from "./CreateSubjectDialog";
-import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
-import { DeleteSubjectDialog } from "./DeleteSubjectDialog";
-import { EditCategoryDialog } from "./EditCategoryDialog";
-import { EditSubjectDialog } from "./EditSubjectDialog";
+import { CreateCategoryDialog } from "@/frontend/views/dashboard/subjects/home/components/CreateCategoryDialog";
+import { CreateSubjectDialog } from "@/frontend/views/dashboard/subjects/home/components/CreateSubjectDialog";
+import { DeleteCategoryDialog } from "@/frontend/views/dashboard/subjects/home/components/DeleteCategoryDialog";
+import { DeleteSubjectDialog } from "@/frontend/views/dashboard/subjects/home/components/DeleteSubjectDialog";
+import { EditCategoryDialog } from "@/frontend/views/dashboard/subjects/home/components/EditCategoryDialog";
+import { EditSubjectDialog } from "@/frontend/views/dashboard/subjects/home/components/EditSubjectDialog";
+import type { CategoryItem, SubjectItem } from "@/frontend/views/dashboard/subjects/home/types";
+import { useSubjectMutations } from "@/frontend/views/dashboard/subjects/home/useSubjectMutations";
 
 interface SubjectDialogsProps {
   categories: readonly CategoryItem[];

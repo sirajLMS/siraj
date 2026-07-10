@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { BaseAvatar } from "./BaseAvatar";
+import { BaseAvatar } from "@/frontend/components/ui/avatar/BaseAvatar";
 
 const meta: Meta<typeof BaseAvatar> = {
   title: "UI/Avatar/BaseAvatar",

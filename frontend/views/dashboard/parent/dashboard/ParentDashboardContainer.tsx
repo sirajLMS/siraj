@@ -10,13 +10,13 @@ import {
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ParentDashboardView } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
-import { useRouter } from "@/shared/i18n/routing";
 import type {
   ParentDashboardMetrics,
   ParentScheduleRow,
   StudentProgressItem,
   WorkshopPromo,
-} from "./types/parentDashboardTypes";
+} from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import { useRouter } from "@/shared/i18n/routing";
 
 function mapExecutionStateToLiveClassStatus(
   executionState: string,

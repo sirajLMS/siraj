@@ -2,10 +2,14 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
-import { createMockAdminDecorator } from "../components/createMockAdminDecorator";
-import { AdminComplaintsDesktopView } from "./AdminComplaintsDesktopView";
-import type { AdminComplaintRow, AdminComplaintsSummary, ComplaintTab } from "./types/complaints.types";
-import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
+import { AdminComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/AdminComplaintsDesktopView";
+import type {
+  AdminComplaintRow,
+  AdminComplaintsSummary,
+  ComplaintTab,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
+import { buildComplaintsLabels } from "@/frontend/views/dashboard/complaints/utils/buildComplaintsLabels";
+import { createMockAdminDecorator } from "@/frontend/views/dashboard/components/createMockAdminDecorator";
 
 const MOCK_ADMIN_COMPLAINT_ROWS: readonly AdminComplaintRow[] = [
   {

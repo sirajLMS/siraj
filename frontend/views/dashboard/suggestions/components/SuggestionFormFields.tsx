@@ -3,7 +3,7 @@
 import { DescriptionOutlined, PersonOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
-import type { SuggestionFormFieldsProps } from "../types/suggestionsView.types";
+import type { SuggestionFormFieldsProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 function FieldLabel({ children }: Readonly<{ children: string }>) {
   return (

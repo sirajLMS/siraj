@@ -2,7 +2,7 @@
 
 import { VisibilityOffOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import type { ResourceGovernancePanelProps } from "../types/resourcesTypes";
+import type { ResourceGovernancePanelProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export function ResourceGovernancePanel({ labels }: Readonly<ResourceGovernancePanelProps>) {
   return (

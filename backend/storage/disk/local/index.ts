@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import { getDetectedServerlessEnv } from "@/backend/lib/runtime";
 import { getLocalStorageBasePath } from "@/backend/lib/storage/local-storage-path";
-import type { StorageService } from "../storage.service.interface";
-import { LocalAdapter } from "./adapter";
+import { LocalAdapter } from "@/backend/storage/disk/local/adapter";
+import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
 
 /**
  * Validates that local storage is not used in serverless environments

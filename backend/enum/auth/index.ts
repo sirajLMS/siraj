@@ -1,1 +1,1 @@
-export * from "./auth.enum";
+export * from "@/backend/enum/auth/auth.enum";

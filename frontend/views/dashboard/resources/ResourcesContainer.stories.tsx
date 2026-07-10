@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { ResourcesView } from "./ResourcesView";
-import type { ResourceFilterType, ResourceSortBy } from "./types/resourcesTypes";
+import { ResourcesView } from "@/frontend/views/dashboard/resources/ResourcesView";
+import type { ResourceFilterType, ResourceSortBy } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 const mockLabels = {
   pageTitle: "Resource Library",

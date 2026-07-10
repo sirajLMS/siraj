@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
 import { AccountStatus, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import type {
+  TeacherAdminData,
+  TeacherOwnData,
+} from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { TeacherProfileView } from "@/frontend/views/dashboard/profile/teacher/TeacherProfileView";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
-import type { TeacherAdminData, TeacherOwnData } from "./sections/teacherProfileTypes";
-import { TeacherProfileView } from "./TeacherProfileView";
 
 const teacherOwnProfile: TeacherOwnData = {
   id: "teacher-own-1",

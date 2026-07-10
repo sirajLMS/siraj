@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react";
 import { PaginationControls } from "@/frontend/components/ui/filter/PaginationControls";
 
 const meta: Meta<typeof PaginationControls> = {

@@ -1,6 +1,6 @@
-import { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react";
+import { useState } from "react";
 import { CountryAutocomplete } from "@/frontend/components/ui/input/countrySelect/CountryAutocomplete";
 import { type CountryType, countries } from "@/frontend/lib/locale";
 
@@ -8,21 +8,14 @@ function CountryAutocompleteStory({
   initialCountryCode,
   onChangeAction: _onChangeAction,
   ...props
-}: Readonly<
-  React.ComponentProps<typeof CountryAutocomplete> & { initialCountryCode?: string }
->) {
+}: Readonly<React.ComponentProps<typeof CountryAutocomplete> & { initialCountryCode?: string }>) {
   const [country, setCountry] = useState<CountryType | undefined>(() =>
     initialCountryCode ? countries.find(entry => entry.code === initialCountryCode) : undefined
   );
 
   return (
     <Box sx={{ width: 400, p: 2 }}>
-      <CountryAutocomplete
-        country={country}
-        onChangeAction={setCountry}
-        fullWidth
-        {...props}
-      />
+      <CountryAutocomplete country={country} onChangeAction={setCountry} fullWidth {...props} />
     </Box>
   );
 }

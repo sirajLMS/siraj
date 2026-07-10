@@ -1,4 +1,4 @@
-import type { CommonLabels } from "../../types/common";
+import type { CommonLabels } from "@/shared/messages/types/common";
 
 export const common: CommonLabels = {
   title: "سراج",

@@ -8,10 +8,10 @@ import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/u
 import { PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
 import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { TeacherCardList } from "@/frontend/views/dashboard/teachers/home/components/TeacherCardList";
+import { TeacherDataGrid } from "@/frontend/views/dashboard/teachers/home/components/TeacherDataGrid";
+import { TeacherMetricsRow } from "@/frontend/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { Link } from "@/shared/i18n/routing";
-import { TeacherCardList } from "./components/TeacherCardList";
-import { TeacherDataGrid } from "./components/TeacherDataGrid";
-import { TeacherMetricsRow } from "./components/TeacherMetricsRow";
 
 interface TeachersViewProps {
   readonly metrics: TeacherDirectoryMetrics | null | undefined;

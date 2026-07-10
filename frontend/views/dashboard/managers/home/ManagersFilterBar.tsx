@@ -1,7 +1,7 @@
 import { Box, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import type { ManagerRoleFilter, ManagerStatusFilter } from "./types";
+import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/views/dashboard/managers/home/types";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency

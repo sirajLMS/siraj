@@ -4,8 +4,8 @@ import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ResourceLibraryCardProps } from "../types/resourcesTypes";
-import { ResourceFileTypeIcon } from "./ResourceFileTypeIcon";
+import type { ResourceLibraryCardProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
+import { ResourceFileTypeIcon } from "@/frontend/views/dashboard/resources/components/ResourceFileTypeIcon";
 
 export function ResourceLibraryCard({
   resource,

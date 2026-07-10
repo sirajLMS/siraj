@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Grid, Typography } from "@mui/material";
-import { BookItemCard } from "./BookItemCard";
-import type { BooksAndBagsGridProps } from "./booksAndBags.types";
+import { BookItemCard } from "@/frontend/views/dashboard/resources/books-and-bags/BookItemCard";
+import type { BooksAndBagsGridProps } from "@/frontend/views/dashboard/resources/books-and-bags/booksAndBags.types";
 
 export function BooksAndBagsGrid({ books, labels, onDelete }: Readonly<BooksAndBagsGridProps>) {
   if (books.length === 0) {

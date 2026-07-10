@@ -5,11 +5,11 @@ import { Box, MenuItem, Select, type SelectChangeEvent, useMediaQuery, useTheme 
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { ExportButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import type { LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { RescheduleTrackingCardList } from "./RescheduleTrackingCardList";
-import { RescheduleTrackingDataGrid } from "./RescheduleTrackingDataGrid";
-import { getTrackingStatusLabel } from "./tracking.helpers";
-import type { RescheduleTrackingViewProps } from "./tracking.types";
-import { STATUS_FILTER_OPTIONS } from "./tracking.types";
+import { RescheduleTrackingCardList } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingCardList";
+import { RescheduleTrackingDataGrid } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingDataGrid";
+import { getTrackingStatusLabel } from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
+import type { RescheduleTrackingViewProps } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
+import { STATUS_FILTER_OPTIONS } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
 
 export function RescheduleTrackingView({
   metrics,

@@ -2,7 +2,7 @@
 
 import { Button, ButtonGroup } from "@mui/material";
 import { alpha, styled, type Theme } from "@mui/material/styles";
-import type { OverrideState } from "./OverridesTable";
+import type { OverrideState } from "@/frontend/views/dashboard/permissions/components/OverridesTable";
 
 type OverrideColorVariant = "inherit" | "allow" | "deny";
 

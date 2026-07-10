@@ -12,10 +12,13 @@ import {
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
-import { ClassDetailsHeader } from "./ClassDetailsHeader";
-import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
-import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
+import { ClassDetailsAdminView } from "@/frontend/views/dashboard/classes/details/admin/ClassDetailsAdminView";
+import { ClassDetailsHeader } from "@/frontend/views/dashboard/classes/details/ClassDetailsHeader";
+import { ClassDetailsTeacherView } from "@/frontend/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
+import {
+  useAdminViewLabels,
+  useTeacherViewLabels,
+} from "@/frontend/views/dashboard/classes/details/useClassDetailsLabels";
 
 interface MockClassDetailsState {
   instance: ClassInstanceDetail;

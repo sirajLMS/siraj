@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
-import { RescheduleView } from "./RescheduleView";
-import { type RescheduleFormData, rescheduleSchema } from "./schemas/rescheduleSchema";
+import { RescheduleView } from "@/frontend/views/dashboard/reschedule/home/RescheduleView";
+import {
+  type RescheduleFormData,
+  rescheduleSchema,
+} from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 
 useRescheduleStore.setState({
   session: {

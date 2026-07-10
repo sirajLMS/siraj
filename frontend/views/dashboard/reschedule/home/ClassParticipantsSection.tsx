@@ -3,7 +3,7 @@
 import { PersonOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { RescheduleSession } from "./types";
+import type { RescheduleSession } from "@/frontend/views/dashboard/reschedule/home/types";
 
 interface Props {
   readonly session: RescheduleSession;

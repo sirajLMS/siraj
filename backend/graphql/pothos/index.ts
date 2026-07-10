@@ -4,17 +4,17 @@
 // `import * as Pothos from "@/backend/graphql/pothos"` (from query/mutation)
 // continue to resolve every Pothos object.
 
-export * from "./auth";
-export * from "./billing";
-export * from "./books";
-export * from "./classes";
-export * from "./complaints";
-export * from "./notifications";
-export * from "./parents";
-export * from "./permissions";
-export * from "./profile";
-export * from "./scheduling";
-export * from "./shared";
-export * from "./storage";
-export * from "./students";
-export * from "./teachers";
+export * from "@/backend/graphql/pothos/auth";
+export * from "@/backend/graphql/pothos/billing";
+export * from "@/backend/graphql/pothos/books";
+export * from "@/backend/graphql/pothos/classes";
+export * from "@/backend/graphql/pothos/complaints";
+export * from "@/backend/graphql/pothos/notifications";
+export * from "@/backend/graphql/pothos/parents";
+export * from "@/backend/graphql/pothos/permissions";
+export * from "@/backend/graphql/pothos/profile";
+export * from "@/backend/graphql/pothos/scheduling";
+export * from "@/backend/graphql/pothos/shared";
+export * from "@/backend/graphql/pothos/storage";
+export * from "@/backend/graphql/pothos/students";
+export * from "@/backend/graphql/pothos/teachers";

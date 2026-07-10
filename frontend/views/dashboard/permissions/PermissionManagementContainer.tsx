@@ -1,8 +1,8 @@
 "use client";
 
 import { usePermissionManagementStore } from "@/frontend/stores/permissionManagementStore";
-import { PermissionManagementView } from "./PermissionManagementView";
-import { usePermissionManagementData } from "./usePermissionManagementData";
+import { PermissionManagementView } from "@/frontend/views/dashboard/permissions/PermissionManagementView";
+import { usePermissionManagementData } from "@/frontend/views/dashboard/permissions/usePermissionManagementData";
 
 export function PermissionManagementContainer() {
   const store = usePermissionManagementStore();

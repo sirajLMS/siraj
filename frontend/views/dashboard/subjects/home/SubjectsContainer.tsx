@@ -9,10 +9,10 @@ import { classCategoriesQueryDocument } from "@/frontend/graphql/sharedDocuments
 import { classSubjectsQueryDocument } from "@/frontend/graphql/sharedDocuments/class-subject.documents";
 import { useSubjectManagementStore } from "@/frontend/stores/subjectManagementStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { SubjectDialogs } from "@/frontend/views/dashboard/subjects/home/components/SubjectDialogs";
+import { SubjectsView } from "@/frontend/views/dashboard/subjects/home/SubjectsView";
+import type { CategoryItem, SubjectItem } from "@/frontend/views/dashboard/subjects/home/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { SubjectDialogs } from "./components/SubjectDialogs";
-import { SubjectsView } from "./SubjectsView";
-import type { CategoryItem, SubjectItem } from "./types";
 
 const SUBJECT_PERMS = [AppPermission.SubjectsCreate, AppPermission.SubjectsUpdate, AppPermission.SubjectsDelete];
 const CATEGORY_PERMS = [AppPermission.CategoriesCreate, AppPermission.CategoriesUpdate, AppPermission.CategoriesDelete];

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { FxSyncRepository } from "@/backend/db/repo";
 import { fxSyncRuns } from "@/backend/db/schema";
+import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { FxProvider, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
 
@@ -61,7 +61,8 @@ describe("FxSyncRepository — createSyncRun", () => {
 
   test("stores triggeredByUserId when provided", async () => {
     await runInRollback(async tx => {
-      const userId = randomUUID();
+      const user = await createTestUser(tx);
+      const userId = user.id;
       const row = await FxSyncRepository.createSyncRun(
         {
           provider: FxProvider.Fixer,

@@ -1,11 +1,11 @@
 "use client";
 
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { ComplaintQueueCardList } from "./components/ComplaintQueueCardList";
-import { ComplaintsMetricsRow } from "./components/ComplaintsMetricsRow";
-import { ComplaintsSearchBar } from "./components/ComplaintsSearchBar";
-import { ComplaintsTabBar } from "./components/ComplaintsTabBar";
-import type { AdminComplaintsViewProps } from "./types/complaintsViewTypes";
+import { ComplaintQueueCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintQueueCardList";
+import { ComplaintsMetricsRow } from "@/frontend/views/dashboard/complaints/components/ComplaintsMetricsRow";
+import { ComplaintsSearchBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsSearchBar";
+import { ComplaintsTabBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsTabBar";
+import type { AdminComplaintsViewProps } from "@/frontend/views/dashboard/complaints/types/complaintsViewTypes";
 
 export function AdminComplaintsDesktopView({
   labels,

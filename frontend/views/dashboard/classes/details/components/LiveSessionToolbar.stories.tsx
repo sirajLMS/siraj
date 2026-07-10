@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { LiveSessionToolbar } from "./LiveSessionToolbar";
+import { LiveSessionToolbar } from "@/frontend/views/dashboard/classes/details/components/LiveSessionToolbar";
 
 const meta: Meta<typeof LiveSessionToolbar> = {
   title: "Dashboard/Classes/LiveSessionToolbar",

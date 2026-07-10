@@ -1,2 +1,2 @@
-export * from "./book.types";
-export * from "./report.types";
+export * from "@/backend/types/books/book.types";
+export * from "@/backend/types/books/report.types";

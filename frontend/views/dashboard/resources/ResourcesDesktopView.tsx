@@ -2,12 +2,12 @@
 
 import { Grid } from "@mui/material";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
-import { ResourceDeleteDialog } from "./components/ResourceDeleteDialog";
-import { ResourceGovernancePanel } from "./components/ResourceGovernancePanel";
-import { ResourceLibraryGrid } from "./components/ResourceLibraryGrid";
-import { ResourceUploadForm } from "./components/ResourceUploadForm";
-import { ResourceUploadGuidelines } from "./components/ResourceUploadGuidelines";
-import type { ResourcesLayoutViewProps } from "./types/resourcesViewTypes";
+import { ResourceDeleteDialog } from "@/frontend/views/dashboard/resources/components/ResourceDeleteDialog";
+import { ResourceGovernancePanel } from "@/frontend/views/dashboard/resources/components/ResourceGovernancePanel";
+import { ResourceLibraryGrid } from "@/frontend/views/dashboard/resources/components/ResourceLibraryGrid";
+import { ResourceUploadForm } from "@/frontend/views/dashboard/resources/components/ResourceUploadForm";
+import { ResourceUploadGuidelines } from "@/frontend/views/dashboard/resources/components/ResourceUploadGuidelines";
+import type { ResourcesLayoutViewProps } from "@/frontend/views/dashboard/resources/types/resourcesViewTypes";
 
 export function ResourcesDesktopView({
   labels,

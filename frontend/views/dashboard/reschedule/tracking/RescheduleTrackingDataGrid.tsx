@@ -9,8 +9,14 @@ import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/c
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import { getTrackingStatusIcon, getTrackingStatusLabel } from "./tracking.helpers";
-import type { RescheduleTrackingDataGridProps, TrackingRow } from "./tracking.types";
+import {
+  getTrackingStatusIcon,
+  getTrackingStatusLabel,
+} from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
+import type {
+  RescheduleTrackingDataGridProps,
+  TrackingRow,
+} from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
 
 export function RescheduleTrackingDataGrid({
   rows,

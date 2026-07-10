@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { LocalizedString } from "@/frontend/types/localized-string.types";
-import { useGroupMutationActions } from "./useGroupMutationActions";
-import { useGroupPermissionFilters } from "./useGroupPermissionFilters";
+import { useGroupMutationActions } from "@/frontend/views/dashboard/permissions/components/useGroupMutationActions";
+import { useGroupPermissionFilters } from "@/frontend/views/dashboard/permissions/components/useGroupPermissionFilters";
 
 export type SubTabKey = "current" | "add" | "users";
 

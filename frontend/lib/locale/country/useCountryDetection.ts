@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CountryDetectionResult } from "./types";
+import type { CountryDetectionResult } from "@/frontend/lib/locale/country/types";
 
 const MAX_REQUESTS_PER_DAY = 5;
 

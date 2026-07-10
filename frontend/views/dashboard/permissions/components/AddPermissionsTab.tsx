@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import type { Permission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AddPermissionBulkBar } from "./AddPermissionBulkBar";
-import { AddPermissionFilterBar } from "./AddPermissionFilterBar";
+import { AddPermissionBulkBar } from "@/frontend/views/dashboard/permissions/components/AddPermissionBulkBar";
+import { AddPermissionFilterBar } from "@/frontend/views/dashboard/permissions/components/AddPermissionFilterBar";
 
 const StyledTabContainer = styled(Box)({
   display: "flex",

@@ -3,11 +3,11 @@
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { ComplaintQueueCardList } from "./components/ComplaintQueueCardList";
-import { ComplaintsMetricsRow } from "./components/ComplaintsMetricsRow";
-import { ComplaintsSearchBar } from "./components/ComplaintsSearchBar";
-import { ComplaintsTabBar } from "./components/ComplaintsTabBar";
-import type { AdminComplaintsViewProps } from "./types/complaintsViewTypes";
+import { ComplaintQueueCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintQueueCardList";
+import { ComplaintsMetricsRow } from "@/frontend/views/dashboard/complaints/components/ComplaintsMetricsRow";
+import { ComplaintsSearchBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsSearchBar";
+import { ComplaintsTabBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsTabBar";
+import type { AdminComplaintsViewProps } from "@/frontend/views/dashboard/complaints/types/complaintsViewTypes";
 
 const StyledMobileSearchBox = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(2),

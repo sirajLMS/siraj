@@ -1,2 +1,11 @@
-export { emailChannel, getEmailChannel, resetEmailChannel } from "./EmailChannelFactory";
-export type { EmailPayload, EmailProvider, EmailSendResult, IEmailChannel } from "./IEmailChannel";
+export {
+  emailChannel,
+  getEmailChannel,
+  resetEmailChannel,
+} from "@/backend/services/communication/channels/email/EmailChannelFactory";
+export type {
+  EmailPayload,
+  EmailProvider,
+  EmailSendResult,
+  IEmailChannel,
+} from "@/backend/services/communication/channels/email/IEmailChannel";

@@ -25,9 +25,12 @@ import {
 import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { AdminComplaintsView } from "./AdminComplaintsView";
-import type { AdminComplaintRow, AdminComplaintsSummary } from "./types/complaints.types";
-import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
+import { AdminComplaintsView } from "@/frontend/views/dashboard/complaints/AdminComplaintsView";
+import type {
+  AdminComplaintRow,
+  AdminComplaintsSummary,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
+import { buildComplaintsLabels } from "@/frontend/views/dashboard/complaints/utils/buildComplaintsLabels";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

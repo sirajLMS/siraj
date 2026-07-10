@@ -1,1 +1,1 @@
-export * from "./profile.types";
+export * from "@/backend/types/profile/profile.types";

@@ -5,10 +5,10 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { FormSuccessSnackbar, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import { OnboardingMetricsOverview } from "./OnboardingMetricsOverview";
-import { StaffInfoSection } from "./StaffInfoSection";
-import { SystemAccessSection } from "./SystemAccessSection";
-import type { ManagerOnboardingFormData } from "./schemas/managerOnboardingSchema";
+import { OnboardingMetricsOverview } from "@/frontend/views/dashboard/managers/onboarding/OnboardingMetricsOverview";
+import { StaffInfoSection } from "@/frontend/views/dashboard/managers/onboarding/StaffInfoSection";
+import { SystemAccessSection } from "@/frontend/views/dashboard/managers/onboarding/SystemAccessSection";
+import type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency

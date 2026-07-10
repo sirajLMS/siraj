@@ -6,9 +6,9 @@ import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
-import type { AdminSuggestionRow } from "../types/suggestions.types";
-import type { SuggestionsDataGridProps } from "../types/suggestionsView.types";
-import { mapStatusForBadge, statusLabelKey } from "../utils/suggestionStatusMap";
+import type { AdminSuggestionRow } from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
+import type { SuggestionsDataGridProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
+import { mapStatusForBadge, statusLabelKey } from "@/frontend/views/dashboard/suggestions/utils/suggestionStatusMap";
 
 function actionButtons(
   row: AdminSuggestionRow,

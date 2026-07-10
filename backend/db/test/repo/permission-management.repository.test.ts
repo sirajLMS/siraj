@@ -134,7 +134,7 @@ describe("PermissionManagementRepository", () => {
       );
 
       expect(group).toBeDefined();
-      expect(group.name).toEqual({ ar: "Test Group Created", en: "Test Group Created" });
+      expect(group.name).toEqual(loc("Test Group Created"));
       expect(group.slug).toBe("test_group_created");
       expect(group.isSystem).toBe(false);
       expect(group.permissionIds).toContain(perm.id);
@@ -142,7 +142,7 @@ describe("PermissionManagementRepository", () => {
       // Verify in database
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, group.id)).limit(1);
       expect(dbGroup).toBeDefined();
-      expect(dbGroup.name).toEqual({ ar: "Test Group Created" });
+      expect(dbGroup.name).toEqual(loc("Test Group Created"));
     });
 
     testRepoError("createGroup should throw on database error", () =>
@@ -183,13 +183,13 @@ describe("PermissionManagementRepository", () => {
         tx
       );
 
-      expect(updated.name).toEqual({ ar: "Updated Group Name", en: "Updated Group Name" });
+      expect(updated.name).toEqual(loc("Updated Group Name"));
       expect(updated.permissionIds).not.toContain(perm1.id);
       expect(updated.permissionIds).toContain(perm2.id);
 
       // Verify db
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, group.id)).limit(1);
-      expect(dbGroup.name).toEqual({ ar: "Updated Group Name" });
+      expect(dbGroup.name).toEqual(loc("Updated Group Name"));
     });
 
     testRepo("updateGroup should throw on non-existent group or system group", async tx => {
@@ -462,7 +462,7 @@ describe("PermissionManagementRepository", () => {
         undefined,
         tx
       );
-      expect(updated.name).toEqual({ ar: "Ntx Group Updated", en: "Ntx Group Updated" });
+      expect(updated.name).toEqual(loc("Ntx Group Updated"));
 
       // User overrides
       const tempUser = await createTestUser(tx);

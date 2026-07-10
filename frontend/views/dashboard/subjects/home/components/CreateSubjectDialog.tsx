@@ -5,7 +5,6 @@ import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import type { CreateSubjectDialogProps } from "../types";
 import {
   ActiveToggleField,
   CategorySelectField,
@@ -15,7 +14,8 @@ import {
   type SubjectFormValues,
   slugify,
   subjectFormSchema,
-} from "./__shared__";
+} from "@/frontend/views/dashboard/subjects/home/components/__shared__";
+import type { CreateSubjectDialogProps } from "@/frontend/views/dashboard/subjects/home/types";
 
 const FORM_ID = "create-subject-form";
 

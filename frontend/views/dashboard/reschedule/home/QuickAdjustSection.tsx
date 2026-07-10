@@ -4,7 +4,7 @@ import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
-import type { RescheduleFormData } from "./schemas/rescheduleSchema";
+import type { RescheduleFormData } from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import {
   addOneDay,
   addOneHour,
@@ -12,7 +12,7 @@ import {
   combineDateTime,
   toDateString,
   toTimeString,
-} from "./utils/rescheduleDateTime";
+} from "@/frontend/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 
 interface Props {
   readonly setValue: UseFormSetValue<RescheduleFormData>;

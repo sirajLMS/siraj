@@ -3,7 +3,7 @@
 import type { PaletteMode } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import EmotionCacheProvider from "@/frontend/lib/emotion-cache";
-import { AppThemeProvider } from "./ThemeProvider";
+import { AppThemeProvider } from "@/frontend/providers/theme/ThemeProvider";
 
 interface MuiProviderProps {
   readonly children: ReactNode;

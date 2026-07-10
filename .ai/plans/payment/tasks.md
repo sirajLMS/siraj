@@ -121,17 +121,49 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [ ] Update `frontend/graphql/sharedDocuments/index.ts`
 - [ ] Re-run `bun codegen`
 
-## Phase 7 — UI components + i18n
+## Phase 7 — UI composables + i18n
 
-- [ ] Create `frontend/components/ui/input/PaymentMethodSelect.tsx`
-- [ ] Create `frontend/components/ui/input/PaymentMethodTypeFields.tsx`
-- [ ] Create `frontend/components/ui/input/PaymentMethodDefaultsEditor.tsx`
-- [ ] Create `frontend/components/ui/input/PaymentMethodSelect.stories.tsx`
-- [ ] Create `frontend/components/ui/display/PaymentMethodDisplay.tsx`
-- [ ] Create `frontend/components/ui/display/PaymentMethodList.tsx`
-- [ ] Create `frontend/components/ui/display/PaymentMethodDisplay.stories.tsx`
-- [ ] Update `frontend/components/ui/input/index.ts`
-- [ ] Update `frontend/components/ui/display/index.ts`
+> Net-new components are thin composables over existing `frontend/components/ui/**` primitives — see plan.md [Component reuse map](./plan.md#component-reuse-map). No new top-level input/display primitives where an existing one fits. Also add `CatalogImageUpload` (currently un-barreled) to `input/index.ts`.
+
+### `frontend/lib` option builders (mirror `frontend/lib/currency.ts`)
+
+- [ ] Create `frontend/lib/payment-method.ts` — catalog option builders (`getPaymentMethodTypeOptions`, `getCatalogOptionRowLabel`, etc.) mirroring `getCurrencyOptions` / `getCurrencyDisplayName` / `getCurrencySymbol` from `frontend/lib/currency.ts`
+
+### `PaymentMethodSelect` (mirror `CurrencySelect` / `CurrencyAutocomplete` / `CurrencyOptionRow`)
+
+- [ ] Create `frontend/components/ui/input/paymentMethodSelect/index.ts` — barrel
+- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow.tsx` — mirror `CurrencyOptionRow.tsx` (type icon + localized name + catalog slug)
+- [ ] Create `frontend/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper.ts` — mirror `currencyAutocompletePopper.ts`
+- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete.tsx` — mirror `CurrencyAutocomplete.tsx` (searchable Autocomplete + `allowedCodes`-style subset filter + popper plumbing)
+- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.tsx` — thin wrapper mirroring `CurrencySelect.tsx` over `PaymentMethodAutocomplete`
+- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.stories.tsx` — mirror `CurrencySelect.stories.tsx` (single-select + `allowedCodes` subset story)
+
+### `PaymentMethodTypeFields` (mirror `GenderSelector` + per-type field composition)
+
+- [ ] Create `frontend/components/ui/input/paymentMethodTypeFields/index.ts` — barrel
+- [ ] Create `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector.tsx` — mirror `GenderSelector.tsx` (`ButtonGroup` over `PaymentMethodType` codegen enum, `allowEmpty` + `labels` override)
+- [ ] Create `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields.tsx` — per-type dynamic fields composing `PhoneFormField` (MOBILE_WALLET phone), `CurrencySelect`/`CountryAutocomplete` (country/currency filter), `TagInput` (`url_allowlist`), `LocalizedStringFormField` (`instructions`/`name`), `react-hook-form` `Controller` (mirror `PhoneFormField` + `LocalizedStringFormField`)
+
+### `PaymentMethodDefaultsEditor` (compose `LocalizedStringDrawer` + `FieldWrapper` + `FormSuccessSnackbar`)
+
+- [ ] Create `frontend/components/ui/input/paymentMethodDefaultsEditor/index.ts` — barrel
+- [ ] Create `frontend/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditor.tsx` — compose `LocalizedStringDrawer` (per-locale instructions), `CurrencySelect` (`allowedCodes`), `FieldWrapper`, `FormSuccessSnackbar`
+
+### `PaymentMethodDisplay` + `PaymentMethodList` (compose display family + `AppDataGrid`)
+
+- [ ] Create `frontend/components/ui/display/paymentMethod/index.ts` — barrel
+- [ ] Create `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.tsx` — compose `LocalizedStringDisplay` (catalog name) + `CurrencyDisplay`/`CountryDisplay` + `PhoneDisplay` (MOBILE_WALLET) + `StatusBadge(category="paymentMethod")`
+- [ ] Create `frontend/components/ui/display/paymentMethod/PaymentMethodList.tsx` — compose `BaseCard` + `AppDataGrid<PaymentMethodRow>` (mirror `PermissionCatalogDataGrid`); column defs + row type only — no new list primitive
+- [ ] Create `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.stories.tsx`
+
+### Existing-component extensions + barrel wiring
+
+- [ ] Update `frontend/components/ui/badge/StatusBadge.tsx` — extend `StatusBadgeCategory` union with `"paymentMethod"`; add `case "paymentMethod":` in `resolveStatusPaletteKey` (≈10 lines — self-contained, no theme token additions)
+- [ ] Update `frontend/components/ui/input/index.ts` — export the three new folders (`paymentMethodSelect`, `paymentMethodTypeFields`, `paymentMethodDefaultsEditor`); **add `export * from "@/frontend/components/ui/input/catalogImageUpload/CatalogImageUpload"`** (currently un-barreled, needed for catalog icons)
+- [ ] Update `frontend/components/ui/display/index.ts` — re-export `paymentMethod/`
+
+### i18n
+
 - [ ] Create `shared/messages/types/ui/payment-method.ts`
 - [ ] Create `shared/messages/ar/ui/payment-method.ts`
 - [ ] Update `shared/messages/en.ts`
@@ -139,6 +171,8 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [ ] Update `shared/messages/ar/ui/index.ts`
 
 ## Phase 8 — View usages + admin catalog UI
+
+> Net-new view components are thin compositions of the Phase 7 payment-method composables + existing `frontend/components/ui/**` primitives. See plan.md [Component reuse map](./plan.md#component-reuse-map).
 
 ### Teacher payment methods (replace banking tab)
 
@@ -187,15 +221,18 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [ ] Update `frontend/hooks/useCreateParentOnboarding.ts`
 - [ ] Update `frontend/types/shared.types.ts`
 
-### Admin catalog UI (new)
+### Admin catalog UI (new — composed from existing primitives)
 
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer.tsx`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView.tsx`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/MobileWalletCatalogGrid.tsx`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/PaymentLinkCatalogGrid.tsx`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/OnlineAccountCatalogGrid.tsx`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog.tsx`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdmin.stories.tsx`
+> Mirror `SubjectsContainer`/`SubjectsView`/`SubjectDialogs` (Apollo queries/mutations + dialog state + view layout) and `PermissionCatalogDataGrid` (`AppDataGrid` + `LocalizedStringDisplay` columns). See plan.md [Component reuse map](./plan.md#component-reuse-map).
+
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer.tsx` — mirror `frontend/views/dashboard/subjects/home/SubjectsContainer.tsx` (Apollo query + mutation hook + dialog state)
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView.tsx` — compose `PageContainer` + `PageHeader` + MUI `Tabs` over the three per-catalog `*CatalogGrid` components
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/MobileWalletCatalogGrid.tsx` — thin `AppDataGrid<SupportedMobileWallet>` wrapper mirroring `PermissionCatalogDataGrid.tsx`; columns: `LocalizedStringDisplay` (name) + `CountryDisplay` + `CurrencyDisplay` + `StatusBadge(category="paymentMethod", status="active"|"inactive")` + edit/delete row actions
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/PaymentLinkCatalogGrid.tsx` — same pattern; `url_allowlist` column renders as read-only `TagInput` chips
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/OnlineAccountCatalogGrid.tsx` — same pattern; `identifier_kind` column renders as `StatusBadge`
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog.tsx` — compose MUI `Dialog` + `react-hook-form` + `LocalizedStringFormField` (name/description/instructions) + `CurrencySelect`/`CountryAutocomplete` + `TagInput` (url allowlist) + `EntityFormDialogActions` (from `frontend/views/dashboard/subjects/home/components/__shared__/`) + `CatalogImageUpload` (logo)
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog.tsx` — thin wrapper over `BaseDeleteDialog` mirroring `DeleteSubjectDialog.tsx`
+- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdmin.stories.tsx` — mirror `SubjectsContainer.stories.tsx`
 
 - [ ] Update `frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes.ts` — replace `BANKING_DETAILS_CHANGED` with `PAYMENT_METHOD_CHANGED`
 

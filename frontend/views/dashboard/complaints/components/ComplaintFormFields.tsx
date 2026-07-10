@@ -6,9 +6,9 @@ import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { ComplaintCategory } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
+import type { ParentStudentOption } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
-import type { ComplaintFormData } from "../schemas/complaintFormSchema";
-import type { ParentStudentOption } from "../types/complaints.types";
 
 const StyledFieldLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,

@@ -4,12 +4,12 @@ import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/mate
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
-import { FutureClassCard } from "./components/FutureClassCard";
-import { ImportantNotes } from "./components/ImportantNotes";
-import { JumpToDateHeader } from "./components/JumpToDateHeader";
-import { MiniCalendar } from "./components/MiniCalendar";
-import { SupportContact } from "./components/SupportContact";
-import type { FutureScheduleViewProps } from "./types";
+import { FutureClassCard } from "@/frontend/views/dashboard/teachers/futureSchedule/components/FutureClassCard";
+import { ImportantNotes } from "@/frontend/views/dashboard/teachers/futureSchedule/components/ImportantNotes";
+import { JumpToDateHeader } from "@/frontend/views/dashboard/teachers/futureSchedule/components/JumpToDateHeader";
+import { MiniCalendar } from "@/frontend/views/dashboard/teachers/futureSchedule/components/MiniCalendar";
+import { SupportContact } from "@/frontend/views/dashboard/teachers/futureSchedule/components/SupportContact";
+import type { FutureScheduleViewProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 export function FutureScheduleView({
   classes,

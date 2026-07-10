@@ -1,9 +1,9 @@
 "use client";
 
 import { useMediaQuery, useTheme } from "@mui/material";
-import { AdminComplaintsDesktopView } from "./AdminComplaintsDesktopView";
-import { AdminComplaintsMobileView } from "./AdminComplaintsMobileView";
-import type { AdminComplaintsViewProps } from "./types/complaintsViewTypes";
+import { AdminComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/AdminComplaintsDesktopView";
+import { AdminComplaintsMobileView } from "@/frontend/views/dashboard/complaints/AdminComplaintsMobileView";
+import type { AdminComplaintsViewProps } from "@/frontend/views/dashboard/complaints/types/complaintsViewTypes";
 
 export function AdminComplaintsView(props: Readonly<AdminComplaintsViewProps>) {
   const theme = useTheme();

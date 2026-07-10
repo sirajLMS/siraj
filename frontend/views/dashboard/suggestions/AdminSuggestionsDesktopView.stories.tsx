@@ -2,10 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { AppPermission, SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
-import { createMockAdminDecorator } from "../components/createMockAdminDecorator";
-import { AdminSuggestionsDesktopView } from "./AdminSuggestionsDesktopView";
-import type { AdminSuggestionRow, AdminSuggestionsSummary } from "./types/suggestions.types";
-import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
+import { createMockAdminDecorator } from "@/frontend/views/dashboard/components/createMockAdminDecorator";
+import { AdminSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/AdminSuggestionsDesktopView";
+import type {
+  AdminSuggestionRow,
+  AdminSuggestionsSummary,
+} from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
+import { buildSuggestionsLabels } from "@/frontend/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 
 const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
   {

@@ -10,15 +10,15 @@ import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graph
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
+import { ClassDetailsContent } from "@/frontend/views/dashboard/classes/details/components/ClassDetailsContent";
+import { useClassActionHandlers } from "@/frontend/views/dashboard/classes/details/hooks/useClassActionHandlers";
+import { useClassDetailsContainerState } from "@/frontend/views/dashboard/classes/details/hooks/useClassDetailsContainerState";
+import { useClassDetailsPermissions } from "@/frontend/views/dashboard/classes/details/hooks/useClassDetailsPermissions";
+import { useClassDetailsData } from "@/frontend/views/dashboard/classes/details/hooks/useClassDetailsQuery";
+import { useClassMutations } from "@/frontend/views/dashboard/classes/details/hooks/useClassMutations";
+import { useEventLogDownload } from "@/frontend/views/dashboard/classes/details/hooks/useEventLogDownload";
+import { formatClassDetailDate } from "@/frontend/views/dashboard/classes/details/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { ClassDetailsContent } from "./components/ClassDetailsContent";
-import { useClassActionHandlers } from "./hooks/useClassActionHandlers";
-import { useClassDetailsContainerState } from "./hooks/useClassDetailsContainerState";
-import { useClassDetailsPermissions } from "./hooks/useClassDetailsPermissions";
-import { useClassDetailsData } from "./hooks/useClassDetailsQuery";
-import { useClassMutations } from "./hooks/useClassMutations";
-import { useEventLogDownload } from "./hooks/useEventLogDownload";
-import { formatClassDetailDate } from "./types";
 
 function InvalidIdState({ t }: { readonly t: ReturnType<typeof useTranslations> }) {
   return (

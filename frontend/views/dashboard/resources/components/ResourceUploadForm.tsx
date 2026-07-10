@@ -3,8 +3,8 @@
 import { CloudUploadOutlined, DescriptionOutlined } from "@mui/icons-material";
 import { Box, TextField, Typography } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import type { ResourceUploadFormProps } from "../types/resourcesTypes";
-import { ResourceUploadDropzone } from "./ResourceUploadDropzone";
+import type { ResourceUploadFormProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
+import { ResourceUploadDropzone } from "@/frontend/views/dashboard/resources/components/ResourceUploadDropzone";
 
 export function ResourceUploadForm({
   labels,

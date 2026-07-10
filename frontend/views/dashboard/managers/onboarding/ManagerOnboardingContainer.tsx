@@ -7,11 +7,13 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useCreateManagerOnboarding } from "@/frontend/hooks/useCreateManagerOnboarding";
 import { logger } from "@/frontend/utils/logger";
+import { ManagerOnboardingView } from "@/frontend/views/dashboard/managers/onboarding/ManagerOnboardingView";
+import {
+  type ManagerOnboardingFormData,
+  managerOnboardingSchema,
+} from "@/frontend/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 import { useRouter } from "@/shared/i18n/routing";
-import { ManagerOnboardingView } from "./ManagerOnboardingView";
-import { type ManagerOnboardingFormData, managerOnboardingSchema } from "./schemas/managerOnboardingSchema";
-
-import { ManagerAccountType } from "./types";
+import { ManagerAccountType } from "@/frontend/views/dashboard/managers/onboarding/types";
 
 const defaultValues: ManagerOnboardingFormData = {
   name: "",

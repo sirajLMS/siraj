@@ -1,30 +1,29 @@
-export type { UserReturnType, UserSelectType } from "@/backend/types";
-export { AuditRepository } from "./audit";
-export { ImpersonationRepository } from "./auth";
-export { BillingRepository } from "./billing/billing.repository";
-export { BookRepository } from "./books/book.repository";
-export { ReportGroupingMode, ReportRepository } from "./books/report.repository";
-export { ClassCategoryRepository } from "./classes/class-category.repository";
-export { ClassPerformanceRepository } from "./classes/class-performance.repository";
-export { ClassSubjectRepository } from "./classes/class-subject.repository";
-export { DstMigrationRepository } from "./classes/dst-migration.repository";
-export { GroupClassRepository } from "./classes/group-class.repository";
-export { SubjectResourceRepository } from "./classes/subject-resource.repository";
+export { AuditRepository } from "@/backend/db/repo/audit";
+export { ImpersonationRepository } from "@/backend/db/repo/auth";
+export { BillingRepository } from "@/backend/db/repo/billing/billing.repository";
+export { BookRepository } from "@/backend/db/repo/books/book.repository";
+export { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books/report.repository";
+export { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
+export { ClassPerformanceRepository } from "@/backend/db/repo/classes/class-performance.repository";
+export { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
+export { DstMigrationRepository } from "@/backend/db/repo/classes/dst-migration.repository";
+export { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
+export { SubjectResourceRepository } from "@/backend/db/repo/classes/subject-resource.repository";
 export {
   ComplaintRepository,
   ComplaintResponseRepository,
-} from "./complaints";
-export { FxSyncRepository } from "./fx-sync.repository";
+} from "@/backend/db/repo/complaints";
+export { FxSyncRepository } from "@/backend/db/repo/fx-sync.repository";
 export {
   NotificationPreferencesRepository,
   NotificationRepository,
-} from "./notifications";
+} from "@/backend/db/repo/notifications";
 export {
   ParentRepository,
   SuggestionRepository,
-} from "./parents";
-export { PermissionManagementRepository } from "./permissions";
-export { SchedulingRepository } from "./scheduling";
+} from "@/backend/db/repo/parents";
+export { PermissionManagementRepository } from "@/backend/db/repo/permissions";
+export { SchedulingRepository } from "@/backend/db/repo/scheduling";
 export {
   CacheDbRepository,
   RateLimitRepository,
@@ -32,20 +31,21 @@ export {
   SignedUrlRepository,
   SoftDeleteRepository,
   SystemSettingsRepository,
-} from "./shared";
+} from "@/backend/db/repo/shared";
 export {
   LearningResourceRepository,
   StorageDbRepository,
-} from "./storage";
+} from "@/backend/db/repo/storage";
 export {
   StudentHistoryRepository,
   StudentRepository,
-} from "./students";
+} from "@/backend/db/repo/students";
 export {
   StaffProfileRepository,
   TeacherAvailabilityRepository,
   TeacherBankingRepository,
   TeacherNotesRepository,
   TeacherRepository,
-} from "./teachers";
-export { UserRepository } from "./users";
+} from "@/backend/db/repo/teachers";
+export { UserRepository } from "@/backend/db/repo/users";
+export type { UserReturnType, UserSelectType } from "@/backend/types";

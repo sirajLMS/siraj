@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
-import { RescheduleTrackingView } from "./RescheduleTrackingView";
-import { TRACKING_METRIC_DEFINITIONS } from "./tracking.helpers";
-import type { TrackingRow } from "./tracking.types";
+import { RescheduleTrackingView } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingView";
+import { TRACKING_METRIC_DEFINITIONS } from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
+import type { TrackingRow } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
 
 const MOCK_METRIC_COUNTS: Record<string, number> = {
   pending: 24,

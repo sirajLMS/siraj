@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ClassAvatar } from "./ClassAvatar";
+import { ClassAvatar } from "@/frontend/components/ui/avatar/ClassAvatar";
 
 const meta: Meta<typeof ClassAvatar> = {
   title: "UI/Avatar/ClassAvatar",

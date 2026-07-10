@@ -1,2 +1,2 @@
-export { buildMaskedBankingSummary, loadTeacherBankingSummary } from "./banking-summary";
-export * from "./profile.service";
+export { buildMaskedBankingSummary, loadTeacherBankingSummary } from "@/backend/services/profile/banking-summary";
+export * from "@/backend/services/profile/profile.service";

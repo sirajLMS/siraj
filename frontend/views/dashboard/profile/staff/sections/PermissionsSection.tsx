@@ -6,7 +6,10 @@ import { Box, Chip, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typ
 import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/components/ui";
 import { OverrideState } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StaffPermissionGroups, StaffPermissionOverrides } from "./staffProfileTypes";
+import type {
+  StaffPermissionGroups,
+  StaffPermissionOverrides,
+} from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
 
 type PermissionsSectionProps = {
   readonly permissionGroups: StaffPermissionGroups;

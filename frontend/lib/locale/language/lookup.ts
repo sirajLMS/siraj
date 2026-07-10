@@ -1,6 +1,6 @@
 import type { AppLanguage } from "@/frontend/graphql/generated/gql/graphql-types";
-import languages from "./languages";
-import type { LanguageType } from "./types";
+import languages from "@/frontend/lib/locale/language/languages";
+import type { LanguageType } from "@/frontend/lib/locale/language/types";
 
 /** Find a language entry by app language code. */
 export function getLanguageByCode(languageCode: AppLanguage | string): LanguageType | undefined {

@@ -1,4 +1,7 @@
-import type { AdminSuggestionRow, SuggestionStatus } from "../types/suggestions.types";
+import type {
+  AdminSuggestionRow,
+  SuggestionStatus,
+} from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
 
 export function filterSuggestionsByTab(
   rows: readonly AdminSuggestionRow[],

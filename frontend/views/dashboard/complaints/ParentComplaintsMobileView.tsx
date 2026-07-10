@@ -4,13 +4,16 @@ import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { ComplaintFormFields } from "@/frontend/views/dashboard/complaints/components/ComplaintFormFields";
+import { ComplaintPolicyPanel } from "@/frontend/views/dashboard/complaints/components/ComplaintPolicyPanel";
+import { ComplaintRecordCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintRecordCardList";
+import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
+import type {
+  ParentComplaintRecord,
+  ParentStudentOption,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
 import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
-import { ComplaintFormFields } from "./components/ComplaintFormFields";
-import { ComplaintPolicyPanel } from "./components/ComplaintPolicyPanel";
-import { ComplaintRecordCardList } from "./components/ComplaintRecordCardList";
-import type { ComplaintFormData } from "./schemas/complaintFormSchema";
-import type { ParentComplaintRecord, ParentStudentOption } from "./types/complaints.types";
 
 /** Mobile success banner wrapper with padding */
 const StyledMobileSuccessBannerBox = styled(Box)(({ theme }) => ({

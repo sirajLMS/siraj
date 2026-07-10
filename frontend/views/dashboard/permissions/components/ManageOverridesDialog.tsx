@@ -5,11 +5,11 @@ import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from 
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
-import { OverridesDialogFooter } from "./OverridesDialogFooter";
-import { OverridesTable } from "./OverridesTable";
-import { OverridesToolbar } from "./OverridesToolbar";
-import { OverridesUserSidebar } from "./OverridesUserSidebar";
-import { useManageOverridesState } from "./useManageOverridesState";
+import { OverridesDialogFooter } from "@/frontend/views/dashboard/permissions/components/OverridesDialogFooter";
+import { OverridesTable } from "@/frontend/views/dashboard/permissions/components/OverridesTable";
+import { OverridesToolbar } from "@/frontend/views/dashboard/permissions/components/OverridesToolbar";
+import { OverridesUserSidebar } from "@/frontend/views/dashboard/permissions/components/OverridesUserSidebar";
+import { useManageOverridesState } from "@/frontend/views/dashboard/permissions/components/useManageOverridesState";
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,

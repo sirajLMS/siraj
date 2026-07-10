@@ -1,16 +1,65 @@
-# Agents Instructions
+# Backend Database Seeds Layer
+
+## Purpose
+
+This directory contains all idempotent data seeders for local/development database bootstrapping. Each `seed-<entity>.ts` file exports a `seedOrGet(...)` function that returns either newly-inserted or existing records. Files are grouped by domain, mirroring the `backend/db/repo/`, `backend/types/`, `backend/enum/`, and `backend/graphql/` sub-directory layouts.
+
+## Layout
+
+```
+backend/db/seeds/
+├── index.ts             (master controller — orchestrates the seed order and `SeedContext`)
+├── AGENTS.md            (this file)
+│
+├── lib/                 Shared factories + helpers (admin-user, faker, batchInsert, schedule-factory, …) — unchanged
+├── assets/              Static JSON / image seed assets (unchanged)
+│
+├── shared/              cross-cutting reference data + coverage verifier (system-settings, timezones, verify-coverage)
+├── auth/                user-permission-overrides (auth-coupled seed)
+├── users/               seed-users, seed-user-device-tokens
+├── audit/               seed-admin-audit-logs, seed-audit-logs
+├── teachers/            seed-teachers, seed-teacher-availability-windows, seed-teacher-recurring-unavailability,
+│                        seed-teacher-vacation-requests, seed-teacher-banking-details-history, seed-teacher-payments,
+│                        seed-leave-requests, seed-leave-quota-usage
+├── parents/             seed-parents, seed-suggestions
+├── students/            seed-students, seed-student-progress, seed-student-status-history
+├── classes/             seed-classes, seed-class-instances, seed-class-performance, seed-class-status-events,
+│                        seed-group-classes, seed-group-class-enrollments, seed-class-communications,
+│                        seed-dst-migration-runs, seed-dst-migration-entries, seed-recurring-schedule-days
+├── billing/             seed-currency-exchange-rates, seed-currency-exchange-audit-logs, seed-currency-hedges,
+│                        seed-invoices, seed-invoice-coverage-months, seed-payments
+├── notifications/       seed-user-notification-preferences, seed-notification-deliveries
+├── complaints/          seed-complaints, seed-complaint-responses
+└── storage/             seed-learning-resources, seed-site-content
+```
+
+Each domain sub-directory contains its own `index.ts` barrel that re-exports each `seedOrGet` under a domain-qualified alias (e.g. `export { seedOrGet as seedOrGetTeachers } from "./seed-teachers";`). The top-level `backend/db/seeds/index.ts` master controller is the **only** file that imports individual seeders — it now imports them via the sub-directory paths (e.g. `@/backend/db/seeds/teachers/seed-teachers`) or, equivalently, the sub-directory barrel aliases.
+
+## Rules
 
 When creating or updating a seeder in this directory, you must adhere to the following rules:
 
-- **"seed or get" Pattern:** Every seeder MUST export a function named `seedOrGet`.
-- **One Seeder per Table**: Every table must have its own dedicated seeder file (e.g., `seed-classes.ts`, `seed-class-instances.ts`). Do not combine distinct domains.
-- **Idempotency:** The `seedOrGet` function must be safely runnable multiple times. It should not create duplicate records (use `onConflictDoUpdate`, `onConflictDoNothing`, or similar mechanisms).
-- **Return Value:** The function should return the seeded or retrieved entities. This allows other seeders to use those entities without querying the database again.
-- **Dependencies via Controller Context:** If your seeder depends on data seeded by another seeder, the results should be passed from the master seeder controller (`index.ts`) through context, calling that seeder's `seedOrGet` function or accepting it as a parameter.
+- **"seed or get" Pattern**: Every seeder MUST export a function named `seedOrGet`.
+- **One Seeder per Table**: Every table must have its own dedicated seeder file (e.g. `seed-classes.ts`, `seed-class-instances.ts`). Do not combine distinct domains.
+- **Idempotency**: The `seedOrGet` function must be safely runnable multiple times. It should not create duplicate records (use `onConflictDoUpdate`, `onConflictDoNothing`, or similar mechanisms).
+- **Return Value**: The function should return the seeded or retrieved entities. This allows other seeders to use those entities without querying the database again.
+- **Dependencies via Controller Context**: If your seeder depends on data seeded by another seeder, the results should be passed from the master seeder controller (`index.ts`) through context, calling that seeder's `seedOrGet` function or accepting it as a parameter.
 
 This ensures that we avoid duplicating data (such as permission groups or users) even if seeders are run multiple times.
 
-- **Check Constraints:** Ensure your seeded data respects database-level `CHECK` constraints (e.g. `class_instances_state_machine_chk`). Check `backend/db/schema/*.ts` for these constraints to prevent seeding failures.
-- **Enums Verification:** PostgreSQL enums must be matched EXACTLY. Check the `backend/db/schema/enums.ts` or `shared/lib/enum.ts` for the correct values (e.g., using `"ACTIVATED"` or `"REGULAR"` instead of `"ACTIVE"`). Do not guess valid statuses.
-- **Schema Synchronization:** If you modified the database schema during your task (e.g., adding a column like `avatar_url`), you MUST run `bun run scripts/dbActions.ts push` (or `bun run db push`) to apply changes to the local database before running `bun run db seed`.
-- **Drizzle Type Safety:** When querying inside seeders to check for existing records, favor `db.select().from(table).where(...)` instead of `db.query.table.findFirst({ where: ... })` if you encounter strict typing issues with relational queries. If strict `Entity` types are unavailable for dependency injection, you must create new types under `backend/types/` in the specified type file (one type per table) and update `backend/types/index.ts` accordingly, instead of using inline types or `any`.
+- **Check Constraints**: Ensure your seeded data respects database-level `CHECK` constraints (e.g. `class_instances_state_machine_chk`). Check `backend/db/schema/*.ts` for these constraints to prevent seeding failures.
+- **Enums Verification**: PostgreSQL enums must be matched EXACTLY. Check the `backend/db/schema/enums.ts` or `shared/lib/enum.ts` for the correct values (e.g., using `"ACTIVATED"` or `"REGULAR"` instead of `"ACTIVE"`). Do not guess valid statuses.
+- **Schema Synchronization**: If you modified the database schema during your task (e.g. adding a column like `avatar_url`), you MUST run `bun run scripts/dbActions.ts push` (or `bun run db push`) to apply changes to the local database before running `bun run db seed`.
+- **Drizzle Type Safety**: When querying inside seeders to check for existing records, favor `db.select().from(table).where(...)` instead of `db.query.table.findFirst({ where: ... })` if you encounter strict typing issues with relational queries. If strict `Entity` types are unavailable for dependency injection, you must create new types under `backend/types/` in the specified type file (one type per table) and update `backend/types/index.ts` accordingly, instead of using inline types or `any`.
+
+### File Organization
+- Group seeders for the same domain in the matching sub-directory.
+- File naming: `backend/db/seeds/<subdir>/seed-<entity>.ts` (e.g. `backend/db/seeds/teachers/seed-teachers.ts`).
+- The pre-existing `lib/` and `assets/` directories are **not** part of this domain grouping — `lib/` holds shared factories and helpers imported by all seeders via `@/backend/db/seeds/lib`; `assets/` holds static seed data files.
+
+### Adding New Seeders
+1. Identify the matching sub-directory (or create a new one following the sub-directory convention).
+2. Create `seed-<entity>.ts` in that sub-directory; expose `export async function seedOrGet(...) { ... }`.
+3. Add `export { seedOrGet as seedOrGet<Entity> } from "./seed-<entity>";` to the sub-directory's `index.ts`.
+4. Add the import + orchestration call to `backend/db/seeds/index.ts` (the master controller) so the new seeder runs in the correct dependency order.
+5. If a new sub-directory was created, also add its `index.ts` barrel.

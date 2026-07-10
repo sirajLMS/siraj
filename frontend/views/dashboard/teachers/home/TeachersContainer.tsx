@@ -6,7 +6,7 @@ import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graph
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import { useTeacherDirectoryStore } from "@/frontend/stores/teacherDirectoryStore";
-import { TeachersView } from "./TeachersView";
+import { TeachersView } from "@/frontend/views/dashboard/teachers/home/TeachersView";
 
 export function TeachersContainer() {
   const { searchQuery, setSearchQuery, page, pageSize, setPage } = useTeacherDirectoryStore();

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { CreateRecurringClassContainer } from "./CreateRecurringClassContainer";
+import { CreateRecurringClassContainer } from "@/frontend/views/dashboard/classes/recurring/CreateRecurringClassContainer";
 
 const meta: Meta<typeof CreateRecurringClassContainer> = {
   title: "Views/dashboard/classes/recurring/CreateRecurringClassContainer",

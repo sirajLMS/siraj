@@ -1,1 +1,1 @@
-export { UserRepository } from "./user.repository";
+export { UserRepository } from "@/backend/db/repo/users/user.repository";

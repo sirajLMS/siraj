@@ -7,12 +7,12 @@ const meta: Meta<typeof ClassProfileLink> = {
   tags: ["autodocs"],
   args: {
     name: "Quran Basics - Level 1",
-  href: "/classes/123",
-  avatarUrl: "",
+    href: "/classes/123",
+    avatarUrl: "",
     label: "Class",
-  avatarSize: 28,
-  fontWeight: 600,
-  typographyVariant: "bodyMd",
+    avatarSize: 28,
+    fontWeight: 600,
+    typographyVariant: "bodyMd",
   },
 };
 

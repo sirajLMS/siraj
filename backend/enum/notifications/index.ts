@@ -1,1 +1,1 @@
-export * from "./notificationDeliveries.enum";
+export * from "@/backend/enum/notifications/notificationDeliveries.enum";

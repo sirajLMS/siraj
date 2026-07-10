@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { ManagerAccountType } from "../types";
+import { ManagerAccountType } from "@/frontend/views/dashboard/managers/onboarding/types";
 
-export type { ManagerOnboardingFormData } from "../types";
+export type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/types";
 
 export const managerOnboardingSchema = z.object({
   name: z.string().min(1, "fullNameRequired"),

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { BaseDeleteDialog } from "@/frontend/components/ui/dialog/BaseDeleteDialog";
-import type { DeleteCategoryDialogProps } from "../types";
+import type { DeleteCategoryDialogProps } from "@/frontend/views/dashboard/subjects/home/types";
 
 export function DeleteCategoryDialog({
   open,

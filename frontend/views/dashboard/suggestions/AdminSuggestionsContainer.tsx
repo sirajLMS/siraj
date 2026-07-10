@@ -28,12 +28,15 @@ import {
 import { useAdminSuggestionsStore } from "@/frontend/stores/adminSuggestionsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { AdminSuggestionsView } from "./AdminSuggestionsView";
-import { SuggestionMarkDuplicateDialog } from "./components/SuggestionMarkDuplicateDialog";
-import { SuggestionRespondDialog } from "./components/SuggestionRespondDialog";
-import type { AdminSuggestionRow, AdminSuggestionsSummary } from "./types/suggestions.types";
-import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
-import { filterSuggestionsByTab } from "./utils/suggestionFilters";
+import { AdminSuggestionsView } from "@/frontend/views/dashboard/suggestions/AdminSuggestionsView";
+import { SuggestionMarkDuplicateDialog } from "@/frontend/views/dashboard/suggestions/components/SuggestionMarkDuplicateDialog";
+import { SuggestionRespondDialog } from "@/frontend/views/dashboard/suggestions/components/SuggestionRespondDialog";
+import type {
+  AdminSuggestionRow,
+  AdminSuggestionsSummary,
+} from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
+import { buildSuggestionsLabels } from "@/frontend/views/dashboard/suggestions/utils/buildSuggestionsLabels";
+import { filterSuggestionsByTab } from "@/frontend/views/dashboard/suggestions/utils/suggestionFilters";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

@@ -10,13 +10,13 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import { ClassParticipantsSection } from "./ClassParticipantsSection";
-import { NotificationPolicyCard } from "./NotificationPolicyCard";
-import { QuickAdjustSection } from "./QuickAdjustSection";
-import { RescheduleDateTimeSection } from "./RescheduleDateTimeSection";
-import type { RescheduleFormData } from "./schemas/rescheduleSchema";
-import { TimezoneWarningBanner } from "./TimezoneWarningBanner";
-import type { RescheduleSession } from "./types";
+import { ClassParticipantsSection } from "@/frontend/views/dashboard/reschedule/home/ClassParticipantsSection";
+import { NotificationPolicyCard } from "@/frontend/views/dashboard/reschedule/home/NotificationPolicyCard";
+import { QuickAdjustSection } from "@/frontend/views/dashboard/reschedule/home/QuickAdjustSection";
+import { RescheduleDateTimeSection } from "@/frontend/views/dashboard/reschedule/home/RescheduleDateTimeSection";
+import type { RescheduleFormData } from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
+import { TimezoneWarningBanner } from "@/frontend/views/dashboard/reschedule/home/TimezoneWarningBanner";
+import type { RescheduleSession } from "@/frontend/views/dashboard/reschedule/home/types";
 
 interface Props {
   readonly session: RescheduleSession;

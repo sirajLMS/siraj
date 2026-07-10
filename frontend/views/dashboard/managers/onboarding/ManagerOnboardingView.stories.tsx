@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useForm } from "react-hook-form";
-import { ManagerOnboardingView } from "./ManagerOnboardingView";
-import type { ManagerOnboardingFormData } from "./schemas/managerOnboardingSchema";
-import { ManagerAccountType } from "./types";
+import { ManagerOnboardingView } from "@/frontend/views/dashboard/managers/onboarding/ManagerOnboardingView";
+import type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
+import { ManagerAccountType } from "@/frontend/views/dashboard/managers/onboarding/types";
 
 const defaultValues: ManagerOnboardingFormData = {
   name: "",

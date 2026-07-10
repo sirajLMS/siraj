@@ -1,8 +1,12 @@
 import type { GridColDef } from "@mui/x-data-grid";
 import type { Control, FieldErrors } from "react-hook-form";
+import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
+import type {
+  AdminSuggestionRow,
+  AdminSuggestionsSummary,
+  SuggestionStatus,
+} from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsAdminLabels, SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
-import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
-import type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus } from "./suggestions.types";
 
 export type { SuggestionsAdminLabels, SuggestionsLabels };
 

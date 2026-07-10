@@ -15,10 +15,13 @@ import {
 import { useRescheduleTrackingStore } from "@/frontend/stores/rescheduleTrackingStore";
 import { exportRescheduleTracking } from "@/frontend/utils/excel-export/tracking-export";
 import { logger } from "@/frontend/utils/logger";
+import { RescheduleTrackingView } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingView";
+import {
+  buildTrackingMetrics,
+  buildTrackingRows,
+} from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
+import type { RescheduleTrackingViewLabels } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
 import { useRouter } from "@/shared/i18n/routing";
-import { RescheduleTrackingView } from "./RescheduleTrackingView";
-import { buildTrackingMetrics, buildTrackingRows } from "./tracking.helpers";
-import type { RescheduleTrackingViewLabels } from "./tracking.types";
 
 const loadingSx: SxProps<Theme> = {
   display: "flex",

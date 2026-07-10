@@ -11,8 +11,14 @@ import { Box, Card, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
-import { getTrackingStatusIcon, getTrackingStatusLabel } from "./tracking.helpers";
-import type { RescheduleTrackingCardListProps, TrackingRow } from "./tracking.types";
+import {
+  getTrackingStatusIcon,
+  getTrackingStatusLabel,
+} from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
+import type {
+  RescheduleTrackingCardListProps,
+  TrackingRow,
+} from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
 
 const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) => void }) => {
   const rowId = row.id ?? "";

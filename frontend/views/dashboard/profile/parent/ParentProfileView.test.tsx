@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
-import { ParentProfileView } from "./ParentProfileView";
 
 const parentOwnProfile = {
   id: "parent-own-1",

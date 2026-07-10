@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { DstMigrationContainer } from "./DstMigrationContainer";
+import { DstMigrationContainer } from "@/frontend/views/dashboard/tools/dst-migration/DstMigrationContainer";
 
 const meta: Meta<typeof DstMigrationContainer> = {
   title: "Views/dashboard/tools/dst-migration/DstMigrationContainer",

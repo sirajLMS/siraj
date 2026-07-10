@@ -1,1 +1,1 @@
-export * from "./gql";
+export * from "@/frontend/graphql/generated/gql/gql";

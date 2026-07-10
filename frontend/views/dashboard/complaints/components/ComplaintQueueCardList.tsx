@@ -3,9 +3,9 @@
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls } from "@/frontend/components/ui/filter/PaginationControls";
+import { ComplaintQueueCard } from "@/frontend/views/dashboard/complaints/components/ComplaintQueueCard";
+import type { AdminComplaintRow } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
-import type { AdminComplaintRow } from "../types/complaints.types";
-import { ComplaintQueueCard } from "./ComplaintQueueCard";
 
 /** Centered message displayed when the complaint queue has no entries */
 const StyledEmptyStateMessage = styled(Typography)(({ theme }) => ({

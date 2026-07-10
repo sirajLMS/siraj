@@ -7,7 +7,7 @@ import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/fronten
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
 import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
-import type { UserBillingProfileDesktopViewProps } from "./types/userBillingProfile.types";
+import type { UserBillingProfileDesktopViewProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 
 export function UserBillingProfileDesktopView({
   labels,

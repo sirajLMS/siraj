@@ -1,7 +1,7 @@
 "use client";
 
-import type { BaseAvatarProps } from "./BaseAvatar";
-import { BaseAvatar } from "./BaseAvatar";
+import type { BaseAvatarProps } from "@/frontend/components/ui/avatar/BaseAvatar";
+import { BaseAvatar } from "@/frontend/components/ui/avatar/BaseAvatar";
 
 export type ClassAvatarProps = Omit<BaseAvatarProps, "variant"> & {
   readonly variant?: BaseAvatarProps["variant"];

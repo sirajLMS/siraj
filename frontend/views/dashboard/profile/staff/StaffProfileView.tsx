@@ -2,9 +2,9 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { AccountSection } from "./sections/AccountSection";
-import { ContactSection } from "./sections/ContactSection";
-import type { StaffProfileData } from "./sections/staffProfileTypes";
+import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
+import { ContactSection } from "@/frontend/views/dashboard/profile/staff/sections/ContactSection";
+import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
 
 export function StaffProfileView({
   staffData,

@@ -8,14 +8,14 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { executeDstBulkUpdateMutationDocument } from "@/frontend/graphql/sharedDocuments/dst-migration.documents";
 import { logger } from "@/frontend/utils/logger";
-import { DstMigrationView } from "./DstMigrationView";
+import { DstMigrationView } from "@/frontend/views/dashboard/tools/dst-migration/DstMigrationView";
 import {
   type CheckedEmptyItem,
   type ConflictGroup,
   type DstMigrationMetrics,
   MigrationStatus,
   type UpdatedSession,
-} from "./dst-migration.types";
+} from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 function detectDstOffsetMinutes(): number | null {
   const now = new Date();

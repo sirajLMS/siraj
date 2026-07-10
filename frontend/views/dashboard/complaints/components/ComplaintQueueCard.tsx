@@ -4,8 +4,12 @@ import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, Sen
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import {
+  type AdminComplaintRow,
+  type ComplaintPriority,
+  ComplaintStatus,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
-import { type AdminComplaintRow, type ComplaintPriority, ComplaintStatus } from "../types/complaints.types";
 
 /** Container for an already-answered complaint response with surface background */
 const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({

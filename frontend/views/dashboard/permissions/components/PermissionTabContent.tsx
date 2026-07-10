@@ -4,10 +4,10 @@ import { Box, CircularProgress } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/components/ui";
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PermissionCatalogSection } from "./PermissionCatalogSection";
-import { PermissionGroupCardList } from "./PermissionGroupCardList";
-import { PermissionGroupsDataGrid } from "./PermissionGroupsDataGrid";
-import { UserOverridesDataGrid } from "./UserOverridesDataGrid";
+import { PermissionCatalogSection } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogSection";
+import { PermissionGroupCardList } from "@/frontend/views/dashboard/permissions/components/PermissionGroupCardList";
+import { PermissionGroupsDataGrid } from "@/frontend/views/dashboard/permissions/components/PermissionGroupsDataGrid";
+import { UserOverridesDataGrid } from "@/frontend/views/dashboard/permissions/components/UserOverridesDataGrid";
 
 export type TabKey = "groups" | "catalog" | "overrides";
 

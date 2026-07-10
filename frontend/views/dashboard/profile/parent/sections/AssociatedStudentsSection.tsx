@@ -3,9 +3,9 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { AppDataGridLoadingOverlay, SectionPanel } from "@/frontend/components/ui";
-import { AssociatedStudentsCardList } from "./AssociatedStudentsCardList";
-import { AssociatedStudentsDataGrid } from "./AssociatedStudentsDataGrid";
-import type { AssociatedStudents } from "./parentProfileTypes";
+import { AssociatedStudentsCardList } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsCardList";
+import { AssociatedStudentsDataGrid } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsDataGrid";
+import type { AssociatedStudents } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 
 type AssociatedStudentsSectionProps = {
   readonly associatedStudents: AssociatedStudents;

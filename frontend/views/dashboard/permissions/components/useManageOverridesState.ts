@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { OverrideState } from "./OverridesTable";
-import { useOverrideData } from "./useOverrideData";
+import type { OverrideState } from "@/frontend/views/dashboard/permissions/components/OverridesTable";
+import { useOverrideData } from "@/frontend/views/dashboard/permissions/components/useOverrideData";
 
 interface UseManageOverridesStateParams {
   readonly userId: string | null;

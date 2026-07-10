@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { LocalContext } from "@/backend/storage/disk/local/types";
+import { calculateFileHash, getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/shared/utils/storage.utils";
-import type { LocalContext } from "./types";
-import { calculateFileHash, getAbsolutePath } from "./utils";
 
 export async function processFile(
   ctx: LocalContext,

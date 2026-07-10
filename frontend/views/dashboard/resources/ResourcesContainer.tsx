@@ -15,11 +15,11 @@ import {
 import { useLearningResourcesStore } from "@/frontend/stores/learningResourcesStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import { ResourcesView } from "@/frontend/views/dashboard/resources/ResourcesView";
+import { buildResourcesLabels } from "@/frontend/views/dashboard/resources/utils/buildResourcesLabels";
+import { inferResourceFileType } from "@/frontend/views/dashboard/resources/utils/resourceFileTypeUtils";
+import { filterResources } from "@/frontend/views/dashboard/resources/utils/resourceFilters";
 import { extToMime, isAllowedMimeType, validateFileName } from "@/shared/utils/storage.utils";
-import { ResourcesView } from "./ResourcesView";
-import { buildResourcesLabels } from "./utils/buildResourcesLabels";
-import { inferResourceFileType } from "./utils/resourceFileTypeUtils";
-import { filterResources } from "./utils/resourceFilters";
 
 async function computeContentHash(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();

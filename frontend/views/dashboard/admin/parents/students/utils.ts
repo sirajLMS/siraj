@@ -11,18 +11,18 @@ import {
 import type { useTranslations } from "next-intl";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { StudentDirectoryQuery } from "@/frontend/graphql/generated/gql/operations";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import type {
   StudentAccountStatus,
   StudentDirectoryRowExtended,
   StudentEnrollmentStatus,
   StudentsViewLabels,
-} from "./types";
+} from "@/frontend/views/dashboard/admin/parents/students/types";
 import {
   StudentEnrollmentStatus as EnrollmentEnum,
   MOBILE_METRIC_KEYS,
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
-} from "./types";
+} from "@/frontend/views/dashboard/admin/parents/students/types";
+import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 const MOBILE_METRIC_ICONS = {
   regular: PersonOutlined,

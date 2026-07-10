@@ -6,7 +6,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { ProfileShell } from "./ProfileShell";
+import { ProfileShell } from "@/frontend/views/dashboard/profile/core/ProfileShell";
 
 function StorybookPageFrame({ children }: { readonly children: ReactNode }) {
   return (

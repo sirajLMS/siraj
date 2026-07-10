@@ -1,3 +1,3 @@
-export * from "./user.types";
-export * from "./userDeviceTokens.types";
-export * from "./userNotificationPreferences.types";
+export * from "@/backend/types/users/user.types";
+export * from "@/backend/types/users/userDeviceTokens.types";
+export * from "@/backend/types/users/userNotificationPreferences.types";

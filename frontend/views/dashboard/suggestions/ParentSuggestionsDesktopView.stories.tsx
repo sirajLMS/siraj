@@ -5,10 +5,10 @@ import { useForm } from "react-hook-form";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { ParentSuggestionsDesktopView } from "./ParentSuggestionsDesktopView";
-import type { SuggestionFormData } from "./schemas/suggestionFormSchema";
-import { suggestionFormSchema } from "./schemas/suggestionFormSchema";
-import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
+import { ParentSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/ParentSuggestionsDesktopView";
+import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
+import { suggestionFormSchema } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
+import { buildSuggestionsLabels } from "@/frontend/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 
 const PARENT_PERMISSIONS = [AppPermission.CommunicationSubmitSuggestion];
 

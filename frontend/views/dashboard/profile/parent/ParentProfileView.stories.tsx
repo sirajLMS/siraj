@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
-import { ParentProfileView } from "./ParentProfileView";
+import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;

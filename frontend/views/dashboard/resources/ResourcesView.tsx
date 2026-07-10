@@ -2,9 +2,9 @@
 
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useState } from "react";
-import { ResourcesDesktopView } from "./ResourcesDesktopView";
-import { ResourcesMobileView } from "./ResourcesMobileView";
-import type { ResourcesViewProps } from "./types/resourcesViewTypes";
+import { ResourcesDesktopView } from "@/frontend/views/dashboard/resources/ResourcesDesktopView";
+import { ResourcesMobileView } from "@/frontend/views/dashboard/resources/ResourcesMobileView";
+import type { ResourcesViewProps } from "@/frontend/views/dashboard/resources/types/resourcesViewTypes";
 
 export function ResourcesView({
   labels,

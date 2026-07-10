@@ -1,12 +1,12 @@
 import { bigint, boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { invoices } from "./billing";
-import { complaints, learningResources } from "./communications";
-import { parents } from "./parents";
-import { classInstances, recurringSchedules } from "./scheduling";
-import { staffProfiles } from "./staff";
-import { students } from "./students";
-import { teachers } from "./teachers";
-import { users } from "./users";
+import { invoices } from "@/backend/db/schema/billing";
+import { complaints, learningResources } from "@/backend/db/schema/communications";
+import { parents } from "@/backend/db/schema/parents";
+import { classInstances, recurringSchedules } from "@/backend/db/schema/scheduling";
+import { staffProfiles } from "@/backend/db/schema/staff";
+import { students } from "@/backend/db/schema/students";
+import { teachers } from "@/backend/db/schema/teachers";
+import { users } from "@/backend/db/schema/users";
 
 export const storageFiles = pgTable("storage_file", {
   id: uuid("id").defaultRandom().primaryKey(),

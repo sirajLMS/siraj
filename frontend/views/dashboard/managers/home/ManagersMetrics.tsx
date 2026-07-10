@@ -2,7 +2,7 @@ import { AdminPanelSettingsOutlined, BoltOutlined, GroupOutlined, WarningAmberOu
 import { Grid } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/components/ui";
-import type { NonNullableManagerDirectoryMetrics } from "./types";
+import type { NonNullableManagerDirectoryMetrics } from "@/frontend/views/dashboard/managers/home/types";
 
 interface ManagersMetricsProps {
   metrics: NonNullableManagerDirectoryMetrics;

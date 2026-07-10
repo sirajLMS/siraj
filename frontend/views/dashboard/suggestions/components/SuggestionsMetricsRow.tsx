@@ -4,7 +4,7 @@ import { CheckCircleOutlined, ContentCopyOutlined, VisibilityOutlined } from "@m
 import { Box } from "@mui/material";
 import { MetricCard, type MetricCardVariant } from "@/frontend/components/ui";
 import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
-import type { SuggestionsMetricsRowProps } from "../types/suggestionsView.types";
+import type { SuggestionsMetricsRowProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 export function SuggestionsMetricsRow({ summary, labels, compact = false }: Readonly<SuggestionsMetricsRowProps>) {
   const variant: MetricCardVariant = compact ? "compact" : "default";

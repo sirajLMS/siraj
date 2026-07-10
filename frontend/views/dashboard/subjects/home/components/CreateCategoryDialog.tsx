@@ -5,7 +5,6 @@ import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import type { CreateCategoryDialogProps } from "../types";
 import {
   ActiveToggleField,
   type CategoryFormValues,
@@ -14,7 +13,8 @@ import {
   emptyCategoryFormValues,
   LabeledTextField,
   slugify,
-} from "./__shared__";
+} from "@/frontend/views/dashboard/subjects/home/components/__shared__";
+import type { CreateCategoryDialogProps } from "@/frontend/views/dashboard/subjects/home/types";
 
 const FORM_ID = "create-category-form";
 

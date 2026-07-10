@@ -15,10 +15,13 @@ import {
 import { parentAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-portal.documents";
 import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
 import { logger } from "@/frontend/utils/logger";
-import { ParentComplaintsView } from "./ParentComplaintsView";
-import type { ComplaintFormData } from "./schemas/complaintFormSchema";
-import type { ParentComplaintRecord, ParentStudentOption } from "./types/complaints.types";
-import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
+import { ParentComplaintsView } from "@/frontend/views/dashboard/complaints/ParentComplaintsView";
+import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
+import type {
+  ParentComplaintRecord,
+  ParentStudentOption,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
+import { buildComplaintsLabels } from "@/frontend/views/dashboard/complaints/utils/buildComplaintsLabels";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

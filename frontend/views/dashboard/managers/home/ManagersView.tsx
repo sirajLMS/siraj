@@ -3,12 +3,17 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ManagersCardList } from "@/frontend/views/dashboard/managers/home/ManagersCardList";
+import { ManagersDataGrid } from "@/frontend/views/dashboard/managers/home/ManagersDataGrid";
+import { ManagersFilterBar } from "@/frontend/views/dashboard/managers/home/ManagersFilterBar";
+import { ManagersMetrics } from "@/frontend/views/dashboard/managers/home/ManagersMetrics";
+import type {
+  Manager,
+  ManagerRoleFilter,
+  ManagerStatusFilter,
+  NonNullableManagerDirectoryMetrics,
+} from "@/frontend/views/dashboard/managers/home/types";
 import { Link } from "@/shared/i18n/routing";
-import { ManagersCardList } from "./ManagersCardList";
-import { ManagersDataGrid } from "./ManagersDataGrid";
-import { ManagersFilterBar } from "./ManagersFilterBar";
-import { ManagersMetrics } from "./ManagersMetrics";
-import type { Manager, ManagerRoleFilter, ManagerStatusFilter, NonNullableManagerDirectoryMetrics } from "./types";
 
 interface ManagersViewProps {
   managers: Manager[];

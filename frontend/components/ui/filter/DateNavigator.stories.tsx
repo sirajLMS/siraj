@@ -1,11 +1,9 @@
-import { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
 import { Box } from "@mui/material";
+import type { Meta, StoryObj } from "@storybook/react";
+import { useState } from "react";
 import { DateNavigator } from "@/frontend/components/ui/filter/DateNavigator";
 
-function DateNavigatorStory({
-  initialValue = "2024-01-15",
-}: Readonly<{ initialValue?: string }>) {
+function DateNavigatorStory({ initialValue = "2024-01-15" }: Readonly<{ initialValue?: string }>) {
   const [date, setDate] = useState(initialValue);
 
   return (

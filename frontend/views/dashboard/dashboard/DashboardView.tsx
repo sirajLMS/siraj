@@ -3,9 +3,9 @@
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ScheduleOverviewSection } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewSection";
+import { TodayClassesSection } from "@/frontend/views/dashboard/admin/home/components/TodayClassesSection";
 import type { MetricItem, ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
-import { ScheduleOverviewSection } from "../admin/home/components/ScheduleOverviewSection";
-import { TodayClassesSection } from "../admin/home/components/TodayClassesSection";
 
 interface AdminDashboardViewProps extends ScheduleOverviewData {
   readonly todayClassesTitle: string;

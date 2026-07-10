@@ -14,8 +14,8 @@ import {
 import { useEffect, useState } from "react";
 import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
 import { searchSuggestionsQueryDocument } from "@/frontend/graphql/sharedDocuments/suggestion.documents";
-import type { SearchResult } from "../types/suggestions.types";
-import type { SuggestionMarkDuplicateDialogProps } from "../types/suggestionsView.types";
+import type { SearchResult } from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
+import type { SuggestionMarkDuplicateDialogProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 const MIN_SEARCH_LENGTH = 2;
 

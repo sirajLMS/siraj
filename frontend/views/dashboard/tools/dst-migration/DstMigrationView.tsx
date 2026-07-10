@@ -4,6 +4,15 @@ import { ReportProblemOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { CheckedEmptyPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/CheckedEmptyPanel";
+import { ConflictErrorsPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
+import { DstMigrationMetricsRow } from "@/frontend/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
+import { UpdatedSessionsCardList } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
+import { UpdatedSessionsSection } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsSection";
+import {
+  UpdateSchedulesButton,
+  UpdateSchedulesButtonMobile,
+} from "@/frontend/views/dashboard/tools/dst-migration/components/UpdateSchedulesButton";
 import type {
   CheckedEmptyItem,
   ConflictGroup,
@@ -11,12 +20,6 @@ import type {
   MigrationStatus,
   UpdatedSession,
 } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
-import { CheckedEmptyPanel } from "./components/CheckedEmptyPanel";
-import { ConflictErrorsPanel } from "./components/ConflictErrorsPanel";
-import { DstMigrationMetricsRow } from "./components/DstMigrationMetricsRow";
-import { UpdatedSessionsCardList } from "./components/UpdatedSessionsCardList";
-import { UpdatedSessionsSection } from "./components/UpdatedSessionsSection";
-import { UpdateSchedulesButton, UpdateSchedulesButtonMobile } from "./components/UpdateSchedulesButton";
 
 interface Props {
   readonly metrics: DstMigrationMetrics;

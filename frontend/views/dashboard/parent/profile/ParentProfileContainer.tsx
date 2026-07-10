@@ -7,8 +7,8 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentAssociatedStudentsQueryDocument, parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
-import type { ParentProfileData, ParentStudent } from "../types/profile";
-import ParentProfileView from "./ParentProfileView";
+import ParentProfileView from "@/frontend/views/dashboard/parent/profile/ParentProfileView";
+import type { ParentProfileData, ParentStudent } from "@/frontend/views/dashboard/parent/types/profile";
 
 interface ParentProfileContainerProps {
   readonly id: string;
