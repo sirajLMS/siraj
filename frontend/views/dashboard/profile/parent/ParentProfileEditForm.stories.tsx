@@ -2,6 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ParentProfileEditForm } from "@/frontend/views/dashboard/profile/parent/ParentProfileEditForm";
 
 const ownParentData = {
@@ -21,7 +22,7 @@ const adminParentData = {
   invoiceType: "Monthly",
   feeAmount: "500",
   paymentMethod: "Bank Transfer",
-  currency: "SAR",
+  currency: CurrencyCode.Sar,
   timezone: "Asia/Riyadh" as const,
 };
 

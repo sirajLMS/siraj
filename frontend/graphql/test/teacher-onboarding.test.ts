@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { CountryCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-onboarding.documents";
 import {
   authenticatedRequest,
@@ -25,7 +25,7 @@ const createMinimalTeacherInput = (
   phone: "+1234567890",
   gender: Gender.Male,
   hourlyRate: "25.00",
-  rateCurrency: "USD",
+  rateCurrency: CurrencyCode.Usd,
   accountNumber: "1234567890",
   address: "123 Main St",
   bankName: "Bank of America",

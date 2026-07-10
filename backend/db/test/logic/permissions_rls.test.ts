@@ -4,9 +4,9 @@ import { eq, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, students, users } from "@/backend/db/schema";
+import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import type { ParentEntity, StudentEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 /**
  * Helper to create a user with a given name and unique email

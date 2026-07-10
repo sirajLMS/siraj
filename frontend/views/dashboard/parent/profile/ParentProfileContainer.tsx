@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentAssociatedStudentsQueryDocument, parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import ParentProfileView from "@/frontend/views/dashboard/parent/profile/ParentProfileView";
@@ -108,7 +108,7 @@ function mapProfileData(
     invoiceType: profile.invoiceType ?? "",
     feeAmount: profile.feeAmount ? Number(profile.feeAmount) : 0,
     paymentMethod: profile.paymentMethod ?? "",
-    currency: profile.currency ?? "",
+    currency: (profile.currency as CurrencyCode) ?? CurrencyCode.Usd,
     students,
   };
 }

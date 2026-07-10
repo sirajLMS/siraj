@@ -4,9 +4,9 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
-import { Gender } from "@/backend/enum";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode, Gender } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, name: string, email: string, now: Date) {
   const [user] = await tx
@@ -77,7 +77,7 @@ async function createOriginalClassWithRate(tx: DBTransaction, studentId: string,
   return createTestClass(tx, studentId, teacherId, {
     quotaDeducted: true,
     rateAmount: "50.00",
-    rateCurrency: "USD",
+    rateCurrency: CurrencyCode.USD,
   });
 }
 
@@ -188,7 +188,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
 
       const rescheduled = await rescheduleTestClass(tx, original.id, student.id, teacher.id, {
         rateAmount: "60.00",
-        rateCurrency: "USD",
+        rateCurrency: CurrencyCode.USD,
         isRateOverridden: true,
       });
 

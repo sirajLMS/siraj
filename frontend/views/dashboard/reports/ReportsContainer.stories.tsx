@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
@@ -31,8 +31,8 @@ const mockLabels = {
     leave: "Leave",
     pending: "Pending",
     hours: "Hours",
-    paidEgp: "Paid (EGP)",
-    paidUsd: "Paid (USD)",
+    paidEgp: `Paid (${CurrencyCode.Egp})`,
+    paidUsd: `Paid (${CurrencyCode.Usd})`,
     noEntries: "No report data found.",
   },
   summaryLabels: {
@@ -41,8 +41,8 @@ const mockLabels = {
     increase: "Increase",
     financialDistribution: "Currency Split",
     financialSubtitle: "Distribution of payouts",
-    egpLabel: "EGP",
-    usdLabel: "USD",
+    egpLabel: CurrencyCode.Egp,
+    usdLabel: CurrencyCode.Usd,
   },
   totalsLabel: "Totals",
   ledgerTitle: "Attendance Ledger",

@@ -3,6 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import type { AttendanceReportRow } from "@/backend/types/books/report.types";
 
 function reportRepoTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
@@ -83,7 +84,7 @@ async function setupTestData(tx: DBTransaction) {
     actualStartAt: date1,
     actualEndAt: new Date(date1.getTime() + 60 * 60 * 1000),
     rateAmount: "100.00",
-    rateCurrency: "EGP",
+    rateCurrency: CurrencyCode.EGP,
   });
 
   // Instance 2: ABSENT, 90 minutes, rate 150.00 EGP
@@ -94,7 +95,7 @@ async function setupTestData(tx: DBTransaction) {
     outcome: "ABSENT",
     executionState: "COMPLETED",
     rateAmount: "150.00",
-    rateCurrency: "EGP",
+    rateCurrency: CurrencyCode.EGP,
   });
 
   // Instance 3: LEAVE, 120 minutes, rate 50.00 USD
@@ -105,7 +106,7 @@ async function setupTestData(tx: DBTransaction) {
     outcome: "LEAVE",
     executionState: "COMPLETED",
     rateAmount: "50.00",
-    rateCurrency: "USD",
+    rateCurrency: CurrencyCode.USD,
   });
 
   // Instance 4: PENDING, 60 minutes, rate 0.00 EGP
@@ -116,7 +117,7 @@ async function setupTestData(tx: DBTransaction) {
     outcome: "PENDING",
     executionState: "NOT_ACTIVATED",
     rateAmount: "0.00",
-    rateCurrency: "EGP",
+    rateCurrency: CurrencyCode.EGP,
   });
 
   return { student, teacher, teacherUser, date1, date2, date3, date4 };
@@ -197,7 +198,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
       actualStartAt: new Date("2026-05-15T10:00:00Z"),
       actualEndAt: new Date("2026-05-15T11:00:00Z"),
       rateAmount: "300.00",
-      rateCurrency: "EGP",
+      rateCurrency: CurrencyCode.EGP,
     });
 
     const filters = buildMayFilters(teacher.id, ReportGroupingMode.TEACHER);

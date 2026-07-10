@@ -119,6 +119,7 @@ export const CoreUserProfileFieldsInputPothosObject = gqlSchemaBuilder
       name: t.string({ required: false }),
       email: t.string({ required: false }),
       avatarUrl: t.string({ required: false }),
+      displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     }),
   });
 

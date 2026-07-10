@@ -4,9 +4,10 @@ import { desc, eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository } from "@/backend/db/repo";
 import { currencyExchangeAuditLogs, currencyExchangeRates, systemSettings } from "@/backend/db/schema";
+import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { createTestParent, createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -49,8 +50,8 @@ describe("Billing Safeguards & Exchange Rates", () => {
     await runInRollback(async tx => {
       const { adminUser } = await setupBillingTestEntities(tx);
 
-      const from = "EGP";
-      const to = "USD";
+      const from = CurrencyCode.EGP;
+      const to = CurrencyCode.USD;
       const rateValue = "50.000000";
 
       const newRate = await BillingRepository.updateExchangeRate(
@@ -85,8 +86,8 @@ describe("Billing Safeguards & Exchange Rates", () => {
 
   test("Stale rate detection throws error after 24 hours", async () => {
     await runInRollback(async tx => {
-      const from = "GBP";
-      const to = "USD";
+      const from = CurrencyCode.GBP;
+      const to = CurrencyCode.USD;
       const staleDate = new Date(Date.now() - 25 * 60 * 60 * 1000);
 
       await tx.insert(currencyExchangeRates).values({
@@ -109,8 +110,8 @@ describe("Billing Safeguards & Exchange Rates", () => {
     await runInRollback(async tx => {
       const { parent } = await setupBillingTestEntities(tx);
 
-      const from = "EUR";
-      const to = "USD";
+      const from = CurrencyCode.EUR;
+      const to = CurrencyCode.USD;
       const rateValue = "1.080000";
 
       const now = new Date();

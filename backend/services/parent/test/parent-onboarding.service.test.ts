@@ -2,6 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
 
@@ -41,7 +42,7 @@ describe("ParentOnboardingService.createParent", () => {
           invoiceType: "MONTHLY",
           feeAmount: "500.00",
           paymentMethod: "BANK_ACCOUNT",
-          currency: "USD",
+          currency: CurrencyCode.USD,
           timezone: "America/Chicago",
         },
         "en",
@@ -51,7 +52,7 @@ describe("ParentOnboardingService.createParent", () => {
       expect(result.userId).toBeDefined();
       expect(result.parentId).toBeDefined();
       expect(result.invoiceType).toBe("MONTHLY");
-      expect(result.currency).toBe("USD");
+      expect(result.currency).toBe(CurrencyCode.USD);
 
       hasPermissionSpy.mockRestore();
       existsByEmailSpy.mockRestore();

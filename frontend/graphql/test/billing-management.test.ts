@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import type { InvoiceType as InvoiceTypeEnumType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { InvoiceStatus, InvoiceType as InvoiceTypeEnum } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, InvoiceType as InvoiceTypeEnumType } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  CurrencyCode as CurrencyCodeEnum,
+  InvoiceStatus,
+  InvoiceType as InvoiceTypeEnum,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   createManualInvoiceMutationDocument,
   deleteInvoiceMutationDocument,
@@ -24,7 +28,7 @@ function invoiceVars(parentId: string, amount: string) {
     parentId,
     studentId: null as string | null,
     amount,
-    currency: "USD",
+    currency: CurrencyCodeEnum.Usd as CurrencyCode,
     invoiceType: InvoiceTypeEnum.Manual as InvoiceTypeEnumType,
     issueDate: "2026-06-22",
     dueDate: "2026-07-22",
@@ -122,7 +126,7 @@ describe("GraphQL: createManualInvoice mutation", () => {
     expect(data.createManualInvoice?.parentId).toBe(state.parentId);
     expect(data.createManualInvoice?.status).toBe(InvoiceStatus.Unpaid);
     expect(data.createManualInvoice?.amount).toBe("200.00");
-    expect(data.createManualInvoice?.currency).toBe("USD");
+    expect(data.createManualInvoice?.currency).toBe(CurrencyCodeEnum.Usd);
   });
 
   test("teacher role is denied", async () => {

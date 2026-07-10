@@ -4,8 +4,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema/shared/cache";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 describe("Cache Split Routing & Functionality", () => {
   const uid = randomUUID();

@@ -6,7 +6,7 @@ import { BillingRepository } from "@/backend/db/repo";
 import { currencyExchangeAuditLogs, currencyExchangeRates, invoices } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { InvoiceStatus, InvoiceType } from "@/backend/enum";
+import { CurrencyCode, InvoiceStatus, InvoiceType } from "@/backend/enum";
 import { PaginationArgs } from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -38,7 +38,7 @@ async function createOverdueInvoice(
       issueDate: issueDate.toISOString().split("T")[0],
       dueDate: dueDate.toISOString().split("T")[0],
       amount,
-      currency: "USD",
+      currency: CurrencyCode.USD,
       status,
       invoiceType: InvoiceType.MONTHLY,
       idempotencyKey: randomUUID(),
@@ -85,7 +85,7 @@ describe("BillingRepository.getUnpaidInvoicesSummary", () => {
       expect(testItem?.userName).toBe("Billing Parent");
       expect(testItem?.totalUnpaidAmount).toBe("150.00");
       expect(testItem?.overdueCount).toBe(2);
-      expect(testItem?.currency).toBe("USD");
+      expect(testItem?.currency).toBe(CurrencyCode.USD);
     });
   });
 
@@ -161,7 +161,7 @@ describe("BillingRepository — getInvoicesForParent", () => {
       expect(item1?.issueDate).toBe(inv1.issueDate);
       expect(item1?.dueDate).toBe(inv1.dueDate);
       expect(item1?.amount).toBe("120.00");
-      expect(item1?.currency).toBe("USD");
+      expect(item1?.currency).toBe(CurrencyCode.USD);
       expect(item1?.status).toBe(InvoiceStatus.UNPAID);
       expect(item1?.invoiceType).toBe(InvoiceType.MONTHLY);
       expect(item1?.paidDate).toBeNull();
@@ -197,7 +197,7 @@ describe("BillingRepository — getInvoicesForParent", () => {
           issueDate: now.toISOString().split("T")[0],
           dueDate: now.toISOString().split("T")[0],
           amount: "150.00",
-          currency: "USD",
+          currency: CurrencyCode.USD,
           status: InvoiceStatus.UNPAID,
           invoiceType: InvoiceType.MONTHLY,
           idempotencyKey: randomUUID(),
@@ -348,8 +348,8 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
 
 async function insertExchangeRateRow(
   tx: DBTransaction,
-  fromCurrency: string,
-  toCurrency: string,
+  fromCurrency: CurrencyCode,
+  toCurrency: CurrencyCode,
   rate: string,
   source: string,
   effectiveDate: Date
@@ -376,8 +376,8 @@ describe("BillingRepository — updateExchangeRate", () => {
       const now = new Date();
       const result = await BillingRepository.updateExchangeRate(
         {
-          fromCurrency: "USD",
-          toCurrency: "EGP",
+          fromCurrency: CurrencyCode.USD,
+          toCurrency: CurrencyCode.EGP,
           rate: "48.123456",
           source: "cron",
           effectiveDate: now,
@@ -386,8 +386,8 @@ describe("BillingRepository — updateExchangeRate", () => {
         tx
       );
 
-      expect(result.fromCurrency).toBe("USD");
-      expect(result.toCurrency).toBe("EGP");
+      expect(result.fromCurrency).toBe(CurrencyCode.USD);
+      expect(result.toCurrency).toBe(CurrencyCode.EGP);
       expect(result.rate).toBe("48.123456");
 
       const auditRows = await tx
@@ -395,8 +395,8 @@ describe("BillingRepository — updateExchangeRate", () => {
         .from(currencyExchangeAuditLogs)
         .where(
           and(
-            eq(currencyExchangeAuditLogs.fromCurrency, "USD"),
-            eq(currencyExchangeAuditLogs.toCurrency, "EGP"),
+            eq(currencyExchangeAuditLogs.fromCurrency, CurrencyCode.USD),
+            eq(currencyExchangeAuditLogs.toCurrency, CurrencyCode.EGP),
             eq(currencyExchangeAuditLogs.newRate, "48.123456")
           )
         )
@@ -413,12 +413,12 @@ describe("BillingRepository — updateExchangeRate", () => {
   test("records oldRate from previous latest row when updating", async () => {
     await runInRollback(async tx => {
       const earlier = new Date(Date.now() - 2 * 86400000);
-      await insertExchangeRateRow(tx, "USD", "SAR", "3.750000", "seed", earlier);
+      await insertExchangeRateRow(tx, CurrencyCode.USD, CurrencyCode.SAR, "3.750000", "seed", earlier);
 
       const result = await BillingRepository.updateExchangeRate(
         {
-          fromCurrency: "USD",
-          toCurrency: "SAR",
+          fromCurrency: CurrencyCode.USD,
+          toCurrency: CurrencyCode.SAR,
           rate: "3.760000",
           source: "manual",
           effectiveDate: new Date(),
@@ -434,8 +434,8 @@ describe("BillingRepository — updateExchangeRate", () => {
         .from(currencyExchangeAuditLogs)
         .where(
           and(
-            eq(currencyExchangeAuditLogs.fromCurrency, "USD"),
-            eq(currencyExchangeAuditLogs.toCurrency, "SAR"),
+            eq(currencyExchangeAuditLogs.fromCurrency, CurrencyCode.USD),
+            eq(currencyExchangeAuditLogs.toCurrency, CurrencyCode.SAR),
             eq(currencyExchangeAuditLogs.newRate, "3.760000")
           )
         )
@@ -456,8 +456,8 @@ describe("BillingRepository — updateExchangeRateInTx", () => {
       const now = new Date();
       const result = await BillingRepository.updateExchangeRateInTx(
         {
-          fromCurrency: "EUR",
-          toCurrency: "USD",
+          fromCurrency: CurrencyCode.EUR,
+          toCurrency: CurrencyCode.USD,
           rate: "1.085000",
           source: "openexchangerates",
           effectiveDate: now,
@@ -466,7 +466,7 @@ describe("BillingRepository — updateExchangeRateInTx", () => {
         tx
       );
 
-      expect(result.fromCurrency).toBe("EUR");
+      expect(result.fromCurrency).toBe(CurrencyCode.EUR);
       expect(result.rate).toBe("1.085000");
 
       const auditRows = await tx
@@ -474,8 +474,8 @@ describe("BillingRepository — updateExchangeRateInTx", () => {
         .from(currencyExchangeAuditLogs)
         .where(
           and(
-            eq(currencyExchangeAuditLogs.fromCurrency, "EUR"),
-            eq(currencyExchangeAuditLogs.toCurrency, "USD"),
+            eq(currencyExchangeAuditLogs.fromCurrency, CurrencyCode.EUR),
+            eq(currencyExchangeAuditLogs.toCurrency, CurrencyCode.USD),
             eq(currencyExchangeAuditLogs.newRate, "1.085000")
           )
         )
@@ -495,21 +495,21 @@ describe("BillingRepository — listLatestExchangeRates", () => {
       const older = new Date(Date.now() - 3 * 86400000);
       const newer = new Date(Date.now() - 1 * 86400000);
 
-      await insertExchangeRateRow(tx, "USD", "EGP", "47.000000", "seed", older);
-      await insertExchangeRateRow(tx, "USD", "EGP", "48.500000", "cron", newer);
-      await insertExchangeRateRow(tx, "USD", "SAR", "3.750000", "seed", older);
+      await insertExchangeRateRow(tx, CurrencyCode.USD, CurrencyCode.EGP, "47.000000", "seed", older);
+      await insertExchangeRateRow(tx, CurrencyCode.USD, CurrencyCode.EGP, "48.500000", "cron", newer);
+      await insertExchangeRateRow(tx, CurrencyCode.USD, CurrencyCode.SAR, "3.750000", "seed", older);
 
       const result = await BillingRepository.listLatestExchangeRates(null, tx);
 
-      const egpRow = result.find(r => r.fromCurrency === "USD" && r.toCurrency === "EGP");
+      const egpRow = result.find(r => r.fromCurrency === CurrencyCode.USD && r.toCurrency === CurrencyCode.EGP);
       expect(egpRow).toBeDefined();
       expect(egpRow?.rate).toBe("48.500000");
 
-      const sarRow = result.find(r => r.fromCurrency === "USD" && r.toCurrency === "SAR");
+      const sarRow = result.find(r => r.fromCurrency === CurrencyCode.USD && r.toCurrency === CurrencyCode.SAR);
       expect(sarRow).toBeDefined();
       expect(sarRow?.rate).toBe("3.750000");
 
-      const egpCount = result.filter(r => r.toCurrency === "EGP").length;
+      const egpCount = result.filter(r => r.toCurrency === CurrencyCode.EGP).length;
       expect(egpCount).toBe(1);
     });
   });
@@ -521,11 +521,11 @@ describe("BillingRepository — listExchangeRateHistory", () => {
       const within = new Date(Date.now() - 5 * 86400000);
       const outside = new Date(Date.now() - 200 * 86400000);
 
-      await insertExchangeRateRow(tx, "USD", "AED", "3.670000", "seed", within);
-      await insertExchangeRateRow(tx, "USD", "AED", "3.680000", "cron", new Date());
-      await insertExchangeRateRow(tx, "USD", "AED", "3.500000", "old", outside);
+      await insertExchangeRateRow(tx, CurrencyCode.USD, CurrencyCode.AED, "3.670000", "seed", within);
+      await insertExchangeRateRow(tx, CurrencyCode.USD, CurrencyCode.AED, "3.680000", "cron", new Date());
+      await insertExchangeRateRow(tx, CurrencyCode.USD, CurrencyCode.AED, "3.500000", "old", outside);
 
-      const result = await BillingRepository.listExchangeRateHistory("USD", "AED", null, 90, tx);
+      const result = await BillingRepository.listExchangeRateHistory(CurrencyCode.USD, CurrencyCode.AED, null, 90, tx);
 
       expect(result.id).toBe("exchange-rate-history-USD-AED");
       expect(result.rows).toHaveLength(2);
@@ -542,7 +542,14 @@ describe("BillingRepository — listExchangeRateHistory", () => {
       const now = new Date();
       const baseTime = now.getTime();
       for (let i = 0; i < 3; i++) {
-        await insertExchangeRateRow(tx, "USD", "KWD", `${0.307 + i / 1000}`, "seed", new Date(baseTime - i * 86400000));
+        await insertExchangeRateRow(
+          tx,
+          CurrencyCode.USD,
+          CurrencyCode.KWD,
+          `${0.307 + i / 1000}`,
+          "seed",
+          new Date(baseTime - i * 86400000)
+        );
       }
 
       const pagination = new PaginationArgs({
@@ -551,7 +558,13 @@ describe("BillingRepository — listExchangeRateHistory", () => {
         maxCount: 100,
       });
 
-      const result = await BillingRepository.listExchangeRateHistory("USD", "KWD", pagination, 90, tx);
+      const result = await BillingRepository.listExchangeRateHistory(
+        CurrencyCode.USD,
+        CurrencyCode.KWD,
+        pagination,
+        90,
+        tx
+      );
 
       expect(result.rows).toHaveLength(2);
       expect(result.totalCount).toBe(3);

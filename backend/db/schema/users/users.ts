@@ -13,6 +13,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { currencyCodeEnum } from "@/backend/db/schema/enums";
+import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
@@ -31,6 +33,7 @@ export const users = pgTable(
     isActive: boolean("is_active").notNull().default(true),
     isSuperAdmin: boolean("is_super_admin").notNull().default(false),
     timezone: varchar("timezone", { length: 100 }).notNull().default(IanaTimezone.UTC),
+    displayCurrency: currencyCodeEnum("display_currency").$type<CurrencyCode>(),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),

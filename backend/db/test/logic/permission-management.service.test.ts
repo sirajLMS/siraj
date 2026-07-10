@@ -3,11 +3,11 @@ import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups, permissions, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
 import { getErrorMessage } from "@/shared/utils/error";
-import { runInRollback } from "../test-utils";
 
 function loc(en: string, ar?: string) {
   return { ar: ar ?? en, en };

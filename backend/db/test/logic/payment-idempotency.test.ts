@@ -4,9 +4,10 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { invoices, parents, payments, students, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import type { InvoiceInsertType, PaymentInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 async function createTestParent(args: { tx: DBTransaction; suffix: string; now: Date }) {
   const { tx, suffix, now } = args;
@@ -66,7 +67,7 @@ async function createTestInvoice(args: {
     issueDate: "2026-06-09",
     dueDate: "2026-06-16",
     amount: "100.00",
-    currency: "USD",
+    currency: CurrencyCode.USD,
     status: "UNPAID",
     invoiceType: "PER_CLASSES",
     idempotencyKey: `inv-${suffix}`,
@@ -104,7 +105,7 @@ describe("Payment Idempotency", () => {
       const paymentInput1: PaymentInsertType = {
         invoiceId: invoiceRecord.id,
         amount: "100.00",
-        currency: "USD",
+        currency: CurrencyCode.USD,
         paymentDate: now,
         paymentMethod: "PAYPAL",
         idempotencyKey,
@@ -118,7 +119,7 @@ describe("Payment Idempotency", () => {
       const paymentInput2: PaymentInsertType = {
         invoiceId: invoiceRecord.id,
         amount: "100.00",
-        currency: "USD",
+        currency: CurrencyCode.USD,
         paymentDate: now,
         paymentMethod: "PAYPAL",
         idempotencyKey,

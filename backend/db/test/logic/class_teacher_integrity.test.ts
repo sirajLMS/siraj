@@ -4,13 +4,13 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { ParentEntity } from "@/backend/types/parents/parent.types";
 import type { StudentEntity } from "@/backend/types/students/student.types";
 import type { TeacherEntity } from "@/backend/types/teachers/teacher.types";
 import type { UserSelectType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, name: string, email: string) {
   const now = new Date();

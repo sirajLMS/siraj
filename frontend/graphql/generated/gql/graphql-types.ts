@@ -128,6 +128,8 @@ export enum AppPermission {
   ParentViewOwnProfile = 'PARENT_VIEW_OWN_PROFILE',
   ParentViewProfile = 'PARENT_VIEW_PROFILE',
   ParentViewStudents = 'PARENT_VIEW_STUDENTS',
+  PaymentMethodsManageCatalogs = 'PAYMENT_METHODS_MANAGE_CATALOGS',
+  PaymentMethodsVerifyBankTransfer = 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER',
   PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',
   PermissionGroupsManage = 'PERMISSION_GROUPS_MANAGE',
   ReportsGenerate = 'REPORTS_GENERATE',
@@ -629,6 +631,7 @@ export type ComplaintSubmitInput = {
 
 export type CoreUserProfileFieldsInput = {
   avatarUrl: InputMaybe<Scalars['String']['input']>;
+  displayCurrency: InputMaybe<CurrencyCode>;
   email: InputMaybe<Scalars['String']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
 };
@@ -4473,6 +4476,7 @@ export type User = {
   __typename?: 'User';
   avatarUrl: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
+  displayCurrency: Maybe<CurrencyCode>;
   email: Maybe<Scalars['String']['output']>;
   emailVerifiedAt: Maybe<Scalars['DateTime']['output']>;
   id: Maybe<Scalars['String']['output']>;

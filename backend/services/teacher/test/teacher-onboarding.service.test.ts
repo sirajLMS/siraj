@@ -2,6 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, TeacherBankingRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
@@ -45,7 +46,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
           phone: "+1234567890",
           gender: "MALE",
           hourlyRate: "30.00",
-          rateCurrency: "USD",
+          rateCurrency: CurrencyCode.USD,
           beneficiaryName: "John Doe",
           bankName: "Test Bank",
           accountNumber: "123456789",

@@ -99,7 +99,7 @@ describe("Parent Onboarding GraphQL API", () => {
     expect(result.createParent.userId).toBeDefined();
     expect(result.createParent.parentId).toBeDefined();
     expect(result.createParent.invoiceType).toBe("MONTHLY");
-    expect(result.createParent.currency).toBe("USD");
+    expect(result.createParent.currency).toBe(CurrencyCode.Usd);
   });
 
   test("Super Admin can create parent", async () => {

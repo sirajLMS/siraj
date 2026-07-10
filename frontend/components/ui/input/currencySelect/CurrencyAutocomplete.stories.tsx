@@ -2,13 +2,14 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { CurrencyAutocomplete } from "@/frontend/components/ui/input/currencySelect/CurrencyAutocomplete";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyOptions } from "@/frontend/lib/currency";
 
 function CurrencyAutocompleteStory({
   initialCurrencyCode,
   onChangeAction: _onChangeAction,
   ...props
-}: Readonly<React.ComponentProps<typeof CurrencyAutocomplete> & { initialCurrencyCode?: string }>) {
+}: Readonly<React.ComponentProps<typeof CurrencyAutocomplete> & { initialCurrencyCode?: CurrencyCode }>) {
   const options = getCurrencyOptions();
   const [currency, setCurrency] = useState<CurrencyOption | null>(() =>
     initialCurrencyCode ? (options.find(option => option.code === initialCurrencyCode) ?? null) : null
@@ -32,7 +33,7 @@ type Story = StoryObj<typeof CurrencyAutocompleteStory>;
 
 export const Default: Story = {
   args: {
-    initialCurrencyCode: "SAR",
+    initialCurrencyCode: CurrencyCode.Sar,
   },
 };
 
@@ -40,21 +41,21 @@ export const Empty: Story = {};
 
 export const Required: Story = {
   args: {
-    initialCurrencyCode: "EGP",
+    initialCurrencyCode: CurrencyCode.Egp,
     required: true,
   },
 };
 
 export const Disabled: Story = {
   args: {
-    initialCurrencyCode: "SAR",
+    initialCurrencyCode: CurrencyCode.Sar,
     disabled: true,
   },
 };
 
 export const WithoutSymbol: Story = {
   args: {
-    initialCurrencyCode: "USD",
+    initialCurrencyCode: CurrencyCode.Usd,
     showSymbol: false,
   },
 };
@@ -62,6 +63,6 @@ export const WithoutSymbol: Story = {
 export const Arabic: Story = {
   globals: { locale: "ar" },
   args: {
-    initialCurrencyCode: "SAR",
+    initialCurrencyCode: CurrencyCode.Sar,
   },
 };

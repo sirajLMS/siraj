@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { currencyExchangeRates } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import type { CurrencyExchangeRateInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 describe("Currency Exchange Rates", () => {
   test("Composite unique constraint prevents duplicate rates for same effective date", async () => {
@@ -13,8 +14,8 @@ describe("Currency Exchange Rates", () => {
       const effectiveDate = new Date(Date.UTC(2026, 5, 9, 12, 0, 0));
 
       const exchangeRateInput1: CurrencyExchangeRateInsertType = {
-        fromCurrency: "USD",
-        toCurrency: "EUR",
+        fromCurrency: CurrencyCode.USD,
+        toCurrency: CurrencyCode.EUR,
         rate: "0.920000",
         effectiveDate,
         createdAt: now,
@@ -22,8 +23,8 @@ describe("Currency Exchange Rates", () => {
       };
 
       const exchangeRateInput2: CurrencyExchangeRateInsertType = {
-        fromCurrency: "USD",
-        toCurrency: "EUR",
+        fromCurrency: CurrencyCode.USD,
+        toCurrency: CurrencyCode.EUR,
         rate: "0.930000",
         effectiveDate,
         createdAt: now,

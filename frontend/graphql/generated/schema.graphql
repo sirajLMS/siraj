@@ -100,6 +100,8 @@ enum AppPermission {
   PARENT_VIEW_OWN_PROFILE
   PARENT_VIEW_PROFILE
   PARENT_VIEW_STUDENTS
+  PAYMENT_METHODS_MANAGE_CATALOGS
+  PAYMENT_METHODS_VERIFY_BANK_TRANSFER
   PERMISSION_GROUPS_ASSIGN
   PERMISSION_GROUPS_MANAGE
   REPORTS_GENERATE
@@ -583,6 +585,7 @@ input ComplaintSubmitInput {
 
 input CoreUserProfileFieldsInput {
   avatarUrl: String
+  displayCurrency: CurrencyCode
   email: String
   name: String
 }
@@ -3613,6 +3616,7 @@ enum UploadType {
 type User {
   avatarUrl: String
   createdAt: DateTime
+  displayCurrency: CurrencyCode
   email: String
   emailVerifiedAt: DateTime
   id: String

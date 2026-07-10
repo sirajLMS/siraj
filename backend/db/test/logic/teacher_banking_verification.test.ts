@@ -3,10 +3,10 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { TeacherBankingRepository } from "@/backend/db/repo/teachers/teacher-banking.repository";
 import { teachers, users } from "@/backend/db/schema";
-import { NotificationEventType } from "@/backend/enum";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode, NotificationEventType } from "@/backend/enum";
 import type { TeacherEntity, UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 async function createTeacherWithAdmin(tx: DBTransaction): Promise<{
   teacher: TeacherEntity;
@@ -82,7 +82,7 @@ describe("Teacher Banking Verification & Payments", () => {
           {
             teacherId: teacher.id,
             amount: "100.00",
-            currency: "USD",
+            currency: CurrencyCode.USD,
             paymentDate: new Date(),
           },
           tx
@@ -109,7 +109,7 @@ describe("Teacher Banking Verification & Payments", () => {
         {
           teacherId: teacher.id,
           amount: "100.00",
-          currency: "USD",
+          currency: CurrencyCode.USD,
           paymentDate: new Date(),
         },
         tx
@@ -140,7 +140,7 @@ describe("Teacher Banking Verification & Payments", () => {
         {
           teacherId: teacher.id,
           amount: "1.00",
-          currency: "USD",
+          currency: CurrencyCode.USD,
           paymentDate: new Date(),
           isTestPayment: true,
         },
@@ -181,7 +181,7 @@ describe("Teacher Banking Verification & Payments", () => {
         {
           teacherId: teacher.id,
           amount: "200.00",
-          currency: "USD",
+          currency: CurrencyCode.USD,
           paymentDate: new Date(),
         },
         tx
@@ -210,7 +210,7 @@ describe("Teacher Banking Verification & Payments", () => {
         {
           teacherId: teacher.id,
           amount: "300.00",
-          currency: "USD",
+          currency: CurrencyCode.USD,
           paymentDate: new Date(),
         },
         tx

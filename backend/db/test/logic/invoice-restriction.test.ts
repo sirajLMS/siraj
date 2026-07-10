@@ -2,9 +2,10 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { invoices, parents, students, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import type { InvoiceInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 describe("Invoice Referential Integrity", () => {
   test("Deleting a student with associated invoices is blocked by restrict constraint", async () => {
@@ -56,7 +57,7 @@ describe("Invoice Referential Integrity", () => {
         issueDate: "2026-06-09",
         dueDate: "2026-06-16",
         amount: "100.00",
-        currency: "USD",
+        currency: CurrencyCode.USD,
         status: "UNPAID",
         invoiceType: "PER_CLASSES",
         idempotencyKey: `inv-${uniqueSuffix}`,

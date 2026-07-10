@@ -15,7 +15,7 @@ export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"][
       .refine(value => isValidIanaTimezoneId(value), { message: messages.timezoneRequired }),
     address: z.string().optional(),
     baseSalary: z.coerce.number().min(0),
-    currency: z.enum(CurrencyCode).optional(),
+    currency: z.enum(CurrencyCode).nullable().optional(),
     paymentMethod: z.enum(["PAYPAL", "BANK_ACCOUNT"]),
     zoomLink: z.url().or(z.literal("")),
     accountStatus: z.boolean(),

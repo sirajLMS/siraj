@@ -7,7 +7,7 @@ import { TeacherRepository } from "@/backend/db/repo";
 import { teachers, users } from "@/backend/db/schema";
 import { createTestUser, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { AccountStatus } from "@/backend/enum";
+import { AccountStatus, CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PaginationArgs } from "@/backend/types";
 
@@ -161,7 +161,7 @@ describe("TeacherRepository", () => {
             phone: "+1234567890",
             gender: "MALE",
             hourlyRate: "25.00",
-            rateCurrency: "USD",
+            rateCurrency: CurrencyCode.USD,
             createdAt: new Date(),
             updatedAt: new Date(),
           },

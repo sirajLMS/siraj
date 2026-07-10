@@ -3,11 +3,11 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { StudentEntity, TeacherEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { createTestParent, createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 async function setupTestParent(tx: DBTransaction) {
   const user = await createTestUser(tx, {

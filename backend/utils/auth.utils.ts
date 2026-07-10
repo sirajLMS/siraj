@@ -2,7 +2,7 @@ import { AccountStatus, UserRole } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
 
-type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId">;
+type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId" | "displayCurrency">;
 
 export namespace AuthUtils {
   export const validateUserName = (name: string) => {
@@ -23,6 +23,7 @@ export namespace AuthUtils {
       status: resolved.status ?? AccountStatus.ACTIVATED,
       teacherId: resolved.teacherId ?? null,
       parentId: resolved.parentId ?? null,
+      displayCurrency: resolved.displayCurrency ?? null,
       timezone: user.timezone as IanaTimezone,
     };
   };

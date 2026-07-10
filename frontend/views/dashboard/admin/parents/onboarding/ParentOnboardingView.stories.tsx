@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useForm } from "react-hook-form";
-import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ParentOnboardingView } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
@@ -18,7 +18,7 @@ const defaultValues: ParentOnboardingFormData = {
   invoiceType: InvoiceType.Monthly,
   feeAmount: "",
   paymentMethod: PaymentMethod.Paypal,
-  currency: "USD",
+  currency: CurrencyCode.Usd,
   timezone: IanaTimezone.AfricaCairo,
 };
 

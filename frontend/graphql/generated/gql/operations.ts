@@ -66,6 +66,8 @@ export type AppPermission =
   | 'PARENT_VIEW_OWN_PROFILE'
   | 'PARENT_VIEW_PROFILE'
   | 'PARENT_VIEW_STUDENTS'
+  | 'PAYMENT_METHODS_MANAGE_CATALOGS'
+  | 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER'
   | 'PERMISSION_GROUPS_ASSIGN'
   | 'PERMISSION_GROUPS_MANAGE'
   | 'REPORTS_GENERATE'
@@ -287,6 +289,7 @@ export type ComplaintSubmitInput = {
 
 export type CoreUserProfileFieldsInput = {
   avatarUrl: string | null | undefined;
+  displayCurrency: CurrencyCode | null | undefined;
   email: string | null | undefined;
   name: string | null | undefined;
 };

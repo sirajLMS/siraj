@@ -4,10 +4,10 @@ import { config } from "dotenv";
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo";
 import { users } from "@/backend/db/schema";
+import { IP_ADDRESS_1, IP_ADDRESS_2 } from "@/backend/db/test/const";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { IP_ADDRESS_1, IP_ADDRESS_2 } from "../const";
 
 config({ path: ".env.redis", override: true });
 

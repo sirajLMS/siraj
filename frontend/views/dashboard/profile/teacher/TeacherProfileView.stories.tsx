@@ -2,7 +2,13 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AccountStatus, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AccountStatus,
+  CurrencyCode,
+  Gender,
+  IanaTimezone,
+  PaymentMethod,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   TeacherAdminData,
   TeacherOwnData,
@@ -16,7 +22,7 @@ const teacherOwnProfile: TeacherOwnData = {
   phone: "+966 50 123 4567",
   timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
-  rateCurrency: "USD",
+  rateCurrency: CurrencyCode.Usd,
   paymentMethod: PaymentMethod.Paypal,
   zoomLink: "https://zoom.us/j/teacher123",
   totalClasses: 128,
@@ -37,7 +43,7 @@ const teacherAdminProfile: TeacherAdminData = {
   hasZoomPassword: true,
   timezone: IanaTimezone.AsiaRiyadh,
   hourlyRate: "45.00",
-  rateCurrency: "USD",
+  rateCurrency: CurrencyCode.Usd,
   status: AccountStatus.Activated,
   updatedAt: "2024-06-01T00:00:00.000Z",
   paymentMethod: PaymentMethod.Paypal,

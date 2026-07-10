@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, Gender, IanaTimezone, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import {
   teacherProfileForEditQueryDocument,
@@ -216,7 +216,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           paymentMethod: PaymentMethod.BankAccount,
           phone: "+1111111111",
           qualifications: "None",
-          rateCurrency: "USD",
+          rateCurrency: CurrencyCode.Usd,
           status: null,
           timezone: IanaTimezone.Utc,
           zoomLink: "https://zoom.us/j/123",
@@ -281,7 +281,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           paymentMethod: PaymentMethod.Paypal,
           phone: null,
           qualifications: "Certified Instructor",
-          rateCurrency: "USD",
+          rateCurrency: CurrencyCode.Usd,
           status: null,
           timezone: IanaTimezone.Utc,
           zoomLink: null,

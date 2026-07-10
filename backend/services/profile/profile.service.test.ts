@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import { CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { isRedirect, toParentRepoInput } from "@/backend/services";
 
@@ -32,7 +32,7 @@ describe("toParentRepoInput", () => {
       invoiceType: "monthly",
       feeAmount: "500",
       paymentMethod: "bank_transfer",
-      currency: "SAR",
+      currency: CurrencyCode.SAR,
       timezone: IanaTimezone.Asia_Riyadh,
     };
 
@@ -47,7 +47,7 @@ describe("toParentRepoInput", () => {
       invoiceType: "monthly",
       feeAmount: "500",
       paymentMethod: "bank_transfer",
-      currency: "SAR",
+      currency: CurrencyCode.SAR,
       timezone: IanaTimezone.Asia_Riyadh,
     });
   });

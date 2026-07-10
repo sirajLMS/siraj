@@ -45,6 +45,7 @@ function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; isActive: bo
     avatarUrl: null,
     lastLoginAt: null,
     timezone: IanaTimezone.UTC,
+    displayCurrency: null,
   });
 }
 

@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo";
 import { users } from "@/backend/db/schema";
-import { closeRlsClients, queryAsRlsRole, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { closeRlsClients, queryAsRlsRole, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 
 describe("Row Level Security and Soft Delete", () => {
   beforeAll(async () => {

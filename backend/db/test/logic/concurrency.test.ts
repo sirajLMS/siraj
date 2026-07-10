@@ -3,8 +3,9 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository, StudentRepository } from "@/backend/db/repo";
 import { invoices, parents, students, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 const getCommonDates = () => ({ createdAt: new Date(), updatedAt: new Date() });
 
@@ -57,7 +58,7 @@ async function setupInvoiceTest(tx: DBTransaction, suffix: string) {
       issueDate: "2024-01-01",
       dueDate: "2024-01-31",
       amount: "100.00",
-      currency: "USD",
+      currency: CurrencyCode.USD,
       status: "UNPAID",
       invoiceType: "MONTHLY",
       idempotencyKey: `invoice-${Date.now()}-${suffix.replace(/\s+/g, "-")}`,

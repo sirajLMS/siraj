@@ -14,6 +14,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
       teacherId
       parentId
       staffProfileId
+      displayCurrency
       teacherOwnProfile {
         id
         name
@@ -169,6 +170,7 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
       teacherId
       parentId
       staffProfileId
+      displayCurrency
       teacherOwnProfile {
         id
         name
@@ -216,6 +218,7 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
       teacherId
       parentId
       staffProfileId
+      displayCurrency
       teacherAdminProfile {
         id
         name

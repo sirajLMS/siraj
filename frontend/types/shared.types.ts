@@ -9,6 +9,7 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type {
   CountryCode,
+  CurrencyCode,
   Gender,
   InvoiceType,
   ManagerOnboardingInput,
@@ -171,7 +172,7 @@ export type ParentOnboardingFormData = Omit<
   phone: string;
   address: string;
   feeAmount: string;
-  currency: string;
+  currency: CurrencyCode;
   invoiceType: InvoiceType;
   paymentMethod: PaymentMethod;
   timezone: string;
@@ -198,7 +199,7 @@ export type TeacherOnboardingFormData = Omit<
   countryCode: CountryCode;
   timezone: string;
   hourlyRate: string;
-  rateCurrency: string;
+  rateCurrency: CurrencyCode;
   beneficiaryName: string;
   bankName: string;
   accountNumber: string;

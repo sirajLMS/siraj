@@ -17,12 +17,12 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo";
 import { auditLogs, users } from "@/backend/db/schema";
-import { type AccountStatus, StudentStatus, type UserRole } from "@/backend/enum";
+import { IP_ADDRESS_1 } from "@/backend/db/test/const";
+import { type AccountStatus, CurrencyCode, StudentStatus, type UserRole } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { IP_ADDRESS_1 } from "../const";
 
 describe("Audit Trail System", () => {
   let testUser1: UserReturnType;
@@ -112,15 +112,15 @@ describe("Audit Trail System", () => {
       entityId: "00000000-0000-0000-0000-000000000002",
       action: "UPDATE",
       description: "Updated invoice amount",
-      previousState: { amount: 100, currency: "USD" },
-      newState: { amount: 150, currency: "USD" },
+      previousState: { amount: 100, currency: CurrencyCode.USD },
+      newState: { amount: 150, currency: CurrencyCode.USD },
       changes: { amount: { from: 100, to: 150 } },
     } as CreateAuditLogInput;
 
     const auditLog = await AuditRepository.createAuditLog(input);
 
-    expect(auditLog.previousState).toEqual({ amount: 100, currency: "USD" });
-    expect(auditLog.newState).toEqual({ amount: 150, currency: "USD" });
+    expect(auditLog.previousState).toEqual({ amount: 100, currency: CurrencyCode.USD });
+    expect(auditLog.newState).toEqual({ amount: 150, currency: CurrencyCode.USD });
     expect(auditLog.changes).toEqual({ amount: { from: 100, to: 150 } });
 
     testLogger.info("Audit log with state changes created", { auditLogId: auditLog.id });
@@ -138,7 +138,7 @@ describe("Audit Trail System", () => {
       userAgent: "Mozilla/5.0",
       metadata: {
         refundAmount: 50,
-        currency: "USD",
+        currency: CurrencyCode.USD,
         reason: "Duplicate payment",
       },
     } as CreateAuditLogInput;
@@ -150,7 +150,7 @@ describe("Audit Trail System", () => {
     expect(auditLog.ipAddress).toBe(IP_ADDRESS_1);
     expect(auditLog.metadata).toEqual({
       refundAmount: 50,
-      currency: "USD",
+      currency: CurrencyCode.USD,
       reason: "Duplicate payment",
     });
 
@@ -276,7 +276,7 @@ describe("Audit Trail System", () => {
     const auditLog = await AuditRepository.logPaymentRefund({
       paymentId,
       refundAmount: 50,
-      currency: "USD",
+      currency: CurrencyCode.USD,
       actorUserId: testUser1.id,
       reason: "Customer requested refund",
     });
@@ -285,7 +285,7 @@ describe("Audit Trail System", () => {
     expect(auditLog.action).toBe("REFUND");
     expect(auditLog.metadata).toEqual({
       refundAmount: 50,
-      currency: "USD",
+      currency: CurrencyCode.USD,
       reason: "Customer requested refund",
     });
     testLogger.info("Payment refund logged", { auditLogId: auditLog.id });
@@ -312,8 +312,8 @@ describe("Audit Trail System", () => {
 
     const auditLog = await AuditRepository.logExchangeRateUpdate({
       rateId,
-      fromCurrency: "USD",
-      toCurrency: "EUR",
+      fromCurrency: CurrencyCode.USD,
+      toCurrency: CurrencyCode.EUR,
       oldRate: 0.85,
       newRate: 0.87,
       actorUserId: testUser1.id,

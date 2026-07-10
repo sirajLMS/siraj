@@ -9,7 +9,10 @@ import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission as AppPermissionEnum } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission as AppPermissionEnum,
+  CurrencyCode as CurrencyCodeEnum,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { createAppTheme } from "@/frontend/providers/theme/theme";
 import { useUserStore } from "@/frontend/stores/userStore";
 import ar from "@/shared/messages/ar";
@@ -125,6 +128,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
       updatedAt: new Date().toISOString(),
       emailVerifiedAt: new Date().toISOString(),
       email: "admin@example.com",
+      displayCurrency: CurrencyCodeEnum.Usd,
       __typename: "User" as const,
     };
 

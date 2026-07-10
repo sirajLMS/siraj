@@ -1,5 +1,3 @@
-"use client";
-
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
@@ -47,7 +45,7 @@ export function TeacherProfileContainer() {
             timezone: toGraphqlIanaTimezone(formData.timezone),
             address: formData.address || null,
             hourlyRate: String(formData.baseSalary),
-            rateCurrency: formData.currency,
+            rateCurrency: formData.currency ?? CurrencyCode.Usd,
             paymentMethod: formData.paymentMethod as PaymentMethod,
             status: null,
             zoomLink: formData.zoomLink || null,
@@ -78,7 +76,7 @@ export function TeacherProfileContainer() {
         timezone: data.teacherProfileForEdit.timezone ?? "",
         address: data.teacherProfileForEdit.address ?? "",
         baseSalary: Number.parseFloat(data.teacherProfileForEdit.hourlyRate ?? "0"),
-        currency: data.teacherProfileForEdit.rateCurrency ?? CurrencyCode.Usd,
+        currency: (data.teacherProfileForEdit.rateCurrency as CurrencyCode) ?? CurrencyCode.Usd,
         paymentMethod: data.teacherProfileForEdit.paymentMethod ?? null,
         zoomLink: data.teacherProfileForEdit.zoomLink ?? "",
         accountStatus: data.teacherProfileForEdit.status === GqlAccountStatus.Activated,

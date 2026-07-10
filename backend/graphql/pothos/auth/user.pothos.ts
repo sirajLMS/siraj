@@ -1,6 +1,6 @@
 import { UserRepository } from "@/backend/db/repo";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { AppPermissionPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { AppPermissionPothosEnum, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { UserReturnType } from "@/backend/types/auth/auth.types";
 
@@ -32,6 +32,11 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
     }),
     role: t.string({
       resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.role),
+    }),
+    displayCurrency: t.field({
+      type: CurrencyCodePothosObject,
+      nullable: true,
+      resolve: user => user.displayCurrency,
     }),
     teacherId: t.string({
       nullable: true,

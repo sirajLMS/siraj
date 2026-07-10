@@ -1,4 +1,4 @@
-import type { teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
+import type { teacherPayments, teachers } from "@/backend/db/schema";
 import type {
   AccountStatus,
   ClassExecutionState,
@@ -6,7 +6,6 @@ import type {
   ClassType,
   CurrencyCode,
   Gender,
-  PaymentMethod,
   StudentStatus,
 } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -16,42 +15,18 @@ import type { PageInfo } from "@/backend/types/shared/pagination.types";
 export type TeacherEntity = typeof teachers.$inferSelect;
 export type TeacherEntityInput = typeof teachers.$inferInsert;
 
-export type TeacherBankingDetailsHistorySelectType = typeof teacherBankingDetailsHistory.$inferSelect;
-export type TeacherBankingDetailsHistoryInsertInput = typeof teacherBankingDetailsHistory.$inferInsert;
-
-export type TeacherBankingSummaryReturnType = {
-  readonly id: string;
-  readonly beneficiaryName: string;
-  readonly bankName: string;
-  readonly accountNumber: string;
-  readonly routingNumber: string | null;
-  readonly swiftBic: string;
-  readonly iban: string | null;
-  readonly verifiedAt: string | null;
-  readonly verifiedByUserId: string | null;
-  readonly verifiedByName: string | null;
-};
-
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
 export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;
 
 // TeacherPaymentReturnType removed — was unused. Re-create from TeacherPaymentSelectType if needed (Omit bankingDetailsHistoryId).
 
-export type SubmitBankingDetailsInput = Pick<
-  TeacherBankingDetailsHistoryInsertInput,
-  "teacherId" | "beneficiaryName" | "bankName" | "accountNumber" | "routingNumber" | "swiftBic" | "iban"
->;
-
-export type VerifyBankingDetailsInput = {
-  bankingDetailsId: string;
-};
-
 export type CreateTeacherPaymentInput = {
-  teacherId: string;
-  amount: string;
-  currency: CurrencyCode;
-  paymentDate: Date;
-  isTestPayment?: boolean;
+  readonly teacherId: string;
+  readonly amount: string;
+  readonly currency: CurrencyCode;
+  readonly paymentDate: Date;
+  readonly userPaymentMethodId: string | null;
+  readonly isTestPayment?: boolean;
 };
 
 export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "status" | "createdAt"> & {
@@ -119,7 +94,6 @@ export type TeacherProfileReturnType = Omit<
   email: string;
   status: AccountStatus;
   gender: Gender | null;
-  paymentMethod: PaymentMethod | null;
   dateOfBirth: string | null;
   updatedAt: string;
   timezone: IanaTimezone;
@@ -136,7 +110,6 @@ export type TeacherProfileUpdateInputType = Partial<
 > & {
   readonly status?: AccountStatus | null;
   readonly gender?: Gender | null;
-  readonly paymentMethod?: PaymentMethod | null;
   readonly timezone?: IanaTimezone | null;
 };
 
@@ -192,7 +165,6 @@ export type TeacherOwnProfileReturnType = {
   timezone: IanaTimezone;
   hourlyRate: string | null;
   rateCurrency: CurrencyCode | null;
-  paymentMethod: PaymentMethod | null;
   zoomLink: string | null;
   totalClasses: number;
 };

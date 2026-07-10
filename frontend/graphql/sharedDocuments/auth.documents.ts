@@ -17,6 +17,7 @@ export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
       notificationCount
       teacherId
       parentId
+      displayCurrency
     }
   }
 `;
@@ -36,6 +37,7 @@ export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.Qu
       notificationCount
       teacherId
       parentId
+      displayCurrency
     }
   }
 `;
@@ -44,6 +46,7 @@ export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery> = gql`
   query users {
     users {
       createdAt
+      displayCurrency
       email
       emailVerifiedAt
       id
@@ -65,6 +68,7 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
       token
       user {
         createdAt
+        displayCurrency
         email
         emailVerifiedAt
         id
@@ -74,8 +78,8 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
         role
         avatarUrl
         notificationCount
-      teacherId
-      parentId
+        teacherId
+        parentId
       }
     }
   }
@@ -88,6 +92,7 @@ export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMu
       token
       user {
         createdAt
+        displayCurrency
         email
         emailVerifiedAt
         id
@@ -97,8 +102,8 @@ export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMu
         role
         avatarUrl
         notificationCount
-      teacherId
-      parentId
+        teacherId
+        parentId
       }
     }
   }
@@ -116,6 +121,7 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
       token
       user {
         createdAt
+        displayCurrency
         email
         emailVerifiedAt
         id
@@ -125,8 +131,8 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
         role
         avatarUrl
         notificationCount
-      teacherId
-      parentId
+        teacherId
+        parentId
       }
     }
   }
@@ -170,8 +176,9 @@ export const startImpersonationMutationDocument: TypedDocumentNode<
         role
         avatarUrl
         notificationCount
-      teacherId
-      parentId
+        teacherId
+        parentId
+        displayCurrency
       }
     }
   }

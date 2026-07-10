@@ -3,10 +3,10 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { TeacherBankingRepository } from "@/backend/db/repo/teachers/teacher-banking.repository";
 import { teacherBankingDetailsHistory } from "@/backend/db/schema";
+import { setupTeacher } from "@/backend/db/test/entity-setup";
+import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { setupTeacher } from "../entity-setup";
-import { createTestUser, runInRollback } from "../test-utils";
 
 type DBTransaction = NonNullable<Parameters<typeof TeacherBankingRepository.submitBankingDetails>[1]>;
 

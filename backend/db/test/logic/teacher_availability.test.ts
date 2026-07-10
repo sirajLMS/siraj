@@ -3,10 +3,10 @@ import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { StudentEntity, TeacherEntity, UserSelectType } from "@/backend/types";
-import { runInRollback } from "../test-utils";
 
 async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserSelectType> {
   const now = new Date();

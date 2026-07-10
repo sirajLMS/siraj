@@ -11,11 +11,11 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
+import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEntity } from "@/backend/types";
 import type { ClassInstanceEntity } from "@/backend/types/scheduling/scheduling.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function setupTestEnvironment(tx: DBTransaction, now: Date) {
   const [userP] = await tx

@@ -1,1 +1,0 @@
-ALTER TABLE "teacher_payments" ALTER COLUMN "currency" SET DATA TYPE "currency_code" USING "currency"::"currency_code";

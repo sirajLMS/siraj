@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "04fd6c76-dd7c-447a-a9dd-c7ea7c3556dc",
-  "prevIds": ["097c3ec4-ef47-4fd4-a79c-26fa23a6f1dd"],
+  "id": "94e1b885-8983-4ae4-8453-17c07f7f0250",
+  "prevIds": ["cbc9bfbd-55cd-4fc3-80a0-54f3b6b055aa"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -8570,8 +8570,8 @@
       "table": "teacher_payments"
     },
     {
-      "type": "varchar(10)",
-      "typeSchema": null,
+      "type": "currency_code",
+      "typeSchema": "public",
       "notNull": true,
       "dimensions": 0,
       "default": null,
@@ -9618,6 +9618,19 @@
       "generated": null,
       "identity": null,
       "name": "timezone",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "currency_code",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "display_currency",
       "entityType": "columns",
       "schema": "public",
       "table": "users"

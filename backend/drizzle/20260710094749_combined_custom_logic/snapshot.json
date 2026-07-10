@@ -1,8 +1,8 @@
 {
+  "id": "686503d3-eeef-48ca-ab39-7c7f270ab4ca",
+  "prevIds": ["94e1b885-8983-4ae4-8453-17c07f7f0250"],
   "version": "8",
   "dialect": "postgres",
-  "id": "535fb34e-982b-4884-b2a8-bb6b3eb764d5",
-  "prevIds": ["babe61d3-0efe-4f4f-a15c-4c04a8fdbf31"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -9618,6 +9618,19 @@
       "generated": null,
       "identity": null,
       "name": "timezone",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "currency_code",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "display_currency",
       "entityType": "columns",
       "schema": "public",
       "table": "users"

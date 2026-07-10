@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { adminAuditLogs, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 describe("Audit Log Immutability", () => {
   test("Trigger blocks update and delete operations on admin_audit_logs", async () => {

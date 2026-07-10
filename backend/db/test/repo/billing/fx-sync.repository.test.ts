@@ -68,7 +68,7 @@ type IsRecentSuccessCase = {
   expected: boolean;
 };
 
-function _testIsRecentSuccessCase(c: IsRecentSuccessCase): void {
+function testIsRecentSuccessCase(c: IsRecentSuccessCase): void {
   test(c.name, async () => {
     await runInRollback(async tx => {
       const created = await insertSyncRun(tx, {

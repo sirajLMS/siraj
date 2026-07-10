@@ -10,7 +10,4 @@ export enum InvoiceType {
   MANUAL = "MANUAL",
 }
 
-export enum PaymentMethod {
-  PAYPAL = "PAYPAL",
-  BANK_ACCOUNT = "BANK_ACCOUNT",
-}
+export { PaymentMethod } from "./payment-method.enum";

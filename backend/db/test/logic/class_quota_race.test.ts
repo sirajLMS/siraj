@@ -5,9 +5,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 async function createBaseTestData(
   executor: DBTransaction | typeof db,

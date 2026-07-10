@@ -1,6 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppPermission, FxProvider, FxSyncStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode, FxProvider, FxSyncStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   latestExchangeRatesQueryDocument,
   latestFxSyncRunQueryDocument,
@@ -13,8 +13,8 @@ const MOCK_RATES = [
   {
     __typename: "ExchangeRate" as const,
     id: "rate-1",
-    fromCurrency: "USD",
-    toCurrency: "SAR",
+    fromCurrency: CurrencyCode.Usd,
+    toCurrency: CurrencyCode.Sar,
     rate: "3.7508",
     source: "openexchangerates",
     effectiveDate: "2026-07-10T00:00:00.000Z",
@@ -22,8 +22,8 @@ const MOCK_RATES = [
   {
     __typename: "ExchangeRate" as const,
     id: "rate-2",
-    fromCurrency: "EUR",
-    toCurrency: "SAR",
+    fromCurrency: CurrencyCode.Eur,
+    toCurrency: CurrencyCode.Sar,
     rate: "4.0521",
     source: "openexchangerates",
     effectiveDate: "2026-07-10T00:00:00.000Z",
@@ -31,8 +31,8 @@ const MOCK_RATES = [
   {
     __typename: "ExchangeRate" as const,
     id: "rate-3",
-    fromCurrency: "AED",
-    toCurrency: "SAR",
+    fromCurrency: CurrencyCode.Aed,
+    toCurrency: CurrencyCode.Sar,
     rate: "1.0206",
     source: "fixer",
     effectiveDate: "2026-07-10T00:00:00.000Z",

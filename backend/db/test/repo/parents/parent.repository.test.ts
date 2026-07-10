@@ -7,6 +7,7 @@ import { ParentRepository } from "@/backend/db/repo";
 import { parents, users } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -178,7 +179,7 @@ describe("ParentRepository — create", () => {
           invoiceType: "MONTHLY",
           feeAmount: "500.00",
           paymentMethod: "BANK_ACCOUNT",
-          currency: "USD",
+          currency: CurrencyCode.USD,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -191,7 +192,7 @@ describe("ParentRepository — create", () => {
       expect(result.invoiceType).toBe("MONTHLY");
       expect(result.feeAmount).toBe("500.00");
       expect(result.paymentMethod).toBe("BANK_ACCOUNT");
-      expect(result.currency).toBe("USD");
+      expect(result.currency).toBe(CurrencyCode.USD);
       expect(result.timezone).toBe(IanaTimezone.America_Chicago);
     });
   });

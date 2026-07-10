@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { passwordResetTokens } from "@/backend/db/schema";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import type { PasswordResetTokenInsertType } from "@/backend/types/auth/auth.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { runInRollback } from "../test-utils";
 
 describe("Password Reset Tokens", () => {
   test("Can insert multiple password reset tokens for the same email", async () => {

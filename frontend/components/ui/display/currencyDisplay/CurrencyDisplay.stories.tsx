@@ -5,6 +5,7 @@ import {
   CurrencyDisplayPart,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
 } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { currencies } from "@/frontend/lib/currency";
 
 const currencyCodeOptions = currencies.map(currency => currency.code);
@@ -38,7 +39,7 @@ const meta: Meta<typeof CurrencyDisplay> = {
     },
   },
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [...DEFAULT_CURRENCY_DISPLAY_PARTS],
   },
 };
@@ -50,63 +51,63 @@ export const Default: Story = {};
 
 export const EmptyPartsUsesDefault: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [],
   },
 };
 
 export const FlagOnly: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Flag],
   },
 };
 
 export const LabelOnly: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Label],
   },
 };
 
 export const SymbolOnly: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Symbol],
   },
 };
 
 export const CodeOnly: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Code],
   },
 };
 
 export const FlagAndSymbol: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Symbol],
   },
 };
 
 export const FlagAndCode: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Code],
   },
 };
 
 export const FlagAndLabel: Story = {
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Label],
   },
 };
 
 export const AllParts: Story = {
   args: {
-    code: "EGP",
+    code: CurrencyCode.Egp,
     parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Label, CurrencyDisplayPart.Symbol, CurrencyDisplayPart.Code],
   },
 };
@@ -129,7 +130,7 @@ export const NullCode: Story = {
 
 export const CustomVariant: Story = {
   args: {
-    code: "USD",
+    code: CurrencyCode.Usd,
     parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Label],
     typographyVariant: "h6",
   },
@@ -138,7 +139,7 @@ export const CustomVariant: Story = {
 export const Arabic: Story = {
   globals: { locale: "ar" },
   args: {
-    code: "SAR",
+    code: CurrencyCode.Sar,
     parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Label, CurrencyDisplayPart.Symbol, CurrencyDisplayPart.Code],
   },
 };
@@ -146,6 +147,6 @@ export const Arabic: Story = {
 export const ArabicDefaultParts: Story = {
   globals: { locale: "ar" },
   args: {
-    code: "EGP",
+    code: CurrencyCode.Egp,
   },
 };

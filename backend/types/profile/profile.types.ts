@@ -11,8 +11,11 @@ import type {
   StaffPermissionOverrideReturnType,
 } from "@/backend/types/staff/staff-profile.types";
 import type {
+  PaymentMethodDefaults,
+  UserPaymentMethodReturnType,
+} from "@/backend/types/billing/payment-method.types";
+import type {
   TeacherAssignedStudentsResult,
-  TeacherBankingSummaryReturnType,
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
   TeacherProfileReturnType,
@@ -43,6 +46,7 @@ export type CoreUserProfileFields = {
   readonly name?: string;
   readonly email?: string;
   readonly avatarUrl?: string | null;
+  readonly displayCurrency?: CurrencyCode | null;
 };
 
 export type ParentOwnProfileUpdateInput = {
@@ -58,7 +62,6 @@ export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {
   readonly address?: string | null;
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
-  readonly paymentMethod?: string | null;
   readonly currency?: CurrencyCode | null;
   readonly timezone?: IanaTimezone | null;
 };
@@ -104,6 +107,7 @@ export type UnifiedProfileReturnType = {
   readonly staffProfile: ManagerDirectoryRow | null;
   readonly staffPermissionGroups: StaffPermissionGroupReturnType[] | null;
   readonly staffPermissionOverrides: StaffPermissionOverrideReturnType[] | null;
-  readonly bankingSummary: TeacherBankingSummaryReturnType | null;
+  readonly paymentMethods: readonly UserPaymentMethodReturnType[] | null;
+  readonly paymentMethodDefaults: PaymentMethodDefaults | null;
   readonly assignedStudents: TeacherAssignedStudentsResult | null;
 };

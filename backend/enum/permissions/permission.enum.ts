@@ -133,4 +133,7 @@ export enum AppPermission {
   // FX Rate Ingestion
   BILLING_VIEW_EXCHANGE_RATES = "billing.view_exchange_rates",
   BILLING_REFRESH_EXCHANGE_RATES = "billing.refresh_exchange_rates",
+  // Payment Method Catalog Admin
+  PAYMENT_METHODS_MANAGE_CATALOGS = "payment_methods.manage_catalogs",
+  PAYMENT_METHODS_VERIFY_BANK_TRANSFER = "payment_methods.verify_bank_transfer",
 }

@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { studentStatusHistory, students } from "@/backend/db/schema";
+import { createTestUser, setupStudent } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { StudentStatus } from "@/backend/enum";
 import type { StudentStatusHistorySelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { createTestUser, setupStudent } from "../entity-setup";
-import { runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

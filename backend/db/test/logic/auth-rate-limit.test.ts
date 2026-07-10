@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { authRateLimits } from "@/backend/db/schema";
+import { IP_ADDRESS_1 } from "@/backend/db/test/const";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import type { AuthRateLimitInsertType } from "@/backend/types/auth/auth.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { IP_ADDRESS_1 } from "../const";
-import { runInRollback } from "../test-utils";
 
 describe("Authentication Rate Limiting", () => {
   test("Composite unique constraint on IP and email prevents duplicates", async () => {
