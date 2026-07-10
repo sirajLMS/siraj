@@ -112,6 +112,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
       type: EffectiveMeetingPothosObject,
       resolve: parent => resolveEffectiveMeetingForClassInstance(parent.id),
     }),
+    recurringScheduleId: t.exposeString("recurringScheduleId", { nullable: true }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
     isRescheduled: t.exposeBoolean("isRescheduled"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),

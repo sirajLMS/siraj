@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
@@ -25,6 +26,8 @@ export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement(
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),
 });
 

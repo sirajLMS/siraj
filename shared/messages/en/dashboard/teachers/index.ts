@@ -5,6 +5,7 @@ export * from "./dashboard";
 export * from "./directory";
 export * from "./future.schedule";
 export * from "./onboarding";
+export * from "./own-profile";
 export * from "./profile";
 export * from "./reassignment";
 export * from "./students";

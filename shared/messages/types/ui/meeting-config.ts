@@ -75,6 +75,10 @@ export interface MeetingConfigClassScopeLabels {
   readonly recurringSectionTitle: string;
   readonly recurringSectionSubtitle: string;
   readonly createNewConfig: string;
+  readonly recurringFieldsRequired: string;
+  readonly seriesSectionTitle: string;
+  readonly seriesSectionSubtitle: string;
+  readonly manageSeriesLink: string;
 }
 
 export interface MeetingConfigProviderSelectLabels {
@@ -88,6 +92,15 @@ export interface MeetingConfigSummaryLabels {
   readonly sectionTitle: string;
   readonly empty: string;
   readonly manageLink: string;
+}
+
+export interface MeetingConfigRecurringScheduleLabels {
+  readonly pageTitle: string;
+  readonly scheduleSummary: string;
+  readonly invalidId: string;
+  readonly breadcrumbDashboard: string;
+  readonly breadcrumbClasses: string;
+  readonly goToClass: string;
 }
 
 export type MeetingConfigLabels = {
@@ -107,4 +120,5 @@ export type MeetingConfigLabels = {
   readonly classScope: MeetingConfigClassScopeLabels;
   readonly summary: MeetingConfigSummaryLabels;
   readonly providerSelect: MeetingConfigProviderSelectLabels;
+  readonly recurringSchedule: MeetingConfigRecurringScheduleLabels;
 };

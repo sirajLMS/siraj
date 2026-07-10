@@ -1,15 +1,15 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { ParentsDirectoryLabels } from "@/shared/messages/types/dashboard/parents";
+
+export const directory: ParentsDirectoryLabels = {
   pageTitle: "Parents Directory",
-  pageSubtitle: "Manage and search parents",
-  searchPlaceholder: "Search by name, email, or phone",
-  records: "Records",
+  pageSubtitle: "Manage guardian profiles, subscription statuses, and financial records.",
+  searchPlaceholder: "Search parents...",
+  records: "Parent Records",
   metrics: {
     regular: "Regular",
     onLeave: "On Leave",
     suspended: "Suspended",
     onTrial: "On Trial",
-    deactivated: "Deactivated",
   },
   table: {
     index: "#",
@@ -17,19 +17,25 @@ exports.messages = {
     name: "Name",
     email: "Email",
     time: "Time",
-    status: "Status",
+    status: "Lifecycle",
+    accountStatus: "Account",
     unpaidInvoices: "Unpaid Invoices",
     options: "Options",
   },
   card: {
     guardianOf: "Guardian of {name}",
-    unpaidCount: "{count} unpaid invoices",
-    invoicesCleared: "All invoices cleared",
+    unpaidCount: "Unpaid: {count}",
+    invoicesCleared: "Invoices Cleared",
+  },
+  accountStatus: {
+    activated: "Activated",
+    deactivated: "Deactivated",
   },
   actions: {
-    addParent: "Add Parent",
+    addParent: "Add New Parent",
     filter: "Filter",
     clearFilters: "Clear Filters",
+    manageLifecycle: "Manage lifecycle",
   },
   noEntries: "No parents found",
 };

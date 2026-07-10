@@ -23,7 +23,8 @@ export const UnpaidInvoiceItemPothosObject = UnpaidInvoiceItemRef.implement({
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "totalUnpaidAmount", "currency"),
+      resolve: (parent, _args, ctx) =>
+        resolveDisplayAmountField(parent, ctx, "totalUnpaidAmount", "currency", parent.userId),
     }),
   }),
 });

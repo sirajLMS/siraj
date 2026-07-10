@@ -54,6 +54,7 @@ export const billing: BillingLabels = {
     markAsPaid: "تحديد كمدفوعة",
     quickPay: "دفع سريع",
     reviewSubmission: "مراجعة",
+    viewRejection: "عرض الرفض",
     noEntries: "لا توجد فواتير مطابقة للبحث",
   },
   creditTable: {
@@ -124,6 +125,7 @@ export const billing: BillingLabels = {
     student: "الطالب",
     uploadFailed: "فشل رفع الملف. يرجى المحاولة مرة أخرى.",
     uploadPrepareFailed: "تعذر تجهيز رفع الملف. يرجى المحاولة مرة أخرى.",
+    impersonationBlocked: "إجراءات الدفع معطلة أثناء انتحال شخصية مستخدم آخر.",
   },
   paymentDetailsDialog: {
     title: "تفاصيل الدفع",
@@ -145,6 +147,9 @@ export const billing: BillingLabels = {
     date: "تاريخ الدفع",
     submittedAt: "تاريخ الإرسال",
     reviewActions: "مراجعة الإرسال",
+    tryAgain: "إعادة المحاولة",
+    confirmReject: "تأكيد الرفض",
+    confirmRejectMessage: "رفض إثبات الدفع هذا؟ ستعود الفاتورة إلى غير مدفوعة.",
   },
   notifications: {
     popupBlocked: "تم حظر النافذة المنبثقة. اسمح بالنوافذ المنبثقة لتحميل الملف.",
@@ -152,6 +157,7 @@ export const billing: BillingLabels = {
   },
   errors: {
     invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
+    retry: "إعادة المحاولة",
   },
   exchangeRates,
   fxStaleBanner: {
@@ -171,6 +177,7 @@ export const billing: BillingLabels = {
     },
   },
   fxConversionNote: "تستخدم الإجماليات المحوّلة عملة العرض الخاصة بك ({code})",
+  fxConversionNoteSubject: "تستخدم المبالغ المحوّلة عملة عرض هذا المستخدم ({code})",
   currencyHedges,
   supportedCurrencies,
 };

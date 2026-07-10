@@ -45,7 +45,7 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "feeAmount", "currency"),
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "feeAmount", "currency", parent.userId),
     }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),

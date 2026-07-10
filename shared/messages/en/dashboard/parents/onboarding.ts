@@ -1,5 +1,6 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { ParentOnboardingLabels } from "@/shared/messages/types/dashboard/parents";
+
+export const onboarding: ParentOnboardingLabels = {
   pageTitle: "Complete Your Onboarding",
   pageSubtitle: "Fill in the required information to get started",
   statusBanner: "You have mandatory fields to complete",
@@ -44,7 +45,6 @@ exports.messages = {
     paymentMethod: "Select payment method",
     currency: "Select currency",
     timezone: "Select time zone",
-    meetingProvider: "Select meeting provider",
     meetingUrl: "Enter meeting URL",
     meetingLabel: "Enter meeting label",
   },

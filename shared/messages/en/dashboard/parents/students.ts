@@ -1,5 +1,6 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { ParentStudentsLabels } from "@/shared/messages/types/dashboard/parents/students";
+
+export const parentStudents: ParentStudentsLabels = {
   pageTitle: "Associated Students",
   pageSubtitle: "View and manage your associated students",
   noStudents: "No students associated with this account.",

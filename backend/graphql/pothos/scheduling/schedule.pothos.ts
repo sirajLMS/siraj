@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
@@ -71,6 +72,8 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
     studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),
 });
 
@@ -181,6 +184,8 @@ export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRe
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     isFrozen: t.exposeBoolean("isFrozen"),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),
 });
 

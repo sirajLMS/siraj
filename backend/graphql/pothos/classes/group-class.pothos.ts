@@ -33,6 +33,9 @@ export const OnlineMeetingInfoPothosObject = OnlineMeetingInfoRef.implement({
     platform: t.exposeString("platform"),
     meetingId: t.exposeString("meetingId", { nullable: true }),
     joinUrl: t.exposeString("joinUrl", { nullable: true }),
+    logoUrl: t.exposeString("logoUrl", { nullable: true }),
+    providerName: t.expose("providerName", { type: "LocalizedString", nullable: true }),
+    source: t.exposeString("source", { nullable: true }),
   }),
 });
 

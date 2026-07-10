@@ -49,4 +49,9 @@ export interface TeacherAvailabilityLabels {
     readonly pageTitle: string;
     readonly pageSubtitle: string;
   };
+  readonly status: {
+    readonly live: string;
+    readonly lastUpdate: string;
+  };
+  readonly availabilityGridTitle: string;
 }

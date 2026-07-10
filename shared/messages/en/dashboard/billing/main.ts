@@ -54,6 +54,7 @@ export const billing: BillingLabels = {
     markAsPaid: "Mark as Paid",
     quickPay: "Quick Pay",
     reviewSubmission: "Review",
+    viewRejection: "View Rejection",
     noEntries: "No matching invoices found",
   },
   creditTable: {
@@ -124,6 +125,7 @@ export const billing: BillingLabels = {
     student: "Student",
     uploadFailed: "Failed to upload file. Please try again.",
     uploadPrepareFailed: "Failed to prepare file upload. Please try again.",
+    impersonationBlocked: "Payment actions are disabled while impersonating another user.",
   },
   paymentDetailsDialog: {
     title: "Payment Details",
@@ -145,6 +147,9 @@ export const billing: BillingLabels = {
     date: "Date",
     submittedAt: "Submitted At",
     reviewActions: "Review Actions",
+    tryAgain: "Try Again",
+    confirmReject: "Confirm Rejection",
+    confirmRejectMessage: "Reject this payment proof? The invoice will return to unpaid status.",
   },
   notifications: {
     popupBlocked: "Popup blocked. Allow popups to download the file.",
@@ -152,6 +157,7 @@ export const billing: BillingLabels = {
   },
   errors: {
     invalidId: "Invalid parent ID in invoice view.",
+    retry: "Retry",
   },
   exchangeRates,
   fxStaleBanner: {
@@ -171,6 +177,7 @@ export const billing: BillingLabels = {
     },
   },
   fxConversionNote: "Converted totals use your display currency ({code})",
+  fxConversionNoteSubject: "Converted amounts use this user's display currency ({code})",
   currencyHedges,
   supportedCurrencies,
 };

@@ -53,6 +53,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly markAsPaid: string;
     readonly quickPay: string;
     readonly reviewSubmission: string;
+    readonly viewRejection: string;
     readonly noEntries: string;
   };
   readonly creditTable: {
@@ -112,6 +113,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly student: string;
     readonly uploadFailed: string;
     readonly uploadPrepareFailed: string;
+    readonly impersonationBlocked: string;
   };
   readonly paymentDetailsDialog: {
     readonly title: string;
@@ -133,6 +135,9 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly date: string;
     readonly submittedAt: string;
     readonly reviewActions: string;
+    readonly tryAgain: string;
+    readonly confirmReject: string;
+    readonly confirmRejectMessage: string;
   };
   readonly notifications: {
     readonly popupBlocked: string;
@@ -141,6 +146,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly hasPaymentProofHint: string;
   readonly errors: {
     readonly invalidId: string;
+    readonly retry: string;
   };
   readonly exchangeRates: ExchangeRatesLabels;
   readonly fxStaleBanner: {
@@ -160,6 +166,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     };
   };
   readonly fxConversionNote: string;
+  readonly fxConversionNoteSubject: string;
   readonly currencyHedges: CurrencyHedgesLabels;
   readonly supportedCurrencies: SupportedCurrenciesLabels;
 }

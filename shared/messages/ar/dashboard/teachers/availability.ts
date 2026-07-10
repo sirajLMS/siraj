@@ -51,4 +51,9 @@ export const availability: TeacherAvailabilityLabels = {
     pageTitle: "أداة التوفر",
     pageSubtitle: "ابحث عن الفترات الشاغرة عبر هيئة التدريس.",
   },
+  status: {
+    live: "مباشر",
+    lastUpdate: "آخر تحديث {minutes, plural, =1 {منذ # دقيقة} other {منذ # دقائق}}",
+  },
+  availabilityGridTitle: "الفترات المتاحة",
 };

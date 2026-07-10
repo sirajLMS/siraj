@@ -24,6 +24,7 @@ import { meetingProviders as meetingProvidersLabels } from "@/shared/messages/ar
 import {
   directory,
   onboarding,
+  lifecycle as parentLifecycle,
   parentRules,
   parentSocial,
   parentStudents,
@@ -40,6 +41,7 @@ import {
   directory as studentDirectory,
   history as studentHistory,
   onboarding as studentOnboarding,
+  profile as studentProfile,
   quota as studentQuota,
   status as studentStatus,
 } from "@/shared/messages/ar/dashboard/students";
@@ -126,6 +128,7 @@ export const arTranslations = {
     teachersDirectory,
     studentStatus,
     studentQuota,
+    studentProfile,
     studentHistory,
     studentDirectory,
     studentOnboarding,
@@ -146,6 +149,7 @@ export const arTranslations = {
     teacherOwnProfile,
     teacherClassList,
     parentsDirectory: directory,
+    parentLifecycle,
     parentProfile: profile,
     managersDirectory,
     parentOnboarding: onboarding,

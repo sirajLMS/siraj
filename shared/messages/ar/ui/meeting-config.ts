@@ -83,6 +83,10 @@ export const meetingConfig: MeetingConfigLabels = {
     recurringSectionTitle: "اجتماع الجدول المتكرر",
     recurringSectionSubtitle: "تجاوز اختياري لجميع حصص هذا الجدول المتكرر.",
     createNewConfig: "إنشاء إعداد اجتماع جديد",
+    recurringFieldsRequired: "اختر مزوداً وأدخل رابط الاجتماع.",
+    seriesSectionTitle: "إعدادات اجتماع السلسلة",
+    seriesSectionSubtitle: "تنطبق على جميع الحصص المستقبلية من هذا الجدول المتكرر.",
+    manageSeriesLink: "إدارة إعدادات السلسلة الكاملة",
   },
   providerSelect: {
     emptyCatalogTitle: "لا توجد مزودات اجتماعات",
@@ -94,5 +98,13 @@ export const meetingConfig: MeetingConfigLabels = {
     sectionTitle: "الاجتماع عبر الإنترنت",
     empty: "لم يتم تكوين اجتماع افتراضي",
     manageLink: "إدارة إعدادات الاجتماع",
+  },
+  recurringSchedule: {
+    pageTitle: "اجتماع السلسلة المتكررة",
+    scheduleSummary: "{student} مع {teacher} · {duration} دقيقة · {timezone}",
+    invalidId: "معرّف الجدول غير صالح",
+    breadcrumbDashboard: "لوحة التحكم",
+    breadcrumbClasses: "الحصص",
+    goToClass: "الانتقال إلى الحصة",
   },
 };

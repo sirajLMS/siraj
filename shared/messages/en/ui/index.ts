@@ -1,0 +1,179 @@
+export { meetingConfig } from "@/shared/messages/en/ui/meeting-config";
+
+export const catalogImageUpload = {
+  upload: "Upload image",
+  uploading: "Uploading…",
+  remove: "Remove",
+  optional: "Optional",
+  logoUrlLabel: "Logo URL",
+  helperText: "PNG, JPG, or WebP · Max {maxMb} MB",
+  previewAlt: "Logo preview",
+  invalidType: "Unsupported file type. Only PNG, JPG, or WebP are allowed.",
+  fileTooLarge: "File exceeds {maxMb} MB.",
+  uploadFailed: "Image upload failed. Please try again.",
+};
+
+export const genderSelector = {
+  title: "Gender",
+  male: "Male",
+  female: "Female",
+  ariaLabel: "Gender selection button group",
+  any: "Any",
+};
+
+export const countrySelect = {
+  selectCountry: "Select country",
+  required: "Country is required",
+};
+
+export const currencySelect = {
+  selectCurrency: "Select currency",
+  searchByCodeOrName: "Search by code or name",
+  required: "Currency is required",
+};
+
+export const languageSelector = {
+  selectLanguage: "Select language",
+  required: "Language is required",
+};
+
+export const localizedString = {
+  editTranslations: "Edit translations",
+  cancel: "Cancel",
+  save: "Save",
+  selectLocale: "Select locale",
+  drawerSubtitle: "Edit all translations",
+  switchLocale: "Switch locale",
+  atLeastOneTranslationRequired: "Enter at least one translation",
+  localeRequired: "{localeName} is required for this field",
+  localesRequired: "{localeNames} are required for this field",
+  localeRequiredEntry: "{localeName} is required",
+};
+
+export const phoneInput = {
+  label: "Phone number",
+  selectCountry: "Select country",
+  invalidPrefix: "Invalid dial code",
+  invalidPhone: "Invalid phone number",
+  required: "Phone number is required",
+};
+
+export const tagInput = {
+  label: "Add items",
+  placeholder: "Type and press Enter",
+};
+
+export const timezoneSelect = {
+  selectTimezone: "Select timezone",
+  required: "Timezone is required",
+};
+
+export const paymentMethod = {
+  type: {
+    mobileWallet: "Mobile wallet",
+    paymentLink: "Payment link",
+    onlineAccount: "Online account",
+    bankTransfer: "Bank transfer",
+    cash: "Cash",
+  },
+  direction: {
+    in: "In",
+    out: "Out",
+    both: "Both",
+  },
+  identifier: {
+    email: "Email",
+    handle: "Handle",
+    emailOrHandle: "Email or handle",
+  },
+  typeSelector: {
+    title: "Payment method type",
+    mobileWallet: "Mobile wallet",
+    paymentLink: "Payment link",
+    onlineAccount: "Online account",
+    bankTransfer: "Bank transfer",
+    cash: "Cash",
+    ariaLabel: "Payment method type selection",
+    any: "Any",
+  },
+  select: {
+    selectMethod: "Select payment method",
+    searchByNameOrSlug: "Search by name or slug",
+    required: "Payment method is required",
+  },
+  display: {
+    defaultBadge: "Default",
+    verified: "Verified",
+    unverified: "Unverified",
+    active: "Active",
+    inactive: "Inactive",
+    phone: "Phone",
+    url: "URL",
+    identifier: "Identifier",
+    bankName: "Bank name",
+    beneficiaryName: "Beneficiary name",
+    iban: "IBAN",
+    note: "Note",
+  },
+  list: {
+    title: "Payment methods",
+    empty: "No payment methods yet",
+    columnLabel: "Label",
+    columnType: "Type",
+    columnDirection: "Direction",
+    columnStatus: "Status",
+    columnDefault: "Default",
+    edit: "Edit",
+    delete: "Delete",
+    setDefault: "Set as default",
+  },
+  manager: {
+    add: "Add payment method",
+    addTitle: "Add payment method",
+    editTitle: "Edit payment method",
+    listTitle: "Payment methods",
+    empty: "No payment methods yet",
+    direction: "Direction",
+    label: "Label (optional)",
+    defaultPayin: "Set as default pay-in method",
+    defaultPayout: "Set as default pay-out method",
+    cancel: "Cancel",
+    save: "Save",
+    deleteTitle: "Delete payment method",
+    deleteBody: "Delete {name}? This cannot be undone.",
+    deleteConfirm: "Delete",
+    loadError: "Failed to load payment methods",
+    retry: "Retry",
+    verify: "Verify {label}",
+  },
+  defaultsEditor: {
+    payinDefault: "Pay-in default",
+    payoutDefault: "Pay-out default",
+    instructions: "Instructions",
+    editInstructions: "Edit instructions",
+    displayCurrency: "Display currency",
+    saved: "Settings saved",
+    none: "None",
+  },
+  typeFields: {
+    wallet: "Wallet",
+    paymentLink: "Payment link",
+    onlineAccount: "Online account",
+    phone: "Phone number",
+    url: "URL",
+    identifier: "Identifier",
+    bankName: "Bank name",
+    beneficiaryName: "Beneficiary name",
+    iban: "IBAN",
+    swiftBic: "SWIFT / BIC",
+    accountNumber: "Account number",
+    routingNumber: "Routing number",
+    note: "Note",
+    country: "Country",
+    currency: "Currency",
+    urlAllowlist: "URL allowlist",
+    name: "Name",
+    description: "Description",
+    instructions: "Instructions",
+  },
+};

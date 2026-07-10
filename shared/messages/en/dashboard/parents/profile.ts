@@ -1,5 +1,6 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { ParentProfileLabels } from "@/shared/messages/types/dashboard/parents/profile";
+
+export const profile: ParentProfileLabels = {
   pageTitle: "Parent Profile",
   status: {
     regular: "Active",
@@ -80,7 +81,6 @@ exports.messages = {
       regular: "Regular",
       suspended: "Suspended",
       on_leave: "On Leave",
-      deactivated: "Deactivated",
       on_trial: "On Trial",
     },
   },

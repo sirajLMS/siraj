@@ -17,7 +17,8 @@ export const directory: ParentsDirectoryLabels = {
     name: "الاسم",
     email: "البريد الإلكتروني",
     time: "الوقت",
-    status: "الحالة",
+    status: "دورة الحياة",
+    accountStatus: "الحساب",
     unpaidInvoices: "الفواتير غير المدفوعة",
     options: "خيارات",
   },
@@ -26,10 +27,15 @@ export const directory: ParentsDirectoryLabels = {
     unpaidCount: "غير مدفوع: {count}",
     invoicesCleared: "تم تسوية الفواتير",
   },
+  accountStatus: {
+    activated: "مفعّل",
+    deactivated: "غير مفعّل",
+  },
   actions: {
     addParent: "إضافة ولي أمر جديد",
     filter: "تصفية",
     clearFilters: "مسح التصفية",
+    manageLifecycle: "إدارة دورة الحياة",
   },
   noEntries: "لا يوجد أولياء أمور",
 };

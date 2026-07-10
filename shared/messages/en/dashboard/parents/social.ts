@@ -1,5 +1,6 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { ParentSocialLabels } from "@/shared/messages/types/dashboard/parents/social";
+
+export const parentSocial: ParentSocialLabels = {
   pageTitle: "Social & Communication",
   pageSubtitle: "Manage your social media and communication channels",
   sections: {

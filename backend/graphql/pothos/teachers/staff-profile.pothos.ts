@@ -39,7 +39,8 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency"),
+      resolve: (parent, _args, ctx) =>
+        resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency", parent.userId),
     }),
   }),
 });

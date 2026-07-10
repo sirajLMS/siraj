@@ -9,7 +9,6 @@ export const reassignment: TeacherReassignmentLabels = {
     teacherReassignment: "Teacher Reassignment",
   },
   studentContext: {
-    title: "Student Context",
     studentId: "Student ID: {id}",
     grade: "Grade: {grade}",
     enrollment: "Enrollment Date: {date}",

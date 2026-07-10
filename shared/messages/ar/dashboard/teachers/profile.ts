@@ -29,6 +29,8 @@ export const profile: TeacherProfileLabels = {
     active: "نشط",
     inactive: "غير نشط",
     displayCurrency: "عملة العرض",
+    hourlyRate: "السعر بالساعة",
+    qualifications: "المؤهلات",
   },
   actions: {
     saveProfile: "حفظ الملف الشخصي",

@@ -121,6 +121,20 @@ export interface ProfileLabels {
       readonly activated: string;
       readonly deactivated: string;
     };
+    readonly actions: {
+      readonly deactivateAccount: string;
+      readonly deactivateDialogTitle: string;
+      readonly deactivateConfirmText: string;
+      readonly reactivateAccount: string;
+      readonly reactivateDialogTitle: string;
+      readonly reactivateConfirmText: string;
+      readonly cancel: string;
+      readonly deactivating: string;
+      readonly reactivating: string;
+      readonly deactivateSuccess: string;
+      readonly reactivateSuccess: string;
+      readonly manageLifecycle: string;
+    };
     readonly students: {
       readonly empty: string;
       readonly mobileListLabel: string;

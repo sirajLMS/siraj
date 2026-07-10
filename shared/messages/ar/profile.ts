@@ -123,6 +123,22 @@ export const profile: ProfileLabels = {
       activated: "مفعّل",
       deactivated: "غير مفعّل",
     },
+    actions: {
+      deactivateAccount: "إلغاء صلاحية الدخول",
+      deactivateDialogTitle: "إلغاء صلاحية دخول ولي الأمر",
+      deactivateConfirmText:
+        "هل أنت متأكد من إلغاء صلاحية دخول ولي الأمر؟ سيتم تسجيل خروجه فوراً ولن يتمكن من تسجيل الدخول حتى استعادة الصلاحية.",
+      reactivateAccount: "استعادة صلاحية الدخول",
+      reactivateDialogTitle: "استعادة صلاحية دخول ولي الأمر",
+      reactivateConfirmText:
+        "هل أنت متأكد من استعادة صلاحية الدخول لولي الأمر؟ سيتمكن من تسجيل الدخول مجدداً. هذا لا يغيّر حالة دورة الحياة.",
+      cancel: "إلغاء",
+      deactivating: "جارٍ إلغاء الصلاحية...",
+      reactivating: "جارٍ استعادة الصلاحية...",
+      deactivateSuccess: "تم إلغاء صلاحية دخول ولي الأمر.",
+      reactivateSuccess: "تم استعادة صلاحية دخول ولي الأمر.",
+      manageLifecycle: "إدارة دورة الحياة",
+    },
     students: {
       empty: "لا يوجد طلاب مرتبطون حالياً.",
       mobileListLabel: "قائمة الطلاب المرتبطين",

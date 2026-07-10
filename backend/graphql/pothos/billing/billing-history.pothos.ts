@@ -20,6 +20,7 @@ import type {
   BillingCurrencyTotal,
   InvoiceHistoryPaginatedResult,
   InvoiceHistoryRow,
+  NextUnpaidInvoiceSummary,
   PaginationInput,
   ParentBillingSummaryResult,
   StudentCreditRow,
@@ -102,7 +103,8 @@ export const BillingCurrencyTotalPothosObject = BillingCurrencyTotalRef.implemen
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "amount", "currency"),
+      resolve: (parent, _args, ctx) =>
+        resolveDisplayAmountField(parent, ctx, "amount", "currency", parent.subjectUserId),
     }),
   }),
 });
@@ -135,6 +137,18 @@ export const StudentCreditRowPothosObject = StudentCreditRowRef.implement({
   }),
 });
 
+const NextUnpaidInvoiceSummaryRef = gqlSchemaBuilder.objectRef<NextUnpaidInvoiceSummary>("NextUnpaidInvoiceSummary");
+
+export const NextUnpaidInvoiceSummaryPothosObject = NextUnpaidInvoiceSummaryRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    amount: t.exposeString("amount"),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject }),
+    dueDate: t.exposeString("dueDate"),
+    studentName: t.exposeString("studentName", { nullable: true }),
+  }),
+});
+
 const ParentBillingSummaryRef = gqlSchemaBuilder.objectRef<ParentBillingSummaryResult>("ParentBillingSummary");
 
 export const ParentBillingSummaryPothosObject = ParentBillingSummaryRef.implement({
@@ -144,6 +158,11 @@ export const ParentBillingSummaryPothosObject = ParentBillingSummaryRef.implemen
     paidThisTerm: t.exposeString("paidThisTerm"),
     nextDueDate: t.exposeString("nextDueDate", { nullable: true }),
     activeStudents: t.exposeInt("activeStudents"),
+    nextUnpaidInvoice: t.expose("nextUnpaidInvoice", {
+      type: NextUnpaidInvoiceSummaryPothosObject,
+      nullable: true,
+    }),
+    pendingPaymentCount: t.exposeInt("pendingPaymentCount"),
     outstandingByCurrency: t.expose("outstandingByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
     paidThisTermByCurrency: t.expose("paidThisTermByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
   }),
@@ -166,6 +185,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       parentId: t.arg.string({ required: false }),
       userId: t.arg.string({ required: false }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
+      search: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
       const callerUserId = await requireAuth(ctx);
@@ -178,6 +198,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
         args.parentId ?? null,
         args.userId ?? null,
         pagination,
+        args.search ?? null,
         ctx.locale
       );
     },
@@ -190,12 +211,13 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
     authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
+      search: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
       const pagination = parsePaginationArgs(args.paginationArgs);
 
-      const result = await BillingHistoryService.getAdminInvoices(userId, pagination, ctx.locale);
+      const result = await BillingHistoryService.getAdminInvoices(userId, pagination, args.search ?? null, ctx.locale);
       await populateBillingFxDisplayCurrencyByUserId(
         ctx,
         result.rows.map(row => row.parentUserId)

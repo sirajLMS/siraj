@@ -4,7 +4,6 @@ export const directory: TeachersDirectoryLabels = {
   pageTitle: "Teachers Directory",
   pageSubtitle: "Manage and view all teachers",
   metrics: {
-    title: "Teachers Overview",
     activated: "Activated",
     deactivated: "Deactivated",
   },
@@ -14,7 +13,6 @@ export const directory: TeachersDirectoryLabels = {
     joinRoom: "Join Classroom",
     viewSchedule: "View Schedule",
     options: "Options",
-    viewProfile: "View Profile",
   },
   table: {
     hash: "#",
@@ -33,8 +31,5 @@ export const directory: TeachersDirectoryLabels = {
   status: {
     active: "Active",
     offline: "Offline",
-  },
-  errors: {
-    failedToLoad: "Failed to load teachers.",
   },
 };

@@ -16,6 +16,7 @@ export interface ParentsDirectoryLabels {
     readonly email: string;
     readonly time: string;
     readonly status: string;
+    readonly accountStatus: string;
     readonly unpaidInvoices: string;
     readonly options: string;
   };
@@ -24,10 +25,15 @@ export interface ParentsDirectoryLabels {
     readonly unpaidCount: string;
     readonly invoicesCleared: string;
   };
+  readonly accountStatus: {
+    readonly activated: string;
+    readonly deactivated: string;
+  };
   readonly actions: {
     readonly addParent: string;
     readonly filter: string;
     readonly clearFilters: string;
+    readonly manageLifecycle: string;
   };
   readonly noEntries: string;
 }

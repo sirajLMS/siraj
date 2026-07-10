@@ -1,5 +1,6 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { StudentQuotaLabels } from "@/shared/messages/types/dashboard/students";
+
+export const quota: StudentQuotaLabels = {
   pageTitle: "Student Quota",
   studentId: "Student ID: {id}",
   breadcrumbs: {
@@ -51,7 +52,6 @@ exports.messages = {
     totalClassesMin: "Total classes must be at least 1",
     classesLeftRequired: "Classes left is required",
     classesLeftMin: "Classes left must be at least 0",
-    insufficientClasses: "Classes left cannot exceed total classes",
   },
   errors: {
     invalidId: "Invalid student ID",

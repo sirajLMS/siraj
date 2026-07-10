@@ -1,4 +1,4 @@
-import { UserRepository } from "@/backend/db/repo";
+import { BillingRepository, ParentRepository, UserRepository } from "@/backend/db/repo";
 import type { CurrencyCode } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -41,6 +41,20 @@ export async function setBillingFxDisplayCurrencyForSubject(
 
   const user = await UserRepository.findSafeById(subjectUserId);
   ctx.billingFxDisplayCurrency = user?.displayCurrency ?? null;
+}
+
+export async function setBillingFxDisplayCurrencyForInvoiceParent(
+  ctx: BaseContext,
+  invoiceId: string,
+  callerUserId: string
+): Promise<void> {
+  const invoice = await BillingRepository.getInvoiceById(invoiceId);
+  if (!invoice?.parentId) {
+    return;
+  }
+
+  const parentUserId = await ParentRepository.findUserIdByParentId(invoice.parentId);
+  await setBillingFxDisplayCurrencyForSubject(ctx, parentUserId, callerUserId);
 }
 
 export async function populateBillingFxDisplayCurrencyByUserId(

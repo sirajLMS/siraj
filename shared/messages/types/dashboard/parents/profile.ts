@@ -79,7 +79,6 @@ export interface ParentProfileLabels {
       readonly regular: string;
       readonly suspended: string;
       readonly on_leave: string;
-      readonly deactivated: string;
       readonly on_trial: string;
     };
   };

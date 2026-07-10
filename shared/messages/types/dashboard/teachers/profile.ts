@@ -27,6 +27,8 @@ export interface TeacherProfileLabels {
     readonly active: string;
     readonly inactive: string;
     readonly displayCurrency: string;
+    readonly hourlyRate: string;
+    readonly qualifications: string;
   };
   readonly actions: {
     readonly saveProfile: string;

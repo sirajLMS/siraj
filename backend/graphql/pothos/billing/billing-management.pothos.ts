@@ -4,6 +4,7 @@ import { BillingMonthInputRef } from "@/backend/graphql/pothos/billing/billing-h
 import {
   DisplayAmountPothosObject,
   resolveDisplayAmountField,
+  setBillingFxDisplayCurrencyForInvoiceParent,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
   CurrencyCodePothosObject,
@@ -269,6 +270,7 @@ gqlSchemaBuilder.queryField("invoicePaymentSubmission", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
+      await setBillingFxDisplayCurrencyForInvoiceParent(ctx, args.invoiceId, userId);
       return BillingManagementService.getInvoicePaymentSubmission(userId, args.invoiceId, ctx.locale);
     },
   })

@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { RecurringScheduleDetailPothosObject } from "@/backend/graphql/pothos/scheduling/recurring-schedule.pothos";
 import {
   AdminDashboardScheduleInputPothosObject,
   AdminDashboardScheduleResultPothosObject,
@@ -14,6 +15,7 @@ import {
 import { LeaveRequestStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { RecurringScheduleDetailService } from "@/backend/services/schedule/recurring-schedule-detail.service";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
 import { PaginationArgs, type PaginationInput } from "@/backend/types";
@@ -153,6 +155,20 @@ gqlSchemaBuilder.queryField("teacherWeeklyScheduleGrid", t =>
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       return await WeeklyScheduleService.getWeeklySchedule(userId, args.teacherId || null, args.weekDate, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("recurringSchedule", t =>
+  t.field({
+    type: RecurringScheduleDetailPothosObject,
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return RecurringScheduleDetailService.getDetail(userId, args.id, ctx.locale);
     },
   })
 );

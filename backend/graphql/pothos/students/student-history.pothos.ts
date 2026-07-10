@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import type {
   StudentClassHistory,
   StudentHistoryMetricsType,
@@ -38,6 +39,8 @@ export const StudentHistorySessionPothosObject = StudentHistorySessionRef.implem
     room: t.exposeString("room", { nullable: true }),
     notes: t.exposeString("notes"),
     dayOfMonth: t.exposeInt("dayOfMonth"),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),
 });
 
@@ -66,6 +69,7 @@ export const StudentSessionDetailPothosObject = StudentSessionDetailRef.implemen
     outcome: t.exposeString("outcome", { nullable: true }),
     remarks: t.exposeString("remarks", { nullable: true }),
     meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
     teacherName: t.exposeString("teacherName"),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime", nullable: true }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime", nullable: true }),

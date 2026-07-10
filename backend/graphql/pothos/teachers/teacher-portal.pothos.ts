@@ -3,6 +3,7 @@ import {
   DisplayAmountPothosObject,
   resolveDisplayAmountField,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
@@ -81,6 +82,8 @@ export const TeacherAssignedClassPothosObject = TeacherAssignedClassRef.implemen
     durationMinutes: t.exposeInt("durationMinutes"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
+    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),
 });
 

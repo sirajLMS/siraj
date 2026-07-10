@@ -1,11 +1,10 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { ParentRulesLabels } from "@/shared/messages/types/dashboard/parents/rules";
+
+export const parentRules: ParentRulesLabels = {
   pageTitle: "Rules & Policies",
   pageSubtitle: "Important policies for guardians",
   sections: {
-    policies: {
-      policies: "Policies",
-    },
+    policies: "Policies",
   },
   policyIntro: "Please review our policies to ensure a smooth experience for you and your child.",
   policyLeave: "Leaves must be requested at least 48 hours in advance.",

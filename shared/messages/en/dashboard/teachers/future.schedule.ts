@@ -2,37 +2,26 @@ import type { TeacherFutureScheduleLabels } from "@/shared/messages/types/dashbo
 
 export const futureSchedule: TeacherFutureScheduleLabels = {
   pageTitle: "Future Schedule",
-  monthlyFilter: {
-    jumpToDate: "Jump to Date",
-  },
-  quotaInfo: {
-    leaveQuota: "Leave Quota",
-    totalClasses: "Total Classes",
-    futureClasses: "Future Classes",
-  },
-  classTable: {
-    headers: {
-      available: "Available",
-      regular: "Regular",
-      reScheduled: "Rescheduled",
-      requestLeave: "Request Leave",
-      viewMaterials: "View Materials",
-    },
-  },
-  quotaAlerts: {
-    quotaReached: "You have reached your leave quota.",
-    remaining: "Remaining quota: {count}",
-  },
-  notes: {
-    importantNotes: "Important Notes",
-    supportContact: "Contact Support",
-    contactAdmin: "Contact an administrator for assistance.",
-    defaultLeaveReason: "Not specified",
-  },
+  jumpToDate: "Jump to Date",
+  leaveQuota: "Leave Quota",
+  totalClasses: "Total Classes",
+  futureClasses: "Future Classes",
+  available: "Available",
+  regular: "Regular",
+  reScheduled: "Rescheduled",
+  requestLeave: "Request Leave",
+  viewMaterials: "View Materials",
+  quotaReached: "You have reached your leave quota.",
+  remaining: "Remaining quota: {count}",
+  importantNotes: "Important Notes",
+  supportContact: "Contact Support",
+  contactAdmin: "Contact an administrator for assistance.",
   monthDisplay: "{month} {year}",
   leaveQuotaDesc: "You can request leave for {count} classes.",
   totalClassesDesc: "You have {count} classes scheduled.",
   loading: "Loading schedule...",
+  defaultLeaveReason: "Not specified",
+  supportRequestReason: "Not specified",
   students: "Students",
   errors: {
     quotaExceeded: "Cannot request leave: quota exceeded.",

@@ -27,6 +27,7 @@ import type {
 import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "@/shared/messages/types/dashboard/managers";
 import type { MeetingProvidersLabels } from "@/shared/messages/types/dashboard/meeting-providers";
 import type {
+  ParentLifecycleLabels,
   ParentOnboardingLabels,
   ParentProfileLabels,
   ParentsDirectoryLabels,
@@ -77,6 +78,7 @@ export type {
   ManagersDirectoryLabels,
   MeetingProvidersLabels,
   ParentDashboardLabels,
+  ParentLifecycleLabels,
   ParentOnboardingLabels,
   ParentProfileLabels,
   ParentsDirectoryLabels,
@@ -118,6 +120,7 @@ export type MessageSchema = {
     readonly teachersDirectory: TeachersDirectoryLabels;
     readonly studentStatus: StudentStatusLabels;
     readonly studentQuota: StudentQuotaLabels;
+    readonly studentProfile: import("@/shared/messages/types/dashboard/students/profile").StudentProfileLabels;
     readonly studentHistory: StudentHistoryLabels;
     readonly studentDirectory: StudentDirectoryLabels;
     readonly rescheduleTracking: RescheduleTrackingLabels;
@@ -140,6 +143,7 @@ export type MessageSchema = {
     readonly teacherOwnProfile: import("@/shared/messages/types/dashboard/teachers/own-profile").TeacherOwnProfileLabels;
     readonly teacherClassList: import("@/shared/messages/types/dashboard/teachers/class-list").TeacherClassListLabels;
     readonly parentsDirectory: ParentsDirectoryLabels;
+    readonly parentLifecycle: ParentLifecycleLabels;
     readonly parentProfile: ParentProfileLabels;
     readonly managersDirectory: ManagersDirectoryLabels;
     readonly parentOnboarding: ParentOnboardingLabels;

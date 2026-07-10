@@ -1,36 +1,37 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
-  pageTitle: "Student Status",
-  studentId: "Student ID: {id}",
+import type { StudentStatusLabels } from "@/shared/messages/types/dashboard/students";
+
+export const status: StudentStatusLabels = {
+  pageTitle: "Student Status & Schedule Hold",
+  studentId: "ID: #{id}",
   breadcrumbs: {
     students: "Students",
     statusHold: "Status & Hold",
   },
   sections: {
-    adminHold: "Admin Hold",
+    adminHold: "Administrative Hold",
     policyOverview: "Policy Overview",
     upcomingClasses: "Upcoming Classes",
   },
   fields: {
-    accountStatus: "Account Status",
-    statusReason: "Reason for Status",
-    statusReasonPlaceholder: "Enter reason",
+    accountStatus: "New Account Status",
+    statusReason: "Reason for Change",
+    statusReasonPlaceholder: "Enter administrative justification...",
     quickReasons: "Quick Reasons",
   },
   statusOptions: {
-    REGULAR: "Regular",
-    SUSPENDED: "Suspended",
-    ON_LEAVE: "On Leave",
+    REGULAR: "Regular / Active",
+    SUSPENDED: "Suspended (Financial/Disciplinary)",
+    ON_LEAVE: "On Leave (Medical/Planned)",
     ON_TRIAL: "On Trial",
     DEACTIVATED: "Deactivated",
   },
   reasons: {
-    unpaidInvoice: "Unpaid invoice",
+    unpaidInvoice: "Unpaid Invoice",
     misconduct: "Misconduct",
     vacation: "Vacation",
   },
   actions: {
-    applyChange: "Apply Changes",
+    applyChange: "Apply Status Change",
     viewHistory: "View History",
     contactParent: "Contact Parent",
     viewAll: "View All",
@@ -41,24 +42,25 @@ exports.messages = {
     roomLink: "Room / Link",
     status: "Status",
     pendingHolds: "{count} pending holds",
-    footerInfo: "Student ID: {id}",
+    footerInfo: "End of upcoming classes for {id}",
     noUpcomingClasses: "No upcoming classes",
     frozen: "Frozen",
     active: "Active",
     minutesShort: "{minutes}m",
   },
   policies: {
-    suspensionTitle: "Suspension Policy",
-    suspensionDesc: "Suspensions are applied by system for policy violations.",
-    onLeaveTitle: "Leave Policy",
-    onLeaveDesc: "Leaves must be requested in advance.",
+    suspensionTitle: "Suspension",
+    suspensionDesc: "Stops the billing engine completely and closes all student portal access permissions immediately.",
+    onLeaveTitle: "On Leave",
+    onLeaveDesc: "Preserves enrollment records but pauses class scheduling. Billing may be prorated.",
   },
   warning: {
-    title: "Warning",
-    description: "Status changes are synced with system and invoicing.",
+    title: "Warning: Account Suspension Pending",
+    description:
+      "Changing status to 'Suspended' will trigger an immediate full system lock. All upcoming classes will be frozen, preventing teachers from starting sessions. The billing engine for this ID will be halted until manually reactivated.",
   },
   successMessage: "Student status updated successfully.",
   errors: {
-    invalidId: "Invalid student ID",
+    invalidId: "Invalid student ID.",
   },
 };

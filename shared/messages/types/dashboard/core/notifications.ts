@@ -4,6 +4,7 @@ export interface NotificationsLabels {
   readonly errorLoading: string;
   readonly unpaidInvoicesTitle: string;
   readonly totalOverdueLabel: string;
+  readonly unpaidInvoicesFxNote: string;
   readonly noUnpaidInvoices: string;
   readonly loadingBilling: string;
   readonly newUnansweredComplaint: string;

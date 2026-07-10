@@ -23,6 +23,8 @@ const sampleRow = (overrides: Partial<DailyScheduleRow>): DailyScheduleRow => ({
   teacher: { id: "t1", name: "Teacher", avatarUrl: null },
   teacherTimezone: null,
   studentTimezone: null,
+  meetingJoinUrl: null,
+  effectiveMeeting: null,
   ...overrides,
 });
 

@@ -49,10 +49,4 @@ export const profile: TeacherProfileLabels = {
     emailInvalid: "Invalid email format",
     timezoneRequired: "Timezone is required",
   },
-  errors: {
-    failedToLoad: "Failed to load profile.",
-  },
-  status: {
-    activated: "Activated",
-  },
 };

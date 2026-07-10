@@ -1,5 +1,6 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.messages = {
+import type { StudentHistoryLabels } from "@/shared/messages/types/dashboard/students";
+
+export const history: StudentHistoryLabels = {
   breadcrumbs: {
     archive: "Archive",
     history: "Student History",
