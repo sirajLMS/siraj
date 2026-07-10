@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
@@ -15,7 +15,7 @@ export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"][
       .refine(value => isValidIanaTimezoneId(value), { message: messages.timezoneRequired }),
     address: z.string().optional(),
     baseSalary: z.coerce.number().min(0),
-    currency: z.string(),
+    currency: z.enum(CurrencyCode).optional(),
     paymentMethod: z.enum(["PAYPAL", "BANK_ACCOUNT"]),
     zoomLink: z.url().or(z.literal("")),
     accountStatus: z.boolean(),

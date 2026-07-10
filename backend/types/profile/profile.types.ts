@@ -1,4 +1,4 @@
-import type { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import type { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   ParentAssignedStudentsResult,
@@ -59,7 +59,7 @@ export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly paymentMethod?: string | null;
-  readonly currency?: string | null;
+  readonly currency?: CurrencyCode | null;
   readonly timezone?: IanaTimezone | null;
 };
 

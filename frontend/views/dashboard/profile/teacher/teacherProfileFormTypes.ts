@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountStatus, Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode, Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 
 const coreSchema = z.object({
@@ -25,7 +25,7 @@ const adminTeacherSchema = ownTeacherSchema.extend({
     .optional()
     .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
   hourlyRate: z.string().optional(),
-  rateCurrency: z.string().optional(),
+  rateCurrency: z.nativeEnum(CurrencyCode).optional(),
   paymentMethod: z.enum(PaymentMethod).optional().nullable(),
   status: z.enum(AccountStatus).optional().nullable(),
 });
@@ -49,7 +49,7 @@ export type TeacherEditData = {
   readonly zoomUsername?: string | null;
   readonly timezone?: string | null;
   readonly hourlyRate?: string | null;
-  readonly rateCurrency?: string | null;
+  readonly rateCurrency?: CurrencyCode | null;
   readonly paymentMethod?: PaymentMethod | null;
   readonly status?: AccountStatus | null;
 };

@@ -9,9 +9,12 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classSubjectByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/class-subject.documents";
 import { logger } from "@/frontend/utils/logger";
-import { getErrorMessage } from "@/shared/utils/error";
 import { SubjectDetailView } from "@/frontend/views/dashboard/subjects/detail/SubjectDetailView";
-import type { SubjectDetailContainerProps, SubjectResourceItem } from "@/frontend/views/dashboard/subjects/detail/types";
+import type {
+  SubjectDetailContainerProps,
+  SubjectResourceItem,
+} from "@/frontend/views/dashboard/subjects/detail/types";
+import { getErrorMessage } from "@/shared/utils/error";
 
 export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailContainerProps>) {
   const t = useTranslations("dashboard.subjects");

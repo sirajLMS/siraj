@@ -1,6 +1,5 @@
 import type { currencyExchangeRates, fxSyncRuns, invoices, payments } from "@/backend/db/schema";
-import type { FxProvider, FxSyncStatus, FxSyncTrigger, InvoiceStatus, InvoiceType } from "@/backend/enum";
-import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
+import type { CurrencyCode, FxProvider, FxSyncStatus, FxSyncTrigger, InvoiceStatus, InvoiceType } from "@/backend/enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -105,7 +104,7 @@ export type UnpaidInvoiceSummaryItem = {
   userName: string;
   userEmail: string;
   totalUnpaidAmount: string;
-  currency: string;
+  currency: CurrencyCode;
   overdueCount: number;
   oldestDueDate: string;
 };
@@ -130,7 +129,7 @@ export type InvoiceHistoryRow = {
   readonly dueDate: string;
   readonly paidDate: string | null;
   readonly amount: string;
-  readonly currency: string;
+  readonly currency: CurrencyCode;
   readonly status: InvoiceStatus;
   readonly invoiceType: InvoiceType;
   readonly studentId: string | null;
@@ -168,7 +167,7 @@ export type ManualInvoiceResult = {
   readonly parentId: string;
   readonly studentId: string | null;
   readonly amount: string;
-  readonly currency: string;
+  readonly currency: CurrencyCode;
   readonly status: InvoiceStatus;
   readonly invoiceType: InvoiceType;
   readonly issueDate: string;
@@ -208,7 +207,7 @@ export type CreateManualInvoiceInput = {
   readonly parentId: string;
   readonly studentId?: string | null;
   readonly amount: string;
-  readonly currency: string;
+  readonly currency: CurrencyCode;
   readonly invoiceType: string;
   readonly issueDate: string;
   readonly dueDate: string;

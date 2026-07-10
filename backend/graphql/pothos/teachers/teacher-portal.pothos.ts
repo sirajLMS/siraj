@@ -2,6 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
+  CurrencyCodePothosObject,
   IanaTimezonePothosObject,
   PaymentMethodPothosObject,
   StudentStatusPothosObject,
@@ -56,7 +57,7 @@ export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
     phone: t.exposeString("phone", { nullable: true }),
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
-    rateCurrency: t.exposeString("rateCurrency", { nullable: true }),
+    rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
     paymentMethod: t.expose("paymentMethod", { type: PaymentMethodPothosObject, nullable: true }),
     totalClasses: t.exposeInt("totalClasses"),
     zoomLink: t.exposeString("zoomLink", { nullable: true }),

@@ -1,4 +1,4 @@
-import type { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherProfileFormData } from "@/frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema";
 
 export interface TeacherProfileData {
@@ -11,7 +11,7 @@ export interface TeacherProfileData {
   readonly timezone: string;
   readonly address: string;
   readonly baseSalary: number;
-  readonly currency: string;
+  readonly currency: CurrencyCode;
   readonly paymentMethod: PaymentMethod | null;
   readonly zoomLink: string;
   readonly accountStatus: boolean;

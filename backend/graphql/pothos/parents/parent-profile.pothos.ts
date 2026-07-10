@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
 import type { EditQuotaResult } from "@/backend/services/student/student-management.service";
 import { StudentManagementService } from "@/backend/services/student/student-management.service";
@@ -27,7 +27,7 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     invoiceType: t.exposeString("invoiceType", { nullable: true }),
     feeAmount: t.exposeString("feeAmount", { nullable: true }),
     paymentMethod: t.exposeString("paymentMethod", { nullable: true }),
-    currency: t.exposeString("currency", { nullable: true }),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject, nullable: true }),
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),

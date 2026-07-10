@@ -5,6 +5,7 @@ import {
 } from "@/backend/graphql/pothos/parents/parent-portal.pothos";
 import { ParentProfilePothosObject } from "@/backend/graphql/pothos/parents/parent-profile.pothos";
 import {
+  CurrencyCodePothosObject,
   IanaTimezonePothosObject,
   OverrideStatePothosObject,
   ProfileAudiencePothosEnum,
@@ -156,7 +157,7 @@ export const ParentAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
       invoiceType: t.string({ required: false }),
       feeAmount: t.string({ required: false }),
       paymentMethod: t.string({ required: false }),
-      currency: t.string({ required: false }),
+      currency: t.field({ type: CurrencyCodePothosObject, required: false }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),
   });

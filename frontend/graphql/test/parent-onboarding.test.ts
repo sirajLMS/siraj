@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { IanaTimezone, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone, InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parent-onboarding.documents";
 import {
   authenticatedRequest,
@@ -40,7 +40,7 @@ const createFullParentInput = (
     invoiceType: InvoiceType | null;
     feeAmount: string | null;
     paymentMethod: PaymentMethod | null;
-    currency: string | null;
+    currency: CurrencyCode | null;
     timezone: IanaTimezone | null;
     address: string | null;
     defaultZoomLink: string | null;
@@ -59,7 +59,7 @@ const createFullParentInput = (
   invoiceType: overrides?.invoiceType ?? InvoiceType.Monthly,
   feeAmount: overrides?.feeAmount ?? "500.00",
   paymentMethod: overrides?.paymentMethod ?? PaymentMethod.BankAccount,
-  currency: overrides?.currency ?? "USD",
+  currency: overrides?.currency ?? CurrencyCode.Usd,
   timezone: overrides?.timezone ?? IanaTimezone.AmericaChicago,
   address: overrides?.address ?? "123 Main St",
   defaultZoomLink: overrides?.defaultZoomLink ?? "https://zoom.us/j/1234567890",

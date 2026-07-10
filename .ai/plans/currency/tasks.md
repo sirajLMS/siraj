@@ -34,153 +34,154 @@
 
 ## Phase 1 — Backend DB enum registration
 
-- [ ] **T1.1** Add `currencyCodeEnum = createPgEnumFromEnum("currency_code", CurrencyCode)` to `backend/db/schema/enums.ts` (next to `countryCodeEnum`, line 36). Add `CurrencyCode` import from `@/backend/enum`.
-- [ ] **T1.2** Re-export `currencyCodeEnum` from `backend/db/schema/index.ts` (verify pattern vs how `countryCodeEnum` is surfaced).
-- [ ] **T1.3** Per-file verify: `tsgo` on `enums.ts` + `schema/index.ts` → biome → lint-queue.
+- [x] **T1.1** DONE — `currencyCodeEnum = createPgEnumFromEnum("currency_code", CurrencyCode)` + `CurrencyCode` import added to `backend/db/schema/enums.ts` next to `countryCodeEnum`.
+- [x] **T1.2** NO-OP — `backend/db/schema/index.ts` uses `export * from "./enums"` (wildcard barrel); `currencyCodeEnum` auto-propagates with zero edits, matching `countryCodeEnum`.
+- [x] **T1.3** Verified — tsgo clean; lint-queue `{success:true, exitCode:0}` on `backend/db/schema/enums.ts` (2026-07-10).
 
 _Rules (read before editing):_ `AGENTS.md` (root — lint queue + verification loop) · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Seeds + Database Access Patterns — `createPgEnumFromEnum` derives PG enum values from the TS enum so values stay synced)
 
 ## Phase 2 — Backend DB schema — column types
 
-- [ ] **T2.1** `backend/db/schema/billing.ts:35` — `invoices.currency` → `currencyCodeEnum("currency").notNull().$type<CurrencyCode>()`
-- [ ] **T2.2** `backend/db/schema/billing.ts:76` — `payments.currency` → same
-- [ ] **T2.3** `backend/db/schema/billing.ts:99` — `currency_exchange_rates.fromCurrency` → `currencyCodeEnum("from_currency").notNull().$type<CurrencyCode>()`
-- [ ] **T2.4** `backend/db/schema/billing.ts:100` — `currency_exchange_rates.toCurrency` → same
-- [ ] **T2.5** `backend/db/schema/billing.ts:126` — `currency_exchange_audit_logs.fromCurrency` → same (nullable? verify `.notNull()`)
-- [ ] **T2.6** `backend/db/schema/billing.ts:127` — `currency_exchange_audit_logs.toCurrency` → same
-- [ ] **T2.7** `backend/db/schema/billing.ts:145` — `currency_hedges.currency` → same
-- [ ] **T2.8** Add imports for `currencyCodeEnum` + `CurrencyCode` to `billing.ts`
-- [ ] **T2.9** `backend/db/schema/teacher-banking.ts:63` — `teacher_payments.currency` → `currencyCodeEnum("currency").notNull().$type<CurrencyCode>()` + imports
-- [ ] **T2.10** `backend/db/schema/teachers.ts:32` — `teachers.rateCurrency` → `currencyCodeEnum("rate_currency").$type<CurrencyCode>()` (nullable) + imports
-- [ ] **T2.11** `backend/db/schema/parents.ts:24` — `parents.currency` → `currencyCodeEnum("currency").$type<CurrencyCode>()` (nullable) + imports
-- [ ] **T2.12** `backend/db/schema/scheduling.ts:152` — `class_instances.rateCurrency` → `currencyCodeEnum("rate_currency").$type<CurrencyCode>()` (nullable) + imports
-- [ ] **T2.13** Per-file `tsgo` on all 7 schema files → biome → lint-queue.
+- [x] **T2.1** `backend/db/schema/billing/billing.ts` — `invoices.currency` → `currencyCodeEnum("currency").notNull().$type<CurrencyCode>()`
+- [x] **T2.2** `backend/db/schema/billing/billing.ts` — `payments.currency` → same
+- [x] **T2.3** `backend/db/schema/billing/billing.ts` — `currency_exchange_rates.fromCurrency` → `currencyCodeEnum("from_currency").notNull().$type<CurrencyCode>()`
+- [x] **T2.4** `backend/db/schema/billing/billing.ts` — `currency_exchange_rates.toCurrency` → same
+- [x] **T2.5** `backend/db/schema/billing/billing.ts` — `currency_exchange_audit_logs.fromCurrency` → same (`.notNull()` confirmed)
+- [x] **T2.6** `backend/db/schema/billing/billing.ts` — `currency_exchange_audit_logs.toCurrency` → same
+- [x] **T2.7** `backend/db/schema/billing/billing.ts` — `currency_hedges.currency` → same
+- [x] **T2.8** Imports for `currencyCodeEnum` + `CurrencyCode` added to `billing/billing.ts`
+- [x] **T2.9** `backend/db/schema/teachers/teacher-banking.ts` — `teacher_payments.currency` → `currencyCodeEnum("currency").notNull().$type<CurrencyCode>()` + imports
+- [x] **T2.10** `backend/db/schema/teachers/teachers.ts` — `teachers.rateCurrency` → `currencyCodeEnum("rate_currency").$type<CurrencyCode>()` (nullable) + imports
+- [x] **T2.11** `backend/db/schema/parents/parents.ts` — `parents.currency` → `currencyCodeEnum("currency").$type<CurrencyCode>()` (nullable) + imports
+- [x] **T2.12** `backend/db/schema/classes/scheduling.ts` — `class_instances.rateCurrency` → `currencyCodeEnum("rate_currency").$type<CurrencyCode>()` (nullable) + imports
+- [x] **T2.13** Per-file `tsgo` on all schema files → lint-queue (verified by subagents 2026-07-10).
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/AGENTS.md` (6-layer data flow — schema layer) · `.agents/instructions/backend.instructions.md` (Database schema relations; match PG enums EXACTLY from `backend/db/schema/enums.ts` — `CurrencyCode.EGP === "EGP"`)
 
 ## Phase 3 — `bun db cleanGenerate`
 
-- [ ] **T3.1** Run `bun db cleanGenerate` (select action `8` if interactive; or pipe-arg).
-- [ ] **T3.2** Verify the regenerated `backend/drizzle/` contains a migration with `CREATE TYPE currency_code AS ENUM (...)` + the column-type changes on the 11 columns.
-- [ ] **T3.3** If one of the hand-written `backend/db/migration/*.sql` files references currency columns, fix it to enum-compatible (clean slate usually wipes+regenerates, but verify).
+- [x] **T3.1** Run `bun db cleanGenerate` (select action `8` if interactive; or pipe-arg). — `bun run db cleanGenerate`; added missing `currencyCodeEnum`/`CurrencyCode` imports in `scheduling.ts`; exit 0, migrate+seed OK.
+- [x] **T3.2** Verify the regenerated `backend/drizzle/` contains a migration with `CREATE TYPE currency_code AS ENUM (...)` + the column-type changes on the 11 columns. — `backend/drizzle/20260710090321_fantastic_old_lace/migration.sql`: `CREATE TYPE "currency_code"` at line 11; 10/11 columns enum in that file (`teacher_payments.currency` still `varchar(10)`; extra `generate` yields ALTER to `currency_code`).
+- [x] **T3.3** If one of the hand-written `backend/db/migration/*.sql` files references currency columns, fix it to enum-compatible (clean slate usually wipes+regenerates, but verify). — hand-written SQL has no currency column DDL (only permission label JSON).
 - ⚠️ Phase 3 seeds may fail until Phase 9 lands — re-run `bun db seed` after Phase 9.
 
 _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop) · `.agents/instructions/backend.instructions.md` ("Seeds (CRITICAL)" — schema changes require `push`/`cleanGenerate` BEFORE `bun db seed`) · drizzle skills (`drizzle-migrations`, `drizzle-responses-and-errors`, `drizzle-generate`, `drizzle-hints` if `generate` returns `missing_hints`)
 
 ## Phase 4 — Backend types
 
-- [ ] **T4.1** `backend/types/billing/billing.types.ts:50` — `currency: string` → `currency: CurrencyCode`
-- [ ] **T4.2** `backend/types/billing/billing.types.ts:75` — `readonly currency: string` → `readonly currency: CurrencyCode`
-- [ ] **T4.3** `backend/types/billing/billing.types.ts:113` — same
-- [ ] **T4.4** `backend/types/billing/billing.types.ts:153` — `CreateManualInvoiceInput.currency` → `CurrencyCode`
-- [ ] **T4.5** `backend/types/billing/billing.types.ts:39-42` — verify FX `CurrencyExchangeRate{Select,Insert}Type` now infer `CurrencyCode` automatically (no manual edit unless the type widen chain breaks)
-- [ ] **T4.6** `backend/types/teachers/teacher.types.ts:51` — `CreateTeacherPaymentInput.currency: string` → `CurrencyCode`
-- [ ] **T4.7** `backend/types/teachers/teacher.types.ts:193` — `TeacherOwnProfileReturnType.rateCurrency: string | null` → `CurrencyCode | null`
-- [ ] **T4.8** `backend/types/parents/parent.types.ts:171` — `ParentAdminProfile.currency: string | null` → `CurrencyCode | null`
-- [ ] **T4.9** `backend/types/parents/parent.types.ts:218` — `ParentProfileUpdateInput.currency` → `CurrencyCode | null`
-- [ ] **T4.10** `backend/types/profile/profile.types.ts:66` — `ParentAdminProfileUpdateInput.currency` → `CurrencyCode | null`
-- [ ] **T4.11** `backend/types/index.ts` — re-export `CurrencyCode` from `@/backend/enum` if not already present
-- [ ] **T4.12** Per-file `tsgo` on each touched `backend/types/**.ts` → biome → lint-queue.
+- [x] **T4.1** `backend/types/billing/billing.types.ts:50` — `currency: string` → `currency: CurrencyCode`
+- [x] **T4.2** `backend/types/billing/billing.types.ts:75` — `readonly currency: string` → `readonly currency: CurrencyCode`
+- [x] **T4.3** `backend/types/billing/billing.types.ts:113` — same
+- [x] **T4.4** `backend/types/billing/billing.types.ts:153` — `CreateManualInvoiceInput.currency` → `CurrencyCode`
+- [x] **T4.5** `backend/types/billing/billing.types.ts:39-42` — verify FX `CurrencyExchangeRate{Select,Insert}Type` now infer `CurrencyCode` automatically (no manual edit unless the type widen chain breaks)
+- [x] **T4.6** `backend/types/teachers/teacher.types.ts:51` — `CreateTeacherPaymentInput.currency: string` → `CurrencyCode`
+- [x] **T4.7** `backend/types/teachers/teacher.types.ts:193` — `TeacherOwnProfileReturnType.rateCurrency: string | null` → `CurrencyCode | null`
+- [x] **T4.8** `backend/types/parents/parent.types.ts:171` — `ParentAdminProfile.currency: string | null` → `CurrencyCode | null`
+- [x] **T4.9** `backend/types/parents/parent.types.ts:218` — `ParentProfileUpdateInput.currency` → `CurrencyCode | null`
+- [x] **T4.10** `backend/types/profile/profile.types.ts:66` — `ParentAdminProfileUpdateInput.currency` → `CurrencyCode | null`
+- [x] **T4.11** `backend/types/index.ts` — re-export `CurrencyCode` from `@/backend/enum` if not already present
+- [x] **T4.12** Per-file `tsgo` on each touched `backend/types/**.ts` → biome → lint-queue.
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/types/AGENTS.md` (**Single Canonical Object Type Pattern** — `CurrencyCode` is the re-applied enum on `{Entity}ReturnType`; `Omit<>` then re-apply `currency: CurrencyCode`; never create local types in Pothos) · `backend/AGENTS.md` (Type Definition Pattern — `{Entity}SelectType` = `typeof table.$inferSelect`) · `.agents/instructions/backend.instructions.md` (Type Definition Pattern CRITICAL: ALWAYS import from `@/backend/types` alias, never relative; update `backend/types/index.ts` barrel)
 
 ## Phase 5 — Repositories
 
-- [ ] **T5.1** `backend/db/repo/billing.repository.ts:50-56` — `resolveExchangeRateSnapshot` signature `currency: string` → `CurrencyCode`
-- [ ] **T5.2** `backend/db/repo/billing.repository.ts:71-79` — `createBillingEntity` input `currency: CurrencyCode`
-- [ ] **T5.3** `backend/db/repo/billing.repository.ts:105-110` — `getLatestExchangeRate` `fromCurrency`/`toCurrency: CurrencyCode`
-- [ ] **T5.4** `backend/db/repo/billing.repository.ts:139-143` — `updateExchangeRate` (verify inferred input flow; no edits beyond updates if inferred)
-- [ ] **T5.5** `backend/db/repo/billing.repository.ts:279-316` — `OverdueInvoiceRow.currency: CurrencyCode` + `fetchOverdueInvoices` select (casting may need `${x}::currency_code`)
-- [ ] **T5.6** `backend/db/repo/billing.repository.ts:401-412` — `invoiceBaseFields` (`currency: invoices.currency`)
-- [ ] **T5.7** `backend/db/repo/billing.repository.ts:414-438` — `mapInvoiceRow` row type `currency: CurrencyCode`
-- [ ] **T5.8** `backend/db/repo/teacher.repository.ts:56, 205, 242, 263` — Insert + select + mapper; `rateCurrency: CurrencyCode | null`
-- [ ] **T5.9** `backend/db/repo/parent.repository.ts:68, 92, 270, 297, 342` — `currency: CurrencyCode | null` through insert/select/map/update
-- [ ] **T5.10** `backend/db/repo/teacher-banking.repository.ts:278` — verify `currency: input.currency` type inference via repo
-- [ ] **T5.11** `backend/db/repo/audit.repository.ts:310, 319, 325-326, 363-387` — `currency`, `fromCurrency`, `toCurrency` → `CurrencyCode`; metadata-template narrowing
-- [ ] **T5.12** `backend/db/repo/scheduling/shared.ts:183` — pass-through (verify typing only)
-- [ ] **T5.13** `backend/db/repo/scheduling/state-changes.ts:539-540` — `rateCurrency: CurrencyCode | null`
-- [ ] **T5.14** `backend/db/repo/report.repository.ts:92-93, 115-116` — DECISION: keep `'EGP'`/`'USD'` raw SQL string literals inside the `sql<T>` template (drizzle-safe) OR interpolate `${CurrencyCode.Egp}`. Choose option A unless a tsgo/type-assertion requires B. Record choice in this task note.
+- [x] **T5.1** `backend/db/repo/billing.repository.ts:50-56` — `resolveExchangeRateSnapshot` signature `currency: string` → `CurrencyCode`
+- [x] **T5.2** `backend/db/repo/billing.repository.ts:71-79` — `createBillingEntity` input `currency: CurrencyCode`
+- [x] **T5.3** `backend/db/repo/billing.repository.ts:105-110` — `getLatestExchangeRate` `fromCurrency`/`toCurrency: CurrencyCode`
+- [x] **T5.4** `backend/db/repo/billing.repository.ts:139-143` — `updateExchangeRate` (verify inferred input flow; no edits beyond updates if inferred)
+- [x] **T5.5** `backend/db/repo/billing.repository.ts:279-316` — `OverdueInvoiceRow.currency: CurrencyCode` + `fetchOverdueInvoices` select (casting may need `${x}::currency_code`)
+- [x] **T5.6** `backend/db/repo/billing.repository.ts:401-412` — `invoiceBaseFields` (`currency: invoices.currency`)
+- [x] **T5.7** `backend/db/repo/billing.repository.ts:414-438` — `mapInvoiceRow` row type `currency: CurrencyCode`
+- [x] **T5.8** `backend/db/repo/teacher.repository.ts:56, 205, 242, 263` — Insert + select + mapper; `rateCurrency: CurrencyCode | null`
+- [x] **T5.9** `backend/db/repo/parent.repository.ts:68, 92, 270, 297, 342` — `currency: CurrencyCode | null` through insert/select/map/update
+- [x] **T5.10** `backend/db/repo/teacher-banking.repository.ts:278` — verify `currency: input.currency` type inference via repo
+- [x] **T5.11** `backend/db/repo/audit.repository.ts:310, 319, 325-326, 363-387` — `currency`, `fromCurrency`, `toCurrency` → `CurrencyCode`; metadata-template narrowing
+- [x] **T5.12** `backend/db/repo/scheduling/shared.ts:183` — pass-through (verify typing only)
+- [x] **T5.13** `backend/db/repo/scheduling/state-changes.ts:539-540` — `rateCurrency: CurrencyCode | null` (pass-through via schema-inferred `ClassInstanceInsertInput`)
+- [x] **T5.14** `backend/db/repo/books/report.repository.ts:92-93, 115-116` — **Decision: Option A** — kept `'EGP'`/`'USD'` as raw SQL string literals inside `sql<number>` templates (drizzle-safe; no bind-param interpolation). tsgo + biome + lint-queue all pass with no code changes. `${CurrencyCode.EGP}` interpolation not required.
 - [ ] **T5.15** Per-file `tsgo` on every touched repo file → biome → lint-queue.
 
 _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop, fix-or-report cross-file rule) · `backend/db/repo/AGENTS.md` (**data access ONLY**: no business logic, no permission checks, no hardcoded user-facing error strings — use `getBackendTranslations` + `locale?` param; repos must use `{Entity}SelectType`/`{Entity}InsertType` from `backend/types/`, NOT raw schema types; conditional aggregation via `sql<number>` template + `.mapWith(Number)` — never raw `CAST(...)`) · `backend/AGENTS.md` (Repository Layer) · `.agents/instructions/backend.instructions.md` ("Repository Layer" — when `findMany` complex relations give `SQL<unknown>` errors, revert to `.select().from().leftJoin()` or manual ID-based mapping)
 
 ## Phase 6 — Services
 
-- [ ] **T6.1** `backend/services/billing/billing-management.service.ts:12, 15, 40-55, 57-72` — type flow for `currency`, `buildInvoiceInsertPayload`, `mapToManualInvoiceResult`.
-- [ ] **T6.2** `backend/services/teacher/teacher-onboarding.service.ts:35, 82` — `rateCurrency?: CurrencyCode | null`.
-- [ ] **T6.3** `backend/services/parent/parent-onboarding.service.ts:24, 36, 85, 111` — `currency?: CurrencyCode | null` + result mapping.
-- [ ] **T6.4** `backend/services/parent/parent-profile.service.ts:59` — pass-through typing flows automatically (verify).
-- [ ] **T6.5** `backend/services/profile/profile.service.ts:78` — broaden dispatcher input union as needed for `CurrencyCode`.
-- [ ] **T6.6** `backend/services/teacher/teacher-portal.service.ts:52` — `rateCurrency: CurrencyCode | null`.
-- [ ] **T6.7** `backend/services/session/class-session.service.ts:234-235` — pass-through typing (verify).
-- [ ] **T6.8** Per-file `tsgo` on every touched service → biome → lint-queue.
+- [x] **T6.1** `backend/services/billing/billing-management.service.ts:12, 15, 40-55, 57-72` — type flow for `currency`, `buildInvoiceInsertPayload`, `mapToManualInvoiceResult`.
+- [x] **T6.2** `backend/services/teacher/teacher-onboarding.service.ts:35, 82` — `rateCurrency?: CurrencyCode | null`.
+- [x] **T6.3** `backend/services/parent/parent-onboarding.service.ts:24, 36, 85, 111` — `currency?: CurrencyCode | null` + result mapping.
+- [x] **T6.4** `backend/services/parent/parent-profile.service.ts:59` — pass-through typing flows automatically (verify).
+- [x] **T6.5** `backend/services/profile/profile.service.ts:78` — broaden dispatcher input union as needed for `CurrencyCode`.
+- [x] **T6.6** `backend/services/teacher/teacher-portal.service.ts:52` — `rateCurrency: CurrencyCode | null`.
+- [x] **T6.7** `backend/services/session/class-session.service.ts:234-235` — pass-through typing (verify).
+- [x] **T6.8** Per-file `tsgo` on every touched service → biome → lint-queue.
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/services/AGENTS.md` (**domain-driven**, no monolithic services; business-logic hub; SSR-compatible — must NOT rely on GraphQL context unless passed explicitly; import types from `@/backend/types`, never ad-hoc; i18n: all user-facing errors via `getBackendTranslations` + `locale?` param; never hardcode error strings) · `backend/AGENTS.md` (Service Layer — data transformations `SubmitInput → InsertType`, `SelectType → ReturnType`) · `.agents/instructions/backend.instructions.md` ("Service Layer" — never call services outside your domain boundary)
 
 ## Phase 7 — Pothos GraphQL
 
-- [ ] **T7.1** `backend/graphql/pothos/billing/billing-management.pothos.ts:23` — `ManualInvoiceResult.currency` → `t.expose("currency", { type: CurrencyCodePothosObject })`.
-- [ ] **T7.2** `backend/graphql/pothos/billing/billing-management.pothos.ts:74` — `createManualInvoice.currency` arg → `t.field({ type: CurrencyCodePothosObject, required: true })`.
-- [ ] **T7.3** Leave lines `78-79` (`exchangeRateSnapshot`/`exchangeRateSource`) as `String`.
-- [ ] **T7.4** `backend/graphql/pothos/billing/billing-history.pothos.ts:44` — `InvoiceHistoryRow.currency` → `t.expose`.
-- [ ] **T7.5** `backend/graphql/pothos/billing/billing-alerts.pothos.ts:13` — `UnpaidInvoiceItem.currency` → `t.expose`.
-- [ ] **T7.6** `backend/graphql/pothos/teachers/teacher-onboarding.pothos.ts:68-71` — `TeacherOnboardingInput.rateCurrency` → `t.field({ type: CurrencyCodePothosObject })`, drop `maxLength: 512`.
-- [ ] **T7.7** `backend/graphql/pothos/parents/parent-onboarding.pothos.ts:39` — `ParentOnboardingInput.currency` → `t.field({ type: CurrencyCodePothosObject })`, drop `maxLength: 512`.
-- [ ] **T7.8** `backend/graphql/pothos/parents/parent-onboarding.pothos.ts:55` — `ParentOnboardingResult.currency` → `t.expose` (nullable).
-- [ ] **T7.9** `backend/graphql/pothos/parents/parent-profile.pothos.ts:30` — `ParentProfile.currency` → `t.expose` (nullable).
-- [ ] **T7.10** `backend/graphql/pothos/profile/profile.pothos.ts:166` — `ParentAdminProfileUpdateInput.currency` → `t.field({ type: CurrencyCodePothosObject, required: false })`.
-- [ ] **T7.11** `backend/graphql/pothos/teachers/staff-profile.pothos.ts:28` — `TeacherProfileForEdit.rateCurrency` → `t.expose({ type: CurrencyCodePothosObject, nullable: true, authScopes: { superAdmin: true } })`.
-- [ ] **T7.12** `backend/graphql/pothos/teachers/staff-profile.pothos.ts:57` — `TeacherProfileUpdateInput.rateCurrency` → `t.field({ type: CurrencyCodePothosObject, required: false })`, drop `maxLength: 255`.
-- [ ] **T7.13** Per-file `tsgo` on touched Pothos files → biome → lint-queue.
+- [x] **T7.1** `backend/graphql/pothos/billing/billing-management.pothos.ts:23` — `ManualInvoiceResult.currency` → `t.expose("currency", { type: CurrencyCodePothosObject })`.
+- [x] **T7.2** `backend/graphql/pothos/billing/billing-management.pothos.ts:74` — `createManualInvoice.currency` arg → `t.field({ type: CurrencyCodePothosObject, required: true })`.
+- [x] **T7.3** Leave lines `78-79` (`exchangeRateSnapshot`/`exchangeRateSource`) as `String`.
+- [x] **T7.4** `backend/graphql/pothos/billing/billing-history.pothos.ts:44` — `InvoiceHistoryRow.currency` → `t.expose`.
+- [x] **T7.5** `backend/graphql/pothos/billing/billing-alerts.pothos.ts:13` — `UnpaidInvoiceItem.currency` → `t.expose`.
+- [x] **T7.6** `backend/graphql/pothos/teachers/teacher-onboarding.pothos.ts:68-71` — `TeacherOnboardingInput.rateCurrency` → `t.field({ type: CurrencyCodePothosObject })`, drop `maxLength: 512`.
+- [x] **T7.7** `backend/graphql/pothos/parents/parent-onboarding.pothos.ts:39` — `ParentOnboardingInput.currency` → `t.field({ type: CurrencyCodePothosObject })`, drop `maxLength: 512`.
+- [x] **T7.8** `backend/graphql/pothos/parents/parent-onboarding.pothos.ts:55` — `ParentOnboardingResult.currency` → `t.expose` (nullable).
+- [x] **T7.9** `backend/graphql/pothos/parents/parent-profile.pothos.ts:30` — `ParentProfile.currency` → `t.expose` (nullable).
+- [x] **T7.10** `backend/graphql/pothos/profile/profile.pothos.ts:159` — `ParentAdminProfileUpdateInput.currency` → `t.field({ type: CurrencyCodePothosObject, required: false })`.
+- [x] **T7.11** `backend/graphql/pothos/teachers/staff-profile.pothos.ts:28` — `TeacherProfileForEdit.rateCurrency` → `t.expose({ type: CurrencyCodePothosObject, nullable: true, authScopes: { superAdmin: true } })`.
+- [x] **T7.12** `backend/graphql/pothos/teachers/staff-profile.pothos.ts:57` — `TeacherProfileUpdateInput.rateCurrency` → `t.field({ type: CurrencyCodePothosObject, required: false })`, drop `maxLength: 255`.
+- [x] **T7.12b** `backend/graphql/pothos/teachers/teacher-portal.pothos.ts:59` — `TeacherOwnProfile.rateCurrency` → `t.expose({ type: CurrencyCodePothosObject, nullable: true })` (13th site — missed in original plan).
+- [x] **T7.13** Per-file `tsgo` on touched Pothos files → biome → lint-queue.
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/graphql/AGENTS.md` (**Single Canonical Object Type (CRITICAL)** — objectRef uses `{Entity}ReturnType` from `backend/types/`; never local `{Entity}Definition`; `nullable: true` REQUIRED for `CurrencyCode | null` — Pothos defaults non-nullable; resolvers delegate to SERVICES not repos; propagate `ctx.locale`; errors via `getBackendTranslations`; `id` on all objects; input + collection wrapper types allowed) · `backend/AGENTS.md` (GraphQL Layer) · `.agents/instructions/backend.instructions.md` ("Pothos/GraphQL" — import types from `@/backend/types`; input + collection wrapper exceptions allowed)
 
 ## Phase 8 — Codegen + Schema
 
-- [ ] **T8.1** Run `bun run generate:gqlSchema`.
-- [ ] **T8.2** Run `bun codegen`.
-- [ ] **T8.3** Verify in `frontend/graphql/generated/schema.graphql` that the 12 currency fields now read `CurrencyCode!`/`CurrencyCode` instead of `String!`/`String`.
-- [ ] **T8.4** Verify in `frontend/graphql/generated/gql/graphql-types.ts` that the 12 fields now read `Maybe<CurrencyCode>`/`CurrencyCode`.
+- [x] **T8.1** Run `bun run generate:gqlSchema`.
+- [x] **T8.2** Run `bun codegen`.
+- [x] **T8.3** Verify in `frontend/graphql/generated/schema.graphql` that the 12 currency fields now read `CurrencyCode!`/`CurrencyCode` instead of `String!`/`String`.
+- [x] **T8.4** Verify in `frontend/graphql/generated/gql/graphql-types.ts` that the 12 fields now read `Maybe<CurrencyCode>`/`CurrencyCode`.
 - [ ] Do NOT hand-edit generated files.
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `frontend/AGENTS.md` (Code Quality + Apollo/GraphQL Codegen rule) · `frontend/graphql/sharedDocuments/AGENTS.md` ("Codegen" — `~/.bun/bin/bun run generate:gqlSchema` THEN `~/.bun/bin/bun codegen` after any schema or document change; never inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL → codegen after schema/document changes — both steps required) · `.agents/instructions/backend.instructions.md` ("GraphQL Schema Generation" — both `generate:gqlSchema` AND `codegen` required)
 
 ## Phase 9 — Seeds
 
-- [ ] **T9.1** `backend/db/seeds/lib/billing-factory.ts:41` — `DEFAULT_INVOICE_CURRENCY = CurrencyCode.USD` (+ import).
-- [ ] **T9.2** `backend/db/seeds/seed-teacher-payments.ts:42` — replace inline `"USD"` with `DEFAULT_INVOICE_CURRENCY`.
-- [ ] **T9.3** `backend/db/seeds/seed-currency-hedges.ts:8-10` — `CurrencyCode.USD / EGP / SAR` (+ import).
-- [ ] **T9.4** `backend/db/seeds/seed-currency-exchange-rates.ts` — swap pair source array to `CurrencyCode` tuples; insert flow via `CurrencyExchangeRateInsertType`.
-- [ ] **T9.5** `backend/db/seeds/seed-currency-exchange-audit-logs.ts` — verify still compiles (no literal changes).
-- [ ] **T9.6** Re-run `bun db seed` after Phase 3 if it failed before — now it should pass.
+- [x] **T9.1** `backend/db/seeds/lib/billing-factory.ts:41` — `DEFAULT_INVOICE_CURRENCY = CurrencyCode.USD` (+ import).
+- [x] **T9.2** `backend/db/seeds/teachers/seed-teacher-payments.ts:42` — replace inline `"USD"` with `DEFAULT_INVOICE_CURRENCY`.
+- [x] **T9.3** `backend/db/seeds/billing/seed-currency-hedges.ts:8-10` — `CurrencyCode.USD / EGP / SAR` (+ import).
+- [x] **T9.4** `backend/db/seeds/billing/seed-currency-exchange-rates.ts` — swap pair source array to `CurrencyCode` tuples; insert flow via `CurrencyExchangeRateInsertType`.
+- [x] **T9.5** `backend/db/seeds/billing/seed-currency-exchange-audit-logs.ts` — verify still compiles (no literal changes; `ExchangeRateRow` narrowed to `CurrencyCode`).
+- [x] **T9.6** Re-run `bun db seed` after Phase 3 if it failed before — now it should pass.
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `backend/AGENTS.md` (Seeds section) · `.agents/instructions/backend.instructions.md` ("Seeds (CRITICAL)" — one `seedOrGet` per table in a dedicated file; idempotent via `onConflictDoUpdate`/`onConflictDoNothing`; match PG enum values EXACTLY (`CurrencyCode.USD === "USD"`); check constraints by reading `backend/db/schema/*.ts`; run schema push/cleanGenerate BEFORE `bun db seed` after schema change; return seeded entities downstream; helpers over ~70-80 lines extracted; never `any`/inline types)
 
 ## Phase 10 — Frontend GraphQL documents
 
-- [ ] **T10.1** `frontend/graphql/sharedDocuments/billing-management.documents.ts:13` — `$currency: String!` → `$currency: CurrencyCode!`.
-- [ ] **T10.2** Verify (no edit) `parent-onboarding.documents.ts`, `billing-alerts.documents.ts`, `parent-billing-history.documents.ts`, `parent-profile.documents.ts`, `user-billing-profile.documents.ts`, `staff-profile.documents.ts`, `profile.documents.ts`, `teacher-portal.documents.ts` — all unchanged; field selections auto-typed via codegen.
-- [ ] **T10.3** Verify `frontend/graphql/sharedDocuments/profile.documents.test.ts:55` (`expect(mutationSource).toContain("currency")`) still passes — no edit.
+- [x] **T10.1** `frontend/graphql/sharedDocuments/billing-management.documents.ts:13` — `$currency: String!` → `$currency: CurrencyCode!`.
+- [x] **T10.2** Verify (no edit) `parent-onboarding.documents.ts`, `billing-alerts.documents.ts`, `parent-billing-history.documents.ts`, `parent-profile.documents.ts`, `user-billing-profile.documents.ts`, `staff-profile.documents.ts`, `profile.documents.ts`, `teacher-portal.documents.ts` — all unchanged; field selections auto-typed via codegen.
+- [x] **T10.3** Verify `frontend/graphql/sharedDocuments/profile.documents.test.ts:55` (`expect(mutationSource).toContain("currency")`) still passes — no edit.
 
 _Rules (read before editing):_ `AGENTS.md` (root) · `frontend/graphql/sharedDocuments/AGENTS.md` (one file per domain; import `gql` + `TypedDocumentNode` from `"@apollo/client"` NEVER `"@apollo/client/core"`; naming `{entityName}QueryDocument`/`{entityName}MutationDocument` → `TypedDocumentNode<Operations.X, Types.Y>`; **`id` field on EVERY object type in selection sets** for Apollo cache normalization; NO `useLazyQuery`; codegen after any document change) · `frontend/graphql/AGENTS.md` (Type Safety + Document Organization — all ops strongly typed via codegen; never custom inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — import `gql`+`TypedDocumentNode` from `"@apollo/client"`, hooks from `"@apollo/client/react"`; import TYPES from `graphql-types.ts` NOT `operations.ts`) · `frontend/AGENTS.md` (Apollo hooks rule)
 
 ## Phase 11 — Frontend Zod schemas
 
-- [ ] **T11.1** `frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema.ts:48` — `z.nativeEnum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired })` (add `CurrencyCode` import from `@/frontend/graphql/generated/gql/graphql-types`).
-- [ ] **T11.2** `frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema.ts:26` — `z.nativeEnum(CurrencyCode).refine(...)` triggering `currencyRequired`.
-- [ ] **T11.3** `frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema.ts:17` — `z.nativeEnum(CurrencyCode).optional()`.
-- [ ] **T11.4** `frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema.ts:23` — `z.nativeEnum(CurrencyCode).refine(...)`.
-- [ ] **T11.5** `frontend/views/dashboard/profile/teacher/teacherProfileFormTypes.ts:28, 52` — `z.nativeEnum(CurrencyCode).optional()` + `readonly rateCurrency?: CurrencyCode | null`.
-- [ ] **T11.6** `frontend/views/dashboard/profile/parent/parentProfileFormTypes.ts:23, 49` — `z.nativeEnum(CurrencyCode).optional()` + `readonly currency?: CurrencyCode | null`.
-- [ ] **T11.7** Per-file `tsgo` → biome → lint-queue on touched schemas.
+- [x] **T11.1** `frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema.ts:48` — `z.nativeEnum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired })` (add `CurrencyCode` import from `@/frontend/graphql/generated/gql/graphql-types`).
+- [x] **T11.2** `frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema.ts:26` — `z.nativeEnum(CurrencyCode).refine(...)` triggering `currencyRequired`.
+- [x] **T11.3** `frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema.ts:17` — `z.nativeEnum(CurrencyCode).optional()`.
+- [x] **T11.4** `frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema.ts:23` — `z.nativeEnum(CurrencyCode).refine(...)`.
+- [x] **T11.5** `frontend/views/dashboard/profile/teacher/teacherProfileFormTypes.ts:28, 52` — `z.nativeEnum(CurrencyCode).optional()` + `readonly rateCurrency?: CurrencyCode | null`.
+- [x] **T11.6** `frontend/views/dashboard/profile/parent/parentProfileFormTypes.ts:23, 49` — `z.nativeEnum(CurrencyCode).optional()` + `readonly currency?: CurrencyCode | null`.
+- [x] **T11.7** Per-file `tsgo` → biome → lint-queue on touched schemas (verified 2026-07-10).
 
 _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop) · `frontend/views/AGENTS.md` (form/view types follow domain structure) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — `graphql-types.ts` is canonical for entity types, NOT `operations.ts`; NEVER inline type literals — always use codegen types; `CurrencyCode` from `@/frontend/graphql/generated/gql/graphql-types`) · `frontend/AGENTS.md` (Zustand-stores + type-consumers rule — if schema/FE misalign, fix the schema or query, never redefine types locally)
 
 ## Phase 12 — Frontend form/view types
 
-- [ ] **T12.1** `frontend/views/dashboard/teachers/profile/types.ts:14` — `readonly currency: CurrencyCode;`.
-- [ ] **T12.2** `frontend/views/dashboard/parent/types/profile.ts:37` — `readonly currency: CurrencyCode;`.
-- [ ] **T12.3** Per-file verification.
+- [x] **T12.1** `frontend/views/dashboard/teachers/profile/types.ts:14` — `readonly currency: CurrencyCode;`.
+- [x] **T12.2** `frontend/views/dashboard/parent/types/profile.ts:37` — `readonly currency: CurrencyCode;`.
+- [x] **T12.3** Per-file verification (verified 2026-07-10).
 
 _Rules (read before editing):_ same as Phase 11 — `frontend/views/AGENTS.md` + `.agents/instructions/frontend.instructions.md` (`graphql-types.ts` canonical) + `frontend/AGENTS.md` (no manual type redefinitions).
 

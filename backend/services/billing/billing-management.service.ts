@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { BillingRepository, ParentRepository } from "@/backend/db/repo";
-import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, type InvoiceStatus, type InvoiceType } from "@/backend/enum";
 import { ForbiddenError, getBackendTranslations, logger, NotFoundError } from "@/backend/lib";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
 import type * as Types from "@/backend/types";
@@ -9,7 +9,7 @@ function deriveIdempotencyKey(input: {
   parentId: string;
   studentId?: string | null;
   amount: string;
-  currency: string;
+  currency: CurrencyCode;
   invoiceType: string;
 }): string {
   const parts = [input.parentId, input.studentId ?? "", input.amount, input.currency, input.invoiceType];

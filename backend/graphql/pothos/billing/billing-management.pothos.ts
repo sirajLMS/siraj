@@ -1,6 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { BillingMonthInputRef } from "@/backend/graphql/pothos/billing/billing-history.pothos";
-import { InvoiceStatusPothosObject, InvoiceTypePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  CurrencyCodePothosObject,
+  InvoiceStatusPothosObject,
+  InvoiceTypePothosObject,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
 import type {
@@ -20,7 +24,7 @@ export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement(
     parentId: t.exposeString("parentId"),
     studentId: t.exposeString("studentId", { nullable: true }),
     amount: t.exposeString("amount"),
-    currency: t.exposeString("currency"),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject }),
     status: t.expose("status", { type: InvoiceStatusPothosObject }),
     invoiceType: t.expose("invoiceType", { type: InvoiceTypePothosObject }),
     issueDate: t.exposeString("issueDate"),
@@ -71,7 +75,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
       parentId: t.arg.string({ required: true }),
       studentId: t.arg.string({ required: false }),
       amount: t.arg.string({ required: true }),
-      currency: t.arg.string({ required: true }),
+      currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
       invoiceType: t.arg({ type: InvoiceTypePothosObject, required: true }),
       issueDate: t.arg.string({ required: true }),
       dueDate: t.arg.string({ required: true }),

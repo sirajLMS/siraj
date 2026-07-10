@@ -3,9 +3,9 @@
 import { ExpandMoreOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Collapse, IconButton, Typography } from "@mui/material";
 import { useState } from "react";
-import type { ReportTeacherOption, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import type { ReportFiltersFormLabels } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
 import { ReportFiltersForm } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
+import type { ReportTeacherOption, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 interface ReportFiltersCollapsibleProps {
   readonly title: string;

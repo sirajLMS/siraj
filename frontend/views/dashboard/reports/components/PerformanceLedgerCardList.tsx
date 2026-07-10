@@ -1,8 +1,8 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { PerformanceLedgerCard } from "@/frontend/views/dashboard/reports/components/PerformanceLedgerCard";
+import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 interface PerformanceLedgerCardListLabels {
   readonly studentLabel: string;

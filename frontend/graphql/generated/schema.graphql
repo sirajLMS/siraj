@@ -1889,7 +1889,7 @@ type ManagerOnboardingResult {
 type ManualInvoiceResult {
   amount: String
   createdAt: DateTime
-  currency: String
+  currency: CurrencyCode
   dueDate: String
   id: String
   invoiceType: InvoiceType
@@ -1936,7 +1936,7 @@ type Mutation {
 
   """Create a new manager/staff account (System Admin only)"""
   createManager(input: ManagerOnboardingInput!): ManagerOnboardingResult
-  createManualInvoice(amount: String!, billingMonths: [BillingMonthInput!], currency: String!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: InvoiceType!, issueDate: String!, parentId: String!, sendEmail: Boolean, studentId: String): ManualInvoiceResult
+  createManualInvoice(amount: String!, billingMonths: [BillingMonthInput!], currency: CurrencyCode!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: InvoiceType!, issueDate: String!, parentId: String!, sendEmail: Boolean, studentId: String): ManualInvoiceResult
 
   """Create a new parent account with billing configuration"""
   createParent(input: ParentOnboardingInput!): ParentOnboardingResult
@@ -2142,7 +2142,7 @@ input PaginationArgs {
 
 input ParentAdminProfileUpdateInput {
   address: String
-  currency: String
+  currency: CurrencyCode
   defaultZoomLink: String
   facebook: String
   feeAmount: String
@@ -2289,7 +2289,7 @@ type ParentInvoiceHistoryResult {
 
 type ParentInvoiceRow {
   amount: String
-  currency: String
+  currency: CurrencyCode
   dueDate: String
   id: String
   invoiceType: InvoiceType
@@ -2303,7 +2303,7 @@ type ParentInvoiceRow {
 """Input for creating a new parent account with billing configuration"""
 input ParentOnboardingInput {
   address: String
-  currency: String
+  currency: CurrencyCode
   defaultZoomLink: String
   email: Email!
   facebook: String
@@ -2321,7 +2321,7 @@ input ParentOnboardingInput {
 
 """Result of parent onboarding operation"""
 type ParentOnboardingResult {
-  currency: String
+  currency: CurrencyCode
   email: String
   invoiceType: String
   name: String
@@ -2353,7 +2353,7 @@ type ParentProfile {
   address: String
   avatarUrl: String
   createdAt: DateTime
-  currency: String
+  currency: CurrencyCode
   defaultZoomLink: String
   email: String
   facebook: String
@@ -3388,7 +3388,7 @@ input TeacherOnboardingInput {
   qualifications: String
 
   """Currency for hourly rate"""
-  rateCurrency: String
+  rateCurrency: CurrencyCode
 
   """Bank routing number"""
   routingNumber: String
@@ -3414,7 +3414,7 @@ type TeacherOwnProfile {
   name: String
   paymentMethod: PaymentMethod
   phone: String
-  rateCurrency: String
+  rateCurrency: CurrencyCode
   timezone: IanaTimezone
   totalClasses: Int
   zoomLink: String
@@ -3439,7 +3439,7 @@ type TeacherProfileResult {
   paymentMethod: PaymentMethod
   phone: String
   qualifications: String
-  rateCurrency: String
+  rateCurrency: CurrencyCode
   status: AccountStatus
   timezone: IanaTimezone
   totalClasses: Int
@@ -3458,7 +3458,7 @@ input TeacherProfileUpdateInput {
   paymentMethod: PaymentMethod
   phone: String
   qualifications: String
-  rateCurrency: String
+  rateCurrency: CurrencyCode
   status: AccountStatus
   timezone: IanaTimezone
   zoomLink: String
@@ -3539,7 +3539,7 @@ type UnifiedProfile {
 }
 
 type UnpaidInvoiceItem {
-  currency: String
+  currency: CurrencyCode
   id: String
   oldestDueDate: String
   overdueCount: Int

@@ -1,7 +1,7 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository, PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
-import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
@@ -21,7 +21,7 @@ export interface ParentOnboardingInput {
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly paymentMethod?: string | null;
-  readonly currency?: string | null;
+  readonly currency?: CurrencyCode | null;
   readonly timezone?: string | null;
   readonly status?: string | null;
 }
@@ -33,7 +33,7 @@ export interface ParentOnboardingResult {
   readonly email: string;
   readonly status: string;
   readonly invoiceType: string | null;
-  readonly currency: string | null;
+  readonly currency: CurrencyCode | null;
 }
 
 export namespace ParentOnboardingService {

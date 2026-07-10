@@ -4,6 +4,7 @@ import type {
   ClassExecutionState,
   ClassOutcome,
   ClassType,
+  CurrencyCode,
   Gender,
   PaymentMethod,
   StudentStatus,
@@ -48,7 +49,7 @@ export type VerifyBankingDetailsInput = {
 export type CreateTeacherPaymentInput = {
   teacherId: string;
   amount: string;
-  currency: string;
+  currency: CurrencyCode;
   paymentDate: Date;
   isTestPayment?: boolean;
 };
@@ -190,7 +191,7 @@ export type TeacherOwnProfileReturnType = {
   phone: string | null;
   timezone: IanaTimezone;
   hourlyRate: string | null;
-  rateCurrency: string | null;
+  rateCurrency: CurrencyCode | null;
   paymentMethod: PaymentMethod | null;
   zoomLink: string | null;
   totalClasses: number;

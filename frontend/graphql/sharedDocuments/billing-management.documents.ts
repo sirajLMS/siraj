@@ -10,7 +10,7 @@ export const createManualInvoiceMutationDocument: TypedDocumentNode<
     $parentId: String!
     $studentId: String
     $amount: String!
-    $currency: String!
+    $currency: CurrencyCode!
     $invoiceType: InvoiceType!
     $issueDate: String!
     $dueDate: String!

@@ -1,3 +1,5 @@
+export type { CurrencyCode } from "@/backend/enum";
+
 /**
  * @warning SelectType exports include all database columns — some contain sensitive data
  * (hashed tokens, banking details, internal keys, etc.). Always use ReturnType variants
@@ -66,6 +68,7 @@ export type {
 } from "@/backend/types/billing/billing.types";
 // Billing types
 export * from "@/backend/types/billing/billing.types";
+export * from "@/backend/types/billing/payment-method.types";
 // Book types
 export * from "@/backend/types/books/book.types";
 // Report types

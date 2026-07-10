@@ -1953,7 +1953,7 @@ export type ManualInvoiceResult = {
   __typename?: 'ManualInvoiceResult';
   amount: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
-  currency: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
   dueDate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<InvoiceType>;
@@ -2192,7 +2192,7 @@ export type MutationCreateManagerArgs = {
 export type MutationCreateManualInvoiceArgs = {
   amount: Scalars['String']['input'];
   billingMonths: InputMaybe<Array<BillingMonthInput>>;
-  currency: Scalars['String']['input'];
+  currency: CurrencyCode;
   dueDate: Scalars['String']['input'];
   exchangeRateSnapshot: InputMaybe<Scalars['String']['input']>;
   exchangeRateSource: InputMaybe<Scalars['String']['input']>;
@@ -2667,7 +2667,7 @@ export type PaginationArgs = {
 
 export type ParentAdminProfileUpdateInput = {
   address: InputMaybe<Scalars['String']['input']>;
-  currency: InputMaybe<Scalars['String']['input']>;
+  currency: InputMaybe<CurrencyCode>;
   defaultZoomLink: InputMaybe<Scalars['String']['input']>;
   facebook: InputMaybe<Scalars['String']['input']>;
   feeAmount: InputMaybe<Scalars['String']['input']>;
@@ -2829,7 +2829,7 @@ export type ParentInvoiceHistoryResult = {
 export type ParentInvoiceRow = {
   __typename?: 'ParentInvoiceRow';
   amount: Maybe<Scalars['String']['output']>;
-  currency: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
   dueDate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<InvoiceType>;
@@ -2843,7 +2843,7 @@ export type ParentInvoiceRow = {
 /** Input for creating a new parent account with billing configuration */
 export type ParentOnboardingInput = {
   address: InputMaybe<Scalars['String']['input']>;
-  currency: InputMaybe<Scalars['String']['input']>;
+  currency: InputMaybe<CurrencyCode>;
   defaultZoomLink: InputMaybe<Scalars['String']['input']>;
   email: Scalars['Email']['input'];
   facebook: InputMaybe<Scalars['String']['input']>;
@@ -2862,7 +2862,7 @@ export type ParentOnboardingInput = {
 /** Result of parent onboarding operation */
 export type ParentOnboardingResult = {
   __typename?: 'ParentOnboardingResult';
-  currency: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
   email: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
@@ -2896,7 +2896,7 @@ export type ParentProfile = {
   address: Maybe<Scalars['String']['output']>;
   avatarUrl: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
-  currency: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
   defaultZoomLink: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
   facebook: Maybe<Scalars['String']['output']>;
@@ -4241,7 +4241,7 @@ export type TeacherOnboardingInput = {
   /** Teacher qualifications */
   qualifications: InputMaybe<Scalars['String']['input']>;
   /** Currency for hourly rate */
-  rateCurrency: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
   /** Bank routing number */
   routingNumber: InputMaybe<Scalars['String']['input']>;
   /** SWIFT/BIC code */
@@ -4263,7 +4263,7 @@ export type TeacherOwnProfile = {
   name: Maybe<Scalars['String']['output']>;
   paymentMethod: Maybe<PaymentMethod>;
   phone: Maybe<Scalars['String']['output']>;
-  rateCurrency: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<CurrencyCode>;
   timezone: Maybe<IanaTimezone>;
   totalClasses: Maybe<Scalars['Int']['output']>;
   zoomLink: Maybe<Scalars['String']['output']>;
@@ -4289,7 +4289,7 @@ export type TeacherProfileResult = {
   paymentMethod: Maybe<PaymentMethod>;
   phone: Maybe<Scalars['String']['output']>;
   qualifications: Maybe<Scalars['String']['output']>;
-  rateCurrency: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<CurrencyCode>;
   status: Maybe<AccountStatus>;
   timezone: Maybe<IanaTimezone>;
   totalClasses: Maybe<Scalars['Int']['output']>;
@@ -4308,7 +4308,7 @@ export type TeacherProfileUpdateInput = {
   paymentMethod: InputMaybe<PaymentMethod>;
   phone: InputMaybe<Scalars['String']['input']>;
   qualifications: InputMaybe<Scalars['String']['input']>;
-  rateCurrency: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
   status: InputMaybe<AccountStatus>;
   timezone: InputMaybe<IanaTimezone>;
   zoomLink: InputMaybe<Scalars['String']['input']>;
@@ -4396,7 +4396,7 @@ export type UnifiedProfile = {
 
 export type UnpaidInvoiceItem = {
   __typename?: 'UnpaidInvoiceItem';
-  currency: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
   id: Maybe<Scalars['String']['output']>;
   oldestDueDate: Maybe<Scalars['String']['output']>;
   overdueCount: Maybe<Scalars['Int']['output']>;

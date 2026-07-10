@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 
 const coreSchema = z.object({
@@ -20,7 +21,7 @@ const adminParentSchema = ownParentSchema.extend({
   invoiceType: z.string().optional(),
   feeAmount: z.string().optional(),
   paymentMethod: z.string().optional(),
-  currency: z.string().optional(),
+  currency: z.enum(CurrencyCode).optional(),
   timezone: z
     .string()
     .optional()
@@ -46,6 +47,6 @@ export type ParentEditData = {
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly paymentMethod?: string | null;
-  readonly currency?: string | null;
+  readonly currency?: CurrencyCode | null;
   readonly timezone?: string | null;
 };

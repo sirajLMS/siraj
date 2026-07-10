@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import { InvoiceType, PaymentMethod } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
@@ -23,7 +24,7 @@ export const parentOnboardingSchema = z.object({
     val => typeof val === "string" && Object.values(PaymentMethod).includes(val as PaymentMethod),
     { message: "paymentMethodRequired" }
   ),
-  currency: z.string().min(1, "currencyRequired"),
+  currency: z.enum(CurrencyCode).refine(v => !!v, { message: "currencyRequired" }),
   timezone: z
     .string()
     .min(1, "timezoneRequired")

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 import { CountryCode, Gender } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
@@ -45,7 +46,7 @@ export const teacherOnboardingSchema = (validationLabels: {
       .min(1, validationLabels.timezoneRequired)
       .refine(value => isValidIanaTimezoneId(value), { message: validationLabels.timezoneRequired }),
     hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
-    rateCurrency: z.string().min(1, validationLabels.currencyRequired),
+    rateCurrency: z.nativeEnum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired }),
     beneficiaryName: z.string().min(1, validationLabels.beneficiaryNameRequired),
     bankName: z.string().min(1, validationLabels.bankNameRequired),
     accountNumber: z.string().min(1, validationLabels.accountNumberRequired),

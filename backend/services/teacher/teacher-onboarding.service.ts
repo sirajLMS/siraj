@@ -6,7 +6,7 @@ import {
   TeacherRepository,
   UserRepository,
 } from "@/backend/db/repo";
-import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -32,7 +32,7 @@ export interface TeacherOnboardingInput {
   readonly timezoneId?: number | null;
   readonly timezone: string;
   readonly hourlyRate?: string | null;
-  readonly rateCurrency?: string | null;
+  readonly rateCurrency?: CurrencyCode | null;
   readonly beneficiaryName?: string | null;
   readonly bankName?: string | null;
   readonly accountNumber?: string | null;

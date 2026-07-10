@@ -1,5 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  CurrencyCodePothosObject,
   InvoiceStatusPothosObject,
   InvoiceTypePothosObject,
   StudentStatusPothosObject,
@@ -41,7 +42,7 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     dueDate: t.exposeString("dueDate"),
     paidDate: t.exposeString("paidDate", { nullable: true }),
     amount: t.exposeString("amount"),
-    currency: t.exposeString("currency"),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject }),
     status: t.expose("status", { type: InvoiceStatusPothosObject }),
     invoiceType: t.expose("invoiceType", { type: InvoiceTypePothosObject }),
     studentId: t.exposeString("studentId", { nullable: true }),

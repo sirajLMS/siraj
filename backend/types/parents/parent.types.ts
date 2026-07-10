@@ -1,4 +1,4 @@
-import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/backend/enum";
+import type { BookingStatus, ClassExecutionState, ClassOutcome, CurrencyCode, ParentStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
@@ -168,7 +168,7 @@ export interface ParentProfileResult {
   readonly invoiceType: string | null;
   readonly feeAmount: string | null;
   readonly paymentMethod: string | null;
-  readonly currency: string | null;
+  readonly currency: CurrencyCode | null;
   readonly timezone: IanaTimezone;
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -215,7 +215,7 @@ export type ParentProfileUpdateInput = {
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly paymentMethod?: string | null;
-  readonly currency?: string | null;
+  readonly currency?: CurrencyCode | null;
   readonly timezone?: IanaTimezone | null;
 };
 

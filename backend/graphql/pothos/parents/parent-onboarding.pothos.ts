@@ -1,6 +1,7 @@
-import type { InvoiceType, PaymentMethod } from "@/backend/enum";
+import type { CurrencyCode, InvoiceType, PaymentMethod } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  CurrencyCodePothosObject,
   IanaTimezonePothosObject,
   InvoiceTypePothosObject,
   PaymentMethodPothosObject,
@@ -12,10 +13,11 @@ import type {
 } from "@/backend/services/parent/parent-onboarding.service";
 
 export interface ParentOnboardingGqlInput
-  extends Omit<ParentOnboardingInput, "email" | "invoiceType" | "paymentMethod"> {
+  extends Omit<ParentOnboardingInput, "email" | "invoiceType" | "paymentMethod" | "currency"> {
   email: Email;
   invoiceType?: InvoiceType | null;
   paymentMethod?: PaymentMethod | null;
+  currency?: CurrencyCode | null;
 }
 
 export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
@@ -36,7 +38,7 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       invoiceType: t.field({ type: InvoiceTypePothosObject }),
       feeAmount: t.string({ directives: { constraint: { maxLength: 512 } } }),
       paymentMethod: t.field({ type: PaymentMethodPothosObject }),
-      currency: t.string({ directives: { constraint: { maxLength: 512 } } }),
+      currency: t.field({ type: CurrencyCodePothosObject }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
     }),
   });
@@ -52,6 +54,10 @@ export const ParentOnboardingResultPothosObject = gqlSchemaBuilder
       email: t.exposeString("email"),
       status: t.exposeString("status"),
       invoiceType: t.exposeString("invoiceType", { nullable: true }),
-      currency: t.exposeString("currency", { nullable: true }),
+      currency: t.field({
+        type: CurrencyCodePothosObject,
+        nullable: true,
+        resolve: parent => parent.currency as CurrencyCode | null,
+      }),
     }),
   });

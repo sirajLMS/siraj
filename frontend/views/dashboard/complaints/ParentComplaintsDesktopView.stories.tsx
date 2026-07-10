@@ -5,11 +5,14 @@ import { useForm } from "react-hook-form";
 import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { ParentComplaintsDesktopView } from "./ParentComplaintsDesktopView";
-import type { ComplaintFormData } from "./schemas/complaintFormSchema";
-import { complaintFormSchema } from "./schemas/complaintFormSchema";
-import type { ParentComplaintRecord, ParentStudentOption } from "./types/complaints.types";
-import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
+import { ParentComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/ParentComplaintsDesktopView";
+import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
+import { complaintFormSchema } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
+import type {
+  ParentComplaintRecord,
+  ParentStudentOption,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
+import { buildComplaintsLabels } from "@/frontend/views/dashboard/complaints/utils/buildComplaintsLabels";
 
 const MOCK_PARENT_COMPLAINTS: readonly ParentComplaintRecord[] = [
   {
