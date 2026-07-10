@@ -155,7 +155,7 @@ export function TeacherOnboardingView({
           <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
         </SectionPanel>
         <SectionPanel title={labels.sections.salaryDetails}>
-          <SalaryDetailsSection register={register} errors={errors} labels={labels} />
+          <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
         </SectionPanel>
         <SectionPanel title={labels.sections.bankingLedger}>
           <BankingLedgerSection register={register} errors={errors} labels={labels} />

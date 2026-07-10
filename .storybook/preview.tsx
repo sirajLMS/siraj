@@ -1,11 +1,11 @@
 // cspell:ignore circlehollow
 import type { Decorator, Preview } from "@storybook/react";
 import { initialize, mswLoader } from "msw-storybook-addon";
-import { mswHandlers } from "./msw-handlers";
-import { StoryWrapper } from "./StoryWrapper";
+import { mswHandlers } from "@/../.storybook/msw-handlers";
+import { StoryWrapper } from "@/../.storybook/StoryWrapper";
 
 // Import global styles
-import "../app/index.css";
+import "@/app/index.css";
 
 // Initialize MSW
 initialize({ onUnhandledRequest: "bypass" });

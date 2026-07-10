@@ -1,5 +1,6 @@
-import type { currencyExchangeRates, invoices, payments } from "@/backend/db/schema";
-import type { InvoiceStatus, InvoiceType } from "@/backend/enum";
+import type { currencyExchangeRates, fxSyncRuns, invoices, payments } from "@/backend/db/schema";
+import type { FxProvider, FxSyncStatus, FxSyncTrigger, InvoiceStatus, InvoiceType } from "@/backend/enum";
+import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -40,6 +41,63 @@ export type CurrencyExchangeRateSelectType = typeof currencyExchangeRates.$infer
 export type CurrencyExchangeRateInsertType = typeof currencyExchangeRates.$inferInsert;
 
 export type CurrencyExchangeRateSubmitInput = Omit<CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;
+
+export type CurrencyExchangeRateReturnType = Omit<CurrencyExchangeRateSelectType, "providerResponse">;
+
+export type FxSyncRunSelectType = typeof fxSyncRuns.$inferSelect;
+export type FxSyncRunInsertType = typeof fxSyncRuns.$inferInsert;
+
+export type FxSyncRunReturnType = Omit<FxSyncRunSelectType, "providerResponse"> & {
+  provider: FxProvider;
+  status: FxSyncStatus;
+};
+
+export type FxRatePair = {
+  readonly fromCurrency: CurrencyCode;
+  readonly toCurrency: CurrencyCode;
+  readonly rate: string;
+  readonly source: string;
+};
+
+export type FxProviderFetchResult = {
+  readonly provider: FxProvider;
+  readonly base: CurrencyCode;
+  readonly timestamp: Date;
+  readonly rates: ReadonlyMap<CurrencyCode, string>;
+  readonly rawResponse: unknown;
+};
+
+export type RefreshExchangeRatesInput = {
+  readonly triggeredByUserId: string | null;
+  readonly trigger: FxSyncTrigger;
+  readonly force?: boolean;
+  readonly locale?: string;
+};
+
+export type RefreshExchangeRatesResult = {
+  readonly id: string;
+  readonly success: boolean;
+  readonly pairsWritten: number;
+  readonly pairsFailed: number;
+  readonly syncRunId: string;
+  readonly errorMessage?: string;
+};
+
+export type ExchangeRateHistoryRow = {
+  readonly id: string;
+  readonly fromCurrency: CurrencyCode;
+  readonly toCurrency: CurrencyCode;
+  readonly rate: string;
+  readonly source: string | null;
+  readonly effectiveDate: Date;
+};
+
+export type ExchangeRateHistoryPaginatedResult = {
+  readonly id: string;
+  readonly rows: ExchangeRateHistoryRow[];
+  readonly totalCount: number;
+  readonly pageInfo: PageInfo | null;
+};
 
 export type UnpaidInvoiceSummaryItem = {
   id: string;

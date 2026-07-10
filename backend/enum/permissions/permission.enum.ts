@@ -130,4 +130,7 @@ export enum AppPermission {
   TEST_CUSTOM_ONLY = "test.custom_only",
   TEST_CUSTOM_ALT = "test.custom_alt",
   STORAGE_MANAGE = "storage.manage",
+  // FX Rate Ingestion
+  BILLING_VIEW_EXCHANGE_RATES = "billing.view_exchange_rates",
+  BILLING_REFRESH_EXCHANGE_RATES = "billing.refresh_exchange_rates",
 }

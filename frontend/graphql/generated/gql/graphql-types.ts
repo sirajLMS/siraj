@@ -86,7 +86,9 @@ export enum AppPermission {
   AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
   BillingCreateInvoice = 'BILLING_CREATE_INVOICE',
   BillingDeleteInvoice = 'BILLING_DELETE_INVOICE',
+  BillingRefreshExchangeRates = 'BILLING_REFRESH_EXCHANGE_RATES',
   BillingUpdateStatusPaid = 'BILLING_UPDATE_STATUS_PAID',
+  BillingViewExchangeRates = 'BILLING_VIEW_EXCHANGE_RATES',
   BillingViewHistory = 'BILLING_VIEW_HISTORY',
   BillingViewUnpaidInvoices = 'BILLING_VIEW_UNPAID_INVOICES',
   CategoriesCreate = 'CATEGORIES_CREATE',
@@ -1135,6 +1137,36 @@ export type EndPermissionGroupSimulationResponse = {
   token: Maybe<Scalars['String']['output']>;
 };
 
+export type ExchangeRate = {
+  __typename?: 'ExchangeRate';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  effectiveDate: Maybe<Scalars['DateTime']['output']>;
+  fromCurrency: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  rate: Maybe<Scalars['String']['output']>;
+  source: Maybe<Scalars['String']['output']>;
+  toCurrency: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ExchangeRateHistoryResult = {
+  __typename?: 'ExchangeRateHistoryResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<ExchangeRateHistoryRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type ExchangeRateHistoryRow = {
+  __typename?: 'ExchangeRateHistoryRow';
+  effectiveDate: Maybe<Scalars['DateTime']['output']>;
+  fromCurrency: Maybe<CurrencyCode>;
+  id: Maybe<Scalars['String']['output']>;
+  rate: Maybe<Scalars['String']['output']>;
+  source: Maybe<Scalars['String']['output']>;
+  toCurrency: Maybe<CurrencyCode>;
+};
+
 export type FileInfo = StorageObject & {
   __typename?: 'FileInfo';
   contentHash: Maybe<Scalars['String']['output']>;
@@ -1253,6 +1285,34 @@ export type FutureClass = {
   subjectName: Maybe<Scalars['String']['output']>;
   zoomMeetingUrl: Maybe<Scalars['String']['output']>;
 };
+
+export enum FxProvider {
+  Fixer = 'Fixer',
+  OpenExchangeRates = 'OpenExchangeRates'
+}
+
+export type FxSyncRun = {
+  __typename?: 'FxSyncRun';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  errorMessage: Maybe<Scalars['String']['output']>;
+  finishedAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  pairsFailed: Maybe<Scalars['String']['output']>;
+  pairsWritten: Maybe<Scalars['String']['output']>;
+  provider: Maybe<FxProvider>;
+  startedAt: Maybe<Scalars['DateTime']['output']>;
+  status: Maybe<FxSyncStatus>;
+  triggerType: Maybe<Scalars['String']['output']>;
+  triggeredByUserId: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export enum FxSyncStatus {
+  Failed = 'Failed',
+  Partial = 'Partial',
+  Running = 'Running',
+  Success = 'Success'
+}
 
 export enum Gender {
   Female = 'FEMALE',
@@ -1991,6 +2051,7 @@ export type Mutation = {
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
   reassignStudentTeacher: Maybe<ReassignStudentTeacherResult>;
+  refreshExchangeRates: Maybe<RefreshExchangeRatesResult>;
   refreshToken: Maybe<RefreshTokenResponse>;
   renameFile: Maybe<FileOperationResult>;
   rescheduleClass: Maybe<ClassInstanceDetail>;
@@ -2337,6 +2398,11 @@ export type MutationReassignStudentTeacherArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   newTeacherId: Scalars['String']['input'];
   studentId: Scalars['String']['input'];
+};
+
+
+export type MutationRefreshExchangeRatesArgs = {
+  force?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -2952,6 +3018,7 @@ export type Query = {
   directoryChildren: Maybe<Array<DirectoryInfo>>;
   /** Return effective permissions for a user, combining groups and overrides. */
   effectiveUserPermissions: Maybe<Array<Scalars['String']['output']>>;
+  exchangeRateHistory: Maybe<ExchangeRateHistoryResult>;
   fileInfo: Maybe<FileInfo>;
   fileUsage: Maybe<FileUsageResult>;
   folderInfo: Maybe<DirectoryInfo>;
@@ -2959,6 +3026,8 @@ export type Query = {
   generateAttendanceReport: Maybe<AttendanceReportPayload>;
   groupClassAudit: Maybe<GroupClassAudit>;
   impersonationStatus: Maybe<ImpersonationStatus>;
+  latestExchangeRates: Maybe<Array<ExchangeRate>>;
+  latestFxSyncRun: Maybe<FxSyncRun>;
   /** Lists all learning resources available to the academy. */
   learningResources: Maybe<Array<LearningResourceRow>>;
   listFiles: Maybe<StorageObjectList>;
@@ -3105,6 +3174,14 @@ export type QueryEffectiveUserPermissionsArgs = {
 };
 
 
+export type QueryExchangeRateHistoryArgs = {
+  from: CurrencyCode;
+  maxDays?: InputMaybe<Scalars['Int']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
+  to: CurrencyCode;
+};
+
+
 export type QueryFileInfoArgs = {
   path: Scalars['String']['input'];
 };
@@ -3127,6 +3204,11 @@ export type QueryGenerateAttendanceReportArgs = {
 
 export type QueryGroupClassAuditArgs = {
   classInstanceId: Scalars['String']['input'];
+};
+
+
+export type QueryLatestExchangeRatesArgs = {
+  paginationArgs: InputMaybe<PaginationArgs>;
 };
 
 
@@ -3370,6 +3452,16 @@ export type RecurringClassDayInput = {
   dayOfWeek: Scalars['String']['input'];
   isActive: Scalars['Boolean']['input'];
   startTime: Scalars['String']['input'];
+};
+
+export type RefreshExchangeRatesResult = {
+  __typename?: 'RefreshExchangeRatesResult';
+  errorMessage: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  pairsFailed: Maybe<Scalars['Int']['output']>;
+  pairsWritten: Maybe<Scalars['Int']['output']>;
+  success: Maybe<Scalars['Boolean']['output']>;
+  syncRunId: Maybe<Scalars['String']['output']>;
 };
 
 export type RefreshTokenResponse = {

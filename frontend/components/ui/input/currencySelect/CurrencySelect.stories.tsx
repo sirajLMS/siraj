@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { CurrencySelect, type CurrencySelectProps } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 
 function CurrencySelectStory({
@@ -31,13 +31,13 @@ type Story = StoryObj<typeof CurrencySelectStory>;
 
 export const Default: Story = {
   args: {
-    initialCurrencyCode: "EUR",
+    initialCurrencyCode: CurrencyCode.Eur,
   },
 };
 
 export const EgyptianPound: Story = {
   args: {
-    initialCurrencyCode: "EGP",
+    initialCurrencyCode: CurrencyCode.Egp,
   },
 };
 
@@ -45,15 +45,22 @@ export const Empty: Story = {};
 
 export const Required: Story = {
   args: {
-    initialCurrencyCode: "SAR",
+    initialCurrencyCode: CurrencyCode.Sar,
     required: true,
   },
 };
 
 export const FilteredToGcc: Story = {
   args: {
-    initialCurrencyCode: "SAR",
-    allowedCodes: ["SAR", "AED", "KWD", "QAR", "BHD", "OMR", "QAR"],
+    initialCurrencyCode: CurrencyCode.Sar,
+    allowedCodes: [
+      CurrencyCode.Sar,
+      CurrencyCode.Aed,
+      CurrencyCode.Kwd,
+      CurrencyCode.Qar,
+      CurrencyCode.Bhd,
+      CurrencyCode.Omr,
+    ],
   },
 };
 
@@ -62,6 +69,6 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    initialCurrencyCode: "SAR",
+    initialCurrencyCode: CurrencyCode.Sar,
   },
 };

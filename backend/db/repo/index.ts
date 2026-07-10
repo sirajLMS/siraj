@@ -14,6 +14,7 @@ export {
   ComplaintRepository,
   ComplaintResponseRepository,
 } from "./complaints";
+export { FxSyncRepository } from "./fx-sync.repository";
 export {
   NotificationPreferencesRepository,
   NotificationRepository,

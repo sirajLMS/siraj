@@ -5,6 +5,7 @@
 **Updates:** `.ai/plans/user-entity-enhancement/ANALYSIS.md` § 7.1 + § 2.3 (mark currency as landed)
 **Migration strategy:** Inherited Decision **8C** — clean-slate (`bun db cleanGenerate`), no dual-write
 **Parent plan:** `.ai/plans/user-entity-enhancement/` (currency slice only — other decisions untouched here)
+**Prerequisite:** [`.ai/plans/fx-ingestion/`](../fx-ingestion/spec.md) — FX rate ingestion (provider/cron/observability) has landed; this plan consumes the `currency_exchange_rates` rows it produces. Read fx-ingestion spec.md before implementing the FX read-path fork below.
 
 ---
 
@@ -94,7 +95,7 @@ Migrate, in one clean-slate wave, every existing currency surface PLUS the three
 
 ## 4. Scope (OUT)
 
-- **FX rate *ingestion*** (fetching/caching/cron cadence) — the decision does not request changes here. The existing `getLatestExchangeRate` 24h staleness THROW stays intact for the financial snapshot insert. The display path forks a soft variant; ingestion itself is untouched.
+- **FX rate *ingestion*** (fetching/caching/cron cadence) — **implemented separately in [`.ai/plans/fx-ingestion/`](../fx-ingestion/spec.md)** (see prerequisite). The existing `getLatestExchangeRate` 24h staleness THROW stays intact for the financial snapshot insert. The display path forks a soft variant; this plan consumes the rates that fx-ingestion lands.
 - **New money entities** (wallets, payment links, online accounts) — those tables don't exist yet; out of scope here. When they land per the payment-methods decisions, they should be created with `currencyCodeEnum` + the FX-read `displayAmount` field from day one.
 - **Country-bundled currencies** (`CurrencyType.code` GraphQL enum from the original `currency-select` plan) — already merged; this plan supercedes the "use a string until the GraphQL enum lands" stub.
 - **Dropping payment-related deprecated tables** — `payments`/`teacher_payments` keep their existing `currency` column; no table drops in this slice.

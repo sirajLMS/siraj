@@ -1,8 +1,8 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
+import { formatBulkOperationResult } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { formatBulkOperationResult } from "./bulk-operations.helper";
 
 /**
  * Options for validating delete permissions

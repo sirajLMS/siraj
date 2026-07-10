@@ -17,10 +17,10 @@ import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments
 import { useParentsStore } from "@/frontend/stores/parentsStore";
 import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
-import { useRouter } from "@/shared/i18n/routing";
 import { toParentAccountStatus } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentsView } from "@/frontend/views/dashboard/admin/parents/home/ParentsView";
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
+import { useRouter } from "@/shared/i18n/routing";
 
 function useDirectoryMetrics(
   directory: {

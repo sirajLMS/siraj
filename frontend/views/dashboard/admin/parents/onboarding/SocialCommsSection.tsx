@@ -1,37 +1,32 @@
 "use client";
 
-import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined, MeetingRoomOutlined } from "@mui/icons-material";
+import { AlternateEmailOutlined, GroupsOutlined, MeetingRoomOutlined } from "@mui/icons-material";
 import { Grid, Input, InputAdornment } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { PhoneFormField } from "@/frontend/components/ui/input";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
 interface Props {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
+  readonly control: Control<ParentOnboardingFormData>;
 }
 
-export function SocialCommsSection({ register }: Props) {
+export function SocialCommsSection({ register, control }: Props) {
   const t = useTranslations("dashboard.parentOnboarding");
 
   return (
     <SectionPanel title={t("sections.socialComms")}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <FieldWrapper label={t("fields.whatsapp")}>
-            <Input
-              {...register("whatsapp")}
-              placeholder={t("placeholders.whatsapp")}
-              fullWidth
-              sx={standardInputSx}
-              startAdornment={
-                <InputAdornment position="start">
-                  <ChatOutlined sx={theme => ({ color: theme.palette.primary.main, opacity: 0.4 })} />
-                </InputAdornment>
-              }
-            />
-          </FieldWrapper>
+          <PhoneFormField
+            name="whatsapp"
+            control={control}
+            label={t("fields.whatsapp")}
+            placeholder={t("placeholders.whatsapp")}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <FieldWrapper label={t("fields.facebook")}>

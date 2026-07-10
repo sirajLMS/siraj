@@ -59,7 +59,7 @@ export default function ParentProfileEditView({ register, control, errors, handl
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
       >
         <ParentInfoSection register={onboardingRegister} control={onboardingControl} errors={onboardingErrors} />
-        <SocialCommsSection register={onboardingRegister} />
+        <SocialCommsSection register={onboardingRegister} control={onboardingControl} />
         <FeesContractSection register={onboardingRegister} control={onboardingControl} errors={onboardingErrors} />
 
         <Box

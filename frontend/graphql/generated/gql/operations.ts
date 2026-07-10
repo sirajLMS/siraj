@@ -26,7 +26,9 @@ export type AppPermission =
   | 'AUTH_VIEW_OWN_PROFILE'
   | 'BILLING_CREATE_INVOICE'
   | 'BILLING_DELETE_INVOICE'
+  | 'BILLING_REFRESH_EXCHANGE_RATES'
   | 'BILLING_UPDATE_STATUS_PAID'
+  | 'BILLING_VIEW_EXCHANGE_RATES'
   | 'BILLING_VIEW_HISTORY'
   | 'BILLING_VIEW_UNPAID_INVOICES'
   | 'CATEGORIES_CREATE'
@@ -574,6 +576,40 @@ export type CreateTeacherNoteInput = {
   title: string;
 };
 
+export type CurrencyCode =
+  | 'AED'
+  | 'AUD'
+  | 'BHD'
+  | 'CAD'
+  | 'CHF'
+  | 'CNY'
+  | 'DJF'
+  | 'DZD'
+  | 'EGP'
+  | 'EUR'
+  | 'GBP'
+  | 'ILS'
+  | 'INR'
+  | 'IQD'
+  | 'JOD'
+  | 'JPY'
+  | 'KMF'
+  | 'KWD'
+  | 'LBP'
+  | 'LYD'
+  | 'MAD'
+  | 'MRU'
+  | 'OMR'
+  | 'QAR'
+  | 'SAR'
+  | 'SDG'
+  | 'SOS'
+  | 'SYP'
+  | 'TND'
+  | 'TRY'
+  | 'USD'
+  | 'YER';
+
 export type DayOfWeek =
   | 'FRIDAY'
   | 'MONDAY'
@@ -588,6 +624,16 @@ export type DemoLoginInput = {
   /** The unique slug of the permission group to authenticate as. */
   groupSlug: string;
 };
+
+export type FxProvider =
+  | 'Fixer'
+  | 'OpenExchangeRates';
+
+export type FxSyncStatus =
+  | 'Failed'
+  | 'Partial'
+  | 'Running'
+  | 'Success';
 
 export type Gender =
   | 'FEMALE'
@@ -2103,6 +2149,59 @@ export type ExecuteDstBulkUpdateMutationVariables = Exact<{
 
 
 export type ExecuteDstBulkUpdateMutation = ExecuteDstBulkUpdateMutation_Mutation;
+
+export type LatestExchangeRatesQuery_latestExchangeRates_ExchangeRate = { id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null };
+
+export type LatestExchangeRatesQuery_Query = { latestExchangeRates: Array<LatestExchangeRatesQuery_latestExchangeRates_ExchangeRate> | null };
+
+
+export type LatestExchangeRatesQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type LatestExchangeRatesQuery = LatestExchangeRatesQuery_Query;
+
+export type ExchangeRateHistoryQuery_exchangeRateHistory_ExchangeRateHistoryResult_rows_ExchangeRateHistoryRow = { id: string | null, fromCurrency: Types.CurrencyCode | null, toCurrency: Types.CurrencyCode | null, rate: string | null, source: string | null, effectiveDate: string | null };
+
+export type ExchangeRateHistoryQuery_exchangeRateHistory_ExchangeRateHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
+
+export type ExchangeRateHistoryQuery_exchangeRateHistory_ExchangeRateHistoryResult = { id: string | null, totalCount: number | null, rows: Array<ExchangeRateHistoryQuery_exchangeRateHistory_ExchangeRateHistoryResult_rows_ExchangeRateHistoryRow> | null, pageInfo: ExchangeRateHistoryQuery_exchangeRateHistory_ExchangeRateHistoryResult_pageInfo_PageInfo | null };
+
+export type ExchangeRateHistoryQuery_Query = { exchangeRateHistory: ExchangeRateHistoryQuery_exchangeRateHistory_ExchangeRateHistoryResult | null };
+
+
+export type ExchangeRateHistoryQueryVariables = Exact<{
+  from: Types.CurrencyCode;
+  to: Types.CurrencyCode;
+  paginationArgs: Types.PaginationArgs | null | undefined;
+  maxDays: number | null | undefined;
+}>;
+
+
+export type ExchangeRateHistoryQuery = ExchangeRateHistoryQuery_Query;
+
+export type LatestFxSyncRunQuery_latestFxSyncRun_FxSyncRun = { id: string | null, provider: Types.FxProvider | null, status: Types.FxSyncStatus | null, pairsWritten: string | null, pairsFailed: string | null, errorMessage: string | null, triggerType: string | null, triggeredByUserId: string | null, startedAt: string | null, finishedAt: string | null };
+
+export type LatestFxSyncRunQuery_Query = { latestFxSyncRun: LatestFxSyncRunQuery_latestFxSyncRun_FxSyncRun | null };
+
+
+export type LatestFxSyncRunQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LatestFxSyncRunQuery = LatestFxSyncRunQuery_Query;
+
+export type RefreshExchangeRatesMutation_refreshExchangeRates_RefreshExchangeRatesResult = { id: string | null, success: boolean | null, pairsWritten: number | null, pairsFailed: number | null, syncRunId: string | null, errorMessage: string | null };
+
+export type RefreshExchangeRatesMutation_Mutation = { refreshExchangeRates: RefreshExchangeRatesMutation_refreshExchangeRates_RefreshExchangeRatesResult | null };
+
+
+export type RefreshExchangeRatesMutationVariables = Exact<{
+  force: boolean | null | undefined;
+}>;
+
+
+export type RefreshExchangeRatesMutation = RefreshExchangeRatesMutation_Mutation;
 
 export type GroupClassAuditQuery_groupClassAudit_GroupClassAudit_students_GroupClassStudent = { id: string | null, name: string | null, studentId: string | null, initials: string | null, attendanceStatus: Types.GroupClassAttendanceStatus | null, avatarUrl: string | null };
 

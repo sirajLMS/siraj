@@ -1,5 +1,5 @@
+import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
-import type { StorageService } from "./storage.service.interface";
 
 export interface AdapterOperations<TContext> {
   fileExists: (ctx: TContext, path: string) => Promise<boolean>;

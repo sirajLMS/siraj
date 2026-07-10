@@ -1,4 +1,4 @@
-import type { ComplaintsLabels } from "../../../types/dashboard/complaints";
+import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints";
 
 export const complaints: ComplaintsLabels = {
   parent: {

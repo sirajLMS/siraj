@@ -1,16 +1,15 @@
-import type { SessionLabels } from "../types/session";
-import { auth } from "./auth";
-import { common } from "./common";
-import { admin, dstMigration } from "./dashboard/admin";
-import { billing as billingLabels } from "./dashboard/billing";
+import { auth } from "@/shared/messages/ar/auth";
+import { common } from "@/shared/messages/ar/common";
+import { admin, dstMigration } from "@/shared/messages/ar/dashboard/admin";
+import { billing as billingLabels } from "@/shared/messages/ar/dashboard/billing";
 import {
   classAudit,
   classDetails,
   createRecurringClass,
   rescheduleForm,
   rescheduleTracking,
-} from "./dashboard/classes";
-import { complaints as complaintsLabels } from "./dashboard/complaints";
+} from "@/shared/messages/ar/dashboard/classes";
+import { complaints as complaintsLabels } from "@/shared/messages/ar/dashboard/complaints";
 import {
   layout,
   nav,
@@ -19,21 +18,31 @@ import {
   scheduleAlerts,
   searchSchedule,
   statusTracking,
-} from "./dashboard/core";
-import { managerOnboarding, managersDirectory } from "./dashboard/managers";
-import { directory, onboarding, parentRules, parentSocial, parentStudents, profile } from "./dashboard/parents";
-import { permissions as permissionsLabels } from "./dashboard/permissions";
-import { reports as reportsLabels } from "./dashboard/reports";
-import { booksAndBags as booksAndBagsLabels, resources as resourcesLabels } from "./dashboard/resources";
+} from "@/shared/messages/ar/dashboard/core";
+import { managerOnboarding, managersDirectory } from "@/shared/messages/ar/dashboard/managers";
+import {
+  directory,
+  onboarding,
+  parentRules,
+  parentSocial,
+  parentStudents,
+  profile,
+} from "@/shared/messages/ar/dashboard/parents";
+import { permissions as permissionsLabels } from "@/shared/messages/ar/dashboard/permissions";
+import { reports as reportsLabels } from "@/shared/messages/ar/dashboard/reports";
+import {
+  booksAndBags as booksAndBagsLabels,
+  resources as resourcesLabels,
+} from "@/shared/messages/ar/dashboard/resources";
 import {
   directory as studentDirectory,
   history as studentHistory,
   onboarding as studentOnboarding,
   quota as studentQuota,
   status as studentStatus,
-} from "./dashboard/students";
-import { subjects as subjectsLabels } from "./dashboard/subjects";
-import { suggestions as suggestionsLabels } from "./dashboard/suggestions";
+} from "@/shared/messages/ar/dashboard/students";
+import { subjects as subjectsLabels } from "@/shared/messages/ar/dashboard/subjects";
+import { suggestions as suggestionsLabels } from "@/shared/messages/ar/dashboard/suggestions";
 import {
   availability as teacherAvailability,
   classList as teacherClassList,
@@ -47,9 +56,9 @@ import {
   students as teacherStudents,
   directory as teachersDirectory,
   weeklySchedule as teacherWeeklySchedule,
-} from "./dashboard/teachers";
-import { errors } from "./errors";
-import { profile as profileLabels } from "./profile";
+} from "@/shared/messages/ar/dashboard/teachers";
+import { errors } from "@/shared/messages/ar/errors";
+import { profile as profileLabels } from "@/shared/messages/ar/profile";
 import {
   catalogImageUpload,
   countrySelect,
@@ -60,7 +69,8 @@ import {
   phoneInput,
   tagInput,
   timezoneSelect,
-} from "./ui";
+} from "@/shared/messages/ar/ui";
+import type { SessionLabels } from "@/shared/messages/types/session";
 
 export const session: SessionLabels = {
   leaveProcessedDescription: "تمت معالجة طلب الإجازة، أعيدت جدولته إلى الجلسة {successorId}.",

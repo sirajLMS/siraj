@@ -31,6 +31,7 @@
     "test:ui:e2e": "bun test test/ui/e2e/ --timeout=120000",
     "codescene": "bun run scripts/health/codescene/main.ts --scan",
     "lint": "bun run scripts/lint-queue-client.ts",
+    "lint:fix": "eslint . --fix --concurrency=auto --cache",
     "quality-gate": "bun run scripts/quality-gate.ts",
     "quality-gate:fresh": "bun run scripts/quality-gate.ts --fresh",
     "sonar-scan": "bun run scripts/health/sonar/ts/main.ts --scan",

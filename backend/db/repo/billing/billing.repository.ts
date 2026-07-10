@@ -134,51 +134,224 @@ export namespace BillingRepository {
   };
 
   /**
+   * Inserts a new exchange rate row and audit log entry within a single transaction.
+   * Shared by {@link updateExchangeRate} (own transaction) and
+   * {@link updateExchangeRateInTx} (caller-provided transaction).
+   */
+  async function writeExchangeRateWithAudit(
+    t: DBTransaction,
+    input: CurrencyExchangeRateUpdateInput,
+    changedByUserId: string | null
+  ): Promise<Types.CurrencyExchangeRateSelectType> {
+    const results = await t
+      .select()
+      .from(currencyExchangeRates)
+      .where(
+        and(
+          eq(currencyExchangeRates.fromCurrency, input.fromCurrency),
+          eq(currencyExchangeRates.toCurrency, input.toCurrency)
+        )
+      )
+      .orderBy(desc(currencyExchangeRates.effectiveDate))
+      .limit(1);
+
+    const oldRate = results[0];
+
+    const [newRate] = await t
+      .insert(currencyExchangeRates)
+      .values({
+        ...input,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    await t.insert(currencyExchangeAuditLogs).values({
+      fromCurrency: input.fromCurrency,
+      toCurrency: input.toCurrency,
+      oldRate: results.length > 0 ? oldRate.rate : null,
+      newRate: input.rate,
+      source: input.source || "MANUAL",
+      changedByUserId,
+      createdAt: new Date(),
+    });
+
+    return newRate;
+  }
+
+  /**
    * Updates an exchange rate and creates an audit log entry.
+   * Accepts `changedByUserId: string | null` so the cron path can pass null.
    */
   export const updateExchangeRate = async (
     input: CurrencyExchangeRateUpdateInput,
-    changedByUserId: string,
+    changedByUserId: string | null,
     tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
-    const runner = async (t: DBTransaction) => {
-      const results = await t
-        .select()
-        .from(currencyExchangeRates)
-        .where(
-          and(
-            eq(currencyExchangeRates.fromCurrency, input.fromCurrency),
-            eq(currencyExchangeRates.toCurrency, input.toCurrency)
-          )
-        )
-        .orderBy(desc(currencyExchangeRates.effectiveDate))
-        .limit(1);
-
-      const oldRate = results[0];
-
-      const [newRate] = await t
-        .insert(currencyExchangeRates)
-        .values({
-          ...input,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-
-      await t.insert(currencyExchangeAuditLogs).values({
-        fromCurrency: input.fromCurrency,
-        toCurrency: input.toCurrency,
-        oldRate: results.length > 0 ? oldRate.rate : null,
-        newRate: input.rate,
-        source: input.source || "MANUAL",
-        changedByUserId,
-        createdAt: new Date(),
-      });
-
-      return newRate;
-    };
-
+    const runner = async (t: DBTransaction) => writeExchangeRateWithAudit(t, input, changedByUserId);
     return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  /**
+   * Writes an exchange rate + audit log inside a caller-provided transaction.
+   * Used so the FX ingestion service can write many pairs in one transaction (C3).
+   * Never starts a nested transaction — `tx` is required.
+   */
+  export const updateExchangeRateInTx = async (
+    input: CurrencyExchangeRateUpdateInput,
+    changedByUserId: string | null,
+    tx: DBTransaction
+  ): Promise<Types.CurrencyExchangeRateSelectType> => writeExchangeRateWithAudit(tx, input, changedByUserId);
+
+  /**
+   * Lists the latest exchange rate per `(fromCurrency, toCurrency)` pair using
+   * `DISTINCT ON` ordered by `effective_date DESC` (P2 — reports/latest query).
+   * Supports optional limit/offset pagination; defaults to 200 when null.
+   *
+   * Drizzle lacks a first-class DISTINCT ON DSL, so we fetch ordered rows and
+   * deduplicate in-memory: the ORDER BY (from, to, effective_date DESC) ensures
+   * the first row encountered per pair is the latest.
+   */
+  export const listLatestExchangeRates = async (
+    pagination: Types.PaginationArgs | null = null,
+    tx?: DBTransaction
+  ): Promise<Types.CurrencyExchangeRateReturnType[]> => {
+    const queryDb = tx ?? db;
+    const limit = pagination ? pagination.perPage : 200;
+    const offset = pagination ? pagination.offset : 0;
+
+    const rows = await queryDb
+      .select()
+      .from(currencyExchangeRates)
+      .orderBy(
+        currencyExchangeRates.fromCurrency,
+        currencyExchangeRates.toCurrency,
+        desc(currencyExchangeRates.effectiveDate)
+      )
+      .limit(limit)
+      .offset(offset);
+
+    const seen = new Set<string>();
+    const latest: Types.CurrencyExchangeRateReturnType[] = [];
+    for (const row of rows) {
+      const key = `${row.fromCurrency}:${row.toCurrency}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      latest.push({
+        id: row.id,
+        fromCurrency: row.fromCurrency,
+        toCurrency: row.toCurrency,
+        rate: row.rate,
+        source: row.source,
+        effectiveDate: row.effectiveDate,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      });
+    }
+
+    return latest;
+  };
+
+  /**
+   * Returns paginated exchange-rate history for a single (from, to) pair
+   * filtered to the last `maxDays` days (default 90), capped at limit 100 (S5).
+   * Uses the same pagination pattern as {@link getInvoicesForParent}.
+   */
+  type ExchangeRateHistorySelectRow = {
+    id: string;
+    fromCurrency: string;
+    toCurrency: string;
+    rate: string;
+    source: string | null;
+    effectiveDate: Date;
+  };
+
+  const exchangeRateHistoryFields = {
+    id: currencyExchangeRates.id,
+    fromCurrency: currencyExchangeRates.fromCurrency,
+    toCurrency: currencyExchangeRates.toCurrency,
+    rate: currencyExchangeRates.rate,
+    source: currencyExchangeRates.source,
+    effectiveDate: currencyExchangeRates.effectiveDate,
+  };
+
+  function mapExchangeRateHistoryRow(r: ExchangeRateHistorySelectRow): Types.ExchangeRateHistoryRow {
+    return {
+      id: r.id,
+      fromCurrency: r.fromCurrency as Types.ExchangeRateHistoryRow["fromCurrency"],
+      toCurrency: r.toCurrency as Types.ExchangeRateHistoryRow["toCurrency"],
+      rate: r.rate,
+      source: r.source,
+      effectiveDate: r.effectiveDate,
+    };
+  }
+
+  export const listExchangeRateHistory = async (
+    from: string,
+    to: string,
+    pagination: Types.PaginationArgs | null = null,
+    maxDays = 90,
+    tx?: DBTransaction
+  ): Promise<Types.ExchangeRateHistoryPaginatedResult> => {
+    const queryDb = tx ?? db;
+    const whereCondition = and(
+      eq(currencyExchangeRates.fromCurrency, from),
+      eq(currencyExchangeRates.toCurrency, to),
+      sql`${currencyExchangeRates.effectiveDate} >= NOW() - INTERVAL '${sql.raw(String(maxDays))} days'`
+    );
+
+    const historyId = `exchange-rate-history-${from}-${to}`;
+
+    if (!pagination) {
+      const rows = await queryDb
+        .select(exchangeRateHistoryFields)
+        .from(currencyExchangeRates)
+        .where(whereCondition)
+        .orderBy(desc(currencyExchangeRates.effectiveDate))
+        .limit(100);
+
+      return {
+        id: historyId,
+        rows: rows.map(mapExchangeRateHistoryRow),
+        totalCount: rows.length,
+        pageInfo: null,
+      };
+    }
+
+    const cap = Math.min(pagination.perPage, 100);
+    const currentPage = pagination.currentPage;
+    const offset = pagination.offset;
+
+    const [dataRows, countResult] = await Promise.all([
+      queryDb
+        .select(exchangeRateHistoryFields)
+        .from(currencyExchangeRates)
+        .where(whereCondition)
+        .orderBy(desc(currencyExchangeRates.effectiveDate))
+        .limit(cap)
+        .offset(offset),
+      queryDb.select({ count: count() }).from(currencyExchangeRates).where(whereCondition),
+    ]);
+
+    const totalCount = countResult[0]?.count ?? 0;
+    const lastPage = Math.max(1, Math.ceil(totalCount / cap));
+    const rows = dataRows.map(mapExchangeRateHistoryRow);
+
+    return {
+      id: historyId,
+      rows,
+      totalCount,
+      pageInfo: {
+        count: rows.length,
+        currentPage,
+        firstItem: rows.length > 0 ? offset + 1 : null,
+        lastItem: rows.length > 0 ? offset + rows.length : null,
+        hasMorePages: currentPage < lastPage,
+        lastPage,
+        perPage: cap,
+        total: totalCount,
+      },
+    };
   };
 
   /**

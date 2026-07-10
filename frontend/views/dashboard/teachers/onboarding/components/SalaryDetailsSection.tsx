@@ -1,12 +1,16 @@
 "use client";
 
-import { Box, Grid, Input, InputAdornment, MenuItem, Select, Typography } from "@mui/material";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { labelSx, outlinedInputSx, standardInputSx } from "@/frontend/components/ui/form";
+import { Box, Grid, Input, InputAdornment, Typography } from "@mui/material";
+import { type Control, Controller, type FieldErrors, type UseFormRegister } from "react-hook-form";
+import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
+import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 interface SalaryDetailsSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
+  readonly control: Control<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
   readonly labels: {
     readonly fields: {
@@ -19,7 +23,7 @@ interface SalaryDetailsSectionProps {
   };
 }
 
-export function SalaryDetailsSection({ register, errors, labels }: Readonly<SalaryDetailsSectionProps>) {
+export function SalaryDetailsSection({ register, control, errors, labels }: Readonly<SalaryDetailsSectionProps>) {
   return (
     <Grid
       container
@@ -66,13 +70,26 @@ export function SalaryDetailsSection({ register, errors, labels }: Readonly<Sala
         <Box component="label" sx={labelSx}>
           {labels.fields.currency}
         </Box>
-        <Select {...register("rateCurrency")} defaultValue="USD" fullWidth sx={outlinedInputSx}>
-          <MenuItem value="USD">USD</MenuItem>
-          <MenuItem value="EGP">EGP</MenuItem>
-          <MenuItem value="SAR">SAR</MenuItem>
-          <MenuItem value="AED">AED</MenuItem>
-          <MenuItem value="EUR">EUR</MenuItem>
-        </Select>
+        <Controller
+          name="rateCurrency"
+          control={control}
+          render={({ field }) => {
+            const option: CurrencyOption | null = field.value
+              ? (getCurrencyByCode(field.value as CurrencyCode) ?? null)
+              : null;
+            return (
+              <CurrencySelect
+                currency={option}
+                setCurrencyAction={selected => {
+                  field.onChange(selected.code as string);
+                }}
+                onBlurAction={field.onBlur}
+                fullWidth
+                required
+              />
+            );
+          }}
+        />
       </Grid>
     </Grid>
   );

@@ -9,10 +9,10 @@ import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teache
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
-import { DashboardView } from "@/frontend/views/dashboard/DashboardView";
+import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import { resolveDailyScheduleMetricFilter } from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
-import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
+import { DashboardView } from "@/frontend/views/dashboard/dashboard/DashboardView";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 // This container component handles all GraphQL queries, filter state, and metric/row transformations

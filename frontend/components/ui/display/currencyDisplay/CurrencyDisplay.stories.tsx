@@ -107,12 +107,7 @@ export const FlagAndLabel: Story = {
 export const AllParts: Story = {
   args: {
     code: "EGP",
-    parts: [
-      CurrencyDisplayPart.Flag,
-      CurrencyDisplayPart.Label,
-      CurrencyDisplayPart.Symbol,
-      CurrencyDisplayPart.Code,
-    ],
+    parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Label, CurrencyDisplayPart.Symbol, CurrencyDisplayPart.Code],
   },
 };
 
@@ -144,12 +139,7 @@ export const Arabic: Story = {
   globals: { locale: "ar" },
   args: {
     code: "SAR",
-    parts: [
-      CurrencyDisplayPart.Flag,
-      CurrencyDisplayPart.Label,
-      CurrencyDisplayPart.Symbol,
-      CurrencyDisplayPart.Code,
-    ],
+    parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Label, CurrencyDisplayPart.Symbol, CurrencyDisplayPart.Code],
   },
 };
 

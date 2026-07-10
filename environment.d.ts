@@ -11,6 +11,10 @@ declare global {
       LOCAL_STORAGE_PATH?: string;
       NEXT_PUBLIC_BASE_URL?: string;
 
+      // FX Ingestion
+      FX_PROVIDER?: "openexchangerates" | "fixer";
+      OPENEXCHANGERATES_APP_ID?: string;
+      FIXER_API_KEY?: string;
       // Signed URL Cleanup Configuration
       SIGNED_URL_CLEANUP_STRATEGY?: "lazy" | "cron" | "both" | "disabled";
       SIGNED_URL_CLEANUP_CRON_SCHEDULE?: string;

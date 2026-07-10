@@ -1,5 +1,5 @@
-import type { SessionLabels } from "../types/session";
-import { errors } from "./errors";
+import { errors } from "@/shared/messages/en/errors";
+import type { SessionLabels } from "@/shared/messages/types/session";
 
 export const session: SessionLabels = {
   leaveProcessedDescription: "Leave request processed, rescheduled to session {successorId}.",

@@ -3,8 +3,11 @@
 import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/components/ui";
-import { InfoField } from "../../parent/sections/InfoField";
-import { type StaffProfileData, toDisplayValue } from "./staffProfileTypes";
+import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
+import {
+  type StaffProfileData,
+  toDisplayValue,
+} from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
 
 export function RoleSection({ staffData }: { readonly staffData: StaffProfileData }) {
   const t = useTranslations("profile.staff");

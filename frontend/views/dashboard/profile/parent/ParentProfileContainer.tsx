@@ -11,11 +11,14 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import {
+  type ParentAdminEditFormData,
+  ParentProfileEditForm,
+} from "@/frontend/views/dashboard/profile/parent/ParentProfileEditForm";
+import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
+import { ParentProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/parent/sections/ParentProfileLoadingSkeleton";
 import { useRouter } from "@/shared/i18n/routing";
-import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
-import { type ParentAdminEditFormData, ParentProfileEditForm } from "./ParentProfileEditForm";
-import { ParentProfileView } from "./ParentProfileView";
-import { ParentProfileLoadingSkeleton } from "./sections/ParentProfileLoadingSkeleton";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;

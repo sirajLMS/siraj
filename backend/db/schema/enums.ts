@@ -13,6 +13,8 @@ import {
   DayOfWeek,
   DevicePlatform,
   DstMigrationResult,
+  FxProvider,
+  FxSyncStatus,
   Gender,
   InvoiceStatus,
   InvoiceType,
@@ -85,3 +87,7 @@ export const appPermissionEnum = pgEnum(
   "app_permission",
   Object.values(AppPermission) as [AppPermission, ...AppPermission[]]
 );
+
+export const fxProviderEnum = createPgEnumFromEnum("fx_provider", FxProvider);
+
+export const fxSyncStatusEnum = createPgEnumFromEnum("fx_sync_status", FxSyncStatus);

@@ -40,6 +40,10 @@ export interface EnvironmentConfig {
   smsProvider?: string;
   emailProvider?: string;
   pushProvider?: string;
+  fxProvider?: string;
+  openexchangeratesAppId?: string;
+  fixerApiKey?: string;
+  cronSecret?: string;
   signedUrlCleanupStrategy?: string;
   localStoragePath?: string;
   nextPublicBaseUrl?: string;
@@ -218,6 +222,8 @@ function validateNoPlaceholderSecrets(): void {
     "TWILIO_AUTH_TOKEN",
     "GCP_CREDENTIALS_JSON",
     "BLOB_READ_WRITE_TOKEN",
+    "OPENEXCHANGERATES_APP_ID",
+    "FIXER_API_KEY",
   ] as const;
 
   for (const name of secretEnvVars) {
@@ -295,6 +301,13 @@ export function validateEnvironment(): EnvironmentConfig {
       smsProvider: process.env.SMS_PROVIDER,
       emailProvider: process.env.EMAIL_PROVIDER,
       pushProvider: process.env.PUSH_PROVIDER,
+      fxProvider: process.env.FX_PROVIDER,
+      openexchangeratesAppId: process.env.OPENEXCHANGERATES_APP_ID,
+      fixerApiKey: process.env.FIXER_API_KEY,
+      cronSecret:
+        process.env.NODE_ENV === "production"
+          ? validateRequiredAppSecret("CRON_SECRET")
+          : (process.env.CRON_SECRET ?? ""),
       signedUrlCleanupStrategy: process.env.SIGNED_URL_CLEANUP_STRATEGY,
       localStoragePath: process.env.LOCAL_STORAGE_PATH,
       nextPublicBaseUrl: process.env.NEXT_PUBLIC_BASE_URL,

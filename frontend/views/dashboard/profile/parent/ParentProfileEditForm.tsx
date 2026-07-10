@@ -98,7 +98,7 @@ export function ParentProfileEditForm({
             register={form.register}
           />
           <ContactSection mode="edit" control={form.control} />
-          <SocialSection mode="edit" register={form.register} />
+          <SocialSection mode="edit" register={form.register} control={form.control} />
 
           {isAdminScope ? (
             <>

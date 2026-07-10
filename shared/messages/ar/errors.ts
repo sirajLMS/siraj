@@ -14,6 +14,8 @@ export const errors: ErrorsLabels = {
   userCreateFailed: "فشل إنشاء مستخدم بالبريد الإلكتروني: {email}",
   noExchangeRate: "لا يوجد سعر صرف لـ {fromCurrency} إلى {toCurrency}",
   exchangeRateStale: "سعر الصرف لـ {fromCurrency} إلى {toCurrency} قديم (أقدم من 24 ساعة)",
+  fxSyncAlreadyRunning: "توجد مزامنة أسعار صرف قيد التشغيل بالفعل",
+  fxRefreshRateLimitExceeded: "تم تجاوز الحد المسموح لتحديث أسعار الصرف (3 مرات/ساعة)",
   invoiceNotFound: "الفاتورة {id} غير موجودة",
   invoiceVersionMismatch:
     "عدم تطابق الإصدار للفاتورة {id}. المتوقع {expectedVersion}، الحاصل {gotVersion}. يرجى إعادة المحاولة.",

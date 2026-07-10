@@ -2,8 +2,11 @@
 
 import { Box, CircularProgress } from "@mui/material";
 import { PaginationControls } from "@/frontend/components/ui";
-import type { StudentDirectoryCardListLabels, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
 import { StudentDirectoryCard } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCard";
+import type {
+  StudentDirectoryCardListLabels,
+  StudentDirectoryRowExtended,
+} from "@/frontend/views/dashboard/admin/parents/students/types";
 
 interface StudentDirectoryCardListProps {
   readonly rows: readonly StudentDirectoryRowExtended[];

@@ -14,6 +14,8 @@ export const errors: ErrorsLabels = {
   userCreateFailed: "Failed to create user with email: {email}",
   noExchangeRate: "No exchange rate for {fromCurrency} to {toCurrency}",
   exchangeRateStale: "Exchange rate for {fromCurrency} to {toCurrency} is stale (older than 24 hours)",
+  fxSyncAlreadyRunning: "FX rate sync is already in progress",
+  fxRefreshRateLimitExceeded: "FX manual refresh rate limit exceeded (3 per hour)",
   invoiceNotFound: "Invoice {id} not found",
   invoiceVersionMismatch:
     "Version mismatch for invoice {id}. Expected {expectedVersion}, got {gotVersion}. Please retry.",

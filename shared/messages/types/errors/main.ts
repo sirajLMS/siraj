@@ -23,6 +23,8 @@ export interface ErrorsLabels {
   readonly userCreateFailed: string;
   readonly noExchangeRate: string;
   readonly exchangeRateStale: string;
+  readonly fxSyncAlreadyRunning: string;
+  readonly fxRefreshRateLimitExceeded: string;
   readonly invoiceNotFound: string;
   readonly invoiceVersionMismatch: string;
   readonly cannotTransitionFailed: string;

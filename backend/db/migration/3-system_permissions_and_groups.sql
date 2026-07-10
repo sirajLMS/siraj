@@ -8,6 +8,10 @@ EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
+-- FX Rate Ingestion: Add new app_permission enum values
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.view_exchange_rates';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.refresh_exchange_rates';
+
 -- Story 15: Add ON_APP notification channel
 ALTER TYPE notification_channel ADD VALUE IF NOT EXISTS 'ON_APP';
 
@@ -949,6 +953,24 @@ VALUES (
         '{"ar": "Soft-delete a suggestion record from the system", "en": "Soft-delete a suggestion record from the system"}'::jsonb,
         '{"ar": "التواصل", "en": "Communications"}'::jsonb,
         true
+    ),
+    (
+        gen_random_uuid (),
+        'billing.view_exchange_rates'::app_permission,
+        'billing',
+        'view_exchange_rates',
+        '{"ar": "عرض أسعار صرف العملات وآخر حالة مزامنة", "en": "View currency exchange rates and latest sync status"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'billing.refresh_exchange_rates'::app_permission,
+        'billing',
+        'refresh_exchange_rates',
+        '{"ar": "تشغيل مزامنة أسعار صرف العملات يدوياً", "en": "Trigger manual currency exchange rate refresh"}'::jsonb,
+        '{"ar": "الفوترة", "en": "Billing"}'::jsonb,
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -1241,7 +1263,9 @@ WHERE
         'system.dispatch_email',
         'suggestions.list',
         'suggestions.review',
-        'suggestions.delete'
+        'suggestions.delete',
+        'billing.view_exchange_rates',
+        'billing.refresh_exchange_rates'
     );
 
 INSERT INTO
@@ -1307,7 +1331,9 @@ WHERE
         'complaints.delete',
         'complaints.respond',
         'suggestions.list',
-        'suggestions.review'
+        'suggestions.review',
+        'billing.view_exchange_rates',
+        'billing.refresh_exchange_rates'
     );
 
 INSERT INTO

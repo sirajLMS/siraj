@@ -1,4 +1,4 @@
-import type { AuthLabels } from "../../types/auth";
+import type { AuthLabels } from "@/shared/messages/types/auth";
 
 export const auth: AuthLabels = {
   login: {

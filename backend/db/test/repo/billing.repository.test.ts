@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository } from "@/backend/db/repo";
-import { invoices } from "@/backend/db/schema";
+import { currencyExchangeAuditLogs, currencyExchangeRates, invoices } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { InvoiceStatus, InvoiceType } from "@/backend/enum";
+import { PaginationArgs } from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -341,6 +342,222 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
       const [current] = await tx.select().from(invoices).where(eq(invoices.id, invoice.id)).limit(1);
       const result = await BillingRepository.markInvoiceAsPaid(invoice.id, current.version, tx);
       expect(result.status).toBe(InvoiceStatus.PAID);
+    });
+  });
+});
+
+async function insertExchangeRateRow(
+  tx: DBTransaction,
+  fromCurrency: string,
+  toCurrency: string,
+  rate: string,
+  source: string,
+  effectiveDate: Date
+) {
+  const now = new Date();
+  const [row] = await tx
+    .insert(currencyExchangeRates)
+    .values({
+      fromCurrency,
+      toCurrency,
+      rate,
+      source,
+      effectiveDate,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  return row;
+}
+
+describe("BillingRepository — updateExchangeRate", () => {
+  test("accepts changedByUserId: null and writes audit log with null changed_by_user_id", async () => {
+    await runInRollback(async tx => {
+      const now = new Date();
+      const result = await BillingRepository.updateExchangeRate(
+        {
+          fromCurrency: "USD",
+          toCurrency: "EGP",
+          rate: "48.123456",
+          source: "cron",
+          effectiveDate: now,
+        },
+        null,
+        tx
+      );
+
+      expect(result.fromCurrency).toBe("USD");
+      expect(result.toCurrency).toBe("EGP");
+      expect(result.rate).toBe("48.123456");
+
+      const auditRows = await tx
+        .select()
+        .from(currencyExchangeAuditLogs)
+        .where(
+          and(
+            eq(currencyExchangeAuditLogs.fromCurrency, "USD"),
+            eq(currencyExchangeAuditLogs.toCurrency, "EGP"),
+            eq(currencyExchangeAuditLogs.newRate, "48.123456")
+          )
+        )
+        .orderBy(desc(currencyExchangeAuditLogs.createdAt))
+        .limit(1);
+
+      const audit = auditRows[0];
+      expect(audit).toBeDefined();
+      expect(audit?.changedByUserId).toBeNull();
+      expect(audit?.source).toBe("cron");
+    });
+  });
+
+  test("records oldRate from previous latest row when updating", async () => {
+    await runInRollback(async tx => {
+      const earlier = new Date(Date.now() - 2 * 86400000);
+      await insertExchangeRateRow(tx, "USD", "SAR", "3.750000", "seed", earlier);
+
+      const result = await BillingRepository.updateExchangeRate(
+        {
+          fromCurrency: "USD",
+          toCurrency: "SAR",
+          rate: "3.760000",
+          source: "manual",
+          effectiveDate: new Date(),
+        },
+        null,
+        tx
+      );
+
+      expect(result.rate).toBe("3.760000");
+
+      const auditRows = await tx
+        .select()
+        .from(currencyExchangeAuditLogs)
+        .where(
+          and(
+            eq(currencyExchangeAuditLogs.fromCurrency, "USD"),
+            eq(currencyExchangeAuditLogs.toCurrency, "SAR"),
+            eq(currencyExchangeAuditLogs.newRate, "3.760000")
+          )
+        )
+        .orderBy(desc(currencyExchangeAuditLogs.createdAt))
+        .limit(1);
+
+      const audit = auditRows[0];
+      expect(audit).toBeDefined();
+      expect(audit?.oldRate).toBe("3.750000");
+      expect(audit?.newRate).toBe("3.760000");
+    });
+  });
+});
+
+describe("BillingRepository — updateExchangeRateInTx", () => {
+  test("writes rate + audit inside a provided transaction without nesting", async () => {
+    await runInRollback(async tx => {
+      const now = new Date();
+      const result = await BillingRepository.updateExchangeRateInTx(
+        {
+          fromCurrency: "EUR",
+          toCurrency: "USD",
+          rate: "1.085000",
+          source: "openexchangerates",
+          effectiveDate: now,
+        },
+        null,
+        tx
+      );
+
+      expect(result.fromCurrency).toBe("EUR");
+      expect(result.rate).toBe("1.085000");
+
+      const auditRows = await tx
+        .select()
+        .from(currencyExchangeAuditLogs)
+        .where(
+          and(
+            eq(currencyExchangeAuditLogs.fromCurrency, "EUR"),
+            eq(currencyExchangeAuditLogs.toCurrency, "USD"),
+            eq(currencyExchangeAuditLogs.newRate, "1.085000")
+          )
+        )
+        .orderBy(desc(currencyExchangeAuditLogs.createdAt))
+        .limit(1);
+
+      const audit = auditRows[0];
+      expect(audit).toBeDefined();
+      expect(audit?.changedByUserId).toBeNull();
+    });
+  });
+});
+
+describe("BillingRepository — listLatestExchangeRates", () => {
+  test("returns one latest row per (from, to) pair ordered by effective_date DESC", async () => {
+    await runInRollback(async tx => {
+      const older = new Date(Date.now() - 3 * 86400000);
+      const newer = new Date(Date.now() - 1 * 86400000);
+
+      await insertExchangeRateRow(tx, "USD", "EGP", "47.000000", "seed", older);
+      await insertExchangeRateRow(tx, "USD", "EGP", "48.500000", "cron", newer);
+      await insertExchangeRateRow(tx, "USD", "SAR", "3.750000", "seed", older);
+
+      const result = await BillingRepository.listLatestExchangeRates(null, tx);
+
+      const egpRow = result.find(r => r.fromCurrency === "USD" && r.toCurrency === "EGP");
+      expect(egpRow).toBeDefined();
+      expect(egpRow?.rate).toBe("48.500000");
+
+      const sarRow = result.find(r => r.fromCurrency === "USD" && r.toCurrency === "SAR");
+      expect(sarRow).toBeDefined();
+      expect(sarRow?.rate).toBe("3.750000");
+
+      const egpCount = result.filter(r => r.toCurrency === "EGP").length;
+      expect(egpCount).toBe(1);
+    });
+  });
+});
+
+describe("BillingRepository — listExchangeRateHistory", () => {
+  test("returns rows filtered by (from, to) ordered DESC and respects maxDays cap", async () => {
+    await runInRollback(async tx => {
+      const within = new Date(Date.now() - 5 * 86400000);
+      const outside = new Date(Date.now() - 200 * 86400000);
+
+      await insertExchangeRateRow(tx, "USD", "AED", "3.670000", "seed", within);
+      await insertExchangeRateRow(tx, "USD", "AED", "3.680000", "cron", new Date());
+      await insertExchangeRateRow(tx, "USD", "AED", "3.500000", "old", outside);
+
+      const result = await BillingRepository.listExchangeRateHistory("USD", "AED", null, 90, tx);
+
+      expect(result.id).toBe("exchange-rate-history-USD-AED");
+      expect(result.rows).toHaveLength(2);
+      expect(result.totalCount).toBe(2);
+      expect(result.pageInfo).toBeNull();
+
+      expect(result.rows[0]?.rate).toBe("3.680000");
+      expect(result.rows[1]?.rate).toBe("3.670000");
+    });
+  });
+
+  test("paginates with pageInfo and caps limit at 100", async () => {
+    await runInRollback(async tx => {
+      const now = new Date();
+      const baseTime = now.getTime();
+      for (let i = 0; i < 3; i++) {
+        await insertExchangeRateRow(tx, "USD", "KWD", `${0.307 + i / 1000}`, "seed", new Date(baseTime - i * 86400000));
+      }
+
+      const pagination = new PaginationArgs({
+        first: 2,
+        page: 1,
+        maxCount: 100,
+      });
+
+      const result = await BillingRepository.listExchangeRateHistory("USD", "KWD", pagination, 90, tx);
+
+      expect(result.rows).toHaveLength(2);
+      expect(result.totalCount).toBe(3);
+      expect(result.pageInfo?.hasMorePages).toBe(true);
+      expect(result.pageInfo?.lastPage).toBe(2);
+      expect(result.pageInfo?.perPage).toBe(2);
     });
   });
 });

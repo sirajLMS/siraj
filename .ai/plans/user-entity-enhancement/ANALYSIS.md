@@ -127,7 +127,7 @@ Drop duplicated **person** columns from `teachers` / `parents` / `staff_profiles
 - Parent: `invoiceType`, `feeAmount`, **fee/invoice currency LOCKED on money entities**, billing-specific overrides
 - Role-specific **lifecycle status** if we do not flatten ParentStatus onto users
 
-See [decisions/03-currency-vs-rate-currency.md](./decisions/03-currency-vs-rate-currency.md) for locked-vs-display FX rules.
+See [decisions/03-currency-vs-rate-currency.md](./decisions/03-currency-vs-rate-currency.md) for locked-vs-display FX rules. FX rate *ingestion* (provider adapters, cron scheduling, the `fx_sync_runs` observability table) has landed in [`.ai/plans/fx-ingestion/`](../fx-ingestion/spec.md); the `currency_exchange_rates` rows it produces are consumed by this plan's display FX read-path.
 
 ---
 

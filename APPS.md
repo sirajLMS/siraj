@@ -49,7 +49,10 @@
 | `NEXT_PUBLIC_BASE_URL` | no | `.env` | Public base URL for signed URLs (default: `http://localhost:3000`) |
 | `ALLOWED_ORIGIN` | no | `.env` | CORS allowed origin |
 | `NODE_ENV` | no | `.env` | `development` / `production` / `test` |
-| `CRON_SECRET` | no | `.env` | Auth secret for cleanup cron endpoint |
+| `CRON_SECRET` | no | `.env` | Auth secret for cron endpoints (`/api/storage/cleanup`, `/api/fx/refresh`) |
+| `FX_PROVIDER` | no | `.env` | FX rate provider: `openexchangerates` (USD base) or `fixer` (EUR base, normalised to USD hub) |
+| `OPENEXCHANGERATES_APP_ID` | conditional | `.env` | Required when `FX_PROVIDER=openexchangerates` |
+| `FIXER_API_KEY` | conditional | `.env` | Required when `FX_PROVIDER=fixer` |
 | `ADMIN_EMAIL` | no | `.env` | Initial admin account email |
 | `ADMIN_PASSWORD` | no | `.env` | Initial admin account password |
 | `GCP_PROJECT_ID` | conditional | `.env` | Required when `STORAGE_PROVIDER=gcp` |
@@ -71,7 +74,8 @@
 
 - **CI**: [issue] No CI/CD workflows defined. `.github/` contains only `instructions/` (Copilot instructions). No GitHub Actions, no deployment pipeline.
 - **Build**: `bun run build` → `next build`
-- **Deploy**: [issue] No deployment target configured. App is designed for Vercel (has Vercel-specific env var detection, `@vercel/blob`, `@vercel/speed-insights`), but no `vercel.json` or deployment config found.
+- **Deploy**: Vercel-ready config at `vercel.json` defines a single cron: `GET /api/fx/refresh` daily at `0 6 * * *` UTC (FX rate refresh). No other deployment automation yet.
+- **Cron Jobs**: `vercel.json` schedules `/api/fx/refresh` daily at 06:00 UTC. Auth: `CRON_SECRET` (Vercel auto-injects `Authorization: Bearer ${CRON_SECRET}`). `/api/storage/cleanup` still lacks a scheduler.
 - **Rollback**: N/A — no production deployment
 
 #### Observability
@@ -90,7 +94,7 @@
 - [issue] **Stale config paths** — `graphql.config.yml` and `apollo.config.json` reference `client/graphql/generated/schema.graphql` but actual path is `frontend/graphql/generated/schema.graphql`.
 - [issue] **No health monitoring in production** — no Sentry, no APM, no alerting. When deployed, there's no way to know it's broken.
 - [issue] **No secrets management** — `.env` file only. No vault, no parameter store. Secrets are local-only with no rotation mechanism.
-- [issue] **Cron has no scheduler** — Signed URL cleanup cron exists as an API endpoint (`/api/storage/cleanup`) gated by `CRON_SECRET`, but no external scheduler calls it in production.
+- [issue] **Signed URL cleanup cron has no external scheduler** — `/api/storage/cleanup` gated by `CRON_SECRET` exists but no scheduler calls it in production. FX rate refresh cron (`/api/fx/refresh`, daily 06:00 UTC) IS scheduled via `vercel.json` since the FX ingestion plan landed; storage cleanup remains unschedulable on Vercel cron.
 - [inferred] **Serverless-ready architecture** — env detection for Vercel/Netlify/Lambda/K8s/Cloudflare/Railway suggests intent for multi-platform deployment, but none activated.
 
 ---

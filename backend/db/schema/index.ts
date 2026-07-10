@@ -6,6 +6,7 @@ export * from "./class-category";
 export * from "./class-subject";
 export * from "./communications";
 export * from "./enums";
+export * from "./fx-sync";
 export * from "./group-class";
 export * from "./impersonation";
 export * from "./parents";

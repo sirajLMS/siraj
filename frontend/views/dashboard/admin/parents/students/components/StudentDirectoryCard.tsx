@@ -1,10 +1,13 @@
 "use client";
 
 import { Card } from "@mui/material";
-import type { StudentDirectoryCardLabels, StudentDirectoryRowExtended } from "@/frontend/views/dashboard/admin/parents/students/types";
 import { StudentDirectoryCardFooter } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardFooter";
 import { StudentDirectoryCardHeader } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardHeader";
 import { StudentDirectoryCardStats } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardStats";
+import type {
+  StudentDirectoryCardLabels,
+  StudentDirectoryRowExtended,
+} from "@/frontend/views/dashboard/admin/parents/students/types";
 
 interface StudentDirectoryCardProps {
   readonly row: StudentDirectoryRowExtended;

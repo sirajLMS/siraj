@@ -1,0 +1,45 @@
+import { type NextRequest, NextResponse } from "next/server";
+import { FxSyncTrigger } from "@/backend/enum";
+import { logger } from "@/backend/lib";
+import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
+import { FxIngestionService } from "@/backend/services";
+
+/**
+ * Vercel Cron entry point for FX rate refresh.
+ *
+ * Auth: CRON_SECRET only (R1–R11). Vercel injects `Authorization: Bearer ${CRON_SECRET}`.
+ * GET-only. verifyCronSecretAuth rejects non-GET with 405. Staff manual refresh goes
+ * through the GraphQL `refreshExchangeRates` mutation, not this route.
+ */
+export async function GET(request: NextRequest) {
+  const authResult = verifyCronSecretAuth(request);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
+  try {
+    const result = await FxIngestionService.refreshRates({
+      triggeredByUserId: null,
+      trigger: FxSyncTrigger.Cron,
+      force: false,
+    });
+
+    logger.info("FX cron refresh completed", {
+      success: result.success,
+      pairsWritten: result.pairsWritten,
+      syncRunId: result.syncRunId,
+    });
+
+    return NextResponse.json({
+      success: result.success,
+      pairsWritten: result.pairsWritten,
+      pairsFailed: result.pairsFailed,
+      syncRunId: result.syncRunId,
+    });
+  } catch (error) {
+    logger.error("FX cron refresh failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json({ success: false, error: "FX refresh failed" }, { status: 500 });
+  }
+}

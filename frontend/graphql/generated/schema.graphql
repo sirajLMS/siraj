@@ -60,7 +60,9 @@ enum AppPermission {
   AUTH_VIEW_OWN_PROFILE
   BILLING_CREATE_INVOICE
   BILLING_DELETE_INVOICE
+  BILLING_REFRESH_EXCHANGE_RATES
   BILLING_UPDATE_STATUS_PAID
+  BILLING_VIEW_EXCHANGE_RATES
   BILLING_VIEW_HISTORY
   BILLING_VIEW_UNPAID_INVOICES
   CATEGORIES_CREATE
@@ -1088,6 +1090,33 @@ type EndPermissionGroupSimulationResponse {
   token: String
 }
 
+type ExchangeRate {
+  createdAt: DateTime
+  effectiveDate: DateTime
+  fromCurrency: String
+  id: String
+  rate: String
+  source: String
+  toCurrency: String
+  updatedAt: DateTime
+}
+
+type ExchangeRateHistoryResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [ExchangeRateHistoryRow!]
+  totalCount: Int
+}
+
+type ExchangeRateHistoryRow {
+  effectiveDate: DateTime
+  fromCurrency: CurrencyCode
+  id: String
+  rate: String
+  source: String
+  toCurrency: CurrencyCode
+}
+
 type FileInfo implements StorageObject {
   contentHash: String
   contentType: String
@@ -1199,6 +1228,33 @@ type FutureClass {
   subjectId: String
   subjectName: String
   zoomMeetingUrl: String
+}
+
+enum FxProvider {
+  Fixer
+  OpenExchangeRates
+}
+
+type FxSyncRun {
+  createdAt: DateTime
+  errorMessage: String
+  finishedAt: DateTime
+  id: String
+  pairsFailed: String
+  pairsWritten: String
+  provider: FxProvider
+  startedAt: DateTime
+  status: FxSyncStatus
+  triggerType: String
+  triggeredByUserId: String
+  updatedAt: DateTime
+}
+
+enum FxSyncStatus {
+  Failed
+  Partial
+  Running
+  Success
 }
 
 enum Gender {
@@ -1947,6 +2003,7 @@ type Mutation {
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
   reassignStudentTeacher(expectedVersion: Int, newTeacherId: String!, studentId: String!): ReassignStudentTeacherResult
+  refreshExchangeRates(force: Boolean = false): RefreshExchangeRatesResult
   refreshToken: RefreshTokenResponse
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
@@ -2426,6 +2483,7 @@ type Query {
   Return effective permissions for a user, combining groups and overrides.
   """
   effectiveUserPermissions(userId: String!): [String!]
+  exchangeRateHistory(from: CurrencyCode!, maxDays: Int = 90, paginationArgs: PaginationArgs, to: CurrencyCode!): ExchangeRateHistoryResult
   fileInfo(path: String!): FileInfo
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
   folderInfo(path: String!): DirectoryInfo
@@ -2434,6 +2492,8 @@ type Query {
   generateAttendanceReport(filters: AttendanceReportFiltersInput!): AttendanceReportPayload
   groupClassAudit(classInstanceId: String!): GroupClassAudit
   impersonationStatus: ImpersonationStatus
+  latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
+  latestFxSyncRun: FxSyncRun
 
   """Lists all learning resources available to the academy."""
   learningResources(searchQuery: String): [LearningResourceRow!]
@@ -2559,6 +2619,15 @@ input RecurringClassDayInput {
   dayOfWeek: String!
   isActive: Boolean!
   startTime: String!
+}
+
+type RefreshExchangeRatesResult {
+  errorMessage: String
+  id: String
+  pairsFailed: Int
+  pairsWritten: Int
+  success: Boolean
+  syncRunId: String
 }
 
 type RefreshTokenResponse {

@@ -1,6 +1,7 @@
 export * from "./auth";
 export * from "./billing";
 export * from "./communication";
+export * from "./fx";
 export * from "./parent";
 export * from "./profile";
 export * from "./redis";

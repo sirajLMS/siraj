@@ -2,7 +2,7 @@
 
 import { Box, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
-import { mergeSx } from "../../../utils/sx/mergeSx";
+import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 
 type ShowScrollbarOption = boolean | "desktop";
 

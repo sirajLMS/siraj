@@ -12,6 +12,8 @@ import {
   CountryCode,
   CurrencyCode,
   DayOfWeek,
+  FxProvider,
+  FxSyncStatus,
   Gender,
   GroupClassAttendanceStatus,
   InvoiceStatus,
@@ -138,6 +140,14 @@ export const IanaTimezonePothosObject = gqlSchemaBuilder.enumType(IanaTimezone, 
 
 export const CurrencyCodePothosObject = gqlSchemaBuilder.enumType(CurrencyCode, {
   name: "CurrencyCode",
+});
+
+export const FxProviderPothosEnum = gqlSchemaBuilder.enumType(FxProvider, {
+  name: "FxProvider",
+});
+
+export const FxSyncStatusPothosEnum = gqlSchemaBuilder.enumType(FxSyncStatus, {
+  name: "FxSyncStatus",
 });
 
 export const ProfileAudiencePothosEnum = gqlSchemaBuilder.enumType(ProfileAudience, {

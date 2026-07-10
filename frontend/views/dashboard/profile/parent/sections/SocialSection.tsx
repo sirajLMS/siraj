@@ -3,8 +3,9 @@
 import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined, MeetingRoomOutlined } from "@mui/icons-material";
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
+import { PhoneFormField } from "@/frontend/components/ui/input";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import {
   type ParentViewData,
@@ -21,9 +22,16 @@ type SocialSectionProps =
   | {
       readonly mode: "edit";
       readonly register: UseFormRegister<ParentAdminEditFormData>;
+      readonly control: Control<ParentAdminEditFormData>;
     };
 
-const SOCIAL_FIELDS = [
+const NON_PHONE_SOCIAL_FIELDS = [
+  { key: "facebook", platform: "facebook", icon: GroupsOutlined },
+  { key: "twitter", platform: "twitter", icon: AlternateEmailOutlined },
+  { key: "defaultZoomLink", platform: "zoom", icon: MeetingRoomOutlined },
+] as const;
+
+const VIEW_FIELDS = [
   { key: "facebook", platform: "facebook", icon: GroupsOutlined },
   { key: "whatsapp", platform: "whatsapp", icon: ChatOutlined },
   { key: "twitter", platform: "twitter", icon: AlternateEmailOutlined },
@@ -38,7 +46,8 @@ export function SocialSection(props: SocialSectionProps) {
     return (
       <SectionPanel title={t("sections.social")}>
         <Stack spacing={2.5}>
-          {SOCIAL_FIELDS.map(({ key, icon: Icon }) => (
+          <PhoneFormField name="whatsapp" control={props.control} label={t("fields.whatsapp")} />
+          {NON_PHONE_SOCIAL_FIELDS.map(({ key, icon: Icon }) => (
             <TextField
               key={key}
               label={t(`fields.${key}`)}
@@ -64,7 +73,7 @@ export function SocialSection(props: SocialSectionProps) {
   return (
     <SectionPanel title={t("sections.social")}>
       <Stack spacing={2.5}>
-        {SOCIAL_FIELDS.map(({ key, platform, icon: Icon }) => {
+        {VIEW_FIELDS.map(({ key, platform, icon: Icon }) => {
           const value = props.parentData[key];
           const link = buildSocialLink(platform, value);
           return (

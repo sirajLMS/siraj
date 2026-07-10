@@ -11,10 +11,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNotifications } from "@/frontend/components/ui";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const DEFAULT_MAX_SIZE_MB = 2;
@@ -152,7 +152,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
 
   const handleUrlChange = useCallback(
     (value: string) => {
-      onImageUrlChangeAction(value === "" ? null : value);
+      onImageUrlChangeAction?.(value === "" ? null : value);
       onFilePathChangeAction?.(null);
     },
     [onFilePathChangeAction, onImageUrlChangeAction]
@@ -199,14 +199,14 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           )}
           {isUploading ? (
             <Box
-              sx={theme => ({
+              sx={{
                 position: "absolute",
                 inset: 0,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: theme.palette.surface.withAlpha ?? "rgba(0,0,0,0.5)",
-              })}
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
             >
               <CircularProgress size={32} />
             </Box>
@@ -235,12 +235,12 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
               {t("remove")}
             </Button>
           </Box>
-          <Typography variant="bodySm" sx={theme => ({ color: theme.palette.text.secondary })}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {resolvedHelperText}
           </Typography>
           {showError && resolvedError ? (
             <Typography
-              variant="bodySm"
+              variant="bodyMd"
               sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}
             >
               <ErrorOutlined fontSize="small" />
@@ -259,7 +259,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
       />
       {allowUrlFallback ? (
         <>
-          <Divider sx={my => ({ my: my * 0 })}>
+          <Divider sx={{ my: 0 }}>
             <Typography variant="labelMd" component="span" sx={theme => ({ color: theme.palette.text.secondary })}>
               {t("optional")}
             </Typography>

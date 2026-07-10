@@ -10,12 +10,15 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/profile.documents";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import { StaffProfileEditForm } from "@/frontend/views/dashboard/profile/staff/StaffProfileEditForm";
+import { StaffProfileView } from "@/frontend/views/dashboard/profile/staff/StaffProfileView";
+import { StaffProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/staff/sections/StaffProfileLoadingSkeleton";
+import type {
+  StaffAdminEditFormData,
+  StaffOwnEditFormData,
+} from "@/frontend/views/dashboard/profile/staff/staffProfileFormTypes";
 import { useRouter } from "@/shared/i18n/routing";
-import { NotificationPreferencesTab } from "../core/notifications/NotificationPreferencesTab";
-import { StaffProfileEditForm } from "./StaffProfileEditForm";
-import { StaffProfileView } from "./StaffProfileView";
-import { StaffProfileLoadingSkeleton } from "./sections/StaffProfileLoadingSkeleton";
-import type { StaffAdminEditFormData, StaffOwnEditFormData } from "./staffProfileFormTypes";
 
 type StaffProfileContainerProps = {
   readonly scope: ProfileScope;

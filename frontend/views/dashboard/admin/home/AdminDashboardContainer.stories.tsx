@@ -5,15 +5,15 @@ import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
-import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
-import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import { DashboardView } from "@/frontend/views/dashboard/DashboardView";
+import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
 } from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
-import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
+import { DashboardView } from "@/frontend/views/dashboard/dashboard/DashboardView";
+import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [
   { id: "teacher-ahmed", name: "Ahmed Mohammed" },

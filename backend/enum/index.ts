@@ -11,6 +11,7 @@ export * from "./classes/class-instance-detail.enum";
 export * from "./classes/dst-migration.enum";
 export * from "./classes/group-class.enum";
 export * from "./complaints/complaint.enum";
+export * from "./fx";
 export * from "./notifications/notificationDeliveries.enum";
 export * from "./parents/parent.enum";
 export * from "./parents/suggestions.enum";
