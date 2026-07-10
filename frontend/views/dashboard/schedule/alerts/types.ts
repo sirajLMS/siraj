@@ -9,9 +9,14 @@ export interface ScheduleAlert {
   readonly pulse?: boolean;
 }
 
-export type ClassSessionAction = "join_session" | "leave_disabled" | "leave_enabled" | "view_class_audit";
+export type ClassSessionAction =
+  | "join_session"
+  | "leave_disabled"
+  | "leave_enabled"
+  | "view_class_audit"
+  | "contact_admin";
 
-export type ClassSessionStatus = "active" | "upcoming" | "missed";
+export type ClassSessionStatus = "active" | "upcoming" | "missed" | "hold";
 
 export interface AcademicClassRow {
   readonly id: string;
@@ -25,6 +30,7 @@ export interface AcademicClassRow {
   readonly sessionStatus: ClassSessionStatus;
   readonly executionState?: string | null;
   readonly outcome?: string | null;
+  readonly isFrozen?: boolean | null;
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 }

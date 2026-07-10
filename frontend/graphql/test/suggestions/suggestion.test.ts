@@ -4,7 +4,7 @@ import {
   markSuggestionReviewedMutationDocument,
   submitSuggestionMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";
 
@@ -65,26 +65,16 @@ describe("GraphQL: adminSuggestions query", () => {
     }
   });
 
-  test("parent role is denied access to adminSuggestions (Threat 5)", async () => {
-    const token = await loginDemoUser("parent_default");
-    const result = await testClient.query({
-      query: adminSuggestionsQueryDocument,
-      variables: { filter: DEFAULT_FILTER },
-      context: { headers: { Authorization: `Bearer ${token}` } },
+  test("parent and teacher roles are denied access to adminSuggestions (Threat 5)", async () => {
+    const parentDenied = await assertOperationDenied("parent_default", "query", adminSuggestionsQueryDocument, {
+      filter: DEFAULT_FILTER,
     });
-    expect(result.error).toBeDefined();
-    expect(result.data?.adminSuggestions).toBeFalsy();
-  });
+    expect(parentDenied).toBe(true);
 
-  test("teacher role is denied access to adminSuggestions", async () => {
-    const token = await loginDemoUser("teacher_default");
-    const result = await testClient.query({
-      query: adminSuggestionsQueryDocument,
-      variables: { filter: DEFAULT_FILTER },
-      context: { headers: { Authorization: `Bearer ${token}` } },
+    const teacherDenied = await assertOperationDenied("teacher_default", "query", adminSuggestionsQueryDocument, {
+      filter: DEFAULT_FILTER,
     });
-    expect(result.error).toBeDefined();
-    expect(result.data?.adminSuggestions).toBeFalsy();
+    expect(teacherDenied).toBe(true);
   });
 
   test("super_admin can also access adminSuggestions", async () => {
@@ -122,19 +112,10 @@ describe("GraphQL: submitSuggestion mutation", () => {
   });
 
   test("teacher role is denied submitSuggestion", async () => {
-    const token = await loginDemoUser("teacher_default");
-    const result = await testClient.mutate({
-      mutation: submitSuggestionMutationDocument,
-      variables: {
-        input: {
-          body: "Should be denied",
-          submitterName: "Teacher",
-        },
-      },
-      context: { headers: { Authorization: `Bearer ${token}` } },
+    const denied = await assertOperationDenied("teacher_default", "mutate", submitSuggestionMutationDocument, {
+      input: { body: "Should be denied", submitterName: "Teacher" },
     });
-    expect(result.error).toBeDefined();
-    expect(result.data?.submitSuggestion).toBeFalsy();
+    expect(denied).toBe(true);
   });
 
   test("suggestion with empty body is accepted by GraphQL layer", async () => {
@@ -195,26 +176,22 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
     expect(found?.body).toBe("Suggestion awaiting review");
   });
 
-  test("parent role is denied markSuggestionReviewed", async () => {
-    const token = await loginDemoUser("parent_default");
-    const result = await testClient.mutate({
-      mutation: markSuggestionReviewedMutationDocument,
-      variables: { suggestionId: suggestionToReviewId },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-    });
-    expect(result.error).toBeDefined();
-    expect(result.data?.markSuggestionReviewed).toBeFalsy();
-  });
+  test("parent and teacher roles are denied markSuggestionReviewed", async () => {
+    const parentDenied = await assertOperationDenied(
+      "parent_default",
+      "mutate",
+      markSuggestionReviewedMutationDocument,
+      { suggestionId: suggestionToReviewId }
+    );
+    expect(parentDenied).toBe(true);
 
-  test("teacher role is denied markSuggestionReviewed", async () => {
-    const token = await loginDemoUser("teacher_default");
-    const result = await testClient.mutate({
-      mutation: markSuggestionReviewedMutationDocument,
-      variables: { suggestionId: suggestionToReviewId },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-    });
-    expect(result.error).toBeDefined();
-    expect(result.data?.markSuggestionReviewed).toBeFalsy();
+    const teacherDenied = await assertOperationDenied(
+      "teacher_default",
+      "mutate",
+      markSuggestionReviewedMutationDocument,
+      { suggestionId: suggestionToReviewId }
+    );
+    expect(teacherDenied).toBe(true);
   });
 
   test("marking non-existent suggestion returns error", async () => {

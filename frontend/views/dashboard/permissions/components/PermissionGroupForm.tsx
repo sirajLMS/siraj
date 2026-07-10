@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type Control, useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { LocalizedStringFormField } from "@/frontend/components/ui/input/localizedString";
@@ -81,58 +81,46 @@ function usePermissionSelection(
   control: Control<PermissionGroupFormData>,
   setValue: ReturnType<typeof useForm<PermissionGroupFormData>>["setValue"]
 ) {
-  const selectedPermissionIds = useWatch({ control, name: "permissionIds" }) || [];
+  const selectedPermissionIds = useWatch({ control, name: "permissionIds" }) ?? [];
 
-  const handleTogglePermission = useCallback(
-    (permId: string, isSystem: boolean) => {
-      if (isSystem) return;
-      if (selectedPermissionIds.includes(permId)) {
-        setValue(
-          "permissionIds",
-          selectedPermissionIds.filter(id => id !== permId)
-        );
-      } else {
-        setValue("permissionIds", [...selectedPermissionIds, permId]);
-      }
-    },
-    [selectedPermissionIds, setValue]
-  );
+  const handleTogglePermission = (permId: string, isSystem: boolean) => {
+    if (isSystem) return;
+    if (selectedPermissionIds.includes(permId)) {
+      setValue(
+        "permissionIds",
+        selectedPermissionIds.filter(id => id !== permId)
+      );
+    } else {
+      setValue("permissionIds", [...selectedPermissionIds, permId]);
+    }
+  };
 
-  const handleSelectAllCategory = useCallback(
-    (categoryPerms: Array<Permission & { id: string }>, checked: boolean) => {
-      const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-      const modifiableIds = modifiablePerms.map(p => p.id);
-      if (checked) {
-        const merged = Array.from(new Set([...selectedPermissionIds, ...modifiableIds]));
-        setValue("permissionIds", merged);
-      } else {
-        setValue(
-          "permissionIds",
-          selectedPermissionIds.filter(id => !modifiableIds.includes(id))
-        );
-      }
-    },
-    [selectedPermissionIds, setValue]
-  );
+  const handleSelectAllCategory = (categoryPerms: Array<Permission & { id: string }>, checked: boolean) => {
+    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
+    const modifiableIds = modifiablePerms.map(p => p.id);
+    if (checked) {
+      const merged = Array.from(new Set([...selectedPermissionIds, ...modifiableIds]));
+      setValue("permissionIds", merged);
+    } else {
+      setValue(
+        "permissionIds",
+        selectedPermissionIds.filter(id => !modifiableIds.includes(id))
+      );
+    }
+  };
 
-  const isGroupSelected = useCallback(
-    (categoryPerms: Array<Permission & { id: string }>) => {
-      const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-      if (modifiablePerms.length === 0) return false;
-      return modifiablePerms.every(p => selectedPermissionIds.includes(p.id));
-    },
-    [selectedPermissionIds]
-  );
+  const isGroupSelected = (categoryPerms: Array<Permission & { id: string }>) => {
+    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
+    if (modifiablePerms.length === 0) return false;
+    return modifiablePerms.every(p => selectedPermissionIds.includes(p.id));
+  };
 
-  const isGroupIndeterminate = useCallback(
-    (categoryPerms: Array<Permission & { id: string }>) => {
-      const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
-      if (modifiablePerms.length === 0) return false;
-      const selectedInCategory = modifiablePerms.filter(p => selectedPermissionIds.includes(p.id));
-      return selectedInCategory.length > 0 && selectedInCategory.length < modifiablePerms.length;
-    },
-    [selectedPermissionIds]
-  );
+  const isGroupIndeterminate = (categoryPerms: Array<Permission & { id: string }>) => {
+    const modifiablePerms = categoryPerms.filter(p => !p.isSystem);
+    if (modifiablePerms.length === 0) return false;
+    const selectedInCategory = modifiablePerms.filter(p => selectedPermissionIds.includes(p.id));
+    return selectedInCategory.length > 0 && selectedInCategory.length < modifiablePerms.length;
+  };
 
   return {
     selectedPermissionIds,

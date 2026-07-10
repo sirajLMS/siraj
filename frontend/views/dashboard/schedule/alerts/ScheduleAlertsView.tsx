@@ -43,11 +43,14 @@ export interface ScheduleAlertsLabels {
   readonly status: string;
   readonly joinSession: string;
   readonly leaveClass: string;
+  readonly leaveDisabledReason: string;
   readonly viewClassAudit: string;
+  readonly contactAdmin: string;
   readonly showingOf: string;
   readonly active: string;
   readonly upcoming: string;
   readonly missed: string;
+  readonly hold: string;
   readonly endOfSchedule: string;
   readonly noEntries: string;
   readonly loading: string;
@@ -74,10 +77,13 @@ interface ScheduleAlertsViewProps {
 type CardListLabels = {
   readonly joinSession: string;
   readonly leaveClass: string;
+  readonly leaveDisabledReason: string;
   readonly viewClassAudit: string;
+  readonly contactAdmin: string;
   readonly active: string;
   readonly upcoming: string;
   readonly missed: string;
+  readonly hold: string;
   readonly endOfSchedule: string;
 };
 
@@ -349,20 +355,26 @@ export function ScheduleAlertsView({
     status: labels.status,
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
+    leaveDisabledReason: labels.leaveDisabledReason,
     viewClassAudit: labels.viewClassAudit,
+    contactAdmin: labels.contactAdmin,
     active: labels.active,
     upcoming: labels.upcoming,
     missed: labels.missed,
+    hold: labels.hold,
     noEntries: labels.noEntries,
   };
 
   const cardListLabels: CardListLabels = {
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
+    leaveDisabledReason: labels.leaveDisabledReason,
     viewClassAudit: labels.viewClassAudit,
+    contactAdmin: labels.contactAdmin,
     active: labels.active,
     upcoming: labels.upcoming,
     missed: labels.missed,
+    hold: labels.hold,
     endOfSchedule: labels.endOfSchedule,
   };
 

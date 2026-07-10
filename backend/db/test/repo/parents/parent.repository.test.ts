@@ -21,6 +21,56 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
+type ParentSetupOptions = {
+  userOverrides?: Parameters<typeof createTestUser>[1];
+  parentOverrides?: Parameters<typeof createTestParent>[2];
+};
+
+async function setupParent(tx: DBTransaction, label: string, emailPrefix: string, options: ParentSetupOptions = {}) {
+  const user = await createTestUser(tx, {
+    name: label,
+    email: `${emailPrefix}-${randomUUID()}@test.com`,
+    ...options.userOverrides,
+  });
+  const parent = await createTestParent(tx, user.id, options.parentOverrides);
+  return { user, parent };
+}
+
+function testParentRepoError(
+  name: string,
+  label: string,
+  emailPrefix: string,
+  action: (
+    parent: { user: Awaited<ReturnType<typeof createTestUser>>; parent: Awaited<ReturnType<typeof createTestParent>> },
+    tx: DBTransaction
+  ) => Promise<unknown>,
+  messageFragment: string,
+  setupOptions?: ParentSetupOptions
+) {
+  test(name, async () => {
+    await runInRollback(async tx => {
+      const ctx = await setupParent(tx, label, emailPrefix, setupOptions);
+      const error = await expectRepoError(() => action(ctx, tx));
+      expect(error.message).toContain(messageFragment);
+    });
+  });
+}
+
+type StudentSetupOptions = ParentSetupOptions & {
+  studentOverrides?: Parameters<typeof createTestStudent>[2];
+};
+
+async function setupParentWithStudent(
+  tx: DBTransaction,
+  label: string,
+  emailPrefix: string,
+  options: StudentSetupOptions
+) {
+  const { user, parent } = await setupParent(tx, label, emailPrefix, options);
+  const student = await createTestStudent(tx, parent.id, options.studentOverrides);
+  return { user, parent, student };
+}
+
 describe("ParentRepository — getParentProfile", () => {
   test("returns full profile when parentId exists", async () => {
     await runInRollback(async tx => {
@@ -167,19 +217,14 @@ describe("ParentRepository — deactivateParent", () => {
     });
   });
 
-  test("throws parentAlreadyDeactivated when parent is already DEACTIVATED", async () => {
-    await runInRollback(async tx => {
-      const user = await createTestUser(tx, {
-        name: "Deactivated Parent",
-        email: `dp-${randomUUID()}@test.com`,
-        status: AccountStatus.DEACTIVATED,
-      });
-      const parent = await createTestParent(tx, user.id, { status: "REGULAR" });
-
-      const error = await expectRepoError(() => ParentRepository.deactivateParent(parent.id, tx));
-      expect(error.message).toContain("already deactivated");
-    });
-  });
+  testParentRepoError(
+    "throws parentAlreadyDeactivated when parent is already DEACTIVATED",
+    "Deactivated Parent",
+    "dp",
+    (ctx, tx) => ParentRepository.deactivateParent(ctx.parent.id, tx),
+    "already deactivated",
+    { userOverrides: { status: AccountStatus.DEACTIVATED }, parentOverrides: { status: "REGULAR" } }
+  );
 });
 
 describe("ParentRepository — create", () => {
@@ -327,9 +372,9 @@ describe("ParentRepository — getParentDirectory", () => {
 describe("ParentRepository — getAssociatedStudentById", () => {
   test("returns student details if student belongs to parent", async () => {
     await runInRollback(async tx => {
-      const user = await createTestUser(tx, { name: "Parent Stud ID", email: `psid-${randomUUID()}@test.com` });
-      const parent = await createTestParent(tx, user.id);
-      const student = await createTestStudent(tx, parent.id, { name: "Student Target" });
+      const { student } = await setupParentWithStudent(tx, "Parent Stud ID", "psid", {
+        studentOverrides: { name: "Student Target" },
+      });
 
       const result = await ParentRepository.getAssociatedStudentById(student.id, tx);
       expect(result).not.toBeNull();
@@ -369,13 +414,13 @@ describe("ParentRepository — findByUserId", () => {
 describe("ParentRepository — getStudentsForParent", () => {
   test("returns students list", async () => {
     await runInRollback(async tx => {
-      const user = await createTestUser(tx, { name: "Parent List", email: `pl-${randomUUID()}@test.com` });
-      const parent = await createTestParent(tx, user.id);
-      await createTestStudent(tx, parent.id, { name: "Student Child" });
+      const { parent, student } = await setupParentWithStudent(tx, "Parent List", "pl", {
+        studentOverrides: { name: "Student Child" },
+      });
 
       const result = await ParentRepository.getStudentsForParent(parent.id, tx);
       expect(result.length).toBeGreaterThanOrEqual(1);
-      expect(result[0].name).toBe("Student Child");
+      expect(result[0].name).toBe(student.name);
     });
   });
 });
@@ -418,15 +463,13 @@ describe("ParentRepository — reactivateParent", () => {
     });
   });
 
-  test("throws parentAlreadyActivated when account is already ACTIVATED", async () => {
-    await runInRollback(async tx => {
-      const user = await createTestUser(tx, { name: "Active Parent", email: `ap2-${randomUUID()}@test.com` });
-      const parent = await createTestParent(tx, user.id);
-
-      const error = await expectRepoError(() => ParentRepository.reactivateParent(parent.id, tx));
-      expect(error.message).toContain("already activated");
-    });
-  });
+  testParentRepoError(
+    "throws parentAlreadyActivated when account is already ACTIVATED",
+    "Active Parent",
+    "ap2",
+    (ctx, tx) => ParentRepository.reactivateParent(ctx.parent.id, tx),
+    "already activated"
+  );
 });
 
 describe("ParentRepository — changeLifecycleStatus", () => {

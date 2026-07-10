@@ -98,9 +98,9 @@ type PaymentMethodFormFieldsProps = {
   readonly watchedType: PaymentMethodFormValues["type"];
   readonly directionOptions: ReturnType<typeof getPaymentDirectionOptions>;
   readonly slotDirection: PaymentDirection.Payin | PaymentDirection.Payout;
-  readonly walletOptions: PaymentMethodCatalogOption[];
-  readonly paymentLinkOptions: PaymentMethodCatalogOption[];
-  readonly onlineAccountOptions: PaymentMethodCatalogOption[];
+  readonly walletOptions: readonly PaymentMethodCatalogOption[];
+  readonly paymentLinkOptions: readonly PaymentMethodCatalogOption[];
+  readonly onlineAccountOptions: readonly PaymentMethodCatalogOption[];
   readonly selectedWallet: PaymentMethodCatalogOption | null;
   readonly selectedPaymentLink: PaymentMethodCatalogOption | null;
   readonly selectedOnlineAccount: PaymentMethodCatalogOption | null;
@@ -242,9 +242,9 @@ type PaymentMethodFormResetProps = {
   readonly editMethod: UserPaymentMethodFieldsFragment | null;
   readonly defaultDirection: PaymentDirection.Payin | PaymentDirection.Payout;
   readonly form: UseFormReturn<PaymentMethodFormValues>;
-  readonly walletOptions: PaymentMethodCatalogOption[];
-  readonly paymentLinkOptions: PaymentMethodCatalogOption[];
-  readonly onlineAccountOptions: PaymentMethodCatalogOption[];
+  readonly walletOptions: readonly PaymentMethodCatalogOption[];
+  readonly paymentLinkOptions: readonly PaymentMethodCatalogOption[];
+  readonly onlineAccountOptions: readonly PaymentMethodCatalogOption[];
   readonly setSelectedWallet: (option: PaymentMethodCatalogOption | null) => void;
   readonly setSelectedPaymentLink: (option: PaymentMethodCatalogOption | null) => void;
   readonly setSelectedOnlineAccount: (option: PaymentMethodCatalogOption | null) => void;

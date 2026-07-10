@@ -14,13 +14,13 @@ import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfi
 import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 function shouldShowScheduleAlertJoin(row: AcademicClassRow): boolean {
   if (row.sessionStatus !== "upcoming" && row.sessionStatus !== "active") {
     return false;
   }
-  return isJoinableByExecutionState(row.executionState, row.outcome);
+  return isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false });
 }
 
 interface AcademicScheduleCardListProps {
@@ -59,6 +59,7 @@ function ClassCardHeader({ row, labels }: Readonly<{ row: AcademicClassRow; labe
     active: labels.active,
     upcoming: labels.upcoming,
     missed: labels.missed,
+    hold: labels.hold,
   };
 
   return (
@@ -141,6 +142,19 @@ function ClassCardActions({
     return (
       <ClassSessionActionButton
         action="view_class_audit"
+        classId={row.id}
+        labels={actionLabels}
+        onLeave={onLeave}
+        onViewClassAudit={onViewClassAudit}
+        fullWidth
+      />
+    );
+  }
+
+  if (row.sessionStatus === "hold") {
+    return (
+      <ClassSessionActionButton
+        action="contact_admin"
         classId={row.id}
         labels={actionLabels}
         onLeave={onLeave}

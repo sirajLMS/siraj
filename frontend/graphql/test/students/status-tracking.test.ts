@@ -1,12 +1,21 @@
-import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { afterAll, describe, expect, test } from "bun:test";
+import { IanaTimezone, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
-import { authenticatedRequest, loginDemoUser } from "@/frontend/graphql/test/helpers";
+import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/students/student-lifecycle.documents";
+import {
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestEntities,
+  provisionTestSuperAdmin,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
 import { testClient } from "@/frontend/graphql/test/testClient";
 
 /**
  * Helper to fetch status tracking schedule with a given token.
  */
-async function _fetchStatusTracking(
+async function fetchStatusTracking(
   token: string,
   date: string,
   search?: string | null,
@@ -21,15 +30,15 @@ async function _fetchStatusTracking(
 
 /**
  * Helper to verify that a given demo user role is denied access to
- * statusTrackingSchedule. Encapsulates the login → query → assert-error
+ * statusTrackingSchedule. Encapsulates the login -> query -> assert-error
  * pattern shared across authorization and security tests.
  */
-async function _expectRoleDenied(role: string, date: string) {
-  const _token = await loginDemoUser(role);
-  const _result = await testClient.query({
+async function expectRoleDenied(role: string, date: string) {
+  const token = await loginDemoUser(role);
+  const result = await testClient.query({
     query: statusTrackingScheduleQueryDocument,
     variables: { date, search: null, viewerTimezone: IanaTimezone.Utc },
-    context: { headers: { Authorization: `****** } },
+    context: { headers: { Authorization: `Bearer ${token}` } },
   });
 
   expect(result.error).toBeDefined();
@@ -171,20 +180,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
 
   describe("security: T10-001 — unauthorized side-effect trigger prevention", () => {
     test("teacher cannot view status tracking data (prevents reconnaissance)", async () => {
-      const teacherToken = await loginDemoUser("teacher_default");
-
-      const result = await testClient.query({
-        query: statusTrackingScheduleQueryDocument,
-        variables: { date: testDate, search: null, viewerTimezone: IanaTimezone.Utc },
-        context: {
-          headers: {
-            Authorization: `Bearer ${teacherToken}`,
-          },
-        },
-      });
-
-      expect(result.error).toBeDefined();
-      expect(result.data?.statusTrackingSchedule).toBeFalsy();
+      await expectRoleDenied("teacher_default", testDate);
     });
   });
 

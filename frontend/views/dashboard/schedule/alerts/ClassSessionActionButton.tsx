@@ -1,7 +1,7 @@
 "use client";
 
-import { LogoutOutlined, SummarizeOutlined } from "@mui/icons-material";
-import { alpha, Button } from "@mui/material";
+import { AcUnitOutlined, LogoutOutlined, SummarizeOutlined } from "@mui/icons-material";
+import { alpha, Button, Tooltip } from "@mui/material";
 import type { ClassSessionAction } from "@/frontend/views/dashboard/schedule/alerts/types";
 
 interface ClassSessionActionButtonProps {
@@ -10,7 +10,9 @@ interface ClassSessionActionButtonProps {
   readonly labels: {
     readonly joinSession: string;
     readonly leaveClass: string;
+    readonly leaveDisabledReason: string;
     readonly viewClassAudit: string;
+    readonly contactAdmin: string;
   };
   readonly onLeave: (id: string) => void;
   readonly onViewClassAudit: (id: string) => void;
@@ -24,9 +26,39 @@ export function ClassSessionActionButton({
   onLeave,
   onViewClassAudit,
   fullWidth = false,
-}: ClassSessionActionButtonProps) {
+}: Readonly<ClassSessionActionButtonProps>) {
   if (action === "join_session") {
     return null;
+  }
+
+  if (action === "contact_admin") {
+    return (
+      <Tooltip title={labels.contactAdmin}>
+        <Button
+          id={`contact-admin-${classId}`}
+          variant="outlined"
+          fullWidth={fullWidth}
+          disabled
+          startIcon={<AcUnitOutlined />}
+          sx={theme => ({
+            ...theme.typography.labelUppercase,
+            px: 2,
+            py: 0.75,
+            color: theme.palette.info.main,
+            borderColor: theme.palette.info.main,
+            backgroundColor: alpha(theme.palette.info.main, 0.06),
+            borderRadius: theme.layout.radius.button,
+            "&.Mui-disabled": {
+              color: theme.palette.info.main,
+              borderColor: theme.palette.info.main,
+              opacity: 0.7,
+            },
+          })}
+        >
+          {labels.contactAdmin}
+        </Button>
+      </Tooltip>
+    );
   }
 
   if (action === "view_class_audit") {
@@ -59,8 +91,7 @@ export function ClassSessionActionButton({
   }
 
   const isDisabled = action === "leave_disabled";
-
-  return (
+  const baseButton = (
     <Button
       id={`leave-class-${classId}`}
       variant="outlined"
@@ -68,7 +99,7 @@ export function ClassSessionActionButton({
       disabled={isDisabled}
       startIcon={<LogoutOutlined />}
       onClick={() => {
-        onLeave(classId);
+        if (!isDisabled) onLeave(classId);
       }}
       sx={theme => ({
         ...theme.typography.labelUppercase,
@@ -94,4 +125,6 @@ export function ClassSessionActionButton({
       {labels.leaveClass}
     </Button>
   );
+
+  return isDisabled ? <Tooltip title={labels.leaveDisabledReason}>{baseButton}</Tooltip> : baseButton;
 }

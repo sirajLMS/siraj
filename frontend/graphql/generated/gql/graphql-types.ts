@@ -1138,6 +1138,7 @@ export type DailyScheduleList = {
   effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
@@ -1562,6 +1563,7 @@ export type GroupClassAudit = {
   communications: Maybe<Array<CommunicationLogEntry>>;
   courseCode: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   meetingInfo: Maybe<OnlineMeetingInfo>;
   originalDate: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
@@ -4609,6 +4611,7 @@ export type StudentHistorySession = {
   effectiveMeeting: Maybe<EffectiveMeeting>;
   id: Maybe<Scalars['String']['output']>;
   instructor: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   notes: Maybe<Scalars['String']['output']>;
   outcome: Maybe<Scalars['String']['output']>;
@@ -4992,6 +4995,7 @@ export type TeacherAssignedClass = {
   effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['String']['output']>;
@@ -5532,6 +5536,7 @@ export type WeeklyScheduleClass = {
   effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   startTime: Maybe<Scalars['String']['output']>;

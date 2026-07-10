@@ -91,7 +91,7 @@ function normalizeConfigUpdateInput(input: {
   };
 }
 
-function _extractCommonMeetingConfigFields(input: {
+function extractCommonMeetingConfigFields(input: {
   readonly providerId: string;
   readonly label: string;
   readonly isDefault: boolean;

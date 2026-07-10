@@ -1084,6 +1084,7 @@ type DailyScheduleList {
   effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  isFrozen: Boolean
   meetingJoinUrl: String
   outcome: ClassOutcome
   scheduledEndAt: DateTime
@@ -1491,6 +1492,7 @@ type GroupClassAudit {
   communications: [CommunicationLogEntry!]
   courseCode: String
   id: String
+  isFrozen: Boolean
   meetingInfo: OnlineMeetingInfo
   originalDate: String
   outcome: ClassOutcome
@@ -3436,6 +3438,7 @@ type StudentHistorySession {
   effectiveMeeting: EffectiveMeeting
   id: String
   instructor: String
+  isFrozen: Boolean
   meetingJoinUrl: String
   notes: String
   outcome: String
@@ -3801,6 +3804,7 @@ type TeacherAssignedClass {
   effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  isFrozen: Boolean
   meetingJoinUrl: String
   outcome: ClassOutcome
   scheduledEndAt: String
@@ -4327,6 +4331,7 @@ type WeeklyScheduleClass {
   effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  isFrozen: Boolean
   meetingJoinUrl: String
   outcome: ClassOutcome
   startTime: String

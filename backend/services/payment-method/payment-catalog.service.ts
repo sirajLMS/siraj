@@ -38,9 +38,10 @@ interface CatalogListOps<TListAllItem, TListActiveFilters> {
   listActive: (filters: TListActiveFilters, tx?: DBTransaction) => Promise<TListAllItem[]>;
 }
 
-async function listCatalogEntries<TListAllItem, TListActiveFilters extends Record<string, unknown>>(
+async function listCatalogEntries<TListAllItem, TListActiveFilters>(
   actorUserId: string,
-  filters: { activeOnly?: boolean } & TListActiveFilters,
+  filters: { activeOnly?: boolean },
+  activeFilters: TListActiveFilters,
   ops: CatalogListOps<TListAllItem, TListActiveFilters>,
   locale?: string
 ): Promise<TListAllItem[]> {
@@ -48,51 +49,7 @@ async function listCatalogEntries<TListAllItem, TListActiveFilters extends Recor
     await assertCatalogAdmin(actorUserId, locale);
     return ops.listAll(undefined);
   }
-  const { activeOnly: _activeOnly, ...activeFilters } = filters;
-  return ops.listActive(activeFilters as TListActiveFilters, undefined);
-}
-
-interface CatalogCreateOp<TItem, TCreateInput> {
-  create: (input: TCreateInput, tx?: DBTransaction) => Promise<TItem>;
-}
-
-async function createCatalogEntry<TItem, TCreateInput>(
-  actorUserId: string,
-  input: TCreateInput,
-  ops: CatalogCreateOp<TItem, TCreateInput>,
-  locale?: string
-): Promise<TItem> {
-  await assertCatalogAdmin(actorUserId, locale);
-  return ops.create(input, undefined);
-}
-
-interface CatalogUpdateOp<TItem, TUpdateInput> {
-  update: (id: string, input: TUpdateInput, tx?: DBTransaction, locale?: string) => Promise<TItem>;
-}
-
-async function updateCatalogEntry<TItem, TUpdateInput>(
-  actorUserId: string,
-  id: string,
-  input: TUpdateInput,
-  ops: CatalogUpdateOp<TItem, TUpdateInput>,
-  locale?: string
-): Promise<TItem> {
-  await assertCatalogAdmin(actorUserId, locale);
-  return ops.update(id, input, undefined, locale);
-}
-
-interface CatalogDeactivateOp<TItem> {
-  deactivate: (id: string, tx?: DBTransaction, locale?: string) => Promise<TItem>;
-}
-
-async function deactivateCatalogEntry<TItem>(
-  actorUserId: string,
-  id: string,
-  ops: CatalogDeactivateOp<TItem>,
-  locale?: string
-): Promise<TItem> {
-  await assertCatalogAdmin(actorUserId, locale);
-  return ops.deactivate(id, undefined, locale);
+  return ops.listActive(activeFilters, undefined);
 }
 
 export namespace PaymentCatalogService {
@@ -103,7 +60,8 @@ export namespace PaymentCatalogService {
   ) {
     return listCatalogEntries(
       actorUserId,
-      filters ?? {},
+      { activeOnly: filters?.activeOnly },
+      { countryCode: filters?.countryCode, direction: filters?.direction },
       {
         listAll: SupportedMobileWalletRepository.listAll,
         listActive: SupportedMobileWalletRepository.listActive,
@@ -117,7 +75,8 @@ export namespace PaymentCatalogService {
     input: SupportedMobileWalletSubmitInput,
     locale?: string
   ) {
-    return createCatalogEntry(actorUserId, input, { create: SupportedMobileWalletRepository.create }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedMobileWalletRepository.create(input, undefined);
   }
 
   export async function updateMobileWallet(
@@ -126,11 +85,13 @@ export namespace PaymentCatalogService {
     input: UpdateSupportedMobileWalletInput,
     locale?: string
   ) {
-    return updateCatalogEntry(actorUserId, id, input, { update: SupportedMobileWalletRepository.update }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedMobileWalletRepository.update(id, input, undefined, locale);
   }
 
   export async function deactivateMobileWallet(actorUserId: string, id: string, locale?: string) {
-    return deactivateCatalogEntry(actorUserId, id, { deactivate: SupportedMobileWalletRepository.deactivate }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedMobileWalletRepository.deactivate(id, undefined, locale);
   }
 
   export async function listPaymentLinks(
@@ -140,7 +101,8 @@ export namespace PaymentCatalogService {
   ) {
     return listCatalogEntries(
       actorUserId,
-      filters ?? {},
+      { activeOnly: filters?.activeOnly },
+      { direction: filters?.direction },
       {
         listAll: SupportedPaymentLinkRepository.listAll,
         listActive: SupportedPaymentLinkRepository.listActive,
@@ -154,7 +116,8 @@ export namespace PaymentCatalogService {
     input: SupportedPaymentLinkSubmitInput,
     locale?: string
   ) {
-    return createCatalogEntry(actorUserId, input, { create: SupportedPaymentLinkRepository.create }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedPaymentLinkRepository.create(input, undefined);
   }
 
   export async function updatePaymentLink(
@@ -163,11 +126,13 @@ export namespace PaymentCatalogService {
     input: UpdateSupportedPaymentLinkInput,
     locale?: string
   ) {
-    return updateCatalogEntry(actorUserId, id, input, { update: SupportedPaymentLinkRepository.update }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedPaymentLinkRepository.update(id, input, undefined, locale);
   }
 
   export async function deactivatePaymentLink(actorUserId: string, id: string, locale?: string) {
-    return deactivateCatalogEntry(actorUserId, id, { deactivate: SupportedPaymentLinkRepository.deactivate }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedPaymentLinkRepository.deactivate(id, undefined, locale);
   }
 
   export async function listOnlineAccounts(
@@ -177,7 +142,8 @@ export namespace PaymentCatalogService {
   ) {
     return listCatalogEntries(
       actorUserId,
-      filters ?? {},
+      { activeOnly: filters?.activeOnly },
+      { direction: filters?.direction },
       {
         listAll: SupportedOnlineAccountRepository.listAll,
         listActive: SupportedOnlineAccountRepository.listActive,
@@ -191,7 +157,8 @@ export namespace PaymentCatalogService {
     input: SupportedOnlineAccountSubmitInput,
     locale?: string
   ) {
-    return createCatalogEntry(actorUserId, input, { create: SupportedOnlineAccountRepository.create }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedOnlineAccountRepository.create(input, undefined);
   }
 
   export async function updateOnlineAccount(
@@ -200,11 +167,13 @@ export namespace PaymentCatalogService {
     input: UpdateSupportedOnlineAccountInput,
     locale?: string
   ) {
-    return updateCatalogEntry(actorUserId, id, input, { update: SupportedOnlineAccountRepository.update }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedOnlineAccountRepository.update(id, input, undefined, locale);
   }
 
   export async function deactivateOnlineAccount(actorUserId: string, id: string, locale?: string) {
-    return deactivateCatalogEntry(actorUserId, id, { deactivate: SupportedOnlineAccountRepository.deactivate }, locale);
+    await assertCatalogAdmin(actorUserId, locale);
+    return SupportedOnlineAccountRepository.deactivate(id, undefined, locale);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────

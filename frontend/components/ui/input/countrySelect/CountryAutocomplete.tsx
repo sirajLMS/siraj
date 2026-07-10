@@ -1,6 +1,6 @@
 "use client";
 
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { type AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
@@ -56,7 +56,7 @@ const buildSxProp = (
 });
 
 interface RenderInputConfig {
-  readonly params: React.ComponentParams<typeof TextField>[0];
+  readonly params: AutocompleteRenderInputParams;
   readonly listAttached: boolean;
   readonly label: string | undefined;
   readonly selectCountryLabel: string;

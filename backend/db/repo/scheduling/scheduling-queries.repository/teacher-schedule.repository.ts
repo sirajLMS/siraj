@@ -72,6 +72,7 @@ export const getWeeklyScheduleGrid = async (
       durationMinutes: classInstances.durationMinutes,
       executionState: classInstances.executionState,
       outcome: classInstances.outcome,
+      isFrozen: classInstances.isFrozen,
       subjectId: classInstances.subjectId,
       subjectName: classSubjects.name,
       classType: classInstances.classType,
@@ -152,6 +153,7 @@ export const getTeacherAssignedClasses = async (
       durationMinutes: classInstances.durationMinutes,
       executionState: classInstances.executionState,
       outcome: classInstances.outcome,
+      isFrozen: classInstances.isFrozen,
     })
     .from(classInstances)
     .innerJoin(students, eq(classInstances.studentId, students.id))

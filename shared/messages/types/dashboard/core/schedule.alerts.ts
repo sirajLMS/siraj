@@ -33,12 +33,15 @@ export interface ScheduleAlertsLabels {
     readonly export: string;
     readonly joinSession: string;
     readonly leaveClass: string;
+    readonly leaveDisabledReason: string;
     readonly viewClassAudit: string;
+    readonly contactAdmin: string;
   };
   readonly sessionStatus: {
     readonly active: string;
     readonly upcoming: string;
     readonly missed: string;
+    readonly hold: string;
   };
   readonly showingOf: string;
   readonly noEntries: string;

@@ -149,7 +149,7 @@ function buildPaymentLabels(t: BillingTranslator) {
   };
 }
 
-function buildSuccessAndDialogLabels(t: BillingTranslator) {
+function _buildSuccessMessagesAndDeleteDialog(t: BillingTranslator) {
   return {
     manual: buildManualInvoiceLabels((key: string) => {
       if (key === "createSuccess") return t.raw(`manual.${key}`) as string;
@@ -167,6 +167,11 @@ function buildSuccessAndDialogLabels(t: BillingTranslator) {
       confirm: t("deleteInvoiceDialog.confirm"),
     },
     hasPaymentProofHint: t("hasPaymentProofHint"),
+  };
+}
+
+function _buildSubmitProofDialogLabels(t: BillingTranslator) {
+  return {
     submitProofDialog: {
       titleSubmit: t("submitProofDialog.titleSubmit"),
       titleMarkPaid: t("submitProofDialog.titleMarkPaid"),
@@ -187,6 +192,11 @@ function buildSuccessAndDialogLabels(t: BillingTranslator) {
       uploadPrepareFailed: t("submitProofDialog.uploadPrepareFailed"),
       impersonationBlocked: t("submitProofDialog.impersonationBlocked"),
     },
+  };
+}
+
+function _buildPaymentDetailsDialogLabels(t: BillingTranslator) {
+  return {
     paymentDetailsDialog: {
       title: t("paymentDetailsDialog.title"),
       empty: t("paymentDetailsDialog.empty"),
@@ -211,6 +221,11 @@ function buildSuccessAndDialogLabels(t: BillingTranslator) {
       confirmReject: t("paymentDetailsDialog.confirmReject"),
       confirmRejectMessage: t("paymentDetailsDialog.confirmRejectMessage"),
     },
+  };
+}
+
+function _buildNotificationsAndErrorLabels(t: BillingTranslator) {
+  return {
     notifications: {
       popupBlocked: t("notifications.popupBlocked"),
       paymentPendingReview: t("notifications.paymentPendingReview"),
@@ -257,7 +272,10 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     ...buildTableLabels(t),
     ...buildStatusLabels(t),
     ...buildPaymentLabels(t),
-    ...buildSuccessAndDialogLabels(t),
+    ...buildSuccessMessagesAndDeleteDialog(t),
+    ...buildSubmitProofDialogLabels(t),
+    ...buildPaymentDetailsDialogLabels(t),
+    ...buildNotificationsAndErrorLabels(t),
     ...buildFxAndCurrencyLabels(t),
   };
 }

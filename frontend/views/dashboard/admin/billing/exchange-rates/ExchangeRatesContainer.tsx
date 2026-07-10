@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -38,7 +39,7 @@ type SyncRun = {
   readonly errorMessage?: string | null;
 };
 
-function _mapExchangeRatesToRows(
+function mapExchangeRatesToRows(
   rates:
     | readonly {
         readonly id?: string | null;
@@ -65,7 +66,28 @@ function _mapExchangeRatesToRows(
 
 type FeedbackFn = (message: string, severity: "success" | "error") => void;
 
-function _ExchangeRatesViewContent({
+type SnackbarState = {
+  readonly open: boolean;
+  readonly message: string;
+  readonly severity: "success" | "error";
+};
+
+function ExchangeRatesSnackbar({ state, onClose }: Readonly<{ state: SnackbarState; onClose: () => void }>) {
+  return (
+    <Snackbar
+      open={state.open}
+      autoHideDuration={4000}
+      onClose={onClose}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+    >
+      <Alert severity={state.severity} onClose={onClose} variant="filled">
+        {state.message}
+      </Alert>
+    </Snackbar>
+  );
+}
+
+function ExchangeRatesViewContent({
   labels,
   rates,
   ratesLoading,
@@ -77,12 +99,14 @@ function _ExchangeRatesViewContent({
   showStaleWarning,
   billingActionsDisabled,
   onRefresh,
-  onRefreshManualOverride,
+  onOpenManualOverride,
   manualOverrideOpen,
   onCloseManualOverride,
   onSuccessManualOverride,
   onErrorManualOverride,
   showFeedback,
+  snackbarState,
+  onSnackbarClose,
 }: Readonly<{
   labels: ExchangeRatesLabels;
   rates: ExchangeRateRow[];
@@ -95,12 +119,14 @@ function _ExchangeRatesViewContent({
   showStaleWarning: boolean;
   billingActionsDisabled: boolean;
   onRefresh: () => void;
-  onRefreshManualOverride: () => void;
+  onOpenManualOverride: () => void;
   manualOverrideOpen: boolean;
   onCloseManualOverride: () => void;
   onSuccessManualOverride: () => void;
   onErrorManualOverride: (message: string) => void;
   showFeedback: FeedbackFn;
+  snackbarState: SnackbarState;
+  onSnackbarClose: () => void;
 }>) {
   return (
     <PageContainer>
@@ -137,7 +163,7 @@ function _ExchangeRatesViewContent({
         <SectionPanel title={labels.rateTable.title}>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
             <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
-              <Button variant="outlined" onClick={onRefreshManualOverride} disabled={billingActionsDisabled}>
+              <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
                 {labels.manualOverride.title}
               </Button>
             </RequirePermission>
@@ -165,7 +191,7 @@ function _ExchangeRatesViewContent({
         onError={onErrorManualOverride}
       />
 
-      <SnackbarFeedback />
+      <ExchangeRatesSnackbar state={snackbarState} onClose={onSnackbarClose} />
     </PageContainer>
   );
 }
@@ -201,15 +227,7 @@ function ExchangeRatesSyncPanel({
   syncLoading,
   labels,
 }: Readonly<{
-  syncRun: {
-    finishedAt?: string | null;
-    startedAt?: string | null;
-    provider?: string | null;
-    pairsWritten?: number | string | null;
-    pairsFailed?: number | string | null;
-    status?: string | null;
-    errorMessage?: string | null;
-  } | null;
+  syncRun: SyncRun | null;
   syncLoading: boolean;
   labels: ExchangeRatesLabels;
 }>) {
@@ -282,7 +300,7 @@ export function ExchangeRatesContainer() {
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
   const [manualOverrideOpen, setManualOverrideOpen] = useState(false);
 
-  const showFeedback = (message: string, severity: "success" | "error") => {
+  const showFeedback: FeedbackFn = (message, severity) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
@@ -295,10 +313,9 @@ export function ExchangeRatesContainer() {
   }, [billingActionsDisabled]);
 
   const handleOpenManualOverride = () => {
-    if (billingActionsDisabled) {
-      return;
+    if (!billingActionsDisabled) {
+      setManualOverrideOpen(true);
     }
-    setManualOverrideOpen(true);
   };
 
   const {
@@ -314,9 +331,7 @@ export function ExchangeRatesContainer() {
     data: syncData,
     loading: syncLoading,
     refetch: refetchSync,
-  } = useQuery(latestFxSyncRunQueryDocument, {
-    fetchPolicy: "cache-and-network",
-  });
+  } = useQuery(latestFxSyncRunQueryDocument, { fetchPolicy: "cache-and-network" });
 
   const [refreshMutation, { loading: refreshing }] = useMutation(refreshExchangeRatesMutationDocument, {
     onCompleted: result => {
@@ -325,8 +340,7 @@ export function ExchangeRatesContainer() {
         void refetchSync();
         void refetchRates();
       } else {
-        const errMsg = result.refreshExchangeRates?.errorMessage ?? labels.refreshFailed;
-        showFeedback(errMsg, "error");
+        showFeedback(result.refreshExchangeRates?.errorMessage ?? labels.refreshFailed, "error");
       }
     },
     onError: error => {
@@ -335,102 +349,36 @@ export function ExchangeRatesContainer() {
     },
   });
 
-  const syncRun = syncData?.latestFxSyncRun ?? null;
-  const rates: ExchangeRateRow[] = (ratesData?.latestExchangeRates ?? [])
-    .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
-    .map(rate => ({
-      id: rate.id ?? "",
-      fromCurrency: parseCurrencyCode(rate.fromCurrency) ?? CurrencyCode.Usd,
-      toCurrency: parseCurrencyCode(rate.toCurrency) ?? CurrencyCode.Sar,
-      rate: rate.rate ?? "0",
-      source: rate.source ?? null,
-      effectiveDate: rate.effectiveDate ?? "",
-    }));
-
+  const syncRun: SyncRun | null = syncData?.latestFxSyncRun ?? null;
+  const rates = useMemo(() => mapExchangeRatesToRows(ratesData?.latestExchangeRates), [ratesData?.latestExchangeRates]);
   const availablePairs = useMemo(() => rates.map(rate => ({ from: rate.fromCurrency, to: rate.toCurrency })), [rates]);
-
   const columns = useMemo(() => buildExchangeRateColumns(labels.rateTable), [labels.rateTable]);
   const showStaleWarning = shouldShowFxStaleBanner(syncRun) && !refreshing;
 
   return (
-    <PageContainer>
-      <BillingImpersonationNotice />
-      <PageHeader
-        title={labels.pageTitle}
-        subtitle={labels.pageSubtitle}
-        actions={
-          <RequirePermission permissions={AppPermission.BillingRefreshExchangeRates}>
-            <PrimaryPageAction
-              onClick={() => void refreshMutation({ variables: { force: false } })}
-              disabled={refreshing || billingActionsDisabled}
-            >
-              {refreshing ? labels.refreshing : labels.syncStatus.refresh}
-            </PrimaryPageAction>
-          </RequirePermission>
-        }
-      />
-
-      <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
-        {showStaleWarning ? (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            {labels.staleWarning}
-          </Alert>
-        ) : null}
-
-        <SectionPanel title={labels.syncStatus.title}>
-          <ExchangeRatesSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
-        </SectionPanel>
-
-        <ProviderSettingsSection
-          labels={labels.providerSettings}
-          onFeedback={showFeedback}
-          actionsDisabled={billingActionsDisabled}
-        />
-
-        <SectionPanel title={labels.rateTable.title}>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-            <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
-              <Button variant="outlined" onClick={handleOpenManualOverride} disabled={billingActionsDisabled}>
-                {labels.manualOverride.title}
-              </Button>
-            </RequirePermission>
-          </Box>
-          <AppDataGrid
-            rows={rates}
-            columns={columns}
-            loading={ratesLoading}
-            emptyMessage={labels.noRates}
-            autoHeight
-            disableColumnMenu
-          />
-        </SectionPanel>
-
-        <SectionPanel title={labels.history.title}>
-          <ExchangeRateHistorySection labels={labels} availablePairs={availablePairs} />
-        </SectionPanel>
-      </RequirePermission>
-
-      <ManualOverrideDialog
-        open={manualOverrideOpen && !billingActionsDisabled}
-        labels={labels.manualOverride}
-        onClose={() => setManualOverrideOpen(false)}
-        onSuccess={() => {
-          showFeedback(labels.manualOverride.success, "success");
-          void refetchRates();
-        }}
-        onError={message => showFeedback(message, "error")}
-      />
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} variant="filled">
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </PageContainer>
+    <ExchangeRatesViewContent
+      labels={labels}
+      rates={rates}
+      ratesLoading={ratesLoading}
+      ratesColumns={columns}
+      availablePairs={availablePairs}
+      syncRun={syncRun}
+      syncLoading={syncLoading}
+      refreshing={refreshing}
+      showStaleWarning={showStaleWarning}
+      billingActionsDisabled={billingActionsDisabled}
+      onRefresh={() => void refreshMutation({ variables: { force: false } })}
+      onOpenManualOverride={handleOpenManualOverride}
+      manualOverrideOpen={manualOverrideOpen}
+      onCloseManualOverride={() => setManualOverrideOpen(false)}
+      onSuccessManualOverride={() => {
+        showFeedback(labels.manualOverride.success, "success");
+        void refetchRates();
+      }}
+      onErrorManualOverride={message => showFeedback(message, "error")}
+      showFeedback={showFeedback}
+      snackbarState={{ open: snackbarOpen, message: snackbarMessage, severity: snackbarSeverity }}
+      onSnackbarClose={() => setSnackbarOpen(false)}
+    />
   );
 }

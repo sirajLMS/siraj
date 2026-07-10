@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/components/ui";
 import { MeetingConfigList } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -37,6 +37,78 @@ function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): 
   if (config.label?.trim()) return config.label.trim();
   if (config.provider?.name) return resolveLocalizedString(config.provider.name, locale);
   return config.provider?.slug ?? config.id ?? "";
+}
+
+function ConfigsContent({
+  t,
+  tManager,
+  resolvedCanManage,
+  configs,
+  busy,
+  effectiveMeeting,
+  handleAdd,
+  handleEdit,
+  handleSetDefault,
+  onDelete,
+}: {
+  readonly t: ReturnType<typeof useTranslations>;
+  readonly tManager: ReturnType<typeof useTranslations>;
+  readonly resolvedCanManage: boolean;
+  readonly configs: readonly ClassMeetingConfigFieldsFragment[];
+  readonly busy: boolean;
+  readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
+  readonly handleAdd: () => void;
+  readonly handleEdit: (config: unknown) => void;
+  readonly handleSetDefault: (id: string) => Promise<void>;
+  readonly onDelete: (id: string) => void;
+}) {
+  return (
+    <Stack spacing={2}>
+      <ClassMeetingContextBanner effectiveMeeting={effectiveMeeting} hasScopeConfigs={configs.length > 0} />
+
+      {resolvedCanManage ? (
+        <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
+          <Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={handleAdd}>
+            {tManager("add")}
+          </Button>
+        </Stack>
+      ) : null}
+
+      <MeetingConfigList
+        configs={configs}
+        loading={busy}
+        title={tManager("listTitle")}
+        emptyMessage={t("noConfigs")}
+        onEditAction={resolvedCanManage ? handleEdit : undefined}
+        onDeleteAction={resolvedCanManage ? onDelete : undefined}
+        onSetDefaultAction={resolvedCanManage ? handleSetDefault : undefined}
+      />
+
+      {!resolvedCanManage && configs.length === 0 ? (
+        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t("noConfigs")}</Typography>
+      ) : null}
+    </Stack>
+  );
+}
+
+function ErrorSection({
+  title,
+  subtitle,
+  errorMessage,
+  retryLabel,
+  onRetry,
+}: {
+  readonly title: string;
+  readonly subtitle: string;
+  readonly errorMessage: string;
+  readonly retryLabel: string;
+  readonly onRetry: () => void;
+}) {
+  return (
+    <SectionPanel title={title} subTitle={subtitle}>
+      <ErrorState embedded message={errorMessage} retryLabel={retryLabel} onRetry={onRetry} />
+    </SectionPanel>
+  );
 }
 
 export function ClassMeetingConfigsSection({
@@ -97,20 +169,52 @@ export function ClassMeetingConfigsSection({
     return config ? configLabel(config as ClassMeetingConfigFieldsFragment, locale) : "";
   }, [configs, deleteId, locale]);
 
+  const handleSetDefault = useCallback(
+    async (id: string) => {
+      try {
+        await setDefault({ variables: { id } });
+        await refetch();
+      } catch {
+        setErrorMessage(tManager("saveError"));
+      }
+    },
+    [setDefault, refetch, tManager]
+  );
+
+  const handleDelete = useCallback(async () => {
+    if (!deleteId) return;
+    try {
+      await deleteConfig({ variables: { id: deleteId } });
+      setDeleteId(null);
+      await refetch();
+    } catch {
+      setErrorMessage(tManager("deleteError"));
+    }
+  }, [deleteId, deleteConfig, refetch, tManager]);
+
+  const handleEdit = useCallback((config: unknown) => {
+    setEditConfig(config as ClassMeetingConfigFieldsFragment);
+    setFormOpen(true);
+  }, []);
+
+  const handleAdd = useCallback(() => {
+    setEditConfig(null);
+    setFormOpen(true);
+  }, []);
+
   if (!scopeId) return null;
 
   if (error && configs.length === 0) {
     return (
-      <SectionPanel title={t("sectionTitle")} subTitle={t("sectionSubtitle")}>
-        <ErrorState
-          embedded
-          message={tManager("loadError")}
-          retryLabel={tManager("retry")}
-          onRetry={() => {
-            void refetch();
-          }}
-        />
-      </SectionPanel>
+      <ErrorSection
+        title={t("sectionTitle")}
+        subtitle={t("sectionSubtitle")}
+        errorMessage={tManager("loadError")}
+        retryLabel={tManager("retry")}
+        onRetry={() => {
+          void refetch();
+        }}
+      />
     );
   }
 
@@ -118,56 +222,18 @@ export function ClassMeetingConfigsSection({
 
   return (
     <SectionPanel id="meeting-configs" title={t("sectionTitle")} subTitle={t("sectionSubtitle")}>
-      <Stack spacing={2}>
-        <ClassMeetingContextBanner effectiveMeeting={effectiveMeeting} hasScopeConfigs={configs.length > 0} />
-
-        {resolvedCanManage ? (
-          <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
-            <Button
-              variant="contained"
-              startIcon={<AddOutlinedIcon />}
-              onClick={() => {
-                setEditConfig(null);
-                setFormOpen(true);
-              }}
-            >
-              {tManager("add")}
-            </Button>
-          </Stack>
-        ) : null}
-
-        <MeetingConfigList
-          configs={configs}
-          loading={busy}
-          title={tManager("listTitle")}
-          emptyMessage={t("noConfigs")}
-          onEditAction={
-            resolvedCanManage
-              ? config => {
-                  setEditConfig(config as ClassMeetingConfigFieldsFragment);
-                  setFormOpen(true);
-                }
-              : undefined
-          }
-          onDeleteAction={resolvedCanManage ? id => setDeleteId(id) : undefined}
-          onSetDefaultAction={
-            resolvedCanManage
-              ? async id => {
-                  try {
-                    await setDefault({ variables: { id } });
-                    await refetch();
-                  } catch {
-                    setErrorMessage(tManager("saveError"));
-                  }
-                }
-              : undefined
-          }
-        />
-
-        {!resolvedCanManage && configs.length === 0 ? (
-          <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t("noConfigs")}</Typography>
-        ) : null}
-      </Stack>
+      <ConfigsContent
+        t={t}
+        tManager={tManager}
+        resolvedCanManage={resolvedCanManage}
+        configs={configs}
+        busy={busy}
+        effectiveMeeting={effectiveMeeting}
+        handleAdd={handleAdd}
+        handleEdit={handleEdit}
+        handleSetDefault={handleSetDefault}
+        onDelete={id => setDeleteId(id)}
+      />
 
       {resolvedCanManage ? (
         <ClassMeetingConfigFormDialog
@@ -194,16 +260,7 @@ export function ClassMeetingConfigsSection({
         configLabel={deleteLabel}
         isLoading={deleting}
         onClose={() => setDeleteId(null)}
-        onConfirm={async () => {
-          if (!deleteId) return;
-          try {
-            await deleteConfig({ variables: { id: deleteId } });
-            setDeleteId(null);
-            await refetch();
-          } catch {
-            setErrorMessage(tManager("deleteError"));
-          }
-        }}
+        onConfirm={handleDelete}
       />
 
       <FormSuccessSnackbar open={showSuccess} message={tManager("saved")} onClose={() => setShowSuccess(false)} />

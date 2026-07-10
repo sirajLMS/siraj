@@ -13,39 +13,20 @@ export namespace CommunicationService {
     return { channel: "on_app", success: true };
   }
 
-  async function dispatchEmail(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
+  async function dispatchRecipientChannel(
+    payload: CommunicationPayload,
+    locale?: string
+  ): Promise<ChannelDispatchResult> {
     const to = (payload.metadata?.to as string) ?? "";
-    const result = await emailChannel.send(
-      {
-        to,
-        subject: payload.title,
-        html: payload.body ?? "",
-        eventType: payload.eventType,
-        userId: payload.userId,
-      },
-      locale
-    );
-    return {
-      channel: "email",
-      success: result.success,
-      providerMessageId: result.providerMessageId,
-      error: result.error,
-    };
-  }
+    const commonFields = { to, eventType: payload.eventType, userId: payload.userId };
 
-  async function dispatchSms(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
-    const to = (payload.metadata?.to as string) ?? "";
-    const result = await smsChannel.send(
-      {
-        to,
-        body: payload.body ?? "",
-        eventType: payload.eventType,
-        userId: payload.userId,
-      },
-      locale
-    );
+    const isEmail = payload.channel === "email";
+    const result = isEmail
+      ? await emailChannel.send({ ...commonFields, subject: payload.title, html: payload.body ?? "" }, locale)
+      : await smsChannel.send({ ...commonFields, body: payload.body ?? "" }, locale);
+
     return {
-      channel: "sms",
+      channel: payload.channel,
       success: result.success,
       providerMessageId: result.providerMessageId,
       error: result.error,
@@ -76,9 +57,8 @@ export namespace CommunicationService {
         case "on_app":
           return await dispatchOnApp(payload, locale);
         case "email":
-          return await dispatchEmail(payload, locale);
         case "sms":
-          return await dispatchSms(payload, locale);
+          return await dispatchRecipientChannel(payload, locale);
         case "push":
           return await dispatchPush(payload, locale);
         default: {

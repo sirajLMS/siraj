@@ -83,26 +83,32 @@ function resolveTooltip({
   return t("openInNewTab");
 }
 
-export function MeetingJoinAction({
-  joinUrl,
-  meeting,
-  label,
-  variant = "action",
-  disabled,
-  id,
-  onJoinAction,
-  emptyRole,
-  setupHref,
-}: MeetingJoinActionProps) {
+type JoinContext = {
+  readonly t: ReturnType<typeof useTranslations<"ui.meetingConfig.join">>;
+  readonly tDisplay: ReturnType<typeof useTranslations<"ui.meetingConfig.display">>;
+  readonly hasUrl: boolean;
+  readonly resolvedUrl: string | null;
+  readonly buttonLabel: string;
+  readonly tooltip: string;
+  readonly id?: string;
+  readonly providerLogo: string | null;
+  readonly onJoinAction?: () => void;
+};
+
+function useJoinContext(props: MeetingJoinActionProps) {
   const t = useTranslations("ui.meetingConfig.join");
   const tDisplay = useTranslations("ui.meetingConfig.display");
   const locale = useLocale();
-  const resolvedUrl = resolveJoinUrl({ joinUrl, meeting });
-  const hasUrl = Boolean(resolvedUrl) && !disabled;
-  const buttonLabel = label ?? t("joinMeeting");
-  const tooltip = resolveTooltip({ hasUrl, meeting, locale, t, tDisplay, emptyRole });
+  const resolvedUrl = resolveJoinUrl(props);
+  const hasUrl = Boolean(resolvedUrl) && !props.disabled;
+  const buttonLabel = props.label ?? t("joinMeeting");
+  const tooltip = resolveTooltip({ hasUrl, meeting: props.meeting, locale, t, tDisplay, emptyRole: props.emptyRole });
+  const providerLogo = props.meeting?.logoUrl?.trim() || null;
+  return { t, hasUrl, resolvedUrl, buttonLabel, tooltip, id: props.id, providerLogo, onJoinAction: props.onJoinAction };
+}
 
-  const handleJoin = () => {
+function makeHandleJoin(resolvedUrl: string | null, onJoinAction?: () => void): () => void {
+  return () => {
     if (onJoinAction) {
       onJoinAction();
       return;
@@ -111,113 +117,130 @@ export function MeetingJoinAction({
       globalThis.open(resolvedUrl, "_blank", "noopener,noreferrer");
     }
   };
+}
 
-  const providerLogo = meeting?.logoUrl?.trim() || null;
-
-  if (!hasUrl && emptyRole && setupHref && variant !== "icon") {
-    return (
-      <Alert severity="info" sx={{ width: "100%" }}>
-        <Stack spacing={1}>
-          <Typography sx={{ typography: "bodySm" }}>{resolveEmptyMessage(t, emptyRole)}</Typography>
-          <Button
-            component={Link}
-            href={setupHref}
-            size="small"
-            variant="outlined"
-            startIcon={<SettingsOutlinedIcon />}
-          >
-            {t("setupLink")}
-          </Button>
-        </Stack>
-      </Alert>
-    );
-  }
-
-  if (variant === "icon") {
-    if (!hasUrl && setupHref) {
-      return (
-        <Tooltip title={tooltip}>
-          <IconButton
-            component={Link}
-            href={setupHref}
-            id={id}
-            size="small"
-            aria-label={t("setupLink")}
-            sx={theme => ({
-              color: theme.palette.warning.main,
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.warning.main, 0.08),
-              },
-            })}
-          >
-            <SettingsOutlinedIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      );
-    }
-
-    const VideoIcon = hasUrl ? VideocamOutlinedIcon : VideocamOffOutlinedIcon;
-    return (
-      <Stack sx={{ alignItems: "center", gap: 0.25 }}>
-        <Tooltip title={tooltip}>
-          <span>
-            <IconButton
-              id={id}
-              size="small"
-              disabled={!hasUrl}
-              onClick={handleJoin}
-              aria-label={buttonLabel}
-              sx={theme => ({
-                color: theme.palette.info.main,
-                opacity: hasUrl ? 1 : 0.5,
-                "&:hover": {
-                  backgroundColor: alpha(theme.palette.info.main, 0.08),
-                },
-              })}
-            >
-              {hasUrl && providerLogo ? (
-                <Avatar src={providerLogo} alt="" sx={{ width: 20, height: 20 }} />
-              ) : (
-                <VideoIcon fontSize="small" />
-              )}
-            </IconButton>
-          </span>
-        </Tooltip>
+function renderSetupAlert(ctx: JoinContext, setupHref: string, emptyRole: MeetingJoinEmptyRole) {
+  return (
+    <Alert severity="info" sx={{ width: "100%" }}>
+      <Stack spacing={1}>
+        <Typography sx={{ typography: "bodySm" }}>{resolveEmptyMessage(ctx.t, emptyRole)}</Typography>
+        <Button component={Link} href={setupHref} size="small" variant="outlined" startIcon={<SettingsOutlinedIcon />}>
+          {ctx.t("setupLink")}
+        </Button>
       </Stack>
-    );
-  }
+    </Alert>
+  );
+}
 
-  if (variant === "button") {
+function renderIconVariant(ctx: JoinContext, setupHref?: string): React.ReactNode {
+  const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
+
+  if (!ctx.hasUrl && setupHref) {
     return (
-      <Tooltip title={tooltip}>
-        <span>
-          <Button
-            id={id}
-            variant="contained"
-            startIcon={
-              hasUrl && providerLogo ? (
-                <Box component="img" src={providerLogo} alt="" sx={{ width: 18, height: 18, borderRadius: "50%" }} />
-              ) : (
-                <OpenInNewOutlinedIcon />
-              )
-            }
-            disabled={!hasUrl}
-            onClick={handleJoin}
-          >
-            {buttonLabel}
-          </Button>
-        </span>
+      <Tooltip title={ctx.tooltip}>
+        <IconButton
+          component={Link}
+          href={setupHref}
+          id={ctx.id}
+          size="small"
+          aria-label={ctx.t("setupLink")}
+          sx={theme => ({
+            color: theme.palette.warning.main,
+            "&:hover": {
+              backgroundColor: alpha(theme.palette.warning.main, 0.08),
+            },
+          })}
+        >
+          <SettingsOutlinedIcon fontSize="small" />
+        </IconButton>
       </Tooltip>
     );
   }
 
+  const VideoIcon = ctx.hasUrl ? VideocamOutlinedIcon : VideocamOffOutlinedIcon;
   return (
-    <Tooltip title={tooltip}>
+    <Stack sx={{ alignItems: "center", gap: 0.25 }}>
+      <Tooltip title={ctx.tooltip}>
+        <span>
+          <IconButton
+            id={ctx.id}
+            size="small"
+            disabled={!ctx.hasUrl}
+            onClick={handleJoin}
+            aria-label={ctx.buttonLabel}
+            sx={theme => ({
+              color: theme.palette.info.main,
+              opacity: ctx.hasUrl ? 1 : 0.5,
+              "&:hover": {
+                backgroundColor: alpha(theme.palette.info.main, 0.08),
+              },
+            })}
+          >
+            {ctx.hasUrl && ctx.providerLogo ? (
+              <Avatar src={ctx.providerLogo} alt="" sx={{ width: 20, height: 20 }} />
+            ) : (
+              <VideoIcon fontSize="small" />
+            )}
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Stack>
+  );
+}
+
+function renderButtonVariant(ctx: JoinContext): React.ReactNode {
+  const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
+  return (
+    <Tooltip title={ctx.tooltip}>
       <span>
-        <PrimaryPageAction id={id} startIcon={<VideocamOutlinedIcon />} disabled={!hasUrl} onClick={handleJoin}>
-          {buttonLabel}
+        <Button
+          id={ctx.id}
+          variant="contained"
+          startIcon={
+            ctx.hasUrl && ctx.providerLogo ? (
+              <Box component="img" src={ctx.providerLogo} alt="" sx={{ width: 18, height: 18, borderRadius: "50%" }} />
+            ) : (
+              <OpenInNewOutlinedIcon />
+            )
+          }
+          disabled={!ctx.hasUrl}
+          onClick={handleJoin}
+        >
+          {ctx.buttonLabel}
+        </Button>
+      </span>
+    </Tooltip>
+  );
+}
+
+function renderActionVariant(ctx: JoinContext): React.ReactNode {
+  const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
+  return (
+    <Tooltip title={ctx.tooltip}>
+      <span>
+        <PrimaryPageAction id={ctx.id} startIcon={<VideocamOutlinedIcon />} disabled={!ctx.hasUrl} onClick={handleJoin}>
+          {ctx.buttonLabel}
         </PrimaryPageAction>
       </span>
     </Tooltip>
   );
+}
+
+export function MeetingJoinAction(props: MeetingJoinActionProps) {
+  const ctx = useJoinContext(props);
+  const { variant = "action", emptyRole, setupHref } = props;
+
+  if (!ctx.hasUrl && emptyRole && setupHref && variant !== "icon") {
+    return renderSetupAlert(ctx, setupHref, emptyRole);
+  }
+
+  if (variant === "icon") {
+    return renderIconVariant(ctx, setupHref);
+  }
+
+  if (variant === "button") {
+    return renderButtonVariant(ctx);
+  }
+
+  return renderActionVariant(ctx);
 }

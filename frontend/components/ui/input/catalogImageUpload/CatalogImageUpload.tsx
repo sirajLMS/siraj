@@ -29,12 +29,11 @@ export type CatalogImageUploadProps = {
 type UploadState = "idle" | "uploading" | "ready" | "error";
 
 type ImageUploadHookParams = {
-  readonly imageUrl?: string | null;
+  readonly fileInputRef: React.RefObject<HTMLInputElement | null>;
   readonly onImageUrlChangeAction?: (url: string | null) => void;
   readonly onUploadAction?: (file: File) => Promise<{ url: string; filePath?: string }>;
   readonly onFilePathChangeAction?: (filePath: string | null) => void;
   readonly maxSizeMb?: number;
-  readonly disabled?: boolean;
 };
 
 type PreviewBoxProps = {
@@ -72,7 +71,7 @@ type UrlFallbackFieldProps = {
 
 function useImageUpload(params: ImageUploadHookParams) {
   const {
-    imageUrl,
+    fileInputRef,
     onImageUrlChangeAction,
     onUploadAction,
     onFilePathChangeAction,
@@ -80,7 +79,6 @@ function useImageUpload(params: ImageUploadHookParams) {
   } = params;
   const t = useTranslations("ui.catalogImageUpload");
   const notifications = useNotifications();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const objectUrlRef = useRef<string | null>(null);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -182,23 +180,14 @@ function useImageUpload(params: ImageUploadHookParams) {
     [onFilePathChangeAction, onImageUrlChangeAction]
   );
 
-  const triggerFileInput = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
   return {
-    fileInputRef,
     previewUrl,
     uploadState,
     localError,
     isUploading: uploadState === "uploading",
-    disabled,
-    maxBytes,
     handleFileSelect,
     handleRemove,
     handleUrlChange,
-    triggerFileInput,
-    t,
   };
 }
 
@@ -339,19 +328,24 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
   error = false,
   errorMessage,
 }): React.ReactNode => {
+  const t = useTranslations("ui.catalogImageUpload");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const upload = useImageUpload({
-    imageUrl,
+    fileInputRef,
     onImageUrlChangeAction,
     onUploadAction,
     onFilePathChangeAction,
     maxSizeMb,
-    disabled,
   });
+
+  const _triggerFileInput = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
 
   const resolvedPreview = upload.previewUrl ?? imageUrl ?? null;
   const showError = error || upload.localError !== null;
   const resolvedError = errorMessage ?? upload.localError;
-  const resolvedHelperText = helperText ?? upload.t("helperText", { maxMb: String(maxSizeMb) });
+  const resolvedHelperText = helperText ?? t("helperText", { maxMb: String(maxSizeMb) });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -366,18 +360,18 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           label={label}
           showError={showError}
           isUploading={upload.isUploading}
-          previewAlt={upload.t("previewAlt")}
+          previewAlt={t("previewAlt")}
         />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <UploadButtons
-            onUploadClick={upload.triggerFileInput}
+            onUploadClick={triggerFileInput}
             onRemoveClick={upload.handleRemove}
             disabled={disabled}
             isUploading={upload.isUploading}
             hasPreview={resolvedPreview !== null}
-            uploadLabel={upload.t("upload")}
-            uploadingLabel={upload.t("uploading")}
-            removeLabel={upload.t("remove")}
+            uploadLabel={t("upload")}
+            uploadingLabel={t("uploading")}
+            removeLabel={t("remove")}
           />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {resolvedHelperText}
@@ -386,7 +380,7 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
         </Box>
       </Box>
       <input
-        ref={upload.fileInputRef}
+        ref={fileInputRef}
         type="file"
         accept={ACCEPTED_TYPES.join(",")}
         onChange={upload.handleFileSelect}
@@ -400,8 +394,8 @@ export const CatalogImageUpload: React.FC<CatalogImageUploadProps> = ({
           disabled={disabled || upload.isUploading}
           showError={showError}
           errorMessage={resolvedError}
-          label={upload.t("logoUrlLabel")}
-          optionalLabel={upload.t("optional")}
+          label={t("logoUrlLabel")}
+          optionalLabel={t("optional")}
         />
       ) : null}
     </Box>

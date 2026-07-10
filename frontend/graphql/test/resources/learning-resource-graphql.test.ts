@@ -80,8 +80,8 @@ async function createTestResource(token: string): Promise<string> {
   return resource.id;
 }
 
-async function _expectUploadMutationError(token: string, displayName: string): Promise<void> {
-  const file = await uploadDummyFile(token);
+async function expectUploadMutationError(uploadToken: string, mutateToken: string, displayName: string): Promise<void> {
+  const file = await uploadDummyFile(uploadToken);
 
   const result = await testClient.mutate({
     mutation: uploadLearningResourceMutationDocument,
@@ -93,7 +93,7 @@ async function _expectUploadMutationError(token: string, displayName: string): P
       },
     },
     context: {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${mutateToken}` },
     },
   });
 
@@ -166,7 +166,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   test("Teacher denied from uploading resource", async () => {
     if (!superAdminToken) throw new Error("Missing super admin token");
     const teacherToken = await loginDemoUser("teacher_default");
-    await expectUploadMutationError(teacherToken, "Teacher Attempt Upload");
+    await expectUploadMutationError(superAdminToken, teacherToken, "Teacher Attempt Upload");
   });
 
   test("Parent denied from resource directory", async () => {
@@ -185,7 +185,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
 
   test("Upload with missing displayName returns validation error", async () => {
     if (!superAdminToken) throw new Error("Missing super admin token");
-    await expectUploadMutationError(superAdminToken, "");
+    await expectUploadMutationError(superAdminToken, superAdminToken, "");
   });
 
   test("Super Admin can delete learning resource successfully", async () => {

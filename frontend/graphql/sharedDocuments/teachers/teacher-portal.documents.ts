@@ -53,6 +53,7 @@ export const teacherAssignedClassesQueryDocument: TypedDocumentNode<Operations.T
         durationMinutes
         executionState
         outcome
+        isFrozen
         meetingJoinUrl
         effectiveMeeting {
           ...EffectiveMeetingFields

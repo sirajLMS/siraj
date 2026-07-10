@@ -23,6 +23,7 @@ export const teacherWeeklyScheduleGridQueryDocument: TypedDocumentNode<
         day
         executionState
         outcome
+        isFrozen
         subjectName
         classType
         meetingJoinUrl

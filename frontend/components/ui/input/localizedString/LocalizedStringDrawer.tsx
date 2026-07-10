@@ -56,6 +56,58 @@ function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: Hel
   return undefined;
 }
 
+function resolveFieldChange(params: {
+  readonly draft: LocalizedString;
+  readonly locale: AppLocale;
+  readonly text: string;
+  readonly autosave: boolean;
+  readonly onSaveAction: (next: LocalizedString) => void;
+  readonly setDraft: React.Dispatch<React.SetStateAction<LocalizedString>>;
+}): void {
+  const { draft, locale, text, autosave, onSaveAction, setDraft } = params;
+  const next = setLocalizedString(draft, locale, text);
+  setDraft(next);
+  if (autosave) {
+    onSaveAction(next);
+  }
+}
+
+function resolveDismiss(params: {
+  readonly autosave: boolean;
+  readonly dismissAction: "save" | "cancel";
+  readonly canSave: boolean;
+  readonly draft: LocalizedString;
+  readonly onSaveAction: (next: LocalizedString) => void;
+  readonly onCancelAction: () => void;
+}): void {
+  const { autosave, dismissAction, canSave, draft, onSaveAction, onCancelAction } = params;
+  if (autosave) {
+    onCancelAction();
+    return;
+  }
+  if (dismissAction === "save" && canSave) {
+    onSaveAction(draft);
+    return;
+  }
+  onCancelAction();
+}
+
+function resolveFieldChange(params: {
+  readonly draft: LocalizedString;
+  readonly locale: AppLocale;
+  readonly text: string;
+  readonly autosave: boolean;
+  readonly onSaveAction: (next: LocalizedString) => void;
+  readonly setDraft: React.Dispatch<React.SetStateAction<LocalizedString>>;
+}): void {
+  const { draft, locale, text, autosave, onSaveAction, setDraft } = params;
+  const next = setLocalizedString(draft, locale, text);
+  setDraft(next);
+  if (autosave) {
+    onSaveAction(next);
+  }
+}
+
 type LocaleFieldProps = {
   readonly locale: AppLocale;
   readonly fieldValue: string;
@@ -210,32 +262,33 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
   }, [open, value]);
 
   const handleFieldChange = useCallback(
-    (locale: AppLocale, text: string) => {
-      setDraft(prev => {
-        const next = setLocalizedString(prev, locale, text);
-        if (autosave) {
-          onSaveAction(next);
-        }
-        return next;
-      });
-    },
-    [autosave, onSaveAction]
+    (locale: AppLocale, text: string) =>
+      resolveFieldChange({
+        draft,
+        locale,
+        text,
+        autosave,
+        onSaveAction,
+        setDraft,
+      }),
+    [draft, autosave, onSaveAction]
   );
 
   const valid = hasRequiredLocalizedValue(draft, resolvedRequired);
   const canSave = valid && !saving;
 
-  const handleDismiss = useCallback(() => {
-    if (autosave) {
-      onCancelAction();
-      return;
-    }
-    if (dismissAction === "save" && canSave) {
-      onSaveAction(draft);
-      return;
-    }
-    onCancelAction();
-  }, [autosave, dismissAction, canSave, draft, onSaveAction, onCancelAction]);
+  const handleDismiss = useCallback(
+    () =>
+      resolveDismiss({
+        autosave,
+        dismissAction,
+        canSave,
+        draft,
+        onSaveAction,
+        onCancelAction,
+      }),
+    [autosave, dismissAction, canSave, draft, onSaveAction, onCancelAction]
+  );
 
   const headerTitle = title ?? t("editTranslations");
 
@@ -252,7 +305,6 @@ export const LocalizedStringDrawer: React.FC<LocalizedStringDrawerProps> = ({
       }),
     [draft, required, resolvedRequired, uiLocale, t]
   );
-
   return (
     <Drawer
       open={open}

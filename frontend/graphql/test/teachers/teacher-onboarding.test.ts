@@ -54,18 +54,15 @@ const createMinimalTeacherInput = (
   },
 });
 
-const _expectTeacherCreationDenied = async (demoUser: string) => {
+const attemptCreateTeacherAs = async (demoUser: string) => {
   const token = await loginDemoUser(demoUser);
 
-  const result = await testClient.mutate({
+  return testClient.mutate({
     mutation: createTeacherMutationDocument,
     variables: { input: createMinimalTeacherInput() },
     context: { headers: { Authorization: `Bearer ${token}` } },
     errorPolicy: "all",
   });
-
-  expect(result.error).toBeDefined();
-  expect(result.data?.createTeacher).toBeFalsy();
 };
 
 describe("Teacher Onboarding GraphQL API", () => {
@@ -114,38 +111,18 @@ describe("Teacher Onboarding GraphQL API", () => {
   });
 
   test("Teacher denied creating teacher", async () => {
-    const { testClient } = await import("@/frontend/graphql/test/testClient");
-    const token = await loginDemoUser("teacher_default");
-
-    const result = await testClient.mutate({
-      mutation: createTeacherMutationDocument,
-      variables: { input: createMinimalTeacherInput() },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-      errorPolicy: "all",
-    });
-
+    const result = await attemptCreateTeacherAs("teacher_default");
     expect(result.error).toBeDefined();
     expect(result.data?.createTeacher).toBeFalsy();
   });
 
   test("Parent denied creating teacher", async () => {
-    const { testClient } = await import("@/frontend/graphql/test/testClient");
-    const token = await loginDemoUser("parent_default");
-
-    const result = await testClient.mutate({
-      mutation: createTeacherMutationDocument,
-      variables: { input: createMinimalTeacherInput() },
-      context: { headers: { Authorization: `Bearer ${token}` } },
-      errorPolicy: "all",
-    });
-
+    const result = await attemptCreateTeacherAs("parent_default");
     expect(result.error).toBeDefined();
     expect(result.data?.createTeacher).toBeFalsy();
   });
 
   test("Unauthenticated denied creating teacher", async () => {
-    const { testClient } = await import("@/frontend/graphql/test/testClient");
-
     const result = await testClient.mutate({
       mutation: createTeacherMutationDocument,
       variables: {

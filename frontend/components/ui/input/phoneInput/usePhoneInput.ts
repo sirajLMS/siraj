@@ -5,14 +5,9 @@ import { type CountryType, getCountryByCode } from "@/frontend/lib/locale";
 import {
   buildE164FromParts,
   canAppendCallingCodeDigit,
-  clampSelectionToDigits,
-  formatNationalDigits,
   getCallingCodeForRegion,
-  getMaxCallingCodeLength,
   getNextFormatChar,
   isCallingCodeComplete,
-  isCallingCodePrefixValid,
-  isCompletePhoneValid,
   matchCallingCodeFromDigits,
   splitPhoneValueToParts,
 } from "@/shared/lib/phone";
@@ -46,7 +41,7 @@ export type UsePhoneInputResult = {
   readonly maxPrefixDisplayLength: number;
 };
 
-function resolveCountry(region: string | null | undefined): CountryType | undefined {
+function _resolveCountry(region: string | null | undefined): CountryType | undefined {
   if (!region) {
     return undefined;
   }
@@ -215,23 +210,18 @@ function useNationalKeyDown(
   );
 }
 
-export function usePhoneInput({
-  value,
-  onChangeAction,
-  defaultRegion = "EG",
-}: UsePhoneInputOptions): UsePhoneInputResult {
-  const prefixInputRef = useRef<HTMLInputElement>(null);
-  const nationalInputRef = useRef<HTMLInputElement>(null);
-  const lastEmittedRef = useRef<string | null | undefined>(undefined);
-  const [activeSlot, setActiveSlot] = useState<PhoneInputSlot>("prefix");
-
-  const initialParts = useMemo(() => splitPhoneValueToParts(value, defaultRegion), [value, defaultRegion]);
-  const [region, setRegion] = useState<string | null>(
-    initialParts.prefixDigits ? (initialParts.region ?? defaultRegion) : null
-  );
-  const [prefixDigits, setPrefixDigits] = useState(initialParts.prefixDigits);
-  const [nationalDigits, setNationalDigits] = useState(initialParts.nationalDigits);
-
+function _useDerivedPhoneState(
+  region: string | null,
+  prefixDigits: string,
+  nationalDigits: string,
+  defaultRegion: string
+): {
+  readonly country: CountryType | undefined;
+  readonly nationalDisplay: string;
+  readonly prefixInvalid: boolean;
+  readonly phoneInvalid: boolean;
+  readonly isValid: boolean;
+} {
   const country = useMemo(() => (prefixDigits ? resolveCountry(region) : undefined), [prefixDigits, region]);
   const nationalDisplay = useMemo(
     () => formatNationalDigits(nationalDigits, region ?? defaultRegion),
@@ -242,29 +232,17 @@ export function usePhoneInput({
   const isValid = isCompletePhoneValid(prefixDigits, nationalDigits, region, defaultRegion);
   const phoneInvalid = hasInput && !prefixInvalid && !isValid;
 
-  const emitChange = useCallback(
-    (nextPrefixDigits: string, nextNationalDigits: string) => {
-      const emitted = buildEmittedValue(nextPrefixDigits, nextNationalDigits);
-      lastEmittedRef.current = emitted;
-      onChangeAction(emitted);
-    },
-    [onChangeAction]
-  );
+  return { country, nationalDisplay, prefixInvalid, phoneInvalid, isValid };
+}
 
-  usePhoneStateSync(value, defaultRegion, lastEmittedRef, setRegion, setPrefixDigits, setNationalDigits);
-
-  const { focusPrefix, focusNational } = useFocusSlot(prefixInputRef, nationalInputRef, setActiveSlot);
-
-  const updateFromPrefix = usePrefixUpdate(
-    region,
-    nationalDigits,
-    defaultRegion,
-    setPrefixDigits,
-    setRegion,
-    emitChange
-  );
-
-  const selectCountry = useCallback(
+function useSelectCountry(
+  nationalDigits: string,
+  setRegion: (region: string | null) => void,
+  setPrefixDigits: (digits: string) => void,
+  emitChange: (prefixDigits: string, nationalDigits: string) => void,
+  focusPrefix: () => void
+): (nextCountry: CountryType) => void {
+  return useCallback(
     (nextCountry: CountryType) => {
       const nextPrefix = nextCountry.phone;
       setRegion(nextCountry.code);
@@ -272,23 +250,12 @@ export function usePhoneInput({
       emitChange(nextPrefix, nationalDigits);
       focusPrefix();
     },
-    [emitChange, focusPrefix, nationalDigits]
+    [nationalDigits, setRegion, setPrefixDigits, emitChange, focusPrefix]
   );
+}
 
-  const handlePrefixKeyDown = usePrefixKeyDown(prefixDigits, updateFromPrefix, focusNational);
-
-  const handleNationalKeyDown = useNationalKeyDown(
-    prefixDigits,
-    nationalDigits,
-    region,
-    defaultRegion,
-    nationalDisplay,
-    setNationalDigits,
-    emitChange,
-    focusPrefix
-  );
-
-  const handleNationalSelect = useCallback(
+function useNationalSelect(nationalDisplay: string): (event: React.SyntheticEvent<HTMLInputElement>) => void {
+  return useCallback(
     (event: React.SyntheticEvent<HTMLInputElement>) => {
       const input = event.currentTarget;
       const start = input.selectionStart ?? 0;
@@ -301,7 +268,15 @@ export function usePhoneInput({
     },
     [nationalDisplay]
   );
+}
 
+function useResetHandlers(
+  prefixDigits: string,
+  nationalDisplay: string
+): {
+  readonly resetPrefixDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
+  readonly resetNationalDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
+} {
   const resetPrefixDisplay = useCallback(
     (event: React.FormEvent<HTMLInputElement>) => {
       event.currentTarget.value = `+${prefixDigits}`;
@@ -316,6 +291,154 @@ export function usePhoneInput({
     [nationalDisplay]
   );
 
+  return { resetPrefixDisplay, resetNationalDisplay };
+}
+
+type PhoneInputState = {
+  readonly prefixInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly nationalInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly lastEmittedRef: React.RefObject<string | null | undefined>;
+  readonly activeSlot: PhoneInputSlot;
+  readonly setActiveSlot: (slot: PhoneInputSlot) => void;
+  readonly region: string | null;
+  readonly setRegion: (region: string | null) => void;
+  readonly prefixDigits: string;
+  readonly setPrefixDigits: (digits: string) => void;
+  readonly nationalDigits: string;
+  readonly setNationalDigits: (digits: string) => void;
+};
+
+function _usePhoneInputState(value: string | null, defaultRegion: string): PhoneInputState {
+  const prefixInputRef = useRef<HTMLInputElement>(null);
+  const nationalInputRef = useRef<HTMLInputElement>(null);
+  const lastEmittedRef = useRef<string | null | undefined>(undefined);
+  const [activeSlot, setActiveSlot] = useState<PhoneInputSlot>("prefix");
+
+  const initialParts = useMemo(() => splitPhoneValueToParts(value, defaultRegion), [value, defaultRegion]);
+  const [region, setRegion] = useState<string | null>(
+    initialParts.prefixDigits ? (initialParts.region ?? defaultRegion) : null
+  );
+  const [prefixDigits, setPrefixDigits] = useState(initialParts.prefixDigits);
+  const [nationalDigits, setNationalDigits] = useState(initialParts.nationalDigits);
+
+  return {
+    prefixInputRef,
+    nationalInputRef,
+    lastEmittedRef,
+    activeSlot,
+    setActiveSlot,
+    region,
+    setRegion,
+    prefixDigits,
+    setPrefixDigits,
+    nationalDigits,
+    setNationalDigits,
+  };
+}
+
+function useEmitChange(
+  onChangeAction: (e164: string | null) => void,
+  lastEmittedRef: React.RefObject<string | null | undefined>
+): (prefixDigits: string, nationalDigits: string) => void {
+  return useCallback(
+    (nextPrefixDigits: string, nextNationalDigits: string) => {
+      const emitted = buildEmittedValue(nextPrefixDigits, nextNationalDigits);
+      lastEmittedRef.current = emitted;
+      onChangeAction(emitted);
+    },
+    [onChangeAction, lastEmittedRef]
+  );
+}
+
+type PhoneInputHandlers = {
+  readonly selectCountry: (country: CountryType) => void;
+  readonly handlePrefixKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  readonly handleNationalKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  readonly handleNationalSelect: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  readonly resetPrefixDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
+  readonly resetNationalDisplay: (event: React.FormEvent<HTMLInputElement>) => void;
+};
+
+function usePhoneInputHandlers(
+  state: PhoneInputState,
+  derived: { readonly nationalDisplay: string },
+  defaultRegion: string,
+  onChangeAction: (e164: string | null) => void
+): PhoneInputHandlers {
+  const { region, prefixDigits, nationalDigits } = state;
+  const { nationalDisplay } = derived;
+  const emitChange = useEmitChange(onChangeAction, state.lastEmittedRef);
+
+  const { focusPrefix, focusNational } = useFocusSlot(
+    state.prefixInputRef,
+    state.nationalInputRef,
+    state.setActiveSlot
+  );
+  const updateFromPrefix = usePrefixUpdate(
+    region,
+    nationalDigits,
+    defaultRegion,
+    state.setPrefixDigits,
+    state.setRegion,
+    emitChange
+  );
+  const selectCountry = useSelectCountry(
+    nationalDigits,
+    state.setRegion,
+    state.setPrefixDigits,
+    emitChange,
+    focusPrefix
+  );
+  const handlePrefixKeyDown = usePrefixKeyDown(prefixDigits, updateFromPrefix, focusNational);
+  const handleNationalKeyDown = useNationalKeyDown(
+    prefixDigits,
+    nationalDigits,
+    region,
+    defaultRegion,
+    nationalDisplay,
+    state.setNationalDigits,
+    emitChange,
+    focusPrefix
+  );
+  const handleNationalSelect = useNationalSelect(nationalDisplay);
+  const { resetPrefixDisplay, resetNationalDisplay } = useResetHandlers(prefixDigits, nationalDisplay);
+
+  return {
+    selectCountry,
+    handlePrefixKeyDown,
+    handleNationalKeyDown,
+    handleNationalSelect,
+    resetPrefixDisplay,
+    resetNationalDisplay,
+  };
+}
+
+export function usePhoneInput({
+  value,
+  onChangeAction,
+  defaultRegion = "EG",
+}: UsePhoneInputOptions): UsePhoneInputResult {
+  const state = usePhoneInputState(value, defaultRegion);
+  const { prefixDigits, nationalDigits, region, activeSlot } = state;
+
+  usePhoneStateSync(
+    value,
+    defaultRegion,
+    state.lastEmittedRef,
+    state.setRegion,
+    state.setPrefixDigits,
+    state.setNationalDigits
+  );
+
+  const { country, nationalDisplay, prefixInvalid, phoneInvalid, isValid } = useDerivedPhoneState(
+    region,
+    prefixDigits,
+    nationalDigits,
+    defaultRegion
+  );
+
+  const handlers = usePhoneInputHandlers(state, { nationalDisplay }, defaultRegion, onChangeAction);
+
   return {
     country,
     prefixDigits,
@@ -325,15 +448,10 @@ export function usePhoneInput({
     prefixInvalid,
     phoneInvalid,
     isValid,
-    setActiveSlot,
-    selectCountry,
-    handlePrefixKeyDown,
-    handleNationalKeyDown,
-    handleNationalSelect,
-    resetPrefixDisplay,
-    resetNationalDisplay,
-    prefixInputRef,
-    nationalInputRef,
+    setActiveSlot: state.setActiveSlot,
+    ...handlers,
+    prefixInputRef: state.prefixInputRef,
+    nationalInputRef: state.nationalInputRef,
     maxPrefixDisplayLength: getMaxCallingCodeLength() + 1,
   };
 }

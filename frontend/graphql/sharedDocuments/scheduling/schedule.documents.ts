@@ -39,6 +39,7 @@ export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
         scheduledEndAt
         outcome
         executionState
+        isFrozen
         meetingJoinUrl
         effectiveMeeting {
           ...EffectiveMeetingFields
@@ -109,6 +110,7 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
       duration
       outcome
       executionState
+      isFrozen
       meetingJoinUrl
       effectiveMeeting {
         ...EffectiveMeetingFields

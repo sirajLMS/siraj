@@ -63,6 +63,17 @@ function permissionsInclude(permissions: ReadonlySet<AppPermission>, key: AppPer
   return permissions.has(key);
 }
 
+function checkPermissionOrLegacy(
+  permissions: ReadonlySet<AppPermission>,
+  permission: AppPermission,
+  legacyFallback: () => boolean
+): boolean {
+  if (permissionsInclude(permissions, permission)) {
+    return true;
+  }
+  return legacyFallback();
+}
+
 const TEACHER_VIEW_OTHER_ALLOWED_GROUPS = new Set<ProfileFieldGroupKey>([
   "core_identity",
   "core_contact",

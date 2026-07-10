@@ -56,8 +56,8 @@ type VerifyButtonProps = {
   readonly methods: readonly PaymentMethodRow[];
   readonly verifying: boolean;
   readonly onVerify: (id: string) => Promise<void>;
-  readonly t: ReturnType<typeof useTranslations<"ui.paymentMethod.manager">>;
-  readonly tType: ReturnType<typeof useTranslations<"ui.paymentMethod">>;
+  readonly t: TranslationManager;
+  readonly tType: TranslationType;
 };
 
 function VerifyBankTransferButtons({ methods, verifying, onVerify, t, tType }: VerifyButtonProps) {
@@ -116,6 +116,78 @@ function PaymentMethodFormDialogWrapped({
   );
 }
 
+type TranslationManager = ReturnType<typeof useTranslations<"ui.paymentMethod.manager">>;
+type TranslationType = ReturnType<typeof useTranslations<"ui.paymentMethod">>;
+
+type PaymentMethodsManagerData = {
+  readonly userPaymentMethods?: readonly UserPaymentMethodFieldsFragment[] | null;
+};
+
+function usePaymentMethods(
+  data: PaymentMethodsManagerData | undefined,
+  slot: PaymentMethodsSlot,
+): PaymentMethodRow[] {
+  return useMemo(() => {
+    const rows = (data?.userPaymentMethods ?? [])
+      .map(toRow)
+      .filter((row): row is PaymentMethodRow => row != null)
+      .filter(row => matchesSlot(row.direction, slot));
+    return rows;
+  }, [data?.userPaymentMethods, slot]);
+}
+
+function useMethodById(data: PaymentMethodsManagerData | undefined) {
+  return useMemo(() => {
+    const map = new Map<string, UserPaymentMethodFieldsFragment>();
+    for (const method of data?.userPaymentMethods ?? []) {
+      if (method.id) map.set(method.id, method as UserPaymentMethodFieldsFragment);
+    }
+    return map;
+  }, [data?.userPaymentMethods]);
+}
+
+function useDeleteLabel(deleteId: string | null, methods: readonly PaymentMethodRow[], tType: TranslationType): string {
+  return useMemo(() => {
+    if (!deleteId) return "";
+    const row = methods.find(m => m.id === deleteId);
+    if (!row) return "";
+    return row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType(key as never));
+  }, [deleteId, methods, tType]);
+}
+
+type PaymentMethodMutations = {
+  readonly deleting: boolean;
+  readonly settingDefault: boolean;
+  readonly verifying: boolean;
+  readonly confirmDelete: (id: string) => Promise<void>;
+  readonly setDefault: (id: string) => Promise<void>;
+  readonly verify: (id: string) => Promise<void>;
+};
+
+function useMethodMutations(refetch: () => Promise<unknown>): PaymentMethodMutations {
+  const [deleteMethod, { loading: deleting }] = useMutation(deleteUserPaymentMethodMutationDocument);
+  const [setDefaultMut, { loading: settingDefault }] = useMutation(setDefaultUserPaymentMethodMutationDocument);
+  const [verifyMethod, { loading: verifying }] = useMutation(verifyBankTransferPaymentMethodMutationDocument);
+
+  return {
+    deleting,
+    settingDefault,
+    verifying,
+    confirmDelete: async (id: string) => {
+      await deleteMethod({ variables: { id } });
+      await refetch();
+    },
+    setDefault: async (id: string) => {
+      await setDefaultMut({ variables: { id } });
+      await refetch();
+    },
+    verify: async (id: string) => {
+      await verifyMethod({ variables: { id } });
+      await refetch();
+    },
+  };
+}
+
 export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
   const t = useTranslations("ui.paymentMethod.manager");
   const tType = useTranslations("ui.paymentMethod");
@@ -136,52 +208,15 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
   const [editMethod, setEditMethod] = useState<UserPaymentMethodFieldsFragment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const methods = useMemo(() => {
-    const rows = (data?.userPaymentMethods ?? [])
-      .map(toRow)
-      .filter((row): row is PaymentMethodRow => row != null)
-      .filter(row => matchesSlot(row.direction, slot));
-    return rows;
-  }, [data?.userPaymentMethods, slot]);
-
-  const methodById = useMemo(() => {
-    const map = new Map<string, UserPaymentMethodFieldsFragment>();
-    for (const method of data?.userPaymentMethods ?? []) {
-      if (method.id) map.set(method.id, method as UserPaymentMethodFieldsFragment);
-    }
-    return map;
-  }, [data?.userPaymentMethods]);
-
-  const [deleteMethod, { loading: deleting }] = useMutation(deleteUserPaymentMethodMutationDocument);
-  const [setDefault, { loading: settingDefault }] = useMutation(setDefaultUserPaymentMethodMutationDocument);
-  const [verifyMethod, { loading: verifying }] = useMutation(verifyBankTransferPaymentMethodMutationDocument);
-
-  const deleteLabel = useMemo(() => {
-    if (!deleteId) return "";
-    const row = methods.find(m => m.id === deleteId);
-    if (!row) return "";
-    return row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType(key as never));
-  }, [deleteId, methods, tType]);
-
-  const handleSaved = async () => {
-    await refetch();
-  };
+  const methods = usePaymentMethods(data, slot);
+  const methodById = useMethodById(data);
+  const mutations = useMethodMutations(refetch);
+  const deleteLabel = useDeleteLabel(deleteId, methods, tType);
 
   const handleConfirmDelete = async () => {
     if (!deleteId) return;
-    await deleteMethod({ variables: { id: deleteId } });
+    await mutations.confirmDelete(deleteId);
     setDeleteId(null);
-    await refetch();
-  };
-
-  const handleSetDefault = async (id: string) => {
-    await setDefault({ variables: { id } });
-    await refetch();
-  };
-
-  const handleVerify = async (id: string) => {
-    await verifyMethod({ variables: { id } });
-    await refetch();
   };
 
   const handleEdit = canManage
@@ -192,7 +227,7 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
       }
     : undefined;
 
-  const busy = loading || deleting || settingDefault || verifying;
+  const busy = loading || mutations.deleting || mutations.settingDefault || mutations.verifying;
 
   if (error && methods.length === 0) {
     return (
@@ -231,14 +266,14 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
         emptyMessage={t("empty")}
         onEditAction={handleEdit}
         onDeleteAction={canManage ? id => setDeleteId(id) : undefined}
-        onSetDefaultAction={canManage ? handleSetDefault : undefined}
+        onSetDefaultAction={canManage ? mutations.setDefault : undefined}
       />
 
       {canVerify ? (
         <VerifyBankTransferButtons
           methods={methods}
-          verifying={verifying}
-          onVerify={handleVerify}
+          verifying={mutations.verifying}
+          onVerify={mutations.verify}
           t={t}
           tType={tType}
         />
@@ -252,13 +287,13 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
         editMethod={editMethod}
         setFormOpen={setFormOpen}
         setEditMethod={setEditMethod}
-        onSaved={handleSaved}
+        onSaved={refetch}
       />
 
       <PaymentMethodDeleteDialog
         open={deleteId != null}
         methodLabel={deleteLabel}
-        isLoading={deleting}
+        isLoading={mutations.deleting}
         onClose={() => setDeleteId(null)}
         onConfirm={handleConfirmDelete}
       />

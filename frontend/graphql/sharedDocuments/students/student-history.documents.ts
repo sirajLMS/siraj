@@ -25,6 +25,7 @@ export const studentClassHistoryQueryDocument: TypedDocumentNode<
         duration
         status
         outcome
+        isFrozen
         instructor
         timeSlot
         room

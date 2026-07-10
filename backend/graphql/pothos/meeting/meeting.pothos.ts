@@ -1,3 +1,5 @@
+import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { ClassMeetingConfigReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type { MeetingConfigDetails, UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
@@ -5,6 +7,21 @@ import type {
   MeetingProviderFieldSchema,
   MeetingProviderReturnType,
 } from "@/backend/types/meeting/meeting-provider.types";
+
+// Extract the actual SchemaTypes from the builder instance
+type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
+type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
+type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
+
+interface MeetingConfigBaseShape {
+  providerId: string;
+  details: MeetingConfigDetails;
+}
+
+async function resolveMeetingProvider(parent: MeetingConfigBaseShape, _args: unknown, ctx: BaseContext) {
+  const { MeetingProviderCatalogService } = await import("@/backend/services/meeting/meeting-provider-catalog.service");
+  return MeetingProviderCatalogService.getProviderById(ctx.user?.id ?? "", parent.providerId, ctx.locale);
+}
 
 const MeetingProviderFieldSchemaRef =
   gqlSchemaBuilder.objectRef<MeetingProviderFieldSchema>("MeetingProviderFieldSchema");
@@ -47,6 +64,20 @@ export const MeetingConfigDetailsPothosObject = MeetingConfigDetailsRef.implemen
   }),
 });
 
+function meetingConfigSharedFields(t: PothosObjectFieldBuilder<MeetingConfigBaseShape>) {
+  return {
+    details: t.field({ type: MeetingConfigDetailsPothosObject, resolve: parent => parent.details }),
+    hasSecret: t.exposeBoolean("hasSecret", { nullable: true }),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
+    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+    provider: t.field({
+      type: MeetingProviderPothosObject,
+      nullable: true,
+      resolve: resolveMeetingProvider,
+    }),
+  };
+}
+
 const UserMeetingConfigRef = gqlSchemaBuilder.objectRef<UserMeetingConfigReturnType>("UserMeetingConfig");
 
 export const UserMeetingConfigPothosObject = UserMeetingConfigRef.implement({
@@ -56,20 +87,7 @@ export const UserMeetingConfigPothosObject = UserMeetingConfigRef.implement({
     providerId: t.exposeString("providerId"),
     label: t.exposeString("label", { nullable: true }),
     isDefault: t.exposeBoolean("isDefault"),
-    details: t.field({ type: MeetingConfigDetailsPothosObject, resolve: parent => parent.details }),
-    hasSecret: t.exposeBoolean("hasSecret", { nullable: true }),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-    provider: t.field({
-      type: MeetingProviderPothosObject,
-      nullable: true,
-      resolve: async (parent, _args, ctx) => {
-        const { MeetingProviderCatalogService } = await import(
-          "@/backend/services/meeting/meeting-provider-catalog.service"
-        );
-        return MeetingProviderCatalogService.getProviderById(ctx.user?.id ?? "", parent.providerId, ctx.locale);
-      },
-    }),
+    ...meetingConfigSharedFields(t),
   }),
 });
 
@@ -82,32 +100,26 @@ export const MeetingProviderFieldSchemaInputPothos = gqlSchemaBuilder.inputType(
   }),
 });
 
-export const MeetingProviderCreateInputPothos = gqlSchemaBuilder.inputType("MeetingProviderCreateInput", {
-  fields: t => ({
-    slug: t.string({ required: true }),
-    name: t.field({ type: "LocalizedString", required: true }),
+function meetingProviderInputFields(t: PothosInputFieldBuilder, requiredFlag: boolean) {
+  return {
+    slug: t.string({ required: requiredFlag }),
+    name: t.field({ type: "LocalizedString", required: requiredFlag }),
     description: t.field({ type: "LocalizedString", required: false }),
     instructions: t.field({ type: "LocalizedString", required: false }),
-    urlAllowlist: t.stringList({ required: true }),
+    urlAllowlist: t.stringList({ required: requiredFlag }),
     urlExample: t.string({ required: false }),
     logoUrl: t.string({ required: false }),
-    fieldSchema: t.field({ type: MeetingProviderFieldSchemaInputPothos, required: true }),
+    fieldSchema: t.field({ type: MeetingProviderFieldSchemaInputPothos, required: requiredFlag }),
     isActive: t.boolean({ required: false }),
-  }),
+  };
+}
+
+export const MeetingProviderCreateInputPothos = gqlSchemaBuilder.inputType("MeetingProviderCreateInput", {
+  fields: t => meetingProviderInputFields(t, true),
 });
 
 export const MeetingProviderUpdateInputPothos = gqlSchemaBuilder.inputType("MeetingProviderUpdateInput", {
-  fields: t => ({
-    slug: t.string({ required: false }),
-    name: t.field({ type: "LocalizedString", required: false }),
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
-    urlAllowlist: t.stringList({ required: false }),
-    urlExample: t.string({ required: false }),
-    logoUrl: t.string({ required: false }),
-    fieldSchema: t.field({ type: MeetingProviderFieldSchemaInputPothos, required: false }),
-    isActive: t.boolean({ required: false }),
-  }),
+  fields: t => meetingProviderInputFields(t, false),
 });
 
 export const MeetingConfigDetailsInputPothos = gqlSchemaBuilder.inputType("MeetingConfigDetailsInput", {
@@ -149,20 +161,7 @@ export const ClassMeetingConfigPothosObject = ClassMeetingConfigRef.implement({
     providerId: t.exposeString("providerId"),
     label: t.exposeString("label", { nullable: true }),
     isDefault: t.exposeBoolean("isDefault"),
-    details: t.field({ type: MeetingConfigDetailsPothosObject, resolve: parent => parent.details }),
-    hasSecret: t.exposeBoolean("hasSecret", { nullable: true }),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-    provider: t.field({
-      type: MeetingProviderPothosObject,
-      nullable: true,
-      resolve: async (parent, _args, ctx) => {
-        const { MeetingProviderCatalogService } = await import(
-          "@/backend/services/meeting/meeting-provider-catalog.service"
-        );
-        return MeetingProviderCatalogService.getProviderById(ctx.user?.id ?? "", parent.providerId, ctx.locale);
-      },
-    }),
+    ...meetingConfigSharedFields(t),
   }),
 });
 

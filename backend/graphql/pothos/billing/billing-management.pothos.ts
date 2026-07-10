@@ -1,5 +1,6 @@
 import { AppPermission } from "@/backend/enum";
-import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
+import gqlSchemaBuilder from "@/backend/graphql/gqlSchemaBuilder";
 import { BillingMonthInputRef } from "@/backend/graphql/pothos/billing/billing-history.pothos";
 import {
   DisplayAmountPothosObject,
@@ -27,7 +28,7 @@ import type {
 // Services return nested { invoice: {...}, notificationSummaryUpdated } shapes.
 // GraphQL objects expose flat top-level fields, so these helpers perform the mapping.
 
-function _flattenMarkInvoicePaidResult(result: MarkInvoicePaidResult): MarkInvoicePaidReturnType {
+function flattenMarkInvoicePaidResult(result: MarkInvoicePaidResult): MarkInvoicePaidReturnType {
   return {
     id: result.invoice.id,
     parentId: result.invoice.parentId,
@@ -38,12 +39,25 @@ function _flattenMarkInvoicePaidResult(result: MarkInvoicePaidResult): MarkInvoi
   };
 }
 
-function _flattenDeleteInvoiceResult(result: DeleteInvoiceResult): DeleteInvoiceReturnType {
+function flattenDeleteInvoiceResult(result: DeleteInvoiceResult): DeleteInvoiceReturnType {
   return {
     id: result.invoice.id,
     parentId: result.invoice.parentId,
     version: result.invoice.version,
     notificationSummaryUpdated: result.notificationSummaryUpdated,
+  };
+}
+
+// Shared resolver factory: authenticates, calls the service, and flattens the result.
+// Eliminates duplicated resolver bodies across the four MarkInvoicePaid mutations.
+
+function markInvoicePaidResolver(
+  serviceCall: (userId: string, locale: string | undefined) => Promise<MarkInvoicePaidResult>
+) {
+  return async (_root: unknown, _args: object, ctx: BaseContext) => {
+    const userId = await requireAuth(ctx);
+    const result = await serviceCall(userId, ctx.locale);
+    return flattenMarkInvoicePaidResult(result);
   };
 }
 
@@ -177,24 +191,15 @@ gqlSchemaBuilder.mutationField("submitPaymentProof", t =>
       proofFileId: t.arg.id({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const result = await BillingManagementService.submitPaymentProof(
-        userId,
-        args.invoiceId,
-        args.proofFileId,
-        args.expectedVersion ?? undefined,
-        ctx.locale
-      );
-      return {
-        id: result.invoice.id,
-        parentId: result.invoice.parentId,
-        status: result.invoice.status,
-        paidDate: result.invoice.paidDate,
-        version: result.invoice.version,
-        notificationSummaryUpdated: result.notificationSummaryUpdated,
-      };
-    },
+    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
+      BillingManagementService.submitPaymentProof(
+        _userId,
+        _args.invoiceId,
+        _args.proofFileId,
+        _args.expectedVersion ?? undefined,
+        locale
+      )
+    ),
   })
 );
 
@@ -206,23 +211,9 @@ gqlSchemaBuilder.mutationField("approvePaymentProof", t =>
       invoiceId: t.arg.string({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const result = await BillingManagementService.approvePaymentProof(
-        userId,
-        args.invoiceId,
-        args.expectedVersion ?? undefined,
-        ctx.locale
-      );
-      return {
-        id: result.invoice.id,
-        parentId: result.invoice.parentId,
-        status: result.invoice.status,
-        paidDate: result.invoice.paidDate,
-        version: result.invoice.version,
-        notificationSummaryUpdated: result.notificationSummaryUpdated,
-      };
-    },
+    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
+      BillingManagementService.approvePaymentProof(_userId, _args.invoiceId, _args.expectedVersion ?? undefined, locale)
+    ),
   })
 );
 
@@ -235,24 +226,15 @@ gqlSchemaBuilder.mutationField("rejectPaymentProof", t =>
       rejectionReason: t.arg.string({ required: false }),
       expectedVersion: t.arg.int({ required: false }),
     },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const result = await BillingManagementService.rejectPaymentProof(
-        userId,
-        args.invoiceId,
-        args.rejectionReason ?? null,
-        args.expectedVersion ?? undefined,
-        ctx.locale
-      );
-      return {
-        id: result.invoice.id,
-        parentId: result.invoice.parentId,
-        status: result.invoice.status,
-        paidDate: result.invoice.paidDate,
-        version: result.invoice.version,
-        notificationSummaryUpdated: result.notificationSummaryUpdated,
-      };
-    },
+    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
+      BillingManagementService.rejectPaymentProof(
+        _userId,
+        _args.invoiceId,
+        _args.rejectionReason ?? null,
+        _args.expectedVersion ?? undefined,
+        locale
+      )
+    ),
   })
 );
 
@@ -265,24 +247,15 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
       expectedVersion: t.arg.int({ required: false }),
       proofFileId: t.arg.id({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const result = await BillingManagementService.markInvoicePaid(
-        userId,
-        args.invoiceId,
-        args.proofFileId,
-        args.expectedVersion ?? undefined,
-        ctx.locale
-      );
-      return {
-        id: result.invoice.id,
-        parentId: result.invoice.parentId,
-        status: result.invoice.status,
-        paidDate: result.invoice.paidDate,
-        version: result.invoice.version,
-        notificationSummaryUpdated: result.notificationSummaryUpdated,
-      };
-    },
+    resolve: markInvoicePaidResolver((_userId, _args, locale) =>
+      BillingManagementService.markInvoicePaid(
+        _userId,
+        _args.invoiceId,
+        _args.proofFileId,
+        _args.expectedVersion ?? undefined,
+        locale
+      )
+    ),
   })
 );
 
@@ -312,12 +285,7 @@ gqlSchemaBuilder.mutationField("deleteInvoice", t =>
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
       const result = await BillingManagementService.deleteInvoice(userId, args.invoiceId, ctx.locale);
-      return {
-        id: result.invoice.id,
-        parentId: result.invoice.parentId,
-        version: result.invoice.version,
-        notificationSummaryUpdated: result.notificationSummaryUpdated,
-      };
+      return flattenDeleteInvoiceResult(result);
     },
   })
 );

@@ -18,6 +18,7 @@ export const groupClassAuditQueryDocument: TypedDocumentNode<
       venue
       status
       outcome
+      isFrozen
       auditRemark
       auditLoggedAt
       registeredStudentCount
@@ -71,6 +72,7 @@ export const updateClassAdminNoteMutationDocument: TypedDocumentNode<
       venue
       status
       outcome
+      isFrozen
       auditRemark
       auditLoggedAt
       registeredStudentCount

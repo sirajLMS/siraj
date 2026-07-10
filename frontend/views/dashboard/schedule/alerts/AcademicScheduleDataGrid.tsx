@@ -9,13 +9,13 @@ import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfi
 import { classHref, profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 function shouldShowScheduleAlertJoin(row: AcademicClassRow): boolean {
   if (row.sessionStatus !== "upcoming" && row.sessionStatus !== "active") {
     return false;
   }
-  return isJoinableByExecutionState(row.executionState, row.outcome);
+  return isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false });
 }
 
 export interface AcademicScheduleDataGridLabels {
@@ -26,10 +26,13 @@ export interface AcademicScheduleDataGridLabels {
   readonly status: string;
   readonly joinSession: string;
   readonly leaveClass: string;
+  readonly leaveDisabledReason: string;
   readonly viewClassAudit: string;
+  readonly contactAdmin: string;
   readonly active: string;
   readonly upcoming: string;
   readonly missed: string;
+  readonly hold: string;
   readonly noEntries: string;
 }
 
@@ -49,6 +52,7 @@ const SESSION_STATUS_LABELS: Record<ClassSessionStatus, keyof AcademicScheduleDa
   active: "active",
   upcoming: "upcoming",
   missed: "missed",
+  hold: "hold",
 };
 
 export function AcademicScheduleDataGrid({

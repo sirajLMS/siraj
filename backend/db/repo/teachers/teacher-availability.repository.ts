@@ -316,18 +316,7 @@ export namespace TeacherAvailabilityRepository {
     }
   }
 
-  function buildCommonWindowValues(
-    teacherId: string,
-    input: {
-      dayOfWeek: DayOfWeek;
-      startTime: string;
-      endTime: string;
-      timezone: IanaTimezone;
-      utcOffsetSnapshot?: string | null;
-      effectiveFrom?: string | null;
-      effectiveUntil?: string | null;
-    }
-  ) {
+  function buildCommonWindowValues(teacherId: string, input: Types.AvailabilityWindowInput) {
     const now = new Date();
     return {
       teacherId,
@@ -377,7 +366,6 @@ export namespace TeacherAvailabilityRepository {
     const runner = async (t: DBTransaction) => {
       await acquireAvailabilityLock(t, teacherId);
       await assertValidTimeRange(input.startTime, input.endTime, locale);
-      const _now = new Date();
 
       const [created] = await t
         .insert(teacherRecurringUnavailability)
@@ -428,7 +416,7 @@ export namespace TeacherAvailabilityRepository {
       return created;
     };
 
-    return tx ? runner(tx) : db.transaction(runner);
+    return withTransaction(runner, tx);
   };
 
   export const approveVacationRequest = async (
@@ -449,6 +437,38 @@ export namespace TeacherAvailabilityRepository {
     return processVacationRequest(input, VacationRequestStatus.REJECTED, processedByUserId, tx, locale);
   };
 
+  async function fetchVacationRequest(
+    t: DBTransaction,
+    vacationRequestId: string,
+    locale?: string
+  ): Promise<Types.TeacherVacationRequestSelectType> {
+    const results = await t
+      .select()
+      .from(teacherVacationRequests)
+      .where(eq(teacherVacationRequests.id, vacationRequestId))
+      .limit(1);
+
+    if (results.length === 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("vacationRequestNotFound", { id: vacationRequestId }));
+    }
+
+    return results[0];
+  }
+
+  async function assertVacationStatus(
+    current: Types.TeacherVacationRequestSelectType,
+    shouldFail: (status: VacationRequestStatus) => boolean,
+    errorKey: "vacationRequestNotPending" | "vacationRequestAlreadyCancelled",
+    vacationRequestId: string,
+    locale?: string
+  ): Promise<void> {
+    if (shouldFail(current.status as VacationRequestStatus)) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc(errorKey, { id: vacationRequestId }));
+    }
+  }
+
   async function processVacationRequest(
     input: Types.ProcessVacationRequestInput,
     status: VacationRequestStatus.APPROVED | VacationRequestStatus.REJECTED,
@@ -457,24 +477,15 @@ export namespace TeacherAvailabilityRepository {
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> {
     const runner = async (t: DBTransaction) => {
-      const results = await t
-        .select()
-        .from(teacherVacationRequests)
-        .where(eq(teacherVacationRequests.id, input.vacationRequestId))
-        .limit(1);
-
-      if (results.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("vacationRequestNotFound", { id: input.vacationRequestId }));
-      }
-
-      const current = results[0];
+      const current = await fetchVacationRequest(t, input.vacationRequestId, locale);
       await acquireAvailabilityLock(t, current.teacherId);
-
-      if ((current.status as VacationRequestStatus) !== VacationRequestStatus.PENDING) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("vacationRequestNotPending", { id: input.vacationRequestId }));
-      }
+      await assertVacationStatus(
+        current,
+        s => s !== VacationRequestStatus.PENDING,
+        "vacationRequestNotPending",
+        input.vacationRequestId,
+        locale
+      );
 
       const now = new Date();
       const [updated] = await t
@@ -491,7 +502,7 @@ export namespace TeacherAvailabilityRepository {
       return updated;
     };
 
-    return tx ? runner(tx) : db.transaction(runner);
+    return withTransaction(runner, tx);
   }
 
   export const cancelVacationRequest = async (
@@ -500,24 +511,15 @@ export namespace TeacherAvailabilityRepository {
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
     const runner = async (t: DBTransaction) => {
-      const results = await t
-        .select()
-        .from(teacherVacationRequests)
-        .where(eq(teacherVacationRequests.id, vacationRequestId))
-        .limit(1);
-
-      if (results.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("vacationRequestNotFound", { id: vacationRequestId }));
-      }
-
-      const current = results[0];
+      const current = await fetchVacationRequest(t, vacationRequestId, locale);
       await acquireAvailabilityLock(t, current.teacherId);
-
-      if ((current.status as VacationRequestStatus) === VacationRequestStatus.CANCELLED) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("vacationRequestAlreadyCancelled", { id: vacationRequestId }));
-      }
+      await assertVacationStatus(
+        current,
+        s => s === VacationRequestStatus.CANCELLED,
+        "vacationRequestAlreadyCancelled",
+        vacationRequestId,
+        locale
+      );
 
       const now = new Date();
       const [updated] = await t
@@ -532,7 +534,7 @@ export namespace TeacherAvailabilityRepository {
       return updated;
     };
 
-    return tx ? runner(tx) : db.transaction(runner);
+    return withTransaction(runner, tx);
   };
 
   /**

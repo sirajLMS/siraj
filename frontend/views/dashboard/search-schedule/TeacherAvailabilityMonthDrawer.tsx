@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { CalendarToday, ChevronLeft, ChevronRight, CloseOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, Drawer, IconButton, Typography } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import { addMonths, parse, subMonths } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
@@ -72,7 +73,6 @@ const EMPTY_INPUT: AvailabilitySearchInput = {
 };
 
 interface MonthDrawerQueryResult {
-  readonly monthTeacher: { readonly id: string; readonly gaps?: readonly TeacherAvailabilityGapItem[] | null } | null;
   readonly daysByDate: Partial<Record<number, readonly TeacherAvailabilityGapItem[]>>;
   readonly loading: boolean;
   readonly error: unknown;
@@ -109,7 +109,7 @@ function useMonthDrawerQuery(
     [currentMonth, monthTeacher?.gaps]
   );
 
-  return { monthTeacher, daysByDate, loading, error };
+  return { daysByDate, loading, error };
 }
 
 function DrawerHeader({ title, onClose }: { readonly title: string; readonly onClose: () => void }) {
