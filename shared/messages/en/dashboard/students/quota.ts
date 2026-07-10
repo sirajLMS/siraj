@@ -3,6 +3,10 @@ import type { StudentQuotaLabels } from "@/shared/messages/types/dashboard/stude
 export const quota: StudentQuotaLabels = {
   pageTitle: "Student Quota",
   studentId: "Student ID: {id}",
+  common: {
+    system: "System",
+    notSet: "Not set",
+  },
   breadcrumbs: {
     students: "Students",
     editProfile: "Edit Profile",

@@ -3,6 +3,9 @@ export interface StudentHistoryLabels {
     readonly archive: string;
     readonly history: string;
   };
+  readonly common: {
+    readonly student: string;
+  };
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly exportPdf: string;

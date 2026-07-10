@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Link, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigDisplay";
@@ -38,7 +38,10 @@ export function MeetingSummarySection({ userId, meetingTabHref }: MeetingSummary
     <SectionPanel title={t("sectionTitle")}>
       <Stack spacing={1.5}>
         {loading ? (
-          <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>...</Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
+            <CircularProgress size={18} />
+            <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t("loading")}</Typography>
+          </Box>
         ) : defaultConfig ? (
           <MeetingConfigDisplay config={toDisplayData(defaultConfig as UserMeetingConfigFieldsFragment)} compact />
         ) : (

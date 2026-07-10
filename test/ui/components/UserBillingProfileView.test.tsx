@@ -133,6 +133,7 @@ const mockLabels: BillingLabels = {
     submitAndSendEmail: "Submit & Send Email",
     successMessage: "Manual invoice submitted successfully.",
     createSuccess: "Invoice {id} created successfully",
+    manualInvoiceFxNote: "Manual invoice totals use your display currency ({code})",
     months: {
       jan: "January",
       feb: "February",
@@ -310,6 +311,7 @@ const mockLabels: BillingLabels = {
   },
   fxConversionNote: "Converted totals use your display currency ({code})",
   fxConversionNoteSubject: "Converted amounts use this user's display currency ({code})",
+  adminBillingFxNote: "Metrics use your display currency; each invoice uses its parent's currency",
   currencyHedges: {
     pageTitle: "Currency Hedges",
     pageSubtitle: "Manage hedges",

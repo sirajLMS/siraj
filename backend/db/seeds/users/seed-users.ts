@@ -54,7 +54,7 @@ export async function seedOrGet(
       const avatarFile = getAvatarFileNameForPersona("teachers", i);
 
       try {
-        await seedEntityFile({
+        const { url } = await seedEntityFile({
           assetRelativePath: `avatars/teachers/${avatarFile}`,
           bucketPath: `public/avatars/users/${avatarFile}`,
           referenceTable: "users",
@@ -62,6 +62,9 @@ export async function seedOrGet(
           usageType: "avatar",
           ensureParentDirs: ["public/avatars/users"],
         });
+        if (url) {
+          await UserBootstrapService.updateAvatarUrl(user.id, url);
+        }
       } catch (error) {
         logger.error(`Failed to seed user avatar for ${user.id}:`, error);
       }
@@ -73,7 +76,7 @@ export async function seedOrGet(
 
       try {
         const avatarFile = getAvatarFileNameForPersona("teachers", i);
-        await seedEntityFile({
+        const { url } = await seedEntityFile({
           assetRelativePath: `avatars/teachers/${avatarFile}`,
           bucketPath: `public/avatars/staff/${avatarFile}`,
           referenceTable: "staff_profiles",
@@ -81,6 +84,9 @@ export async function seedOrGet(
           usageType: "avatar",
           ensureParentDirs: ["public/avatars/staff"],
         });
+        if (url) {
+          await UserBootstrapService.updateAvatarUrl(profile.id, url);
+        }
       } catch (error) {
         logger.error(`Failed to seed staff profile avatar for ${profile.staffProfileId}:`, error);
       }

@@ -362,6 +362,7 @@ type PaymentDetailsContentProps = {
   readonly dateLabel: string;
   readonly emptyLabel: string;
   readonly fxMessages: FxMessages;
+  readonly viewerDisplayCurrency?: string | null;
 };
 
 function PaymentDetailsDialogContent({
@@ -395,6 +396,7 @@ function PaymentDetailsDialogContent({
   dateLabel,
   emptyLabel,
   fxMessages,
+  viewerDisplayCurrency,
 }: PaymentDetailsContentProps): React.ReactNode {
   if (loading) {
     return (
@@ -422,7 +424,7 @@ function PaymentDetailsDialogContent({
       {showDisplayCurrencyHint ? <DisplayCurrencyHint /> : null}
       {subjectUserId ? (
         <FxConversionNote mode="subject" subjectUserId={subjectUserId} />
-      ) : displayCurrency ? (
+      ) : viewerDisplayCurrency ? (
         <FxConversionNote mode="viewer" />
       ) : null}
       {submission ? (
@@ -586,6 +588,7 @@ export function InvoicePaymentDetailsDialog({
       onRetry={handleRetryLoad}
       showDisplayCurrencyHint={!displayCurrency}
       subjectUserId={subjectUserId}
+      viewerDisplayCurrency={displayCurrency}
       submission={submission}
       payments={payments}
       locale={locale}

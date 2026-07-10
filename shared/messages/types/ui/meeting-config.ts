@@ -90,6 +90,7 @@ export interface MeetingConfigProviderSelectLabels {
 
 export interface MeetingConfigSummaryLabels {
   readonly sectionTitle: string;
+  readonly loading: string;
   readonly empty: string;
   readonly manageLink: string;
 }

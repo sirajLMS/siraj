@@ -26,23 +26,24 @@ export function StudentHistoryContainer() {
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth() + 1;
+  const studentId = useUnifiedProfile ? (profileContext?.studentId ?? "") : (params?.id ?? "");
 
   const { data, loading, error } = useQuery(studentClassHistoryQueryDocument, {
-    variables: { studentId: params.id, year, month },
-    skip: !params.id || useUnifiedProfile,
+    variables: { studentId, year, month },
+    skip: !studentId,
   });
 
   useEffect(() => {
-    if (!useUnifiedProfile && error) {
+    if (error) {
       logger.error("Error loading student history:", { error });
       notifications.show(t("errors.loadFailed"), {
         severity: "error",
         autoHideDuration: 4000,
       });
     }
-  }, [useUnifiedProfile, error, notifications, t]);
+  }, [error, notifications, t]);
 
-  const historyData = useUnifiedProfile ? profileContext?.profile?.classHistory : data?.studentClassHistory;
+  const historyData = data?.studentClassHistory;
   const studentName = historyData?.studentName ?? t("common.student");
 
   const metrics: StudentHistoryMetrics = useMemo(
@@ -103,7 +104,7 @@ export function StudentHistoryContainer() {
     [setSelectedDay]
   );
 
-  if ((useUnifiedProfile ? profileContext?.loading : loading) && !historyData) {
+  if (loading && !historyData) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
         <CircularProgress />

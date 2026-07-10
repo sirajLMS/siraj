@@ -5,6 +5,9 @@ export const history: StudentHistoryLabels = {
     archive: "Archive",
     history: "Student History",
   },
+  common: {
+    student: "Student",
+  },
   pageTitle: "{name}'s History",
   pageSubtitle: "Classes for {month}",
   exportPdf: "Export as PDF",

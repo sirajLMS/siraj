@@ -13,7 +13,7 @@ type StudentProfileContextValue = {
   readonly studentId: string;
   readonly profile: StudentProfileQueryData | null | undefined;
   readonly loading: boolean;
-  readonly refetch: () => Promise<unknown>;
+  readonly refetch: (variables?: { readonly year?: number | null; readonly month?: number | null }) => Promise<unknown>;
 };
 
 const StudentProfileContext = createContext<StudentProfileContextValue | null>(null);

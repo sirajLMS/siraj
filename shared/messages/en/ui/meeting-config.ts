@@ -96,6 +96,7 @@ export const meetingConfig: MeetingConfigLabels = {
   },
   summary: {
     sectionTitle: "Online meeting",
+    loading: "Loading meeting settings...",
     empty: "No virtual meeting configured",
     manageLink: "Manage meeting settings",
   },

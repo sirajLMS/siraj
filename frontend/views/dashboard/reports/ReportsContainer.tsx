@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import { Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -196,6 +197,11 @@ function ReportsMainContent({
     <>
       {showFinancials ? <DisplayCurrencyHint /> : null}
       {showFinancials ? <FxConversionNote /> : null}
+      {showFinancials ? (
+        <Typography variant="caption" sx={theme => ({ display: "block", mb: 1, color: theme.palette.text.secondary })}>
+          {t("reportMultiCurrencyNote")}
+        </Typography>
+      ) : null}
       <ReportsView
         labels={labels}
         fromDate={fromDate}

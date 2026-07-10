@@ -244,6 +244,7 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     },
     fxConversionNote: t("fxConversionNote"),
     fxConversionNoteSubject: t("fxConversionNoteSubject"),
+    adminBillingFxNote: t("adminBillingFxNote"),
     currencyHedges: t.raw("currencyHedges") as CurrencyHedgesLabels,
     supportedCurrencies: t.raw("supportedCurrencies") as SupportedCurrenciesLabels,
   };

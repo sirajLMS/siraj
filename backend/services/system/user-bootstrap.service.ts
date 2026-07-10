@@ -75,4 +75,9 @@ export namespace UserBootstrapService {
     const profiles = await Promise.all(userIds.map(userId => StaffProfileRepository.findByUserId(userId)));
     return profiles.filter((profile): profile is NonNullable<typeof profile> => profile != null);
   }
+
+  export async function updateAvatarUrl(userId: string, avatarUrl: string, tx?: DBTransaction): Promise<void> {
+    assertNonProduction();
+    await UserRepository.updateProfileFields(userId, { avatarUrl }, undefined, tx);
+  }
 }

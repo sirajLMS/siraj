@@ -166,7 +166,8 @@ export function StudentProfilePageClient() {
       studentId,
       profile,
       loading,
-      refetch: async () => refetch(),
+      refetch: async (variables?: { readonly year?: number | null; readonly month?: number | null }) =>
+        refetch(variables ?? {}),
     }),
     [studentId, profile, loading, refetch]
   );

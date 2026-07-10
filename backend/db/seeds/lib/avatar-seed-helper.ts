@@ -1,15 +1,21 @@
 import * as fs from "node:fs";
 import { type FileReferenceTable, resolveAssetPath, seedEntityFile } from "@/backend/db/seeds/lib/file-seed-helper";
 import logger from "@/backend/lib/logger";
+import { UserBootstrapService } from "@/backend/services/system/user-bootstrap.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
+
+export type SeedAvatarEntityLink = {
+  readonly id: string;
+  readonly userId?: string;
+};
 
 export type SeedAvatarPoolInput = {
   assetDir: string;
   bucketDir: string;
   poolFiles: readonly string[];
   referenceTable: FileReferenceTable;
-  entities: readonly { id: string }[];
+  entities: readonly SeedAvatarEntityLink[];
 };
 
 export async function seedAvatarForEntity(input: {
@@ -79,12 +85,24 @@ export async function seedAvatarPool(input: SeedAvatarPoolInput): Promise<Map<st
   return avatarUrls;
 }
 
+async function syncUserAvatarUrl(userId: string, avatarUrl: string | null): Promise<void> {
+  if (!avatarUrl) {
+    return;
+  }
+
+  try {
+    await UserBootstrapService.updateAvatarUrl(userId, avatarUrl);
+  } catch (error) {
+    logger.error(`Failed to sync users.avatarUrl for ${userId}:`, error);
+  }
+}
+
 export async function linkAvatarsToEntities(input: SeedAvatarPoolInput): Promise<void> {
   for (let i = 0; i < input.entities.length; i++) {
     const entity = input.entities[i];
     if (!entity) continue;
 
-    await seedAvatarForEntity({
+    const avatarUrl = await seedAvatarForEntity({
       index: i,
       poolFiles: input.poolFiles,
       assetDir: input.assetDir,
@@ -92,5 +110,9 @@ export async function linkAvatarsToEntities(input: SeedAvatarPoolInput): Promise
       referenceTable: input.referenceTable,
       referenceId: entity.id,
     });
+
+    if (entity.userId) {
+      await syncUserAvatarUrl(entity.userId, avatarUrl);
+    }
   }
 }

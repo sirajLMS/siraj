@@ -18,6 +18,20 @@ import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/q
 import type { StudentProfileData } from "@/frontend/views/dashboard/students/quota/types";
 import { useRouter } from "@/shared/i18n/routing";
 
+function resolveGenderLabel(raw: string | null | undefined): "MALE" | "FEMALE" | null {
+  if (raw == null) {
+    return null;
+  }
+  const normalized = raw.toUpperCase();
+  if (normalized === "FEMALE") {
+    return "FEMALE";
+  }
+  if (normalized === "MALE") {
+    return "MALE";
+  }
+  return null;
+}
+
 export function StudentQuotaContainer() {
   const t = useTranslations("dashboard.studentQuota");
   const tc = useTranslations("common");
@@ -43,7 +57,7 @@ export function StudentQuotaContainer() {
       setIsSaved(true);
       notifications.show(t("actions.saveSuccess"), { severity: "success", autoHideDuration: 4000 });
       if (useUnifiedProfile) {
-        void profileContext?.refetch();
+        void profileContext?.refetch({ year: null, month: null });
       } else {
         void refetch();
       }
@@ -76,12 +90,19 @@ export function StudentQuotaContainer() {
     return <ProfileRestrictedSection title={t("breadcrumbs.editProfile")} />;
   }
 
-  if ((useUnifiedProfile ? profileContext?.loading : loading) && !data && !profileContext?.profile) {
+  const unifiedLoading = Boolean(profileContext?.loading);
+  const unifiedProfileMissing = !profileContext?.profile;
+
+  if ((useUnifiedProfile ? unifiedLoading : loading) && !data && !profileContext?.profile) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />
       </Box>
     );
+  }
+
+  if (useUnifiedProfile && !unifiedLoading && unifiedProfileMissing) {
+    return <ProfileRestrictedSection title={t("breadcrumbs.editProfile")} />;
   }
 
   if (!useUnifiedProfile && error) {
@@ -98,7 +119,7 @@ export function StudentQuotaContainer() {
           studentName: s.name ?? tc("notSet"),
           dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
           language: s.language === "en" ? "en" : "ar",
-          gender: s.gender?.toUpperCase() === "FEMALE" ? "FEMALE" : "MALE",
+          gender: resolveGenderLabel(s.gender) ?? "MALE",
           teacher: s.teacherName ?? "",
           totalClasses: s.classesTotal ?? 0,
           classesLeft: s.classesRemaining ?? 0,
@@ -120,7 +141,7 @@ export function StudentQuotaContainer() {
   return (
     <StudentQuotaView
       studentData={studentData}
-      isLoading={useUnifiedProfile ? Boolean(profileContext?.loading) : loading}
+      isLoading={useUnifiedProfile ? unifiedLoading : loading}
       isSaving={saving}
       isSaved={isSaved}
       embedded={useUnifiedProfile}

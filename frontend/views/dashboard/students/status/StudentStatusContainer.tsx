@@ -162,7 +162,10 @@ export function StudentStatusContainer() {
     return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
   }
 
-  if (useUnifiedProfile ? profileContext?.loading : studentLoading || upcomingLoading) {
+  const unifiedLoading = useUnifiedProfile ? Boolean(profileContext?.loading) : studentLoading || upcomingLoading;
+  const hasProfile = useUnifiedProfile ? Boolean(profileContext?.profile) : Boolean(studentData?.studentById);
+
+  if (unifiedLoading && !hasProfile) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />

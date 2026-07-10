@@ -27,6 +27,7 @@ export {
 } from "./avatar-file-registry";
 export {
   linkAvatarsToEntities,
+  type SeedAvatarEntityLink,
   type SeedAvatarPoolInput,
   seedAvatarForEntity,
   seedAvatarPool,

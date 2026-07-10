@@ -5,6 +5,9 @@ export const history: StudentHistoryLabels = {
     archive: "أرشيف الطلاب",
     history: "تاريخ الحصص",
   },
+  common: {
+    student: "طالب",
+  },
   pageTitle: "تاريخ حصص {name}",
   pageSubtitle: "{month} • العام الدراسي 2024/25",
   exportPdf: "تصدير PDF",
