@@ -42,6 +42,7 @@ const PAYMENT_METHOD_TYPE_LABEL_KEYS: Record<PaymentMethodType, string> = {
   [PaymentMethodType.OnlineAccount]: "ui.paymentMethod.type.onlineAccount",
   [PaymentMethodType.BankTransfer]: "ui.paymentMethod.type.bankTransfer",
   [PaymentMethodType.Cash]: "ui.paymentMethod.type.cash",
+  [PaymentMethodType.ProofUpload]: "ui.paymentMethod.type.proofUpload",
 };
 
 const PAYMENT_DIRECTION_LABEL_KEYS: Record<PaymentDirection, string> = {

@@ -1,11 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 
 export const teacherDashboardQueryDocument: TypedDocumentNode<
   Operations.TeacherDashboardQuery,
   Types.QueryTeacherDashboardArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query teacherDashboard($date: String!, $pagination: PaginationArgs) {
     teacherDashboard(date: $date, pagination: $pagination) {
       id
@@ -33,6 +35,9 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
         executionState
         outcome
         meetingJoinUrl
+        effectiveMeeting {
+          ...EffectiveMeetingFields
+        }
         yourTimeFormatted
       }
       progressFeed {

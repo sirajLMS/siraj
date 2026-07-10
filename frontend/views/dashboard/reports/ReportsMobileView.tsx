@@ -6,6 +6,7 @@ import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/co
 import { PerformanceLedgerCardList } from "@/frontend/views/dashboard/reports/components/PerformanceLedgerCardList";
 import { ReportFiltersCollapsible } from "@/frontend/views/dashboard/reports/components/ReportFiltersCollapsible";
 import type { ReportFiltersFormLabels } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
+import { ReportsTotalsSection } from "@/frontend/views/dashboard/reports/components/ReportsTotalsSection";
 import type {
   LedgerStatus,
   ReportLedgerRow,

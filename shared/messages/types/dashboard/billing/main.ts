@@ -1,6 +1,8 @@
+import type { CurrencyHedgesLabels } from "@/shared/messages/types/dashboard/billing/currency-hedges";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import type { PaymentComponentLabels } from "@/shared/messages/types/dashboard/billing/payment";
+import type { SupportedCurrenciesLabels } from "@/shared/messages/types/dashboard/billing/supported-currencies";
 import type { AdminInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
 
 export interface BillingLabels extends PaymentComponentLabels {
@@ -9,6 +11,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly parentPageTitle: string;
   readonly parentPageSubtitle: string;
   readonly manualInvoice: string;
+  readonly exchangeRatesLink: string;
   readonly quickPay: string;
   readonly viewAllNegativeBalance: string;
   readonly requiresAttention: string;
@@ -49,6 +52,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly actions: string;
     readonly markAsPaid: string;
     readonly quickPay: string;
+    readonly reviewSubmission: string;
     readonly noEntries: string;
   };
   readonly creditTable: {
@@ -75,6 +79,7 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly viewDetails: string;
     readonly downloadPdf: string;
     readonly payNow: string;
+    readonly viewSubmission: string;
     readonly noEntries: string;
     readonly emptyTitle: string;
     readonly emptySubtitle: string;
@@ -83,36 +88,65 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly creditStatus: Record<StudentCreditStatus, string>;
   readonly manual: BillingManualLabels;
   readonly markAsPaidSuccess: string;
+  readonly submitProofSuccess: string;
+  readonly approveProofSuccess: string;
+  readonly rejectProofSuccess: string;
   readonly deleteInvoiceSuccess: string;
   readonly noUnpaidInvoices: string;
-  readonly markPaidDialog: {
-    readonly title: string;
+  readonly submitProofDialog: {
+    readonly titleSubmit: string;
+    readonly titleMarkPaid: string;
     readonly confirm: string;
     readonly confirming: string;
-    readonly selectMethod: string;
-    readonly noMethods: string;
-    readonly addMethods: string;
-    readonly manageMethods: string;
+    readonly selectFile: string;
+    readonly fileHint: string;
+    readonly invalidFileType: string;
     readonly cancel: string;
     readonly errorGeneric: string;
-    readonly missingParentUser: string;
     readonly invoiceNumber: string;
     readonly amount: string;
     readonly dueDate: string;
     readonly student: string;
-    readonly selectedMethod: string;
+    readonly uploadFailed: string;
+    readonly uploadPrepareFailed: string;
   };
   readonly paymentDetailsDialog: {
     readonly title: string;
     readonly empty: string;
-    readonly emptyLegacy: string;
+    readonly pending: string;
+    readonly approve: string;
+    readonly reject: string;
+    readonly rejecting: string;
+    readonly rejectionReason: string;
+    readonly rejectionReasonPlaceholder: string;
+    readonly viewProof: string;
+    readonly noProof: string;
     readonly loadFailed: string;
     readonly close: string;
     readonly amount: string;
     readonly date: string;
+    readonly submittedAt: string;
+    readonly reviewActions: string;
   };
+  readonly notifications: {
+    readonly popupBlocked: string;
+  };
+  readonly hasPaymentProofHint: string;
   readonly errors: {
     readonly invalidId: string;
   };
   readonly exchangeRates: ExchangeRatesLabels;
+  readonly fxStaleBanner: {
+    readonly adminBody: string;
+    readonly userBody: string;
+    readonly adminCta: string;
+    readonly userCta: string;
+  };
+  readonly displayCurrencyHint: {
+    readonly title: string;
+    readonly body: string;
+    readonly cta: string;
+  };
+  readonly currencyHedges: CurrencyHedgesLabels;
+  readonly supportedCurrencies: SupportedCurrenciesLabels;
 }

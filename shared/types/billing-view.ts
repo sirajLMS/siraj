@@ -1,4 +1,4 @@
-export type CoreInvoiceStatus = "UNPAID" | "PAID" | "CANCELLED";
+export type CoreInvoiceStatus = "UNPAID" | "PAYMENT_PENDING" | "PAID" | "CANCELLED";
 
 export type AdminInvoiceStatus = "OVERDUE" | "PENDING" | CoreInvoiceStatus;
 

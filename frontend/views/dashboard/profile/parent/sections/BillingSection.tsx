@@ -31,6 +31,16 @@ type BillingSectionProps =
       readonly control: Control<ParentAdminEditFormData>;
     };
 
+function resolveLifecycleStatus(adminData: ParentAdminData): string {
+  const raw =
+    "lifecycleStatus" in adminData && adminData.lifecycleStatus
+      ? adminData.lifecycleStatus
+      : "status" in adminData
+        ? adminData.status
+        : "REGULAR";
+  return String(raw ?? "REGULAR").toLowerCase();
+}
+
 export function BillingSection(props: BillingSectionProps) {
   const t = useTranslations("profile.parent");
   const tc = useTranslations("profile");
@@ -105,6 +115,8 @@ export function BillingSection(props: BillingSectionProps) {
     }
   );
 
+  const lifecycleStatus = resolveLifecycleStatus(props.adminData);
+
   return (
     <SectionPanel title={t("sections.billing")}>
       <Stack spacing={2}>
@@ -120,13 +132,9 @@ export function BillingSection(props: BillingSectionProps) {
         />
         <Stack spacing={0.5}>
           <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
-            {t("fields.status")}
+            {t("fields.lifecycleStatus")}
           </Typography>
-          <StatusBadge
-            category="studentAccount"
-            status={(props.adminData.status ?? "REGULAR").toLowerCase()}
-            label={t(`status.${(props.adminData.status ?? "REGULAR").toLowerCase()}`)}
-          />
+          <StatusBadge category="studentAccount" status={lifecycleStatus} label={t(`status.${lifecycleStatus}`)} />
         </Stack>
       </Stack>
     </SectionPanel>

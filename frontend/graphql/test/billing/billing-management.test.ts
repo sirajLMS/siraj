@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
+import crypto from "node:crypto";
 import type { CurrencyCode, InvoiceType as InvoiceTypeEnumType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   CurrencyCode as CurrencyCodeEnum,
   InvoiceStatus,
   InvoiceType as InvoiceTypeEnum,
-  PaymentDirection,
   PaymentMethodType,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -13,7 +13,7 @@ import {
   markInvoicePaidMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { invoicePaymentsQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-payments.documents";
-import { createUserPaymentMethodMutationDocument } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
+import { prepareUploadMutationDocument } from "@/frontend/graphql/sharedDocuments/resources/learning-resource.documents";
 import {
   assertOperationDenied,
   authenticatedRequest,
@@ -54,6 +54,45 @@ async function createInvoice(token: string, parentId: string, amount: string): P
   expect(id).toBeTruthy();
   if (!id) throw new Error("No invoice id");
   return id;
+}
+
+async function uploadProofFile(token: string): Promise<string> {
+  const fileContent = Buffer.from("billing payment proof test");
+  const contentHash = crypto.createHash("sha256").update(fileContent).digest("base64");
+  const filePath = `private/billing/proof-test-${Date.now()}.pdf`;
+
+  const prepData = await authenticatedRequest(token, "mutate", prepareUploadMutationDocument, {
+    input: {
+      path: filePath,
+      fileSize: fileContent.length,
+      contentType: "application/pdf",
+      contentHash,
+    },
+  });
+
+  const prep = prepData?.prepareUpload;
+  if (!prep) {
+    throw new Error("Failed to prepare upload");
+  }
+
+  const uploadUrl = `http://localhost:3001/api/storage/upload/${prep.id}`;
+  const response = await Bun.fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-MD5": contentHash,
+      "Content-Length": String(fileContent.length),
+    },
+    body: fileContent,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to upload proof file: ${response.status} - ${errorText}`);
+  }
+
+  const result = await response.json();
+  return result.id as string;
 }
 
 /** Mutable test state shared between provision, test body, and cleanup phases. */
@@ -184,7 +223,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   };
   let unpaidInvoiceId = "";
   let deleteInvoiceId = "";
-  let parentPayinMethodId = "";
+  let proofFileId = "";
 
   test("provision test entities and login", async () => {
     await provisionAndLogin(state, "BillPaidTest");
@@ -196,40 +235,16 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     unpaidInvoiceId = await createInvoice(state.superAdminToken, state.parentId, "300.00");
   });
 
-  test("create parent pay-in method for mark-paid", async () => {
-    const data = await authenticatedRequest(state.superAdminToken, "mutate", createUserPaymentMethodMutationDocument, {
-      input: {
-        userId: state.parentUserId,
-        type: PaymentMethodType.Cash,
-        direction: PaymentDirection.Payin,
-        isDefault: true,
-        label: "Billing test cash",
-        details: {
-          note: "Test pay-in",
-          walletId: null,
-          phone: null,
-          paymentLinkId: null,
-          url: null,
-          onlineAccountId: null,
-          identifier: null,
-          iban: null,
-          bankName: null,
-          beneficiaryName: null,
-          swiftBic: null,
-          accountNumber: null,
-          routingNumber: null,
-        },
-      },
-    });
-    parentPayinMethodId = data.createUserPaymentMethod?.id ?? "";
-    expect(parentPayinMethodId).not.toBe("");
+  test("upload payment proof file for mark-paid", async () => {
+    proofFileId = await uploadProofFile(state.superAdminToken);
+    expect(proofFileId).not.toBe("");
   });
 
   test("admin marks UNPAID invoice as PAID", async () => {
     const data = await authenticatedRequest(state.superAdminToken, "mutate", markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
-      userPaymentMethodId: parentPayinMethodId,
+      proofFileId,
     });
 
     expect(data.markInvoicePaid?.id).toBe(unpaidInvoiceId);
@@ -237,21 +252,21 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     expect(data.markInvoicePaid?.paidDate).toBeTruthy();
   });
 
-  test("markInvoicePaid records payment snapshot retrievable via invoicePayments", async () => {
+  test("markInvoicePaid records proof payment retrievable via invoicePayments", async () => {
     const payments = await authenticatedRequest(state.superAdminToken, "query", invoicePaymentsQueryDocument, {
       invoiceId: unpaidInvoiceId,
     });
     const rows = payments.invoicePayments ?? [];
     expect(rows.length).toBeGreaterThan(0);
-    expect(rows[0]?.paymentMethodSnapshot?.type).toBe(PaymentMethodType.Cash);
-    expect(rows[0]?.paymentMethodSnapshot?.label).toBe("Billing test cash");
+    expect(rows[0]?.paymentMethodType).toBe(PaymentMethodType.ProofUpload);
+    expect(rows[0]?.paymentMethodSnapshot).toBeNull();
   });
 
   test("Threat 1 — double settlement: second markInvoicePaid returns error", async () => {
     await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
-      userPaymentMethodId: parentPayinMethodId,
+      proofFileId,
     });
     expect(unpaidInvoiceId).toBeTruthy();
   });
@@ -260,7 +275,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     const denied = await assertOperationDenied("teacher_default", "mutate", markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
-      userPaymentMethodId: parentPayinMethodId,
+      proofFileId: NIL_UUID,
     });
     expect(denied).toBe(true);
   });
@@ -269,7 +284,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
     await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
-      userPaymentMethodId: parentPayinMethodId,
+      proofFileId: NIL_UUID,
     });
     expect(state.superAdminToken).toBeTruthy();
   });

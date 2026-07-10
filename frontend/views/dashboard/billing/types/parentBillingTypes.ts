@@ -4,7 +4,9 @@ export type ParentInvoiceStatus = `${InvoiceStatus}`;
 
 export interface ParentBillingSummary {
   readonly outstandingBalance: string;
+  readonly outstandingBalanceSubLabel?: string;
   readonly paidThisTerm: string;
+  readonly paidThisTermSubLabel?: string;
   readonly nextDueDate: string;
   readonly activeStudents: string;
 }
@@ -16,7 +18,7 @@ export interface ParentInvoiceRow {
   readonly issueDate: string;
   readonly dueDate: string;
   readonly paidDate: string;
-  readonly paidMethodHint: string | null;
+  readonly hasPaymentProof: boolean;
   readonly fee: string;
   readonly status: InvoiceStatus;
 }

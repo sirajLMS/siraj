@@ -41,6 +41,7 @@ const MOCK_CLASSES = [
     subjectName: null,
     classType: null,
     meetingJoinUrl: null,
+    effectiveMeeting: null,
     avatarUrl: null,
   },
   {
@@ -60,6 +61,7 @@ const MOCK_CLASSES = [
     subjectName: null,
     classType: null,
     meetingJoinUrl: null,
+    effectiveMeeting: null,
     avatarUrl: null,
   },
   {
@@ -79,6 +81,7 @@ const MOCK_CLASSES = [
     subjectName: null,
     classType: null,
     meetingJoinUrl: null,
+    effectiveMeeting: null,
     avatarUrl: null,
   },
 ];

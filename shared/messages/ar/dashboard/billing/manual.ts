@@ -7,7 +7,7 @@ export const billingManual: BillingManualLabels = {
   parentSelection: "اختيار ولي الأمر",
   parentPlaceholder: "اختر سجل ولي أمر...",
   studentSelection: "اختيار الطالب",
-  feeAmount: "مبلغ الرسوم (درهم)",
+  feeAmount: "مبلغ الرسوم",
   feeAmountPlaceholder: "0.00",
   issueDate: "تاريخ الإصدار",
   dueDate: "تاريخ الاستحقاق",

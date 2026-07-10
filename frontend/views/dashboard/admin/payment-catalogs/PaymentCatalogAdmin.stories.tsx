@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import {
+  AccountStatus,
   AppPermission,
   CurrencyCode,
   IdentifierKind,
@@ -105,6 +106,8 @@ export const Default: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "admin@example.com",
+          phone: null,
+          status: AccountStatus.Activated,
           displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },

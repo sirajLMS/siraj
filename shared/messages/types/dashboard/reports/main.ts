@@ -10,6 +10,9 @@ export interface ReportsLabels {
   readonly submit: string;
   readonly exportCsv: string;
   readonly printReport: string;
+  readonly export: {
+    readonly pageTitle: string;
+  };
   readonly reportTypes: {
     readonly byTeacher: string;
     readonly byStudent: string;
@@ -23,6 +26,8 @@ export interface ReportsLabels {
     readonly pending: string;
     readonly hours: string;
     readonly paid: string;
+    readonly paidDisplay: string;
+    readonly paidLocked: string;
     readonly totals: string;
   };
   readonly convertedAmount: string;

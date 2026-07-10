@@ -1,5 +1,6 @@
 import { afterAll, beforeAll } from "bun:test";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import { getTestPort } from "./testPort";
 import { startTestServer, stopTestServer } from "./testServer";
 
 let startedSuitesCount = 0;
@@ -16,6 +17,7 @@ export function setupTestServerLifecycle() {
     }
     serverStartPromise ??= startTestServer();
     await serverStartPromise;
+    testLogger.info(`GraphQL test server ready on port ${getTestPort()}`);
   }, 240000);
 
   afterAll(() => {

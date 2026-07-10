@@ -1,6 +1,6 @@
 "use client";
 
-import { AddOutlined } from "@mui/icons-material";
+import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
@@ -14,6 +14,7 @@ import {
   getAdminInvoiceGridLabels,
   getStudentCreditGridLabels,
 } from "@/frontend/views/dashboard/billing/utils/label-mappers";
+import { Link } from "@/shared/i18n/routing";
 
 // Chip indicating items requiring attention, styled with error colors
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({
@@ -37,6 +38,7 @@ export function AdminBillingDesktopView({
   loading,
   canManage,
   canCreate,
+  canViewExchangeRates,
   onSearchChange,
   onMarkAsPaid,
   onViewPaymentDetails,
@@ -53,11 +55,23 @@ export function AdminBillingDesktopView({
         title={labels.adminPageTitle}
         subtitle={labels.adminPageSubtitle}
         actions={
-          canCreate ? (
-            <PrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
-              {labels.manualInvoice}
-            </PrimaryPageAction>
-          ) : undefined
+          <>
+            {canViewExchangeRates ? (
+              <Button
+                component={Link}
+                href="/billing/exchange-rates"
+                variant="outlined"
+                startIcon={<TimelineOutlined />}
+              >
+                {labels.exchangeRatesLink}
+              </Button>
+            ) : null}
+            {canCreate ? (
+              <PrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
+                {labels.manualInvoice}
+              </PrimaryPageAction>
+            ) : null}
+          </>
         }
       />
 

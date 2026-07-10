@@ -122,7 +122,7 @@ export async function exportParentDirectory(data: ParentDirectoryExportData): Pr
       row.name,
       row.email,
       row.time,
-      labels.table.statusLabels[row.accountStatus] ?? row.accountStatus,
+      labels.table.statusLabels[row.lifecycleStatus] ?? row.lifecycleStatus,
       row.unpaidInvoices,
     ];
 

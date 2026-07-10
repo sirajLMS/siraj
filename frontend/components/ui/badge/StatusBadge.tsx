@@ -80,11 +80,12 @@ function resolveStatusPaletteKey(
       return map[status] ?? "pending";
     }
     case "invoice": {
-      const map: Record<string, "completed" | "pending" | "blocked"> = {
+      const map: Record<string, "completed" | "pending" | "blocked" | "confirmed"> = {
         PAID: "completed",
         PENDING: "pending",
         UNPAID: "pending",
         OVERDUE: "blocked",
+        PAYMENT_PENDING: "confirmed",
       };
       return map[status] ?? "pending";
     }

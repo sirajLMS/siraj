@@ -38,6 +38,7 @@ export const PaymentMethodTypeSelector: React.FC<PaymentMethodTypeSelectorProps>
     [PaymentMethodType.OnlineAccount]: labels?.onlineAccount ?? t("onlineAccount"),
     [PaymentMethodType.BankTransfer]: labels?.bankTransfer ?? t("bankTransfer"),
     [PaymentMethodType.Cash]: labels?.cash ?? t("cash"),
+    [PaymentMethodType.ProofUpload]: "Proof upload",
   };
 
   const visibleTypes = allowedTypes ?? PAYMENT_METHOD_TYPES;

@@ -14,7 +14,7 @@ import {
   provisionTestSuperAdmin,
 } from "@/frontend/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
-import { testClient } from "@/frontend/graphql/test/testClient";
+import { getTestApiUrl, testClient } from "@/frontend/graphql/test/testClient";
 
 async function uploadDummyFile(token: string): Promise<{ id: string; path: string }> {
   const fileContent = Buffer.from("hello world");
@@ -35,7 +35,7 @@ async function uploadDummyFile(token: string): Promise<{ id: string; path: strin
     throw new Error("Failed to prepare upload");
   }
 
-  const uploadUrl = `http://localhost:3001/api/storage/upload/${prep.id}`;
+  const uploadUrl = getTestApiUrl(`/api/storage/upload/${prep.id}`);
   const response = await Bun.fetch(uploadUrl, {
     method: "PUT",
     headers: {

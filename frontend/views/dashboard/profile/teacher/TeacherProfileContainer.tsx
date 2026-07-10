@@ -128,7 +128,7 @@ function renderActiveTabContent({
   }
 
   if (activeTab === "meeting") {
-    return <MeetingConfigsTab targetUserId={targetUserId} />;
+    return <MeetingConfigsTab targetUserId={targetUserId} scope={scope} />;
   }
 
   if (activeTab === "students" && scope === ProfileScope.Other) {
@@ -235,6 +235,8 @@ export function TeacherProfileContainer({
         avatarUrl={avatarUrl}
         displayCurrency={displayCurrency}
         isAdminScope={isAdminScope}
+        targetUserId={targetUserId}
+        meetingTabHref="?tab=meeting"
       />
     );
   }

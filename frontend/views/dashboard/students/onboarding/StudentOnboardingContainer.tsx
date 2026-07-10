@@ -35,7 +35,7 @@ export function StudentOnboardingContainer() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: parentData } = useQuery(parentDirectoryQueryDocument, {
-    variables: { search: null, paginationArgs: null, statusFilter: null },
+    variables: { search: null, paginationArgs: null, lifecycleStatusFilter: null },
     fetchPolicy: "cache-first",
   });
 

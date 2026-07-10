@@ -11,6 +11,7 @@ import { RemarksCard } from "@/frontend/views/dashboard/classes/details/teacher/
 import { StudentProfileCard } from "@/frontend/views/dashboard/classes/details/teacher/StudentProfileCard";
 import type { ClassDetailsViewMode } from "@/frontend/views/dashboard/classes/details/types";
 import type { TeacherViewLabels } from "@/frontend/views/dashboard/classes/details/useClassDetailsLabels";
+import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 
 const EXECUTION_STATE_TO_STATUS: Record<string, ClassInstanceStatus> = {
@@ -102,6 +103,7 @@ export function ClassDetailsTeacherView({
               status={status}
               labels={labels.instanceDetails}
             />
+            <ClassMeetingConfigsSection classInstanceId={instance.id ?? undefined} />
             <RemarksCard remarks={instance.remarks ?? ""} labels={labels.remarks} />
             <PerformanceOverviewCard
               attendanceRate={performance?.attendanceRate ?? 0}

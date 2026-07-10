@@ -13,6 +13,12 @@ export const invoicePaymentsQueryDocument: TypedDocumentNode<
       invoiceId
       amount
       currency
+      displayAmount {
+        id
+        amount
+        currency
+        stale
+      }
       paymentDate
       userPaymentMethodId
       paymentMethodType
@@ -48,6 +54,12 @@ export const recordPaymentMutationDocument: TypedDocumentNode<
       invoiceId
       amount
       currency
+      displayAmount {
+        id
+        amount
+        currency
+        stale
+      }
       paymentDate
       userPaymentMethodId
       paymentMethodType

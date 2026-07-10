@@ -18,6 +18,7 @@ import type { LocalizedString } from "@/backend/types/shared/localized-string.ty
 import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
 import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { updateMeetingProviderMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+import { isUrlAllowedByProvider } from "@/frontend/lib/meeting-config";
 
 type EditMeetingProviderDialogProps = {
   readonly open: boolean;
@@ -50,8 +51,29 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
     setSupportsTenantId(provider.fieldSchema?.supportsTenantId === true);
   }, [provider]);
 
+  const [urlAllowlistError, setUrlAllowlistError] = useState<string | null>(null);
+
+  const parsedAllowlist = urlAllowlist
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const validateUrlExample = (): boolean => {
+    if (!urlExample.trim() || parsedAllowlist.length === 0) {
+      setUrlAllowlistError(null);
+      return true;
+    }
+    if (isUrlAllowedByProvider(urlExample.trim(), parsedAllowlist)) {
+      setUrlAllowlistError(null);
+      return true;
+    }
+    setUrlAllowlistError(t("urlAllowlistInvalid"));
+    return false;
+  };
+
   const handleSave = async () => {
     if (!provider?.id) return;
+    if (!validateUrlExample()) return;
     await updateProvider({
       variables: {
         id: provider.id,
@@ -61,10 +83,7 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
           description: provider.description ?? null,
           instructions: provider.instructions ?? null,
           logoUrl: provider.logoUrl ?? null,
-          urlAllowlist: urlAllowlist
-            .split(",")
-            .map(s => s.trim())
-            .filter(Boolean),
+          urlAllowlist: parsedAllowlist,
           urlExample: urlExample || null,
           isActive,
           fieldSchema: {
@@ -95,7 +114,13 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
           <TextField
             label={t("fields.urlExample")}
             value={urlExample}
-            onChange={e => setUrlExample(e.target.value)}
+            onChange={e => {
+              setUrlExample(e.target.value);
+              setUrlAllowlistError(null);
+            }}
+            onBlur={validateUrlExample}
+            error={Boolean(urlAllowlistError)}
+            helperText={urlAllowlistError ?? undefined}
             fullWidth
           />
           <FormControlLabel

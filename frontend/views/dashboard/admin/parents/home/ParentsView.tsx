@@ -24,7 +24,7 @@ import {
 import { AppPermission, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   type ParentDirectoryRow,
-  toParentAccountStatus,
+  toParentLifecycleStatus,
 } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import {
   ParentCardList,
@@ -36,7 +36,7 @@ import {
 } from "@/frontend/views/dashboard/admin/parents/home/ParentsDataGrid";
 import { ParentsMetricGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsMetricGrid";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
+import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 interface ParentsViewLabels {
   readonly pageTitle: string;
@@ -48,7 +48,7 @@ interface ParentsViewLabels {
   readonly clearFilters: string;
   readonly table: ParentsDataGridLabels;
   readonly card: ParentCardListLabels;
-  readonly statusLabels: Record<ParentAccountStatus, string>;
+  readonly statusLabels: Record<ParentLifecycleStatus, string>;
 }
 
 interface ParentsViewProps {
@@ -59,7 +59,7 @@ interface ParentsViewProps {
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
-  readonly statusFilter: ParentStatus | null;
+  readonly lifecycleStatusFilter: ParentStatus | null;
   readonly filterPanelOpen: boolean;
   readonly onAddParent: () => void;
   readonly onOpenSettings: (id: string) => void;
@@ -67,13 +67,11 @@ interface ParentsViewProps {
   readonly onPageChange?: (page: number) => void;
   readonly onFilter: () => void;
   readonly onExport: () => void;
-  readonly onStatusFilterChange: (status: ParentStatus | null) => void;
+  readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
   readonly onResetFilters: () => void;
 }
 
-const STATUS_FILTER_OPTIONS: readonly ParentStatus[] = [
-  ParentStatus.Activated,
-  ParentStatus.Deactivated,
+const LIFECYCLE_STATUS_FILTER_OPTIONS: readonly ParentStatus[] = [
   ParentStatus.Regular,
   ParentStatus.OnLeave,
   ParentStatus.Suspended,
@@ -149,21 +147,21 @@ function ParentMobileSearchField({ placeholder, onSearch }: Readonly<ParentMobil
 
 interface ParentFilterPanelProps {
   readonly open: boolean;
-  readonly statusFilter: ParentStatus | null;
+  readonly lifecycleStatusFilter: ParentStatus | null;
   readonly filterLabel: string;
   readonly clearFiltersLabel: string;
-  readonly statusLabels: Record<ParentAccountStatus, string>;
-  readonly onStatusFilterChange: (status: ParentStatus | null) => void;
+  readonly statusLabels: Record<ParentLifecycleStatus, string>;
+  readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
   readonly onResetFilters: () => void;
 }
 
 function ParentFilterPanel({
   open,
-  statusFilter,
+  lifecycleStatusFilter,
   filterLabel,
   clearFiltersLabel,
   statusLabels,
-  onStatusFilterChange,
+  onLifecycleStatusFilterChange,
   onResetFilters,
 }: Readonly<ParentFilterPanelProps>) {
   return (
@@ -172,9 +170,9 @@ function ParentFilterPanel({
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mr: 1 })}>
           {filterLabel}:
         </Typography>
-        {STATUS_FILTER_OPTIONS.map(status => {
-          const displayStatus = toParentAccountStatus(status);
-          const isActive = statusFilter === status;
+        {LIFECYCLE_STATUS_FILTER_OPTIONS.map(status => {
+          const displayStatus = toParentLifecycleStatus(status);
+          const isActive = lifecycleStatusFilter === status;
           return (
             <Chip
               key={status}
@@ -183,12 +181,12 @@ function ParentFilterPanel({
               variant={isActive ? "filled" : "outlined"}
               color={isActive ? "primary" : "default"}
               onClick={() => {
-                onStatusFilterChange(statusFilter === status ? null : status);
+                onLifecycleStatusFilterChange(lifecycleStatusFilter === status ? null : status);
               }}
             />
           );
         })}
-        {statusFilter && (
+        {lifecycleStatusFilter && (
           <FilterButton
             size="small"
             onClick={onResetFilters}
@@ -216,8 +214,8 @@ interface ParentRecordsSectionProps {
   readonly onFilter: () => void;
   readonly onExport: () => void;
   readonly filterPanelOpen: boolean;
-  readonly statusFilter: ParentStatus | null;
-  readonly onStatusFilterChange: (status: ParentStatus | null) => void;
+  readonly lifecycleStatusFilter: ParentStatus | null;
+  readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
   readonly onResetFilters: () => void;
 }
 
@@ -235,8 +233,8 @@ function ParentRecordsSection({
   onFilter,
   onExport,
   filterPanelOpen,
-  statusFilter,
-  onStatusFilterChange,
+  lifecycleStatusFilter,
+  onLifecycleStatusFilterChange,
   onResetFilters,
 }: Readonly<ParentRecordsSectionProps>) {
   return (
@@ -253,11 +251,11 @@ function ParentRecordsSection({
     >
       <ParentFilterPanel
         open={filterPanelOpen}
-        statusFilter={statusFilter}
+        lifecycleStatusFilter={lifecycleStatusFilter}
         filterLabel={filterLabel}
         clearFiltersLabel={labels.clearFilters}
         statusLabels={labels.statusLabels}
-        onStatusFilterChange={onStatusFilterChange}
+        onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
         onResetFilters={onResetFilters}
       />
       {isMobile ? (
@@ -294,7 +292,7 @@ export function ParentsView({
   page,
   pageSize,
   totalCount,
-  statusFilter,
+  lifecycleStatusFilter,
   filterPanelOpen,
   onAddParent,
   onOpenSettings,
@@ -302,7 +300,7 @@ export function ParentsView({
   onPageChange,
   onFilter,
   onExport,
-  onStatusFilterChange,
+  onLifecycleStatusFilterChange,
   onResetFilters,
 }: Readonly<ParentsViewProps>) {
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
@@ -340,8 +338,8 @@ export function ParentsView({
         onFilter={onFilter}
         onExport={onExport}
         filterPanelOpen={filterPanelOpen}
-        statusFilter={statusFilter}
-        onStatusFilterChange={onStatusFilterChange}
+        lifecycleStatusFilter={lifecycleStatusFilter}
+        onLifecycleStatusFilterChange={onLifecycleStatusFilterChange}
         onResetFilters={onResetFilters}
       />
     </PageContainer>

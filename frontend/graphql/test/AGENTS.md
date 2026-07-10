@@ -12,6 +12,7 @@ frontend/graphql/test/
 ├── helpers.ts            ← shared test helpers (loginAndProvision, authenticatedRequest, etc.)
 ├── lifecycle.ts          ← setupTestServerLifecycle
 ├── testClient.ts         ← Apollo test client + clearCookies
+├── testPort.ts           ← dynamic port allocation + URL helpers
 ├── testServer.ts         ← Next.js dev server spawn/kill (used by lifecycle.ts)
 │
 ├── auth/                 auth, impersonation
@@ -34,7 +35,7 @@ frontend/graphql/test/
 
 ### Infra files (MUST stay flat)
 
-The four files `helpers.ts`, `lifecycle.ts`, `testClient.ts`, `testServer.ts` MUST stay flat at `frontend/graphql/test/`. They form the shared harness imported by virtually every test; moving them into a sub-directory would break the alias `@/frontend/graphql/test/<infra>` used across all tests.
+The infra files `helpers.ts`, `lifecycle.ts`, `testClient.ts`, `testPort.ts`, and `testServer.ts` MUST stay flat at `frontend/graphql/test/`. They form the shared harness imported by virtually every test; moving them into a sub-directory would break the alias `@/frontend/graphql/test/<infra>` used across all tests.
 
 ### No `index.ts` barrels in sub-directories
 
@@ -46,7 +47,8 @@ Sub-directories contain only `*.test.ts` files. They are NOT imported by anythin
 |---|---|---|
 | `helpers.ts` | `import { loginAndProvision } from "@/frontend/graphql/test/helpers";` | **Preferred alias** — works from any sub-directory unchanged. |
 | `lifecycle.ts` | `import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";` | **Preferred alias** — works from any sub-directory unchanged. |
-| `testClient.ts` | `import { testClient, clearCookies } from "@/frontend/graphql/test/testClient";` | **Preferred alias** — works from any sub-directory unchanged. |
+| `testClient.ts` | `import { testClient, clearCookies, getTestApiUrl } from "@/frontend/graphql/test/testClient";` | **Preferred alias** — works from any sub-directory unchanged. |
+| `testPort.ts` | `import { getTestBaseUrl, getTestGraphqlUrl } from "@/frontend/graphql/test/testPort";` | Use for non-GraphQL REST endpoints or E2E `baseURL`. |
 | Documents | `import { fooQueryDocument } from "@/frontend/graphql/sharedDocuments/<subdir>/foo.documents";` | Always use the full deep alias, including the `sharedDocuments` sub-directory segment. See `frontend/graphql/sharedDocuments/AGENTS.md`. |
 | Generated types | `import { … } from "@/frontend/graphql/generated/gql/graphql-types";` or `Operations` | Unchanged. |
 | Relative `../helpers` etc. | `import { … } from "../helpers";` | Tolerated in legacy files. Files in a sub-directory are one level deeper than the old flat layout, so infra resolves as `../helpers` / `../lifecycle` / `../testClient`. Prefer the `@/` alias for new tests. |
@@ -70,7 +72,10 @@ When adding a **new** test:
        // ...
      });
      ```
-   - This automatically handles hooking into Bun's `beforeAll` and `afterAll` lifecycles to spawn the Next.js dev server on port 3001, poll until ready, and kill the process cleanly upon test suite completion. The process logic itself is defined separately in `testServer.ts`.
+   - This automatically handles hooking into Bun's `beforeAll` and `afterAll` lifecycles to spawn the Next.js dev server on a **dynamically allocated port** (prefers `3001` when free, otherwise scans `3020–3199`), poll until ready, and kill only this process's server tree upon test suite completion. Each run uses an isolated `NEXT_DIST_DIR` (`.next-test-<port>`) so multiple agents can run tests concurrently without port or build-lock conflicts.
+   - Optional env override: `GRAPHQL_TEST_PORT=<port>` pins the port for debugging. The harness does **not** kill existing listeners on startup.
+   - For REST endpoints outside GraphQL (e.g. storage upload), use `getTestApiUrl("/api/...")` from `testClient.ts` or `testPort.ts` — never hardcode `localhost:3001`.
+   - The process logic itself is defined separately in `testServer.ts` and `testPort.ts`.
 
 2. **Apollo Shared Client**:
    - Import the shared, cache-disabled test client from `testClient.ts` to perform all GraphQL operations:

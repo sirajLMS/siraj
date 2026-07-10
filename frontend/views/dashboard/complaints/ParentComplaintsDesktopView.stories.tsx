@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import {
+  AccountStatus,
   AppPermission,
   ComplaintCategory,
   ComplaintStatus,
@@ -137,6 +138,8 @@ const meta: Meta<typeof ParentComplaintsDesktopStoryRenderer> = {
         updatedAt: new Date().toISOString(),
         emailVerifiedAt: new Date().toISOString(),
         email: "sarah.j@example.com",
+        phone: null,
+        status: AccountStatus.Activated,
         displayCurrency: CurrencyCode.Usd,
         __typename: "User" as const,
       };

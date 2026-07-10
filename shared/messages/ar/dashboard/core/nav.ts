@@ -35,6 +35,8 @@ export const nav: DashboardNavigationLabels = {
   dstMigration: "ترحيل التوقيت الصيفي",
   billingAdmin: "الفواتير",
   exchangeRates: "أسعار الصرف",
+  supportedCurrencies: "العملات المدعومة",
+  currencyHedges: "تحوط العملات",
   paymentCatalogs: "طرق الدفع",
   meetingProviders: "منصات الاجتماعات",
   billingParent: "الفواتير والمدفوعات",

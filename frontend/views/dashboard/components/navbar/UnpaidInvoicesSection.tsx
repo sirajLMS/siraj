@@ -7,10 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-alerts.documents";
-import {
-  formatBillingCurrencyTotals,
-  mapBillingCurrencyBuckets,
-} from "@/frontend/lib/formatBillingCurrencyTotals";
+import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function UnpaidInvoicesSection() {
@@ -56,13 +53,21 @@ export function UnpaidInvoicesSection() {
       convertedApprox: string;
       displayCurrency: string;
     }) => tProfile("convertedAmount", values),
+    convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) =>
+      tProfile("convertedTotalApprox", values),
     displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
       tErrors("displayCurrencyFallback", values),
   };
 
+  const globalTotalLabel = formatBillingCurrencyTotals(
+    mapBillingCurrencyBuckets(summary.overdueAmountsByCurrency),
+    locale,
+    fxMessages
+  ).primary;
+
   return (
     <Box>
-      <Box sx={{ px: 2, py: 1, display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ px: 2, py: 1, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <PaymentsOutlined fontSize="small" />
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
           {t("unpaidInvoicesTitle")}
@@ -79,6 +84,9 @@ export function UnpaidInvoicesSection() {
           })}
         >
           {summary.totalOverdueInvoices}
+        </Typography>
+        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, ml: "auto" })}>
+          {globalTotalLabel}
         </Typography>
       </Box>
 

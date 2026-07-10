@@ -10,6 +10,7 @@ export interface BillingMetricItem {
   readonly value: string | number;
   readonly icon: SvgIconComponent;
   readonly variant?: MetricCardVariant;
+  readonly subLabel?: string;
 }
 
 interface BillingMetricsRowProps {
@@ -26,6 +27,7 @@ export function BillingMetricsRow({ metrics, compact = false }: Readonly<Billing
             icon={metric.icon}
             label={metric.label}
             value={metric.value}
+            subLabel={metric.subLabel}
             variant={metric.variant}
             sx={compact ? { "& .MuiTypography-headlineLg": { typography: "titleLg" } } : undefined}
           />

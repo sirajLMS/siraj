@@ -5,6 +5,7 @@ import { Alert, Snackbar } from "@mui/material";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import type { EffectiveMeeting } from "@/frontend/graphql/generated/gql/graphql-types";
 import * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
@@ -46,7 +47,17 @@ interface RawRow {
   readonly executionState?: string | null;
   readonly outcome?: string | null;
   readonly meetingJoinUrl?: string | null;
+  readonly effectiveMeeting?: EffectiveMeeting | null;
   readonly yourTimeFormatted?: string | null;
+}
+
+function resolveMeetingJoinUrl(
+  meetingJoinUrl?: string | null,
+  effectiveMeeting?: EffectiveMeeting | null
+): string | null {
+  const fromEffective = effectiveMeeting?.joinUrl?.trim();
+  const fromLegacy = meetingJoinUrl?.trim();
+  return fromEffective || fromLegacy || null;
 }
 
 interface RawFeedItem {
@@ -123,6 +134,8 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
 
     const status = deriveRowStatus(executionState, outcome, activateEnabled, now, endAt);
 
+    const joinUrl = resolveMeetingJoinUrl(row.meetingJoinUrl, row.effectiveMeeting);
+
     return {
       id: row.id || `row-${idx}`,
       rowNumber: idx + 1,
@@ -141,14 +154,15 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
       status,
       executionState,
       outcome,
-      videoEnabled: !!row.meetingJoinUrl,
+      videoEnabled: Boolean(joinUrl),
       activateEnabled,
       activateDisabledReason,
       markAbsentEnabled,
       durationMinutes: row.durationMinutes ?? undefined,
       scheduledStartAt: row.scheduledStartAt ? new Date(row.scheduledStartAt) : undefined,
       scheduledEndAt: row.scheduledEndAt ? new Date(row.scheduledEndAt) : endAt,
-      meetingJoinUrl: row.meetingJoinUrl ?? null,
+      meetingJoinUrl: joinUrl,
+      effectiveMeeting: row.effectiveMeeting ?? null,
       isLive: isLiveSession,
       isCurrent: isLiveSession,
     };
@@ -335,12 +349,6 @@ export function TeacherDashboardContainer() {
     }
   };
 
-  const showSnackbar = (message: string, severity: SnackbarSeverity) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
   return (
     <RequirePermission permissions={[Types.AppPermission.TeacherViewDashboard]}>
       <TeacherDashboardView
@@ -368,14 +376,6 @@ export function TeacherDashboardContainer() {
         onNewSession={() => {
           setManualEntryDefaultActive(true);
           setManualEntryOpen(true);
-        }}
-        onJoinVideo={id => {
-          const row = scheduleRows.find(r => r.id === id);
-          if (row?.meetingJoinUrl) {
-            globalThis.open(row.meetingJoinUrl, "_blank");
-          } else {
-            showSnackbar(t("errors.meetingUrlNotAvailable"), "error");
-          }
         }}
         onActivate={handleActivate}
         onStartSession={async id => {

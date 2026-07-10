@@ -1,14 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import {
-  BlockOutlined,
-  CancelOutlined,
-  EventBusyOutlined,
-  HowToRegOutlined,
-  TimerOutlined,
-  VerifiedUserOutlined,
-} from "@mui/icons-material";
+import { BlockOutlined, EventBusyOutlined, TimerOutlined, VerifiedUserOutlined } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -17,16 +10,14 @@ import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments
 import { useParentsStore } from "@/frontend/stores/parentsStore";
 import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
-import { toParentAccountStatus } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import { toParentLifecycleStatus } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentsView } from "@/frontend/views/dashboard/admin/parents/home/ParentsView";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
+import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 import { useRouter } from "@/shared/i18n/routing";
 
 function useDirectoryMetrics(
   directory: {
     readonly metrics?: {
-      readonly activated?: number | null;
-      readonly deactivated?: number | null;
       readonly regular?: number | null;
       readonly onLeave?: number | null;
       readonly suspended?: number | null;
@@ -37,18 +28,6 @@ function useDirectoryMetrics(
   const m = directory?.metrics;
   if (!m) return [];
   return [
-    {
-      key: "activated",
-      count: m.activated ?? 0,
-      labelKey: "dashboard.parentsDirectory.metrics.activated",
-      icon: HowToRegOutlined,
-    },
-    {
-      key: "deactivated",
-      count: m.deactivated ?? 0,
-      labelKey: "dashboard.parentsDirectory.metrics.deactivated",
-      icon: CancelOutlined,
-    },
     {
       key: "regular",
       count: m.regular ?? 0,
@@ -88,7 +67,7 @@ function useDirectoryRows(
           readonly avatarUrl?: string | null;
           readonly guardianOf?: string | null;
           readonly time?: string | null;
-          readonly accountStatus?: ParentStatus | null;
+          readonly lifecycleStatus?: ParentStatus | null;
           readonly unpaidInvoices?: number | null;
         }[]
       | null;
@@ -103,20 +82,18 @@ function useDirectoryRows(
     avatarUrl: row.avatarUrl ?? undefined,
     guardianOf: row.guardianOf ?? "",
     time: row.time ?? "",
-    accountStatus: row.accountStatus ? toParentAccountStatus(row.accountStatus) : "regular",
+    lifecycleStatus: row.lifecycleStatus ? toParentLifecycleStatus(row.lifecycleStatus) : "regular",
     unpaidInvoices: row.unpaidInvoices ?? 0,
   }));
 }
 
 function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.parentsDirectory">>) {
   const statusLabels = {
-    activated: t("metrics.activated"),
-    deactivated: t("metrics.deactivated"),
     regular: t("metrics.regular"),
     on_leave: t("metrics.onLeave"),
     suspended: t("metrics.suspended"),
     on_trial: t("metrics.onTrial"),
-  } as Record<ParentAccountStatus, string>;
+  } as Record<ParentLifecycleStatus, string>;
 
   return {
     pageTitle: t("pageTitle"),
@@ -156,11 +133,11 @@ export function ParentsContainer() {
     searchQuery,
     page,
     pageSize,
-    statusFilter,
+    lifecycleStatusFilter,
     filterPanelOpen,
     setSearchQuery,
     setPage,
-    setStatusFilter,
+    setLifecycleStatusFilter,
     setFilterPanelOpen,
     resetFilters,
   } = useParentsStore();
@@ -168,7 +145,7 @@ export function ParentsContainer() {
   const { data, loading } = useQuery(parentDirectoryQueryDocument, {
     variables: {
       search: searchQuery || null,
-      statusFilter: statusFilter || null,
+      lifecycleStatusFilter: lifecycleStatusFilter || null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -228,7 +205,7 @@ export function ParentsContainer() {
         pageSize={pageSize}
         totalCount={directory ? (directory.totalCount ?? 0) : undefined}
         loading={loading}
-        statusFilter={statusFilter}
+        lifecycleStatusFilter={lifecycleStatusFilter}
         filterPanelOpen={filterPanelOpen}
         onAddParent={handleAddParent}
         onOpenSettings={handleOpenSettings}
@@ -236,7 +213,7 @@ export function ParentsContainer() {
         onPageChange={handlePageChange}
         onFilter={handleFilter}
         onExport={handleExport}
-        onStatusFilterChange={setStatusFilter}
+        onLifecycleStatusFilterChange={setLifecycleStatusFilter}
         onResetFilters={resetFilters}
       />
     </RequirePermission>

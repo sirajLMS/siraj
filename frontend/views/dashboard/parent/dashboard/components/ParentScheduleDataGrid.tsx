@@ -1,10 +1,11 @@
 "use client";
 
-import { HistoryOutlined, VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
-import { alpha, Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { HistoryOutlined } from "@mui/icons-material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { ParentClassStatusIndicator } from "@/frontend/views/dashboard/parent/dashboard/components/ParentClassStatusIndicator";
 import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
@@ -18,7 +19,7 @@ interface ParentScheduleDataGridProps {
   readonly rows: readonly ParentScheduleRow[];
   readonly labels: ParentDashboardLabels;
   readonly onHistory: (id: string) => void;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly pagination?: SchedulePagination;
 }
 
@@ -37,13 +38,7 @@ function formatRowNumber(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-export function ParentScheduleDataGrid({
-  rows,
-  labels,
-  onHistory,
-  onJoinVideo,
-  pagination,
-}: Readonly<ParentScheduleDataGridProps>) {
+export function ParentScheduleDataGrid({ rows, labels, onHistory, pagination }: Readonly<ParentScheduleDataGridProps>) {
   const columns = useMemo<GridColDef<ParentScheduleRow>[]>(() => {
     return [
       {
@@ -152,32 +147,18 @@ export function ParentScheduleDataGrid({
         sortable: false,
         align: "center",
         headerAlign: "center",
-        renderCell: ({ row }) => {
-          const VideoIcon = row.videoEnabled ? VideocamOutlined : VideocamOffOutlined;
-          return (
-            <Box
-              sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
-            >
-              <IconButton
-                size="small"
-                disabled={!row.videoEnabled}
-                onClick={() => {
-                  onJoinVideo(row.id);
-                }}
-                aria-label={labels.schedule.joinVideo}
-                sx={theme => ({
-                  color: theme.palette.info.main,
-                  opacity: row.videoEnabled ? 1 : 0.5,
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.info.main, 0.08),
-                  },
-                })}
-              >
-                <VideoIcon fontSize="small" />
-              </IconButton>
-            </Box>
-          );
-        },
+        renderCell: ({ row }) => (
+          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
+            <MeetingJoinAction
+              variant="icon"
+              joinUrl={row.meetingJoinUrl}
+              meeting={row.effectiveMeeting}
+              disabled={!row.videoEnabled}
+              label={labels.schedule.joinVideo}
+              emptyRole="parent"
+            />
+          </Box>
+        ),
       },
       {
         field: "liveClassStatus",
@@ -192,7 +173,7 @@ export function ParentScheduleDataGrid({
         ),
       },
     ];
-  }, [labels, onHistory, onJoinVideo]);
+  }, [labels, onHistory]);
 
   const isServerPagination = pagination !== undefined;
 

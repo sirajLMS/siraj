@@ -34,6 +34,8 @@ export function UserStoreInitializer({ userProfile, isSuperAdmin }: UserStoreIni
       teacherId: userProfile.teacherId || null,
       parentId: userProfile.parentId || null,
       displayCurrency: userProfile.displayCurrency,
+      phone: userProfile.phone ?? null,
+      status: userProfile.status ?? null,
     });
   }, [userProfile, setUser, setActorIsSuperAdmin, permissions, isSuperAdmin]);
 

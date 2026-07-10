@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/ParentSuggestionsDesktopView";
@@ -80,6 +80,8 @@ const meta: Meta<typeof ParentSuggestionsDesktopStoryRenderer> = {
         permissions: PARENT_PERMISSIONS,
         user: {
           ...mockUser,
+          phone: null,
+          status: AccountStatus.Activated,
           displayCurrency: CurrencyCode.Usd,
         },
       });

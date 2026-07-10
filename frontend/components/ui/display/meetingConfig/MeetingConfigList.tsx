@@ -4,33 +4,49 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import type { ClassMeetingConfigFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
 import { resolveLocalizedString } from "@/frontend/lib/localized-string";
 
+export type MeetingConfigListItem = UserMeetingConfigFieldsFragment | ClassMeetingConfigFieldsFragment;
+
 export type MeetingConfigListProps = {
-  readonly configs: readonly UserMeetingConfigFieldsFragment[];
+  readonly configs: readonly MeetingConfigListItem[];
+  readonly title?: string;
+  readonly loading?: boolean;
   readonly onSetDefaultAction?: (id: string) => void;
-  readonly onEditAction?: (config: UserMeetingConfigFieldsFragment) => void;
+  readonly onEditAction?: (config: MeetingConfigListItem) => void;
   readonly onDeleteAction?: (id: string) => void;
-  readonly emptyLabel?: string;
+  readonly emptyMessage?: string;
 };
 
 export function MeetingConfigList({
   configs,
+  title,
+  loading = false,
   onSetDefaultAction,
   onEditAction,
   onDeleteAction,
-  emptyLabel = "No meeting configs yet",
+  emptyMessage,
 }: MeetingConfigListProps) {
   const locale = useLocale();
+  const t = useTranslations("ui.meetingConfig");
+  const tManager = useTranslations("ui.meetingConfig.manager");
+  const tDisplay = useTranslations("ui.meetingConfig.display");
+  const resolvedEmpty = emptyMessage ?? t("empty");
+
+  if (loading && configs.length === 0) {
+    return <Typography sx={{ color: "text.secondary", typography: "bodyMd" }}>{t("loading")}</Typography>;
+  }
 
   if (configs.length === 0) {
-    return <Typography sx={{ color: "text.secondary", typography: "bodyMd" }}>{emptyLabel}</Typography>;
+    return <Typography sx={{ color: "text.secondary", typography: "bodyMd" }}>{resolvedEmpty}</Typography>;
   }
 
   return (
     <Stack sx={{ gap: 1.5 }}>
+      {title ? <Typography sx={{ typography: "titleMd" }}>{title}</Typography> : null}
       {configs.map(config => {
         if (!config.id) return null;
         const providerName = config.provider
@@ -49,9 +65,9 @@ export function MeetingConfigList({
           >
             <Stack sx={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
               <Stack sx={{ gap: 0.5 }}>
-                <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center" }}>
+                <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
                   <Typography sx={{ typography: "titleMd" }}>{providerName}</Typography>
-                  {config.isDefault ? <Chip size="small" label="Default" color="primary" /> : null}
+                  {config.isDefault ? <Chip size="small" label={tDisplay("defaultBadge")} color="primary" /> : null}
                   {config.label ? (
                     <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{config.label}</Typography>
                   ) : null}
@@ -62,13 +78,13 @@ export function MeetingConfigList({
               </Stack>
               <Stack sx={{ flexDirection: "row", gap: 0.5 }}>
                 {onEditAction ? (
-                  <IconButton aria-label="Edit" size="small" onClick={() => onEditAction(config)}>
+                  <IconButton aria-label={tManager("edit")} size="small" onClick={() => onEditAction(config)}>
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}
                 {!config.isDefault && onSetDefaultAction ? (
                   <IconButton
-                    aria-label="Set default"
+                    aria-label={tManager("setDefault")}
                     size="small"
                     onClick={() => onSetDefaultAction(config.id as string)}
                   >
@@ -76,7 +92,11 @@ export function MeetingConfigList({
                   </IconButton>
                 ) : null}
                 {onDeleteAction ? (
-                  <IconButton aria-label="Delete" size="small" onClick={() => onDeleteAction(config.id as string)}>
+                  <IconButton
+                    aria-label={tManager("delete")}
+                    size="small"
+                    onClick={() => onDeleteAction(config.id as string)}
+                  >
                     <DeleteOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}

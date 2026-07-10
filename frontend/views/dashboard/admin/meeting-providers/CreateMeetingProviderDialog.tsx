@@ -17,6 +17,7 @@ import { useState } from "react";
 import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
 import { createMeetingProviderMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+import { isUrlAllowedByProvider } from "@/frontend/lib/meeting-config";
 
 type CreateMeetingProviderDialogProps = {
   readonly open: boolean;
@@ -37,7 +38,28 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved }: CreateMe
   const [supportsPassword, setSupportsPassword] = useState(false);
   const [supportsTenantId, setSupportsTenantId] = useState(false);
 
+  const [urlAllowlistError, setUrlAllowlistError] = useState<string | null>(null);
+
+  const parsedAllowlist = urlAllowlist
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const validateUrlExample = (): boolean => {
+    if (!urlExample.trim() || parsedAllowlist.length === 0) {
+      setUrlAllowlistError(null);
+      return true;
+    }
+    if (isUrlAllowedByProvider(urlExample.trim(), parsedAllowlist)) {
+      setUrlAllowlistError(null);
+      return true;
+    }
+    setUrlAllowlistError(t("urlAllowlistInvalid"));
+    return false;
+  };
+
   const handleSave = async () => {
+    if (!validateUrlExample()) return;
     await createProvider({
       variables: {
         input: {
@@ -46,10 +68,7 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved }: CreateMe
           description: null,
           instructions: null,
           logoUrl: null,
-          urlAllowlist: urlAllowlist
-            .split(",")
-            .map(s => s.trim())
-            .filter(Boolean),
+          urlAllowlist: parsedAllowlist,
           urlExample: urlExample || null,
           fieldSchema: {
             requiresMeetingUrl: true,
@@ -81,7 +100,13 @@ export function CreateMeetingProviderDialog({ open, onClose, onSaved }: CreateMe
           <TextField
             label={t("fields.urlExample")}
             value={urlExample}
-            onChange={e => setUrlExample(e.target.value)}
+            onChange={e => {
+              setUrlExample(e.target.value);
+              setUrlAllowlistError(null);
+            }}
+            onBlur={validateUrlExample}
+            error={Boolean(urlAllowlistError)}
+            helperText={urlAllowlistError ?? undefined}
             fullWidth
           />
           <FormControlLabel

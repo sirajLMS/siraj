@@ -42,6 +42,7 @@ const mockInstance: ClassInstanceDetail = {
   studentTimezone: IanaTimezone.AfricaCairo,
   teacherTimezone: null,
   meetingJoinUrl: "",
+  effectiveMeeting: null,
   executionState: ClassExecutionState.NotActivated,
   isRescheduled: false,
   outcome: ClassOutcome.Pending,

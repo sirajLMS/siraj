@@ -48,7 +48,7 @@ interface TeacherDashboardViewProps {
   readonly onPrintSchedule: () => void;
   readonly onManualEntry: () => void;
   readonly onNewSession: () => void;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -106,7 +106,7 @@ interface MobileScheduleSectionProps {
   readonly loading?: boolean;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;

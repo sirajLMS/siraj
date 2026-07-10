@@ -76,7 +76,8 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         name
         email
         avatarUrl
-        status
+        lifecycleStatus
+        accountStatus
         phone
         nationality
         address
@@ -270,7 +271,8 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         name
         email
         avatarUrl
-        status
+        lifecycleStatus
+        accountStatus
         phone
         nationality
         address

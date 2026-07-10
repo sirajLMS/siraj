@@ -33,7 +33,7 @@ export function UserBillingProfileMobileView({
   invoices,
   searchQuery,
   canView,
-  canManage,
+  canSubmitProof,
   onSearchChange,
   onPayNow,
   onViewPaymentDetails,
@@ -44,7 +44,7 @@ export function UserBillingProfileMobileView({
   totalCount,
   onPageChange,
 }: Readonly<UserBillingProfileMobileViewProps>) {
-  const showQuickPayFab = canView && !canManage;
+  const showQuickPayFab = canSubmitProof;
 
   return (
     <>
@@ -69,13 +69,16 @@ export function UserBillingProfileMobileView({
             <ParentInvoicesCardList
               rows={invoices}
               canView={canView}
+              canSubmitProof={canSubmitProof}
               onPayNow={onPayNow}
               onViewPaymentDetails={onViewPaymentDetails}
               onDownloadPdf={onDownloadPdf}
               labels={{
                 viewDetails: labels.parentTable.viewDetails,
+                viewSubmission: labels.parentTable.viewSubmission,
                 downloadPdf: labels.parentTable.downloadPdf,
                 payNow: labels.parentTable.payNow,
+                hasPaymentProofHint: labels.hasPaymentProofHint,
                 statusLabels: labels.invoiceStatus,
               }}
               page={page}

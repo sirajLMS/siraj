@@ -4,9 +4,10 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { FeesContractSection } from "@/frontend/views/dashboard/admin/parents/onboarding/FeesContractSection";
 import { ParentInfoSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentInfoSection";
+import { ParentMeetingConfigOnboardingSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";
 import { SocialCommsSection } from "@/frontend/views/dashboard/admin/parents/onboarding/SocialCommsSection";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
@@ -57,6 +58,26 @@ export function ParentOnboardingView({ register, control, errors, handleSubmit, 
         <ParentInfoSection register={register} control={control} errors={errors} />
         <SocialCommsSection register={register} control={control} />
         <FeesContractSection register={register} control={control} errors={errors} />
+        <SectionPanel title={t("sections.meetingConfig")}>
+          <ParentMeetingConfigOnboardingSection
+            register={register}
+            control={control}
+            errors={errors}
+            labels={{
+              sectionTitle: t("sections.meetingConfig"),
+              optionalHint: t("optionalHint"),
+              fields: {
+                meetingProvider: t("fields.meetingProvider"),
+                meetingUrl: t("fields.meetingUrl"),
+                meetingLabel: t("fields.meetingLabel"),
+              },
+              placeholders: {
+                meetingUrl: t("placeholders.meetingUrl"),
+                meetingLabel: t("placeholders.meetingLabel"),
+              },
+            }}
+          />
+        </SectionPanel>
 
         <Box
           sx={theme => ({

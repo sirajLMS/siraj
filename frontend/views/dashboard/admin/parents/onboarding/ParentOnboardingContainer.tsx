@@ -35,6 +35,9 @@ const defaultValues: ParentOnboardingFormData = {
   },
   currency: CurrencyCode.Usd,
   timezone: IanaTimezone.AfricaCairo,
+  meetingProvider: null,
+  meetingUrl: "",
+  meetingLabel: "",
 };
 
 export function ParentOnboardingContainer() {

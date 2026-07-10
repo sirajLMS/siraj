@@ -12,6 +12,9 @@ export const reports: ReportsLabels = {
   submit: "إرسال",
   exportCsv: "تصدير CSV",
   printReport: "طباعة التقرير",
+  export: {
+    pageTitle: "تقرير الحضور",
+  },
   reportTypes: {
     byTeacher: "حسب المعلم",
     byStudent: "حسب الطالب",
@@ -25,6 +28,8 @@ export const reports: ReportsLabels = {
     pending: "معلق",
     hours: "الساعات",
     paid: "مدفوع",
+    paidDisplay: "مدفوع (معروض)",
+    paidLocked: "مدفوع (مقفل)",
     totals: "الإجمالي:",
   },
   convertedAmount: "{lockedAmount} {lockedCurrency} (تقريباً {convertedApprox} {displayCurrency})",

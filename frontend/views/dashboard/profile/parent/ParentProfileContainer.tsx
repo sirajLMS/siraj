@@ -122,7 +122,7 @@ export function ParentProfileContainer({
   }
 
   if (activeTab === "meeting") {
-    return <MeetingConfigsTab targetUserId={targetUserId} />;
+    return <MeetingConfigsTab targetUserId={targetUserId} scope={scope} />;
   }
 
   if (activeTab === "paymentMethods") {
@@ -188,6 +188,8 @@ export function ParentProfileContainer({
         displayCurrency={displayCurrency}
         isAdminScope={isAdminScope}
         studentsLoading={loading}
+        targetUserId={targetUserId}
+        meetingTabHref="?tab=meeting"
       />
     );
   }

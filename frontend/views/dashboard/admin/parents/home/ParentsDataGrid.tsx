@@ -15,7 +15,7 @@ import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
+import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export interface ParentsDataGridLabels {
   readonly index: string;
@@ -28,7 +28,7 @@ export interface ParentsDataGridLabels {
   readonly options: string;
   readonly noEntries: string;
   readonly guardianOf: (name: string) => string;
-  readonly statusLabels: Record<ParentAccountStatus, string>;
+  readonly statusLabels: Record<ParentLifecycleStatus, string>;
 }
 
 interface ParentsDataGridProps {
@@ -108,14 +108,14 @@ export function ParentsDataGrid({
         ),
       },
       {
-        field: "accountStatus",
+        field: "lifecycleStatus",
         headerName: labels.status,
         width: 140,
         renderCell: ({ row }) => (
           <StatusBadge
             category="studentAccount"
-            status={row.accountStatus}
-            label={labels.statusLabels[row.accountStatus]}
+            status={row.lifecycleStatus}
+            label={labels.statusLabels[row.lifecycleStatus]}
           />
         ),
       },

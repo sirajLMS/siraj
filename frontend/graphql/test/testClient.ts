@@ -4,10 +4,11 @@ import { config } from "dotenv";
 config({ path: path.resolve(process.cwd(), ".env.test") });
 
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+import { getTestGraphqlUrl } from "./testPort";
+
+export { getTestApiUrl, getTestBaseUrl, getTestGraphqlUrl, getTestPort } from "./testPort";
 
 export const TEST_HOST = "http://localhost";
-export const TEST_PORT = 3001;
-export const TEST_GRAPHQL_URL = `${TEST_HOST}:${TEST_PORT}/api/graphql`;
 
 let cookieJar: string[] = [];
 
@@ -60,7 +61,7 @@ function updateJar(setCookies: string[]) {
   }
 }
 
-const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+const customFetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
   const headers = new Headers(init?.headers);
   const userCookie = headers.get("Cookie");
   const merged = mergeCookies(cookieJar, userCookie);
@@ -69,7 +70,7 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   }
 
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
-  const response = await fetchFn(input, {
+  const response = await fetchFn(getTestGraphqlUrl(), {
     ...init,
     headers,
   });
@@ -82,7 +83,7 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
 
 export const testClient = new ApolloClient({
   link: new HttpLink({
-    uri: TEST_GRAPHQL_URL,
+    uri: "http://localhost/__graphql_test_placeholder__/api/graphql",
     fetch: customFetch as unknown as typeof fetch,
     headers: {
       "apollo-require-preflight": "true",

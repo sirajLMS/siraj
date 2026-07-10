@@ -23,7 +23,9 @@ type GqlCurrencyBucket = {
   } | null;
 } | null;
 
-export function mapBillingCurrencyBuckets(rows: readonly GqlCurrencyBucket[] | null | undefined): BillingCurrencyBucket[] {
+export function mapBillingCurrencyBuckets(
+  rows: readonly GqlCurrencyBucket[] | null | undefined
+): BillingCurrencyBucket[] {
   return (rows ?? [])
     .filter((row): row is NonNullable<typeof row> => row != null && row.currency != null)
     .map(row => ({
@@ -46,6 +48,7 @@ type FormatCurrencyMessages = {
     convertedApprox: string;
     displayCurrency: string;
   }) => string;
+  readonly convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) => string;
   readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
 };
 
@@ -80,10 +83,7 @@ export function formatBillingCurrencyTotals(
   );
 
   const convertibleBuckets = buckets.filter(
-    bucket =>
-      bucket.displayAmount?.amount &&
-      bucket.displayAmount.currency &&
-      !bucket.displayAmount.stale
+    bucket => bucket.displayAmount?.amount && bucket.displayAmount.currency && !bucket.displayAmount.stale
   );
 
   if (convertibleBuckets.length === buckets.length && convertibleBuckets.length > 0) {
@@ -98,7 +98,8 @@ export function formatBillingCurrencyTotals(
         return Number.isFinite(numeric) ? sum + numeric : sum;
       }, 0);
 
-      const primary = formatLockedAmount(convertedTotal.toFixed(2), displayCurrency, locale);
+      const convertedApprox = convertedTotal.toFixed(2);
+      const primary = messages.convertedTotalApprox({ convertedApprox, displayCurrency });
       const breakdown = formattedBuckets.join(" · ");
 
       if (buckets.length === 1) {

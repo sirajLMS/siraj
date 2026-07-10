@@ -1,8 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
+import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/components/ui";
@@ -13,6 +13,7 @@ import {
   latestFxSyncRunQueryDocument,
   refreshExchangeRatesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { isFxStale } from "@/frontend/lib/fx-stale";
 import { logger } from "@/frontend/utils/logger";
 import { ExchangeRateHistorySection } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ExchangeRateHistorySection";
 import {
@@ -20,14 +21,9 @@ import {
   type ExchangeRateRow,
   formatExchangeRateTimestamp,
 } from "@/frontend/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
+import { ManualOverrideDialog } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
+import { ProviderSettingsSection } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
-
-const FX_STALE_MS = 24 * 60 * 60 * 1000;
-
-function isFxStale(finishedAt: string | null | undefined): boolean {
-  if (!finishedAt) return true;
-  return Date.now() - new Date(finishedAt).getTime() > FX_STALE_MS;
-}
 
 function SyncStatusBadge({
   status,
@@ -132,12 +128,12 @@ function ExchangeRatesSyncPanel({
 
 export function ExchangeRatesContainer() {
   const t = useTranslations("dashboard.billing");
-  const _locale = useLocale();
   const labels = t.raw("exchangeRates") as ExchangeRatesLabels;
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [manualOverrideOpen, setManualOverrideOpen] = useState(false);
 
   const showFeedback = (message: string, severity: "success" | "error") => {
     setSnackbarMessage(message);
@@ -224,7 +220,16 @@ export function ExchangeRatesContainer() {
           <ExchangeRatesSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
         </SectionPanel>
 
+        <ProviderSettingsSection labels={labels.providerSettings} onFeedback={showFeedback} />
+
         <SectionPanel title={labels.rateTable.title}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <RequirePermission permissions={AppPermission.BillingOverrideExchangeRates}>
+              <Button variant="outlined" onClick={() => setManualOverrideOpen(true)}>
+                {labels.manualOverride.title}
+              </Button>
+            </RequirePermission>
+          </Box>
           <AppDataGrid
             rows={rates}
             columns={columns}
@@ -239,6 +244,17 @@ export function ExchangeRatesContainer() {
           <ExchangeRateHistorySection labels={labels} availablePairs={availablePairs} />
         </SectionPanel>
       </RequirePermission>
+
+      <ManualOverrideDialog
+        open={manualOverrideOpen}
+        labels={labels.manualOverride}
+        onClose={() => setManualOverrideOpen(false)}
+        onSuccess={() => {
+          showFeedback(labels.manualOverride.success, "success");
+          void refetchRates();
+        }}
+        onError={message => showFeedback(message, "error")}
+      />
 
       <Snackbar
         open={snackbarOpen}

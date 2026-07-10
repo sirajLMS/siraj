@@ -19,14 +19,15 @@ export interface MarkPaidInvoiceTarget {
 
 export interface PaymentDetailsTarget {
   readonly invoiceId: string;
-  readonly isLegacyPaid: boolean;
 }
 
 export interface AdminBillingSummary {
   readonly totalOutstanding: string;
+  readonly totalOutstandingSubLabel?: string;
   readonly pendingInvoices: number;
   readonly negativeBalanceCount: string;
   readonly mtdRevenue: string;
+  readonly mtdRevenueSubLabel?: string;
 }
 
 export interface AdminInvoiceRow {
@@ -39,7 +40,7 @@ export interface AdminInvoiceRow {
   readonly amount: string;
   readonly status: AdminInvoiceStatus;
   readonly parentUserId: string | null;
-  readonly paidMethodHint: string | null;
+  readonly hasPaymentProof: boolean;
 }
 
 export interface StudentCreditRow {
@@ -54,8 +55,10 @@ export interface StudentCreditRow {
 
 export interface BillingCapabilityProps {
   readonly canManage: boolean;
+  readonly canSubmitProof: boolean;
   readonly canView: boolean;
   readonly canCreate: boolean;
+  readonly canViewExchangeRates?: boolean;
 }
 
 export interface AdminBillingViewProps extends BillingCapabilityProps {

@@ -32,18 +32,16 @@ function buildCoreInput(formData: StaffOwnEditFormData | StaffAdminEditFormData)
     name: formData.name.trim(),
     email: formData.email.trim(),
     displayCurrency: formData.displayCurrency ?? null,
-  };
-}
-
-function buildOwnStaffInput(formData: StaffOwnEditFormData | StaffAdminEditFormData) {
-  return {
     phone: formData.phone || null,
   };
 }
 
+function buildOwnStaffInput() {
+  return {};
+}
+
 function buildAdminStaffInput(formData: StaffAdminEditFormData) {
   return {
-    ...buildOwnStaffInput(formData),
     status: formData.status ?? null,
   };
 }
@@ -79,7 +77,7 @@ export function StaffProfileContainer({
 
   const onSubmit = async (formData: StaffAdminEditFormData) => {
     const coreInput = buildCoreInput(formData);
-    const staffInput = isAdminScope ? buildAdminStaffInput(formData) : buildOwnStaffInput(formData);
+    const staffInput = isAdminScope ? buildAdminStaffInput(formData) : buildOwnStaffInput();
 
     if (scope === ProfileScope.Own) {
       await updateOwnProfile({ variables: { input: { core: coreInput, staff: staffInput } } });

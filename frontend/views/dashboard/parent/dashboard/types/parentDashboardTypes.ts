@@ -1,3 +1,5 @@
+import type { EffectiveMeeting } from "@/frontend/graphql/generated/gql/graphql-types";
+
 export type ParentBookingStatus = "confirmed" | "rescheduled";
 
 export type ParentLiveClassStatus = "starting_soon" | "pending" | "scheduled";
@@ -17,6 +19,8 @@ export interface ParentScheduleRow {
   readonly bookingStatus: ParentBookingStatus;
   readonly liveClassStatus: ParentLiveClassStatus;
   readonly videoEnabled: boolean;
+  readonly meetingJoinUrl?: string | null;
+  readonly effectiveMeeting?: EffectiveMeeting | null;
 }
 
 export interface StudentProgressItem {

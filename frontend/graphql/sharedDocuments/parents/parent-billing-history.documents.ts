@@ -23,8 +23,7 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
         studentName
         parentId
         parentUserId
-        latestPaymentMethodType
-        latestPaymentMethodLabel
+        hasPaymentProof
         displayAmount {
           id
           amount
@@ -67,8 +66,7 @@ export const adminInvoicesQueryDocument: TypedDocumentNode<
         studentName
         parentId
         parentUserId
-        latestPaymentMethodType
-        latestPaymentMethodLabel
+        hasPaymentProof
         displayAmount {
           id
           amount

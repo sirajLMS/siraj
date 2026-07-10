@@ -6,13 +6,19 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
   Operations.ParentDirectoryQuery,
   Types.QueryParentDirectoryArgs
 > = gql`
-  query parentDirectory($paginationArgs: PaginationArgs, $search: String, $statusFilter: ParentStatus) {
-    parentDirectory(paginationArgs: $paginationArgs, search: $search, statusFilter: $statusFilter) {
+  query parentDirectory(
+    $paginationArgs: PaginationArgs
+    $search: String
+    $lifecycleStatusFilter: ParentStatus
+  ) {
+    parentDirectory(
+      paginationArgs: $paginationArgs
+      search: $search
+      lifecycleStatusFilter: $lifecycleStatusFilter
+    ) {
       id
       metrics {
         id
-        activated
-        deactivated
         regular
         onLeave
         onTrial
@@ -27,6 +33,7 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
         avatarUrl
         guardianOf
         time
+        lifecycleStatus
         accountStatus
         unpaidInvoices
       }

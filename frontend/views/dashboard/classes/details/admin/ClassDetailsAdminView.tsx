@@ -8,12 +8,13 @@ import {
   type ClassInstanceDetail,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ActivityHeatmap } from "@/frontend/views/dashboard/classes/details/admin/ActivityHeatmap";
-import { AdminActionsBar } from "@/frontend/views/dashboard/classes/details/admin/AdminActionsBar";
 import { ClassInfoCard } from "@/frontend/views/dashboard/classes/details/admin/ClassInfoCard";
+import { AdminActionsBar } from "@/frontend/views/dashboard/classes/details/admin/AdminActionsBar";
 import { LivePerformanceGrid } from "@/frontend/views/dashboard/classes/details/admin/LivePerformanceGrid";
 import { MetadataCard } from "@/frontend/views/dashboard/classes/details/admin/MetadataCard";
 import { classDetailsSectionStackSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 import { ClassDetailsToolbarArea } from "@/frontend/views/dashboard/classes/details/components/ClassDetailsToolbarArea";
+import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
 
 export interface ClassDetailsAdminViewProps {
@@ -116,6 +117,8 @@ export function ClassDetailsAdminView({
           labels={labels.adminActions}
         />
       </RequirePermission>
+
+      <ClassMeetingConfigsSection classInstanceId={instance.id ?? undefined} />
 
       <Grid container rowSpacing={{ xs: 2, lg: 3 }} columnSpacing={{ xs: 0, lg: 3 }}>
         <Grid size={{ xs: 12, md: 8 }}>

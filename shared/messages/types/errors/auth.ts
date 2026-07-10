@@ -10,6 +10,7 @@ export interface AuthErrorLabels {
   readonly tooManyLoginAttempts: string;
   readonly serviceUnavailable: string;
   readonly invalidCredentials: string;
+  readonly accountDeactivated: string;
   readonly accountLocked: string;
   readonly demoLoginNotEnabled: string;
   readonly demoLoginFailed: string;

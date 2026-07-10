@@ -125,3 +125,30 @@ export function aggregateCurrencyTotals(
     percent: totalPaid > 0 ? Math.round((amount / totalPaid) * 100) : 0,
   }));
 }
+
+export function aggregateCurrencyTotalsWithDisplay(
+  rows: readonly { readonly paidAmounts?: readonly ReportPaidAmount[] | null }[]
+): readonly {
+  readonly currency: CurrencyCode;
+  readonly amount: number;
+  readonly percent: number;
+  readonly paidAmount: ReportPaidAmount;
+}[] {
+  const paidTotals = aggregatePaidAmountTotals(rows);
+  const totalLocked = paidTotals.reduce((sum, paid) => {
+    const numeric = Number.parseFloat(paid.amount);
+    return Number.isFinite(numeric) ? sum + numeric : sum;
+  }, 0);
+
+  return paidTotals.map(paid => {
+    const amount = Number.parseFloat(paid.amount);
+    const lockedAmount = Number.isFinite(amount) ? amount : 0;
+
+    return {
+      currency: paid.currency,
+      amount: lockedAmount,
+      percent: totalLocked > 0 ? Math.round((lockedAmount / totalLocked) * 100) : 0,
+      paidAmount: paid,
+    };
+  });
+}

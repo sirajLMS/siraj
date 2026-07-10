@@ -5,17 +5,14 @@ const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
   displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
-});
-
-const ownStaffSchema = z.object({
   phone: z.string().optional(),
 });
 
-const adminStaffSchema = ownStaffSchema.extend({
+const adminStaffSchema = z.object({
   status: z.enum(AccountStatus).optional(),
 });
 
-export const staffOwnEditSchema = z.object({ ...coreSchema.shape, ...ownStaffSchema.shape });
+export const staffOwnEditSchema = coreSchema;
 export const staffAdminEditSchema = z.object({ ...coreSchema.shape, ...adminStaffSchema.shape });
 
 export type StaffOwnEditFormData = z.infer<typeof staffOwnEditSchema>;

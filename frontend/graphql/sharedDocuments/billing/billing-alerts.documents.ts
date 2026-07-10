@@ -7,6 +7,17 @@ export const unpaidInvoicesAlertQueryDocument: TypedDocumentNode<Operations.Unpa
       id
       totalOverdueInvoices
       totalOverdueAmount
+      overdueAmountsByCurrency {
+        id
+        currency
+        amount
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
+      }
       items {
         id
         userId

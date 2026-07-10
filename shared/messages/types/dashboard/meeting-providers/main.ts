@@ -12,6 +12,9 @@ export interface MeetingProvidersLabels {
   readonly save: string;
   readonly edit: string;
   readonly delete: string;
+  readonly emptyCatalogTitle: string;
+  readonly emptyCatalogBody: string;
+  readonly urlAllowlistInvalid: string;
   readonly columns: {
     readonly slug: string;
     readonly name: string;

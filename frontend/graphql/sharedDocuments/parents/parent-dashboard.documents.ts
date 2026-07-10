@@ -1,11 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 
 export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
   Operations.ParentDashboardScheduleQuery,
   Types.QueryParentDashboardScheduleArgs
 > = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   query parentDashboardSchedule($date: String, $search: String, $paginationArgs: PaginationArgs) {
     parentDashboardSchedule(date: $date, search: $search, paginationArgs: $paginationArgs) {
       id
@@ -25,6 +27,9 @@ export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
         executionState
         outcome
         meetingJoinUrl
+        effectiveMeeting {
+          ...EffectiveMeetingFields
+        }
         classTimeFormatted
       }
       totalCount

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   deactivateParentMutationDocument,
   parentAssociatedStudentsQueryDocument,
@@ -48,15 +49,13 @@ describe("GraphQL Parent Directory Tests", () => {
     const data = await authenticatedRequest(superAdminToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
-      statusFilter: null,
+      lifecycleStatusFilter: null,
     });
 
     expect(data.parentDirectory).toBeDefined();
     expect(data.parentDirectory?.id).toBeDefined();
     const metrics = data.parentDirectory?.metrics;
     if (!metrics) throw new Error("No metrics in parentDirectory");
-    expect(metrics.activated).toBeGreaterThanOrEqual(0);
-    expect(metrics.deactivated).toBeGreaterThanOrEqual(0);
     expect(metrics.regular).toBeGreaterThanOrEqual(0);
     expect(metrics.onLeave).toBeGreaterThanOrEqual(0);
     expect(metrics.suspended).toBeGreaterThanOrEqual(0);
@@ -80,7 +79,7 @@ describe("GraphQL Parent Directory Tests", () => {
     const data = await authenticatedRequest(superAdminToken, "query", parentDirectoryQueryDocument, {
       search: "ParentDirTest",
       paginationArgs: null,
-      statusFilter: null,
+      lifecycleStatusFilter: null,
     });
 
     expect(data.parentDirectory?.rows).toBeDefined();
@@ -90,7 +89,7 @@ describe("GraphQL Parent Directory Tests", () => {
     const denied = await assertOperationDenied("teacher_default", "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
-      statusFilter: null,
+      lifecycleStatusFilter: null,
     });
     expect(denied).toBe(true);
   });
@@ -99,7 +98,7 @@ describe("GraphQL Parent Directory Tests", () => {
     const denied = await assertOperationDenied("parent_default", "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
-      statusFilter: null,
+      lifecycleStatusFilter: null,
     });
     expect(denied).toBe(true);
   });
@@ -140,7 +139,8 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
     expect(data.parentProfile?.id).toBe(parentId);
     expect(typeof data.parentProfile?.name).toBe("string");
     expect(typeof data.parentProfile?.email).toBe("string");
-    expect(typeof data.parentProfile?.status).toBe("string");
+    expect(data.parentProfile?.lifecycleStatus).toBeDefined();
+    expect(data.parentProfile?.accountStatus).toBeDefined();
     expect(typeof data.parentProfile?.timezone).toBe("string");
     expect(data.parentProfile?.createdAt).toBeDefined();
   });
@@ -276,7 +276,7 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
 
     expect(data.deactivateParent).toBeDefined();
     expect(data.deactivateParent?.id).toBe(parentId);
-    expect(data.deactivateParent?.status).toBe("DEACTIVATED");
+    expect(data.deactivateParent?.accountStatus).toBe(AccountStatus.Deactivated);
   });
 });
 

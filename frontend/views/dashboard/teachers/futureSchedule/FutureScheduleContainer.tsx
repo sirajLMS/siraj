@@ -5,6 +5,7 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   teacherFutureScheduleQueryDocument,
@@ -81,7 +82,7 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
     );
   }
 
-  const classes = schedule.classes ?? [];
+  const classes = (schedule.classes ?? []) as FutureClass[];
   const notes: ImportantNoteItem[] = (schedule.importantNotes ?? []).map(n => ({
     id: n.id ?? "",
     title: n.title ?? "",

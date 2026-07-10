@@ -1,10 +1,9 @@
 "use client";
 
-import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import { Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PrimaryPageAction } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   classDetailsContentPaddingSx,
@@ -52,12 +51,8 @@ export function ClassDetailsToolbarArea({
 }: ClassDetailsToolbarAreaProps) {
   const t = useTranslations("dashboard.classDetails.liveSession");
   const meetingJoinUrl = instance.meetingJoinUrl?.trim();
-
-  const handleJoinZoom = () => {
-    if (meetingJoinUrl) {
-      window.open(meetingJoinUrl, "_blank", "noopener,noreferrer");
-    }
-  };
+  const effectiveMeeting = (instance as { effectiveMeeting?: { joinUrl?: string | null } }).effectiveMeeting;
+  const joinUrl = effectiveMeeting?.joinUrl?.trim() || meetingJoinUrl;
 
   return (
     <Box sx={classDetailsSectionStackSx}>
@@ -71,13 +66,20 @@ export function ClassDetailsToolbarArea({
         </RequirePermission>
       )}
 
-      {meetingJoinUrl ? (
+      {joinUrl ? (
         <Stack direction="row" sx={classDetailsContentPaddingSx}>
-          <PrimaryPageAction startIcon={<VideocamOutlined />} onClick={handleJoinZoom} id={`join-zoom-${instance.id}`}>
-            {t("joinZoom")}
-          </PrimaryPageAction>
+          <MeetingJoinAction joinUrl={joinUrl} label={t("joinZoom")} id={`join-meeting-${instance.id}`} />
         </Stack>
-      ) : null}
+      ) : (
+        <Stack direction="row" sx={classDetailsContentPaddingSx}>
+          <MeetingJoinAction
+            emptyRole="class"
+            setupHref={`/classes/${instance.id}`}
+            label={t("joinZoom")}
+            id={`join-meeting-${instance.id}`}
+          />
+        </Stack>
+      )}
 
       <Box sx={classDetailsContentPaddingSx}>
         <LiveSessionToolbar

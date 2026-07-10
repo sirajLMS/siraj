@@ -62,7 +62,11 @@ enum AppPermission {
   AUTH_VIEW_OWN_PROFILE
   BILLING_CREATE_INVOICE
   BILLING_DELETE_INVOICE
+  BILLING_MANAGE_CURRENCY_HEDGES
+  BILLING_MANAGE_FX_PROVIDER
+  BILLING_OVERRIDE_EXCHANGE_RATES
   BILLING_REFRESH_EXCHANGE_RATES
+  BILLING_SUBMIT_PAYMENT_PROOF
   BILLING_UPDATE_STATUS_PAID
   BILLING_VIEW_EXCHANGE_RATES
   BILLING_VIEW_HISTORY
@@ -88,6 +92,7 @@ enum AppPermission {
   INVOICES_EDIT
   INVOICES_LIST
   INVOICES_MARK_PAID
+  MEETING_CONFIGS_MANAGE_CLASS
   MEETING_CONFIGS_MANAGE_OTHER
   MEETING_CONFIGS_MANAGE_OWN
   MEETING_PROVIDERS_MANAGE_CATALOG
@@ -315,6 +320,7 @@ enum AvailabilityStatus {
 type BillingCurrencyTotal {
   amount: String
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
 }
 
@@ -392,13 +398,14 @@ type ClassInstanceDetail {
   classType: ClassType
   courseName: String
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   endTime: String
   executionState: ClassExecutionState
   hasTimezoneMismatch: Boolean
   id: String
   instanceId: String
   isRescheduled: Boolean
-  meetingJoinUrl: String
+  meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
   payrollCredited: Boolean
   performance: ClassInstancePerformance
@@ -440,6 +447,38 @@ type ClassInstanceTeacherInfo {
   id: String
   name: String
   title: String
+}
+
+type ClassMeetingConfig {
+  classInstanceId: String
+  createdAt: DateTime
+  details: MeetingConfigDetails
+  hasSecret: Boolean
+  id: String
+  isDefault: Boolean
+  label: String
+  provider: MeetingProvider
+  providerId: String
+  recurringScheduleId: String
+  updatedAt: DateTime
+}
+
+input ClassMeetingConfigCreateInput {
+  classInstanceId: String
+  details: MeetingConfigDetailsInput!
+  isDefault: Boolean!
+  label: String
+  password: String
+  providerId: String!
+  recurringScheduleId: String
+}
+
+input ClassMeetingConfigUpdateInput {
+  details: MeetingConfigDetailsInput
+  isDefault: Boolean
+  label: String
+  password: String
+  providerId: String
 }
 
 enum ClassOutcome {
@@ -936,6 +975,16 @@ enum CurrencyCode {
   YER
 }
 
+type CurrencyHedge {
+  amount: String
+  createdAt: DateTime
+  currency: CurrencyCode
+  hedgeType: String
+  id: String
+  notes: String
+  updatedAt: DateTime
+}
+
 type DailyScheduleList {
   avatarUrl: String
   courseName: String
@@ -998,8 +1047,9 @@ enum DayOfWeek {
 }
 
 type DeactivateParentResult {
+  accountStatus: AccountStatus
   id: String
-  status: String
+  userId: String
 }
 
 type DeleteInvoiceResult {
@@ -1105,6 +1155,24 @@ type EditQuotaResult {
   classesTotal: Int
   id: String
   version: Int
+}
+
+type EffectiveMeeting {
+  configId: String
+  joinUrl: String
+  logoUrl: String
+  meetingId: String
+  providerId: String
+  providerName: LocalizedString
+  providerSlug: String
+  source: EffectiveMeetingSource
+}
+
+enum EffectiveMeetingSource {
+  class
+  none
+  recurring
+  teacher
 }
 
 """A type representing a validated email address"""
@@ -1244,13 +1312,14 @@ type FutureClass {
   classType: ClassType
   courseName: String
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   endTime: String
   id: String
   isRescheduled: Boolean
   leaveRequestDisabled: Boolean
   leaveRequestDisabledReason: String
   location: String
-  meetingJoinUrl: String
+  meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   scheduledDate: String
   startTime: String
   studentCount: Int
@@ -1261,6 +1330,24 @@ type FutureClass {
 enum FxProvider {
   Fixer
   OpenExchangeRates
+}
+
+type FxProviderConfig {
+  activeProvider: FxProvider
+  id: String
+  source: FxProviderConfigSource
+}
+
+enum FxProviderConfigSource {
+  database
+  env
+}
+
+type FxSyncHealth {
+  finishedAt: DateTime
+  id: String
+  isStale: Boolean
+  status: FxSyncStatus
 }
 
 type FxSyncRun {
@@ -1795,9 +1882,30 @@ type ImpersonationStatus {
   targetUser: User
 }
 
+type InvoicePaymentSubmission {
+  fileId: String
+  filePath: String
+  id: String
+  invoiceId: String
+  mimeType: String
+  rejectionReason: String
+  reviewedAt: String
+  reviewedByUserId: String
+  status: InvoicePaymentSubmissionStatus
+  submittedAt: String
+  submittedByUserId: String
+}
+
+enum InvoicePaymentSubmissionStatus {
+  approved
+  pending
+  rejected
+}
+
 enum InvoiceStatus {
   CANCELLED
   PAID
+  PAYMENT_PENDING
   UNPAID
 }
 
@@ -2019,6 +2127,7 @@ input MeetingProviderUpdateInput {
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
+  approvePaymentProof(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
   assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
   attachSubjectResource(input: AttachSubjectResourceInput!): SubjectResource
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
@@ -2031,7 +2140,9 @@ type Mutation {
   clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createClassCategory(input: ClassCategoryCreateInput!): ClassCategory
+  createClassMeetingConfig(input: ClassMeetingConfigCreateInput!): ClassMeetingConfig
   createClassSubject(input: ClassSubjectCreateInput!): ClassSubject
+  createCurrencyHedge(amount: String!, currency: CurrencyCode!, hedgeType: String!, notes: String): CurrencyHedge
   createFolder(input: FolderCreateInput!): FileOperationResult
 
   """Create a new manager/staff account (System Admin only)"""
@@ -2072,10 +2183,12 @@ type Mutation {
   ): Boolean
   deleteClassCategory(id: ID!): Boolean
   deleteClassInstance(classInstanceId: ID!): Boolean
+  deleteClassMeetingConfig(id: ID!): Boolean
   deleteClassSubject(id: ID!): Boolean
 
   """Soft-deletes a complaint (admin only). Returns true on success."""
   deleteComplaint(complaintId: String!): Boolean
+  deleteCurrencyHedge(id: String!): Boolean
   deleteFile(path: String!): FileOperationResult
   deleteInvoice(invoiceId: String!): DeleteInvoiceResult
 
@@ -2110,7 +2223,7 @@ type Mutation {
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
-  markInvoicePaid(expectedVersion: Int, invoiceId: String!, userPaymentMethodId: ID!): MarkInvoicePaidResult
+  markInvoicePaid(expectedVersion: Int, invoiceId: String!, proofFileId: ID!): MarkInvoicePaidResult
 
   """Marks a suggestion as a duplicate of another suggestion (admin only)."""
   markSuggestionDuplicate(input: MarkSuggestionDuplicateInput!): Suggestion
@@ -2124,6 +2237,7 @@ type Mutation {
   recordPayment(amount: String!, currency: CurrencyCode!, invoiceId: ID!, transactionId: String, userPaymentMethodId: ID!): Payment
   refreshExchangeRates(force: Boolean = false): RefreshExchangeRatesResult
   refreshToken: RefreshTokenResponse
+  rejectPaymentProof(expectedVersion: Int, invoiceId: String!, rejectionReason: String): MarkInvoicePaidResult
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
   resendClassNotifications(classInstanceId: String!): SupportRequestResult
@@ -2136,6 +2250,7 @@ type Mutation {
   respondToSuggestion(input: RespondToSuggestionInput!): Suggestion
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   sendPaymentReminder(studentId: String!): SendPaymentReminderResult
+  setDefaultClassMeetingConfig(id: ID!): ClassMeetingConfig
   setDefaultMeetingConfig(id: ID!): UserMeetingConfig
   setDefaultUserPaymentMethod(id: ID!): UserPaymentMethod
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
@@ -2145,13 +2260,17 @@ type Mutation {
 
   """Submits a new complaint from the authenticated parent."""
   submitComplaint(input: ComplaintSubmitInput!): Complaint
+  submitPaymentProof(expectedVersion: Int, invoiceId: String!, proofFileId: ID!): MarkInvoicePaidResult
 
   """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
+  updateClassMeetingConfig(id: ID!, input: ClassMeetingConfigUpdateInput!): ClassMeetingConfig
   updateClassSubject(id: ID!, input: ClassSubjectUpdateInput!): ClassSubject
+  updateCurrencyHedge(amount: String, currency: CurrencyCode, hedgeType: String, id: String!, notes: String): CurrencyHedge
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
+  updateFxProvider(provider: FxProvider!): FxProviderConfig
 
   """Updates a manager's profile fields."""
   updateManagerProfile(input: UpdateManagerProfileInput!, staffProfileId: ID!): ManagerDirectoryRow
@@ -2175,6 +2294,7 @@ type Mutation {
 
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
+  upsertManualExchangeRate(effectiveDate: DateTime, fromCurrency: CurrencyCode!, rate: String!, toCurrency: CurrencyCode!): UpsertManualExchangeRateResult
   verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
 }
 
@@ -2343,9 +2463,10 @@ type ParentDashboardScheduleRow {
   bookingStatus: BookingStatus
   classTimeFormatted: String
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
-  meetingJoinUrl: String
+  meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
@@ -2367,8 +2488,6 @@ type ParentDirectory {
 }
 
 type ParentDirectoryMetrics {
-  activated: Int
-  deactivated: Int
   id: String
   onLeave: Int
   onTrial: Int
@@ -2377,12 +2496,13 @@ type ParentDirectoryMetrics {
 }
 
 type ParentDirectoryRow {
-  accountStatus: ParentStatus
+  accountStatus: AccountStatus
   avatarUrl: String
   email: String
   guardianOf: String
   id: String
   index: Int
+  lifecycleStatus: ParentStatus
   name: String
   time: String
   unpaidInvoices: Int
@@ -2415,11 +2535,10 @@ type ParentInvoiceRow {
   currency: CurrencyCode
   displayAmount: DisplayAmount
   dueDate: String
+  hasPaymentProof: Boolean
   id: String
   invoiceType: InvoiceType
   issueDate: String
-  latestPaymentMethodLabel: String
-  latestPaymentMethodType: PaymentMethodType
   paidDate: String
   parentId: String
   parentUserId: String
@@ -2475,6 +2594,7 @@ input ParentOwnProfileUpdateInput {
 }
 
 type ParentProfile {
+  accountStatus: AccountStatus
   address: String
   avatarUrl: String
   createdAt: DateTime
@@ -2485,10 +2605,10 @@ type ParentProfile {
   feeAmount: String
   id: String
   invoiceType: String
+  lifecycleStatus: String
   name: String
   nationality: String
   phone: String
-  status: String
   timezone: IanaTimezone
   twitter: String
   updatedAt: DateTime
@@ -2497,8 +2617,6 @@ type ParentProfile {
 }
 
 enum ParentStatus {
-  ACTIVATED
-  DEACTIVATED
   ON_LEAVE
   ON_TRIAL
   REGULAR
@@ -2528,6 +2646,7 @@ type Payment {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   invoiceId: String
   paymentDate: DateTime
@@ -2602,6 +2721,7 @@ enum PaymentMethodType {
   MOBILE_WALLET
   ONLINE_ACCOUNT
   PAYMENT_LINK
+  PROOF_UPLOAD
 }
 
 type Permission {
@@ -2668,6 +2788,7 @@ type Query {
   booksAndBags: [Book!]
   classCategories: [ClassCategory!]
   classInstance(id: ID!): ClassInstanceDetail
+  classMeetingConfigs(classInstanceId: ID!): [ClassMeetingConfig!]
   classStatusEvents(classInstanceId: ID!): [ClassStatusEvent!]
   classSubject(id: ID!): ClassSubject
   classSubjects(categoryId: String): [ClassSubject!]
@@ -2676,6 +2797,7 @@ type Query {
   Returns file attachments for a specific complaint. Accessible by the owning parent or admins.
   """
   complaintFiles(complaintId: String!): [ComplaintFile!]
+  currencyHedges: [CurrencyHedge!]
   dailyScheduleList(date: String!, metricFilter: String, search: String, teacherId: String): [DailyScheduleList!]
   dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
   directoryChildren(
@@ -2691,11 +2813,14 @@ type Query {
   fileInfo(path: String!): FileInfo
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
   folderInfo(path: String!): DirectoryInfo
+  fxProviderConfig: FxProviderConfig
+  fxSyncHealth: FxSyncHealth
 
   """Generates dynamic attendance and financial reports."""
   generateAttendanceReport(filters: AttendanceReportFiltersInput!): AttendanceReportPayload
   groupClassAudit(classInstanceId: String!): GroupClassAudit
   impersonationStatus: ImpersonationStatus
+  invoicePaymentSubmission(invoiceId: String!): InvoicePaymentSubmission
   invoicePayments(invoiceId: ID!): [Payment!]
   latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
   latestFxSyncRun: FxSyncRun
@@ -2722,7 +2847,7 @@ type Query {
   parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
   parentDashboardMetrics: ParentDashboardMetricsResult
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
-  parentDirectory(paginationArgs: PaginationArgs, search: String, statusFilter: ParentStatus): ParentDirectory
+  parentDirectory(lifecycleStatusFilter: ParentStatus, paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
   parentHandbookUrl: ParentHandbookUrl
   parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String, userId: String): ParentInvoiceHistoryResult
@@ -2744,6 +2869,7 @@ type Query {
   """List all permission catalog entries."""
   permissions: [Permission!]
   profileByUserId(userId: String!): UnifiedProfile
+  recurringMeetingConfigs(recurringScheduleId: ID!): [ClassMeetingConfig!]
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
   rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: LeaveRequestStatus): RescheduleTrackingResult
   searchFiles(
@@ -3567,9 +3693,10 @@ type TeacherDashboardMetrics {
 
 type TeacherDashboardScheduleRow {
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
-  meetingJoinUrl: String
+  meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
@@ -3837,6 +3964,7 @@ type UnifiedProfile {
 }
 
 type UnpaidInvoiceItem {
+  amountsByCurrency: [BillingCurrencyTotal!]
   currency: CurrencyCode
   displayAmount: DisplayAmount
   id: String
@@ -3851,6 +3979,7 @@ type UnpaidInvoiceItem {
 type UnpaidInvoicesSummary {
   id: String
   items: [UnpaidInvoiceItem!]
+  overdueAmountsByCurrency: [BillingCurrencyTotal!]
   totalOverdueAmount: String
   totalOverdueInvoices: Int
 }
@@ -3909,6 +4038,11 @@ enum UploadType {
   VERCEL_BLOB_CLIENT
 }
 
+type UpsertManualExchangeRateResult {
+  id: String
+  rate: ExchangeRate
+}
+
 type User {
   avatarUrl: String
   createdAt: DateTime
@@ -3920,7 +4054,9 @@ type User {
   notificationCount: Int
   parentId: String
   permissions: [AppPermission!]
+  phone: String
   role: String
+  status: AccountStatus
   teacherId: String
   updatedAt: DateTime
 }

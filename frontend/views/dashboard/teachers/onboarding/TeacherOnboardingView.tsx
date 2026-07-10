@@ -1,12 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircleOutlined } from "@mui/icons-material";
-import { Box, Snackbar, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import {
+  FormSuccessSnackbar,
+  PageContainer,
+  PageHeader,
+  PrimaryPageAction,
+  SectionPanel,
+} from "@/frontend/components/ui";
 import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { MeetingConfigOnboardingSection } from "@/frontend/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
@@ -191,28 +196,7 @@ export function TeacherOnboardingView({
           <FormActions isSubmitting={isSubmitting} labels={labels} />
         </Box>
       </FormProvider>
-      <Snackbar
-        open={showSuccess}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={onDismissSuccess}
-      >
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            px: 3,
-            py: 1.5,
-            borderRadius: 10,
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            boxShadow: theme.palette.shadow.card,
-          })}
-        >
-          <CheckCircleOutlined />
-          <Typography sx={{ fontWeight: 700 }}>{labels.actions.successMessage}</Typography>
-        </Box>
-      </Snackbar>
+      <FormSuccessSnackbar open={showSuccess} message={labels.actions.successMessage} onClose={onDismissSuccess} />
     </PageContainer>
   );
 }

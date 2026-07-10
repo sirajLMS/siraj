@@ -1,2 +1,2 @@
-export { billing } from "./main";
+export { billing, currencyHedges, supportedCurrencies } from "./main";
 export { billingManual } from "./manual";

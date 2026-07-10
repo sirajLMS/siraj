@@ -1,8 +1,9 @@
 "use client";
 
-import { ScheduleOutlined, VideocamOutlined } from "@mui/icons-material";
-import { Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
+import { ScheduleOutlined } from "@mui/icons-material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
 import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
@@ -11,7 +12,7 @@ import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashbo
 interface ParentScheduleCardListProps {
   readonly rows: readonly ParentScheduleRow[];
   readonly labels: ParentDashboardLabels;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly pagination?: SchedulePagination;
 }
 
@@ -23,15 +24,7 @@ function formatTeacherLabel(template: string, name: string): string {
   return template.replace("{name}", name);
 }
 
-function ScheduleCard({
-  row,
-  labels,
-  onJoinVideo,
-}: {
-  readonly row: ParentScheduleRow;
-  readonly labels: ParentDashboardLabels;
-  readonly onJoinVideo: (id: string) => void;
-}) {
+function ScheduleCard({ row, labels }: { readonly row: ParentScheduleRow; readonly labels: ParentDashboardLabels }) {
   const studentProfileHref = row.studentId ? studentHref(row.studentId) : undefined;
   const teacherProfileHref = profileHrefForTeacher({ teacherId: row.teacherId });
   const teacherLabel = formatTeacherLabel(labels.schedule.teacherLabel, row.teacherName);
@@ -103,44 +96,27 @@ function ScheduleCard({
               emphasizeLink={Boolean(teacherProfileHref)}
             />
           </Stack>
-          <IconButton
-            onClick={() => {
-              onJoinVideo(row.id);
-            }}
+          <MeetingJoinAction
+            variant="icon"
+            joinUrl={row.meetingJoinUrl}
+            meeting={row.effectiveMeeting}
             disabled={!row.videoEnabled}
-            aria-label={labels.schedule.joinVideo}
-            sx={theme => ({
-              width: 40,
-              height: 40,
-              backgroundColor: theme.palette.header,
-              color: theme.palette.onPrimary,
-              "&:hover": { backgroundColor: theme.palette.primary.dark },
-              "&.Mui-disabled": {
-                backgroundColor: theme.palette.surfaceContainer,
-                color: theme.palette.onSurfaceVariant,
-              },
-            })}
-          >
-            <VideocamOutlined />
-          </IconButton>
+            label={labels.schedule.joinVideo}
+            emptyRole="parent"
+          />
         </Box>
       </CardContent>
     </Card>
   );
 }
 
-export function ParentScheduleCardList({
-  rows,
-  labels,
-  onJoinVideo,
-  pagination,
-}: Readonly<ParentScheduleCardListProps>) {
+export function ParentScheduleCardList({ rows, labels, pagination }: Readonly<ParentScheduleCardListProps>) {
   const pageCount = pagination ? Math.max(1, Math.ceil(pagination.totalCount / pagination.pageSize)) : 0;
 
   return (
     <Stack spacing={1.5}>
       {rows.map(row => (
-        <ScheduleCard key={row.id} row={row} labels={labels} onJoinVideo={onJoinVideo} />
+        <ScheduleCard key={row.id} row={row} labels={labels} />
       ))}
       {pagination && pagination.totalCount > 0 && (
         <PaginationControls

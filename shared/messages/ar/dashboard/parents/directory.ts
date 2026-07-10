@@ -6,8 +6,6 @@ export const directory: ParentsDirectoryLabels = {
   searchPlaceholder: "البحث عن أولياء الأمور...",
   records: "سجلات أولياء الأمور",
   metrics: {
-    activated: "مفعّل",
-    deactivated: "معطّل",
     regular: "عادي",
     onLeave: "في إجازة",
     suspended: "موقوف",

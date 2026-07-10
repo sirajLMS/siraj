@@ -59,7 +59,7 @@ export function ManualInvoiceContainer() {
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
   const { data: parentData, loading: parentsLoading } = useQuery(parentDirectoryQueryDocument, {
-    variables: { search: null, paginationArgs: null, statusFilter: null },
+    variables: { search: null, paginationArgs: null, lifecycleStatusFilter: null },
     fetchPolicy: "cache-first",
   });
 

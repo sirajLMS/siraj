@@ -19,19 +19,16 @@ import {
   sendPaymentReminderMutationDocument,
   studentCreditStatusQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import {
-  formatBillingCurrencyTotals,
-  mapBillingCurrencyBuckets,
-} from "@/frontend/lib/formatBillingCurrencyTotals";
+import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
-import { buildPaidMethodHint } from "@/frontend/lib/user-payment-method";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
+import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";
 import { filterAdminInvoices } from "@/frontend/views/dashboard/admin/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/admin/billing/utils/buildBillingLabels";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
-import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
+import { SubmitPaymentProofDialog } from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
 import type {
   AdminBillingSummary,
   AdminInvoiceRow,
@@ -40,6 +37,7 @@ import type {
   PaymentDetailsTarget,
   StudentCreditRow,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface AdminBillingContainerProps {
@@ -48,6 +46,12 @@ interface AdminBillingContainerProps {
 
 function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): AdminInvoiceStatus {
   if (gqlStatus === InvoiceStatus.Paid) return InvoiceStatus.Paid;
+  if (gqlStatus === InvoiceStatus.PaymentPending) return InvoiceStatus.PaymentPending;
+  if (gqlStatus === InvoiceStatus.Cancelled) return InvoiceStatus.Cancelled;
+  if (gqlStatus === InvoiceStatus.Unpaid) {
+    if (dueDate && new Date(dueDate) < new Date()) return "OVERDUE";
+    return InvoiceStatus.Unpaid;
+  }
   if (dueDate && new Date(dueDate) < new Date()) return "OVERDUE";
   return "PENDING";
 }
@@ -76,18 +80,21 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
   const tProfile = useTranslations("profile.teacher");
   const tErrors = useTranslations("errors");
-  const tUi = useTranslations("ui.paymentMethod");
   const locale = useLocale();
   const tc = useTranslations("common");
   const router = useRouter();
   const labels = buildBillingLabels(t);
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canViewExchangeRates = hasPermission(AppPermission.BillingViewExchangeRates);
+  const canManage = hasPermission(AppPermission.BillingUpdateStatusPaid);
+  const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
 
   const page = useAdminBillingStore(state => state.page);
   const pageSize = useAdminBillingStore(state => state.pageSize);
   const setPage = useAdminBillingStore(state => state.setPage);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
+  const [proofTarget, setProofTarget] = useState<MarkPaidInvoiceTarget | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -177,13 +184,9 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         ),
         status: mapInvoiceStatus(inv.status, inv.dueDate),
         parentUserId: inv.parentUserId ?? null,
-        paidMethodHint: buildPaidMethodHint(
-          inv.latestPaymentMethodType,
-          inv.latestPaymentMethodLabel,
-          key => tUi(key as never)
-        ),
+        hasPaymentProof: inv.hasPaymentProof ?? false,
       })),
-    [invoicesData?.adminInvoices, locale, tErrors, tProfile, tUi]
+    [invoicesData?.adminInvoices, locale, tErrors, tProfile]
   );
 
   const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
@@ -198,23 +201,30 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         convertedApprox: string;
         displayCurrency: string;
       }) => tProfile("convertedAmount", values),
+      convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) =>
+        tProfile("convertedTotalApprox", values),
       displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
         tErrors("displayCurrencyFallback", values),
     };
 
+    const outstandingTotals = formatBillingCurrencyTotals(
+      mapBillingCurrencyBuckets(summaryData?.adminBillingSummary?.outstandingByCurrency),
+      locale,
+      fxMessages
+    );
+    const mtdRevenueTotals = formatBillingCurrencyTotals(
+      mapBillingCurrencyBuckets(summaryData?.adminBillingSummary?.mtdRevenueByCurrency),
+      locale,
+      fxMessages
+    );
+
     return {
-      totalOutstanding: formatBillingCurrencyTotals(
-        mapBillingCurrencyBuckets(summaryData?.adminBillingSummary?.outstandingByCurrency),
-        locale,
-        fxMessages
-      ).primary,
+      totalOutstanding: outstandingTotals.primary,
+      totalOutstandingSubLabel: outstandingTotals.breakdown,
       pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
       negativeBalanceCount: `${summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0} Students`,
-      mtdRevenue: formatBillingCurrencyTotals(
-        mapBillingCurrencyBuckets(summaryData?.adminBillingSummary?.mtdRevenueByCurrency),
-        locale,
-        fxMessages
-      ).primary,
+      mtdRevenue: mtdRevenueTotals.primary,
+      mtdRevenueSubLabel: mtdRevenueTotals.breakdown,
     };
   }, [summaryData?.adminBillingSummary, locale, tProfile, tErrors]);
 
@@ -247,17 +257,26 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   );
 
   const handleMarkAsPaid = (invoice: MarkPaidInvoiceTarget) => {
-    setMarkPaidTarget(invoice);
+    setProofTarget({
+      ...invoice,
+      dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : invoice.dueDate,
+    });
   };
 
-  const handleMarkPaidSuccess = () => {
+  const handleProofSuccess = () => {
     showFeedback(labels.markAsPaidSuccess, "success");
     void refetchInvoices();
     void refetchSummary();
   };
 
-  const handleMarkPaidError = (message: string) => {
+  const handleProofError = (message: string) => {
     showFeedback(message, "error");
+  };
+
+  const handleDetailsSuccess = (action: "approve" | "reject") => {
+    showFeedback(action === "approve" ? labels.approveProofSuccess : labels.rejectProofSuccess, "success");
+    void refetchInvoices();
+    void refetchSummary();
   };
 
   const handleDeleteInvoice = (invoiceId: string) => {
@@ -270,15 +289,18 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
+      <DisplayCurrencyHint />
       <AdminBillingView
         labels={labels}
         summary={summary}
         invoices={filteredInvoices}
         creditRows={creditRows}
         searchQuery={searchQuery}
-        canManage
+        canManage={canManage}
+        canSubmitProof={false}
         canView
-        canCreate
+        canCreate={canCreate}
+        canViewExchangeRates={canViewExchangeRates}
         onSearchChange={setSearchQuery}
         onMarkAsPaid={handleMarkAsPaid}
         onViewPaymentDetails={setDetailsTarget}
@@ -304,18 +326,20 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      <MarkInvoicePaidDialog
-        open={markPaidTarget !== null}
-        onClose={() => setMarkPaidTarget(null)}
-        invoice={markPaidTarget}
-        onSuccess={handleMarkPaidSuccess}
-        onError={handleMarkPaidError}
+      <SubmitPaymentProofDialog
+        open={proofTarget !== null}
+        onClose={() => setProofTarget(null)}
+        invoice={proofTarget}
+        mode="markPaid"
+        onSuccess={handleProofSuccess}
+        onError={handleProofError}
       />
       <InvoicePaymentDetailsDialog
         open={detailsTarget !== null}
         onClose={() => setDetailsTarget(null)}
         invoiceId={detailsTarget?.invoiceId ?? null}
-        isLegacyPaid={detailsTarget?.isLegacyPaid ?? false}
+        canManage={canManage}
+        onSuccess={handleDetailsSuccess}
       />
     </RequirePermission>
   );

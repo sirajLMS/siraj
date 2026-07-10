@@ -6,6 +6,7 @@ import {
   type PaymentMethodType,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { createUserMeetingConfigMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
@@ -14,7 +15,8 @@ import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/pa
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);
-  const { cache } = useApolloClient();
+  const client = useApolloClient();
+  const { cache } = client;
 
   const execute = async (formData: ParentOnboardingFormData): Promise<ParentOnboardingResult> => {
     useParentOnboardingStore.getState().reset();
@@ -47,6 +49,27 @@ export function useCreateParentOnboarding() {
       const result = await mutate({ variables: { input } });
 
       if (result.data?.createParent) {
+        const created = result.data.createParent;
+        if (formData.meetingProvider?.id && formData.meetingUrl?.trim() && created.userId) {
+          await client.mutate({
+            mutation: createUserMeetingConfigMutationDocument,
+            variables: {
+              input: {
+                userId: created.userId,
+                providerId: formData.meetingProvider.id,
+                label: formData.meetingLabel?.trim() || null,
+                isDefault: true,
+                password: null,
+                details: {
+                  meetingUrl: formData.meetingUrl.trim(),
+                  username: null,
+                  tenantId: null,
+                },
+              },
+            },
+          });
+        }
+
         cache.evict({ id: "ROOT_QUERY", fieldName: "parentDirectory" });
         cache.gc();
         useParentOnboardingStore.setState({ result: result.data.createParent, isSubmitting: false });

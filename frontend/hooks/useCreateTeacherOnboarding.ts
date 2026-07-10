@@ -1,4 +1,5 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
+import { useState } from "react";
 import {
   PaymentDirection,
   type PaymentMethodDetailsInput,
@@ -18,12 +19,14 @@ import type {
 
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);
+  const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const client = useApolloClient();
   const { cache } = client;
 
   const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboardingCreateResult> => {
     useTeacherOnboardingStore.getState().reset();
     useTeacherOnboardingStore.setState({ isSubmitting: true });
+    setMeetingConfigWarning(false);
 
     try {
       const details: PaymentMethodDetailsInput = formDetailsToInput(formData.payoutMethod.details);
@@ -57,23 +60,28 @@ export function useCreateTeacherOnboarding() {
       if (result.data?.createTeacher) {
         const created = result.data.createTeacher;
         if (formData.meetingProvider?.id && formData.meetingUrl?.trim() && created.userId) {
-          await client.mutate({
-            mutation: createUserMeetingConfigMutationDocument,
-            variables: {
-              input: {
-                userId: created.userId,
-                providerId: formData.meetingProvider.id,
-                label: formData.meetingLabel?.trim() || null,
-                isDefault: true,
-                password: null,
-                details: {
-                  meetingUrl: formData.meetingUrl.trim(),
-                  username: null,
-                  tenantId: null,
+          try {
+            await client.mutate({
+              mutation: createUserMeetingConfigMutationDocument,
+              variables: {
+                input: {
+                  userId: created.userId,
+                  providerId: formData.meetingProvider.id,
+                  label: formData.meetingLabel?.trim() || null,
+                  isDefault: true,
+                  password: null,
+                  details: {
+                    meetingUrl: formData.meetingUrl.trim(),
+                    username: null,
+                    tenantId: null,
+                  },
                 },
               },
-            },
-          });
+            });
+          } catch (meetingErr) {
+            logger.warn("Teacher created but meeting config failed", { meetingErr });
+            setMeetingConfigWarning(true);
+          }
         }
 
         cache.evict({ id: "ROOT_QUERY", fieldName: "teacherDirectory" });
@@ -93,5 +101,12 @@ export function useCreateTeacherOnboarding() {
     }
   };
 
-  return { execute, loading, error, data };
+  return {
+    execute,
+    loading,
+    error,
+    data,
+    meetingConfigWarning,
+    clearMeetingConfigWarning: () => setMeetingConfigWarning(false),
+  };
 }

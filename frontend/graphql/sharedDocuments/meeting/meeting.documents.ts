@@ -1,6 +1,7 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import type * as ClassOps from "@/frontend/graphql/types/meeting-class-config.operations";
 
 const MEETING_PROVIDER_FIELDS = gql`
   fragment MeetingProviderFields on MeetingProvider {
@@ -171,3 +172,110 @@ export const setDefaultMeetingConfigMutationDocument: TypedDocumentNode<
     }
   }
 `;
+
+const CLASS_MEETING_CONFIG_FIELDS = gql`
+  fragment ClassMeetingConfigFields on ClassMeetingConfig {
+    id
+    classInstanceId
+    recurringScheduleId
+    providerId
+    label
+    isDefault
+    hasSecret
+    details {
+      meetingUrl
+      username
+      tenantId
+    }
+    provider {
+      ...MeetingProviderFields
+    }
+    createdAt
+    updatedAt
+  }
+  ${MEETING_PROVIDER_FIELDS}
+`;
+
+const EFFECTIVE_MEETING_FIELDS = gql`
+  fragment EffectiveMeetingFields on EffectiveMeeting {
+    joinUrl
+    providerSlug
+    providerName
+    logoUrl
+    meetingId
+    source
+    configId
+    providerId
+  }
+`;
+
+export const classMeetingConfigsQueryDocument: TypedDocumentNode<
+  ClassOps.ClassMeetingConfigsQuery,
+  ClassOps.ClassMeetingConfigsQueryVariables
+> = gql`
+  ${CLASS_MEETING_CONFIG_FIELDS}
+  query classMeetingConfigs($classInstanceId: ID!) {
+    classMeetingConfigs(classInstanceId: $classInstanceId) {
+      ...ClassMeetingConfigFields
+    }
+  }
+`;
+
+export const recurringMeetingConfigsQueryDocument: TypedDocumentNode<
+  ClassOps.RecurringMeetingConfigsQuery,
+  ClassOps.RecurringMeetingConfigsQueryVariables
+> = gql`
+  ${CLASS_MEETING_CONFIG_FIELDS}
+  query recurringMeetingConfigs($recurringScheduleId: ID!) {
+    recurringMeetingConfigs(recurringScheduleId: $recurringScheduleId) {
+      ...ClassMeetingConfigFields
+    }
+  }
+`;
+
+export const createClassMeetingConfigMutationDocument: TypedDocumentNode<
+  ClassOps.CreateClassMeetingConfigMutation,
+  ClassOps.CreateClassMeetingConfigMutationVariables
+> = gql`
+  ${CLASS_MEETING_CONFIG_FIELDS}
+  mutation createClassMeetingConfig($input: ClassMeetingConfigCreateInput!) {
+    createClassMeetingConfig(input: $input) {
+      ...ClassMeetingConfigFields
+    }
+  }
+`;
+
+export const updateClassMeetingConfigMutationDocument: TypedDocumentNode<
+  ClassOps.UpdateClassMeetingConfigMutation,
+  ClassOps.UpdateClassMeetingConfigMutationVariables
+> = gql`
+  ${CLASS_MEETING_CONFIG_FIELDS}
+  mutation updateClassMeetingConfig($id: ID!, $input: ClassMeetingConfigUpdateInput!) {
+    updateClassMeetingConfig(id: $id, input: $input) {
+      ...ClassMeetingConfigFields
+    }
+  }
+`;
+
+export const deleteClassMeetingConfigMutationDocument: TypedDocumentNode<
+  ClassOps.DeleteClassMeetingConfigMutation,
+  ClassOps.DeleteClassMeetingConfigMutationVariables
+> = gql`
+  mutation deleteClassMeetingConfig($id: ID!) {
+    deleteClassMeetingConfig(id: $id)
+  }
+`;
+
+export const setDefaultClassMeetingConfigMutationDocument: TypedDocumentNode<
+  ClassOps.SetDefaultClassMeetingConfigMutation,
+  ClassOps.SetDefaultClassMeetingConfigMutationVariables
+> = gql`
+  ${CLASS_MEETING_CONFIG_FIELDS}
+  mutation setDefaultClassMeetingConfig($id: ID!) {
+    setDefaultClassMeetingConfig(id: $id) {
+      ...ClassMeetingConfigFields
+    }
+  }
+`;
+
+export { EFFECTIVE_MEETING_FIELDS };

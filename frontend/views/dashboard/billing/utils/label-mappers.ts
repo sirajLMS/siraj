@@ -10,6 +10,7 @@ export function getAdminInvoiceGridLabels(labels: BillingLabels) {
     actions: labels.adminTable.actions,
     markAsPaid: labels.adminTable.markAsPaid,
     quickPay: labels.adminTable.quickPay,
+    reviewSubmission: labels.adminTable.reviewSubmission,
     viewDetails: labels.parentTable.viewDetails,
     noEntries: labels.adminTable.noEntries,
     statusLabels: labels.invoiceStatus,
@@ -45,6 +46,7 @@ export function getParentInvoiceGridLabels(labels: BillingLabels) {
     viewDetails: labels.parentTable.viewDetails,
     downloadPdf: labels.parentTable.downloadPdf,
     payNow: labels.parentTable.payNow,
+    viewSubmission: labels.parentTable.viewSubmission,
     noEntries: labels.parentTable.noEntries,
     statusLabels: labels.invoiceStatus,
   };

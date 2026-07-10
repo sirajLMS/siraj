@@ -10,7 +10,7 @@ interface TeacherScheduleCardListProps {
   readonly labels: TeacherDashboardLabels;
   readonly canActivate: boolean;
   readonly emptyMessage: string;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;

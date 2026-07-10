@@ -36,7 +36,9 @@ function DistributionLegend({
             })}
           />
           <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.primary }}>
-            {slice.percent}% {slice.label}
+            {slice.formattedAmount
+              ? `${slice.percent}% ${slice.label} · ${slice.formattedAmount}`
+              : `${slice.percent}% ${slice.label}`}
           </Typography>
         </Box>
       ))}

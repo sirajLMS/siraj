@@ -1,6 +1,8 @@
+import { currencyHedges } from "@/shared/messages/ar/dashboard/billing/currency-hedges";
 import { exchangeRates } from "@/shared/messages/ar/dashboard/billing/exchange-rates";
 import { billingManual } from "@/shared/messages/ar/dashboard/billing/manual";
 import { payment } from "@/shared/messages/ar/dashboard/billing/payment";
+import { supportedCurrencies } from "@/shared/messages/ar/dashboard/billing/supported-currencies";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
 export const billing: BillingLabels = {
@@ -10,6 +12,7 @@ export const billing: BillingLabels = {
   parentPageTitle: "الفواتير والمدفوعات",
   parentPageSubtitle: "تتبع وتحميل سجلات الفوترة المؤسسية.",
   manualInvoice: "فاتورة يدوية",
+  exchangeRatesLink: "أسعار الصرف",
   quickPay: "دفع سريع",
   viewAllNegativeBalance: "عرض جميع الطلاب برصيد سالب",
   requiresAttention: "يتطلب اهتماماً",
@@ -50,6 +53,7 @@ export const billing: BillingLabels = {
     actions: "إجراءات",
     markAsPaid: "تحديد كمدفوعة",
     quickPay: "دفع سريع",
+    reviewSubmission: "مراجعة",
     noEntries: "لا توجد فواتير مطابقة للبحث",
   },
   creditTable: {
@@ -76,12 +80,14 @@ export const billing: BillingLabels = {
     viewDetails: "عرض التفاصيل",
     downloadPdf: "تحميل PDF",
     payNow: "ادفع الآن",
+    viewSubmission: "عرض إثبات الدفع",
     noEntries: "لا توجد فواتير مطابقة للبحث",
     emptyTitle: "لا توجد لديك فواتير.",
     emptySubtitle: "ستظهر دورات الفوترة القادمة هنا تلقائياً.",
   },
   invoiceStatus: {
     OVERDUE: "متأخرة",
+    PAYMENT_PENDING: "قيد مراجعة الدفع",
     PENDING: "معلقة",
     PAID: "مدفوعة",
     UNPAID: "غير مدفوعة",
@@ -93,36 +99,67 @@ export const billing: BillingLabels = {
   },
   manual: billingManual,
   markAsPaidSuccess: "تم تحديد الفاتورة كمدفوعة بنجاح",
+  submitProofSuccess: "تم إرسال إثبات الدفع بنجاح",
+  approveProofSuccess: "تمت الموافقة على إثبات الدفع",
+  rejectProofSuccess: "تم رفض إثبات الدفع",
   noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
   deleteInvoiceSuccess: "تم حذف الفاتورة بنجاح",
-  markPaidDialog: {
-    title: "تحديد الفاتورة كمدفوعة",
-    confirm: "تأكيد الدفع",
-    confirming: "جاري التأكيد…",
-    selectMethod: "طريقة الدفع",
-    noMethods: "لا توجد طرق دفع واردة مسجلة.",
-    addMethods: "أضف طريقة دفع واردة في الملف الشخصي قبل تسجيل هذا الدفع.",
-    manageMethods: "إدارة طرق الدفع",
+  hasPaymentProofHint: "إثبات دفع مرفق",
+  submitProofDialog: {
+    titleSubmit: "إرسال إثبات الدفع",
+    titleMarkPaid: "تحديد الفاتورة كمدفوعة",
+    confirm: "إرسال الإثبات",
+    confirming: "جاري الإرسال…",
+    selectFile: "ملف إثبات الدفع",
+    fileHint: "ارفع ملف PDF أو صورة (JPEG أو PNG أو WebP) كإثبات للدفع.",
+    invalidFileType: "نوع الملف غير مسموح. استخدم PDF أو JPEG أو PNG أو WebP.",
     cancel: "إلغاء",
-    errorGeneric: "تعذر تحديد الفاتورة كمدفوعة. يرجى المحاولة مرة أخرى.",
-    missingParentUser: "تفتقد هذه الفاتورة إلى معلومات حساب ولي الأمر. تواصل مع الدعم قبل تسجيل الدفع.",
+    errorGeneric: "تعذر إرسال إثبات الدفع. يرجى المحاولة مرة أخرى.",
     invoiceNumber: "الفاتورة",
     amount: "المبلغ",
     dueDate: "تاريخ الاستحقاق",
     student: "الطالب",
-    selectedMethod: "الدفع باستخدام",
+    uploadFailed: "فشل رفع الملف. يرجى المحاولة مرة أخرى.",
+    uploadPrepareFailed: "تعذر تجهيز رفع الملف. يرجى المحاولة مرة أخرى.",
   },
   paymentDetailsDialog: {
     title: "تفاصيل الدفع",
     empty: "لا توجد سجلات دفع متاحة لهذه الفاتورة.",
-    emptyLegacy: "تم تحديد هذه الفاتورة كمدفوعة قبل تسجيل لقطات طرق الدفع.",
+    pending: "إثبات الدفع قيد المراجعة.",
+    approve: "موافقة",
+    reject: "رفض",
+    rejecting: "جاري الرفض…",
+    rejectionReason: "سبب الرفض",
+    rejectionReasonPlaceholder: "سبب اختياري للرفض",
+    viewProof: "عرض ملف الإثبات",
+    noProof: "لا يوجد ملف إثبات دفع مرفق.",
     loadFailed: "تعذر تحميل تفاصيل الدفع. يرجى المحاولة مرة أخرى.",
     close: "إغلاق",
     amount: "المبلغ",
     date: "تاريخ الدفع",
+    submittedAt: "تاريخ الإرسال",
+    reviewActions: "مراجعة الإرسال",
+  },
+  notifications: {
+    popupBlocked: "تم حظر النافذة المنبثقة. اسمح بالنوافذ المنبثقة لتحميل الملف.",
   },
   errors: {
     invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
   },
   exchangeRates,
+  fxStaleBanner: {
+    adminBody: "أسعار الصرف قديمة. قد لا تظهر التحويلات في العملة المعروضة حتى يتم التحديث.",
+    userBody: "أسعار الصرف قديمة. قد لا تظهر التحويلات في عملتك المعروضة حتى يتم التحديث.",
+    adminCta: "إدارة الأسعار",
+    userCta: "تحديث الملف",
+  },
+  displayCurrencyHint: {
+    title: "لم يتم تعيين عملة العرض",
+    body: "عيّن عملة عرض في ملفك الشخصي لرؤية المبالغ المحوّلة في الفواتير والتقارير.",
+    cta: "تعديل الملف",
+  },
+  currencyHedges,
+  supportedCurrencies,
 };
+
+export { currencyHedges, supportedCurrencies };

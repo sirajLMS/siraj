@@ -35,7 +35,7 @@ interface TeacherDailyScheduleSectionProps {
   readonly canActivate: boolean;
   readonly loading?: boolean;
   readonly emptyMessage: string;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;

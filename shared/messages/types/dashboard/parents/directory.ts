@@ -4,8 +4,6 @@ export interface ParentsDirectoryLabels {
   readonly searchPlaceholder: string;
   readonly records: string;
   readonly metrics: {
-    readonly activated: string;
-    readonly deactivated: string;
     readonly regular: string;
     readonly onLeave: string;
     readonly suspended: string;

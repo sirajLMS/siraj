@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Chip, IconButton, Stack } from "@mui/material";
+import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
@@ -88,6 +88,14 @@ export function MeetingProvidersContainer() {
             </PrimaryPageAction>
           }
         />
+        {!loading && rows.length === 0 ? (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Stack spacing={0.5}>
+              <Box sx={{ typography: "titleSm" }}>{t("emptyCatalogTitle")}</Box>
+              <Box sx={{ typography: "bodySm" }}>{t("emptyCatalogBody")}</Box>
+            </Stack>
+          </Alert>
+        ) : null}
         <Box sx={{ height: 560 }}>
           <AppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
         </Box>

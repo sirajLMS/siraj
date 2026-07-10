@@ -2,18 +2,35 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 
 export function TeacherOwnProfileContainer() {
   const t = useTranslations("dashboard.teacherOwnProfile");
+  const tProfile = useTranslations("profile");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
   const { data, loading, error } = useQuery(teacherOwnProfileQueryDocument);
   const profile = data?.teacherOwnProfile;
+
+  const salaryDisplay = profile
+    ? formatCurrencyForDisplay(
+        profile.hourlyRate ?? "0",
+        profile.rateCurrency ?? CurrencyCode.Usd,
+        profile.displayAmount,
+        locale,
+        {
+          convertedAmount: values => tProfile("convertedAmount", values),
+          displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+        }
+      )
+    : "";
 
   return (
     <RequirePermission permissions={[AppPermission.TeacherViewOwnProfile]}>
@@ -51,12 +68,7 @@ export function TeacherOwnProfileContainer() {
               <Paper variant="outlined" sx={{ p: 3 }}>
                 <Typography sx={{ typography: "titleLg", mb: 2 }}>{t("sections.salary")}</Typography>
                 <Stack spacing={1}>
-                  <Typography sx={{ typography: "bodyMd" }}>
-                    {t("baseSalary", {
-                      amount: profile.hourlyRate ?? "0",
-                      currency: profile.rateCurrency ?? CurrencyCode.Usd,
-                    })}
-                  </Typography>
+                  <Typography sx={{ typography: "bodyMd" }}>{salaryDisplay}</Typography>
                 </Stack>
               </Paper>
             </Grid>

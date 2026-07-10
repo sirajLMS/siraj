@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { SubjectDetailView } from "@/frontend/views/dashboard/subjects/detail/SubjectDetailView";
 import type { SubjectDetailData, SubjectResourceItem } from "@/frontend/views/dashboard/subjects/detail/types";
@@ -86,6 +86,8 @@ const mockPermsDecorator = (Story: React.ComponentType) => {
       emailVerifiedAt: new Date().toISOString(),
       email: "mock@example.com",
       __typename: "User",
+      phone: null,
+      status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,
     },
   });

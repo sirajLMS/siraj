@@ -15,13 +15,8 @@ export function ParentsMetricGrid({ metrics }: Readonly<ParentsMetricGridProps>)
   return (
     <Grid container spacing={2} sx={{ mb: 4 }}>
       {metrics.map(metric => (
-        <Grid key={metric.key} size={{ xs: 6, md: 4, lg: 2 }}>
-          <MetricCard
-            icon={metric.icon}
-            label={t(metric.labelKey)}
-            value={metric.count}
-            variant={metric.key === "deactivated" ? "error" : "default"}
-          />
+        <Grid key={metric.key} size={{ xs: 6, md: 3 }}>
+          <MetricCard icon={metric.icon} label={t(metric.labelKey)} value={metric.count} variant="default" />
         </Grid>
       ))}
     </Grid>

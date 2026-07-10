@@ -37,7 +37,7 @@ interface ParentDashboardViewProps {
   readonly onViewFullWeek: () => void;
   readonly onViewAll: () => void;
   readonly onHistory: (id: string) => void;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onDownloadReport: () => void;
   readonly onLearnMore: () => void;
   readonly onSupport: () => void;

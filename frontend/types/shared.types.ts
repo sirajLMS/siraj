@@ -12,6 +12,7 @@ import type {
   ClassOutcome,
   CountryCode,
   CurrencyCode,
+  EffectiveMeeting,
   Gender,
   InvoiceType,
   ManagerOnboardingInput,
@@ -133,6 +134,7 @@ export interface TeacherScheduleRow {
   readonly isCurrent?: boolean;
   readonly studentId?: string;
   readonly meetingJoinUrl?: string | null;
+  readonly effectiveMeeting?: EffectiveMeeting | null;
 }
 
 export interface TeacherDashboardMetrics {
@@ -196,6 +198,9 @@ export type ParentOnboardingFormData = Omit<
   invoiceType: InvoiceType;
   payinMethod: OnboardingPaymentMethodFormValues;
   timezone: string;
+  meetingProvider?: MeetingProviderFieldsFragment | null;
+  meetingUrl?: string;
+  meetingLabel?: string;
 };
 
 export type TeacherOnboardingFormData = Omit<

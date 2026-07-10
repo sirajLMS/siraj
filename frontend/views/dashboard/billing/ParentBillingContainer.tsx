@@ -11,16 +11,12 @@ import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parents/parent-billing-history.documents";
-import {
-  formatBillingCurrencyTotals,
-  mapBillingCurrencyBuckets,
-} from "@/frontend/lib/formatBillingCurrencyTotals";
+import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
-import { buildPaidMethodHint } from "@/frontend/lib/user-payment-method";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
-import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
+import { SubmitPaymentProofDialog } from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
 import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
 import type {
   MarkPaidInvoiceTarget,
@@ -29,6 +25,7 @@ import type {
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
@@ -43,17 +40,23 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
+function mapParentInvoiceStatus(status: string | null | undefined): InvoiceStatus {
+  if (status === InvoiceStatus.Paid) return InvoiceStatus.Paid;
+  if (status === InvoiceStatus.PaymentPending) return InvoiceStatus.PaymentPending;
+  if (status === InvoiceStatus.Cancelled) return InvoiceStatus.Cancelled;
+  return InvoiceStatus.Unpaid;
+}
+
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
   const tProfile = useTranslations("profile.teacher");
   const tErrors = useTranslations("errors");
-  const tUi = useTranslations("ui.paymentMethod");
   const locale = useLocale();
   const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
+  const [proofTarget, setProofTarget] = useState<MarkPaidInvoiceTarget | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -70,6 +73,8 @@ export function ParentBillingContainer() {
   const setPage = useParentBillingStore(state => state.setPage);
 
   const parentUserId = useUserStore(state => state.user?.id ?? null);
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canSubmitProof = hasPermission(AppPermission.BillingSubmitPaymentProof);
 
   const { data, loading, error, refetch } = useQuery(parentInvoiceHistoryQueryDocument, {
     variables: {
@@ -94,21 +99,33 @@ export function ParentBillingContainer() {
   });
 
   const handlePayNow = (invoice: MarkPaidInvoiceTarget) => {
-    setMarkPaidTarget({ ...invoice, parentUserId: parentUserId ?? invoice.parentUserId });
+    setProofTarget({
+      ...invoice,
+      parentUserId: parentUserId ?? invoice.parentUserId,
+      dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : invoice.dueDate,
+    });
   };
 
-  const handleMarkPaidSuccess = () => {
-    showFeedback(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), "success");
+  const handleProofSuccess = () => {
+    showFeedback(labels.submitProofSuccess, "success");
     void refetch();
     void refetchSummary();
   };
 
-  const handleMarkPaidError = (message: string) => {
+  const handleProofError = (message: string) => {
     showFeedback(message, "error");
   };
 
   const handleDownloadPdf = (invoiceId: string) => {
-    window.open(`/api/invoices/${invoiceId}/download`, "_blank", "noopener,noreferrer");
+    const popup = window.open(`/api/invoices/${invoiceId}/download`, "_blank", "noopener,noreferrer");
+    if (!popup) {
+      showFeedback(labels.notifications.popupBlocked, "error");
+    }
+  };
+
+  const handleDetailsSuccess = () => {
+    void refetch();
+    void refetchSummary();
   };
 
   const totalCount = data ? (data.parentInvoiceHistory?.totalCount ?? 0) : undefined;
@@ -121,14 +138,10 @@ export function ParentBillingContainer() {
         id: inv.id ?? "",
         invoiceNumber: (inv.id ?? "").slice(0, 8).toUpperCase(),
         month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
-        issueDate: inv.issueDate ?? "",
-        dueDate: inv.dueDate ?? "",
+        issueDate: formatDate(inv.issueDate),
+        dueDate: formatDate(inv.dueDate),
         paidDate: inv.paidDate ? formatDate(inv.paidDate) : "—",
-        paidMethodHint: buildPaidMethodHint(
-          inv.latestPaymentMethodType,
-          inv.latestPaymentMethodLabel,
-          key => tUi(key as never)
-        ),
+        hasPaymentProof: inv.hasPaymentProof ?? false,
         fee: formatCurrencyForDisplay(
           inv.amount ?? "0",
           inv.currency ?? CurrencyCode.Usd,
@@ -145,9 +158,9 @@ export function ParentBillingContainer() {
             displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
           }
         ),
-        status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
+        status: mapParentInvoiceStatus(inv.status),
       })),
-    [invoices, tProfile, tErrors, locale, tUi]
+    [invoices, tProfile, tErrors, locale]
   );
 
   const handleQuickPay = () => {
@@ -177,21 +190,28 @@ export function ParentBillingContainer() {
         convertedApprox: string;
         displayCurrency: string;
       }) => tProfile("convertedAmount", values),
+      convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) =>
+        tProfile("convertedTotalApprox", values),
       displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
         tErrors("displayCurrencyFallback", values),
     };
 
+    const outstandingTotals = formatBillingCurrencyTotals(
+      mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.outstandingByCurrency),
+      locale,
+      fxMessages
+    );
+    const paidThisTermTotals = formatBillingCurrencyTotals(
+      mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.paidThisTermByCurrency),
+      locale,
+      fxMessages
+    );
+
     return {
-      outstandingBalance: formatBillingCurrencyTotals(
-        mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.outstandingByCurrency),
-        locale,
-        fxMessages
-      ).primary,
-      paidThisTerm: formatBillingCurrencyTotals(
-        mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.paidThisTermByCurrency),
-        locale,
-        fxMessages
-      ).primary,
+      outstandingBalance: outstandingTotals.primary,
+      outstandingBalanceSubLabel: outstandingTotals.breakdown,
+      paidThisTerm: paidThisTermTotals.primary,
+      paidThisTermSubLabel: paidThisTermTotals.breakdown,
       nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
     };
@@ -215,6 +235,7 @@ export function ParentBillingContainer() {
     invoices: filteredInvoices,
     searchQuery,
     canManage: false,
+    canSubmitProof,
     canView: true,
     canCreate: false,
     onSearchChange: setSearchQuery,
@@ -231,6 +252,7 @@ export function ParentBillingContainer() {
 
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]}>
+      <DisplayCurrencyHint />
       <ParentBillingView {...viewProps} />
       <Snackbar
         open={snackbarOpen}
@@ -242,18 +264,19 @@ export function ParentBillingContainer() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      <MarkInvoicePaidDialog
-        open={markPaidTarget !== null}
-        onClose={() => setMarkPaidTarget(null)}
-        invoice={markPaidTarget}
-        onSuccess={handleMarkPaidSuccess}
-        onError={handleMarkPaidError}
+      <SubmitPaymentProofDialog
+        open={proofTarget !== null}
+        onClose={() => setProofTarget(null)}
+        invoice={proofTarget}
+        mode="submit"
+        onSuccess={handleProofSuccess}
+        onError={handleProofError}
       />
       <InvoicePaymentDetailsDialog
         open={detailsTarget !== null}
         onClose={() => setDetailsTarget(null)}
         invoiceId={detailsTarget?.invoiceId ?? null}
-        isLegacyPaid={detailsTarget?.isLegacyPaid ?? false}
+        onSuccess={handleDetailsSuccess}
       />
     </RequirePermission>
   );

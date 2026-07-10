@@ -1,5 +1,5 @@
 import type { Decorator } from "@storybook/react";
-import { type AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, type AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 
 export function createMockAdminDecorator(permissions: readonly AppPermission[]): Decorator[] {
@@ -18,6 +18,8 @@ export function createMockAdminDecorator(permissions: readonly AppPermission[]):
         updatedAt: new Date().toISOString(),
         emailVerifiedAt: new Date().toISOString(),
         email: "admin@example.com",
+        phone: null,
+        status: AccountStatus.Activated,
         displayCurrency: CurrencyCode.Usd,
         __typename: "User" as const,
       };

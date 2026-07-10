@@ -14,6 +14,10 @@ export const meetingProviders: MeetingProvidersLabels = {
   save: "حفظ",
   edit: "تعديل",
   delete: "حذف",
+  emptyCatalogTitle: "لا يوجد مزودو اجتماعات",
+  emptyCatalogBody:
+    "أضف مزوداً نشطاً واحداً على الأقل قبل أن يتمكن المستخدمون من إنشاء إعدادات الاجتماع. يحتاج المعلمون وأولياء الأمور إلى إدخال في الكتالوج لربط روابط Zoom أو Google Meet أو Teams.",
+  urlAllowlistInvalid: "أحد عناوين URL المثال لا يطابق أنماط القائمة المسموحة",
   columns: {
     slug: "المعرّف",
     name: "الاسم",

@@ -1,9 +1,10 @@
 "use client";
 
-import { AccessTimeOutlined, VideocamOffOutlined, VideocamOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { AccessTimeOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { alpha, Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -55,7 +56,7 @@ interface TeacherScheduleMobileCardProps {
   readonly row: TeacherScheduleRow;
   readonly labels: TeacherDashboardLabels;
   readonly canActivate: boolean;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -297,38 +298,16 @@ function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
   );
 }
 
-function VideoButton({
-  row,
-  labels,
-  tooltip,
-  onJoinVideo,
-}: {
-  readonly row: TeacherScheduleRow;
-  readonly labels: TeacherDashboardLabels;
-  readonly tooltip: string;
-  readonly onJoinVideo: (id: string) => void;
-}) {
+function VideoButton({ row, labels }: { readonly row: TeacherScheduleRow; readonly labels: TeacherDashboardLabels }) {
   return (
-    <Tooltip title={tooltip}>
-      <span>
-        <IconButton
-          disabled={!row.videoEnabled}
-          onClick={() => {
-            if (row.videoEnabled) {
-              onJoinVideo(row.id);
-            }
-          }}
-          aria-label={labels.actions.joinVideo}
-          sx={theme => ({
-            border: `1px solid ${theme.palette.border.light}`,
-            borderRadius: 1,
-            flexShrink: 0,
-          })}
-        >
-          {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
-        </IconButton>
-      </span>
-    </Tooltip>
+    <MeetingJoinAction
+      variant="icon"
+      joinUrl={row.meetingJoinUrl}
+      meeting={row.effectiveMeeting}
+      disabled={!row.videoEnabled}
+      label={labels.actions.joinVideo}
+      emptyRole="teacher"
+    />
   );
 }
 
@@ -338,8 +317,6 @@ function CardFooter({
   canActivate,
   isCompleted,
   sessionActions,
-  actionTooltips,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -350,8 +327,6 @@ function CardFooter({
   readonly canActivate: boolean;
   readonly isCompleted: boolean;
   readonly sessionActions: ReturnType<typeof resolveTeacherScheduleSessionActions>;
-  readonly actionTooltips: ReturnType<typeof resolveTeacherScheduleActionTooltips>;
-  readonly onJoinVideo: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -362,9 +337,7 @@ function CardFooter({
       <Box sx={{ flex: 1, minWidth: 0 }}>
         {renderFooterAction(row, labels, canActivate, onActivate, onStartSession, onMarkAbsent, onRequestLeave)}
       </Box>
-      {!isCompleted && sessionActions.joinVideo ? (
-        <VideoButton row={row} labels={labels} tooltip={actionTooltips.joinVideo} onJoinVideo={onJoinVideo} />
-      ) : null}
+      {!isCompleted && sessionActions.joinVideo ? <VideoButton row={row} labels={labels} /> : null}
     </Box>
   );
 }
@@ -373,7 +346,6 @@ export function TeacherScheduleMobileCard({
   row,
   labels,
   canActivate,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -390,7 +362,6 @@ export function TeacherScheduleMobileCard({
     videoEnabled: row.videoEnabled,
     isConnecting: row.status === "connecting",
   });
-  const actionTooltips = resolveTeacherScheduleActionTooltips(row, labels);
 
   return (
     <StyledScheduleCard elevation={0} isLive={isLive} sx={{ opacity: isCompleted ? 0.7 : 1 }}>
@@ -403,8 +374,6 @@ export function TeacherScheduleMobileCard({
         canActivate={canActivate}
         isCompleted={isCompleted}
         sessionActions={sessionActions}
-        actionTooltips={actionTooltips}
-        onJoinVideo={onJoinVideo}
         onActivate={onActivate}
         onStartSession={onStartSession}
         onMarkAbsent={onMarkAbsent}
@@ -419,7 +388,7 @@ interface TeacherScheduleMobileCardListProps {
   readonly labels: TeacherDashboardLabels;
   readonly canActivate: boolean;
   readonly emptyMessage: string;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;

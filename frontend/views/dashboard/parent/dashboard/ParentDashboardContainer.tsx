@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import type { EffectiveMeeting } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   parentDashboardMetricsQueryDocument,
   parentDashboardScheduleQueryDocument,
@@ -27,6 +28,15 @@ function mapExecutionStateToLiveClassStatus(
   return "scheduled";
 }
 
+function resolveMeetingJoinUrl(
+  meetingJoinUrl?: string | null,
+  effectiveMeeting?: EffectiveMeeting | null
+): string | null {
+  const fromEffective = effectiveMeeting?.joinUrl?.trim();
+  const fromLegacy = meetingJoinUrl?.trim();
+  return fromEffective || fromLegacy || null;
+}
+
 function useScheduleRows(
   data:
     | {
@@ -47,6 +57,7 @@ function useScheduleRows(
                 readonly executionState?: string | null;
                 readonly outcome?: string | null;
                 readonly meetingJoinUrl?: string | null;
+                readonly effectiveMeeting?: EffectiveMeeting | null;
               }[]
             | null;
           readonly totalCount?: number | null;
@@ -57,22 +68,27 @@ function useScheduleRows(
   return useMemo(() => {
     const rows = data?.parentDashboardSchedule?.rows;
     if (!rows) return [];
-    return rows.map(r => ({
-      id: r.id ?? "",
-      rowNumber: 0,
-      classTime: r.classTimeFormatted ?? "",
-      durationMinutes: r.durationMinutes ?? 0,
-      studentId: r.studentId ?? undefined,
-      studentName: r.studentName ?? "",
-      studentInitials: r.studentInitials ?? "",
-      studentAvatarUrl: r.studentAvatarUrl ?? undefined,
-      teacherId: r.teacherId ?? undefined,
-      teacherName: r.teacherName ?? "",
-      teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
-      bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
-      liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),
-      videoEnabled: !!r.meetingJoinUrl,
-    }));
+    return rows.map(r => {
+      const joinUrl = resolveMeetingJoinUrl(r.meetingJoinUrl, r.effectiveMeeting);
+      return {
+        id: r.id ?? "",
+        rowNumber: 0,
+        classTime: r.classTimeFormatted ?? "",
+        durationMinutes: r.durationMinutes ?? 0,
+        studentId: r.studentId ?? undefined,
+        studentName: r.studentName ?? "",
+        studentInitials: r.studentInitials ?? "",
+        studentAvatarUrl: r.studentAvatarUrl ?? undefined,
+        teacherId: r.teacherId ?? undefined,
+        teacherName: r.teacherName ?? "",
+        teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
+        bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
+        liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),
+        videoEnabled: Boolean(joinUrl),
+        meetingJoinUrl: joinUrl,
+        effectiveMeeting: r.effectiveMeeting ?? null,
+      };
+    });
   }, [data]);
 }
 
@@ -208,8 +224,6 @@ export function ParentDashboardContainer() {
   const totalCount = scheduleData?.parentDashboardSchedule?.totalCount ?? 0;
   const labels = useDashboardLabels(t, userName, metrics.pendingMessages);
 
-  const rawScheduleRows = scheduleData?.parentDashboardSchedule?.rows;
-
   const handlers = useMemo(
     () => ({
       handleFilter: () => {
@@ -223,13 +237,6 @@ export function ParentDashboardContainer() {
       },
       handleHistory: (id: string) => {
         router.push(`/students/${id}/history`);
-      },
-      handleJoinVideo: (id: string) => {
-        const row = rawScheduleRows?.find(r => r?.id === id);
-        const url = row?.meetingJoinUrl;
-        if (url) {
-          globalThis.open(url, "_blank");
-        }
       },
       handleDownloadReport: () => {
         router.push("/reports");
@@ -246,7 +253,7 @@ export function ParentDashboardContainer() {
         setPage(newPage);
       },
     }),
-    [router, rawScheduleRows, workshopPromo, setPage]
+    [router, workshopPromo, setPage]
   );
 
   if (totalCount !== useParentDashboardStore.getState().scheduleTotalCount) {
@@ -271,7 +278,6 @@ export function ParentDashboardContainer() {
       onViewFullWeek={handlers.handleViewFullWeek}
       onViewAll={handlers.handleViewAll}
       onHistory={handlers.handleHistory}
-      onJoinVideo={handlers.handleJoinVideo}
       onDownloadReport={handlers.handleDownloadReport}
       onLearnMore={handlers.handleLearnMore}
       onSupport={handlers.handleSupport}

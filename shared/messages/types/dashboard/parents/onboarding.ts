@@ -7,6 +7,7 @@ export interface ParentOnboardingLabels {
     readonly parentInfo: string;
     readonly socialComms: string;
     readonly feesContract: string;
+    readonly meetingConfig: string;
   };
   readonly fields: {
     readonly fullName: string;
@@ -23,6 +24,9 @@ export interface ParentOnboardingLabels {
     readonly paymentMethod: string;
     readonly currency: string;
     readonly timezone: string;
+    readonly meetingProvider: string;
+    readonly meetingUrl: string;
+    readonly meetingLabel: string;
   };
   readonly placeholders: {
     readonly fullName: string;
@@ -39,6 +43,8 @@ export interface ParentOnboardingLabels {
     readonly paymentMethod: string;
     readonly currency: string;
     readonly timezone: string;
+    readonly meetingUrl: string;
+    readonly meetingLabel: string;
   };
   readonly options: {
     readonly invoiceType: {
@@ -81,5 +87,9 @@ export interface ParentOnboardingLabels {
     readonly invoiceTypeRequired: string;
     readonly paymentMethodRequired: string;
     readonly timezoneRequired: string;
+    readonly meetingProviderRequired: string;
+    readonly meetingUrlRequired: string;
+    readonly meetingUrlInvalid: string;
   };
+  readonly optionalHint: string;
 }

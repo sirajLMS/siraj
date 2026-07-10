@@ -36,7 +36,7 @@ export function ParentBillingMobileView({
   invoices,
   searchQuery,
   canView,
-  canManage,
+  canSubmitProof,
   onSearchChange,
   onPayNow,
   onViewPaymentDetails,
@@ -47,7 +47,7 @@ export function ParentBillingMobileView({
   totalCount,
   onPageChange,
 }: Readonly<ParentBillingViewProps>) {
-  const showQuickPayFab = canView && !canManage;
+  const showQuickPayFab = canSubmitProof;
 
   return (
     <>
@@ -72,13 +72,16 @@ export function ParentBillingMobileView({
           <ParentInvoicesCardList
             rows={invoices}
             canView={canView}
+            canSubmitProof={canSubmitProof}
             onPayNow={onPayNow}
             onViewPaymentDetails={onViewPaymentDetails}
             onDownloadPdf={onDownloadPdf}
             labels={{
               viewDetails: labels.parentTable.viewDetails,
+              viewSubmission: labels.parentTable.viewSubmission,
               downloadPdf: labels.parentTable.downloadPdf,
               payNow: labels.parentTable.payNow,
+              hasPaymentProofHint: labels.hasPaymentProofHint,
               statusLabels: labels.invoiceStatus,
             }}
             page={page}

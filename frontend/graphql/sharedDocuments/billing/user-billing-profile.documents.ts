@@ -58,8 +58,7 @@ export const userBillingProfileInvoiceHistoryQueryDocument: TypedDocumentNode<
         invoiceType
         studentId
         studentName
-        latestPaymentMethodType
-        latestPaymentMethodLabel
+        hasPaymentProof
         displayAmount {
           id
           amount

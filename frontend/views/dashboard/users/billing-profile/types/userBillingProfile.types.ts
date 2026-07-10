@@ -23,6 +23,7 @@ export interface UserBillingProfileViewProps {
   readonly invoices: readonly ParentInvoiceRow[];
   readonly searchQuery: string;
   readonly canManage: boolean;
+  readonly canSubmitProof: boolean;
   readonly canView: boolean;
   readonly canCreate: boolean;
   readonly onSearchChange: (value: string) => void;

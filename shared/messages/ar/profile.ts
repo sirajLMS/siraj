@@ -34,6 +34,8 @@ export const profile: ProfileLabels = {
     failedToLoad: "Failed to load profile.",
     notFound: "Profile not found.",
   },
+  convertedAmount: "{lockedAmount} {lockedCurrency} (تقريباً {convertedApprox} {displayCurrency})",
+  convertedTotalApprox: "≈ {convertedApprox} {displayCurrency}",
   teacher: {
     ownSubtitle: "عرض وتحديث ملفك التدريسي وبيانات الاتصال.",
     subtitle: "إدارة بيانات الاعتماد المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",
@@ -108,14 +110,18 @@ export const profile: ProfileLabels = {
       currency: "العملة",
       displayCurrency: "عملة العرض",
       timezone: "المنطقة الزمنية",
-      status: "الحالة",
+      lifecycleStatus: "حالة دورة الحياة",
+      accountStatus: "حالة الحساب",
     },
     status: {
       regular: "عادي",
       on_trial: "فترة تجريبية",
       on_leave: "في إجازة",
       suspended: "موقوف",
-      deactivated: "مُلغى التفعيل",
+    },
+    accountStatus: {
+      activated: "مفعّل",
+      deactivated: "غير مفعّل",
     },
     students: {
       empty: "لا يوجد طلاب مرتبطون حالياً.",

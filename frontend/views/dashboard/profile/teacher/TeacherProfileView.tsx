@@ -3,6 +3,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { MeetingSummarySection } from "@/frontend/views/dashboard/profile/shared/MeetingSummarySection";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/views/dashboard/profile/teacher/sections/CompensationSection";
@@ -18,11 +19,15 @@ export function TeacherProfileView({
   avatarUrl,
   displayCurrency,
   isAdminScope,
+  targetUserId,
+  meetingTabHref,
 }: {
   readonly teacherData: TeacherViewData;
   readonly avatarUrl?: string | null;
   readonly displayCurrency: CurrencyCode | null | undefined;
   readonly isAdminScope: boolean;
+  readonly targetUserId?: string;
+  readonly meetingTabHref?: string;
 }) {
   const t = useTranslations("profile.teacher");
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
@@ -49,6 +54,7 @@ export function TeacherProfileView({
         <ContactSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
         <CompensationSection mode="view" teacherData={teacherData} />
         {isAdminScope && adminData ? <AdminOnlySection mode="view" adminData={adminData} /> : null}
+        {targetUserId ? <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} /> : null}
       </Box>
 
       <StatsSection teacherData={teacherData} isAdminScope={isAdminScope} />

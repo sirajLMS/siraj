@@ -33,6 +33,8 @@ export interface DashboardNavigationLabels {
   readonly dstMigration: string;
   readonly billingAdmin: string;
   readonly exchangeRates: string;
+  readonly supportedCurrencies: string;
+  readonly currencyHedges: string;
   readonly paymentCatalogs: string;
   readonly meetingProviders: string;
   readonly billingParent: string;

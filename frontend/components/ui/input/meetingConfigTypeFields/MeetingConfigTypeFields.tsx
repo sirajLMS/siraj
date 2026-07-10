@@ -2,6 +2,7 @@
 
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import { useTranslations } from "next-intl";
 import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { getVisibleMeetingConfigFields } from "@/frontend/lib/meeting-config";
 
@@ -17,9 +18,18 @@ export type MeetingConfigTypeFieldsProps = {
   readonly value: MeetingConfigDetailsFormValue;
   readonly onChangeAction: (value: MeetingConfigDetailsFormValue) => void;
   readonly disabled?: boolean;
+  readonly passwordHelperText?: string;
 };
 
-export function MeetingConfigTypeFields({ provider, value, onChangeAction, disabled }: MeetingConfigTypeFieldsProps) {
+export function MeetingConfigTypeFields({
+  provider,
+  value,
+  onChangeAction,
+  disabled,
+  passwordHelperText,
+}: MeetingConfigTypeFieldsProps) {
+  const t = useTranslations("ui.meetingConfig.fields");
+
   if (!provider) {
     return null;
   }
@@ -29,7 +39,7 @@ export function MeetingConfigTypeFields({ provider, value, onChangeAction, disab
   return (
     <Stack spacing={2}>
       <TextField
-        label="Meeting URL"
+        label={t("meetingUrl")}
         value={value.meetingUrl}
         disabled={disabled}
         fullWidth
@@ -39,7 +49,7 @@ export function MeetingConfigTypeFields({ provider, value, onChangeAction, disab
       />
       {fields.showUsername ? (
         <TextField
-          label="Username"
+          label={t("username")}
           value={value.username ?? ""}
           disabled={disabled}
           fullWidth
@@ -48,17 +58,18 @@ export function MeetingConfigTypeFields({ provider, value, onChangeAction, disab
       ) : null}
       {fields.showPassword ? (
         <TextField
-          label="Password"
+          label={t("password")}
           type="password"
           value={value.password ?? ""}
           disabled={disabled}
           fullWidth
+          helperText={passwordHelperText}
           onChange={event => onChangeAction({ ...value, password: event.target.value })}
         />
       ) : null}
       {fields.showTenantId ? (
         <TextField
-          label="Tenant ID"
+          label={t("tenantId")}
           value={value.tenantId ?? ""}
           disabled={disabled}
           fullWidth

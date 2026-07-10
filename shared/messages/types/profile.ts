@@ -32,6 +32,8 @@ export interface ProfileLabels {
     readonly failedToLoad: string;
     readonly notFound: string;
   };
+  readonly convertedAmount: string;
+  readonly convertedTotalApprox: string;
   readonly teacher: {
     readonly ownSubtitle: string;
     readonly subtitle: string;
@@ -106,13 +108,17 @@ export interface ProfileLabels {
       readonly currency: string;
       readonly displayCurrency: string;
       readonly timezone: string;
-      readonly status: string;
+      readonly lifecycleStatus: string;
+      readonly accountStatus: string;
     };
     readonly status: {
       readonly regular: string;
       readonly on_trial: string;
       readonly on_leave: string;
       readonly suspended: string;
+    };
+    readonly accountStatus: {
+      readonly activated: string;
       readonly deactivated: string;
     };
     readonly students: {

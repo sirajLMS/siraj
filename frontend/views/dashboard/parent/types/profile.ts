@@ -1,5 +1,5 @@
 import type { CurrencyCode, Gender, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
+import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export type ParentStudentStatus = `${Lowercase<StudentStatus>}`;
 
@@ -23,7 +23,7 @@ export interface ParentProfileData {
   readonly userId: string;
   readonly name: string;
   readonly avatarUrl?: string;
-  readonly status: ParentAccountStatus;
+  readonly lifecycleStatus: ParentLifecycleStatus;
   readonly nationality: string;
   readonly email: string;
   readonly phone: string;

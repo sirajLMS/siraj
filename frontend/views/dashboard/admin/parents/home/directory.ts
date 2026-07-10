@@ -1,8 +1,8 @@
 import type { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
+import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 
-export function toParentAccountStatus(status: ParentStatus): ParentAccountStatus {
-  return status.toLowerCase() as ParentAccountStatus;
+export function toParentLifecycleStatus(status: ParentStatus): ParentLifecycleStatus {
+  return status.toLowerCase() as ParentLifecycleStatus;
 }
 
 export interface ParentDirectoryRow {
@@ -14,6 +14,6 @@ export interface ParentDirectoryRow {
   readonly avatarUrl?: string;
   readonly guardianOf: string;
   readonly time: string;
-  readonly accountStatus: ParentAccountStatus;
+  readonly lifecycleStatus: ParentLifecycleStatus;
   readonly unpaidInvoices: number;
 }

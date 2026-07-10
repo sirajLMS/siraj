@@ -1,7 +1,7 @@
 "use client";
 
-import { AddOutlined } from "@mui/icons-material";
-import { Fab } from "@mui/material";
+import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
+import { Box, Button, Fab } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { AdminInvoicesCardList } from "@/frontend/views/dashboard/admin/billing/components/AdminInvoicesCardList";
@@ -10,6 +10,7 @@ import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/compo
 import { StudentCreditCardList } from "@/frontend/views/dashboard/billing/components/StudentCreditCardList";
 import type { AdminBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { buildAdminMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
+import { Link } from "@/shared/i18n/routing";
 
 // Floating action button for creating a manual invoice, fixed at bottom-right with primary colors
 const StyledManualInvoiceFab = styled(Fab)(({ theme }) => ({
@@ -32,6 +33,7 @@ export function AdminBillingMobileView({
   searchQuery,
   canManage,
   canCreate,
+  canViewExchangeRates,
   onSearchChange,
   onMarkAsPaid,
   onViewPaymentDetails,
@@ -46,6 +48,19 @@ export function AdminBillingMobileView({
     <>
       <PageContainer>
         <PageHeader title={labels.adminPageTitle} subtitle={labels.adminPageSubtitle} titleVariant="headlineMd" />
+        {canViewExchangeRates ? (
+          <Box sx={{ mb: 2, px: { xs: 2, md: 0 } }}>
+            <Button
+              component={Link}
+              href="/billing/exchange-rates"
+              variant="outlined"
+              size="small"
+              startIcon={<TimelineOutlined />}
+            >
+              {labels.exchangeRatesLink}
+            </Button>
+          </Box>
+        ) : null}
         <BillingMetricsRow metrics={buildAdminMetrics(summary, labels)} compact />
         <BillingMobileSearchBar
           value={searchQuery}
@@ -62,6 +77,7 @@ export function AdminBillingMobileView({
             labels={{
               markAsPaid: labels.adminTable.markAsPaid,
               quickPay: labels.adminTable.quickPay,
+              reviewSubmission: labels.adminTable.reviewSubmission,
               viewDetails: labels.parentTable.viewDetails,
               statusLabels: labels.invoiceStatus,
             }}

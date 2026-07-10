@@ -7,7 +7,10 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MarkPaidInvoiceTarget, PaymentDetailsTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type {
+  MarkPaidInvoiceTarget,
+  PaymentDetailsTarget,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 
 export interface ParentInvoicesDataGridLabels {
@@ -20,16 +23,19 @@ export interface ParentInvoicesDataGridLabels {
   readonly status: string;
   readonly options: string;
   readonly viewDetails: string;
+  readonly viewSubmission: string;
   readonly downloadPdf: string;
   readonly payNow: string;
+  readonly hasPaymentProofHint: string;
   readonly noEntries: string;
-  readonly statusLabels: Record<InvoiceStatus, string>;
+  readonly statusLabels: Record<string, string>;
 }
 
 interface ParentInvoicesDataGridProps {
   readonly rows: readonly ParentInvoiceRow[];
   readonly labels: ParentInvoicesDataGridLabels;
   readonly canView: boolean;
+  readonly canSubmitProof: boolean;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDownloadPdf: (id: string) => void;
@@ -40,7 +46,6 @@ interface ParentInvoicesDataGridProps {
   readonly loading?: boolean;
 }
 
-// Fee amount text styled with primary color and bold weight for emphasis
 const StyledFeeTypography = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   color: theme.palette.primary.main,
@@ -50,6 +55,7 @@ export function ParentInvoicesDataGrid({
   rows,
   labels,
   canView,
+  canSubmitProof,
   onPayNow,
   onViewPaymentDetails,
   onDownloadPdf,
@@ -101,9 +107,9 @@ export function ParentInvoicesDataGrid({
         renderCell: ({ row }) => (
           <Box>
             <Typography variant="bodyMd">{row.paidDate}</Typography>
-            {row.status === InvoiceStatus.Paid && row.paidMethodHint ? (
+            {row.status === InvoiceStatus.Paid && row.hasPaymentProof ? (
               <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
-                {row.paidMethodHint}
+                {labels.hasPaymentProofHint}
               </Typography>
             ) : null}
           </Box>
@@ -124,7 +130,7 @@ export function ParentInvoicesDataGrid({
         align: "center",
         headerAlign: "center",
         renderCell: ({ row }) => (
-          <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
+          <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status] ?? row.status} />
         ),
       },
       {
@@ -140,7 +146,7 @@ export function ParentInvoicesDataGrid({
             return null;
           }
 
-          if (row.status === InvoiceStatus.Unpaid) {
+          if (row.status === InvoiceStatus.Unpaid && canSubmitProof) {
             return (
               <PrimaryPageAction
                 size="small"
@@ -158,39 +164,53 @@ export function ParentInvoicesDataGrid({
             );
           }
 
-          return (
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-              <Tooltip title={labels.viewDetails}>
-                <IconButton
-                  size="small"
-                  aria-label={labels.viewDetails}
-                  onClick={() => {
-                    onViewPaymentDetails?.({
-                      invoiceId: row.id,
-                      isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
-                    });
-                  }}
-                >
-                  <VisibilityOutlined fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={labels.downloadPdf}>
-                <IconButton
-                  size="small"
-                  aria-label={labels.downloadPdf}
-                  onClick={() => {
-                    onDownloadPdf(row.id);
-                  }}
-                >
-                  <DownloadOutlined fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          );
+          if (row.status === InvoiceStatus.PaymentPending) {
+            return (
+              <PrimaryPageAction
+                size="small"
+                onClick={() => {
+                  onViewPaymentDetails?.({ invoiceId: row.id });
+                }}
+              >
+                {labels.viewSubmission}
+              </PrimaryPageAction>
+            );
+          }
+
+          if (row.status === InvoiceStatus.Paid) {
+            return (
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
+                <Tooltip title={labels.viewDetails}>
+                  <IconButton
+                    size="small"
+                    aria-label={labels.viewDetails}
+                    onClick={() => {
+                      onViewPaymentDetails?.({ invoiceId: row.id });
+                    }}
+                  >
+                    <VisibilityOutlined fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={labels.downloadPdf}>
+                  <IconButton
+                    size="small"
+                    aria-label={labels.downloadPdf}
+                    onClick={() => {
+                      onDownloadPdf(row.id);
+                    }}
+                  >
+                    <DownloadOutlined fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            );
+          }
+
+          return null;
         },
       },
     ],
-    [canView, labels, onDownloadPdf, onPayNow, onViewPaymentDetails]
+    [canSubmitProof, canView, labels, onDownloadPdf, onPayNow, onViewPaymentDetails]
   );
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;

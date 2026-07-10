@@ -16,6 +16,7 @@ export function ParentBillingDesktopView({
   searchQuery,
   loading,
   canView,
+  canSubmitProof,
   onSearchChange,
   onPayNow,
   onViewPaymentDetails,
@@ -50,10 +51,14 @@ export function ParentBillingDesktopView({
         <ParentInvoicesDataGrid
           rows={invoices}
           canView={canView}
+          canSubmitProof={canSubmitProof}
           onPayNow={onPayNow}
           onViewPaymentDetails={onViewPaymentDetails}
           onDownloadPdf={onDownloadPdf}
-          labels={getParentInvoiceGridLabels(labels)}
+          labels={{
+            ...getParentInvoiceGridLabels(labels),
+            hasPaymentProofHint: labels.hasPaymentProofHint,
+          }}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}

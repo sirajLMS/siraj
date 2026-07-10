@@ -5,20 +5,26 @@ import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MarkPaidInvoiceTarget, PaymentDetailsTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type {
+  MarkPaidInvoiceTarget,
+  PaymentDetailsTarget,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
   readonly viewDetails: string;
+  readonly viewSubmission: string;
   readonly downloadPdf: string;
   readonly payNow: string;
-  readonly statusLabels: Record<InvoiceStatus, string>;
+  readonly hasPaymentProofHint: string;
+  readonly statusLabels: Record<string, string>;
 }
 
 interface ParentInvoicesCardListProps {
   readonly rows: readonly ParentInvoiceRow[];
   readonly labels: ParentInvoicesCardListLabels;
   readonly canView: boolean;
+  readonly canSubmitProof: boolean;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
   readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDownloadPdf: (id: string) => void;
@@ -28,7 +34,6 @@ interface ParentInvoicesCardListProps {
   readonly onPageChange?: (page: number) => void;
 }
 
-// Invoice card with outline border and surface background for mobile card list
 const StyledInvoiceCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   borderRadius: theme.layout.radius.card,
@@ -36,17 +41,14 @@ const StyledInvoiceCard = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.surfaceContainerLowest,
 }));
 
-// Month label styled with secondary text color for subdued appearance
 const StyledMonthTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Fee label styled with secondary text color for subdued appearance
 const StyledFeeLabelTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Container for action icon buttons aligned at the end of a row
 const StyledActionsContainer = styled(Box)({
   display: "flex",
   justifyContent: "flex-end",
@@ -56,6 +58,7 @@ export function ParentInvoicesCardList({
   rows,
   labels,
   canView,
+  canSubmitProof,
   onPayNow,
   onViewPaymentDetails,
   onDownloadPdf,
@@ -78,7 +81,7 @@ export function ParentInvoicesCardList({
               </Typography>
               <StyledMonthTypography variant="bodyMd">{row.month}</StyledMonthTypography>
             </Box>
-            <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
+            <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status] ?? row.status} />
           </Box>
           <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, mb: 1.5 }}>
             <StyledFeeLabelTypography variant="labelMd">{row.issueDate}</StyledFeeLabelTypography>
@@ -86,12 +89,12 @@ export function ParentInvoicesCardList({
               {row.fee}
             </Typography>
           </Box>
-          {row.status === InvoiceStatus.Paid && row.paidMethodHint ? (
+          {row.status === InvoiceStatus.Paid && row.hasPaymentProof ? (
             <Typography variant="labelMd" sx={{ color: "text.secondary", mb: 1 }}>
-              {row.paidMethodHint}
+              {labels.hasPaymentProofHint}
             </Typography>
           ) : null}
-          {canView && row.status === InvoiceStatus.Unpaid && (
+          {canView && row.status === InvoiceStatus.Unpaid && canSubmitProof ? (
             <PrimaryPageAction
               fullWidth
               onClick={() => {
@@ -105,17 +108,24 @@ export function ParentInvoicesCardList({
             >
               {labels.payNow}
             </PrimaryPageAction>
-          )}
-          {canView && row.status === InvoiceStatus.Paid && (
+          ) : null}
+          {canView && row.status === InvoiceStatus.PaymentPending ? (
+            <PrimaryPageAction
+              fullWidth
+              onClick={() => {
+                onViewPaymentDetails?.({ invoiceId: row.id });
+              }}
+            >
+              {labels.viewSubmission}
+            </PrimaryPageAction>
+          ) : null}
+          {canView && row.status === InvoiceStatus.Paid ? (
             <StyledActionsContainer sx={{ gap: 0.5 }}>
               <IconButton
                 size="small"
                 aria-label={labels.viewDetails}
                 onClick={() => {
-                  onViewPaymentDetails?.({
-                    invoiceId: row.id,
-                    isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
-                  });
+                  onViewPaymentDetails?.({ invoiceId: row.id });
                 }}
               >
                 <VisibilityOutlined fontSize="small" />
@@ -130,10 +140,10 @@ export function ParentInvoicesCardList({
                 <DownloadOutlined fontSize="small" />
               </IconButton>
             </StyledActionsContainer>
-          )}
+          ) : null}
         </StyledInvoiceCard>
       ))}
-      {showPagination && (
+      {showPagination ? (
         <PaginationControls
           page={page}
           pageCount={pageCount}
@@ -141,7 +151,7 @@ export function ParentInvoicesCardList({
           pageSize={pageSize}
           onPageChange={onPageChange}
         />
-      )}
+      ) : null}
     </Box>
   );
 }

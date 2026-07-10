@@ -4,6 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { exchangeRateHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import {
@@ -12,7 +13,7 @@ import {
 } from "@/frontend/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 
-const HISTORY_MAX_DAYS = 90;
+const HISTORY_DAY_OPTIONS = [7, 30, 90] as const;
 
 interface ExchangeRateHistorySectionProps {
   readonly labels: ExchangeRatesLabels;
@@ -23,12 +24,13 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
   const defaultPair = availablePairs[0] ?? { from: CurrencyCode.Usd, to: CurrencyCode.Sar };
   const [fromCurrency, setFromCurrency] = useState<CurrencyCode>(defaultPair.from);
   const [toCurrency, setToCurrency] = useState<CurrencyCode>(defaultPair.to);
+  const [maxDays, setMaxDays] = useState<(typeof HISTORY_DAY_OPTIONS)[number]>(90);
 
   const { data, loading } = useQuery(exchangeRateHistoryQueryDocument, {
     variables: {
       from: fromCurrency,
       to: toCurrency,
-      maxDays: HISTORY_MAX_DAYS,
+      maxDays,
       paginationArgs: null,
     },
     fetchPolicy: "cache-and-network",
@@ -60,12 +62,12 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
           {labels.history.subtitle}
         </Typography>
         <Typography variant="caption" color="textSecondary">
-          {labels.history.maxDays.replace("{days}", String(HISTORY_MAX_DAYS))}
+          {labels.history.maxDays.replace("{days}", String(maxDays))}
         </Typography>
       </Box>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        <FormControl size="small" sx={{ minWidth: 160 }}>
+        <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel id="fx-history-from">{labels.rateTable.fromCurrency}</InputLabel>
           <Select
             labelId="fx-history-from"
@@ -75,13 +77,13 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
           >
             {fromOptions.map(currency => (
               <MenuItem key={currency} value={currency}>
-                {currency}
+                <CurrencyDisplay code={currency} parts={[CurrencyDisplayPart.Label, CurrencyDisplayPart.Code]} />
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        <FormControl size="small" sx={{ minWidth: 160 }}>
+        <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel id="fx-history-to">{labels.rateTable.toCurrency}</InputLabel>
           <Select
             labelId="fx-history-to"
@@ -91,7 +93,23 @@ export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<
           >
             {(toOptions.length > 0 ? toOptions : [toCurrency]).map(currency => (
               <MenuItem key={currency} value={currency}>
-                {currency}
+                <CurrencyDisplay code={currency} parts={[CurrencyDisplayPart.Label, CurrencyDisplayPart.Code]} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 160 }}>
+          <InputLabel id="fx-history-days">{labels.history.daysLabel}</InputLabel>
+          <Select
+            labelId="fx-history-days"
+            label={labels.history.daysLabel}
+            value={maxDays}
+            onChange={event => setMaxDays(Number(event.target.value) as (typeof HISTORY_DAY_OPTIONS)[number])}
+          >
+            {HISTORY_DAY_OPTIONS.map(days => (
+              <MenuItem key={days} value={days}>
+                {labels.history.maxDays.replace("{days}", String(days))}
               </MenuItem>
             ))}
           </Select>

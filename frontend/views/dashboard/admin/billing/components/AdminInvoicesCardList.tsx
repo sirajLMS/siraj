@@ -15,6 +15,7 @@ import type {
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;
   readonly quickPay: string;
+  readonly reviewSubmission: string;
   readonly viewDetails: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
 }
@@ -31,7 +32,6 @@ interface AdminInvoicesCardListProps {
   readonly onPageChange?: (page: number) => void;
 }
 
-// Invoice card with outline border and surface background for mobile card list
 const StyledInvoiceCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   borderRadius: theme.layout.radius.card,
@@ -39,7 +39,6 @@ const StyledInvoiceCard = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.surfaceContainerLowest,
 }));
 
-// Circular avatar with secondary container background for student initials
 const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
   width: 40,
   height: 40,
@@ -47,12 +46,10 @@ const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
   fontSize: 12,
 }));
 
-// Invoice ID label styled with secondary text color
 const StyledInvoiceIdLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Date text styled with secondary color for subdued appearance
 const StyledDateTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
@@ -73,8 +70,9 @@ export function AdminInvoicesCardList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => {
+        const isPayable =
+          canManage && (row.status === "OVERDUE" || row.status === InvoiceStatus.Unpaid || row.status === "PENDING");
         const actionLabel = row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay;
-        const showAction = canManage && row.status !== InvoiceStatus.Paid;
 
         return (
           <StyledInvoiceCard key={row.id} elevation={0}>
@@ -98,7 +96,7 @@ export function AdminInvoicesCardList({
                 {row.amount}
               </Typography>
             </Box>
-            {showAction && (
+            {isPayable ? (
               <Button
                 fullWidth
                 variant="outlined"
@@ -116,17 +114,26 @@ export function AdminInvoicesCardList({
               >
                 {actionLabel}
               </Button>
-            )}
+            ) : null}
+            {row.status === InvoiceStatus.PaymentPending ? (
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => {
+                  onViewPaymentDetails?.({ invoiceId: row.id });
+                }}
+                sx={{ mt: 1.5, textTransform: "uppercase", fontWeight: 700 }}
+              >
+                {labels.reviewSubmission}
+              </Button>
+            ) : null}
             {row.status === InvoiceStatus.Paid && onViewPaymentDetails ? (
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
                 <IconButton
                   size="small"
                   aria-label={labels.viewDetails}
                   onClick={() => {
-                    onViewPaymentDetails({
-                      invoiceId: row.id,
-                      isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
-                    });
+                    onViewPaymentDetails({ invoiceId: row.id });
                   }}
                 >
                   <VisibilityOutlined fontSize="small" />

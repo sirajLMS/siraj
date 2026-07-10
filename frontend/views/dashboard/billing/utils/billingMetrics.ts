@@ -19,6 +19,7 @@ export function buildAdminMetrics(summary: AdminBillingSummary, labels: BillingL
       key: "total-outstanding",
       label: labels.adminMetrics.totalOutstanding,
       value: summary.totalOutstanding,
+      subLabel: summary.totalOutstandingSubLabel,
       icon: AccountBalanceOutlined,
     },
     {
@@ -38,6 +39,7 @@ export function buildAdminMetrics(summary: AdminBillingSummary, labels: BillingL
       key: "mtd-revenue",
       label: labels.adminMetrics.mtdRevenue,
       value: summary.mtdRevenue,
+      subLabel: summary.mtdRevenueSubLabel,
       icon: TrendingUpOutlined,
     },
   ];
@@ -49,12 +51,14 @@ export function buildParentMetrics(summary: ParentBillingSummary, labels: Billin
       key: "outstanding-balance",
       label: labels.parentMetrics.outstandingBalance,
       value: summary.outstandingBalance,
+      subLabel: summary.outstandingBalanceSubLabel,
       icon: AccountBalanceWalletOutlined,
     },
     {
       key: "paid-this-term",
       label: labels.parentMetrics.paidThisTerm,
       value: summary.paidThisTerm,
+      subLabel: summary.paidThisTermSubLabel,
       icon: CheckCircleOutlined,
       variant: "highlight",
     },

@@ -1,9 +1,10 @@
 "use client";
 
-import { OpenInNewOutlined, VideocamOutlined } from "@mui/icons-material";
-import { Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { OnlineMeetingInfo } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface OnlineMeetingCardProps {
@@ -32,13 +33,13 @@ const StyledPreviewContainer = styled(Box)(({ theme }) => ({
   justifyContent: "center",
 }));
 
-const StyledMobileVideoIcon = styled(VideocamOutlined)(({ theme }) => ({
+const StyledMobileVideoIcon = styled(VideocamOutlinedIcon)(({ theme }) => ({
   fontSize: 48,
   color: theme.palette.text.disabled,
   opacity: 0.4,
 }));
 
-const StyledDesktopVideoIcon = styled(VideocamOutlined)(({ theme }) => ({
+const StyledDesktopVideoIcon = styled(VideocamOutlinedIcon)(({ theme }) => ({
   fontSize: 64,
   color: theme.palette.text.disabled,
   opacity: 0.3,
@@ -92,7 +93,7 @@ const StyledMeetingInfoRow = styled(Box)(({ theme }) => ({
   borderRadius: 2,
 }));
 
-const StyledMeetingInfoIcon = styled(VideocamOutlined)(({ theme }) => ({
+const StyledMeetingInfoIcon = styled(VideocamOutlinedIcon)(({ theme }) => ({
   color: theme.palette.onPrimaryContainer,
 }));
 
@@ -123,16 +124,13 @@ const MobileMeetingCard = ({ meetingInfo, labels, onJoinMeeting }: OnlineMeeting
             </StyledLocationText>
           ) : null}
         </Box>
-        <Button
+        <MeetingJoinAction
+          joinUrl={meetingInfo?.joinUrl}
+          label={labels.joinMeeting}
+          variant="button"
           id="venue-join-meeting-mobile"
-          variant="contained"
-          startIcon={<OpenInNewOutlined />}
-          onClick={onJoinMeeting}
-          disabled={!meetingInfo?.joinUrl}
-          sx={{ typography: "labelUppercase" }}
-        >
-          {labels.joinMeeting}
-        </Button>
+          onJoinAction={onJoinMeeting}
+        />
       </Box>
     </BaseCard>
   );

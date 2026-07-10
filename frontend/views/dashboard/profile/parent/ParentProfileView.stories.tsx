@@ -2,7 +2,12 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AccountStatus,
+  CurrencyCode,
+  IanaTimezone,
+  ParentStatus,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
@@ -28,7 +33,8 @@ const parentAdminProfile: ParentAdminData = {
   name: "Noor Abdullah",
   email: "noor.abdullah@example.com",
   avatarUrl: null,
-  status: "REGULAR",
+  lifecycleStatus: ParentStatus.Regular,
+  accountStatus: AccountStatus.Activated,
   phone: "+966 50 123 4567",
   nationality: "SA",
   address: "123 King Fahd Rd, Riyadh",

@@ -90,7 +90,11 @@ export enum AppPermission {
   AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
   BillingCreateInvoice = 'BILLING_CREATE_INVOICE',
   BillingDeleteInvoice = 'BILLING_DELETE_INVOICE',
+  BillingManageCurrencyHedges = 'BILLING_MANAGE_CURRENCY_HEDGES',
+  BillingManageFxProvider = 'BILLING_MANAGE_FX_PROVIDER',
+  BillingOverrideExchangeRates = 'BILLING_OVERRIDE_EXCHANGE_RATES',
   BillingRefreshExchangeRates = 'BILLING_REFRESH_EXCHANGE_RATES',
+  BillingSubmitPaymentProof = 'BILLING_SUBMIT_PAYMENT_PROOF',
   BillingUpdateStatusPaid = 'BILLING_UPDATE_STATUS_PAID',
   BillingViewExchangeRates = 'BILLING_VIEW_EXCHANGE_RATES',
   BillingViewHistory = 'BILLING_VIEW_HISTORY',
@@ -116,6 +120,7 @@ export enum AppPermission {
   InvoicesEdit = 'INVOICES_EDIT',
   InvoicesList = 'INVOICES_LIST',
   InvoicesMarkPaid = 'INVOICES_MARK_PAID',
+  MeetingConfigsManageClass = 'MEETING_CONFIGS_MANAGE_CLASS',
   MeetingConfigsManageOther = 'MEETING_CONFIGS_MANAGE_OTHER',
   MeetingConfigsManageOwn = 'MEETING_CONFIGS_MANAGE_OWN',
   MeetingProvidersManageCatalog = 'MEETING_PROVIDERS_MANAGE_CATALOG',
@@ -345,6 +350,7 @@ export type BillingCurrencyTotal = {
   __typename?: 'BillingCurrencyTotal';
   amount: Maybe<Scalars['String']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
 };
 
@@ -428,12 +434,14 @@ export type ClassInstanceDetail = {
   classType: Maybe<ClassType>;
   courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   endTime: Maybe<Scalars['String']['output']>;
   executionState: Maybe<ClassExecutionState>;
   hasTimezoneMismatch: Maybe<Scalars['Boolean']['output']>;
   id: Maybe<Scalars['String']['output']>;
   instanceId: Maybe<Scalars['String']['output']>;
   isRescheduled: Maybe<Scalars['Boolean']['output']>;
+  /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   payrollCredited: Maybe<Scalars['Boolean']['output']>;
@@ -479,6 +487,39 @@ export type ClassInstanceTeacherInfo = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
+};
+
+export type ClassMeetingConfig = {
+  __typename?: 'ClassMeetingConfig';
+  classInstanceId: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  details: Maybe<MeetingConfigDetails>;
+  hasSecret: Maybe<Scalars['Boolean']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isDefault: Maybe<Scalars['Boolean']['output']>;
+  label: Maybe<Scalars['String']['output']>;
+  provider: Maybe<MeetingProvider>;
+  providerId: Maybe<Scalars['String']['output']>;
+  recurringScheduleId: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClassMeetingConfigCreateInput = {
+  classInstanceId: InputMaybe<Scalars['String']['input']>;
+  details: MeetingConfigDetailsInput;
+  isDefault: Scalars['Boolean']['input'];
+  label: InputMaybe<Scalars['String']['input']>;
+  password: InputMaybe<Scalars['String']['input']>;
+  providerId: Scalars['String']['input'];
+  recurringScheduleId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ClassMeetingConfigUpdateInput = {
+  details: InputMaybe<MeetingConfigDetailsInput>;
+  isDefault: InputMaybe<Scalars['Boolean']['input']>;
+  label: InputMaybe<Scalars['String']['input']>;
+  password: InputMaybe<Scalars['String']['input']>;
+  providerId: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum ClassOutcome {
@@ -985,6 +1026,17 @@ export enum CurrencyCode {
   Yer = 'YER'
 }
 
+export type CurrencyHedge = {
+  __typename?: 'CurrencyHedge';
+  amount: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  currency: Maybe<CurrencyCode>;
+  hedgeType: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  notes: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type DailyScheduleList = {
   __typename?: 'DailyScheduleList';
   avatarUrl: Maybe<Scalars['String']['output']>;
@@ -1041,8 +1093,9 @@ export enum DayOfWeek {
 
 export type DeactivateParentResult = {
   __typename?: 'DeactivateParentResult';
+  accountStatus: Maybe<AccountStatus>;
   id: Maybe<Scalars['String']['output']>;
-  status: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
 };
 
 export type DeleteInvoiceResult = {
@@ -1159,6 +1212,25 @@ export type EditQuotaResult = {
   id: Maybe<Scalars['String']['output']>;
   version: Maybe<Scalars['Int']['output']>;
 };
+
+export type EffectiveMeeting = {
+  __typename?: 'EffectiveMeeting';
+  configId: Maybe<Scalars['String']['output']>;
+  joinUrl: Maybe<Scalars['String']['output']>;
+  logoUrl: Maybe<Scalars['String']['output']>;
+  meetingId: Maybe<Scalars['String']['output']>;
+  providerId: Maybe<Scalars['String']['output']>;
+  providerName: Maybe<Scalars['LocalizedString']['output']>;
+  providerSlug: Maybe<Scalars['String']['output']>;
+  source: Maybe<EffectiveMeetingSource>;
+};
+
+export enum EffectiveMeetingSource {
+  Class = 'class',
+  None = 'none',
+  Recurring = 'recurring',
+  Teacher = 'teacher'
+}
 
 export type EndImpersonationResponse = {
   __typename?: 'EndImpersonationResponse';
@@ -1305,12 +1377,14 @@ export type FutureClass = {
   classType: Maybe<ClassType>;
   courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   endTime: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isRescheduled: Maybe<Scalars['Boolean']['output']>;
   leaveRequestDisabled: Maybe<Scalars['Boolean']['output']>;
   leaveRequestDisabledReason: Maybe<Scalars['String']['output']>;
   location: Maybe<Scalars['String']['output']>;
+  /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   scheduledDate: Maybe<Scalars['String']['output']>;
   startTime: Maybe<Scalars['String']['output']>;
@@ -1323,6 +1397,26 @@ export enum FxProvider {
   Fixer = 'Fixer',
   OpenExchangeRates = 'OpenExchangeRates'
 }
+
+export type FxProviderConfig = {
+  __typename?: 'FxProviderConfig';
+  activeProvider: Maybe<FxProvider>;
+  id: Maybe<Scalars['String']['output']>;
+  source: Maybe<FxProviderConfigSource>;
+};
+
+export enum FxProviderConfigSource {
+  Database = 'database',
+  Env = 'env'
+}
+
+export type FxSyncHealth = {
+  __typename?: 'FxSyncHealth';
+  finishedAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isStale: Maybe<Scalars['Boolean']['output']>;
+  status: Maybe<FxSyncStatus>;
+};
 
 export type FxSyncRun = {
   __typename?: 'FxSyncRun';
@@ -1861,9 +1955,31 @@ export type ImpersonationStatus = {
   targetUser: Maybe<User>;
 };
 
+export type InvoicePaymentSubmission = {
+  __typename?: 'InvoicePaymentSubmission';
+  fileId: Maybe<Scalars['String']['output']>;
+  filePath: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  invoiceId: Maybe<Scalars['String']['output']>;
+  mimeType: Maybe<Scalars['String']['output']>;
+  rejectionReason: Maybe<Scalars['String']['output']>;
+  reviewedAt: Maybe<Scalars['String']['output']>;
+  reviewedByUserId: Maybe<Scalars['String']['output']>;
+  status: Maybe<InvoicePaymentSubmissionStatus>;
+  submittedAt: Maybe<Scalars['String']['output']>;
+  submittedByUserId: Maybe<Scalars['String']['output']>;
+};
+
+export enum InvoicePaymentSubmissionStatus {
+  Approved = 'approved',
+  Pending = 'pending',
+  Rejected = 'rejected'
+}
+
 export enum InvoiceStatus {
   Cancelled = 'CANCELLED',
   Paid = 'PAID',
+  PaymentPending = 'PAYMENT_PENDING',
   Unpaid = 'UNPAID'
 }
 
@@ -2091,6 +2207,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   activateClass: Maybe<ClassInstanceDetail>;
   activateOverrideClass: Maybe<ClassInstanceDetail>;
+  approvePaymentProof: Maybe<MarkInvoicePaidResult>;
   assignPermissionGroupToUser: Maybe<Scalars['Boolean']['output']>;
   attachSubjectResource: Maybe<SubjectResource>;
   bulkAssignUsersToGroup: Maybe<Scalars['Boolean']['output']>;
@@ -2103,7 +2220,9 @@ export type Mutation = {
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createClassCategory: Maybe<ClassCategory>;
+  createClassMeetingConfig: Maybe<ClassMeetingConfig>;
   createClassSubject: Maybe<ClassSubject>;
+  createCurrencyHedge: Maybe<CurrencyHedge>;
   createFolder: Maybe<FileOperationResult>;
   /** Create a new manager/staff account (System Admin only) */
   createManager: Maybe<ManagerOnboardingResult>;
@@ -2136,9 +2255,11 @@ export type Mutation = {
   deleteBook: Maybe<Scalars['Boolean']['output']>;
   deleteClassCategory: Maybe<Scalars['Boolean']['output']>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
+  deleteClassMeetingConfig: Maybe<Scalars['Boolean']['output']>;
   deleteClassSubject: Maybe<Scalars['Boolean']['output']>;
   /** Soft-deletes a complaint (admin only). Returns true on success. */
   deleteComplaint: Maybe<Scalars['Boolean']['output']>;
+  deleteCurrencyHedge: Maybe<Scalars['Boolean']['output']>;
   deleteFile: Maybe<FileOperationResult>;
   deleteInvoice: Maybe<DeleteInvoiceResult>;
   /** Permanently deletes a learning resource from physical storage and the database. */
@@ -2175,6 +2296,7 @@ export type Mutation = {
   recordPayment: Maybe<Payment>;
   refreshExchangeRates: Maybe<RefreshExchangeRatesResult>;
   refreshToken: Maybe<RefreshTokenResponse>;
+  rejectPaymentProof: Maybe<MarkInvoicePaidResult>;
   renameFile: Maybe<FileOperationResult>;
   rescheduleClass: Maybe<ClassInstanceDetail>;
   resendClassNotifications: Maybe<SupportRequestResult>;
@@ -2185,6 +2307,7 @@ export type Mutation = {
   respondToSuggestion: Maybe<Suggestion>;
   revokePermissionGroupFromUser: Maybe<Scalars['Boolean']['output']>;
   sendPaymentReminder: Maybe<SendPaymentReminderResult>;
+  setDefaultClassMeetingConfig: Maybe<ClassMeetingConfig>;
   setDefaultMeetingConfig: Maybe<UserMeetingConfig>;
   setDefaultUserPaymentMethod: Maybe<UserPaymentMethod>;
   setStorageItemProtection: Maybe<FileOperationResult>;
@@ -2193,12 +2316,16 @@ export type Mutation = {
   stopClass: Maybe<ClassInstanceDetail>;
   /** Submits a new complaint from the authenticated parent. */
   submitComplaint: Maybe<Complaint>;
+  submitPaymentProof: Maybe<MarkInvoicePaidResult>;
   /** Submits a new suggestion from the authenticated parent. */
   submitSuggestion: Maybe<Suggestion>;
   updateClassAdminNote: Maybe<GroupClassAudit>;
   updateClassCategory: Maybe<ClassCategory>;
+  updateClassMeetingConfig: Maybe<ClassMeetingConfig>;
   updateClassSubject: Maybe<ClassSubject>;
+  updateCurrencyHedge: Maybe<CurrencyHedge>;
   updateDirectoryPermissions: Maybe<FileOperationResult>;
+  updateFxProvider: Maybe<FxProviderConfig>;
   /** Updates a manager's profile fields. */
   updateManagerProfile: Maybe<ManagerDirectoryRow>;
   updateMeetingProvider: Maybe<MeetingProvider>;
@@ -2220,6 +2347,7 @@ export type Mutation = {
   updateUserProfile: Maybe<UnifiedProfile>;
   /** Uploads a new learning resource to the academy library. */
   uploadLearningResource: Maybe<LearningResourceRow>;
+  upsertManualExchangeRate: Maybe<UpsertManualExchangeRateResult>;
   verifyBankTransferPaymentMethod: Maybe<UserPaymentMethod>;
 };
 
@@ -2231,6 +2359,12 @@ export type MutationActivateClassArgs = {
 
 export type MutationActivateOverrideClassArgs = {
   classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type MutationApprovePaymentProofArgs = {
+  expectedVersion: InputMaybe<Scalars['Int']['input']>;
+  invoiceId: Scalars['String']['input'];
 };
 
 
@@ -2303,8 +2437,21 @@ export type MutationCreateClassCategoryArgs = {
 };
 
 
+export type MutationCreateClassMeetingConfigArgs = {
+  input: ClassMeetingConfigCreateInput;
+};
+
+
 export type MutationCreateClassSubjectArgs = {
   input: ClassSubjectCreateInput;
+};
+
+
+export type MutationCreateCurrencyHedgeArgs = {
+  amount: Scalars['String']['input'];
+  currency: CurrencyCode;
+  hedgeType: Scalars['String']['input'];
+  notes: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2460,6 +2607,11 @@ export type MutationDeleteClassInstanceArgs = {
 };
 
 
+export type MutationDeleteClassMeetingConfigArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteClassSubjectArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2467,6 +2619,11 @@ export type MutationDeleteClassSubjectArgs = {
 
 export type MutationDeleteComplaintArgs = {
   complaintId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteCurrencyHedgeArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -2567,7 +2724,7 @@ export type MutationLoginArgs = {
 export type MutationMarkInvoicePaidArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   invoiceId: Scalars['String']['input'];
-  userPaymentMethodId: Scalars['ID']['input'];
+  proofFileId: Scalars['ID']['input'];
 };
 
 
@@ -2617,6 +2774,13 @@ export type MutationRefreshExchangeRatesArgs = {
 };
 
 
+export type MutationRejectPaymentProofArgs = {
+  expectedVersion: InputMaybe<Scalars['Int']['input']>;
+  invoiceId: Scalars['String']['input'];
+  rejectionReason: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type MutationRenameFileArgs = {
   input: FileRenameInput;
 };
@@ -2658,6 +2822,11 @@ export type MutationSendPaymentReminderArgs = {
 };
 
 
+export type MutationSetDefaultClassMeetingConfigArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationSetDefaultMeetingConfigArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2694,6 +2863,13 @@ export type MutationSubmitComplaintArgs = {
 };
 
 
+export type MutationSubmitPaymentProofArgs = {
+  expectedVersion: InputMaybe<Scalars['Int']['input']>;
+  invoiceId: Scalars['String']['input'];
+  proofFileId: Scalars['ID']['input'];
+};
+
+
 export type MutationSubmitSuggestionArgs = {
   input: SubmitSuggestionInput;
 };
@@ -2711,14 +2887,34 @@ export type MutationUpdateClassCategoryArgs = {
 };
 
 
+export type MutationUpdateClassMeetingConfigArgs = {
+  id: Scalars['ID']['input'];
+  input: ClassMeetingConfigUpdateInput;
+};
+
+
 export type MutationUpdateClassSubjectArgs = {
   id: Scalars['ID']['input'];
   input: ClassSubjectUpdateInput;
 };
 
 
+export type MutationUpdateCurrencyHedgeArgs = {
+  amount: InputMaybe<Scalars['String']['input']>;
+  currency: InputMaybe<CurrencyCode>;
+  hedgeType: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
+  notes: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type MutationUpdateDirectoryPermissionsArgs = {
   input: DirectoryPermissionsUpdateInput;
+};
+
+
+export type MutationUpdateFxProviderArgs = {
+  provider: FxProvider;
 };
 
 
@@ -2828,6 +3024,14 @@ export type MutationUpdateUserProfileArgs = {
 
 export type MutationUploadLearningResourceArgs = {
   input: ResourceUploadInput;
+};
+
+
+export type MutationUpsertManualExchangeRateArgs = {
+  effectiveDate: InputMaybe<Scalars['DateTime']['input']>;
+  fromCurrency: CurrencyCode;
+  rate: Scalars['String']['input'];
+  toCurrency: CurrencyCode;
 };
 
 
@@ -3013,8 +3217,10 @@ export type ParentDashboardScheduleRow = {
   bookingStatus: Maybe<BookingStatus>;
   classTimeFormatted: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
@@ -3039,8 +3245,6 @@ export type ParentDirectory = {
 
 export type ParentDirectoryMetrics = {
   __typename?: 'ParentDirectoryMetrics';
-  activated: Maybe<Scalars['Int']['output']>;
-  deactivated: Maybe<Scalars['Int']['output']>;
   id: Maybe<Scalars['String']['output']>;
   onLeave: Maybe<Scalars['Int']['output']>;
   onTrial: Maybe<Scalars['Int']['output']>;
@@ -3050,12 +3254,13 @@ export type ParentDirectoryMetrics = {
 
 export type ParentDirectoryRow = {
   __typename?: 'ParentDirectoryRow';
-  accountStatus: Maybe<ParentStatus>;
+  accountStatus: Maybe<AccountStatus>;
   avatarUrl: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
   guardianOf: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   index: Maybe<Scalars['Int']['output']>;
+  lifecycleStatus: Maybe<ParentStatus>;
   name: Maybe<Scalars['String']['output']>;
   time: Maybe<Scalars['String']['output']>;
   unpaidInvoices: Maybe<Scalars['Int']['output']>;
@@ -3092,11 +3297,10 @@ export type ParentInvoiceRow = {
   currency: Maybe<CurrencyCode>;
   displayAmount: Maybe<DisplayAmount>;
   dueDate: Maybe<Scalars['String']['output']>;
+  hasPaymentProof: Maybe<Scalars['Boolean']['output']>;
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<InvoiceType>;
   issueDate: Maybe<Scalars['String']['output']>;
-  latestPaymentMethodLabel: Maybe<Scalars['String']['output']>;
-  latestPaymentMethodType: Maybe<PaymentMethodType>;
   paidDate: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   parentUserId: Maybe<Scalars['String']['output']>;
@@ -3155,6 +3359,7 @@ export type ParentOwnProfileUpdateInput = {
 
 export type ParentProfile = {
   __typename?: 'ParentProfile';
+  accountStatus: Maybe<AccountStatus>;
   address: Maybe<Scalars['String']['output']>;
   avatarUrl: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
@@ -3165,10 +3370,10 @@ export type ParentProfile = {
   feeAmount: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<Scalars['String']['output']>;
+  lifecycleStatus: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   nationality: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
-  status: Maybe<Scalars['String']['output']>;
   timezone: Maybe<IanaTimezone>;
   twitter: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
@@ -3177,8 +3382,6 @@ export type ParentProfile = {
 };
 
 export enum ParentStatus {
-  Activated = 'ACTIVATED',
-  Deactivated = 'DEACTIVATED',
   OnLeave = 'ON_LEAVE',
   OnTrial = 'ON_TRIAL',
   Regular = 'REGULAR',
@@ -3209,6 +3412,7 @@ export type Payment = {
   amount: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
   invoiceId: Maybe<Scalars['String']['output']>;
   paymentDate: Maybe<Scalars['DateTime']['output']>;
@@ -3286,7 +3490,8 @@ export enum PaymentMethodType {
   Cash = 'CASH',
   MobileWallet = 'MOBILE_WALLET',
   OnlineAccount = 'ONLINE_ACCOUNT',
-  PaymentLink = 'PAYMENT_LINK'
+  PaymentLink = 'PAYMENT_LINK',
+  ProofUpload = 'PROOF_UPLOAD'
 }
 
 export type Permission = {
@@ -3351,11 +3556,13 @@ export type Query = {
   booksAndBags: Maybe<Array<Book>>;
   classCategories: Maybe<Array<ClassCategory>>;
   classInstance: Maybe<ClassInstanceDetail>;
+  classMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
   classStatusEvents: Maybe<Array<ClassStatusEvent>>;
   classSubject: Maybe<ClassSubject>;
   classSubjects: Maybe<Array<ClassSubject>>;
   /** Returns file attachments for a specific complaint. Accessible by the owning parent or admins. */
   complaintFiles: Maybe<Array<ComplaintFile>>;
+  currencyHedges: Maybe<Array<CurrencyHedge>>;
   dailyScheduleList: Maybe<Array<DailyScheduleList>>;
   dailyScheduleMetrics: Maybe<DailyScheduleMetrics>;
   directoryChildren: Maybe<Array<DirectoryInfo>>;
@@ -3365,10 +3572,13 @@ export type Query = {
   fileInfo: Maybe<FileInfo>;
   fileUsage: Maybe<FileUsageResult>;
   folderInfo: Maybe<DirectoryInfo>;
+  fxProviderConfig: Maybe<FxProviderConfig>;
+  fxSyncHealth: Maybe<FxSyncHealth>;
   /** Generates dynamic attendance and financial reports. */
   generateAttendanceReport: Maybe<AttendanceReportPayload>;
   groupClassAudit: Maybe<GroupClassAudit>;
   impersonationStatus: Maybe<ImpersonationStatus>;
+  invoicePaymentSubmission: Maybe<InvoicePaymentSubmission>;
   invoicePayments: Maybe<Array<Payment>>;
   latestExchangeRates: Maybe<Array<ExchangeRate>>;
   latestFxSyncRun: Maybe<FxSyncRun>;
@@ -3407,6 +3617,7 @@ export type Query = {
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
   profileByUserId: Maybe<UnifiedProfile>;
+  recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
   rescheduleTrackingRows: Maybe<RescheduleTrackingResult>;
   searchFiles: Maybe<StorageObjectList>;
@@ -3480,6 +3691,11 @@ export type QueryAdminSuggestionsArgs = {
 
 export type QueryClassInstanceArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryClassMeetingConfigsArgs = {
+  classInstanceId: Scalars['ID']['input'];
 };
 
 
@@ -3560,6 +3776,11 @@ export type QueryGroupClassAuditArgs = {
 };
 
 
+export type QueryInvoicePaymentSubmissionArgs = {
+  invoiceId: Scalars['String']['input'];
+};
+
+
 export type QueryInvoicePaymentsArgs = {
   invoiceId: Scalars['ID']['input'];
 };
@@ -3621,9 +3842,9 @@ export type QueryParentDashboardScheduleArgs = {
 
 
 export type QueryParentDirectoryArgs = {
+  lifecycleStatusFilter: InputMaybe<ParentStatus>;
   paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
-  statusFilter: InputMaybe<ParentStatus>;
 };
 
 
@@ -3656,6 +3877,11 @@ export type QueryPermissionGroupArgs = {
 
 export type QueryProfileByUserIdArgs = {
   userId: Scalars['String']['input'];
+};
+
+
+export type QueryRecurringMeetingConfigsArgs = {
+  recurringScheduleId: Scalars['ID']['input'];
 };
 
 
@@ -4634,8 +4860,10 @@ export type TeacherDashboardMetrics = {
 export type TeacherDashboardScheduleRow = {
   __typename?: 'TeacherDashboardScheduleRow';
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
@@ -4902,6 +5130,7 @@ export type UnifiedProfile = {
 
 export type UnpaidInvoiceItem = {
   __typename?: 'UnpaidInvoiceItem';
+  amountsByCurrency: Maybe<Array<BillingCurrencyTotal>>;
   currency: Maybe<CurrencyCode>;
   displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
@@ -4917,6 +5146,7 @@ export type UnpaidInvoicesSummary = {
   __typename?: 'UnpaidInvoicesSummary';
   id: Maybe<Scalars['String']['output']>;
   items: Maybe<Array<UnpaidInvoiceItem>>;
+  overdueAmountsByCurrency: Maybe<Array<BillingCurrencyTotal>>;
   totalOverdueAmount: Maybe<Scalars['String']['output']>;
   totalOverdueInvoices: Maybe<Scalars['Int']['output']>;
 };
@@ -4976,6 +5206,12 @@ export enum UploadType {
   VercelBlobClient = 'VERCEL_BLOB_CLIENT'
 }
 
+export type UpsertManualExchangeRateResult = {
+  __typename?: 'UpsertManualExchangeRateResult';
+  id: Maybe<Scalars['String']['output']>;
+  rate: Maybe<ExchangeRate>;
+};
+
 export type User = {
   __typename?: 'User';
   avatarUrl: Maybe<Scalars['String']['output']>;
@@ -4988,7 +5224,9 @@ export type User = {
   notificationCount: Maybe<Scalars['Int']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   permissions: Maybe<Array<AppPermission>>;
+  phone: Maybe<Scalars['String']['output']>;
   role: Maybe<Scalars['String']['output']>;
+  status: Maybe<AccountStatus>;
   teacherId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };

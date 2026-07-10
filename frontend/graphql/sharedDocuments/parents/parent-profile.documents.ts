@@ -16,7 +16,8 @@ export const parentProfileQueryDocument: TypedDocumentNode<
       name
       email
       avatarUrl
-      status
+      lifecycleStatus
+      accountStatus
       phone
       nationality
       address
@@ -72,7 +73,8 @@ export const deactivateParentMutationDocument: TypedDocumentNode<
   mutation DeactivateParent($parentId: String!) {
     deactivateParent(parentId: $parentId) {
       id
-      status
+      userId
+      accountStatus
     }
   }
 `;

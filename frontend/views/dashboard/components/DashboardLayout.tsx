@@ -3,6 +3,7 @@
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
 import { BottomNavbar } from "@/frontend/views/dashboard/components/BottomNavbar";
+import { FxStaleBanner } from "@/frontend/views/dashboard/components/FxStaleBanner";
 import { Sidebar } from "@/frontend/views/dashboard/components/Sidebar";
 import { TopNavbar } from "@/frontend/views/dashboard/components/TopNavbar";
 import { getActiveNavKey } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
@@ -53,6 +54,7 @@ function MainScrollArea({ children }: { readonly children: ReactNode }) {
           py: { xs: theme.spacing(2), md: theme.layout.pageMargin },
         })}
       >
+        <FxStaleBanner />
         {children}
       </Box>
     </Box>

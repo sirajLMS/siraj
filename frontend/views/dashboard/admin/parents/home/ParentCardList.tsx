@@ -8,13 +8,13 @@ import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
+import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export interface ParentCardListLabels {
   readonly guardianOf: (name: string) => string;
   readonly unpaidCount: (count: number) => string;
   readonly invoicesCleared: string;
-  readonly statusLabels: Record<ParentAccountStatus, string>;
+  readonly statusLabels: Record<ParentLifecycleStatus, string>;
 }
 
 interface ParentCardProps {
@@ -72,8 +72,8 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <StatusBadge
             category="studentAccount"
-            status={row.accountStatus}
-            label={labels.statusLabels[row.accountStatus]}
+            status={row.lifecycleStatus}
+            label={labels.statusLabels[row.lifecycleStatus]}
           />
           {hasUnpaid ? (
             <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}>

@@ -14,6 +14,7 @@ import type {
   ParentViewData,
 } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/views/dashboard/profile/parent/sections/SocialSection";
+import { MeetingSummarySection } from "@/frontend/views/dashboard/profile/shared/MeetingSummarySection";
 
 export function ParentProfileView({
   parentData,
@@ -22,6 +23,8 @@ export function ParentProfileView({
   displayCurrency,
   isAdminScope,
   studentsLoading = false,
+  targetUserId,
+  meetingTabHref,
 }: {
   readonly parentData: ParentViewData;
   readonly associatedStudents: AssociatedStudents;
@@ -29,6 +32,8 @@ export function ParentProfileView({
   readonly displayCurrency: CurrencyCode | null | undefined;
   readonly isAdminScope: boolean;
   readonly studentsLoading?: boolean;
+  readonly targetUserId?: string;
+  readonly meetingTabHref?: string;
 }) {
   const t = useTranslations("profile.parent");
   const adminData = isAdminScope ? (parentData as ParentAdminData) : null;
@@ -51,7 +56,13 @@ export function ParentProfileView({
           },
         }}
       >
-        <AccountSection mode="view" parentData={parentData} avatarUrl={avatarUrl} displayCurrency={displayCurrency} />
+        <AccountSection
+          mode="view"
+          parentData={parentData}
+          avatarUrl={avatarUrl}
+          displayCurrency={displayCurrency}
+          adminData={adminData}
+        />
         <ContactSection mode="view" parentData={parentData} />
         <SocialSection mode="view" parentData={parentData} />
 
@@ -61,6 +72,7 @@ export function ParentProfileView({
             <BillingSection mode="view" adminData={adminData} />
           </>
         ) : null}
+        {targetUserId ? <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} /> : null}
       </Box>
 
       <AssociatedStudentsSection associatedStudents={associatedStudents} loading={studentsLoading} />

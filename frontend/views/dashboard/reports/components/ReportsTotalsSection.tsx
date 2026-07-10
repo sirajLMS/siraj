@@ -54,11 +54,11 @@ export function ReportsTotalsSection({ summary, rows, totalsLabel, variant }: Re
         })}
       >
         <Stack spacing={1}>
-          <Typography variant="titleMd" sx={theme => ({ color: theme.palette.primary.main })}>
+          <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
             {totalsLabel}
           </Typography>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="bodyMd" color="textSecondary">
+          <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+            <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
               {summary.totalHours}
             </Typography>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>

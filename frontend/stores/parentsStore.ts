@@ -5,11 +5,11 @@ interface ParentsState {
   readonly searchQuery: string;
   readonly page: number;
   readonly pageSize: number;
-  readonly statusFilter: ParentStatus | null;
+  readonly lifecycleStatusFilter: ParentStatus | null;
   readonly filterPanelOpen: boolean;
   setSearchQuery: (query: string) => void;
   setPage: (page: number) => void;
-  setStatusFilter: (status: ParentStatus | null) => void;
+  setLifecycleStatusFilter: (status: ParentStatus | null) => void;
   setFilterPanelOpen: (open: boolean) => void;
   resetFilters: () => void;
 }
@@ -20,7 +20,7 @@ export const useParentsStore = create<ParentsState>(set => ({
   searchQuery: "",
   page: 0,
   pageSize: DEFAULT_PAGE_SIZE,
-  statusFilter: null,
+  lifecycleStatusFilter: null,
   filterPanelOpen: false,
   setSearchQuery: (query: string) => {
     set({ searchQuery: query, page: 0 });
@@ -28,13 +28,13 @@ export const useParentsStore = create<ParentsState>(set => ({
   setPage: (page: number) => {
     set({ page });
   },
-  setStatusFilter: (status: ParentStatus | null) => {
-    set({ statusFilter: status, page: 0 });
+  setLifecycleStatusFilter: (status: ParentStatus | null) => {
+    set({ lifecycleStatusFilter: status, page: 0 });
   },
   setFilterPanelOpen: (open: boolean) => {
     set({ filterPanelOpen: open });
   },
   resetFilters: () => {
-    set({ searchQuery: "", statusFilter: null, page: 0 });
+    set({ searchQuery: "", lifecycleStatusFilter: null, page: 0 });
   },
 }));

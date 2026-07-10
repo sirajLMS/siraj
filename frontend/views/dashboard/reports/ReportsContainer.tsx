@@ -12,6 +12,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
 import type {
   ReportLedgerRow,
@@ -19,7 +20,10 @@ import type {
   ReportsSummary,
   ReportType,
 } from "@/frontend/views/dashboard/reports/types/reportsTypes";
-import { aggregateCurrencyTotals } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
+import {
+  aggregateCurrencyTotalsWithDisplay,
+  formatReportPaidAmount,
+} from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 import { useRouter } from "@/shared/i18n/routing";
 
 function formatHours(hours: number): string {
@@ -77,6 +81,7 @@ function mapReportRows(reportRows: readonly AttendanceReportRow[] | null | undef
 }
 
 interface ReportsMainContentProps {
+  readonly showFinancials: boolean;
   readonly reportData:
     | {
         readonly generateAttendanceReport?: {
@@ -104,6 +109,7 @@ interface ReportsMainContentProps {
 }
 
 function ReportsMainContent({
+  showFinancials,
   reportData,
   summary,
   fromDate,
@@ -180,26 +186,29 @@ function ReportsMainContent({
   };
 
   return (
-    <ReportsView
-      labels={labels}
-      fromDate={fromDate}
-      toDate={toDate}
-      teacherId={teacherId}
-      reportType={reportType}
-      teachers={teachers}
-      rows={rows}
-      summary={summary}
-      canGenerate={canGenerate}
-      loading={loading}
-      onFromDateChange={onFromDateChange}
-      onToDateChange={onToDateChange}
-      onTeacherChange={onTeacherChange}
-      onReportTypeChange={onReportTypeChange}
-      onSubmit={onSubmit}
-      onExportCsv={onExportCsv}
-      onPrintReport={onPrintReport}
-      onRowClick={onRowClick}
-    />
+    <>
+      {showFinancials ? <DisplayCurrencyHint /> : null}
+      <ReportsView
+        labels={labels}
+        fromDate={fromDate}
+        toDate={toDate}
+        teacherId={teacherId}
+        reportType={reportType}
+        teachers={teachers}
+        rows={rows}
+        summary={summary}
+        canGenerate={canGenerate}
+        loading={loading}
+        onFromDateChange={onFromDateChange}
+        onToDateChange={onToDateChange}
+        onTeacherChange={onTeacherChange}
+        onReportTypeChange={onReportTypeChange}
+        onSubmit={onSubmit}
+        onExportCsv={onExportCsv}
+        onPrintReport={onPrintReport}
+        onRowClick={onRowClick}
+      />
+    </>
   );
 }
 
@@ -241,12 +250,24 @@ function useReportFilters() {
   };
 }
 
-function useReportData(activeFilters: {
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly teacherId: string | null;
-  readonly groupBy: ReportGroupingMode;
-}) {
+function useReportData(
+  activeFilters: {
+    readonly fromDate: string;
+    readonly toDate: string;
+    readonly teacherId: string | null;
+    readonly groupBy: ReportGroupingMode;
+  },
+  locale: string,
+  fxMessages: {
+    readonly convertedAmount: (values: {
+      lockedAmount: string;
+      lockedCurrency: string;
+      convertedApprox: string;
+      displayCurrency: string;
+    }) => string;
+    readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  }
+) {
   const { data: teachersData } = useQuery(teachersQueryDocument, {
     variables: { search: "", limit: 100 },
   });
@@ -289,7 +310,7 @@ function useReportData(activeFilters: {
 
     const totalHoursFloat = reportRows.reduce((sum: number, r: AttendanceReportRow) => sum + (r.totalHours ?? 0), 0);
 
-    const currencyTotals = aggregateCurrencyTotals(
+    const currencyTotals = aggregateCurrencyTotalsWithDisplay(
       reportRows.map(row => ({ paidAmounts: mapPaidAmounts(row.paidAmounts) }))
     );
     const currencyDistribution = currencyTotals.map(slice => ({
@@ -297,6 +318,7 @@ function useReportData(activeFilters: {
       amount: slice.amount,
       percent: slice.percent,
       label: getCurrencyDisplayName(slice.currency),
+      formattedAmount: formatReportPaidAmount(slice.paidAmount, locale, fxMessages),
     }));
 
     return {
@@ -305,7 +327,7 @@ function useReportData(activeFilters: {
       currencyDistribution,
       totalHours: formatHours(totalHoursFloat),
     };
-  }, [rows, reportData]);
+  }, [rows, reportData, locale, fxMessages]);
 
   return { reportData, reportLoading, teachers, rows, summary };
 }
@@ -320,6 +342,7 @@ function useReportHandlers({
   showFinancials,
   setActiveFilters,
   locale,
+  exportLabels,
   fxMessages,
 }: {
   readonly fromDate: string;
@@ -336,6 +359,24 @@ function useReportHandlers({
     readonly groupBy: ReportGroupingMode;
   }) => void;
   readonly locale: string;
+  readonly exportLabels: {
+    readonly pageTitle: string;
+    readonly tableLabels: {
+      readonly name: string;
+      readonly taken: string;
+      readonly absent: string;
+      readonly leave: string;
+      readonly pending: string;
+      readonly hours: string;
+      readonly paid: string;
+      readonly paidLocked: string;
+    };
+    readonly totalsLabel: string;
+    readonly summaryLabels: {
+      readonly engagementRate: string;
+      readonly financialDistribution: string;
+    };
+  };
   readonly fxMessages: {
     readonly convertedAmount: (values: {
       lockedAmount: string;
@@ -367,21 +408,21 @@ function useReportHandlers({
       rows,
       summary,
       labels: {
-        pageTitle: "Attendance Report",
+        pageTitle: exportLabels.pageTitle,
         tableLabels: {
-          name: "Name",
-          taken: "Taken",
-          absent: "Absent",
-          leave: "Leave",
-          pending: "Pending",
-          hours: "Hours",
-          paid: "Paid (Display)",
-          paidLocked: "Paid (Locked)",
+          name: exportLabels.tableLabels.name,
+          taken: exportLabels.tableLabels.taken,
+          absent: exportLabels.tableLabels.absent,
+          leave: exportLabels.tableLabels.leave,
+          pending: exportLabels.tableLabels.pending,
+          hours: exportLabels.tableLabels.hours,
+          paid: exportLabels.tableLabels.paid,
+          paidLocked: exportLabels.tableLabels.paidLocked,
         },
-        totalsLabel: "Totals",
+        totalsLabel: exportLabels.totalsLabel,
         summaryLabels: {
-          engagementRate: "Engagement Rate",
-          financialDistribution: "Currency Split",
+          engagementRate: exportLabels.summaryLabels.engagementRate,
+          financialDistribution: exportLabels.summaryLabels.financialDistribution,
         },
       },
       fromDate,
@@ -392,7 +433,7 @@ function useReportHandlers({
     }).catch((error: unknown) => {
       logger.error("Excel export failed", error);
     });
-  }, [rows, summary, fromDate, toDate, showFinancials, locale, fxMessages]);
+  }, [rows, summary, fromDate, toDate, showFinancials, locale, exportLabels, fxMessages]);
 
   const handlePrintReport = useCallback(() => {
     globalThis.print();
@@ -419,6 +460,7 @@ function useReportHandlers({
 export function ReportsContainer() {
   const { hasPermission } = useUserStore();
   const locale = useLocale();
+  const t = useTranslations("dashboard.reports");
   const tProfile = useTranslations("profile");
   const tErrors = useTranslations("errors");
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
@@ -437,7 +479,21 @@ export function ReportsContainer() {
     setReportType,
   } = useReportFilters();
 
-  const { reportData, reportLoading, teachers, rows, summary } = useReportData(activeFilters);
+  const fxMessages = useMemo(
+    () => ({
+      convertedAmount: (values: {
+        lockedAmount: string;
+        lockedCurrency: string;
+        convertedApprox: string;
+        displayCurrency: string;
+      }) => tProfile("convertedAmount", values),
+      displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
+        tErrors("displayCurrencyFallback", values),
+    }),
+    [tProfile, tErrors]
+  );
+
+  const { reportData, reportLoading, teachers, rows, summary } = useReportData(activeFilters, locale, fxMessages);
 
   const { handleSubmit, handleExportCsv, handlePrintReport, handleRowClick } = useReportHandlers({
     fromDate,
@@ -449,15 +505,31 @@ export function ReportsContainer() {
     showFinancials,
     setActiveFilters,
     locale,
-    fxMessages: {
-      convertedAmount: values => tProfile("convertedAmount", values),
-      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+    exportLabels: {
+      pageTitle: t("export.pageTitle"),
+      tableLabels: {
+        name: t("table.name"),
+        taken: t("table.taken"),
+        absent: t("table.absent"),
+        leave: t("table.leave"),
+        pending: t("table.pending"),
+        hours: t("table.hours"),
+        paid: t("table.paidDisplay"),
+        paidLocked: t("table.paidLocked"),
+      },
+      totalsLabel: t("table.totals"),
+      summaryLabels: {
+        engagementRate: t("summary.engagementRate"),
+        financialDistribution: t("summary.financialDistribution"),
+      },
     },
+    fxMessages,
   });
 
   return (
     <RequirePermission permissions={[AppPermission.ReportGenerateCustom]}>
       <ReportsMainContent
+        showFinancials={showFinancials}
         reportData={reportData}
         summary={summary}
         fromDate={fromDate}

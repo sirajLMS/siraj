@@ -1,8 +1,8 @@
 "use client";
 
-import { VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
@@ -15,7 +15,7 @@ interface TeacherScheduleSessionActionsCellProps {
   readonly row: TeacherScheduleRow;
   readonly labels: TeacherDashboardLabels;
   readonly canActivate: boolean;
-  readonly onJoinVideo: (id: string) => void;
+  readonly onJoinVideo?: (id: string) => void;
   readonly onActivate?: (id: string) => void;
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
@@ -26,7 +26,6 @@ export function TeacherScheduleSessionActionsCell({
   row,
   labels,
   canActivate,
-  onJoinVideo,
   onActivate,
   onStartSession,
   onMarkAbsent,
@@ -44,7 +43,6 @@ export function TeacherScheduleSessionActionsCell({
   const tooltips = resolveTeacherScheduleActionTooltips(row, labels);
   const hasSessionControls = actions.start || actions.markAbsent || actions.requestLeave;
   const activateDisabled = !row.activateEnabled || row.status === "connecting";
-  const joinVideoDisabled = !row.videoEnabled;
   const markAbsentDisabled = row.markAbsentEnabled === false;
 
   if (!actions.activate && !hasSessionControls && !actions.joinVideo) {
@@ -84,22 +82,14 @@ export function TeacherScheduleSessionActionsCell({
       ) : null}
 
       {actions.joinVideo ? (
-        <Tooltip title={tooltips.joinVideo}>
-          <span>
-            <IconButton
-              size="small"
-              disabled={joinVideoDisabled}
-              onClick={() => {
-                if (!joinVideoDisabled) {
-                  onJoinVideo(row.id);
-                }
-              }}
-              aria-label={labels.actions.joinVideo}
-            >
-              {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
-            </IconButton>
-          </span>
-        </Tooltip>
+        <MeetingJoinAction
+          variant="icon"
+          joinUrl={row.meetingJoinUrl}
+          meeting={row.effectiveMeeting}
+          disabled={!row.videoEnabled}
+          label={labels.actions.joinVideo}
+          emptyRole="teacher"
+        />
       ) : null}
     </Box>
   );

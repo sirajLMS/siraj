@@ -1,7 +1,9 @@
 import type { useTranslations } from "next-intl";
 import { buildManualInvoiceLabels } from "@/frontend/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import type { CurrencyHedgesLabels } from "@/shared/messages/types/dashboard/billing/currency-hedges";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
+import type { SupportedCurrenciesLabels } from "@/shared/messages/types/dashboard/billing/supported-currencies";
 
 type BillingTranslator = ReturnType<typeof useTranslations<"dashboard.billing">>;
 
@@ -12,6 +14,7 @@ function buildPageLabels(t: BillingTranslator) {
     parentPageTitle: t("parentPageTitle"),
     parentPageSubtitle: t("parentPageSubtitle"),
     manualInvoice: t("manualInvoice"),
+    exchangeRatesLink: t("exchangeRatesLink"),
     quickPay: t("quickPay"),
     viewAllNegativeBalance: t("viewAllNegativeBalance"),
     requiresAttention: t("requiresAttention"),
@@ -67,6 +70,7 @@ function buildTableLabels(t: BillingTranslator) {
       actions: t("adminTable.actions"),
       markAsPaid: t("adminTable.markAsPaid"),
       quickPay: t("adminTable.quickPay"),
+      reviewSubmission: t("adminTable.reviewSubmission"),
       noEntries: t("adminTable.noEntries"),
     },
     creditTable: {
@@ -93,6 +97,7 @@ function buildTableLabels(t: BillingTranslator) {
       viewDetails: t("parentTable.viewDetails"),
       downloadPdf: t("parentTable.downloadPdf"),
       payNow: t("parentTable.payNow"),
+      viewSubmission: t("parentTable.viewSubmission"),
       noEntries: t("parentTable.noEntries"),
       emptyTitle: t("parentTable.emptyTitle"),
       emptySubtitle: t("parentTable.emptySubtitle"),
@@ -105,6 +110,7 @@ function buildStatusLabels(t: BillingTranslator) {
     invoiceStatus: {
       OVERDUE: t("invoiceStatus.OVERDUE"),
       PENDING: t("invoiceStatus.PENDING"),
+      PAYMENT_PENDING: t("invoiceStatus.PAYMENT_PENDING"),
       PAID: t("invoiceStatus.PAID"),
       UNPAID: t("invoiceStatus.UNPAID"),
       CANCELLED: t("invoiceStatus.CANCELLED"),
@@ -151,37 +157,66 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
       return t(`manual.${key}`);
     }),
     markAsPaidSuccess: t("markAsPaidSuccess"),
+    submitProofSuccess: t("submitProofSuccess"),
+    approveProofSuccess: t("approveProofSuccess"),
+    rejectProofSuccess: t("rejectProofSuccess"),
     noUnpaidInvoices: t("noUnpaidInvoices"),
     deleteInvoiceSuccess: t("deleteInvoiceSuccess"),
-    markPaidDialog: {
-      title: t("markPaidDialog.title"),
-      confirm: t("markPaidDialog.confirm"),
-      confirming: t("markPaidDialog.confirming"),
-      selectMethod: t("markPaidDialog.selectMethod"),
-      noMethods: t("markPaidDialog.noMethods"),
-      addMethods: t("markPaidDialog.addMethods"),
-      manageMethods: t("markPaidDialog.manageMethods"),
-      cancel: t("markPaidDialog.cancel"),
-      errorGeneric: t("markPaidDialog.errorGeneric"),
-      missingParentUser: t("markPaidDialog.missingParentUser"),
-      invoiceNumber: t("markPaidDialog.invoiceNumber"),
-      amount: t("markPaidDialog.amount"),
-      dueDate: t("markPaidDialog.dueDate"),
-      student: t("markPaidDialog.student"),
-      selectedMethod: t("markPaidDialog.selectedMethod"),
+    hasPaymentProofHint: t("hasPaymentProofHint"),
+    submitProofDialog: {
+      titleSubmit: t("submitProofDialog.titleSubmit"),
+      titleMarkPaid: t("submitProofDialog.titleMarkPaid"),
+      confirm: t("submitProofDialog.confirm"),
+      confirming: t("submitProofDialog.confirming"),
+      selectFile: t("submitProofDialog.selectFile"),
+      fileHint: t("submitProofDialog.fileHint"),
+      invalidFileType: t("submitProofDialog.invalidFileType"),
+      cancel: t("submitProofDialog.cancel"),
+      errorGeneric: t("submitProofDialog.errorGeneric"),
+      invoiceNumber: t("submitProofDialog.invoiceNumber"),
+      amount: t("submitProofDialog.amount"),
+      dueDate: t("submitProofDialog.dueDate"),
+      student: t("submitProofDialog.student"),
+      uploadFailed: t("submitProofDialog.uploadFailed"),
+      uploadPrepareFailed: t("submitProofDialog.uploadPrepareFailed"),
     },
     paymentDetailsDialog: {
       title: t("paymentDetailsDialog.title"),
       empty: t("paymentDetailsDialog.empty"),
-      emptyLegacy: t("paymentDetailsDialog.emptyLegacy"),
+      pending: t("paymentDetailsDialog.pending"),
+      approve: t("paymentDetailsDialog.approve"),
+      reject: t("paymentDetailsDialog.reject"),
+      rejecting: t("paymentDetailsDialog.rejecting"),
+      rejectionReason: t("paymentDetailsDialog.rejectionReason"),
+      rejectionReasonPlaceholder: t("paymentDetailsDialog.rejectionReasonPlaceholder"),
+      viewProof: t("paymentDetailsDialog.viewProof"),
+      noProof: t("paymentDetailsDialog.noProof"),
       loadFailed: t("paymentDetailsDialog.loadFailed"),
       close: t("paymentDetailsDialog.close"),
       amount: t("paymentDetailsDialog.amount"),
       date: t("paymentDetailsDialog.date"),
+      submittedAt: t("paymentDetailsDialog.submittedAt"),
+      reviewActions: t("paymentDetailsDialog.reviewActions"),
+    },
+    notifications: {
+      popupBlocked: t("notifications.popupBlocked"),
     },
     errors: {
       invalidId: t("errors.invalidId"),
     },
     exchangeRates: t.raw("exchangeRates") as ExchangeRatesLabels,
+    fxStaleBanner: {
+      adminBody: t("fxStaleBanner.adminBody"),
+      userBody: t("fxStaleBanner.userBody"),
+      adminCta: t("fxStaleBanner.adminCta"),
+      userCta: t("fxStaleBanner.userCta"),
+    },
+    displayCurrencyHint: {
+      title: t("displayCurrencyHint.title"),
+      body: t("displayCurrencyHint.body"),
+      cta: t("displayCurrencyHint.cta"),
+    },
+    currencyHedges: t.raw("currencyHedges") as CurrencyHedgesLabels,
+    supportedCurrencies: t.raw("supportedCurrencies") as SupportedCurrenciesLabels,
   };
 }

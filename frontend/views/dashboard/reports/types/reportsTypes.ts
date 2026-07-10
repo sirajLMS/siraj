@@ -42,6 +42,7 @@ export interface CurrencyDistributionSlice {
   readonly percent: number;
   readonly label: string;
   readonly amount: number;
+  readonly formattedAmount?: string;
 }
 
 export interface ReportsSummary {

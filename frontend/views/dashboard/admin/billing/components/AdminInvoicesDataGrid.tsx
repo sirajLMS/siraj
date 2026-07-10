@@ -24,6 +24,7 @@ export interface AdminInvoicesDataGridLabels {
   readonly actions: string;
   readonly markAsPaid: string;
   readonly quickPay: string;
+  readonly reviewSubmission: string;
   readonly viewDetails: string;
   readonly noEntries: string;
   readonly statusLabels: Record<AdminInvoiceStatus, string>;
@@ -42,18 +43,15 @@ interface AdminInvoicesDataGridProps {
   readonly loading?: boolean;
 }
 
-// Invoice ID text styled with primary color and bold weight for emphasis
 const StyledInvoiceIdTypography = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   color: theme.palette.primary.main,
 }));
 
-// Date text styled with secondary color for subdued appearance in grid cells
 const StyledDateTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Check icon displayed when an invoice is already paid, using outline variant color
 const StyledPaidCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
   color: theme.palette.outlineVariant,
 }));
@@ -74,10 +72,7 @@ function renderInvoiceAction(
               size="small"
               aria-label={labels.viewDetails}
               onClick={() => {
-                onViewPaymentDetails({
-                  invoiceId: row.id,
-                  isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
-                });
+                onViewPaymentDetails({ invoiceId: row.id });
               }}
             >
               <VisibilityOutlined fontSize="small" />
@@ -90,11 +85,25 @@ function renderInvoiceAction(
     );
   }
 
+  if (row.status === InvoiceStatus.PaymentPending) {
+    return (
+      <Button
+        variant="text"
+        onClick={() => {
+          onViewPaymentDetails?.({ invoiceId: row.id });
+        }}
+        sx={{ fontWeight: 700, textTransform: "uppercase" }}
+      >
+        {labels.reviewSubmission}
+      </Button>
+    );
+  }
+
   if (!canManage) {
     return null;
   }
 
-  if (row.status === "OVERDUE") {
+  if (row.status === "OVERDUE" || row.status === InvoiceStatus.Unpaid || row.status === "PENDING") {
     return (
       <Button
         variant="text"
@@ -110,29 +119,12 @@ function renderInvoiceAction(
         }}
         sx={{ fontWeight: 700, textTransform: "uppercase" }}
       >
-        {labels.markAsPaid}
+        {row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay}
       </Button>
     );
   }
 
-  return (
-    <Button
-      variant="text"
-      onClick={() => {
-        onMarkAsPaid({
-          id: row.id,
-          parentUserId: row.parentUserId,
-          amount: row.amount,
-          studentName: row.studentName,
-          dueDate: row.dueDate,
-          invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
-        });
-      }}
-      sx={{ fontWeight: 700, textTransform: "uppercase" }}
-    >
-      {labels.quickPay}
-    </Button>
-  );
+  return null;
 }
 
 export function AdminInvoicesDataGrid({

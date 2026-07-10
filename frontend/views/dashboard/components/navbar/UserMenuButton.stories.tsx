@@ -1,6 +1,7 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import type { ReactNode } from "react";
+import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   impersonationStatusQueryDocument,
   permissionGroupSimulationStatusQueryDocument,
@@ -109,6 +110,8 @@ function StoryShell({ mocks, children }: Readonly<{ mocks: Array<Record<string, 
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       emailVerifiedAt: null,
+      phone: null,
+      status: AccountStatus.Activated,
       displayCurrency: null,
       __typename: "User" as const,
     },

@@ -9,6 +9,7 @@ export const onboarding: ParentOnboardingLabels = {
     parentInfo: "معلومات ولي الأمر",
     socialComms: "التواصل الاجتماعي والاتصالات",
     feesContract: "تفاصيل الرسوم والعقد",
+    meetingConfig: "الاجتماع عبر الإنترنت",
   },
   fields: {
     fullName: "الاسم الكامل",
@@ -25,6 +26,9 @@ export const onboarding: ParentOnboardingLabels = {
     paymentMethod: "طريقة الدفع",
     currency: "العملة",
     timezone: "المنطقة الزمنية",
+    meetingProvider: "مزود الاجتماع",
+    meetingUrl: "رابط الاجتماع",
+    meetingLabel: "تسمية الإعداد",
   },
   placeholders: {
     fullName: "مثال: أحمد الفارس",
@@ -41,6 +45,8 @@ export const onboarding: ParentOnboardingLabels = {
     paymentMethod: "اختر الطريقة",
     currency: "اختر العملة",
     timezone: "اختر المنطقة الزمنية",
+    meetingUrl: "https://zoom.us/j/123456789",
+    meetingLabel: "فصل العائلة",
   },
   options: {
     invoiceType: {
@@ -83,5 +89,9 @@ export const onboarding: ParentOnboardingLabels = {
     invoiceTypeRequired: "نوع الفاتورة مطلوب",
     paymentMethodRequired: "طريقة الدفع مطلوبة",
     timezoneRequired: "المنطقة الزمنية مطلوبة",
+    meetingProviderRequired: "اختر مزود اجتماع عند إدخال رابط",
+    meetingUrlRequired: "رابط الاجتماع مطلوب عند اختيار مزود",
+    meetingUrlInvalid: "أدخل رابط اجتماع صالحاً",
   },
+  optionalHint: "اختياري — أضف رابط اجتماع افتراضي لهذا ولي الأمر.",
 };

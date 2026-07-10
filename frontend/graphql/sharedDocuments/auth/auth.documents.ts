@@ -17,6 +17,8 @@ export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
       notificationCount
       teacherId
       parentId
+      phone
+      status
       displayCurrency
     }
   }
@@ -37,6 +39,8 @@ export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.Qu
       notificationCount
       teacherId
       parentId
+      phone
+      status
       displayCurrency
     }
   }
@@ -58,6 +62,8 @@ export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery> = gql`
       notificationCount
       teacherId
       parentId
+      phone
+      status
     }
   }
 `;
@@ -80,6 +86,8 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
         notificationCount
         teacherId
         parentId
+      phone
+      status
       }
     }
   }
@@ -104,6 +112,8 @@ export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMu
         notificationCount
         teacherId
         parentId
+      phone
+      status
       }
     }
   }
@@ -133,6 +143,8 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
         notificationCount
         teacherId
         parentId
+      phone
+      status
       }
     }
   }
@@ -178,6 +190,8 @@ export const startImpersonationMutationDocument: TypedDocumentNode<
         notificationCount
         teacherId
         parentId
+      phone
+      status
         displayCurrency
       }
     }

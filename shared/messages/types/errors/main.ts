@@ -98,6 +98,11 @@ export interface ErrorsLabels {
   readonly invalidInvoiceAmount: string;
   readonly invoiceAlreadyPaid: string;
   readonly cannotDeletePaidInvoice: string;
+  readonly paymentProofRequired: string;
+  readonly invoiceNotPendingReview: string;
+  readonly invoicePaymentProofNotFound: string;
+  readonly invoicePaymentProofPending: string;
+  readonly invalidFileType: string;
   readonly invalidStatusTransition: string;
   readonly staffProfileNotFound: string;
   readonly staffProfileUpdateFailed: string;

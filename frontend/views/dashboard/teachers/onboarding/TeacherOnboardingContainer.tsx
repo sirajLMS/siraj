@@ -1,5 +1,7 @@
 "use client";
 
+import { Alert, Snackbar } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -10,9 +12,10 @@ import { TeacherOnboardingView } from "@/frontend/views/dashboard/teachers/onboa
 import { useTeacherOnboardingLabels } from "@/frontend/views/dashboard/teachers/onboarding/useTeacherOnboardingLabels";
 
 export function TeacherOnboardingContainer() {
-  const { execute, loading } = useCreateTeacherOnboarding();
+  const { execute, loading, meetingConfigWarning, clearMeetingConfigWarning } = useCreateTeacherOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
   const labels = useTeacherOnboardingLabels();
+  const tMeeting = useTranslations("ui.meetingConfig.manager");
 
   const handleSubmit = async (data: TeacherOnboardingFormData) => {
     logger.info("Submitting teacher onboarding data:", data);
@@ -37,6 +40,16 @@ export function TeacherOnboardingContainer() {
         onSubmit={handleSubmit}
         onDismissSuccess={handleDismissSuccess}
       />
+      <Snackbar
+        open={meetingConfigWarning}
+        autoHideDuration={8000}
+        onClose={() => clearMeetingConfigWarning()}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="warning" onClose={() => clearMeetingConfigWarning()}>
+          {tMeeting("loadError")}
+        </Alert>
+      </Snackbar>
     </RequirePermission>
   );
 }
