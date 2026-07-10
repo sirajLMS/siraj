@@ -4,6 +4,7 @@ import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 
 /**
  * ScheduleQueryService — thin service layer for schedule-related read queries.
@@ -50,6 +51,17 @@ export namespace ScheduleQueryService {
       throw new Error(t("unauthorizedAction"));
     }
 
-    return SchedulingRepository.getStatusTrackingRows(date, options);
+    const rows = await SchedulingRepository.getStatusTrackingRows(date, options);
+
+    return Promise.all(
+      rows.map(async row => {
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id);
+        return {
+          ...row,
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        };
+      })
+    );
   }
 }

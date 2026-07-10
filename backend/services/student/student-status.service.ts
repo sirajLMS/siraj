@@ -4,6 +4,7 @@ import { parseClassExecutionState, parseStudentStatus } from "@/backend/lib/enum
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
 
 export namespace StudentStatusService {
@@ -26,10 +27,22 @@ export namespace StudentStatusService {
 
     const classes = await SchedulingRepository.getUpcomingClassesForStudent(studentId);
 
+    const enrichedClasses = await Promise.all(
+      classes.map(async c => {
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(c.id);
+        return {
+          ...c,
+          executionState: parseClassExecutionState(c.executionState),
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        };
+      })
+    );
+
     logger.info("Fetched upcoming classes for student", {
       actorUserId,
       studentId,
-      classCount: classes.length,
+      classCount: enrichedClasses.length,
     });
 
     return {
@@ -37,7 +50,7 @@ export namespace StudentStatusService {
       studentId,
       studentName: student.name,
       status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
-      classes: classes.map(c => ({ ...c, executionState: parseClassExecutionState(c.executionState) })),
+      classes: enrichedClasses,
     };
   }
 }

@@ -2,6 +2,7 @@ import { SchedulingRepository, StudentRepository, TeacherRepository } from "@/ba
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type {
   TeacherAssignedClassesResult,
   TeacherAssignedStudentsResult,
@@ -59,17 +60,26 @@ export namespace TeacherPortalService {
     const teacher = await resolveTeacherForUser(userId, locale);
     const rows = await SchedulingRepository.getTeacherAssignedClasses(teacher.id);
 
+    const enrichedRows = await Promise.all(
+      rows.map(async row => {
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id);
+        return {
+          id: row.id,
+          studentName: row.studentName,
+          scheduledStartAt: row.scheduledStartAt.toISOString(),
+          scheduledEndAt: row.scheduledEndAt.toISOString(),
+          durationMinutes: row.durationMinutes,
+          executionState: row.executionState as TeacherAssignedClassesResult["rows"][number]["executionState"],
+          outcome: row.outcome as TeacherAssignedClassesResult["rows"][number]["outcome"],
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        };
+      })
+    );
+
     return {
-      rows: rows.map(row => ({
-        id: row.id,
-        studentName: row.studentName,
-        scheduledStartAt: row.scheduledStartAt.toISOString(),
-        scheduledEndAt: row.scheduledEndAt.toISOString(),
-        durationMinutes: row.durationMinutes,
-        executionState: row.executionState as TeacherAssignedClassesResult["rows"][number]["executionState"],
-        outcome: row.outcome as TeacherAssignedClassesResult["rows"][number]["outcome"],
-      })),
-      totalCount: rows.length,
+      rows: enrichedRows,
+      totalCount: enrichedRows.length,
     };
   }
 

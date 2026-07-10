@@ -525,4 +525,18 @@ export namespace BillingManagementService {
   ): Promise<Types.InvoiceCoverageMonthSelectType[]> {
     return BillingRepository.createManyInvoiceCoverageMonths(inputs, tx);
   }
+
+  export async function findInvoicePaymentSubmissionsByInvoiceIds(
+    invoiceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoicePaymentSubmissionSelectType[]> {
+    return InvoicePaymentSubmissionRepository.findByInvoiceIds(invoiceIds, tx);
+  }
+
+  export async function createManyInvoicePaymentSubmissions(
+    inputs: readonly Types.InvoicePaymentSubmissionInsertType[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoicePaymentSubmissionSelectType[]> {
+    return InvoicePaymentSubmissionRepository.createMany(inputs, tx);
+  }
 }

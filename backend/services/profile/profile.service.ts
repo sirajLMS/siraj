@@ -17,6 +17,12 @@ import {
 } from "@/backend/services";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import {
+  canEditProfileFieldGroup,
+  collectProfileEditGroupsFromUpdate,
+  type FieldFilterContext,
+  filterProfileByFieldGroups,
+} from "@/backend/services/profile/profile-field-filter";
 import type {
   ParentAdminProfileUpdateInput,
   ParentOwnProfileUpdateInput,
@@ -28,6 +34,7 @@ import type {
 } from "@/backend/types";
 import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
+import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 
 type ResolvedRoleIds = {
@@ -64,7 +71,6 @@ export function toParentRepoInput(
   input: ParentOwnProfileUpdateInput | ParentAdminProfileUpdateInput
 ): ParentProfileUpdateInput {
   return {
-    phone: input.phone,
     nationality: "nationality" in input ? input.nationality : undefined,
     address: "address" in input ? input.address : undefined,
     facebook: input.facebook,
@@ -100,7 +106,7 @@ const VIEW_OTHER_PERMISSIONS: OtherScopePermissionSet = {
   genericPermission: AppPermission.USER_VIEW_PROFILE,
   audiencePermissions: {
     [ProfileAudience.PARENT]: AppPermission.PARENT_VIEW_PROFILE,
-    [ProfileAudience.TEACHER]: AppPermission.STAFF_EDIT_PROFILE,
+    [ProfileAudience.TEACHER]: AppPermission.TEACHER_VIEW_PROFILE,
   },
 };
 
@@ -198,6 +204,11 @@ async function assertProfilePermission(
   }
 }
 
+async function hasAnyProfileViewOtherPermission(actorUserId: string): Promise<boolean> {
+  const viewOtherKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
+  return PermissionsService.hasAnyPermission(actorUserId, viewOtherKeys);
+}
+
 async function assertCanViewProfile(
   actorUserId: string,
   targetUserId: string,
@@ -208,6 +219,9 @@ async function assertCanViewProfile(
   if (scope === ProfileScope.OTHER) {
     const canViewOther = await checkOtherScopePermission(actorUserId, audience, VIEW_OTHER_PERMISSIONS);
     if (canViewOther) {
+      return;
+    }
+    if (await hasAnyProfileViewOtherPermission(actorUserId)) {
       return;
     }
     if (actorUserId === targetUserId) {
@@ -275,26 +289,32 @@ export namespace ProfileService {
         ? await ParentProfileService.getProfile(actorUserId, roleIds.parentId, locale)
         : null;
     const parentStudents = await ParentRepository.getAssociatedStudents(roleIds.parentId);
+    const canViewAssociatedStudents = await PermissionsService.hasPermission(
+      actorUserId,
+      AppPermission.STUDENT_VIEW_ASSOCIATED
+    );
 
     return {
       parentOwnProfile,
       parentAdminProfile,
-      associatedStudents: {
-        rows: parentStudents.map(student => ({
-          id: student.id,
-          name: student.name,
-          studentAvatarUrl: student.studentAvatarUrl,
-          status: student.status,
-          primaryTeacherId: student.primaryTeacherId,
-          teacherUserId: student.teacherUserId,
-          teacherName: student.teacherName,
-          teacherAvatarUrl: student.teacherAvatarUrl,
-          hoursPerWeek: student.hoursPerWeek,
-          classesRemaining: student.classesRemaining,
-          classesTotal: student.classesTotal,
-        })),
-        totalCount: parentStudents.length,
-      },
+      associatedStudents: canViewAssociatedStudents
+        ? {
+            rows: parentStudents.map(student => ({
+              id: student.id,
+              name: student.name,
+              studentAvatarUrl: student.studentAvatarUrl,
+              status: student.status,
+              primaryTeacherId: student.primaryTeacherId,
+              teacherUserId: student.teacherUserId,
+              teacherName: student.teacherName,
+              teacherAvatarUrl: student.teacherAvatarUrl,
+              hoursPerWeek: student.hoursPerWeek,
+              classesRemaining: student.classesRemaining,
+              classesTotal: student.classesTotal,
+            })),
+            totalCount: parentStudents.length,
+          }
+        : null,
     };
   }
 
@@ -432,31 +452,43 @@ export namespace ProfileService {
       locale
     );
 
-    return {
-      id: targetUserId,
-      userId: targetUserId,
-      audience: roleIds.audience,
+    const permissionContext = await PermissionsService.getUserContext(actorUserId);
+    const filterCtx: FieldFilterContext = {
+      actorUserId,
+      targetUserId,
       scope,
-      name: user.name,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-      teacherId: roleIds.teacherId ?? null,
-      parentId: roleIds.parentId ?? null,
-      staffProfileId: roleIds.staffProfileId ?? null,
-      teacherOwnProfile,
-      teacherAdminProfile,
-      parentOwnProfile,
-      parentAdminProfile,
-      associatedStudents,
-      staffProfile,
-      staffPermissionGroups,
-      staffPermissionOverrides,
-      meetingConfigs,
-      paymentMethods,
-      paymentMethodDefaults,
-      assignedStudents,
-      displayCurrency: user.displayCurrency,
+      audience: roleIds.audience,
+      permissions: new Set(permissionContext.permissions),
     };
+
+    return filterProfileByFieldGroups(
+      {
+        id: targetUserId,
+        userId: targetUserId,
+        audience: roleIds.audience,
+        scope,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        teacherId: roleIds.teacherId ?? null,
+        parentId: roleIds.parentId ?? null,
+        staffProfileId: roleIds.staffProfileId ?? null,
+        teacherOwnProfile,
+        teacherAdminProfile,
+        parentOwnProfile,
+        parentAdminProfile,
+        associatedStudents,
+        staffProfile,
+        staffPermissionGroups,
+        staffPermissionOverrides,
+        meetingConfigs,
+        paymentMethods,
+        paymentMethodDefaults,
+        assignedStudents,
+        displayCurrency: user.displayCurrency,
+      },
+      filterCtx
+    );
   }
 
   async function updateCoreUserFields(
@@ -620,6 +652,22 @@ export namespace ProfileService {
   ): Promise<UnifiedProfileReturnType> {
     const roleIds = await resolveRoleIdsOrThrow(targetUserId, locale);
     await assertCanEditProfile(actorUserId, targetUserId, scope, roleIds.audience, locale);
+
+    const permissionContext = await PermissionsService.getUserContext(actorUserId);
+    const filterCtx: FieldFilterContext = {
+      actorUserId,
+      targetUserId,
+      scope,
+      audience: roleIds.audience,
+      permissions: new Set(permissionContext.permissions),
+    };
+    const editGroups = collectProfileEditGroupsFromUpdate(roleIds.audience, scope, input);
+    for (const groupKey of editGroups) {
+      if (!canEditProfileFieldGroup(filterCtx, groupKey)) {
+        await throwInsufficientPermissions(locale);
+      }
+    }
+
     await updateCoreUserFields(actorUserId, targetUserId, scope, input.core, locale);
     await applyRoleSpecificUpdates(actorUserId, scope, targetUserId, roleIds, input, locale);
     return getProfileByUserId(actorUserId, targetUserId, locale);

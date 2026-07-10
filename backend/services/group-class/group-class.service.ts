@@ -98,6 +98,9 @@ export namespace GroupClassService {
       meetingId:
         effectiveMeeting.meetingId ?? (joinUrl && providerSlug ? extractMeetingId(providerSlug, joinUrl) : null),
       joinUrl,
+      logoUrl: effectiveMeeting.logoUrl,
+      providerName: effectiveMeeting.providerName,
+      source: effectiveMeeting.source,
     };
 
     const adminNote: GroupClassAdminNoteReturnType = {

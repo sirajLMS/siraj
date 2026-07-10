@@ -70,4 +70,9 @@ export namespace UserBootstrapService {
     }
     return results;
   }
+
+  export async function findStaffProfilesByUserIds(userIds: readonly string[]) {
+    const profiles = await Promise.all(userIds.map(userId => StaffProfileRepository.findByUserId(userId)));
+    return profiles.filter((profile): profile is NonNullable<typeof profile> => profile != null);
+  }
 }

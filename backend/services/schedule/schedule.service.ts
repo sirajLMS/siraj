@@ -41,6 +41,7 @@ export namespace ScheduleService {
   async function mapDailyScheduleListItem(item: DailyScheduleResult, locale?: string) {
     const t = await getBackendTranslations({ locale, namespace: "errors" });
     const unknownName = t("unknownName");
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(item.id);
     return {
       id: item.id,
       studentTime: item.scheduledStartAt.toISOString(),
@@ -66,6 +67,8 @@ export namespace ScheduleService {
       avatarUrl: item.avatarUrl ?? null,
       teacherTimezone: item.teacherTimezone ?? null,
       studentTimezone: item.studentTimezone ?? null,
+      meetingJoinUrl: effectiveMeeting.joinUrl,
+      effectiveMeeting,
     };
   }
 

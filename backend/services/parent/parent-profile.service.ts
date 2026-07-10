@@ -183,7 +183,12 @@ export namespace ParentProfileService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    const updated = await ParentRepository.updateParentProfile(parentId, input, locale);
+    const { phone, ...repoInput } = input;
+    if (phone !== undefined) {
+      await UserRepository.updateProfileFields(actorUserId, { phone }, locale);
+    }
+
+    const updated = await ParentRepository.updateParentProfile(parentId, repoInput, locale);
     return toParentProfileResult(updated);
   }
 
@@ -203,7 +208,15 @@ export namespace ParentProfileService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    const { timezone, ...repoInput } = input;
+    const { timezone, phone, ...repoInput } = input;
+    if (phone !== undefined) {
+      const existing = await ParentRepository.getParentProfile(parentId);
+      if (!existing) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("parentNotFound", { id: parentId }));
+      }
+      await UserRepository.updateProfileFields(existing.userId, { phone }, locale);
+    }
     if (timezone != null) {
       const existing = await ParentRepository.getParentProfile(parentId);
       if (!existing) {

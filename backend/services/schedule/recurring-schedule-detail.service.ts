@@ -1,0 +1,59 @@
+import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
+import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
+import { AppPermission } from "@/backend/enum";
+import { parseIanaTimezone } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { RecurringScheduleDetailReturnType } from "@/backend/types/scheduling/recurring-schedule-detail.types";
+
+export namespace RecurringScheduleDetailService {
+  async function assertViewAccess(userId: string, teacherId: string, locale?: string) {
+    const canManageClass = await PermissionsService.hasPermission(userId, AppPermission.MEETING_CONFIGS_MANAGE_CLASS);
+    const canViewAll = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_ALL);
+
+    if (canManageClass || canViewAll) {
+      return;
+    }
+
+    const actorTeacher = await TeacherRepository.findByUserId(userId);
+    if (actorTeacher?.id === teacherId) {
+      return;
+    }
+
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(t("unauthorizedAction"));
+  }
+
+  export async function getDetail(
+    userId: string,
+    recurringScheduleId: string,
+    locale?: string
+  ): Promise<RecurringScheduleDetailReturnType> {
+    const row = await RecurringScheduleRepository.findById(recurringScheduleId);
+    if (!row) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("notFound"));
+    }
+
+    await assertViewAccess(userId, row.schedule.teacherId, locale);
+
+    const dayRows = await RecurringScheduleRepository.findDaysByScheduleId(recurringScheduleId);
+
+    return {
+      id: row.schedule.id,
+      studentId: row.schedule.studentId,
+      studentName: row.studentName,
+      teacherId: row.schedule.teacherId,
+      teacherName: row.teacherUserName,
+      durationMinutes: row.schedule.durationMinutes,
+      defaultStartTime: String(row.schedule.defaultStartTime).slice(0, 5),
+      timezone: parseIanaTimezone(row.schedule.timezone),
+      days: dayRows.map(day => ({
+        id: day.id,
+        dayOfWeek: day.dayOfWeek,
+        startTime: String(day.startTime).slice(0, 5),
+        isActive: day.isActive,
+      })),
+    };
+  }
+}

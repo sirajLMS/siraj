@@ -9,6 +9,7 @@ import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/b
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace WeeklyScheduleService {
@@ -58,29 +59,38 @@ export namespace WeeklyScheduleService {
 
       const rows = await getWeeklyScheduleGrid(resolvedTeacherId, weekStart, weekEnd);
 
+      const classes = await Promise.all(
+        rows.map(async row => {
+          const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id);
+          return {
+            id: row.id,
+            studentName: row.studentName,
+            studentId: row.studentId,
+            duration: row.durationMinutes,
+            startTime: row.scheduledStartAt.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: IanaTimezone.UTC,
+            }),
+            day: row.dayOfWeek,
+            executionState: parseClassExecutionState(row.executionState),
+            outcome: parseClassOutcome(row.outcome),
+            subjectId: row.subjectId,
+            subjectName: row.subjectName,
+            classType: parseClassType(row.classType),
+            meetingJoinUrl: effectiveMeeting.joinUrl,
+            effectiveMeeting,
+          };
+        })
+      );
+
       return {
         id: `weekly-schedule-${resolvedTeacherId}-${weekStart.toISOString()}`,
         teacherId: resolvedTeacherId,
         weekStart: weekStart.toISOString(),
         weekEnd: weekEnd.toISOString(),
-        classes: rows.map(row => ({
-          id: row.id,
-          studentName: row.studentName,
-          studentId: row.studentId,
-          duration: row.durationMinutes,
-          startTime: row.scheduledStartAt.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-            timeZone: IanaTimezone.UTC,
-          }),
-          day: row.dayOfWeek,
-          executionState: parseClassExecutionState(row.executionState),
-          outcome: parseClassOutcome(row.outcome),
-          subjectId: row.subjectId,
-          subjectName: row.subjectName,
-          classType: parseClassType(row.classType),
-        })),
+        classes,
       };
     } catch (error) {
       logger.error("Error fetching weekly schedule", { userId, teacherId, error });

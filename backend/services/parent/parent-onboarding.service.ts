@@ -67,13 +67,14 @@ export namespace ParentOnboardingService {
       );
 
       await UserRepository.updateTimezone(user.id, input.timezone ?? IanaTimezone.UTC, txObj, locale);
+      if (input.phone != null) {
+        await UserRepository.updateProfileFields(user.id, { phone: input.phone }, locale, txObj);
+      }
 
-      // Step 2: Create parent profile
       const parent = await ParentRepository.create(
         {
           userId: user.id,
           status: input.status ?? "REGULAR",
-          phone: input.phone ?? null,
           nationality: input.nationality ?? null,
           address: input.address ?? null,
           facebook: input.facebook ?? null,

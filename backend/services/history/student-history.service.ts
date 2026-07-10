@@ -3,6 +3,7 @@ import { StudentHistoryRepository } from "@/backend/db/repo/students/student-his
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 
 export namespace StudentHistoryService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
@@ -23,7 +24,18 @@ export namespace StudentHistoryService {
     await assertPermission(userId, AppPermission.HISTORY_VIEW_CALENDAR, locale);
 
     const metrics = await StudentHistoryRepository.getMonthlyMetrics(studentId, year, month);
-    const sessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month, locale);
+    const rawSessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month, locale);
+
+    const sessions = await Promise.all(
+      rawSessions.map(async session => {
+        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id);
+        return {
+          ...session,
+          meetingJoinUrl: effectiveMeeting.joinUrl,
+          effectiveMeeting,
+        };
+      })
+    );
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
@@ -47,6 +59,13 @@ export namespace StudentHistoryService {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("notFound"));
     }
-    return detail;
+
+    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId);
+
+    return {
+      ...detail,
+      meetingJoinUrl: effectiveMeeting.joinUrl,
+      effectiveMeeting,
+    };
   }
 }

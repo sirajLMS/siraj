@@ -33,12 +33,13 @@ export namespace BillingHistoryService {
     parentId: string | null,
     userId: string | null | undefined,
     pagination: PaginationArgs | null = null,
+    search: string | null | undefined = null,
     locale?: string
   ): Promise<InvoiceHistoryPaginatedResult> {
     await assertBillingViewPermission(actorUserId, locale);
     const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, locale);
 
-    const result = await BillingRepository.getInvoicesForParent(resolvedParentId, pagination);
+    const result = await BillingRepository.getInvoicesForParent(resolvedParentId, pagination, search);
 
     return {
       id: `parent-invoice-history-${resolvedParentId}`,
@@ -51,10 +52,11 @@ export namespace BillingHistoryService {
   export async function getAdminInvoices(
     actorUserId: string,
     pagination: PaginationArgs | null = null,
+    search: string | null | undefined = null,
     locale?: string
   ): Promise<InvoiceHistoryPaginatedResult> {
     await assertBillingViewPermission(actorUserId, locale);
-    return BillingRepository.getAllInvoices(pagination);
+    return BillingRepository.getAllInvoices(pagination, search);
   }
 
   export async function getAdminBillingSummary(
