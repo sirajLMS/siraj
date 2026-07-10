@@ -139,6 +139,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
       avatarUrl: adminUser.avatarUrl,
       permissions: adminPermissions,
       notificationCount: adminUser.notificationCount,
+      displayCurrency: adminUser.displayCurrency,
     });
   }, []);
 
