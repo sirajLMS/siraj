@@ -34,6 +34,7 @@ export const nav: DashboardNavigationLabels = {
   scheduleReschedule: "إعادة جدولة الحصة",
   dstMigration: "ترحيل التوقيت الصيفي",
   billingAdmin: "الفواتير",
+  exchangeRates: "أسعار الصرف",
   paymentCatalogs: "طرق الدفع",
   meetingProviders: "منصات الاجتماعات",
   billingParent: "الفواتير والمدفوعات",

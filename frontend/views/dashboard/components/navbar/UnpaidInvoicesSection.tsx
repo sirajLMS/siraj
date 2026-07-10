@@ -3,14 +3,21 @@
 import { useQuery } from "@apollo/client/react";
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-alerts.documents";
+import {
+  formatBillingCurrencyTotals,
+  mapBillingCurrencyBuckets,
+} from "@/frontend/lib/formatBillingCurrencyTotals";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function UnpaidInvoicesSection() {
   const t = useTranslations("dashboard.notifications");
+  const tProfile = useTranslations("profile");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
   const router = useRouter();
 
   const { data, loading } = useQuery(unpaidInvoicesAlertQueryDocument);
@@ -42,6 +49,16 @@ export function UnpaidInvoicesSection() {
   };
 
   const items = summary.items ?? [];
+  const fxMessages = {
+    convertedAmount: (values: {
+      lockedAmount: string;
+      lockedCurrency: string;
+      convertedApprox: string;
+      displayCurrency: string;
+    }) => tProfile("convertedAmount", values),
+    displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
+      tErrors("displayCurrencyFallback", values),
+  };
 
   return (
     <Box>
@@ -67,10 +84,16 @@ export function UnpaidInvoicesSection() {
 
       <List disablePadding dense>
         {items.map(item => {
+          const amountLabel = formatBillingCurrencyTotals(
+            mapBillingCurrencyBuckets(item.amountsByCurrency),
+            locale,
+            fxMessages
+          ).primary;
+
           const itemText = (
             <ListItemText
               primary={item.userName}
-              secondary={`${item.totalUnpaidAmount} ${item.currency} — ${item.overdueCount} overdue`}
+              secondary={`${amountLabel} — ${item.overdueCount} overdue`}
               slotProps={{
                 primary: { variant: "body2", sx: { fontWeight: 500 } },
                 secondary: { variant: "caption" },

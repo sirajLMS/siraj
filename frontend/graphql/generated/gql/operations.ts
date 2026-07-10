@@ -2278,7 +2278,11 @@ export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
 
 export type DeactivateSupportedOnlineAccountMutation = DeactivateSupportedOnlineAccountMutation_Mutation;
 
-export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null };
+export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_outstandingByCurrency_BillingCurrencyTotal = { id: string | null, currency: Types.CurrencyCode | null, amount: string | null };
+
+export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_paidThisTermByCurrency_BillingCurrencyTotal = { id: string | null, currency: Types.CurrencyCode | null, amount: string | null };
+
+export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null, outstandingByCurrency: Array<UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_outstandingByCurrency_BillingCurrencyTotal> | null, paidThisTermByCurrency: Array<UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary_paidThisTermByCurrency_BillingCurrencyTotal> | null };
 
 export type UserBillingProfileSummaryQuery_Query = { parentBillingSummary: UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary | null };
 
@@ -2293,7 +2297,7 @@ export type UserBillingProfileSummaryQuery = UserBillingProfileSummaryQuery_Quer
 
 export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, displayAmount: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, latestPaymentMethodType: Types.PaymentMethodType | null, latestPaymentMethodLabel: string | null, displayAmount: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2752,7 +2756,7 @@ export type UpdateNotificationPreferencesMutation = UpdateNotificationPreference
 
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, displayAmount: ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, latestPaymentMethodType: Types.PaymentMethodType | null, latestPaymentMethodLabel: string | null, displayAmount: ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2772,7 +2776,7 @@ export type ParentInvoiceHistoryQuery = ParentInvoiceHistoryQuery_Query;
 
 export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, displayAmount: AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
+export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, latestPaymentMethodType: Types.PaymentMethodType | null, latestPaymentMethodLabel: string | null, displayAmount: AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2788,7 +2792,11 @@ export type AdminInvoicesQueryVariables = Exact<{
 
 export type AdminInvoicesQuery = AdminInvoicesQuery_Query;
 
-export type AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary = { id: string | null, totalOutstanding: string | null, pendingCount: number | null, mtdRevenue: string | null, negativeBalanceCount: number | null };
+export type AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary_outstandingByCurrency_BillingCurrencyTotal = { id: string | null, currency: Types.CurrencyCode | null, amount: string | null };
+
+export type AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary_mtdRevenueByCurrency_BillingCurrencyTotal = { id: string | null, currency: Types.CurrencyCode | null, amount: string | null };
+
+export type AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary = { id: string | null, totalOutstanding: string | null, pendingCount: number | null, mtdRevenue: string | null, negativeBalanceCount: number | null, outstandingByCurrency: Array<AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary_outstandingByCurrency_BillingCurrencyTotal> | null, mtdRevenueByCurrency: Array<AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary_mtdRevenueByCurrency_BillingCurrencyTotal> | null };
 
 export type AdminBillingSummaryQuery_Query = { adminBillingSummary: AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary | null };
 
@@ -2808,7 +2816,11 @@ export type StudentCreditStatusQueryVariables = Exact<{ [key: string]: never; }>
 
 export type StudentCreditStatusQuery = StudentCreditStatusQuery_Query;
 
-export type ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null };
+export type ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary_outstandingByCurrency_BillingCurrencyTotal = { id: string | null, currency: Types.CurrencyCode | null, amount: string | null };
+
+export type ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary_paidThisTermByCurrency_BillingCurrencyTotal = { id: string | null, currency: Types.CurrencyCode | null, amount: string | null };
+
+export type ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null, outstandingByCurrency: Array<ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary_outstandingByCurrency_BillingCurrencyTotal> | null, paidThisTermByCurrency: Array<ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary_paidThisTermByCurrency_BillingCurrencyTotal> | null };
 
 export type ParentBillingSummaryQuery_Query = { parentBillingSummary: ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary | null };
 

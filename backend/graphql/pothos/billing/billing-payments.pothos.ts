@@ -3,6 +3,10 @@ import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.en
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
+import {
+  DisplayAmountPothosObject,
+  resolveDisplayAmountField,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PermissionsService } from "@/backend/services";
 import { buildMaskedTransactionSnapshot } from "@/backend/services/payment-method/payment-method-mask";
@@ -22,6 +26,11 @@ export const PaymentPothosObject = PaymentRef.implement({
     invoiceId: t.exposeString("invoiceId"),
     amount: t.exposeString("amount"),
     currency: t.expose("currency", { type: CurrencyCodePothosObject }),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "amount", "currency"),
+    }),
     paymentDate: t.expose("paymentDate", { type: "DateTime" }),
     userPaymentMethodId: t.exposeString("userPaymentMethodId", { nullable: true }),
     paymentMethodType: t.field({

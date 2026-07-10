@@ -11,7 +11,7 @@ import {
   ReportsDataGrid,
   type ReportsDataGridLabels,
 } from "@/frontend/views/dashboard/reports/components/ReportsDataGrid";
-import { ReportsTotalsRow } from "@/frontend/views/dashboard/reports/components/ReportsTotalsRow";
+import { ReportsTotalsSection } from "@/frontend/views/dashboard/reports/components/ReportsTotalsSection";
 import type {
   ReportsSharedViewProps,
   ReportsSummaryLabels,
@@ -97,7 +97,7 @@ export function ReportsDesktopView({
           loading={loading}
           onRowClick={onRowClick}
         />
-        <ReportsTotalsRow summary={summary} totalsLabel={totalsLabel} />
+        <ReportsTotalsSection summary={summary} rows={rows} totalsLabel={totalsLabel} variant="desktop" />
       </SectionPanel>
 
       <Grid container spacing={2}>

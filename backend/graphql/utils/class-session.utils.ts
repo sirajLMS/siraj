@@ -1,5 +1,5 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, type ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import {
   parseClassExecutionState,

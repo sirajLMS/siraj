@@ -42,8 +42,7 @@ export const parseCountryCode = (value: string | null | undefined): CountryCode 
   return parseEnumValue(CountryCode, upperValue);
 };
 
-export const parseGender = (value: string | null | undefined): Gender | null =>
-  parseEnumValue(Gender, value);
+export const parseGender = (value: string | null | undefined): Gender | null => parseEnumValue(Gender, value);
 
 export const parseCurrencyCode = (value: string | null | undefined): CurrencyCode | null =>
   parseEnumValue(CurrencyCode, value);
@@ -64,10 +63,8 @@ export const parseAccountStatus = (
 export const parseClassTypeOrNull = (value: string | null | undefined): ClassType | null =>
   parseEnumValue(ClassType, value);
 
-export const parseClassType = (
-  value: string | null | undefined,
-  fallback: ClassType = ClassType.REGULAR
-): ClassType => parseEnumValue(ClassType, value, fallback) ?? fallback;
+export const parseClassType = (value: string | null | undefined, fallback: ClassType = ClassType.REGULAR): ClassType =>
+  parseEnumValue(ClassType, value, fallback) ?? fallback;
 
 export const parseClassOutcome = (value: string | null | undefined): ClassOutcome | null =>
   parseEnumValue(ClassOutcome, value);

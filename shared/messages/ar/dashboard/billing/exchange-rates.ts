@@ -1,0 +1,42 @@
+import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
+
+export const exchangeRates: ExchangeRatesLabels = {
+  pageTitle: "أسعار الصرف",
+  pageSubtitle: "أحدث أسعار صرف العملات وحالة المزامنة",
+  status: "الحالة",
+  refreshing: "جاري تحديث الأسعار…",
+  refreshSuccess: "تم تحديث الأسعار بنجاح",
+  refreshFailed: "فشل التحديث",
+  noRates: "لا تتوفر أسعار صرف",
+  noSyncRuns: "لا توجد عمليات مزامنة بعد",
+  staleWarning: "أسعار الصرف قديمة (أكثر من 24 ساعة). قد لا تظهر التحويلات في العملة المعروضة حتى يتم التحديث.",
+  syncStatus: {
+    title: "حالة المزامنة",
+    refresh: "تحديث الأسعار",
+    lastSync: "آخر مزامنة",
+    provider: "المزود",
+    pairsWritten: "الأزواج المكتوبة",
+    pairsFailed: "الأزواج الفاشلة",
+    errorMessage: "خطأ",
+    statusSuccess: "نجاح",
+    statusRunning: "قيد التشغيل",
+    statusPartial: "جزئي",
+    statusFailed: "فشل",
+    statusUnknown: "غير معروف",
+  },
+  rateTable: {
+    title: "أحدث الأسعار",
+    fromCurrency: "من",
+    toCurrency: "إلى",
+    rate: "السعر",
+    source: "المصدر",
+    effectiveDate: "تاريخ السريان",
+  },
+  history: {
+    title: "سجل الأسعار",
+    subtitle: "أسعار الصرف التاريخية للزوج المحدد",
+    pairLabel: "زوج العملات",
+    empty: "لا يوجد سجل أسعار لهذا الزوج في النطاق المحدد",
+    maxDays: "عرض آخر {days} يوماً",
+  },
+};

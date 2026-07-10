@@ -1,6 +1,7 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { localeJsonKey, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import {
   permissionGroups,
@@ -10,9 +11,9 @@ import {
   userPermissionOverrides,
   users,
 } from "@/backend/db/schema";
-import { OverrideState } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import { AccountStatus, OverrideState } from "@/backend/enum";
 import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
   LocalizedString,
@@ -59,8 +60,6 @@ export namespace StaffProfileRepository {
       .insert(staffProfiles)
       .values({
         userId: input.userId,
-        phone: input.phone ?? null,
-        status: input.status,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -71,11 +70,22 @@ export namespace StaffProfileRepository {
       throw new Error(t("staff.createFailed"));
     }
 
+    const [userRow] = await queryDb
+      .select({ phone: users.phone, status: users.status })
+      .from(users)
+      .where(eq(users.id, created.userId))
+      .limit(1);
+
+    if (!userRow) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("userNotFound", { id: created.userId }));
+    }
+
     return {
       id: created.id,
       userId: created.userId,
-      status: created.status,
-      phone: created.phone,
+      status: parseAccountStatus(userRow.status) ?? AccountStatus.ACTIVATED,
+      phone: userRow.phone,
       createdAt: created.createdAt,
     };
   }
@@ -86,8 +96,8 @@ export namespace StaffProfileRepository {
     name: users.name,
     email: users.email,
     avatarUrl: users.avatarUrl,
-    phone: staffProfiles.phone,
-    status: staffProfiles.status,
+    phone: users.phone,
+    status: users.status,
     roleSlug: permissionGroups.slug,
     roleNameMap: permissionGroups.name,
   } as const;
@@ -134,10 +144,10 @@ export namespace StaffProfileRepository {
 
   function resolveStatusCondition(filters?: ManagerDirectoryFilters) {
     if (filters?.statusFilter === "active") {
-      return eq(staffProfiles.status, "ACTIVATED");
+      return eq(users.status, AccountStatus.ACTIVATED);
     }
     if (filters?.statusFilter === "offline") {
-      return eq(staffProfiles.status, "DEACTIVATED");
+      return eq(users.status, AccountStatus.DEACTIVATED);
     }
     return undefined;
   }
@@ -223,10 +233,8 @@ export namespace StaffProfileRepository {
             Number
           ),
         activeNow:
-          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${staffProfiles.status} = 'ACTIVATED')`.mapWith(Number),
-        alerts: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${staffProfiles.status} != 'ACTIVATED')`.mapWith(
-          Number
-        ),
+          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${users.status} = 'ACTIVATED')`.mapWith(Number),
+        alerts: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${users.status} != 'ACTIVATED')`.mapWith(Number),
       })
       .from(staffProfiles)
       .innerJoin(users, eq(staffProfiles.userId, users.id))
@@ -250,14 +258,15 @@ export namespace StaffProfileRepository {
 
     const result = await queryDb
       .select({
-        activeStaff: sql<number>`COUNT(*) FILTER (WHERE ${staffProfiles.status} = 'ACTIVATED')`.mapWith(Number),
-        pendingApproval: sql<number>`COUNT(*) FILTER (WHERE ${staffProfiles.status} = 'DEACTIVATED')`.mapWith(Number),
+        activeStaff: sql<number>`COUNT(*) FILTER (WHERE ${users.status} = 'ACTIVATED')`.mapWith(Number),
+        pendingApproval: sql<number>`COUNT(*) FILTER (WHERE ${users.status} = 'DEACTIVATED')`.mapWith(Number),
         avgOnboardingDays:
           sql<number>`COALESCE(AVG(EXTRACT(EPOCH FROM (${staffProfiles.updatedAt} - ${staffProfiles.createdAt})) / 86400) FILTER (WHERE ${staffProfiles.createdAt} >= ${ninetyDaysAgo}), 0)`.mapWith(
             Number
           ),
       })
-      .from(staffProfiles);
+      .from(staffProfiles)
+      .innerJoin(users, eq(staffProfiles.userId, users.id));
 
     const r = result[0];
     return {
@@ -318,18 +327,26 @@ export namespace StaffProfileRepository {
         throw new Error(t18n("staffProfileNotFound"));
       }
 
-      const updateSet: Record<string, unknown> = {
-        updatedAt: new Date(),
-      };
+      const profile = existing[0];
+      const hasUserFieldUpdate = input.phoneIsSet || input.statusIsSet;
 
       if (input.phoneIsSet) {
-        updateSet.phone = input.phone ?? null;
-      }
-      if (input.statusIsSet) {
-        updateSet.status = input.status ?? "ACTIVATED";
+        await UserRepository.updateProfileFields(
+          profile.userId,
+          { phone: input.phone ?? null },
+          locale,
+          t
+        );
       }
 
-      await t.update(staffProfiles).set(updateSet).where(eq(staffProfiles.id, staffProfileId));
+      if (input.statusIsSet) {
+        const status = parseAccountStatus(input.status ?? AccountStatus.ACTIVATED) ?? AccountStatus.ACTIVATED;
+        await UserRepository.updateStatus(profile.userId, status, t, locale);
+      }
+
+      if (hasUserFieldUpdate) {
+        await t.update(staffProfiles).set({ updatedAt: new Date() }).where(eq(staffProfiles.id, staffProfileId));
+      }
 
       const updated = await t
         .select(MANAGER_DIRECTORY_SELECT)

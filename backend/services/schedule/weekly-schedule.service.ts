@@ -5,8 +5,8 @@ import {
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";

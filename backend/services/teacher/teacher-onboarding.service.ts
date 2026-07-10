@@ -55,7 +55,6 @@ export namespace TeacherOnboardingService {
     const teacher = await TeacherRepository.create(
       {
         userId: user.id,
-        status: "ACTIVATED",
         nationality: input.nationality ?? null,
         nationalId: input.nationalId ?? null,
         phone: input.phone ?? null,

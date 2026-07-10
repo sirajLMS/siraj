@@ -1,5 +1,5 @@
 import { AccountStatus, UserRole } from "@/backend/enum";
-import { parseIanaTimezone } from "@/backend/lib/enum";
+import { parseAccountStatus, parseIanaTimezone } from "@/backend/lib/enum";
 import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
 
 type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId" | "displayCurrency">;
@@ -20,7 +20,7 @@ export namespace AuthUtils {
     return {
       ...rest,
       role: resolved.role ?? UserRole.USER,
-      status: resolved.status ?? AccountStatus.ACTIVATED,
+      status: resolved.status ?? parseAccountStatus(user.status),
       teacherId: resolved.teacherId ?? null,
       parentId: resolved.parentId ?? null,
       displayCurrency: resolved.displayCurrency ?? null,

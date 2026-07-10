@@ -2,6 +2,7 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission, CurrencyCode, FxProvider, FxSyncStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
+  exchangeRateHistoryQueryDocument,
   latestExchangeRatesQueryDocument,
   latestFxSyncRunQueryDocument,
   refreshExchangeRatesMutationDocument,
@@ -90,6 +91,38 @@ const buildMocks = (rates: typeof MOCK_RATES, syncRun: SyncRunMock) => [
     result: {
       data: {
         latestFxSyncRun: syncRun,
+      },
+    },
+  },
+  {
+    request: {
+      query: exchangeRateHistoryQueryDocument,
+      variables: {
+        from: CurrencyCode.Usd,
+        to: CurrencyCode.Sar,
+        maxDays: 90,
+        paginationArgs: null,
+      },
+    },
+    result: {
+      data: {
+        exchangeRateHistory: {
+          __typename: "ExchangeRateHistoryResult",
+          id: "history-1",
+          totalCount: 1,
+          rows: [MOCK_RATES[0]],
+          pageInfo: {
+            __typename: "PageInfo",
+            count: 1,
+            currentPage: 1,
+            firstItem: 1,
+            lastItem: 1,
+            hasMorePages: false,
+            lastPage: 1,
+            perPage: 100,
+            total: 1,
+          },
+        },
       },
     },
   },

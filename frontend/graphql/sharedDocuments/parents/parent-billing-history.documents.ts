@@ -23,6 +23,8 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
         studentName
         parentId
         parentUserId
+        latestPaymentMethodType
+        latestPaymentMethodLabel
         displayAmount {
           id
           amount
@@ -65,6 +67,8 @@ export const adminInvoicesQueryDocument: TypedDocumentNode<
         studentName
         parentId
         parentUserId
+        latestPaymentMethodType
+        latestPaymentMethodLabel
         displayAmount {
           id
           amount
@@ -95,6 +99,28 @@ export const adminBillingSummaryQueryDocument: TypedDocumentNode<Operations.Admi
       pendingCount
       mtdRevenue
       negativeBalanceCount
+      outstandingByCurrency {
+        id
+        currency
+        amount
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
+      }
+      mtdRevenueByCurrency {
+        id
+        currency
+        amount
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
+      }
     }
   }
 `;
@@ -124,6 +150,28 @@ export const parentBillingSummaryQueryDocument: TypedDocumentNode<
       paidThisTerm
       nextDueDate
       activeStudents
+      outstandingByCurrency {
+        id
+        currency
+        amount
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
+      }
+      paidThisTermByCurrency {
+        id
+        currency
+        amount
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
+      }
     }
   }
 `;

@@ -255,6 +255,14 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.billingAdmin,
   },
   {
+    key: "exchange-rates",
+    labelKey: "dashboard.nav.exchangeRates",
+    icon: TimelineOutlined,
+    href: "/billing/exchange-rates",
+    section: "main",
+    permission: PAGE_PERMISSIONS.exchangeRates,
+  },
+  {
     key: "payment-catalogs",
     labelKey: "dashboard.nav.paymentCatalogs",
     icon: AccountBalanceWalletOutlined,
@@ -457,6 +465,14 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/billing",
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
+  },
+  {
+    key: "exchange-rates",
+    labelKey: "dashboard.nav.exchangeRates",
+    icon: TimelineOutlined,
+    href: "/billing/exchange-rates",
+    section: "main",
+    permission: PAGE_PERMISSIONS.exchangeRates,
   },
   {
     key: "payment-catalogs",

@@ -1,5 +1,6 @@
 import type { currencyExchangeRates, fxSyncRuns, invoices, payments } from "@/backend/db/schema";
 import type { CurrencyCode, FxProvider, FxSyncStatus, FxSyncTrigger, InvoiceStatus, InvoiceType } from "@/backend/enum";
+import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -116,12 +117,14 @@ export type UnpaidInvoiceSummaryItem = {
   currency: CurrencyCode;
   overdueCount: number;
   oldestDueDate: string;
+  amountsByCurrency: BillingCurrencyTotal[];
 };
 
 export type UnpaidInvoicesSummaryResult = {
   id: string;
   totalOverdueInvoices: number;
   totalOverdueAmount: string;
+  overdueAmountsByCurrency: BillingCurrencyTotal[];
   items: UnpaidInvoiceSummaryItem[];
 };
 
@@ -145,6 +148,14 @@ export type InvoiceHistoryRow = {
   readonly studentName: string | null;
   readonly parentId: string;
   readonly parentUserId: string | null;
+  readonly latestPaymentMethodType: PaymentMethodType | null;
+  readonly latestPaymentMethodLabel: string | null;
+};
+
+export type BillingCurrencyTotal = {
+  readonly id: string;
+  readonly currency: CurrencyCode;
+  readonly amount: string;
 };
 
 export type AdminBillingSummaryResult = {
@@ -153,6 +164,8 @@ export type AdminBillingSummaryResult = {
   readonly pendingCount: number;
   readonly mtdRevenue: string;
   readonly negativeBalanceCount: number;
+  readonly outstandingByCurrency: readonly BillingCurrencyTotal[];
+  readonly mtdRevenueByCurrency: readonly BillingCurrencyTotal[];
 };
 
 export type StudentCreditRow = {
@@ -171,6 +184,8 @@ export type ParentBillingSummaryResult = {
   readonly paidThisTerm: string;
   readonly nextDueDate: string | null;
   readonly activeStudents: number;
+  readonly outstandingByCurrency: readonly BillingCurrencyTotal[];
+  readonly paidThisTermByCurrency: readonly BillingCurrencyTotal[];
 };
 
 /** FX-converted amount for UI display (Decision 3A read path). */

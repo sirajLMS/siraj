@@ -9,8 +9,8 @@ import {
   teacherVacationRequests,
   users,
 } from "@/backend/db/schema";
-import { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";

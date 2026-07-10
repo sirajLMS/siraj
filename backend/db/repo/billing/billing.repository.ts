@@ -14,6 +14,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { CurrencyCode, StudentStatus } from "@/backend/enum";
+import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
@@ -512,8 +513,26 @@ export namespace BillingRepository {
       id: "unpaid-invoices-summary",
       totalOverdueInvoices,
       totalOverdueAmount: "0.00",
+      overdueAmountsByCurrency: [],
       items: [],
     };
+  }
+
+  function groupAmountsByCurrency(
+    rows: readonly { amount: string; currency: CurrencyCode }[],
+    idPrefix: string
+  ): Types.BillingCurrencyTotal[] {
+    const byCurrency = new Map<CurrencyCode, number>();
+    for (const row of rows) {
+      const numericAmount = Number.parseFloat(row.amount);
+      if (!Number.isFinite(numericAmount)) continue;
+      byCurrency.set(row.currency, (byCurrency.get(row.currency) ?? 0) + numericAmount);
+    }
+    return [...byCurrency.entries()].map(([currency, amount]) => ({
+      id: `${idPrefix}-${currency}`,
+      currency,
+      amount: amount.toFixed(2),
+    }));
   }
 
   async function fetchOverdueInvoices(t: DBTransaction | typeof db): Promise<OverdueInvoiceRow[]> {
@@ -570,18 +589,25 @@ export namespace BillingRepository {
       const parent = parentMap.get(parentId);
       if (!parent?.userId) continue;
 
-      const parentTotal = invs.reduce((sum, inv) => sum + Number.parseFloat(inv.amount), 0);
-      totalAmount += parentTotal;
+      const amountsByCurrency = groupAmountsByCurrency(invs, `unpaid-${parentId}`);
+      const sortedInvs = [...invs].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+      const primaryCurrency = amountsByCurrency[0]?.currency ?? sortedInvs[0]?.currency;
+      const primaryAmount = amountsByCurrency.find(bucket => bucket.currency === primaryCurrency)?.amount ?? "0.00";
+
+      for (const bucket of amountsByCurrency) {
+        totalAmount += Number.parseFloat(bucket.amount);
+      }
 
       items.push({
         id: parentId,
         userId: parent.userId,
         userName: parent.userName ?? "Unknown",
         userEmail: parent.userEmail ?? "",
-        totalUnpaidAmount: parentTotal.toFixed(2),
-        currency: invs[0].currency,
+        totalUnpaidAmount: primaryAmount,
+        currency: primaryCurrency,
         overdueCount: invs.length,
-        oldestDueDate: invs[0].dueDate,
+        oldestDueDate: sortedInvs[0]?.dueDate ?? "",
+        amountsByCurrency,
       });
     }
 
@@ -605,11 +631,13 @@ export namespace BillingRepository {
     const parentMap = await fetchParentUsers(t, parentIds);
     const groupedByParent = groupInvoicesByParent(overdueInvoices);
     const { items, totalAmount } = buildSummaryItems(groupedByParent, parentMap);
+    const overdueAmountsByCurrency = groupAmountsByCurrency(overdueInvoices, "overdue-global");
 
     return {
       id: "unpaid-invoices-summary",
       totalOverdueInvoices: overdueInvoices.length,
       totalOverdueAmount: totalAmount.toFixed(2),
+      overdueAmountsByCurrency,
       items,
     };
   };
@@ -627,6 +655,20 @@ export namespace BillingRepository {
     studentName: students.name,
     parentId: invoices.parentId,
     parentUserId: parents.userId,
+    latestPaymentMethodType: sql<string | null>`(
+      SELECT p.payment_method_type
+      FROM payments p
+      WHERE p.invoice_id = ${invoices.id}
+      ORDER BY p.payment_date DESC
+      LIMIT 1
+    )`.as("latest_payment_method_type"),
+    latestPaymentMethodLabel: sql<string | null>`(
+      SELECT p.payment_method_snapshot->>'label'
+      FROM payments p
+      WHERE p.invoice_id = ${invoices.id}
+      ORDER BY p.payment_date DESC
+      LIMIT 1
+    )`.as("latest_payment_method_label"),
   };
 
   function mapInvoiceRow(r: {
@@ -642,7 +684,10 @@ export namespace BillingRepository {
     studentName: string | null;
     parentId: string;
     parentUserId: string | null;
+    latestPaymentMethodType: string | null;
+    latestPaymentMethodLabel: string | null;
   }): Types.InvoiceHistoryRow {
+    const latestType = r.latestPaymentMethodType;
     return {
       id: r.id,
       issueDate: r.issueDate,
@@ -656,6 +701,11 @@ export namespace BillingRepository {
       studentName: r.studentName ?? null,
       parentId: r.parentId,
       parentUserId: r.parentUserId ?? null,
+      latestPaymentMethodType:
+        latestType && Object.values(PaymentMethodType).includes(latestType as PaymentMethodType)
+          ? (latestType as PaymentMethodType)
+          : null,
+      latestPaymentMethodLabel: r.latestPaymentMethodLabel ?? null,
     };
   }
 
@@ -806,6 +856,15 @@ export namespace BillingRepository {
       .from(invoices)
       .where(and(eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
+    const unpaidByCurrency = await t
+      .select({
+        currency: invoices.currency,
+        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+      })
+      .from(invoices)
+      .where(and(eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)))
+      .groupBy(invoices.currency);
+
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
 
@@ -817,6 +876,15 @@ export namespace BillingRepository {
       .where(
         and(eq(invoices.status, "PAID"), isNull(invoices.deletedAt), sql`${invoices.paidDate} >= ${firstOfMonth}`)
       );
+
+    const mtdByCurrency = await t
+      .select({
+        currency: invoices.currency,
+        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+      })
+      .from(invoices)
+      .where(and(eq(invoices.status, "PAID"), isNull(invoices.deletedAt), sql`${invoices.paidDate} >= ${firstOfMonth}`))
+      .groupBy(invoices.currency);
 
     const negBalanceResult = await t
       .select({
@@ -831,6 +899,16 @@ export namespace BillingRepository {
       pendingCount: unpaidResult[0]?.pendingCount ?? 0,
       mtdRevenue: mtdResult[0]?.mtdRevenue ?? "0.00",
       negativeBalanceCount: negBalanceResult[0]?.negativeBalanceCount ?? 0,
+      outstandingByCurrency: unpaidByCurrency.map(row => ({
+        id: `outstanding-${row.currency}`,
+        currency: row.currency,
+        amount: row.amount,
+      })),
+      mtdRevenueByCurrency: mtdByCurrency.map(row => ({
+        id: `mtd-${row.currency}`,
+        currency: row.currency,
+        amount: row.amount,
+      })),
     };
   };
 
@@ -879,12 +957,30 @@ export namespace BillingRepository {
       .from(invoices)
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
+    const unpaidByCurrency = await t
+      .select({
+        currency: invoices.currency,
+        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+      })
+      .from(invoices)
+      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)))
+      .groupBy(invoices.currency);
+
     const paidResult = await t
       .select({
         paidThisTerm: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
       })
       .from(invoices)
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAID"), isNull(invoices.deletedAt)));
+
+    const paidByCurrency = await t
+      .select({
+        currency: invoices.currency,
+        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+      })
+      .from(invoices)
+      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAID"), isNull(invoices.deletedAt)))
+      .groupBy(invoices.currency);
 
     const activeStudentsResult = await t
       .select({
@@ -899,6 +995,16 @@ export namespace BillingRepository {
       paidThisTerm: paidResult[0]?.paidThisTerm ?? "0.00",
       nextDueDate: unpaidResult[0]?.nextDueDate ?? null,
       activeStudents: activeStudentsResult[0]?.activeStudents ?? 0,
+      outstandingByCurrency: unpaidByCurrency.map(row => ({
+        id: `outstanding-${row.currency}`,
+        currency: row.currency,
+        amount: row.amount,
+      })),
+      paidThisTermByCurrency: paidByCurrency.map(row => ({
+        id: `paid-${row.currency}`,
+        currency: row.currency,
+        amount: row.amount,
+      })),
     };
   };
 

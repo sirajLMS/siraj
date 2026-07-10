@@ -1,3 +1,4 @@
+import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import type { PaymentComponentLabels } from "@/shared/messages/types/dashboard/billing/payment";
 import type { AdminInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
@@ -87,19 +88,31 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly markPaidDialog: {
     readonly title: string;
     readonly confirm: string;
+    readonly confirming: string;
     readonly selectMethod: string;
     readonly noMethods: string;
     readonly addMethods: string;
     readonly manageMethods: string;
     readonly cancel: string;
+    readonly errorGeneric: string;
+    readonly missingParentUser: string;
+    readonly invoiceNumber: string;
+    readonly amount: string;
+    readonly dueDate: string;
+    readonly student: string;
+    readonly selectedMethod: string;
   };
   readonly paymentDetailsDialog: {
     readonly title: string;
     readonly empty: string;
+    readonly emptyLegacy: string;
+    readonly loadFailed: string;
+    readonly close: string;
     readonly amount: string;
     readonly date: string;
   };
   readonly errors: {
     readonly invalidId: string;
   };
+  readonly exchangeRates: ExchangeRatesLabels;
 }

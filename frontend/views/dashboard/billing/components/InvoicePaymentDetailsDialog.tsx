@@ -3,8 +3,10 @@
 import { useQuery } from "@apollo/client/react";
 import {
   Box,
+  Button,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
@@ -22,6 +24,7 @@ export type InvoicePaymentDetailsDialogProps = {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly invoiceId: string | null;
+  readonly isLegacyPaid?: boolean;
 };
 
 function formatPaymentDate(dateStr: string | null, locale: string): string {
@@ -39,11 +42,12 @@ export function InvoicePaymentDetailsDialog({
   open,
   onClose,
   invoiceId,
+  isLegacyPaid = false,
 }: InvoicePaymentDetailsDialogProps): React.ReactNode {
   const t = useTranslations("dashboard.billing.paymentDetailsDialog");
   const locale = useLocale();
 
-  const { data, loading } = useQuery(invoicePaymentsQueryDocument, {
+  const { data, loading, error } = useQuery(invoicePaymentsQueryDocument, {
     variables: { invoiceId: invoiceId ?? "" },
     skip: !open || !invoiceId,
     fetchPolicy: "network-only",
@@ -59,9 +63,13 @@ export function InvoicePaymentDetailsDialog({
           <Stack sx={{ alignItems: "center", py: 3 }}>
             <CircularProgress size={28} />
           </Stack>
+        ) : error ? (
+          <Typography variant="bodyMd" sx={{ color: "error.main", py: 1 }}>
+            {t("loadFailed")}
+          </Typography>
         ) : payments.length === 0 ? (
           <Typography variant="bodyMd" sx={{ color: "text.secondary", py: 1 }}>
-            {t("empty")}
+            {isLegacyPaid ? t("emptyLegacy") : t("empty")}
           </Typography>
         ) : (
           <Stack divider={<Divider />} spacing={2} sx={{ py: 1 }}>
@@ -72,21 +80,13 @@ export function InvoicePaymentDetailsDialog({
                   <Stack spacing={1}>
                     <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
                       {t("amount")}:{" "}
-                      {formatLockedAmount(
-                        payment.amount ?? "0",
-                        payment.currency ?? CurrencyCode.Usd,
-                        locale
-                      )}
+                      {formatLockedAmount(payment.amount ?? "0", payment.currency ?? CurrencyCode.Usd, locale)}
                     </Typography>
                     <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
                       {t("date")}: {formatPaymentDate(payment.paymentDate ?? null, locale)}
                     </Typography>
                     {snapshot ? (
-                      <PaymentMethodDisplay
-                        method={snapshotToDisplayData(snapshot)}
-                        showStatus={false}
-                        compact
-                      />
+                      <PaymentMethodDisplay method={snapshotToDisplayData(snapshot)} showStatus={false} compact />
                     ) : null}
                   </Stack>
                 </Box>
@@ -95,6 +95,9 @@ export function InvoicePaymentDetailsDialog({
           </Stack>
         )}
       </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{t("close")}</Button>
+      </DialogActions>
     </Dialog>
   );
 }

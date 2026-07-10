@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { AttendanceReportRow, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -319,6 +319,8 @@ function useReportHandlers({
   summary,
   showFinancials,
   setActiveFilters,
+  locale,
+  fxMessages,
 }: {
   readonly fromDate: string;
   readonly toDate: string;
@@ -333,6 +335,16 @@ function useReportHandlers({
     readonly teacherId: string | null;
     readonly groupBy: ReportGroupingMode;
   }) => void;
+  readonly locale: string;
+  readonly fxMessages: {
+    readonly convertedAmount: (values: {
+      lockedAmount: string;
+      lockedCurrency: string;
+      convertedApprox: string;
+      displayCurrency: string;
+    }) => string;
+    readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  };
 }) {
   const router = useRouter();
 
@@ -363,7 +375,8 @@ function useReportHandlers({
           leave: "Leave",
           pending: "Pending",
           hours: "Hours",
-          paid: "Paid",
+          paid: "Paid (Display)",
+          paidLocked: "Paid (Locked)",
         },
         totalsLabel: "Totals",
         summaryLabels: {
@@ -374,10 +387,12 @@ function useReportHandlers({
       fromDate,
       toDate,
       showFinancials,
+      locale,
+      fxMessages,
     }).catch((error: unknown) => {
       logger.error("Excel export failed", error);
     });
-  }, [rows, summary, fromDate, toDate, showFinancials]);
+  }, [rows, summary, fromDate, toDate, showFinancials, locale, fxMessages]);
 
   const handlePrintReport = useCallback(() => {
     globalThis.print();
@@ -403,6 +418,9 @@ function useReportHandlers({
 
 export function ReportsContainer() {
   const { hasPermission } = useUserStore();
+  const locale = useLocale();
+  const tProfile = useTranslations("profile");
+  const tErrors = useTranslations("errors");
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
@@ -430,6 +448,11 @@ export function ReportsContainer() {
     summary,
     showFinancials,
     setActiveFilters,
+    locale,
+    fxMessages: {
+      convertedAmount: values => tProfile("convertedAmount", values),
+      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+    },
   });
 
   return (

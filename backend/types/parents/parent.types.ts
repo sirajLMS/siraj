@@ -1,4 +1,4 @@
-import type { BookingStatus, ClassExecutionState, ClassOutcome, CurrencyCode, ParentStatus } from "@/backend/enum";
+import type { AccountStatus, BookingStatus, ClassExecutionState, ClassOutcome, CurrencyCode, ParentStatus } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
@@ -15,8 +15,6 @@ export type ParentCreateResult = Pick<
 
 export type ParentDirectoryMetrics = {
   id: string;
-  activated: number;
-  deactivated: number;
   regular: number;
   onLeave: number;
   suspended: number;
@@ -34,7 +32,8 @@ export type ParentDirectoryRawRow = {
   name: string;
   email: string;
   avatarUrl: string | null;
-  status: string;
+  lifecycleStatus: string;
+  accountStatus: string;
   updatedAt: Date;
   unpaidInvoices: number;
 };
@@ -44,8 +43,6 @@ export type ParentDirectoryRawRow = {
  * Does not include the synthetic `id` field that the service layer adds.
  */
 export type ParentDirectoryRawMetrics = {
-  activated: number;
-  deactivated: number;
   regular: number;
   onLeave: number;
   suspended: number;
@@ -61,7 +58,8 @@ export type ParentDirectoryRow = {
   avatarUrl: string | null;
   guardianOf: string;
   time: string;
-  accountStatus: ParentStatus;
+  lifecycleStatus: ParentStatus;
+  accountStatus: AccountStatus;
   unpaidInvoices: number;
 };
 
@@ -157,7 +155,8 @@ export interface ParentProfileResult {
   readonly name: string;
   readonly email: string;
   readonly avatarUrl: string | null;
-  readonly status: string;
+  readonly lifecycleStatus: string;
+  readonly accountStatus: AccountStatus;
   readonly phone: string | null;
   readonly nationality: string | null;
   readonly address: string | null;
@@ -218,7 +217,7 @@ export type ParentProfileUpdateInput = {
 export interface DeactivateParentResult {
   readonly id: string;
   readonly userId: string;
-  readonly status: string;
+  readonly accountStatus: AccountStatus;
 }
 
 export type ParentDocument = {

@@ -8,8 +8,8 @@ import {
   NotificationChannel,
   NotificationEventType,
 } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseClassExecutionState } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { extractMeetingId } from "@/backend/services/meeting/meeting-url-parser";

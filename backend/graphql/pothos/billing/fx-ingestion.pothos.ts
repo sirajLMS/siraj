@@ -1,4 +1,4 @@
-import { AppPermission, FxProvider, type FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
+import { AppPermission, type FxProvider, type FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CurrencyCodePothosObject,

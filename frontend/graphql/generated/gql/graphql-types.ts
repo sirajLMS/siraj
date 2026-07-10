@@ -32,7 +32,9 @@ export type AdminBillingSummary = {
   __typename?: 'AdminBillingSummary';
   id: Maybe<Scalars['String']['output']>;
   mtdRevenue: Maybe<Scalars['String']['output']>;
+  mtdRevenueByCurrency: Maybe<Array<BillingCurrencyTotal>>;
   negativeBalanceCount: Maybe<Scalars['Int']['output']>;
+  outstandingByCurrency: Maybe<Array<BillingCurrencyTotal>>;
   pendingCount: Maybe<Scalars['Int']['output']>;
   totalOutstanding: Maybe<Scalars['String']['output']>;
 };
@@ -338,6 +340,13 @@ export enum AvailabilityStatus {
   Available = 'AVAILABLE',
   OutOfStock = 'OUT_OF_STOCK'
 }
+
+export type BillingCurrencyTotal = {
+  __typename?: 'BillingCurrencyTotal';
+  amount: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
+  id: Maybe<Scalars['String']['output']>;
+};
 
 export type BillingMonthInput = {
   month: Scalars['Int']['input'];
@@ -2957,7 +2966,9 @@ export type ParentBillingSummary = {
   id: Maybe<Scalars['String']['output']>;
   nextDueDate: Maybe<Scalars['String']['output']>;
   outstandingBalance: Maybe<Scalars['String']['output']>;
+  outstandingByCurrency: Maybe<Array<BillingCurrencyTotal>>;
   paidThisTerm: Maybe<Scalars['String']['output']>;
+  paidThisTermByCurrency: Maybe<Array<BillingCurrencyTotal>>;
 };
 
 /** Paginated parent complaints with page info. */
@@ -3084,6 +3095,8 @@ export type ParentInvoiceRow = {
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<InvoiceType>;
   issueDate: Maybe<Scalars['String']['output']>;
+  latestPaymentMethodLabel: Maybe<Scalars['String']['output']>;
+  latestPaymentMethodType: Maybe<PaymentMethodType>;
   paidDate: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   parentUserId: Maybe<Scalars['String']['output']>;

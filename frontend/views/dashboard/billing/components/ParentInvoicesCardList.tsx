@@ -5,7 +5,7 @@ import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type { MarkPaidInvoiceTarget, PaymentDetailsTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
@@ -20,7 +20,7 @@ interface ParentInvoicesCardListProps {
   readonly labels: ParentInvoicesCardListLabels;
   readonly canView: boolean;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (invoiceId: string) => void;
+  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
@@ -86,11 +86,21 @@ export function ParentInvoicesCardList({
               {row.fee}
             </Typography>
           </Box>
+          {row.status === InvoiceStatus.Paid && row.paidMethodHint ? (
+            <Typography variant="labelMd" sx={{ color: "text.secondary", mb: 1 }}>
+              {row.paidMethodHint}
+            </Typography>
+          ) : null}
           {canView && row.status === InvoiceStatus.Unpaid && (
             <PrimaryPageAction
               fullWidth
               onClick={() => {
-                onPayNow({ id: row.id });
+                onPayNow({
+                  id: row.id,
+                  amount: row.fee,
+                  dueDate: row.dueDate,
+                  invoiceNumber: row.invoiceNumber,
+                });
               }}
             >
               {labels.payNow}
@@ -102,7 +112,10 @@ export function ParentInvoicesCardList({
                 size="small"
                 aria-label={labels.viewDetails}
                 onClick={() => {
-                  onViewPaymentDetails?.(row.id);
+                  onViewPaymentDetails?.({
+                    invoiceId: row.id,
+                    isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
+                  });
                 }}
               >
                 <VisibilityOutlined fontSize="small" />

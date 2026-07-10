@@ -13,16 +13,10 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import { BookingStatus, ClassOutcome, ParentStatus } from "@/backend/enum";
-import { CurrencyCode } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { BookingStatus, ClassOutcome, type CurrencyCode, type ParentStatus } from "@/backend/enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { parseClassExecutionState, parseClassOutcome, parseCurrencyCode, parseIanaTimezone } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import {
-  parseClassExecutionState,
-  parseClassOutcome,
-  parseCurrencyCode,
-  parseIanaTimezone,
-} from "@/backend/lib/enum";
 import type {
   PaginationArgs,
   ParentCreateResult,
@@ -120,8 +114,6 @@ export namespace ParentRepository {
       .groupBy(parents.status);
 
     return {
-      activated: metricsResult.find(m => m.status === "ACTIVATED")?.count ?? 0,
-      deactivated: metricsResult.find(m => m.status === "DEACTIVATED")?.count ?? 0,
       regular: metricsResult.find(m => m.status === "REGULAR")?.count ?? 0,
       onLeave: metricsResult.find(m => m.status === "ON_LEAVE")?.count ?? 0,
       suspended: metricsResult.find(m => m.status === "SUSPENDED")?.count ?? 0,
@@ -131,14 +123,14 @@ export namespace ParentRepository {
 
   function buildDirectoryConditions(options: {
     search?: string | null;
-    accountStatus?: ParentStatus | null;
+    lifecycleStatus?: ParentStatus | null;
   }): (SQL | undefined)[] {
     const conditions: (SQL | undefined)[] = [];
     if (options.search) {
       conditions.push(or(ilike(users.name, `%${options.search}%`), ilike(users.email, `%${options.search}%`)));
     }
-    if (options.accountStatus) {
-      conditions.push(eq(parents.status, options.accountStatus));
+    if (options.lifecycleStatus) {
+      conditions.push(eq(parents.status, options.lifecycleStatus));
     }
     return conditions;
   }
@@ -162,7 +154,7 @@ export namespace ParentRepository {
   }
 
   export const getParentDirectory = async (
-    options: { search?: string | null; pagination?: PaginationArgs | null; accountStatus?: ParentStatus | null },
+    options: { search?: string | null; pagination?: PaginationArgs | null; lifecycleStatus?: ParentStatus | null },
     tx?: DBTransaction
   ): Promise<ParentDirectoryResult> => {
     const queryDb = tx ?? db;
@@ -177,7 +169,8 @@ export namespace ParentRepository {
         name: users.name,
         email: users.email,
         avatarUrl: users.avatarUrl,
-        status: parents.status,
+        lifecycleStatus: parents.status,
+        accountStatus: users.status,
         updatedAt: parents.updatedAt,
       })
       .from(parents)

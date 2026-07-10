@@ -1,6 +1,6 @@
 import { StudentStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type { Student, StudentEntity } from "@/backend/types";
 
 export namespace StudentUtils {

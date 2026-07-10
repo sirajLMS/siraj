@@ -4,7 +4,7 @@ import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission, ClassOutcome } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import {
   parseClassExecutionState,

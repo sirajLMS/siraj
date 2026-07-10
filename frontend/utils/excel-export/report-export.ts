@@ -1,4 +1,8 @@
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import {
+  aggregatePaidAmountTotals,
+  formatReportPaidAmounts,
+} from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 
 interface ReportExportLabels {
   readonly pageTitle: string;
@@ -10,6 +14,7 @@ interface ReportExportLabels {
     readonly pending: string;
     readonly hours: string;
     readonly paid: string;
+    readonly paidLocked: string;
   };
   readonly totalsLabel: string;
   readonly summaryLabels: {
@@ -25,6 +30,16 @@ interface ReportExportData {
   readonly fromDate: string;
   readonly toDate: string;
   readonly showFinancials: boolean;
+  readonly locale: string;
+  readonly fxMessages: {
+    readonly convertedAmount: (values: {
+      lockedAmount: string;
+      lockedCurrency: string;
+      convertedApprox: string;
+      displayCurrency: string;
+    }) => string;
+    readonly displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  };
 }
 
 type CellStyle = import("xlsx-js-style").CellStyle;
@@ -118,7 +133,7 @@ type XLSXModule = typeof import("xlsx-js-style");
 export async function exportAttendanceReport(data: ReportExportData): Promise<void> {
   const XLSX = await import("xlsx-js-style");
 
-  const { rows, summary, labels, fromDate, toDate, showFinancials } = data;
+  const { rows, summary, labels, fromDate, toDate, showFinancials, locale, fxMessages } = data;
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([[]]);
 
@@ -128,8 +143,8 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
 
   writeTitleAndSubtitle(XLSX, ws, labels.pageTitle, fromDate, toDate, totalCols);
   writeHeaderRow(XLSX, ws, headers);
-  writeDataRows(XLSX, ws, rows, showFinancials, financialColStart);
-  writeTotalsRow(XLSX, ws, rows, summary, labels.totalsLabel, showFinancials);
+  writeDataRows(XLSX, ws, rows, showFinancials, financialColStart, locale, fxMessages);
+  writeTotalsRow(XLSX, ws, rows, summary, labels.totalsLabel, showFinancials, locale, fxMessages);
   applyColumnWidths(ws, headers, rows, showFinancials);
   applyRowHeights(ws);
 
@@ -151,6 +166,7 @@ function buildHeaders(labels: ReportExportLabels, showFinancials: boolean): stri
 
   if (showFinancials) {
     headers.push(labels.tableLabels.paid);
+    headers.push(labels.tableLabels.paidLocked);
   }
 
   return headers;
@@ -191,24 +207,40 @@ function writeDataRows(
   ws: import("xlsx-js-style").WorkSheet,
   rows: readonly ReportLedgerRow[],
   showFinancials: boolean,
-  financialColStart: number
+  financialColStart: number,
+  locale: string,
+  fxMessages: ReportExportData["fxMessages"]
 ): void {
   const dataStartRow = 4;
   rows.forEach((row, idx) => {
     const r = dataStartRow + idx;
-    const values = buildRowValues(row, showFinancials);
+    const values = buildRowValues(row, showFinancials, locale, fxMessages);
     writeRowCells(XLSX, ws, r, idx, values, showFinancials, financialColStart);
   });
 }
 
-function formatPaidCell(row: ReportLedgerRow): string {
+function formatPaidCell(row: ReportLedgerRow, locale: string, fxMessages: ReportExportData["fxMessages"]): string {
+  return (
+    formatReportPaidAmounts(row.paidAmounts, locale, fxMessages) ||
+    row.paidAmounts.map(paid => `${paid.amount} ${paid.currency}`).join(" | ") ||
+    "—"
+  );
+}
+
+function formatPaidCellLocked(row: ReportLedgerRow): string {
   return row.paidAmounts.map(paid => `${paid.amount} ${paid.currency}`).join(" | ") || "—";
 }
 
-function buildRowValues(row: ReportLedgerRow, showFinancials: boolean): (string | number)[] {
+function buildRowValues(
+  row: ReportLedgerRow,
+  showFinancials: boolean,
+  locale: string,
+  fxMessages: ReportExportData["fxMessages"]
+): (string | number)[] {
   const values: (string | number)[] = [row.name, row.taken, row.absent, row.leave, row.pending, row.hours];
   if (showFinancials) {
-    values.push(formatPaidCell(row));
+    values.push(formatPaidCell(row, locale, fxMessages));
+    values.push(formatPaidCellLocked(row));
   }
   return values;
 }
@@ -245,7 +277,9 @@ function writeTotalsRow(
   rows: readonly ReportLedgerRow[],
   summary: ReportsSummary,
   totalsLabel: string,
-  showFinancials: boolean
+  showFinancials: boolean,
+  locale: string,
+  fxMessages: ReportExportData["fxMessages"]
 ): void {
   const dataStartRow = 4;
   const totalsRow = dataStartRow + rows.length;
@@ -260,8 +294,12 @@ function writeTotalsRow(
   ];
 
   if (showFinancials) {
+    const paidTotals = aggregatePaidAmountTotals(rows);
+    totalsValues.push(formatReportPaidAmounts(paidTotals, locale, fxMessages));
     totalsValues.push(
-      summary.currencyDistribution.map(slice => `${slice.amount} ${slice.currency}`).join(" | ") || "—"
+      paidTotals.map(paid => `${paid.amount} ${paid.currency}`).join(" | ") ||
+        summary.currencyDistribution.map(slice => `${slice.amount} ${slice.currency}`).join(" | ") ||
+        "—"
     );
   }
 
@@ -291,7 +329,7 @@ function applyColumnWidths(
         row.leave,
         row.pending,
         row.hours,
-        ...(showFinancials ? [formatPaidCell(row)] : []),
+        ...(showFinancials ? [formatPaidCellLocked(row)] : []),
       ];
       return Math.max(max, String(vals[i] ?? "").length);
     }, 0);

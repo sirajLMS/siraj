@@ -11,14 +11,22 @@ import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parents/parent-billing-history.documents";
-import { formatLockedAmount } from "@/frontend/lib/currency";
+import {
+  formatBillingCurrencyTotals,
+  mapBillingCurrencyBuckets,
+} from "@/frontend/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { buildPaidMethodHint } from "@/frontend/lib/user-payment-method";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
+import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
 import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
-import type { MarkPaidInvoiceTarget, ParentBillingViewProps } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type {
+  MarkPaidInvoiceTarget,
+  ParentBillingViewProps,
+  PaymentDetailsTarget,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
 
@@ -39,13 +47,14 @@ export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
   const tProfile = useTranslations("profile.teacher");
   const tErrors = useTranslations("errors");
+  const tUi = useTranslations("ui.paymentMethod");
   const locale = useLocale();
   const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
-  const [detailsInvoiceId, setDetailsInvoiceId] = useState<string | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
@@ -79,7 +88,7 @@ export function ParentBillingContainer() {
     fetchPolicy: "cache-and-network",
   });
 
-  const { data: summaryData } = useQuery(parentBillingSummaryQueryDocument, {
+  const { data: summaryData, refetch: refetchSummary } = useQuery(parentBillingSummaryQueryDocument, {
     variables: { parentId: null, userId: null },
     fetchPolicy: "cache-and-network",
   });
@@ -91,62 +100,102 @@ export function ParentBillingContainer() {
   const handleMarkPaidSuccess = () => {
     showFeedback(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), "success");
     void refetch();
+    void refetchSummary();
+  };
+
+  const handleMarkPaidError = (message: string) => {
+    showFeedback(message, "error");
+  };
+
+  const handleDownloadPdf = (invoiceId: string) => {
+    window.open(`/api/invoices/${invoiceId}/download`, "_blank", "noopener,noreferrer");
   };
 
   const totalCount = data ? (data.parentInvoiceHistory?.totalCount ?? 0) : undefined;
 
   const invoices = useMemo(() => data?.parentInvoiceHistory?.rows ?? [], [data?.parentInvoiceHistory]);
 
-  const filteredInvoices = useMemo(
+  const mappedInvoices = useMemo(
     () =>
-      filterParentInvoices(
-        invoices.map(inv => ({
-          id: inv.id ?? "",
-          invoiceNumber: (inv.id ?? "").slice(0, 8).toUpperCase(),
-          month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
-          issueDate: inv.issueDate ?? "",
-          dueDate: inv.dueDate ?? "",
-          paidDate: inv.paidDate ?? "—",
-          fee: formatCurrencyForDisplay(
-            inv.amount ?? "0",
-            inv.currency ?? CurrencyCode.Usd,
-            inv.displayAmount
-              ? {
-                  amount: inv.displayAmount.amount,
-                  currency: inv.displayAmount.currency ?? CurrencyCode.Usd,
-                  stale: inv.displayAmount.stale ?? true,
-                }
-              : null,
-            locale,
-            {
-              convertedAmount: values => tProfile("convertedAmount", values),
-              displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
-            }
-          ),
-          status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
-        })),
-        searchQuery
-      ),
-    [invoices, searchQuery, tProfile, tErrors, locale]
+      invoices.map(inv => ({
+        id: inv.id ?? "",
+        invoiceNumber: (inv.id ?? "").slice(0, 8).toUpperCase(),
+        month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
+        issueDate: inv.issueDate ?? "",
+        dueDate: inv.dueDate ?? "",
+        paidDate: inv.paidDate ? formatDate(inv.paidDate) : "—",
+        paidMethodHint: buildPaidMethodHint(
+          inv.latestPaymentMethodType,
+          inv.latestPaymentMethodLabel,
+          key => tUi(key as never)
+        ),
+        fee: formatCurrencyForDisplay(
+          inv.amount ?? "0",
+          inv.currency ?? CurrencyCode.Usd,
+          inv.displayAmount
+            ? {
+                amount: inv.displayAmount.amount,
+                currency: inv.displayAmount.currency ?? CurrencyCode.Usd,
+                stale: inv.displayAmount.stale ?? true,
+              }
+            : null,
+          locale,
+          {
+            convertedAmount: values => tProfile("convertedAmount", values),
+            displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+          }
+        ),
+        status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
+      })),
+    [invoices, tProfile, tErrors, locale, tUi]
   );
 
-  const summary = useMemo(
-    () => ({
-      outstandingBalance: formatLockedAmount(
-        summaryData?.parentBillingSummary?.outstandingBalance ?? "0.00",
-        CurrencyCode.Usd,
-        locale
-      ),
-      paidThisTerm: formatLockedAmount(
-        summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00",
-        CurrencyCode.Usd,
-        locale
-      ),
+  const handleQuickPay = () => {
+    const firstUnpaid = mappedInvoices.find(inv => inv.status === InvoiceStatus.Unpaid);
+    if (firstUnpaid) {
+      handlePayNow({
+        id: firstUnpaid.id,
+        amount: firstUnpaid.fee,
+        dueDate: firstUnpaid.dueDate,
+        invoiceNumber: firstUnpaid.invoiceNumber,
+      });
+    } else {
+      showFeedback(labels.noUnpaidInvoices, "success");
+    }
+  };
+
+  const filteredInvoices = useMemo(
+    () => filterParentInvoices(mappedInvoices, searchQuery),
+    [mappedInvoices, searchQuery]
+  );
+
+  const summary = useMemo(() => {
+    const fxMessages = {
+      convertedAmount: (values: {
+        lockedAmount: string;
+        lockedCurrency: string;
+        convertedApprox: string;
+        displayCurrency: string;
+      }) => tProfile("convertedAmount", values),
+      displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
+        tErrors("displayCurrencyFallback", values),
+    };
+
+    return {
+      outstandingBalance: formatBillingCurrencyTotals(
+        mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.outstandingByCurrency),
+        locale,
+        fxMessages
+      ).primary,
+      paidThisTerm: formatBillingCurrencyTotals(
+        mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.paidThisTermByCurrency),
+        locale,
+        fxMessages
+      ).primary,
       nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
-    }),
-    [summaryData?.parentBillingSummary, locale]
-  );
+    };
+  }, [summaryData?.parentBillingSummary, locale, tProfile, tErrors]);
 
   if (loading && !data) {
     return (
@@ -170,9 +219,9 @@ export function ParentBillingContainer() {
     canCreate: false,
     onSearchChange: setSearchQuery,
     onPayNow: handlePayNow,
-    onViewPaymentDetails: setDetailsInvoiceId,
-    onDownloadPdf: () => {},
-    onQuickPay: () => {},
+    onViewPaymentDetails: setDetailsTarget,
+    onDownloadPdf: handleDownloadPdf,
+    onQuickPay: handleQuickPay,
     page,
     pageSize,
     totalCount,
@@ -196,14 +245,15 @@ export function ParentBillingContainer() {
       <MarkInvoicePaidDialog
         open={markPaidTarget !== null}
         onClose={() => setMarkPaidTarget(null)}
-        invoiceId={markPaidTarget?.id ?? null}
-        targetUserId={markPaidTarget?.parentUserId ?? parentUserId}
+        invoice={markPaidTarget}
         onSuccess={handleMarkPaidSuccess}
+        onError={handleMarkPaidError}
       />
       <InvoicePaymentDetailsDialog
-        open={detailsInvoiceId !== null}
-        onClose={() => setDetailsInvoiceId(null)}
-        invoiceId={detailsInvoiceId}
+        open={detailsTarget !== null}
+        onClose={() => setDetailsTarget(null)}
+        invoiceId={detailsTarget?.invoiceId ?? null}
+        isLegacyPaid={detailsTarget?.isLegacyPaid ?? false}
       />
     </RequirePermission>
   );

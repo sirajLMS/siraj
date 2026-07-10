@@ -5,6 +5,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { users } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
+import { AccountStatus } from "@/backend/enum";
 import { PaginationArgsDefault } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -56,7 +57,8 @@ export namespace UserRepository {
           rememberTokenHash: users.rememberTokenHash,
           avatarFilePath: users.avatarFilePath,
           avatarUrl: users.avatarUrl,
-          isActive: users.isActive,
+          phone: users.phone,
+          status: users.status,
           isSuperAdmin: users.isSuperAdmin,
           timezone: users.timezone,
           displayCurrency: users.displayCurrency,
@@ -88,14 +90,14 @@ export namespace UserRepository {
    * @deprecated Use `findUsersPaginated` instead. This method lacks pagination and returns all rows.
    */
   export const findAll = async (): Promise<
-    Pick<UserReturnType, "id" | "name" | "email" | "isActive" | "createdAt">[]
+    Pick<UserReturnType, "id" | "name" | "email" | "status" | "createdAt">[]
   > => {
     return await db
       .select({
         id: users.id,
         name: users.name,
         email: users.email,
-        isActive: users.isActive,
+        status: users.status,
         createdAt: users.createdAt,
       })
       .from(users)
@@ -199,6 +201,7 @@ export namespace UserRepository {
     readonly email?: string;
     readonly avatarUrl?: string | null;
     readonly displayCurrency?: CurrencyCode | null;
+    readonly phone?: string | null;
   };
 
   export const updateProfileFields = async (
@@ -240,24 +243,11 @@ export namespace UserRepository {
       updateSet.displayCurrency = input.displayCurrency;
     }
 
-    const [updated] = await queryDb.update(users).set(updateSet).where(eq(users.id, userId)).returning({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      emailVerifiedAt: users.emailVerifiedAt,
-      password: users.password,
-      rememberTokenHash: users.rememberTokenHash,
-      avatarFilePath: users.avatarFilePath,
-      avatarUrl: users.avatarUrl,
-      isActive: users.isActive,
-      isSuperAdmin: users.isSuperAdmin,
-      timezone: users.timezone,
-      displayCurrency: users.displayCurrency,
-      lastLoginAt: users.lastLoginAt,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt,
-      deletedAt: users.deletedAt,
-    });
+    if (input.phone !== undefined) {
+      updateSet.phone = input.phone;
+    }
+
+    const [updated] = await queryDb.update(users).set(updateSet).where(eq(users.id, userId)).returning();
 
     if (!updated) {
       throw new Error(t("userNotFound", { id: userId }));
@@ -307,24 +297,29 @@ export namespace UserRepository {
       .update(users)
       .set({ displayCurrency, updatedAt: new Date() })
       .where(eq(users.id, userId))
-      .returning({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        emailVerifiedAt: users.emailVerifiedAt,
-        password: users.password,
-        rememberTokenHash: users.rememberTokenHash,
-        avatarFilePath: users.avatarFilePath,
-        avatarUrl: users.avatarUrl,
-        isActive: users.isActive,
-        isSuperAdmin: users.isSuperAdmin,
-        timezone: users.timezone,
-        displayCurrency: users.displayCurrency,
-        lastLoginAt: users.lastLoginAt,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-        deletedAt: users.deletedAt,
-      });
+      .returning();
+
+    if (!updated) {
+      throw new Error(t("userNotFound", { id: userId }));
+    }
+
+    return updated;
+  };
+
+  export const updateStatus = async (
+    userId: string,
+    status: AccountStatus,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<UserSelectType> => {
+    const queryDb = tx ?? db;
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+    const [updated] = await queryDb
+      .update(users)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
 
     if (!updated) {
       throw new Error(t("userNotFound", { id: userId }));

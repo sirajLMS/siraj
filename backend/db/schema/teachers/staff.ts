@@ -1,7 +1,11 @@
-import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { accountStatusEnum } from "@/backend/db/schema/enums";
+import { index, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "@/backend/db/schema/users/users";
 
+/**
+ * Thin staff membership marker (Decision 6A).
+ * Row presence = staff audience for profile routing / manager directory.
+ * Account fields (phone, status) live on users.
+ */
 export const staffProfiles = pgTable(
   "staff_profiles",
   {
@@ -10,8 +14,6 @@ export const staffProfiles = pgTable(
       .notNull()
       .unique()
       .references(() => users.id, { onDelete: "restrict" }),
-    phone: varchar("phone", { length: 50 }),
-    status: accountStatusEnum("status").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

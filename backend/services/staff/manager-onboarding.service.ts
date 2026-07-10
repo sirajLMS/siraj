@@ -63,12 +63,14 @@ export namespace ManagerOnboardingService {
         txObj
       );
 
-      // Step 2: Create staff profile
+      if (input.phone != null) {
+        await UserRepository.updateProfileFields(user.id, { phone: input.phone }, locale, txObj);
+      }
+
+      // Step 2: Create thin staff profile marker
       const staffProfile = await StaffProfileRepository.create(
         {
           userId: user.id,
-          phone: input.phone ?? null,
-          status: "ACTIVATED",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

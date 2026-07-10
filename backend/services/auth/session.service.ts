@@ -1,6 +1,5 @@
 import { SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AccountStatus } from "@/backend/enum";
 import { computeSessionHashes, verifyAndMigrateSessionHash } from "@/backend/lib/auth/session-hash";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -66,7 +65,6 @@ export namespace SessionService {
     return {
       ...AuthUtils.toUserReturnType(safeUser, {
         role: permContext.role,
-        status: safeUser.isActive ? AccountStatus.ACTIVATED : AccountStatus.DEACTIVATED,
       }),
       permissions: permContext.permissions,
       notificationCount: 0,

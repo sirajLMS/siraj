@@ -14,6 +14,28 @@ export const userBillingProfileSummaryQueryDocument: TypedDocumentNode<
       paidThisTerm
       nextDueDate
       activeStudents
+      outstandingByCurrency {
+        id
+        currency
+        amount
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
+      }
+      paidThisTermByCurrency {
+        id
+        currency
+        amount
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
+      }
     }
   }
 `;
@@ -36,6 +58,8 @@ export const userBillingProfileInvoiceHistoryQueryDocument: TypedDocumentNode<
         invoiceType
         studentId
         studentName
+        latestPaymentMethodType
+        latestPaymentMethodLabel
         displayAmount {
           id
           amount

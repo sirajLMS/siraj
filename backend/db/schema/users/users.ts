@@ -13,7 +13,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { currencyCodeEnum } from "@/backend/db/schema/enums";
+import { accountStatusEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
+import { AccountStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 
@@ -30,7 +31,8 @@ export const users = pgTable(
     rememberTokenHash: varchar("remember_token_hash", { length: 255 }),
     avatarFilePath: varchar("avatar_file_path", { length: 1024 }),
     avatarUrl: varchar("avatar_url", { length: 1024 }),
-    isActive: boolean("is_active").notNull().default(true),
+    phone: varchar("phone", { length: 50 }),
+    status: accountStatusEnum("status").notNull().default(AccountStatus.ACTIVATED),
     isSuperAdmin: boolean("is_super_admin").notNull().default(false),
     timezone: varchar("timezone", { length: 100 }).notNull().default(IanaTimezone.UTC),
     displayCurrency: currencyCodeEnum("display_currency").$type<CurrencyCode>(),
@@ -39,7 +41,10 @@ export const users = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
-  table => [check("users_timezone_chk", sql`is_valid_timezone(${table.timezone})`)]
+  table => [
+    check("users_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
+    index("users_status_idx").on(table.status),
+  ]
 );
 
 // DEPRECATED: Legacy sessions table - sessions are now stored in Redis

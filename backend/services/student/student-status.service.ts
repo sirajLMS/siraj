@@ -1,7 +1,7 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
 import { AppPermission, StudentStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseClassExecutionState, parseStudentStatus } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentUpcomingClassesResult } from "@/backend/types";

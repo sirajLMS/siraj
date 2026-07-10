@@ -7,7 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type { MarkPaidInvoiceTarget, PaymentDetailsTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import type { ParentInvoiceRow } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 
 export interface ParentInvoicesDataGridLabels {
@@ -31,7 +31,7 @@ interface ParentInvoicesDataGridProps {
   readonly labels: ParentInvoicesDataGridLabels;
   readonly canView: boolean;
   readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (invoiceId: string) => void;
+  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly page?: number;
   readonly pageSize?: number;
@@ -98,7 +98,16 @@ export function ParentInvoicesDataGrid({
         headerName: labels.paidDate,
         flex: 0.9,
         minWidth: 120,
-        renderCell: ({ row }) => <Typography variant="bodyMd">{row.paidDate}</Typography>,
+        renderCell: ({ row }) => (
+          <Box>
+            <Typography variant="bodyMd">{row.paidDate}</Typography>
+            {row.status === InvoiceStatus.Paid && row.paidMethodHint ? (
+              <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+                {row.paidMethodHint}
+              </Typography>
+            ) : null}
+          </Box>
+        ),
       },
       {
         field: "fee",
@@ -136,7 +145,12 @@ export function ParentInvoicesDataGrid({
               <PrimaryPageAction
                 size="small"
                 onClick={() => {
-                  onPayNow({ id: row.id });
+                  onPayNow({
+                    id: row.id,
+                    amount: row.fee,
+                    dueDate: row.dueDate,
+                    invoiceNumber: row.invoiceNumber,
+                  });
                 }}
               >
                 {labels.payNow}
@@ -151,7 +165,10 @@ export function ParentInvoicesDataGrid({
                   size="small"
                   aria-label={labels.viewDetails}
                   onClick={() => {
-                    onViewPaymentDetails?.(row.id);
+                    onViewPaymentDetails?.({
+                      invoiceId: row.id,
+                      isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
+                    });
                   }}
                 >
                   <VisibilityOutlined fontSize="small" />

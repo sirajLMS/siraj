@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { BillingCurrencyTotalPothosObject } from "@/backend/graphql/pothos/billing/billing-history.pothos";
 import {
   DisplayAmountPothosObject,
   resolveDisplayAmountField,
@@ -18,6 +19,7 @@ export const UnpaidInvoiceItemPothosObject = UnpaidInvoiceItemRef.implement({
     currency: t.expose("currency", { type: CurrencyCodePothosObject }),
     overdueCount: t.exposeInt("overdueCount"),
     oldestDueDate: t.exposeString("oldestDueDate"),
+    amountsByCurrency: t.expose("amountsByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
@@ -33,6 +35,7 @@ export const UnpaidInvoicesSummaryPothosObject = UnpaidInvoicesSummaryRef.implem
     id: t.exposeString("id"),
     totalOverdueInvoices: t.exposeInt("totalOverdueInvoices"),
     totalOverdueAmount: t.exposeString("totalOverdueAmount"),
+    overdueAmountsByCurrency: t.expose("overdueAmountsByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
     items: t.expose("items", { type: [UnpaidInvoiceItemPothosObject] }),
   }),
 });

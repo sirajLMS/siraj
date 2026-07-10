@@ -19,20 +19,25 @@ import {
   sendPaymentReminderMutationDocument,
   studentCreditStatusQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import { formatLockedAmount } from "@/frontend/lib/currency";
+import {
+  formatBillingCurrencyTotals,
+  mapBillingCurrencyBuckets,
+} from "@/frontend/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { buildPaidMethodHint } from "@/frontend/lib/user-payment-method";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";
-import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
-import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
 import { filterAdminInvoices } from "@/frontend/views/dashboard/admin/billing/utils/billingFilters";
 import { buildBillingLabels } from "@/frontend/views/dashboard/admin/billing/utils/buildBillingLabels";
+import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
+import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
 import type {
   AdminBillingSummary,
   AdminInvoiceRow,
   AdminInvoiceStatus,
   MarkPaidInvoiceTarget,
+  PaymentDetailsTarget,
   StudentCreditRow,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { useRouter } from "@/shared/i18n/routing";
@@ -71,6 +76,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
   const tProfile = useTranslations("profile.teacher");
   const tErrors = useTranslations("errors");
+  const tUi = useTranslations("ui.paymentMethod");
   const locale = useLocale();
   const tc = useTranslations("common");
   const router = useRouter();
@@ -82,7 +88,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
-  const [detailsInvoiceId, setDetailsInvoiceId] = useState<string | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
@@ -112,7 +118,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     fetchPolicy: "cache-and-network",
   });
 
-  const { data: summaryData } = useQuery(adminBillingSummaryQueryDocument, {
+  const { data: summaryData, refetch: refetchSummary } = useQuery(adminBillingSummaryQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
 
@@ -124,6 +130,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     onCompleted: () => {
       showFeedback(labels.deleteInvoiceSuccess, "success");
       void refetchInvoices();
+      void refetchSummary();
     },
     onError: error => {
       logger.error("Delete invoice failed:", { error });
@@ -151,6 +158,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         studentName: inv.studentName ?? inv.studentId ?? "Student",
         studentInitials: deriveInitials(inv.studentName),
         dateIssued: formatDate(inv.issueDate),
+        dueDate: formatDate(inv.dueDate),
         amount: formatCurrencyForDisplay(
           inv.amount ?? "0",
           inv.currency ?? CurrencyCode.Usd,
@@ -169,27 +177,46 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         ),
         status: mapInvoiceStatus(inv.status, inv.dueDate),
         parentUserId: inv.parentUserId ?? null,
+        paidMethodHint: buildPaidMethodHint(
+          inv.latestPaymentMethodType,
+          inv.latestPaymentMethodLabel,
+          key => tUi(key as never)
+        ),
       })),
-    [invoicesData?.adminInvoices, locale, tErrors, tProfile]
+    [invoicesData?.adminInvoices, locale, tErrors, tProfile, tUi]
   );
 
   const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
 
   const totalCount = invoicesData ? (invoicesData.adminInvoices?.totalCount ?? 0) : undefined;
 
-  const summary: AdminBillingSummary = useMemo(
-    () => ({
-      totalOutstanding: formatLockedAmount(
-        summaryData?.adminBillingSummary?.totalOutstanding ?? "0.00",
-        CurrencyCode.Usd,
-        locale
-      ),
+  const summary: AdminBillingSummary = useMemo(() => {
+    const fxMessages = {
+      convertedAmount: (values: {
+        lockedAmount: string;
+        lockedCurrency: string;
+        convertedApprox: string;
+        displayCurrency: string;
+      }) => tProfile("convertedAmount", values),
+      displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
+        tErrors("displayCurrencyFallback", values),
+    };
+
+    return {
+      totalOutstanding: formatBillingCurrencyTotals(
+        mapBillingCurrencyBuckets(summaryData?.adminBillingSummary?.outstandingByCurrency),
+        locale,
+        fxMessages
+      ).primary,
       pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
       negativeBalanceCount: `${summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0} Students`,
-      mtdRevenue: formatLockedAmount(summaryData?.adminBillingSummary?.mtdRevenue ?? "0.00", CurrencyCode.Usd, locale),
-    }),
-    [summaryData?.adminBillingSummary, locale]
-  );
+      mtdRevenue: formatBillingCurrencyTotals(
+        mapBillingCurrencyBuckets(summaryData?.adminBillingSummary?.mtdRevenueByCurrency),
+        locale,
+        fxMessages
+      ).primary,
+    };
+  }, [summaryData?.adminBillingSummary, locale, tProfile, tErrors]);
 
   const creditRows: StudentCreditRow[] = useMemo(
     () =>
@@ -226,6 +253,11 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const handleMarkPaidSuccess = () => {
     showFeedback(labels.markAsPaidSuccess, "success");
     void refetchInvoices();
+    void refetchSummary();
+  };
+
+  const handleMarkPaidError = (message: string) => {
+    showFeedback(message, "error");
   };
 
   const handleDeleteInvoice = (invoiceId: string) => {
@@ -249,7 +281,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         canCreate
         onSearchChange={setSearchQuery}
         onMarkAsPaid={handleMarkAsPaid}
-        onViewPaymentDetails={setDetailsInvoiceId}
+        onViewPaymentDetails={setDetailsTarget}
         onSendReminder={handleSendReminder}
         onManualInvoice={() => {
           router.push("/billing/manual");
@@ -275,14 +307,15 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       <MarkInvoicePaidDialog
         open={markPaidTarget !== null}
         onClose={() => setMarkPaidTarget(null)}
-        invoiceId={markPaidTarget?.id ?? null}
-        targetUserId={markPaidTarget?.parentUserId ?? null}
+        invoice={markPaidTarget}
         onSuccess={handleMarkPaidSuccess}
+        onError={handleMarkPaidError}
       />
       <InvoicePaymentDetailsDialog
-        open={detailsInvoiceId !== null}
-        onClose={() => setDetailsInvoiceId(null)}
-        invoiceId={detailsInvoiceId}
+        open={detailsTarget !== null}
+        onClose={() => setDetailsTarget(null)}
+        invoiceId={detailsTarget?.invoiceId ?? null}
+        isLegacyPaid={detailsTarget?.isLegacyPaid ?? false}
       />
     </RequirePermission>
   );

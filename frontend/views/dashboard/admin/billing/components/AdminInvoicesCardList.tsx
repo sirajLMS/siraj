@@ -1,11 +1,16 @@
 "use client";
 
-import { Avatar, Box, Button, IconButton, Paper, Typography } from "@mui/material";
 import { VisibilityOutlined } from "@mui/icons-material";
+import { Avatar, Box, Button, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { AdminInvoiceRow, AdminInvoiceStatus, MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type {
+  AdminInvoiceRow,
+  AdminInvoiceStatus,
+  MarkPaidInvoiceTarget,
+  PaymentDetailsTarget,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;
@@ -19,7 +24,7 @@ interface AdminInvoicesCardListProps {
   readonly labels: AdminInvoicesCardListLabels;
   readonly canManage: boolean;
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (invoiceId: string) => void;
+  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -98,7 +103,14 @@ export function AdminInvoicesCardList({
                 fullWidth
                 variant="outlined"
                 onClick={() => {
-                  onMarkAsPaid({ id: row.id, parentUserId: row.parentUserId });
+                  onMarkAsPaid({
+                    id: row.id,
+                    parentUserId: row.parentUserId,
+                    amount: row.amount,
+                    studentName: row.studentName,
+                    dueDate: row.dueDate,
+                    invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
+                  });
                 }}
                 sx={{ mt: 1.5, textTransform: "uppercase", fontWeight: 700 }}
               >
@@ -111,7 +123,10 @@ export function AdminInvoicesCardList({
                   size="small"
                   aria-label={labels.viewDetails}
                   onClick={() => {
-                    onViewPaymentDetails(row.id);
+                    onViewPaymentDetails({
+                      invoiceId: row.id,
+                      isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
+                    });
                   }}
                 >
                   <VisibilityOutlined fontSize="small" />

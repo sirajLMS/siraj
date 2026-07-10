@@ -29,7 +29,8 @@ export type CreateTeacherPaymentInput = {
   readonly isTestPayment?: boolean;
 };
 
-export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "status" | "createdAt"> & {
+export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "createdAt"> & {
+  readonly status: AccountStatus;
   readonly timezone: IanaTimezone;
 };
 
@@ -103,7 +104,7 @@ export type TeacherProfileReturnType = Omit<
 export type TeacherProfileUpdateInputType = Partial<
   Omit<
     TeacherEntityInput,
-    "id" | "userId" | "createdAt" | "updatedAt" | "nationality" | "countryCode" | "gender" | "paymentMethod" | "status"
+    "id" | "userId" | "createdAt" | "updatedAt" | "nationality" | "countryCode" | "gender" | "paymentMethod"
   >
 > & {
   readonly status?: AccountStatus | null;

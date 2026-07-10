@@ -1,6 +1,6 @@
 import { date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { encryptedText } from "@/backend/db/schema/custom-types";
-import { accountStatusEnum, countryCodeEnum, currencyCodeEnum, genderEnum } from "@/backend/db/schema/enums";
+import { countryCodeEnum, currencyCodeEnum, genderEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
 import type { CurrencyCode } from "@/backend/enum";
 
@@ -16,7 +16,6 @@ export const teachers = pgTable(
       .notNull()
       .unique()
       .references(() => users.id, { onDelete: "restrict" }),
-    status: accountStatusEnum("status").notNull(),
     nationality: countryCodeEnum("nationality"),
     nationalId: encryptedText("national_id"),
     phone: varchar("phone", { length: 50 }),
@@ -30,5 +29,5 @@ export const teachers = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("teachers_user_id_idx").on(table.userId), index("teachers_status_idx").on(table.status)]
+  table => [index("teachers_user_id_idx").on(table.userId)]
 );

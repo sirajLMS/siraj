@@ -45,6 +45,64 @@ export function formatReportPaidAmounts(
   return paidAmounts.map(paid => formatReportPaidAmount(paid, locale, messages)).join(" · ");
 }
 
+export function aggregatePaidAmountTotals(
+  rows: readonly { readonly paidAmounts?: readonly ReportPaidAmount[] | null }[]
+): ReportPaidAmount[] {
+  const byCurrency = new Map<
+    CurrencyCode,
+    {
+      amount: number;
+      displayAmount?: { amount: number; currency: CurrencyCode };
+    }
+  >();
+
+  for (const row of rows) {
+    for (const paid of row.paidAmounts ?? []) {
+      const numericAmount = Number.parseFloat(paid.amount);
+      if (!Number.isFinite(numericAmount)) {
+        continue;
+      }
+
+      const existing = byCurrency.get(paid.currency) ?? { amount: 0 };
+      existing.amount += numericAmount;
+
+      if (paid.displayAmount?.amount && paid.displayAmount.currency && !paid.displayAmount.stale) {
+        const displayNumeric = Number.parseFloat(paid.displayAmount.amount);
+        if (!Number.isFinite(displayNumeric)) {
+          existing.displayAmount = undefined;
+        } else if (!existing.displayAmount) {
+          existing.displayAmount = {
+            amount: displayNumeric,
+            currency: paid.displayAmount.currency,
+          };
+        } else if (existing.displayAmount.currency === paid.displayAmount.currency) {
+          existing.displayAmount.amount += displayNumeric;
+        } else {
+          existing.displayAmount = undefined;
+        }
+      } else {
+        existing.displayAmount = undefined;
+      }
+
+      byCurrency.set(paid.currency, existing);
+    }
+  }
+
+  return [...byCurrency.entries()].map(([currency, data]) => ({
+    id: `total-${currency}`,
+    amount: data.amount.toFixed(2),
+    currency,
+    displayAmount: data.displayAmount
+      ? {
+          id: `display-total-${currency}`,
+          amount: data.displayAmount.amount.toFixed(2),
+          currency: data.displayAmount.currency,
+          stale: false,
+        }
+      : null,
+  }));
+}
+
 export function aggregateCurrencyTotals(
   rows: readonly { readonly paidAmounts?: readonly ReportPaidAmount[] | null }[]
 ): readonly { readonly currency: CurrencyCode; readonly amount: number; readonly percent: number }[] {

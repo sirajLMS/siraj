@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   DisplayAmountPothosObject,
@@ -7,6 +8,7 @@ import {
   CurrencyCodePothosObject,
   InvoiceStatusPothosObject,
   InvoiceTypePothosObject,
+  PaymentMethodTypePothosEnum,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
@@ -14,6 +16,7 @@ import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingHistoryService } from "@/backend/services/billing/billing-history.service";
 import type {
   AdminBillingSummaryResult,
+  BillingCurrencyTotal,
   InvoiceHistoryPaginatedResult,
   InvoiceHistoryRow,
   PaginationInput,
@@ -53,6 +56,11 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     studentName: t.exposeString("studentName", { nullable: true }),
     parentId: t.exposeString("parentId"),
     parentUserId: t.exposeString("parentUserId", { nullable: true }),
+    latestPaymentMethodType: t.expose("latestPaymentMethodType", {
+      type: PaymentMethodTypePothosEnum,
+      nullable: true,
+    }),
+    latestPaymentMethodLabel: t.exposeString("latestPaymentMethodLabel", { nullable: true }),
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
@@ -85,6 +93,21 @@ export const AdminInvoiceHistoryResultPothosObject = AdminInvoiceHistoryResultRe
   }),
 });
 
+const BillingCurrencyTotalRef = gqlSchemaBuilder.objectRef<BillingCurrencyTotal>("BillingCurrencyTotal");
+
+export const BillingCurrencyTotalPothosObject = BillingCurrencyTotalRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject }),
+    amount: t.exposeString("amount"),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "amount", "currency"),
+    }),
+  }),
+});
+
 const AdminBillingSummaryRef = gqlSchemaBuilder.objectRef<AdminBillingSummaryResult>("AdminBillingSummary");
 
 export const AdminBillingSummaryPothosObject = AdminBillingSummaryRef.implement({
@@ -94,6 +117,8 @@ export const AdminBillingSummaryPothosObject = AdminBillingSummaryRef.implement(
     pendingCount: t.exposeInt("pendingCount"),
     mtdRevenue: t.exposeString("mtdRevenue"),
     negativeBalanceCount: t.exposeInt("negativeBalanceCount"),
+    outstandingByCurrency: t.expose("outstandingByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
+    mtdRevenueByCurrency: t.expose("mtdRevenueByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
   }),
 });
 
@@ -120,6 +145,8 @@ export const ParentBillingSummaryPothosObject = ParentBillingSummaryRef.implemen
     paidThisTerm: t.exposeString("paidThisTerm"),
     nextDueDate: t.exposeString("nextDueDate", { nullable: true }),
     activeStudents: t.exposeInt("activeStudents"),
+    outstandingByCurrency: t.expose("outstandingByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
+    paidThisTermByCurrency: t.expose("paidThisTermByCurrency", { type: [BillingCurrencyTotalPothosObject] }),
   }),
 });
 
@@ -159,7 +186,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
 gqlSchemaBuilder.queryField("adminInvoices", t =>
   t.field({
     type: AdminInvoiceHistoryResultPothosObject,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
@@ -175,7 +202,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
 gqlSchemaBuilder.queryField("adminBillingSummary", t =>
   t.field({
     type: AdminBillingSummaryPothosObject,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
       return BillingHistoryService.getAdminBillingSummary(userId, ctx.locale);

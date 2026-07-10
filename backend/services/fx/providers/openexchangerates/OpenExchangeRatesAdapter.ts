@@ -1,7 +1,7 @@
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { logger } from "@/backend/lib/logger";
 import { parseCurrencyCode } from "@/backend/lib/enum";
+import { logger } from "@/backend/lib/logger";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
 import type { OpenExchangeRatesResponse } from "@/backend/services/fx/providers/openexchangerates/openexchangerates.types";
 import type { FxProviderFetchResult } from "@/backend/types";

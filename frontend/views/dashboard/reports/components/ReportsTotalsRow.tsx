@@ -1,27 +1,36 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import type { ReportLedgerRow, ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import {
+  aggregatePaidAmountTotals,
+  formatReportPaidAmounts,
+} from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 
 interface ReportsTotalsRowProps {
   readonly summary: ReportsSummary;
+  readonly rows: readonly ReportLedgerRow[];
   readonly totalsLabel: string;
 }
 
-function formatCurrencyAmount(value: number): string {
-  return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-export function ReportsTotalsRow({ summary, totalsLabel }: Readonly<ReportsTotalsRowProps>) {
+export function ReportsTotalsRow({ summary, rows, totalsLabel }: Readonly<ReportsTotalsRowProps>) {
   const { hasPermission } = useUserStore();
+  const locale = useLocale();
+  const tProfile = useTranslations("profile");
+  const tErrors = useTranslations("errors");
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
-  const totalsText =
-    summary.currencyDistribution.length > 0
-      ? summary.currencyDistribution.map(slice => `${formatCurrencyAmount(slice.amount)} ${slice.currency}`).join(", ")
-      : "—";
+  const totalsText = useMemo(() => {
+    const paidTotals = aggregatePaidAmountTotals(rows);
+    return formatReportPaidAmounts(paidTotals, locale, {
+      convertedAmount: values => tProfile("convertedAmount", values),
+      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+    });
+  }, [rows, locale, tProfile, tErrors]);
 
   return (
     <Box

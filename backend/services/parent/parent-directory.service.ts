@@ -1,7 +1,7 @@
 import { ParentRepository } from "@/backend/db/repo";
-import { AppPermission, ParentStatus } from "@/backend/enum";
+import { AccountStatus, AppPermission, ParentStatus } from "@/backend/enum";
+import { parseAccountStatus, parseParentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import { parseParentStatus } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PaginationArgs, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
 
@@ -20,7 +20,7 @@ export namespace ParentDirectoryService {
     actorUserId: string,
     search: string | null,
     pagination: PaginationArgs | null,
-    accountStatus: ParentStatus | null,
+    lifecycleStatus: ParentStatus | null,
     locale?: string
   ): Promise<ParentDirectoryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_DIRECTORY);
@@ -34,7 +34,7 @@ export namespace ParentDirectoryService {
       rows: rawRows,
       totalCount,
       pageInfo,
-    } = await ParentRepository.getParentDirectory({ search, pagination, accountStatus });
+    } = await ParentRepository.getParentDirectory({ search, pagination, lifecycleStatus });
 
     const parentIds = rawRows.map(r => r.id);
     const studentsMap = await ParentRepository.getStudentsForParents(parentIds);
@@ -54,7 +54,8 @@ export namespace ParentDirectoryService {
         avatarUrl: row.avatarUrl,
         guardianOf,
         time: row.updatedAt.toLocaleTimeString(),
-        accountStatus: parseParentStatus(row.status) ?? ParentStatus.REGULAR,
+        lifecycleStatus: parseParentStatus(row.lifecycleStatus) ?? ParentStatus.REGULAR,
+        accountStatus: parseAccountStatus(row.accountStatus),
         unpaidInvoices: row.unpaidInvoices,
       });
     }

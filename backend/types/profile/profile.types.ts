@@ -44,6 +44,7 @@ export type CoreUserProfileFields = {
   readonly email?: string;
   readonly avatarUrl?: string | null;
   readonly displayCurrency?: CurrencyCode | null;
+  readonly phone?: string | null;
 };
 
 export type ParentOwnProfileUpdateInput = {
@@ -62,11 +63,9 @@ export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {
   readonly timezone?: IanaTimezone | null;
 };
 
-export type StaffOwnProfileUpdateInput = {
-  readonly phone?: string | null;
-};
+export type StaffOwnProfileUpdateInput = Record<string, never>;
 
-export type StaffAdminProfileUpdateInput = StaffOwnProfileUpdateInput & {
+export type StaffAdminProfileUpdateInput = {
   readonly status?: string | null;
 };
 

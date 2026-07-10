@@ -10,13 +10,20 @@ import {
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import { formatLockedAmount } from "@/frontend/lib/currency";
+import {
+  formatBillingCurrencyTotals,
+  mapBillingCurrencyBuckets,
+} from "@/frontend/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { buildPaidMethodHint } from "@/frontend/lib/user-payment-method";
 import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
 import { MarkInvoicePaidDialog } from "@/frontend/views/dashboard/billing/components/MarkInvoicePaidDialog";
-import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type {
+  MarkPaidInvoiceTarget,
+  PaymentDetailsTarget,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
@@ -36,22 +43,26 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   const t = useTranslations("dashboard.billing");
   const tProfile = useTranslations("profile.teacher");
   const tErrors = useTranslations("errors");
+  const tUi = useTranslations("ui.paymentMethod");
   const locale = useLocale();
   const labels = buildBillingLabels(t);
   const notifications = useNotifications();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [markPaidTarget, setMarkPaidTarget] = useState<MarkPaidInvoiceTarget | null>(null);
-  const [detailsInvoiceId, setDetailsInvoiceId] = useState<string | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
 
   const page = useUserBillingProfileStore(state => state.page);
   const pageSize = useUserBillingProfileStore(state => state.pageSize);
   const setPage = useUserBillingProfileStore(state => state.setPage);
 
-  const { data: summaryData, loading: summaryLoading } = useQuery(userBillingProfileSummaryQueryDocument, {
-    variables: { userId, parentId: null },
-    fetchPolicy: "cache-and-network",
-  });
+  const { data: summaryData, loading: summaryLoading, refetch: refetchSummary } = useQuery(
+    userBillingProfileSummaryQueryDocument,
+    {
+      variables: { userId, parentId: null },
+      fetchPolicy: "cache-and-network",
+    }
+  );
 
   const { data, loading, refetch } = useQuery(userBillingProfileInvoiceHistoryQueryDocument, {
     variables: {
@@ -81,7 +92,12 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
         issueDate: inv.issueDate ?? "",
         dueDate: inv.dueDate ?? "",
-        paidDate: inv.paidDate ?? "—",
+        paidDate: inv.paidDate ? formatDate(inv.paidDate) : "—",
+        paidMethodHint: buildPaidMethodHint(
+          inv.latestPaymentMethodType,
+          inv.latestPaymentMethodLabel,
+          key => tUi(key as never)
+        ),
         fee: formatCurrencyForDisplay(
           inv.amount ?? "0",
           inv.currency ?? CurrencyCode.Usd,
@@ -100,26 +116,36 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         ),
         status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
       })),
-    [data?.parentInvoiceHistory, tProfile, tErrors, locale]
+    [data?.parentInvoiceHistory, tProfile, tErrors, locale, tUi]
   );
 
-  const summary = useMemo(
-    () => ({
-      outstandingBalance: formatLockedAmount(
-        summaryData?.parentBillingSummary?.outstandingBalance ?? "0.00",
-        CurrencyCode.Usd,
-        locale
-      ),
-      paidThisTerm: formatLockedAmount(
-        summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00",
-        CurrencyCode.Usd,
-        locale
-      ),
+  const summary = useMemo(() => {
+    const fxMessages = {
+      convertedAmount: (values: {
+        lockedAmount: string;
+        lockedCurrency: string;
+        convertedApprox: string;
+        displayCurrency: string;
+      }) => tProfile("convertedAmount", values),
+      displayCurrencyFallback: (values: { lockedAmount: string; lockedCurrency: string }) =>
+        tErrors("displayCurrencyFallback", values),
+    };
+
+    return {
+      outstandingBalance: formatBillingCurrencyTotals(
+        mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.outstandingByCurrency),
+        locale,
+        fxMessages
+      ).primary,
+      paidThisTerm: formatBillingCurrencyTotals(
+        mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.paidThisTermByCurrency),
+        locale,
+        fxMessages
+      ).primary,
       nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
-    }),
-    [summaryData?.parentBillingSummary, locale]
-  );
+    };
+  }, [summaryData?.parentBillingSummary, locale, tProfile, tErrors]);
 
   const isLoading = summaryLoading || loading;
 
@@ -135,9 +161,17 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
 
   const handleMarkPaidSuccess = () => {
     void refetch();
+    void refetchSummary();
     notifications.show(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), {
       severity: "success",
       autoHideDuration: 4000,
+    });
+  };
+
+  const handleMarkPaidError = (message: string) => {
+    notifications.show(message, {
+      severity: "error",
+      autoHideDuration: 6000,
     });
   };
 
@@ -148,7 +182,12 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   const handleQuickPay = () => {
     const firstUnpaid = invoices.find(inv => inv.status === InvoiceStatus.Unpaid);
     if (firstUnpaid) {
-      handlePayNow({ id: firstUnpaid.id });
+      handlePayNow({
+        id: firstUnpaid.id,
+        amount: firstUnpaid.fee,
+        dueDate: firstUnpaid.dueDate,
+        invoiceNumber: firstUnpaid.invoiceNumber,
+      });
     } else {
       notifications.show(labels.noUnpaidInvoices, {
         severity: "info",
@@ -170,7 +209,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
     canCreate,
     onSearchChange: setSearchQuery,
     onPayNow: handlePayNow,
-    onViewPaymentDetails: setDetailsInvoiceId,
+    onViewPaymentDetails: setDetailsTarget,
     onDownloadPdf: handleDownloadPdf,
     onQuickPay: handleQuickPay,
     page,
@@ -186,14 +225,15 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
       <MarkInvoicePaidDialog
         open={markPaidTarget !== null}
         onClose={() => setMarkPaidTarget(null)}
-        invoiceId={markPaidTarget?.id ?? null}
-        targetUserId={userId}
+        invoice={markPaidTarget}
         onSuccess={handleMarkPaidSuccess}
+        onError={handleMarkPaidError}
       />
       <InvoicePaymentDetailsDialog
-        open={detailsInvoiceId !== null}
-        onClose={() => setDetailsInvoiceId(null)}
-        invoiceId={detailsInvoiceId}
+        open={detailsTarget !== null}
+        onClose={() => setDetailsTarget(null)}
+        invoiceId={detailsTarget?.invoiceId ?? null}
+        isLegacyPaid={detailsTarget?.isLegacyPaid ?? false}
       />
     </RequirePermission>
   );

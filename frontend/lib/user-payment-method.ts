@@ -1,4 +1,4 @@
-import { PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
+import { PaymentDirection, type PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import type { PaymentMethodLabelResolver } from "@/frontend/lib/payment-method";
 import { getPaymentMethodTypeLabel } from "@/frontend/lib/payment-method";
@@ -27,4 +27,22 @@ export function userPaymentMethodToOptionLabel(
     parts.push(method.label.trim());
   }
   return parts.filter(Boolean).join(" · ");
+}
+
+export function buildPaidMethodHint(
+  type: PaymentMethodType | null | undefined,
+  label: string | null | undefined,
+  t: PaymentMethodLabelResolver
+): string | null {
+  if (!type && !label?.trim()) {
+    return null;
+  }
+  if (!type) {
+    return label?.trim() ?? null;
+  }
+  const typeLabel = getPaymentMethodTypeLabel(type, t);
+  if (label?.trim()) {
+    return `${typeLabel} · ${label.trim()}`;
+  }
+  return typeLabel;
 }

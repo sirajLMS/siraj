@@ -1,3 +1,4 @@
+import { exchangeRates } from "@/shared/messages/ar/dashboard/billing/exchange-rates";
 import { billingManual } from "@/shared/messages/ar/dashboard/billing/manual";
 import { payment } from "@/shared/messages/ar/dashboard/billing/payment";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
@@ -97,19 +98,31 @@ export const billing: BillingLabels = {
   markPaidDialog: {
     title: "تحديد الفاتورة كمدفوعة",
     confirm: "تأكيد الدفع",
+    confirming: "جاري التأكيد…",
     selectMethod: "طريقة الدفع",
     noMethods: "لا توجد طرق دفع واردة مسجلة.",
     addMethods: "أضف طريقة دفع واردة في الملف الشخصي قبل تسجيل هذا الدفع.",
     manageMethods: "إدارة طرق الدفع",
     cancel: "إلغاء",
+    errorGeneric: "تعذر تحديد الفاتورة كمدفوعة. يرجى المحاولة مرة أخرى.",
+    missingParentUser: "تفتقد هذه الفاتورة إلى معلومات حساب ولي الأمر. تواصل مع الدعم قبل تسجيل الدفع.",
+    invoiceNumber: "الفاتورة",
+    amount: "المبلغ",
+    dueDate: "تاريخ الاستحقاق",
+    student: "الطالب",
+    selectedMethod: "الدفع باستخدام",
   },
   paymentDetailsDialog: {
     title: "تفاصيل الدفع",
     empty: "لا توجد سجلات دفع متاحة لهذه الفاتورة.",
+    emptyLegacy: "تم تحديد هذه الفاتورة كمدفوعة قبل تسجيل لقطات طرق الدفع.",
+    loadFailed: "تعذر تحميل تفاصيل الدفع. يرجى المحاولة مرة أخرى.",
+    close: "إغلاق",
     amount: "المبلغ",
     date: "تاريخ الدفع",
   },
   errors: {
     invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
   },
+  exchangeRates,
 };

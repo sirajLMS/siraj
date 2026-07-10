@@ -3,12 +3,8 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
+import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import {
-  parseClassExecutionState,
-  parseClassOutcome,
-  parseIanaTimezone,
-} from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";

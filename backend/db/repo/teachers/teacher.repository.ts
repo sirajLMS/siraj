@@ -3,9 +3,9 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
-import { AccountStatus, type CurrencyCode, Gender } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import { AccountStatus, type CurrencyCode, type Gender } from "@/backend/enum";
 import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/backend/lib/enum";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
   TeacherCreateResult,
@@ -40,7 +40,6 @@ export namespace TeacherRepository {
       .insert(teachers)
       .values({
         userId: input.userId,
-        status: input.status,
         nationality: input.nationality ?? null,
         nationalId: input.nationalId ?? null,
         phone: input.phone ?? null,
@@ -62,7 +61,7 @@ export namespace TeacherRepository {
     }
 
     const [userRow] = await queryDb
-      .select({ timezone: users.timezone })
+      .select({ timezone: users.timezone, status: users.status })
       .from(users)
       .where(eq(users.id, input.userId))
       .limit(1);
@@ -70,7 +69,7 @@ export namespace TeacherRepository {
     return {
       id: created.id,
       userId: created.userId,
-      status: created.status,
+      status: parseAccountStatus(userRow?.status),
       timezone: parseIanaTimezone(userRow?.timezone),
       createdAt: created.createdAt,
     };
@@ -100,7 +99,7 @@ export namespace TeacherRepository {
       .where(
         and(
           isNull(users.deletedAt),
-          eq(users.isActive, true),
+          eq(users.status, AccountStatus.ACTIVATED),
           searchQuery ? ilike(users.name, `%${escapeLikeWildcards(searchQuery)}%`) : undefined
         )
       )
@@ -130,7 +129,7 @@ export namespace TeacherRepository {
       name: users.name,
       email: users.email,
       avatarUrl: users.avatarUrl,
-      status: teachers.status,
+      status: users.status,
     };
 
     let rowsQuery = queryDb
@@ -168,8 +167,8 @@ export namespace TeacherRepository {
 
     const [metrics] = await queryDb
       .select({
-        activated: sql<number>`sum(case when ${teachers.status} = 'ACTIVATED' then 1 else 0 end)`.mapWith(Number),
-        deactivated: sql<number>`sum(case when ${teachers.status} = 'DEACTIVATED' then 1 else 0 end)`.mapWith(Number),
+        activated: sql<number>`sum(case when ${users.status} = 'ACTIVATED' then 1 else 0 end)`.mapWith(Number),
+        deactivated: sql<number>`sum(case when ${users.status} = 'DEACTIVATED' then 1 else 0 end)`.mapWith(Number),
       })
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
@@ -196,7 +195,7 @@ export namespace TeacherRepository {
     timezone: users.timezone,
     hourlyRate: teachers.hourlyRate,
     rateCurrency: teachers.rateCurrency,
-    status: teachers.status,
+    status: users.status,
     updatedAt: teachers.updatedAt,
     totalClasses: sql<number>`(
       SELECT COUNT(*)
@@ -281,13 +280,11 @@ export namespace TeacherRepository {
   ): Promise<boolean> => {
     const queryDb = tx ?? db;
     const now = new Date();
-    const statusInput = input.status;
     const restInput = Object.fromEntries(
       Object.entries(input).filter(([key]) => key !== "timezone" && key !== "status")
     ) as Omit<TeacherProfileUpdateInputType, "timezone" | "status">;
     const setInput = {
       ...restInput,
-      ...(statusInput == null ? {} : { status: statusInput }),
       updatedAt: now,
     };
     const [updated] = await queryDb

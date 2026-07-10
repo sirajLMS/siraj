@@ -4,8 +4,6 @@ import {
   CurrencyCode as CurrencyCodeEnum,
   InvoiceStatus,
   InvoiceType as InvoiceTypeEnum,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import {
   PaymentDirection,
   PaymentMethodType,
 } from "@/frontend/graphql/generated/gql/graphql-types";

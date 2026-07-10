@@ -23,7 +23,9 @@ interface ReportsMobileViewProps {
     readonly engagementRate: string;
     readonly engagementGrowth: string;
     readonly financialDistribution: string;
+    readonly financialSubtitle: string;
   };
+  readonly totalsLabel: string;
   readonly ledgerTitle: string;
   readonly ledgerLabels: {
     readonly studentLabel: string;
@@ -57,6 +59,7 @@ export function ReportsMobileView({
   filtersTitle,
   filtersLabels,
   summaryLabels,
+  totalsLabel,
   ledgerTitle,
   ledgerLabels,
   fromDate,
@@ -106,11 +109,12 @@ export function ReportsMobileView({
       <FinancialDistributionCard
         currencyDistribution={summary.currencyDistribution}
         title={summaryLabels.financialDistribution}
-        subtitle=""
+        subtitle={summaryLabels.financialSubtitle}
         compact
       />
 
       <SectionPanel title={ledgerTitle}>
+        <ReportsTotalsSection summary={summary} rows={rows} totalsLabel={totalsLabel} variant="mobile" />
         <PerformanceLedgerCardList rows={rows} labels={ledgerLabels} onRowClick={onRowClick} />
       </SectionPanel>
     </PageContainer>

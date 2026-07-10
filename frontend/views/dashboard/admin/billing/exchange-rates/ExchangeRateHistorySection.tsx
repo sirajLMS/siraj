@@ -1,0 +1,111 @@
+"use client";
+
+import { useQuery } from "@apollo/client/react";
+import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { useMemo, useState } from "react";
+import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { exchangeRateHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import {
+  buildExchangeRateColumns,
+  type ExchangeRateRow,
+} from "@/frontend/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
+import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
+
+const HISTORY_MAX_DAYS = 90;
+
+interface ExchangeRateHistorySectionProps {
+  readonly labels: ExchangeRatesLabels;
+  readonly availablePairs: readonly { readonly from: CurrencyCode; readonly to: CurrencyCode }[];
+}
+
+export function ExchangeRateHistorySection({ labels, availablePairs }: Readonly<ExchangeRateHistorySectionProps>) {
+  const defaultPair = availablePairs[0] ?? { from: CurrencyCode.Usd, to: CurrencyCode.Sar };
+  const [fromCurrency, setFromCurrency] = useState<CurrencyCode>(defaultPair.from);
+  const [toCurrency, setToCurrency] = useState<CurrencyCode>(defaultPair.to);
+
+  const { data, loading } = useQuery(exchangeRateHistoryQueryDocument, {
+    variables: {
+      from: fromCurrency,
+      to: toCurrency,
+      maxDays: HISTORY_MAX_DAYS,
+      paginationArgs: null,
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const columns = useMemo(() => buildExchangeRateColumns(labels.rateTable), [labels.rateTable]);
+
+  const rows: ExchangeRateRow[] = (data?.exchangeRateHistory?.rows ?? [])
+    .filter((rate): rate is NonNullable<typeof rate> => rate != null && rate.id != null)
+    .map(rate => ({
+      id: rate.id ?? "",
+      fromCurrency: (rate.fromCurrency ?? fromCurrency) as CurrencyCode,
+      toCurrency: (rate.toCurrency ?? toCurrency) as CurrencyCode,
+      rate: rate.rate ?? "0",
+      source: rate.source ?? null,
+      effectiveDate: rate.effectiveDate ?? "",
+    }));
+
+  const fromOptions = useMemo(() => [...new Set(availablePairs.map(pair => pair.from))], [availablePairs]);
+  const toOptions = useMemo(
+    () => [...new Set(availablePairs.filter(pair => pair.from === fromCurrency).map(pair => pair.to))],
+    [availablePairs, fromCurrency]
+  );
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box>
+        <Typography variant="bodyMd" color="textSecondary">
+          {labels.history.subtitle}
+        </Typography>
+        <Typography variant="caption" color="textSecondary">
+          {labels.history.maxDays.replace("{days}", String(HISTORY_MAX_DAYS))}
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+        <FormControl size="small" sx={{ minWidth: 160 }}>
+          <InputLabel id="fx-history-from">{labels.rateTable.fromCurrency}</InputLabel>
+          <Select
+            labelId="fx-history-from"
+            label={labels.rateTable.fromCurrency}
+            value={fromCurrency}
+            onChange={event => setFromCurrency(event.target.value as CurrencyCode)}
+          >
+            {fromOptions.map(currency => (
+              <MenuItem key={currency} value={currency}>
+                {currency}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 160 }}>
+          <InputLabel id="fx-history-to">{labels.rateTable.toCurrency}</InputLabel>
+          <Select
+            labelId="fx-history-to"
+            label={labels.rateTable.toCurrency}
+            value={toCurrency}
+            onChange={event => setToCurrency(event.target.value as CurrencyCode)}
+          >
+            {(toOptions.length > 0 ? toOptions : [toCurrency]).map(currency => (
+              <MenuItem key={currency} value={currency}>
+                {currency}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      <AppDataGrid
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        emptyMessage={labels.history.empty}
+        autoHeight
+        disableColumnMenu
+      />
+    </Box>
+  );
+}

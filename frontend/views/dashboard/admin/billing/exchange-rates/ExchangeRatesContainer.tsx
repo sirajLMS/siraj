@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/components/ui";
@@ -14,82 +14,63 @@ import {
   refreshExchangeRatesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { ExchangeRateHistorySection } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ExchangeRateHistorySection";
 import {
   buildExchangeRateColumns,
   type ExchangeRateRow,
   formatExchangeRateTimestamp,
 } from "@/frontend/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
+import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
+
+const FX_STALE_MS = 24 * 60 * 60 * 1000;
+
+function isFxStale(finishedAt: string | null | undefined): boolean {
+  if (!finishedAt) return true;
+  return Date.now() - new Date(finishedAt).getTime() > FX_STALE_MS;
+}
 
 function SyncStatusBadge({
   status,
   labels,
 }: {
   readonly status: string | null | undefined;
-  readonly labels: { success: string; running: string; partial: string; failed: string; unknown: string };
+  readonly labels: ExchangeRatesLabels["syncStatus"];
 }) {
   const normalized = (status ?? "unknown").toLowerCase();
-  const labelKey = normalized as keyof typeof labels;
-  return (
-    <StatusBadge category="syncStatus" status={normalized} label={labels[labelKey] ?? labels.unknown} size="small" />
-  );
-}
-
-function buildLabels(t: ReturnType<typeof useTranslations>) {
-  return {
-    pageTitle: t("exchangeRates.pageTitle", { defaultValue: "Exchange Rates" }),
-    pageSubtitle: t("exchangeRates.pageSubtitle", { defaultValue: "Latest currency exchange rates and sync status" }),
-    syncStatus: {
-      title: t("exchangeRates.syncStatus.title", { defaultValue: "Sync Status" }),
-      refresh: t("exchangeRates.syncStatus.refresh", { defaultValue: "Refresh Rates" }),
-      lastSync: t("exchangeRates.syncStatus.lastSync", { defaultValue: "Last Sync" }),
-      provider: t("exchangeRates.syncStatus.provider", { defaultValue: "Provider" }),
-      pairsWritten: t("exchangeRates.syncStatus.pairsWritten", { defaultValue: "Pairs Written" }),
-      pairsFailed: t("exchangeRates.syncStatus.pairsFailed", { defaultValue: "Pairs Failed" }),
-      errorMessage: t("exchangeRates.syncStatus.errorMessage", { defaultValue: "Error" }),
-      statusLabels: {
-        success: t("exchangeRates.syncStatus.statusSuccess", { defaultValue: "Success" }),
-        running: t("exchangeRates.syncStatus.statusRunning", { defaultValue: "Running" }),
-        partial: t("exchangeRates.syncStatus.statusPartial", { defaultValue: "Partial" }),
-        failed: t("exchangeRates.syncStatus.statusFailed", { defaultValue: "Failed" }),
-        unknown: t("exchangeRates.syncStatus.statusUnknown", { defaultValue: "Unknown" }),
-      },
-    },
-    rateTable: {
-      title: t("exchangeRates.rateTable.title", { defaultValue: "Latest Rates" }),
-      fromCurrency: t("exchangeRates.rateTable.fromCurrency", { defaultValue: "From" }),
-      toCurrency: t("exchangeRates.rateTable.toCurrency", { defaultValue: "To" }),
-      rate: t("exchangeRates.rateTable.rate", { defaultValue: "Rate" }),
-      source: t("exchangeRates.rateTable.source", { defaultValue: "Source" }),
-      effectiveDate: t("exchangeRates.rateTable.effectiveDate", { defaultValue: "Effective Date" }),
-    },
-    common: {
-      refreshing: t("exchangeRates.refreshing", { defaultValue: "Refreshing rates…" }),
-      refreshSuccess: t("exchangeRates.refreshSuccess", { defaultValue: "Rates refreshed successfully" }),
-      refreshFailed: t("exchangeRates.refreshFailed", { defaultValue: "Refresh failed" }),
-      noRates: t("exchangeRates.noRates", { defaultValue: "No exchange rates available" }),
-      noSyncRuns: t("exchangeRates.noSyncRuns", { defaultValue: "No sync runs yet" }),
-    },
+  const statusLabels: Record<string, string> = {
+    success: labels.statusSuccess,
+    running: labels.statusRunning,
+    partial: labels.statusPartial,
+    failed: labels.statusFailed,
+    unknown: labels.statusUnknown,
   };
+
+  return (
+    <StatusBadge
+      category="syncStatus"
+      status={normalized}
+      label={statusLabels[normalized] ?? labels.statusUnknown}
+      size="small"
+    />
+  );
 }
 
 function ExchangeRatesSyncPanel({
   syncRun,
   syncLoading,
   labels,
-  statusLabel,
 }: Readonly<{
   syncRun: {
     finishedAt?: string | null;
     startedAt?: string | null;
     provider?: string | null;
-    pairsWritten?: number | null;
-    pairsFailed?: number | null;
+    pairsWritten?: number | string | null;
+    pairsFailed?: number | string | null;
     status?: string | null;
     errorMessage?: string | null;
   } | null;
   syncLoading: boolean;
-  labels: ReturnType<typeof buildLabels>["syncStatus"] & { common: ReturnType<typeof buildLabels>["common"] };
-  statusLabel: string;
+  labels: ExchangeRatesLabels;
 }>) {
   if (syncLoading) {
     return <CircularProgress size={24} />;
@@ -98,7 +79,7 @@ function ExchangeRatesSyncPanel({
   if (!syncRun) {
     return (
       <Typography variant="bodyMd" color="textSecondary">
-        {labels.common.noSyncRuns}
+        {labels.noSyncRuns}
       </Typography>
     );
   }
@@ -107,38 +88,38 @@ function ExchangeRatesSyncPanel({
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
       <Box>
         <Typography variant="bodyMd" color="textSecondary">
-          {labels.lastSync}
+          {labels.syncStatus.lastSync}
         </Typography>
         <Typography variant="bodyMd">{formatExchangeRateTimestamp(syncRun.finishedAt ?? syncRun.startedAt)}</Typography>
       </Box>
       <Box>
         <Typography variant="bodyMd" color="textSecondary">
-          {labels.provider}
+          {labels.syncStatus.provider}
         </Typography>
         <Typography variant="bodyMd">{syncRun.provider}</Typography>
       </Box>
       <Box>
         <Typography variant="bodyMd" color="textSecondary">
-          {labels.pairsWritten}
+          {labels.syncStatus.pairsWritten}
         </Typography>
         <Typography variant="bodyMd">{syncRun.pairsWritten}</Typography>
       </Box>
       <Box>
         <Typography variant="bodyMd" color="textSecondary">
-          {labels.pairsFailed}
+          {labels.syncStatus.pairsFailed}
         </Typography>
         <Typography variant="bodyMd">{syncRun.pairsFailed}</Typography>
       </Box>
       <Box sx={{ gridColumn: { sm: "span 2" } }}>
         <Typography variant="bodyMd" color="textSecondary">
-          {statusLabel}
+          {labels.status}
         </Typography>
-        <SyncStatusBadge status={syncRun.status} labels={labels.statusLabels} />
+        <SyncStatusBadge status={syncRun.status} labels={labels.syncStatus} />
       </Box>
       {syncRun.errorMessage ? (
         <Box sx={{ gridColumn: { sm: "span 2" } }}>
           <Typography variant="bodyMd" color="error">
-            {labels.errorMessage}
+            {labels.syncStatus.errorMessage}
           </Typography>
           <Typography variant="bodyMd" color="error">
             {syncRun.errorMessage}
@@ -151,7 +132,8 @@ function ExchangeRatesSyncPanel({
 
 export function ExchangeRatesContainer() {
   const t = useTranslations("dashboard.billing");
-  const labels = buildLabels(t);
+  const _locale = useLocale();
+  const labels = t.raw("exchangeRates") as ExchangeRatesLabels;
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -163,7 +145,11 @@ export function ExchangeRatesContainer() {
     setSnackbarOpen(true);
   };
 
-  const { data: ratesData, loading: ratesLoading } = useQuery(latestExchangeRatesQueryDocument, {
+  const {
+    data: ratesData,
+    loading: ratesLoading,
+    refetch: refetchRates,
+  } = useQuery(latestExchangeRatesQueryDocument, {
     variables: { paginationArgs: null },
     fetchPolicy: "cache-and-network",
   });
@@ -179,16 +165,17 @@ export function ExchangeRatesContainer() {
   const [refreshMutation, { loading: refreshing }] = useMutation(refreshExchangeRatesMutationDocument, {
     onCompleted: result => {
       if (result.refreshExchangeRates?.success) {
-        showFeedback(labels.common.refreshSuccess, "success");
+        showFeedback(labels.refreshSuccess, "success");
         void refetchSync();
+        void refetchRates();
       } else {
-        const errMsg = result.refreshExchangeRates?.errorMessage ?? labels.common.refreshFailed;
+        const errMsg = result.refreshExchangeRates?.errorMessage ?? labels.refreshFailed;
         showFeedback(errMsg, "error");
       }
     },
     onError: error => {
       logger.error("FX refresh failed", { error });
-      showFeedback(labels.common.refreshFailed, "error");
+      showFeedback(labels.refreshFailed, "error");
     },
   });
 
@@ -204,7 +191,10 @@ export function ExchangeRatesContainer() {
       effectiveDate: rate.effectiveDate ?? "",
     }));
 
+  const availablePairs = useMemo(() => rates.map(rate => ({ from: rate.fromCurrency, to: rate.toCurrency })), [rates]);
+
   const columns = useMemo(() => buildExchangeRateColumns(labels.rateTable), [labels.rateTable]);
+  const showStaleWarning = isFxStale(syncRun?.finishedAt ?? syncRun?.startedAt);
 
   return (
     <PageContainer>
@@ -217,20 +207,21 @@ export function ExchangeRatesContainer() {
               onClick={() => void refreshMutation({ variables: { force: false } })}
               disabled={refreshing}
             >
-              {refreshing ? labels.common.refreshing : labels.syncStatus.refresh}
+              {refreshing ? labels.refreshing : labels.syncStatus.refresh}
             </PrimaryPageAction>
           </RequirePermission>
         }
       />
 
       <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
+        {showStaleWarning ? (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {labels.staleWarning}
+          </Alert>
+        ) : null}
+
         <SectionPanel title={labels.syncStatus.title}>
-          <ExchangeRatesSyncPanel
-            syncRun={syncRun}
-            syncLoading={syncLoading}
-            labels={{ ...labels.syncStatus, common: labels.common }}
-            statusLabel={t("status", { defaultValue: "Status" })}
-          />
+          <ExchangeRatesSyncPanel syncRun={syncRun} syncLoading={syncLoading} labels={labels} />
         </SectionPanel>
 
         <SectionPanel title={labels.rateTable.title}>
@@ -238,10 +229,14 @@ export function ExchangeRatesContainer() {
             rows={rates}
             columns={columns}
             loading={ratesLoading}
-            emptyMessage={labels.common.noRates}
+            emptyMessage={labels.noRates}
             autoHeight
             disableColumnMenu
           />
+        </SectionPanel>
+
+        <SectionPanel title={labels.history.title}>
+          <ExchangeRateHistorySection labels={labels} availablePairs={availablePairs} />
         </SectionPanel>
       </RequirePermission>
 

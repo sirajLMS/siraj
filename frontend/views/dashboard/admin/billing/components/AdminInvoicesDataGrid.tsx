@@ -8,7 +8,12 @@ import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
 import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/utils/profileHref";
-import type { AdminInvoiceRow, AdminInvoiceStatus, MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type {
+  AdminInvoiceRow,
+  AdminInvoiceStatus,
+  MarkPaidInvoiceTarget,
+  PaymentDetailsTarget,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;
@@ -29,7 +34,7 @@ interface AdminInvoicesDataGridProps {
   readonly labels: AdminInvoicesDataGridLabels;
   readonly canManage: boolean;
   readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (invoiceId: string) => void;
+  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -58,7 +63,7 @@ function renderInvoiceAction(
   labels: AdminInvoicesDataGridLabels,
   canManage: boolean,
   onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void,
-  onViewPaymentDetails?: (invoiceId: string) => void
+  onViewPaymentDetails?: (target: PaymentDetailsTarget) => void
 ) {
   if (row.status === InvoiceStatus.Paid) {
     return (
@@ -69,7 +74,10 @@ function renderInvoiceAction(
               size="small"
               aria-label={labels.viewDetails}
               onClick={() => {
-                onViewPaymentDetails(row.id);
+                onViewPaymentDetails({
+                  invoiceId: row.id,
+                  isLegacyPaid: row.status === InvoiceStatus.Paid && !row.paidMethodHint,
+                });
               }}
             >
               <VisibilityOutlined fontSize="small" />
@@ -91,7 +99,14 @@ function renderInvoiceAction(
       <Button
         variant="text"
         onClick={() => {
-          onMarkAsPaid({ id: row.id, parentUserId: row.parentUserId });
+          onMarkAsPaid({
+            id: row.id,
+            parentUserId: row.parentUserId,
+            amount: row.amount,
+            studentName: row.studentName,
+            dueDate: row.dueDate,
+            invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
+          });
         }}
         sx={{ fontWeight: 700, textTransform: "uppercase" }}
       >
@@ -104,7 +119,14 @@ function renderInvoiceAction(
     <Button
       variant="text"
       onClick={() => {
-        onMarkAsPaid({ id: row.id, parentUserId: row.parentUserId });
+        onMarkAsPaid({
+          id: row.id,
+          parentUserId: row.parentUserId,
+          amount: row.amount,
+          studentName: row.studentName,
+          dueDate: row.dueDate,
+          invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
+        });
       }}
       sx={{ fontWeight: 700, textTransform: "uppercase" }}
     >

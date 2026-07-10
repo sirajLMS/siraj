@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { db } from "@/backend/db/drizzleDb";
 import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
 import { BillingRepository, ParentRepository, UserPaymentMethodRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
@@ -103,9 +103,7 @@ async function validatePayinMethodForParent(
 
   const method = await UserPaymentMethodRepository.getById(userPaymentMethodId, tx);
   if (!method) {
-    throw new Error(
-      tFunc("recordNotFound", { tableName: "user_payment_methods", entityId: userPaymentMethodId })
-    );
+    throw new Error(tFunc("recordNotFound", { tableName: "user_payment_methods", entityId: userPaymentMethodId }));
   }
 
   if (method.userId !== parent.userId) {

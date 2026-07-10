@@ -1,7 +1,7 @@
 import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
-import { AppPermission } from "@/backend/enum";
+import { AccountStatus, AppPermission } from "@/backend/enum";
 import { getBackendTranslations, logger } from "@/backend/lib";
-import { parseIanaTimezone } from "@/backend/lib/enum";
+import { parseAccountStatus, parseIanaTimezone } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services";
 import type {
   AssociatedStudentResult,
@@ -16,6 +16,35 @@ export type {
   DeactivateParentResult,
   ParentProfileResult,
 } from "@/backend/types";
+
+type ParentProfileRepoResult = NonNullable<Awaited<ReturnType<typeof ParentRepository.getParentProfile>>>;
+
+async function toParentProfileResult(profile: ParentProfileRepoResult): Promise<ParentProfileResult> {
+  const user = await UserRepository.findById(profile.userId);
+
+  return {
+    id: profile.id,
+    userId: profile.userId,
+    name: profile.name,
+    email: profile.email,
+    avatarUrl: profile.avatarUrl,
+    lifecycleStatus: profile.status,
+    accountStatus: parseAccountStatus(user?.status),
+    phone: profile.phone,
+    nationality: profile.nationality,
+    address: profile.address,
+    facebook: profile.facebook,
+    whatsapp: profile.whatsapp,
+    twitter: profile.twitter,
+    invoiceType: profile.invoiceType,
+    feeAmount: profile.feeAmount,
+    currency: profile.currency,
+    displayCurrency: profile.displayCurrency,
+    timezone: parseIanaTimezone(profile.timezone),
+    createdAt: profile.createdAt,
+    updatedAt: profile.updatedAt,
+  };
+}
 
 export namespace ParentProfileService {
   /**
@@ -39,27 +68,7 @@ export namespace ParentProfileService {
       throw new Error(tFunc("parentNotFound", { id: parentId }));
     }
 
-    return {
-      id: profile.id,
-      userId: profile.userId,
-      name: profile.name,
-      email: profile.email,
-      avatarUrl: profile.avatarUrl,
-      status: profile.status,
-      phone: profile.phone,
-      nationality: profile.nationality,
-      address: profile.address,
-      facebook: profile.facebook,
-      whatsapp: profile.whatsapp,
-      twitter: profile.twitter,
-      invoiceType: profile.invoiceType,
-      feeAmount: profile.feeAmount,
-      currency: profile.currency,
-      displayCurrency: profile.displayCurrency,
-      timezone: parseIanaTimezone(profile.timezone),
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-    };
+    return toParentProfileResult(profile);
   }
 
   /**
@@ -121,6 +130,12 @@ export namespace ParentProfileService {
     }
 
     const result = await ParentRepository.deactivateParent(parentId, undefined, locale);
+    const updatedUser = await UserRepository.updateStatus(
+      result.userId,
+      AccountStatus.DEACTIVATED,
+      undefined,
+      locale
+    );
 
     // Invalidate all active Redis sessions for this parent's user account.
     // Session invalidation failure is logged but does NOT roll back the deactivation —
@@ -138,7 +153,7 @@ export namespace ParentProfileService {
     return {
       id: result.id,
       userId: result.userId,
-      status: result.status,
+      accountStatus: parseAccountStatus(updatedUser.status),
     };
   }
 
@@ -164,7 +179,8 @@ export namespace ParentProfileService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    return ParentRepository.updateParentProfile(parentId, input, locale);
+    const updated = await ParentRepository.updateParentProfile(parentId, input, locale);
+    return toParentProfileResult(updated);
   }
 
   /**
@@ -193,6 +209,7 @@ export namespace ParentProfileService {
       await UserRepository.updateTimezone(existing.userId, timezone, undefined, locale);
     }
 
-    return ParentRepository.updateParentProfile(parentId, repoInput, locale);
+    const updated = await ParentRepository.updateParentProfile(parentId, repoInput, locale);
+    return toParentProfileResult(updated);
   }
 }

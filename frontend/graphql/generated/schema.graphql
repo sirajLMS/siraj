@@ -8,7 +8,9 @@ enum AccountStatus {
 type AdminBillingSummary {
   id: String
   mtdRevenue: String
+  mtdRevenueByCurrency: [BillingCurrencyTotal!]
   negativeBalanceCount: Int
+  outstandingByCurrency: [BillingCurrencyTotal!]
   pendingCount: Int
   totalOutstanding: String
 }
@@ -308,6 +310,12 @@ type AvailabilitySearchTeacher {
 enum AvailabilityStatus {
   AVAILABLE
   OUT_OF_STOCK
+}
+
+type BillingCurrencyTotal {
+  amount: String
+  currency: CurrencyCode
+  id: String
 }
 
 input BillingMonthInput {
@@ -2293,7 +2301,9 @@ type ParentBillingSummary {
   id: String
   nextDueDate: String
   outstandingBalance: String
+  outstandingByCurrency: [BillingCurrencyTotal!]
   paidThisTerm: String
+  paidThisTermByCurrency: [BillingCurrencyTotal!]
 }
 
 """Paginated parent complaints with page info."""
@@ -2408,6 +2418,8 @@ type ParentInvoiceRow {
   id: String
   invoiceType: InvoiceType
   issueDate: String
+  latestPaymentMethodLabel: String
+  latestPaymentMethodType: PaymentMethodType
   paidDate: String
   parentId: String
   parentUserId: String

@@ -1,6 +1,7 @@
 import type { useTranslations } from "next-intl";
 import { buildManualInvoiceLabels } from "@/frontend/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 
 type BillingTranslator = ReturnType<typeof useTranslations<"dashboard.billing">>;
 
@@ -155,20 +156,32 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     markPaidDialog: {
       title: t("markPaidDialog.title"),
       confirm: t("markPaidDialog.confirm"),
+      confirming: t("markPaidDialog.confirming"),
       selectMethod: t("markPaidDialog.selectMethod"),
       noMethods: t("markPaidDialog.noMethods"),
       addMethods: t("markPaidDialog.addMethods"),
       manageMethods: t("markPaidDialog.manageMethods"),
       cancel: t("markPaidDialog.cancel"),
+      errorGeneric: t("markPaidDialog.errorGeneric"),
+      missingParentUser: t("markPaidDialog.missingParentUser"),
+      invoiceNumber: t("markPaidDialog.invoiceNumber"),
+      amount: t("markPaidDialog.amount"),
+      dueDate: t("markPaidDialog.dueDate"),
+      student: t("markPaidDialog.student"),
+      selectedMethod: t("markPaidDialog.selectedMethod"),
     },
     paymentDetailsDialog: {
       title: t("paymentDetailsDialog.title"),
       empty: t("paymentDetailsDialog.empty"),
+      emptyLegacy: t("paymentDetailsDialog.emptyLegacy"),
+      loadFailed: t("paymentDetailsDialog.loadFailed"),
+      close: t("paymentDetailsDialog.close"),
       amount: t("paymentDetailsDialog.amount"),
       date: t("paymentDetailsDialog.date"),
     },
     errors: {
       invalidId: t("errors.invalidId"),
     },
+    exchangeRates: t.raw("exchangeRates") as ExchangeRatesLabels,
   };
 }

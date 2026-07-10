@@ -5,7 +5,10 @@ import type { PageInfo } from "@/backend/types/shared/pagination.types";
 export type StaffProfileEntity = typeof staffProfiles.$inferSelect;
 export type StaffProfileEntityInput = typeof staffProfiles.$inferInsert;
 
-export type StaffProfileCreateResult = Pick<StaffProfileEntity, "id" | "userId" | "status" | "phone" | "createdAt">;
+export type StaffProfileCreateResult = Pick<StaffProfileEntity, "id" | "userId" | "createdAt"> & {
+  readonly phone: string | null;
+  readonly status: AccountStatus;
+};
 
 export interface ManagerDirectoryResult {
   readonly id?: string;

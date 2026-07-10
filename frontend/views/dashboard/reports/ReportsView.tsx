@@ -69,6 +69,7 @@ export function ReportsView({
         filtersTitle={labels.filtersTitle}
         filtersLabels={labels.filtersLabels}
         summaryLabels={labels.summaryLabels}
+        totalsLabel={labels.totalsLabel}
         ledgerTitle={labels.ledgerTitle}
         ledgerLabels={labels.ledgerLabels}
         fromDate={fromDate}
