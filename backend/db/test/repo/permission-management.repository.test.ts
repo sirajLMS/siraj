@@ -134,7 +134,7 @@ describe("PermissionManagementRepository", () => {
       );
 
       expect(group).toBeDefined();
-      expect(group.name).toBe("Test Group Created");
+      expect(group.name).toEqual({ ar: "Test Group Created", en: "Test Group Created" });
       expect(group.slug).toBe("test_group_created");
       expect(group.isSystem).toBe(false);
       expect(group.permissionIds).toContain(perm.id);
@@ -183,7 +183,7 @@ describe("PermissionManagementRepository", () => {
         tx
       );
 
-      expect(updated.name).toBe("Updated Group Name");
+      expect(updated.name).toEqual({ ar: "Updated Group Name", en: "Updated Group Name" });
       expect(updated.permissionIds).not.toContain(perm1.id);
       expect(updated.permissionIds).toContain(perm2.id);
 
@@ -462,7 +462,7 @@ describe("PermissionManagementRepository", () => {
         undefined,
         tx
       );
-      expect(updated.name).toBe("Ntx Group Updated");
+      expect(updated.name).toEqual({ ar: "Ntx Group Updated", en: "Ntx Group Updated" });
 
       // User overrides
       const tempUser = await createTestUser(tx);
