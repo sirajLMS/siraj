@@ -114,6 +114,62 @@ enum AppPermission {
   PAYMENT_METHODS_VERIFY_BANK_TRANSFER
   PERMISSION_GROUPS_ASSIGN
   PERMISSION_GROUPS_MANAGE
+  PROFILE_CORE_CONTACT_EDIT_OTHER
+  PROFILE_CORE_CONTACT_EDIT_OWN
+  PROFILE_CORE_CONTACT_VIEW_OTHER
+  PROFILE_CORE_CONTACT_VIEW_OWN
+  PROFILE_CORE_IDENTITY_EDIT_OTHER
+  PROFILE_CORE_IDENTITY_EDIT_OWN
+  PROFILE_CORE_IDENTITY_VIEW_OTHER
+  PROFILE_CORE_IDENTITY_VIEW_OWN
+  PROFILE_MEETING_CONFIGS_EDIT_OTHER
+  PROFILE_MEETING_CONFIGS_EDIT_OWN
+  PROFILE_MEETING_CONFIGS_VIEW_OTHER
+  PROFILE_MEETING_CONFIGS_VIEW_OWN
+  PROFILE_PARENT_ACCOUNT_EDIT_OTHER
+  PROFILE_PARENT_ACCOUNT_EDIT_OWN
+  PROFILE_PARENT_ACCOUNT_VIEW_OTHER
+  PROFILE_PARENT_ACCOUNT_VIEW_OWN
+  PROFILE_PARENT_BILLING_EDIT_OTHER
+  PROFILE_PARENT_BILLING_EDIT_OWN
+  PROFILE_PARENT_BILLING_VIEW_OTHER
+  PROFILE_PARENT_BILLING_VIEW_OWN
+  PROFILE_PARENT_IDENTITY_EDIT_OTHER
+  PROFILE_PARENT_IDENTITY_EDIT_OWN
+  PROFILE_PARENT_IDENTITY_VIEW_OTHER
+  PROFILE_PARENT_IDENTITY_VIEW_OWN
+  PROFILE_PARENT_SOCIAL_EDIT_OTHER
+  PROFILE_PARENT_SOCIAL_EDIT_OWN
+  PROFILE_PARENT_SOCIAL_VIEW_OTHER
+  PROFILE_PARENT_SOCIAL_VIEW_OWN
+  PROFILE_PARENT_STUDENTS_EDIT_OTHER
+  PROFILE_PARENT_STUDENTS_EDIT_OWN
+  PROFILE_PARENT_STUDENTS_VIEW_OTHER
+  PROFILE_PARENT_STUDENTS_VIEW_OWN
+  PROFILE_PAYMENT_METHODS_EDIT_OTHER
+  PROFILE_PAYMENT_METHODS_EDIT_OWN
+  PROFILE_PAYMENT_METHODS_VIEW_OTHER
+  PROFILE_PAYMENT_METHODS_VIEW_OWN
+  PROFILE_STAFF_PERMISSIONS_EDIT_OTHER
+  PROFILE_STAFF_PERMISSIONS_EDIT_OWN
+  PROFILE_STAFF_PERMISSIONS_VIEW_OTHER
+  PROFILE_STAFF_PERMISSIONS_VIEW_OWN
+  PROFILE_STAFF_ROLE_EDIT_OTHER
+  PROFILE_STAFF_ROLE_EDIT_OWN
+  PROFILE_STAFF_ROLE_VIEW_OTHER
+  PROFILE_STAFF_ROLE_VIEW_OWN
+  PROFILE_TEACHER_IDENTITY_EDIT_OTHER
+  PROFILE_TEACHER_IDENTITY_EDIT_OWN
+  PROFILE_TEACHER_IDENTITY_VIEW_OTHER
+  PROFILE_TEACHER_IDENTITY_VIEW_OWN
+  PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER
+  PROFILE_TEACHER_PROFESSIONAL_EDIT_OWN
+  PROFILE_TEACHER_PROFESSIONAL_VIEW_OTHER
+  PROFILE_TEACHER_PROFESSIONAL_VIEW_OWN
+  PROFILE_TEACHER_STUDENTS_EDIT_OTHER
+  PROFILE_TEACHER_STUDENTS_EDIT_OWN
+  PROFILE_TEACHER_STUDENTS_VIEW_OTHER
+  PROFILE_TEACHER_STUDENTS_VIEW_OWN
   REPORTS_GENERATE
   REPORT_GENERATE_CUSTOM
   REPORT_VIEW_FINANCIALS
@@ -155,9 +211,37 @@ enum AppPermission {
   STUDENTS_EDIT
   STUDENTS_LIST
   STUDENTS_OVERRIDE_QUOTA
+  STUDENT_ACADEMIC_EDIT_OTHER
+  STUDENT_ACADEMIC_EDIT_OWN
+  STUDENT_ACADEMIC_VIEW_OTHER
+  STUDENT_ACADEMIC_VIEW_OWN
   STUDENT_EDIT_QUOTA
+  STUDENT_HISTORY_EDIT_OTHER
+  STUDENT_HISTORY_EDIT_OWN
+  STUDENT_HISTORY_VIEW_OTHER
+  STUDENT_HISTORY_VIEW_OWN
+  STUDENT_IDENTITY_EDIT_OTHER
+  STUDENT_IDENTITY_EDIT_OWN
+  STUDENT_IDENTITY_VIEW_OTHER
+  STUDENT_IDENTITY_VIEW_OWN
   STUDENT_MANAGE_STATUS
+  STUDENT_PARENT_EDIT_OTHER
+  STUDENT_PARENT_EDIT_OWN
+  STUDENT_PARENT_VIEW_OTHER
+  STUDENT_PARENT_VIEW_OWN
+  STUDENT_QUOTA_EDIT_EDIT_OTHER
+  STUDENT_QUOTA_EDIT_EDIT_OWN
+  STUDENT_QUOTA_EDIT_VIEW_OTHER
+  STUDENT_QUOTA_EDIT_VIEW_OWN
   STUDENT_REASSIGN_TEACHER
+  STUDENT_SCHEDULE_EDIT_OTHER
+  STUDENT_SCHEDULE_EDIT_OWN
+  STUDENT_SCHEDULE_VIEW_OTHER
+  STUDENT_SCHEDULE_VIEW_OWN
+  STUDENT_TEACHER_EDIT_OTHER
+  STUDENT_TEACHER_EDIT_OWN
+  STUDENT_TEACHER_VIEW_OTHER
+  STUDENT_TEACHER_VIEW_OWN
   STUDENT_VIEW_ASSOCIATED
   SUBJECTS_CREATE
   SUBJECTS_DELETE
@@ -185,6 +269,7 @@ enum AppPermission {
   TEACHER_EDIT_OWN_PROFILE
   TEACHER_VIEW_DASHBOARD
   TEACHER_VIEW_OWN_PROFILE
+  TEACHER_VIEW_PROFILE
   TEACHER_VIEW_STUDENTS
   TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
@@ -414,6 +499,7 @@ type ClassInstanceDetail {
   outcome: ClassOutcome
   payrollCredited: Boolean
   performance: ClassInstancePerformance
+  recurringScheduleId: String
   remarks: String
   scheduledDate: String
   startTime: String
@@ -994,8 +1080,10 @@ type DailyScheduleList {
   avatarUrl: String
   courseName: String
   duration: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  meetingJoinUrl: String
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
@@ -2308,6 +2396,14 @@ type Mutation {
   verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
 }
 
+type NextUnpaidInvoiceSummary {
+  amount: String
+  currency: CurrencyCode
+  dueDate: String
+  id: String
+  studentName: String
+}
+
 type NotificationAlertsResult {
   alerts: [SystemAlert!]
   id: String
@@ -2356,8 +2452,11 @@ type OnboardingMetrics {
 
 type OnlineMeetingInfo {
   joinUrl: String
+  logoUrl: String
   meetingId: String
   platform: String
+  providerName: LocalizedString
+  source: String
 }
 
 enum OrderSortDirection {
@@ -2430,10 +2529,12 @@ type ParentBillingSummary {
   activeStudents: Int
   id: String
   nextDueDate: String
+  nextUnpaidInvoice: NextUnpaidInvoiceSummary
   outstandingBalance: String
   outstandingByCurrency: [BillingCurrencyTotal!]
   paidThisTerm: String
   paidThisTermByCurrency: [BillingCurrencyTotal!]
+  pendingPaymentCount: Int
 }
 
 """Paginated parent complaints with page info."""
@@ -2790,7 +2891,7 @@ type Query {
   """Returns the paginated admin complaint queue with metrics."""
   adminComplaintQueue(filter: ComplaintQueueFilter!, paginationArgs: PaginationArgs): ComplaintQueueResult
   adminDashboardSchedule(input: AdminDashboardScheduleInput!): AdminDashboardScheduleResult
-  adminInvoices(paginationArgs: PaginationArgs): AdminInvoiceHistoryResult
+  adminInvoices(paginationArgs: PaginationArgs, search: String): AdminInvoiceHistoryResult
 
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
@@ -2861,7 +2962,7 @@ type Query {
   parentDirectory(lifecycleStatusFilter: ParentStatus, paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
   parentHandbookUrl: ParentHandbookUrl
-  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String, userId: String): ParentInvoiceHistoryResult
+  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String, search: String, userId: String): ParentInvoiceHistoryResult
   parentOwnProfile: ParentOwnProfile
   parentProfile(parentId: String!): ParentProfile
 
@@ -2881,6 +2982,7 @@ type Query {
   permissions: [Permission!]
   profileByUserId(userId: String!): UnifiedProfile
   recurringMeetingConfigs(recurringScheduleId: ID!): [ClassMeetingConfig!]
+  recurringSchedule(id: ID!): RecurringScheduleDetail
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
   rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: LeaveRequestStatus): RescheduleTrackingResult
   searchFiles(
@@ -2918,6 +3020,7 @@ type Query {
 
   """Fetches the global student directory with cross-relational data."""
   studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentDirectoryPayload
+  studentProfile(month: Int, studentId: String!, year: Int): StudentProfile
   studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
 
@@ -2976,6 +3079,25 @@ input RecurringClassDayInput {
   dayOfWeek: String!
   isActive: Boolean!
   startTime: String!
+}
+
+type RecurringScheduleDayDetail {
+  dayOfWeek: String
+  id: String
+  isActive: Boolean
+  startTime: String
+}
+
+type RecurringScheduleDetail {
+  days: [RecurringScheduleDayDetail!]
+  defaultStartTime: String
+  durationMinutes: Int
+  id: String
+  studentId: String
+  studentName: String
+  teacherId: String
+  teacherName: String
+  timezone: IanaTimezone
 }
 
 type RefreshExchangeRatesResult {
@@ -3123,9 +3245,11 @@ type StatusTrackingScheduleRow {
   avatarUrl: String
   courseName: String
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
   isFrozen: Boolean
+  meetingJoinUrl: String
   outcome: ClassOutcome
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
@@ -3304,8 +3428,10 @@ type StudentHistoryMetrics {
 type StudentHistorySession {
   dayOfMonth: Int
   duration: Int
+  effectiveMeeting: EffectiveMeeting
   id: String
   instructor: String
+  meetingJoinUrl: String
   notes: String
   room: String
   status: String
@@ -3336,6 +3462,29 @@ type StudentOnboardingResult {
   studentId: String
 }
 
+type StudentProfile {
+  avatarUrl: String
+  classHistory: StudentClassHistory
+  classesRemaining: Int
+  classesTotal: Int
+  createdAt: DateTime
+  dateOfBirth: DateTime
+  gender: Gender
+  hoursPerWeek: Float
+  id: String
+  language: AppLanguage
+  name: String
+  parentId: String
+  parentName: String
+  primaryTeacherId: String
+  status: StudentStatus
+  teacherName: String
+  teacherUserId: String
+  upcomingClasses: StudentUpcomingClassesResult
+  updatedAt: DateTime
+  version: Int
+}
+
 type StudentProgress {
   completionPercent: Int
   id: String
@@ -3344,6 +3493,7 @@ type StudentProgress {
 
 type StudentSessionDetail {
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: String
   id: String
   meetingJoinUrl: String
@@ -3364,10 +3514,12 @@ enum StudentStatus {
 
 type StudentUpcomingClass {
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
   instructor: String
   isFrozen: Boolean
+  meetingJoinUrl: String
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
   teacherId: String
@@ -3637,8 +3789,10 @@ type SystemAlert {
 
 type TeacherAssignedClass {
   durationMinutes: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  meetingJoinUrl: String
   outcome: ClassOutcome
   scheduledEndAt: String
   scheduledStartAt: String
@@ -4161,8 +4315,10 @@ type WeeklyScheduleClass {
   classType: ClassType
   day: String
   duration: Int
+  effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  meetingJoinUrl: String
   outcome: ClassOutcome
   startTime: String
   studentId: String

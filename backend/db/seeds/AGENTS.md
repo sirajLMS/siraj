@@ -113,3 +113,33 @@ Use these service bootstrap entry points from seeders. Domain seed data (constan
 
 - `orchestrateSeedMany` — idempotent many-row seeding helper (re-exported from `lib/index.ts`); coordinates look-before-create and duplicate-key race recovery via services
 - `batchInsert` — **removed**; bulk inserts live in `@/backend/db/repo/shared/bulk-upsert` and are called from service bootstrap methods, not seeders
+
+## Phased execution (`runSeedStep`)
+
+`backend/db/seeds/index.ts` wraps each domain step with `runSeedStep` from `lib/run-seed-step.ts`. Failed steps are logged and collected in `context.failedSteps`, then passed to `verifySeedCoverage(failedSteps)` so coverage reporting distinguishes empty tables from earlier step failures.
+
+## Asset checkpoint
+
+- Manifest: `lib/asset-manifest.ts`
+- Validator: `bun run validate:seed-assets` (also runs automatically in `backend/db/scripts/drizzleSeed.ts` for `standard` profile)
+- Skip gate: `SEED_SKIP_ASSET_CHECK=true`
+- Prompts for human-generated assets: `backend/db/seeds/prompts/`
+
+## Additional bootstrap registry entries
+
+| Seeder | Service | Bootstrap method(s) |
+|--------|---------|---------------------|
+| `books/seed-books` | `BookService` | `findBooksByNames`, `upsertManyBooks` |
+| `classes/seed-class-categories` | `ClassCatalogService` | `findCategoriesBySlugs`, `upsertManyCategories` |
+| `classes/seed-class-subjects` | `ClassCatalogService` | `findSubjectsBySlugs`, `upsertManySubjects` |
+| `classes/seed-subject-resources` | `ClassCatalogService` | `createManySubjectResources` |
+| `meeting/seed-user-meeting-configs` | `MeetingConfigService` | `upsertManyUserMeetingConfigs` |
+| `meeting/seed-class-meeting-configs` | `MeetingConfigService` | `upsertManyClassMeetingConfigs` |
+| `teachers/seed-teacher-important-notes` | `TeacherNotesService` | `findNotesByTitles`, `createManyImportantNotes` |
+| `billing/seed-invoice-payment-submissions` | `BillingManagementService` | `findInvoicePaymentSubmissionsByInvoiceIds`, `createManyInvoicePaymentSubmissions` |
+
+### Avatar and logo helpers
+
+- `lib/avatar-seed-helper.ts` — `seedAvatarForEntity`, `seedAvatarPool`, `linkAvatarsToEntities`
+- `lib/logo-seed-helper.ts` — `seedCatalogLogoUrl` for meeting/payment/subject branding assets
+- `lib/class-catalog-factory.ts` — canonical specs for books, categories, subjects, and subject-resource links

@@ -4,16 +4,15 @@ import {
   cycleAtIndex,
   getStudentAvatarFileName,
   getTotalStudents,
+  linkAvatarsToEntities,
   loadSeedConfig,
-  resolveAssetPath,
   type SeedConfig,
+  seedAvatarPool,
+  shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { StudentStatus } from "@/backend/enum";
 import logger from "@/backend/lib/logger";
-import { StorageService } from "@/backend/services/storage/storage.service";
 import { StudentBootstrapService } from "@/backend/services/student/student-bootstrap.service";
-import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
-import { getStorageService } from "@/backend/storage/storage.service";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
 
 const DEMO_STUDENTS = [
@@ -26,47 +25,7 @@ const DEMO_STUDENTS = [
   },
 ] as const;
 
-async function seedAvatarAssets(): Promise<Map<string, string | null>> {
-  const avatarUrls = new Map<string, string | null>();
-
-  try {
-    const fileSeeder = await createFileSeedingService();
-    await fileSeeder.ensureDirectory("public", true);
-    await fileSeeder.ensureDirectory("public/avatars", true);
-    await fileSeeder.ensureDirectory("public/avatars/students", true);
-
-    const storageService = await getStorageService();
-
-    for (let i = 1; i <= 8; i++) {
-      const fileName = `${String(i).padStart(2, "0")}.png`;
-      const bucketPath = `public/avatars/students/${fileName}`;
-      const localFilePath = resolveAssetPath(`avatars/students/${fileName}`);
-
-      try {
-        await fileSeeder.seedFile({ bucketPath, localFilePath });
-        const fileInfo = await storageService.fileInfoByPath(bucketPath);
-        if (!fileInfo?.url) {
-          throw new Error(`File info URL is missing for ${bucketPath}`);
-        }
-        avatarUrls.set(fileName, fileInfo.url);
-      } catch (fileError) {
-        logger.error(`Failed to seed avatar ${fileName}:`, fileError);
-        avatarUrls.set(fileName, null);
-      }
-    }
-
-    if (avatarUrls.size === 0 || Array.from(avatarUrls.values()).every(url => url === null)) {
-      throw new Error("No student avatars were successfully seeded.");
-    }
-
-    logger.info("Student avatar assets seeded successfully.");
-  } catch (error) {
-    logger.error("Failed to seed student avatars:", error);
-    throw error;
-  }
-
-  return avatarUrls;
-}
+const STUDENT_AVATAR_POOL_SIZE = 8;
 
 function getAvatarUrl(avatarUrls: Map<string, string | null>, index: number): string | null {
   const fileName = getStudentAvatarFileName(index);
@@ -84,7 +43,16 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
     throw new Error("No teachers available to link to students.");
   }
 
-  const avatarUrls = await seedAvatarAssets();
+  const avatarUrls = shouldSeedExtendedFiles(seedConfig)
+    ? await seedAvatarPool({
+        assetDir: "avatars/students",
+        bucketDir: "public/avatars/students",
+        poolSize: STUDENT_AVATAR_POOL_SIZE,
+        referenceTable: "students",
+        entities: [],
+      })
+    : new Map<string, string | null>();
+
   const totalStudents = getTotalStudents(seedConfig);
   const results = [];
   const assignmentDate = new Date("2020-01-01");
@@ -125,20 +93,16 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
     results.push(student);
 
     await StudentBootstrapService.ensureTeacherAssignment(student.id, teacher.id, assignmentDate);
+  }
 
-    if (avatarUrl) {
-      const fileName = getStudentAvatarFileName(i);
-      try {
-        await StorageService.linkFileToEntity({
-          referenceTable: "students",
-          referenceId: student.id,
-          usageType: "avatar",
-          filePath: `public/avatars/students/${fileName}`,
-        });
-      } catch (error) {
-        logger.error(`Failed to register avatar usage for student ${student.id}:`, error);
-      }
-    }
+  if (shouldSeedExtendedFiles(seedConfig)) {
+    await linkAvatarsToEntities({
+      assetDir: "avatars/students",
+      bucketDir: "public/avatars/students",
+      poolSize: STUDENT_AVATAR_POOL_SIZE,
+      referenceTable: "students",
+      entities: results,
+    });
   }
 
   logger.info(`System students seeded (${results.length} total).`);

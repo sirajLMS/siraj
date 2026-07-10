@@ -1,11 +1,10 @@
 import {
   ALL_ACCOUNT_STATUSES,
   cycleAtIndex,
-  getAvatarFileName,
+  linkAvatarsToEntities,
   loadSeedConfig,
   pickTimezoneForIndex,
   type SeedConfig,
-  seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -49,24 +48,17 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEnti
       timezone: tzIana,
       status,
     });
-
-    if (shouldSeedExtendedFiles(seedConfig)) {
-      try {
-        const avatarFile = getAvatarFileName(i, 4);
-        await seedEntityFile({
-          assetRelativePath: `avatars/teachers/${avatarFile}`,
-          bucketPath: `public/avatars/teachers/${avatarFile}`,
-          referenceTable: "teachers",
-          referenceId: teacher.id,
-          usageType: "avatar",
-          ensureParentDirs: ["public/avatars/teachers"],
-        });
-      } catch (error) {
-        logger.error(`Failed to seed teacher avatar for ${teacher.id}:`, error);
-      }
-    }
-
     results.push(teacher);
+  }
+
+  if (shouldSeedExtendedFiles(seedConfig)) {
+    await linkAvatarsToEntities({
+      assetDir: "avatars/teachers",
+      bucketDir: "public/avatars/teachers",
+      poolSize: 4,
+      referenceTable: "teachers",
+      entities: results,
+    });
   }
 
   logger.info(`System teachers seeded (${results.length} total).`);

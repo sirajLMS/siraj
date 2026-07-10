@@ -6,6 +6,8 @@ import {
   pickScheduleDurationMinutes,
   pickTimezoneForIndex,
   type SeedConfig,
+  seedEntityFile,
+  shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
@@ -31,6 +33,27 @@ export async function seedOrGet(teachersList: TeacherEntity[], studentsList: Stu
   }));
 
   const results = await RecurringClassService.upsertManyRecurringSchedules(inputs);
+
+  if (shouldSeedExtendedFiles(seedConfig)) {
+    for (let i = 0; i < results.length; i++) {
+      const schedule = results[i];
+      if (!schedule) continue;
+
+      try {
+        await seedEntityFile({
+          assetRelativePath: "documents/sample-attachment.pdf",
+          bucketPath: `public/schedules/seed_${schedule.id}.pdf`,
+          referenceTable: "recurring_schedules",
+          referenceId: schedule.id,
+          usageType: "attachment",
+          ensureParentDirs: ["public/schedules"],
+        });
+      } catch (error) {
+        logger.error(`Failed to seed recurring schedule file for ${schedule.id}:`, error);
+      }
+    }
+  }
+
   logger.info(`System classes seeded (${results.length} recurring schedules).`);
   return results;
 }

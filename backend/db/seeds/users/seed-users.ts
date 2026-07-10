@@ -1,9 +1,12 @@
 import {
   buildExtraParentUserSpecs,
   buildExtraTeacherUserSpecs,
+  getAvatarFileName,
   loadSeedConfig,
   type SeedConfig,
   type SeedUserSpec,
+  seedEntityFile,
+  shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
@@ -42,6 +45,48 @@ export async function seedOrGet(
   ];
 
   const results = await UserBootstrapService.upsertManyDemoUsers(demoInputs, groupMap);
+
+  if (shouldSeedExtendedFiles(seedConfig)) {
+    const staffProfiles = await UserBootstrapService.findStaffProfilesByUserIds(results.map(user => user.id));
+
+    for (let i = 0; i < results.length; i++) {
+      const user = results[i];
+      const avatarFile = getAvatarFileName(i, 4);
+
+      try {
+        await seedEntityFile({
+          assetRelativePath: `avatars/teachers/${avatarFile}`,
+          bucketPath: `public/avatars/users/${avatarFile}`,
+          referenceTable: "users",
+          referenceId: user.id,
+          usageType: "avatar",
+          ensureParentDirs: ["public/avatars/users"],
+        });
+      } catch (error) {
+        logger.error(`Failed to seed user avatar for ${user.id}:`, error);
+      }
+    }
+
+    for (let i = 0; i < staffProfiles.length; i++) {
+      const profile = staffProfiles[i];
+      if (!profile) continue;
+
+      try {
+        const avatarFile = getAvatarFileName(i, 4);
+        await seedEntityFile({
+          assetRelativePath: `avatars/teachers/${avatarFile}`,
+          bucketPath: `public/avatars/staff/${avatarFile}`,
+          referenceTable: "staff_profiles",
+          referenceId: profile.staffProfileId,
+          usageType: "avatar",
+          ensureParentDirs: ["public/avatars/staff"],
+        });
+      } catch (error) {
+        logger.error(`Failed to seed staff profile avatar for ${profile.staffProfileId}:`, error);
+      }
+    }
+  }
+
   logger.info(`System users seeded (${results.length} total).`);
   return results;
 }

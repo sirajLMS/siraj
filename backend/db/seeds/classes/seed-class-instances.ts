@@ -5,6 +5,8 @@ import {
   loadSeedConfig,
   type ScheduleContext,
   type SeedConfig,
+  seedEntityFile,
+  shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import logger from "@/backend/lib/logger";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
@@ -66,6 +68,26 @@ export async function seedOrGet(
     });
     results.push(...inserted);
     logger.info(`Class instances progress: ${Math.min(i + CHUNK_SIZE, allInstances.length)}/${allInstances.length}`);
+  }
+
+  if (shouldSeedExtendedFiles(seedConfig)) {
+    for (let i = 0; i < Math.min(results.length, 3); i++) {
+      const instance = results[i];
+      if (!instance) continue;
+
+      try {
+        await seedEntityFile({
+          assetRelativePath: "documents/sample-attachment.pdf",
+          bucketPath: `public/class-instances/seed_${instance.id}.pdf`,
+          referenceTable: "class_instances",
+          referenceId: instance.id,
+          usageType: "attachment",
+          ensureParentDirs: ["public/class-instances"],
+        });
+      } catch (error) {
+        logger.error(`Failed to seed class instance file for ${instance.id}:`, error);
+      }
+    }
   }
 
   logger.info(`System class instances seeded (${results.length} total).`);

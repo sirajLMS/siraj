@@ -3,6 +3,7 @@ export {
   findAdminUser,
   findAdminUserOrFallback,
 } from "./admin-user";
+export { SEED_ASSET_MANIFEST, type SeedAssetEntry } from "./asset-manifest";
 export {
   ADMIN_AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
@@ -17,6 +18,12 @@ export {
   shouldSeedLunchBlock,
 } from "./availability-factory";
 export {
+  linkAvatarsToEntities,
+  type SeedAvatarPoolInput,
+  seedAvatarForEntity,
+  seedAvatarPool,
+} from "./avatar-seed-helper";
+export {
   buildInvoiceAmount,
   DEFAULT_INVOICE_CURRENCY,
   DEFAULT_INVOICE_TYPE,
@@ -24,6 +31,16 @@ export {
   type InvoiceMonthSpec,
   iterateInvoiceMonths,
 } from "./billing-factory";
+export {
+  BOOK_CATALOG_SEEDS,
+  type BookCatalogSeed,
+  CLASS_CATEGORY_SEEDS,
+  CLASS_SUBJECT_SEEDS,
+  type ClassCategoryCatalogSeed,
+  type ClassSubjectCatalogSeed,
+  SUBJECT_RESOURCE_SEEDS,
+  type SubjectResourceCatalogSeed,
+} from "./class-catalog-factory";
 export {
   buildShowcaseInstancesForToday,
   generateClassInstancesForSchedule,
@@ -75,6 +92,13 @@ export {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "./file-seed-helper";
+export {
+  type CatalogLogoCategory,
+  getCatalogLogoAssetPath,
+  getCatalogLogoBucketPath,
+  seedCatalogLogoUrl,
+  seedCatalogLogoUrls,
+} from "./logo-seed-helper";
 export { type OrchestrateSeedManyOptions, orchestrateSeedMany } from "./orchestrate-seed-many";
 export {
   buildExtraParentUserSpecs,
@@ -84,6 +108,7 @@ export {
   pickTimezoneForIndex,
   type SeedUserSpec,
 } from "./person-factory";
+export { logFailedSeedSteps, runSeedStep, type SeedStepOutcome, type SeedStepResult } from "./run-seed-step";
 export {
   buildScheduleDaysForStudent,
   isScheduleDayActive,
@@ -100,3 +125,4 @@ export {
   type SeedConfig,
   type SeedProfile,
 } from "./seed-config";
+export { type SeedAssetValidationResult, validateSeedAssets, validateSeedAssetsOrThrow } from "./validate-seed-assets";

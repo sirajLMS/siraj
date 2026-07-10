@@ -142,6 +142,62 @@ export enum AppPermission {
   PaymentMethodsVerifyBankTransfer = 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER',
   PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',
   PermissionGroupsManage = 'PERMISSION_GROUPS_MANAGE',
+  ProfileCoreContactEditOther = 'PROFILE_CORE_CONTACT_EDIT_OTHER',
+  ProfileCoreContactEditOwn = 'PROFILE_CORE_CONTACT_EDIT_OWN',
+  ProfileCoreContactViewOther = 'PROFILE_CORE_CONTACT_VIEW_OTHER',
+  ProfileCoreContactViewOwn = 'PROFILE_CORE_CONTACT_VIEW_OWN',
+  ProfileCoreIdentityEditOther = 'PROFILE_CORE_IDENTITY_EDIT_OTHER',
+  ProfileCoreIdentityEditOwn = 'PROFILE_CORE_IDENTITY_EDIT_OWN',
+  ProfileCoreIdentityViewOther = 'PROFILE_CORE_IDENTITY_VIEW_OTHER',
+  ProfileCoreIdentityViewOwn = 'PROFILE_CORE_IDENTITY_VIEW_OWN',
+  ProfileMeetingConfigsEditOther = 'PROFILE_MEETING_CONFIGS_EDIT_OTHER',
+  ProfileMeetingConfigsEditOwn = 'PROFILE_MEETING_CONFIGS_EDIT_OWN',
+  ProfileMeetingConfigsViewOther = 'PROFILE_MEETING_CONFIGS_VIEW_OTHER',
+  ProfileMeetingConfigsViewOwn = 'PROFILE_MEETING_CONFIGS_VIEW_OWN',
+  ProfileParentAccountEditOther = 'PROFILE_PARENT_ACCOUNT_EDIT_OTHER',
+  ProfileParentAccountEditOwn = 'PROFILE_PARENT_ACCOUNT_EDIT_OWN',
+  ProfileParentAccountViewOther = 'PROFILE_PARENT_ACCOUNT_VIEW_OTHER',
+  ProfileParentAccountViewOwn = 'PROFILE_PARENT_ACCOUNT_VIEW_OWN',
+  ProfileParentBillingEditOther = 'PROFILE_PARENT_BILLING_EDIT_OTHER',
+  ProfileParentBillingEditOwn = 'PROFILE_PARENT_BILLING_EDIT_OWN',
+  ProfileParentBillingViewOther = 'PROFILE_PARENT_BILLING_VIEW_OTHER',
+  ProfileParentBillingViewOwn = 'PROFILE_PARENT_BILLING_VIEW_OWN',
+  ProfileParentIdentityEditOther = 'PROFILE_PARENT_IDENTITY_EDIT_OTHER',
+  ProfileParentIdentityEditOwn = 'PROFILE_PARENT_IDENTITY_EDIT_OWN',
+  ProfileParentIdentityViewOther = 'PROFILE_PARENT_IDENTITY_VIEW_OTHER',
+  ProfileParentIdentityViewOwn = 'PROFILE_PARENT_IDENTITY_VIEW_OWN',
+  ProfileParentSocialEditOther = 'PROFILE_PARENT_SOCIAL_EDIT_OTHER',
+  ProfileParentSocialEditOwn = 'PROFILE_PARENT_SOCIAL_EDIT_OWN',
+  ProfileParentSocialViewOther = 'PROFILE_PARENT_SOCIAL_VIEW_OTHER',
+  ProfileParentSocialViewOwn = 'PROFILE_PARENT_SOCIAL_VIEW_OWN',
+  ProfileParentStudentsEditOther = 'PROFILE_PARENT_STUDENTS_EDIT_OTHER',
+  ProfileParentStudentsEditOwn = 'PROFILE_PARENT_STUDENTS_EDIT_OWN',
+  ProfileParentStudentsViewOther = 'PROFILE_PARENT_STUDENTS_VIEW_OTHER',
+  ProfileParentStudentsViewOwn = 'PROFILE_PARENT_STUDENTS_VIEW_OWN',
+  ProfilePaymentMethodsEditOther = 'PROFILE_PAYMENT_METHODS_EDIT_OTHER',
+  ProfilePaymentMethodsEditOwn = 'PROFILE_PAYMENT_METHODS_EDIT_OWN',
+  ProfilePaymentMethodsViewOther = 'PROFILE_PAYMENT_METHODS_VIEW_OTHER',
+  ProfilePaymentMethodsViewOwn = 'PROFILE_PAYMENT_METHODS_VIEW_OWN',
+  ProfileStaffPermissionsEditOther = 'PROFILE_STAFF_PERMISSIONS_EDIT_OTHER',
+  ProfileStaffPermissionsEditOwn = 'PROFILE_STAFF_PERMISSIONS_EDIT_OWN',
+  ProfileStaffPermissionsViewOther = 'PROFILE_STAFF_PERMISSIONS_VIEW_OTHER',
+  ProfileStaffPermissionsViewOwn = 'PROFILE_STAFF_PERMISSIONS_VIEW_OWN',
+  ProfileStaffRoleEditOther = 'PROFILE_STAFF_ROLE_EDIT_OTHER',
+  ProfileStaffRoleEditOwn = 'PROFILE_STAFF_ROLE_EDIT_OWN',
+  ProfileStaffRoleViewOther = 'PROFILE_STAFF_ROLE_VIEW_OTHER',
+  ProfileStaffRoleViewOwn = 'PROFILE_STAFF_ROLE_VIEW_OWN',
+  ProfileTeacherIdentityEditOther = 'PROFILE_TEACHER_IDENTITY_EDIT_OTHER',
+  ProfileTeacherIdentityEditOwn = 'PROFILE_TEACHER_IDENTITY_EDIT_OWN',
+  ProfileTeacherIdentityViewOther = 'PROFILE_TEACHER_IDENTITY_VIEW_OTHER',
+  ProfileTeacherIdentityViewOwn = 'PROFILE_TEACHER_IDENTITY_VIEW_OWN',
+  ProfileTeacherProfessionalEditOther = 'PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER',
+  ProfileTeacherProfessionalEditOwn = 'PROFILE_TEACHER_PROFESSIONAL_EDIT_OWN',
+  ProfileTeacherProfessionalViewOther = 'PROFILE_TEACHER_PROFESSIONAL_VIEW_OTHER',
+  ProfileTeacherProfessionalViewOwn = 'PROFILE_TEACHER_PROFESSIONAL_VIEW_OWN',
+  ProfileTeacherStudentsEditOther = 'PROFILE_TEACHER_STUDENTS_EDIT_OTHER',
+  ProfileTeacherStudentsEditOwn = 'PROFILE_TEACHER_STUDENTS_EDIT_OWN',
+  ProfileTeacherStudentsViewOther = 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER',
+  ProfileTeacherStudentsViewOwn = 'PROFILE_TEACHER_STUDENTS_VIEW_OWN',
   ReportsGenerate = 'REPORTS_GENERATE',
   ReportGenerateCustom = 'REPORT_GENERATE_CUSTOM',
   ReportViewFinancials = 'REPORT_VIEW_FINANCIALS',
@@ -183,9 +239,37 @@ export enum AppPermission {
   StudentsEdit = 'STUDENTS_EDIT',
   StudentsList = 'STUDENTS_LIST',
   StudentsOverrideQuota = 'STUDENTS_OVERRIDE_QUOTA',
+  StudentAcademicEditOther = 'STUDENT_ACADEMIC_EDIT_OTHER',
+  StudentAcademicEditOwn = 'STUDENT_ACADEMIC_EDIT_OWN',
+  StudentAcademicViewOther = 'STUDENT_ACADEMIC_VIEW_OTHER',
+  StudentAcademicViewOwn = 'STUDENT_ACADEMIC_VIEW_OWN',
   StudentEditQuota = 'STUDENT_EDIT_QUOTA',
+  StudentHistoryEditOther = 'STUDENT_HISTORY_EDIT_OTHER',
+  StudentHistoryEditOwn = 'STUDENT_HISTORY_EDIT_OWN',
+  StudentHistoryViewOther = 'STUDENT_HISTORY_VIEW_OTHER',
+  StudentHistoryViewOwn = 'STUDENT_HISTORY_VIEW_OWN',
+  StudentIdentityEditOther = 'STUDENT_IDENTITY_EDIT_OTHER',
+  StudentIdentityEditOwn = 'STUDENT_IDENTITY_EDIT_OWN',
+  StudentIdentityViewOther = 'STUDENT_IDENTITY_VIEW_OTHER',
+  StudentIdentityViewOwn = 'STUDENT_IDENTITY_VIEW_OWN',
   StudentManageStatus = 'STUDENT_MANAGE_STATUS',
+  StudentParentEditOther = 'STUDENT_PARENT_EDIT_OTHER',
+  StudentParentEditOwn = 'STUDENT_PARENT_EDIT_OWN',
+  StudentParentViewOther = 'STUDENT_PARENT_VIEW_OTHER',
+  StudentParentViewOwn = 'STUDENT_PARENT_VIEW_OWN',
+  StudentQuotaEditEditOther = 'STUDENT_QUOTA_EDIT_EDIT_OTHER',
+  StudentQuotaEditEditOwn = 'STUDENT_QUOTA_EDIT_EDIT_OWN',
+  StudentQuotaEditViewOther = 'STUDENT_QUOTA_EDIT_VIEW_OTHER',
+  StudentQuotaEditViewOwn = 'STUDENT_QUOTA_EDIT_VIEW_OWN',
   StudentReassignTeacher = 'STUDENT_REASSIGN_TEACHER',
+  StudentScheduleEditOther = 'STUDENT_SCHEDULE_EDIT_OTHER',
+  StudentScheduleEditOwn = 'STUDENT_SCHEDULE_EDIT_OWN',
+  StudentScheduleViewOther = 'STUDENT_SCHEDULE_VIEW_OTHER',
+  StudentScheduleViewOwn = 'STUDENT_SCHEDULE_VIEW_OWN',
+  StudentTeacherEditOther = 'STUDENT_TEACHER_EDIT_OTHER',
+  StudentTeacherEditOwn = 'STUDENT_TEACHER_EDIT_OWN',
+  StudentTeacherViewOther = 'STUDENT_TEACHER_VIEW_OTHER',
+  StudentTeacherViewOwn = 'STUDENT_TEACHER_VIEW_OWN',
   StudentViewAssociated = 'STUDENT_VIEW_ASSOCIATED',
   SubjectsCreate = 'SUBJECTS_CREATE',
   SubjectsDelete = 'SUBJECTS_DELETE',
@@ -213,6 +297,7 @@ export enum AppPermission {
   TeacherEditOwnProfile = 'TEACHER_EDIT_OWN_PROFILE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
   TeacherViewOwnProfile = 'TEACHER_VIEW_OWN_PROFILE',
+  TeacherViewProfile = 'TEACHER_VIEW_PROFILE',
   TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
@@ -452,6 +537,7 @@ export type ClassInstanceDetail = {
   outcome: Maybe<ClassOutcome>;
   payrollCredited: Maybe<Scalars['Boolean']['output']>;
   performance: Maybe<ClassInstancePerformance>;
+  recurringScheduleId: Maybe<Scalars['String']['output']>;
   remarks: Maybe<Scalars['String']['output']>;
   scheduledDate: Maybe<Scalars['String']['output']>;
   startTime: Maybe<Scalars['String']['output']>;
@@ -1048,8 +1134,10 @@ export type DailyScheduleList = {
   avatarUrl: Maybe<Scalars['String']['output']>;
   courseName: Maybe<Scalars['String']['output']>;
   duration: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
@@ -3061,6 +3149,15 @@ export type MutationVerifyBankTransferPaymentMethodArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type NextUnpaidInvoiceSummary = {
+  __typename?: 'NextUnpaidInvoiceSummary';
+  amount: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
+  dueDate: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+};
+
 export type NotificationAlertsResult = {
   __typename?: 'NotificationAlertsResult';
   alerts: Maybe<Array<SystemAlert>>;
@@ -3113,8 +3210,11 @@ export type OnboardingMetrics = {
 export type OnlineMeetingInfo = {
   __typename?: 'OnlineMeetingInfo';
   joinUrl: Maybe<Scalars['String']['output']>;
+  logoUrl: Maybe<Scalars['String']['output']>;
   meetingId: Maybe<Scalars['String']['output']>;
   platform: Maybe<Scalars['String']['output']>;
+  providerName: Maybe<Scalars['LocalizedString']['output']>;
+  source: Maybe<Scalars['String']['output']>;
 };
 
 export enum OrderSortDirection {
@@ -3191,10 +3291,12 @@ export type ParentBillingSummary = {
   activeStudents: Maybe<Scalars['Int']['output']>;
   id: Maybe<Scalars['String']['output']>;
   nextDueDate: Maybe<Scalars['String']['output']>;
+  nextUnpaidInvoice: Maybe<NextUnpaidInvoiceSummary>;
   outstandingBalance: Maybe<Scalars['String']['output']>;
   outstandingByCurrency: Maybe<Array<BillingCurrencyTotal>>;
   paidThisTerm: Maybe<Scalars['String']['output']>;
   paidThisTermByCurrency: Maybe<Array<BillingCurrencyTotal>>;
+  pendingPaymentCount: Maybe<Scalars['Int']['output']>;
 };
 
 /** Paginated parent complaints with page info. */
@@ -3641,6 +3743,7 @@ export type Query = {
   permissions: Maybe<Array<Permission>>;
   profileByUserId: Maybe<UnifiedProfile>;
   recurringMeetingConfigs: Maybe<Array<ClassMeetingConfig>>;
+  recurringSchedule: Maybe<RecurringScheduleDetail>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
   rescheduleTrackingRows: Maybe<RescheduleTrackingResult>;
   searchFiles: Maybe<StorageObjectList>;
@@ -3657,6 +3760,7 @@ export type Query = {
   studentCreditStatus: Maybe<Array<StudentCreditRow>>;
   /** Fetches the global student directory with cross-relational data. */
   studentDirectory: Maybe<StudentDirectoryPayload>;
+  studentProfile: Maybe<StudentProfile>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
   students: StudentsWithFiltersResponse;
   /** Returns contributor statistics for the suggestion social proof display. */
@@ -3704,6 +3808,7 @@ export type QueryAdminDashboardScheduleArgs = {
 
 export type QueryAdminInvoicesArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
+  search: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3879,6 +3984,7 @@ export type QueryParentDocumentsArgs = {
 export type QueryParentInvoiceHistoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   parentId: InputMaybe<Scalars['String']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
   userId: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -3905,6 +4011,11 @@ export type QueryProfileByUserIdArgs = {
 
 export type QueryRecurringMeetingConfigsArgs = {
   recurringScheduleId: Scalars['ID']['input'];
+};
+
+
+export type QueryRecurringScheduleArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3972,6 +4083,13 @@ export type QueryStudentDirectoryArgs = {
   filterArgs: InputMaybe<StudentFilterArgs>;
   orderBy: InputMaybe<Array<StudentsOrderByClause>>;
   paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
+export type QueryStudentProfileArgs = {
+  month: InputMaybe<Scalars['Int']['input']>;
+  studentId: Scalars['String']['input'];
+  year: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4116,6 +4234,27 @@ export type RecurringClassDayInput = {
   dayOfWeek: Scalars['String']['input'];
   isActive: Scalars['Boolean']['input'];
   startTime: Scalars['String']['input'];
+};
+
+export type RecurringScheduleDayDetail = {
+  __typename?: 'RecurringScheduleDayDetail';
+  dayOfWeek: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  startTime: Maybe<Scalars['String']['output']>;
+};
+
+export type RecurringScheduleDetail = {
+  __typename?: 'RecurringScheduleDetail';
+  days: Maybe<Array<RecurringScheduleDayDetail>>;
+  defaultStartTime: Maybe<Scalars['String']['output']>;
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<IanaTimezone>;
 };
 
 export type RefreshExchangeRatesResult = {
@@ -4275,9 +4414,11 @@ export type StatusTrackingScheduleRow = {
   avatarUrl: Maybe<Scalars['String']['output']>;
   courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
   isFrozen: Maybe<Scalars['Boolean']['output']>;
+  meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
@@ -4460,8 +4601,10 @@ export type StudentHistorySession = {
   __typename?: 'StudentHistorySession';
   dayOfMonth: Maybe<Scalars['Int']['output']>;
   duration: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   id: Maybe<Scalars['String']['output']>;
   instructor: Maybe<Scalars['String']['output']>;
+  meetingJoinUrl: Maybe<Scalars['String']['output']>;
   notes: Maybe<Scalars['String']['output']>;
   room: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
@@ -4493,6 +4636,30 @@ export type StudentOnboardingResult = {
   studentId: Maybe<Scalars['String']['output']>;
 };
 
+export type StudentProfile = {
+  __typename?: 'StudentProfile';
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  classHistory: Maybe<StudentClassHistory>;
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  dateOfBirth: Maybe<Scalars['DateTime']['output']>;
+  gender: Maybe<Gender>;
+  hoursPerWeek: Maybe<Scalars['Float']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  language: Maybe<AppLanguage>;
+  name: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
+  primaryTeacherId: Maybe<Scalars['String']['output']>;
+  status: Maybe<StudentStatus>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  teacherUserId: Maybe<Scalars['String']['output']>;
+  upcomingClasses: Maybe<StudentUpcomingClassesResult>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
+};
+
 export type StudentProgress = {
   __typename?: 'StudentProgress';
   completionPercent: Maybe<Scalars['Int']['output']>;
@@ -4503,6 +4670,7 @@ export type StudentProgress = {
 export type StudentSessionDetail = {
   __typename?: 'StudentSessionDetail';
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
@@ -4524,10 +4692,12 @@ export enum StudentStatus {
 export type StudentUpcomingClass = {
   __typename?: 'StudentUpcomingClass';
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
   instructor: Maybe<Scalars['String']['output']>;
   isFrozen: Maybe<Scalars['Boolean']['output']>;
+  meetingJoinUrl: Maybe<Scalars['String']['output']>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
@@ -4810,8 +4980,10 @@ export type SystemAlert = {
 export type TeacherAssignedClass = {
   __typename?: 'TeacherAssignedClass';
   durationMinutes: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   scheduledEndAt: Maybe<Scalars['String']['output']>;
   scheduledStartAt: Maybe<Scalars['String']['output']>;
@@ -5348,8 +5520,10 @@ export type WeeklyScheduleClass = {
   classType: Maybe<ClassType>;
   day: Maybe<Scalars['String']['output']>;
   duration: Maybe<Scalars['Int']['output']>;
+  effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
   startTime: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;

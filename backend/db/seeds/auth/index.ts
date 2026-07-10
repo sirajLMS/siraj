@@ -2,4 +2,5 @@
 // Master controller (`backend/db/seeds/index.ts`) imports these aliases.
 
 export { seedOrGet as seedOrGetPaymentMethodPermissions } from "./seed-payment-method-permissions";
+export { seedOrGet as seedOrGetProfileFieldPermissions } from "./seed-profile-field-permissions";
 export { seedOrGet as seedOrGetUserPermissionOverrides } from "./seed-user-permission-overrides";

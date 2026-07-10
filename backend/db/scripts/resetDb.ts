@@ -1,36 +1,84 @@
+import { neonConfig, Pool as NeonPool } from "@neondatabase/serverless";
 import { Pool } from "pg";
-import { getEnv, requireEnv } from "@/backend/lib/env";
+import ws from "ws";
+import { getStringEnv, requireEnv } from "@/backend/lib/env";
 import logger from "@/backend/lib/logger";
 import { assertDestructiveDbCommandAllowed } from "@/scripts/lib/destructiveDbGuard";
 import { runMigrations } from "./migrate";
 
-function parseDatabaseUrl(url: string) {
-  // Example: postgres://user:password@host:port/dbname or postgresql://user:password@host/dbname?params
-  const matchWithPort = /^postgres(?:ql)?:\/\/([^:]+):([^@]+)@([^:/]+):(\d+)\/([^?]*)/.exec(url);
+type ResetPool = Pool | NeonPool;
 
-  if (matchWithPort) {
-    return {
-      user: matchWithPort[1],
-      password: matchWithPort[2],
-      host: matchWithPort[3],
-      port: matchWithPort[4],
-      database: matchWithPort[5],
-    };
+interface ParsedDatabaseUrl {
+  connectionString: string;
+  database: string;
+  requiresSsl: boolean;
+}
+
+function parseDatabaseUrl(url: string): ParsedDatabaseUrl {
+  const parsed = new URL(url);
+  const database = parsed.pathname.replace(/^\//, "");
+  if (!database) {
+    throw new Error("Invalid DATABASE_URL format: missing database name");
   }
 
-  // Try without port: postgres://user:password@host/dbname?params
-  const matchWithoutPort = /^postgres(?:ql)?:\/\/([^:]+):([^@]+)@([^/]+)\/([^?]*)/.exec(url);
-  if (matchWithoutPort) {
-    return {
-      user: matchWithoutPort[1],
-      password: matchWithoutPort[2],
-      host: matchWithoutPort[3],
-      port: getEnv("PGPORT", "5432"),
-      database: matchWithoutPort[4],
-    };
-  }
+  const requiresSsl =
+    parsed.searchParams.get("sslmode") === "require" || /\.neon\.tech$/i.test(parsed.hostname);
 
-  throw new Error("Invalid DATABASE_URL format");
+  return {
+    connectionString: url,
+    database,
+    requiresSsl,
+  };
+}
+
+function buildConnectionString(connectionString: string, database: string): string {
+  const parsed = new URL(connectionString);
+  parsed.pathname = `/${database}`;
+  return parsed.toString();
+}
+
+function createPgPool(connectionString: string): Pool {
+  const parsed = new URL(connectionString);
+  const requiresSsl =
+    parsed.searchParams.get("sslmode") === "require" || /\.neon\.tech$/i.test(parsed.hostname);
+
+  return new Pool({
+    connectionString,
+    ssl: requiresSsl ? { rejectUnauthorized: false } : undefined,
+  });
+}
+
+function createNeonPool(connectionString: string): NeonPool {
+  neonConfig.webSocketConstructor = ws;
+  return new NeonPool({ connectionString });
+}
+
+function createResetPool(connectionString: string, isNeon: boolean): ResetPool {
+  return isNeon ? createNeonPool(connectionString) : createPgPool(connectionString);
+}
+
+async function resetNeonDatabase(pool: ResetPool, database: string): Promise<void> {
+  logger.log(`Resetting Neon database schema: ${database}`);
+  await pool.query("DROP SCHEMA IF EXISTS public CASCADE");
+  await pool.query("CREATE SCHEMA public");
+  await pool.query("GRANT ALL ON SCHEMA public TO PUBLIC");
+  await pool.query('DROP TABLE IF EXISTS "__drizzle_migrations" CASCADE');
+  logger.log(`Reset Neon schema for: ${database}`);
+}
+
+async function resetPostgresDatabase(adminPool: ResetPool, database: string): Promise<void> {
+  await adminPool.query(
+    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid();",
+    [database]
+  );
+  await adminPool.query(`DROP DATABASE IF EXISTS "${database}";`);
+  logger.log(`Dropped database: ${database}`);
+  await adminPool.query(`CREATE DATABASE "${database}";`);
+  logger.log(`Created database: ${database}`);
+}
+
+async function closeResetPool(pool: ResetPool): Promise<void> {
+  await pool.end();
 }
 
 async function resetDatabase() {
@@ -48,34 +96,31 @@ async function resetDatabase() {
     logger.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
-  logger.debug(`Resetting database: ${dbUrl}`);
+  logger.debug("Resetting database");
 
-  const { user, password, host, port, database } = parseDatabaseUrl(dbUrl);
-  logger.log(`Resetting database: ${database}`);
+  const { connectionString, database } = parseDatabaseUrl(dbUrl);
+  const provider = getStringEnv("DB_PROVIDER", "postgres");
+  const isNeon = provider === "neon";
 
-  // Connect to 'postgres' DB to drop/create target DB
-  const adminPool = new Pool({
-    user,
-    password,
-    host,
-    port: Number(port),
-    database: "postgres",
-  });
+  logger.log(`Resetting database: ${database} (provider: ${provider})`);
+
+  const pool = createResetPool(
+    isNeon ? connectionString : buildConnectionString(connectionString, "postgres"),
+    isNeon
+  );
+
   try {
-    // Terminate connections to target DB
-    await adminPool.query(`SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1;`, [database]);
-    // Drop DB
-    await adminPool.query(`DROP DATABASE IF EXISTS "${database}";`);
-    logger.log(`Dropped database: ${database}`);
-    // Create DB
-    await adminPool.query(`CREATE DATABASE "${database}";`);
-    logger.log(`Created database: ${database}`);
+    if (isNeon) {
+      await resetNeonDatabase(pool, database);
+    } else {
+      await resetPostgresDatabase(pool, database);
+    }
   } catch (err) {
     logger.error("Error resetting database:", err);
-    await adminPool.end();
+    await closeResetPool(pool);
     process.exit(1);
   }
-  await adminPool.end();
+  await closeResetPool(pool);
 
   const skipMigrate = process.argv.includes("--skip-migrate");
   if (skipMigrate) {
@@ -83,7 +128,6 @@ async function resetDatabase() {
     return;
   }
 
-  // Run migrations
   try {
     await runMigrations(true);
     logger.log("Migration after reset completed successfully!");
