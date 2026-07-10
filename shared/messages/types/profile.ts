@@ -34,6 +34,10 @@ export interface ProfileLabels {
   };
   readonly convertedAmount: string;
   readonly convertedTotalApprox: string;
+  readonly fieldAccess: {
+    readonly restrictedTitle: string;
+    readonly restrictedDescription: string;
+  };
   readonly teacher: {
     readonly ownSubtitle: string;
     readonly subtitle: string;

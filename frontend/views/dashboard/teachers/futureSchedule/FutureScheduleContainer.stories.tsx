@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { ClassExecutionState } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
 import { FutureScheduleView } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleView";
 import type { ImportantNoteItem, SupportContactData } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
@@ -40,6 +41,8 @@ const MOCK_CLASSES = [
     subjectId: null,
     subjectName: null,
     classType: null,
+    executionState: ClassExecutionState.NotActivated,
+    outcome: null,
     meetingJoinUrl: null,
     effectiveMeeting: null,
     avatarUrl: null,
@@ -60,6 +63,8 @@ const MOCK_CLASSES = [
     subjectId: null,
     subjectName: null,
     classType: null,
+    executionState: ClassExecutionState.NotActivated,
+    outcome: null,
     meetingJoinUrl: null,
     effectiveMeeting: null,
     avatarUrl: null,
@@ -80,6 +85,8 @@ const MOCK_CLASSES = [
     subjectId: null,
     subjectName: null,
     classType: null,
+    executionState: ClassExecutionState.NotActivated,
+    outcome: null,
     meetingJoinUrl: null,
     effectiveMeeting: null,
     avatarUrl: null,

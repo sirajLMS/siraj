@@ -1473,6 +1473,7 @@ export type FutureClass = {
   durationMinutes: Maybe<Scalars['Int']['output']>;
   effectiveMeeting: Maybe<EffectiveMeeting>;
   endTime: Maybe<Scalars['String']['output']>;
+  executionState: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   isRescheduled: Maybe<Scalars['Boolean']['output']>;
   leaveRequestDisabled: Maybe<Scalars['Boolean']['output']>;
@@ -1480,6 +1481,7 @@ export type FutureClass = {
   location: Maybe<Scalars['String']['output']>;
   /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<Scalars['String']['output']>;
   scheduledDate: Maybe<Scalars['String']['output']>;
   startTime: Maybe<Scalars['String']['output']>;
   studentCount: Maybe<Scalars['Int']['output']>;
@@ -4606,6 +4608,7 @@ export type StudentHistorySession = {
   instructor: Maybe<Scalars['String']['output']>;
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   notes: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<Scalars['String']['output']>;
   room: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
   time: Maybe<Scalars['String']['output']>;
@@ -4647,10 +4650,12 @@ export type StudentProfile = {
   gender: Maybe<Gender>;
   hoursPerWeek: Maybe<Scalars['Float']['output']>;
   id: Maybe<Scalars['String']['output']>;
+  isAssociatedViewer: Maybe<Scalars['Boolean']['output']>;
   language: Maybe<AppLanguage>;
   name: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
+  parentUserId: Maybe<Scalars['String']['output']>;
   primaryTeacherId: Maybe<Scalars['String']['output']>;
   status: Maybe<StudentStatus>;
   teacherName: Maybe<Scalars['String']['output']>;

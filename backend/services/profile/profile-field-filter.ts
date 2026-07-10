@@ -1,10 +1,10 @@
 import { type AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
-import type { ProfileFieldGroupDefinition } from "@/backend/types/profile/profile-field-manifest";
 import {
-  getProfileEditPermission,
-  getProfileViewPermission,
-  PROFILE_FIELD_GROUPS,
-} from "@/backend/types/profile/profile-field-manifest";
+  hasProfileGroupViewPermission,
+  hasStudentGroupViewPermission,
+} from "@/backend/services/profile/profile-field-filter-bridge";
+import type { ProfileFieldGroupDefinition } from "@/backend/types/profile/profile-field-manifest";
+import { getProfileEditPermission, PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { StudentFieldGroupDefinition } from "@/backend/types/students/student-field-manifest";
 import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 
@@ -71,8 +71,7 @@ export function filterProfileByFieldGroups<T extends Record<string, unknown>>(pa
       continue;
     }
 
-    const viewPermission = getProfileViewPermission(group, ctx.scope);
-    if (!hasPermission(ctx.permissions, viewPermission)) {
+    if (!hasProfileGroupViewPermission(ctx, group)) {
       stripProfileGroupPaths(filtered, group);
     }
   }
@@ -84,7 +83,7 @@ function getStudentScope(ctx: StudentFieldFilterContext): ProfileScope {
   return ctx.isAssociatedViewer ? ProfileScope.OWN : ProfileScope.OTHER;
 }
 
-function getStudentViewPermission(group: StudentFieldGroupDefinition, ctx: StudentFieldFilterContext): AppPermission {
+function _getStudentViewPermission(group: StudentFieldGroupDefinition, ctx: StudentFieldFilterContext): AppPermission {
   return getStudentScope(ctx) === ProfileScope.OWN ? group.viewOwn : group.viewOther;
 }
 
@@ -102,8 +101,7 @@ export function filterStudentProfileByFieldGroups<T extends Record<string, unkno
   const filtered = cloneForFiltering(payload);
 
   for (const group of STUDENT_FIELD_GROUPS) {
-    const viewPermission = getStudentViewPermission(group, ctx);
-    if (!hasPermission(ctx.permissions, viewPermission)) {
+    if (!hasStudentGroupViewPermission(ctx, group)) {
       for (const path of group.paths) {
         setValueAtPath(filtered, path, null);
       }
@@ -118,7 +116,7 @@ export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
-  return hasPermission(ctx.permissions, getProfileViewPermission(group, ctx.scope));
+  return hasProfileGroupViewPermission(ctx, group);
 }
 
 export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {

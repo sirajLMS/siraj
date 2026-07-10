@@ -183,6 +183,8 @@ export const FutureClassPothosObject = FutureClassRef.implement({
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
+    executionState: t.exposeString("executionState", { nullable: true }),
+    outcome: t.exposeString("outcome", { nullable: true }),
     meetingJoinUrl: t.string({
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",

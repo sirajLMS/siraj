@@ -10,6 +10,7 @@ export type StudentProfileClassHistorySession = {
   readonly time: string | null;
   readonly duration: number | null;
   readonly status: string | null;
+  readonly outcome?: string | null;
   readonly instructor: string | null;
   readonly timeSlot: string | null;
   readonly room: string | null;
@@ -28,7 +29,9 @@ export type StudentProfileQueryData = {
   readonly gender: Gender | null;
   readonly language: string | null;
   readonly parentId: string | null;
+  readonly parentUserId: string | null;
   readonly parentName: string | null;
+  readonly isAssociatedViewer: boolean | null;
   readonly primaryTeacherId: string | null;
   readonly teacherUserId: string | null;
   readonly teacherName: string | null;

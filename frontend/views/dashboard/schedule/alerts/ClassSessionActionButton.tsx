@@ -13,6 +13,7 @@ interface ClassSessionActionButtonProps {
     readonly viewRecording: string;
   };
   readonly onLeave: (id: string) => void;
+  readonly onViewRecording: (id: string) => void;
   readonly fullWidth?: boolean;
 }
 
@@ -21,6 +22,7 @@ export function ClassSessionActionButton({
   classId,
   labels,
   onLeave,
+  onViewRecording,
   fullWidth = false,
 }: ClassSessionActionButtonProps) {
   if (action === "join_session") {
@@ -34,6 +36,9 @@ export function ClassSessionActionButton({
         variant="outlined"
         fullWidth={fullWidth}
         startIcon={<OndemandVideoOutlined />}
+        onClick={() => {
+          onViewRecording(classId);
+        }}
         sx={theme => ({
           ...theme.typography.labelUppercase,
           px: 2,

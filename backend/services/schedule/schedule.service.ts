@@ -333,6 +333,9 @@ export namespace ScheduleService {
           subjectName: cls.subjectName,
           classType: resolvedClassType,
           meetingJoinUrl: effectiveMeeting.joinUrl ?? null,
+          effectiveMeeting,
+          executionState: cls.executionState ?? null,
+          outcome: cls.outcome ?? null,
           avatarUrl: resolveClassAvatarUrl(cls.recurringAvatarUrl, cls.subjectAvatarUrl),
         };
       })

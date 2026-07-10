@@ -22,6 +22,7 @@ import {
   formatScheduleTimeOnly,
   formatScheduleYourTime,
 } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface UseScheduleColumnsParams {
   readonly headers: {
@@ -223,12 +224,14 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
         headerAlign: "center",
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
-            <MeetingJoinAction
-              variant="icon"
-              joinUrl={row.meetingJoinUrl}
-              meeting={row.effectiveMeeting}
-              emptyRole="parent"
-            />
+            {isJoinableByExecutionState(row.executionState, row.outcome) ? (
+              <MeetingJoinAction
+                variant="icon"
+                joinUrl={row.meetingJoinUrl}
+                meeting={row.effectiveMeeting}
+                emptyRole="parent"
+              />
+            ) : null}
           </Box>
         ),
       },

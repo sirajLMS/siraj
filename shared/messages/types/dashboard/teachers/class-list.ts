@@ -3,6 +3,7 @@ export interface TeacherClassListLabels {
   readonly pageSubtitle: string;
   readonly noClasses: string;
   readonly viewDetails: string;
+  readonly durationMinutes: string;
   readonly errors: {
     readonly failedToLoad: string;
   };

@@ -18,6 +18,14 @@ export {
   shouldSeedLunchBlock,
 } from "./availability-factory";
 export {
+  type AvatarPersona,
+  getAvatarFileNameForPersona,
+  getAvatarPoolFiles,
+  PARENT_AVATAR_FILES,
+  STUDENT_AVATAR_FILES,
+  TEACHER_AVATAR_FILES,
+} from "./avatar-file-registry";
+export {
   linkAvatarsToEntities,
   type SeedAvatarPoolInput,
   seedAvatarForEntity,

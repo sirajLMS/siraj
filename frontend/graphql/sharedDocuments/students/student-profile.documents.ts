@@ -13,7 +13,9 @@ export const studentProfileQueryDocument = gql`
       gender
       language
       parentId
+      parentUserId
       parentName
+      isAssociatedViewer
       primaryTeacherId
       teacherUserId
       teacherName
@@ -58,6 +60,7 @@ export const studentProfileQueryDocument = gql`
           time
           duration
           status
+          outcome
           instructor
           timeSlot
           room

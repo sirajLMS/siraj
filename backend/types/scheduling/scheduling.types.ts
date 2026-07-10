@@ -169,6 +169,8 @@ export type FutureClassRow = {
   subjectAvatarUrl?: string | null;
   recurringAvatarUrl?: string | null;
   meetingJoinUrl?: string | null;
+  executionState?: string | null;
+  outcome?: string | null;
 };
 
 export type WeeklyScheduleGridRow = {

@@ -1,10 +1,5 @@
 import * as fs from "node:fs";
-import {
-  type FileReferenceTable,
-  getAvatarFileName,
-  resolveAssetPath,
-  seedEntityFile,
-} from "@/backend/db/seeds/lib/file-seed-helper";
+import { type FileReferenceTable, resolveAssetPath, seedEntityFile } from "@/backend/db/seeds/lib/file-seed-helper";
 import logger from "@/backend/lib/logger";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
@@ -12,20 +7,24 @@ import { getStorageService } from "@/backend/storage/storage.service";
 export type SeedAvatarPoolInput = {
   assetDir: string;
   bucketDir: string;
-  poolSize: number;
+  poolFiles: readonly string[];
   referenceTable: FileReferenceTable;
   entities: readonly { id: string }[];
 };
 
 export async function seedAvatarForEntity(input: {
   index: number;
-  poolSize: number;
+  poolFiles: readonly string[];
   assetDir: string;
   bucketDir: string;
   referenceTable: FileReferenceTable;
   referenceId: string;
 }): Promise<string | null> {
-  const avatarFile = getAvatarFileName(input.index, input.poolSize);
+  const avatarFile = input.poolFiles[input.index % input.poolFiles.length];
+  if (!avatarFile) {
+    return null;
+  }
+
   const assetRelativePath = `${input.assetDir}/${avatarFile}`;
   const localFilePath = resolveAssetPath(assetRelativePath);
 
@@ -53,8 +52,7 @@ export async function seedAvatarForEntity(input: {
 export async function seedAvatarPool(input: SeedAvatarPoolInput): Promise<Map<string, string | null>> {
   const avatarUrls = new Map<string, string | null>();
 
-  for (let i = 0; i < input.poolSize; i++) {
-    const avatarFile = getAvatarFileName(i, input.poolSize);
+  for (const avatarFile of input.poolFiles) {
     const assetRelativePath = `${input.assetDir}/${avatarFile}`;
     const localFilePath = resolveAssetPath(assetRelativePath);
     const bucketPath = `${input.bucketDir}/${avatarFile}`;
@@ -88,7 +86,7 @@ export async function linkAvatarsToEntities(input: SeedAvatarPoolInput): Promise
 
     await seedAvatarForEntity({
       index: i,
-      poolSize: input.poolSize,
+      poolFiles: input.poolFiles,
       assetDir: input.assetDir,
       bucketDir: input.bucketDir,
       referenceTable: input.referenceTable,

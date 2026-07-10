@@ -3,6 +3,7 @@ import {
   cycleAtIndex,
   linkAvatarsToEntities,
   loadSeedConfig,
+  PARENT_AVATAR_FILES,
   pickTimezoneForIndex,
   type SeedConfig,
   shouldSeedExtendedFiles,
@@ -41,7 +42,7 @@ export async function seedOrGet(users: UserSelectType[], config?: SeedConfig) {
     await linkAvatarsToEntities({
       assetDir: "avatars/parents",
       bucketDir: "public/avatars/parents",
-      poolSize: 4,
+      poolFiles: PARENT_AVATAR_FILES,
       referenceTable: "parents",
       entities: results,
     });

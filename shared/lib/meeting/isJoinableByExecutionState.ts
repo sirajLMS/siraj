@@ -17,3 +17,26 @@ export function isJoinableByExecutionState(executionState?: string | null, outco
 
   return true;
 }
+
+export function isJoinableClassInstance(
+  executionState?: string | null,
+  outcome?: string | null,
+  options?: { readonly isFrozen?: boolean }
+): boolean {
+  if (options?.isFrozen) {
+    return false;
+  }
+  return isJoinableByExecutionState(executionState, outcome);
+}
+
+export function isFutureClassJoinable(item: {
+  readonly executionState?: string | null;
+  readonly outcome?: string | null;
+  readonly leaveRequestDisabled?: boolean | null;
+  readonly leaveRequestDisabledReason?: string | null;
+}): boolean {
+  if (item.leaveRequestDisabled && item.leaveRequestDisabledReason === "time") {
+    return false;
+  }
+  return isJoinableByExecutionState(item.executionState, item.outcome);
+}

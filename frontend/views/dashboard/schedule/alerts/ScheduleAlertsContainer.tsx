@@ -14,6 +14,7 @@ import type {
   ClassSessionStatus,
   ScheduleAlert,
 } from "@/frontend/views/dashboard/schedule/alerts/types";
+import { useRouter } from "@/shared/i18n/routing";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 function getTodayString() {
@@ -50,6 +51,7 @@ function mapOutcomeToAction(outcome: string | null | undefined, status: ClassSes
 
 export function ScheduleAlertsContainer() {
   const t = useTranslations("dashboard.scheduleAlerts");
+  const router = useRouter();
 
   const page = useScheduleAlertsStore(state => state.page);
   const pageSize = useScheduleAlertsStore(state => state.pageSize);
@@ -90,6 +92,8 @@ export function ScheduleAlertsContainer() {
       room: "",
       action: mapOutcomeToAction(row?.outcome, status),
       sessionStatus: status,
+      executionState: row?.executionState,
+      outcome: row?.outcome,
       meetingJoinUrl: row?.meetingJoinUrl,
       effectiveMeeting: row?.effectiveMeeting,
     };
@@ -146,7 +150,13 @@ export function ScheduleAlertsContainer() {
     setPage(newPage);
   };
 
-  const handleLeave = (_id: string) => {};
+  const handleLeave = (id: string) => {
+    router.push(`/reschedule?classInstanceId=${id}`);
+  };
+
+  const handleViewRecording = (id: string) => {
+    router.push(`/classes/${id}/audit`);
+  };
 
   return (
     <RequirePermission permissions={[AppPermission.ScheduleViewList]}>
@@ -160,6 +170,7 @@ export function ScheduleAlertsContainer() {
         pageSize={pageSize}
         labels={labels}
         onLeave={handleLeave}
+        onViewRecording={handleViewRecording}
         onPageChange={handlePageChange}
         loading={loading}
         onDownloadReport={() => {}}

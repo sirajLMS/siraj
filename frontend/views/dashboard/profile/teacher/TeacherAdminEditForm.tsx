@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/views/dashboard/profile/teacher/sections/CompensationSection";
@@ -32,6 +33,8 @@ export function TeacherAdminEditForm({
   readonly onSubmit: (values: TeacherAdminEditFormData) => Promise<void>;
 }) {
   const tc = useTranslations("profile");
+  const scope = ProfileScope.Other;
+  const { canEdit } = useProfileFieldAccess({ scope });
   const form = useForm<TeacherAdminEditFormData>({
     resolver: zodResolver(teacherAdminEditSchema),
     defaultValues: {
@@ -86,17 +89,26 @@ export function TeacherAdminEditForm({
             },
           }}
         >
-          <AccountSection
-            mode="edit"
-            teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
-            avatarUrl={avatarUrl}
-            register={form.register}
-            control={form.control}
-          />
-          <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
+          {canEdit("core_identity") ? (
+            <AccountSection
+              mode="edit"
+              scope={scope}
+              teacherData={{ name: teacherData.name ?? null, email: teacherData.email ?? null }}
+              avatarUrl={avatarUrl}
+              register={form.register}
+              control={form.control}
+            />
+          ) : null}
+          {canEdit("core_contact") ? (
+            <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
+          ) : null}
           {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
-          <CompensationSection mode="edit" register={form.register} control={form.control} />
-          <AdminOnlySection mode="edit" register={form.register} control={form.control} />
+          {canEdit("teacher_professional") ? (
+            <CompensationSection mode="edit" register={form.register} control={form.control} />
+          ) : null}
+          {canEdit("teacher_identity") ? (
+            <AdminOnlySection mode="edit" register={form.register} control={form.control} />
+          ) : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {isSaving ? tc("shell.loading") : tc("actions.save")}

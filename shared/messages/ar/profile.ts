@@ -36,6 +36,10 @@ export const profile: ProfileLabels = {
   },
   convertedAmount: "{lockedAmount} {lockedCurrency} (تقريباً {convertedApprox} {displayCurrency})",
   convertedTotalApprox: "≈ {convertedApprox} {displayCurrency}",
+  fieldAccess: {
+    restrictedTitle: "Restricted",
+    restrictedDescription: "You do not have permission to view these details.",
+  },
   teacher: {
     ownSubtitle: "عرض وتحديث ملفك التدريسي وبيانات الاتصال.",
     subtitle: "إدارة بيانات الاعتماد المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",

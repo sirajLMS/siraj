@@ -68,6 +68,7 @@ export function StudentHistoryContainer() {
             duration: session.duration ?? 0,
             status: mapStatusToAttendance(session.status ?? "present"),
             executionState: session.status ?? "",
+            outcome: session.outcome ?? null,
             instructor: session.instructor ?? "",
             timeSlot: session.timeSlot ?? "",
             room: session.room ?? "",

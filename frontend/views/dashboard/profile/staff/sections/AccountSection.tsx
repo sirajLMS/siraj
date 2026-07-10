@@ -3,102 +3,102 @@
 import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
-import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import { AccountStatus, type CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
-import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
+import { AccountStatus, type CurrencyCode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CoreIdentitySection } from "@/frontend/views/dashboard/profile/shared/sections/CoreIdentitySection";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/views/dashboard/profile/staff/staffProfileFormTypes";
 
 type AccountSectionProps =
   | {
       readonly mode: "view";
+      readonly scope?: ProfileScope;
       readonly staffData: StaffProfileData;
       readonly isAdminScope: boolean;
       readonly displayCurrency: CurrencyCode | null | undefined;
     }
   | {
       readonly mode: "edit";
+      readonly scope?: ProfileScope;
       readonly staffData: StaffProfileData;
       readonly isAdminScope: boolean;
       readonly register: UseFormRegister<StaffAdminEditFormData>;
       readonly control: Control<StaffAdminEditFormData>;
     };
 
+function StaffRoleStatusView({
+  status,
+  statusLabel,
+  statusFieldLabel,
+}: {
+  readonly status: string;
+  readonly statusLabel: string;
+  readonly statusFieldLabel: string;
+}) {
+  return (
+    <Stack spacing={0.25}>
+      <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
+        {statusFieldLabel}
+      </Typography>
+      <StatusBadge category="staffAccount" status={status} label={statusLabel} size="small" />
+    </Stack>
+  );
+}
+
 export function AccountSection(props: AccountSectionProps) {
   const t = useTranslations("profile.staff");
-  const tc = useTranslations("profile");
+  const { canView, canEdit } = useProfileFieldAccess({ scope: props.scope });
 
   if (props.mode === "edit") {
     return (
-      <SectionPanel title={t("sections.account")}>
-        <Stack spacing={2}>
-          <TextField label={t("fields.fullName")} fullWidth size="small" {...props.register("name")} />
-          <TextField
-            label={t("fields.primaryEmail")}
-            fullWidth
-            size="small"
-            type="email"
-            {...props.register("email")}
-          />
-          <Controller
-            name="displayCurrency"
-            control={props.control}
-            render={({ field, fieldState }) => {
-              const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
-              return (
-                <CurrencySelect
-                  currency={option}
-                  setCurrencyAction={selected => {
-                    field.onChange(selected.code);
-                  }}
-                  onBlurAction={field.onBlur}
-                  label={t("fields.displayCurrency")}
-                  error={Boolean(fieldState.error)}
-                  helperText={fieldState.error?.message}
-                  fullWidth
-                />
-              );
-            }}
-          />
-          {props.isAdminScope ? (
+      <Stack spacing={2}>
+        <CoreIdentitySection
+          mode="edit"
+          scope={props.scope}
+          name={props.staffData.name}
+          sectionTitle={t("sections.account")}
+          nameLabel={t("fields.fullName")}
+          emailLabel={t("fields.primaryEmail")}
+          currencyLabel={t("fields.displayCurrency")}
+          register={props.register}
+          control={props.control}
+        />
+        {props.isAdminScope && canEdit("staff_role") ? (
+          <SectionPanel title={t("sections.role")}>
             <TextField label={t("fields.status")} fullWidth size="small" select {...props.register("status")}>
               <MenuItem value={AccountStatus.Activated}>{t("fields.statusActive")}</MenuItem>
               <MenuItem value={AccountStatus.Deactivated}>{t("fields.statusInactive")}</MenuItem>
             </TextField>
-          ) : null}
-        </Stack>
-      </SectionPanel>
+          </SectionPanel>
+        ) : null}
+      </Stack>
     );
   }
 
   const statusLabel =
     props.staffData.status === AccountStatus.Activated ? t("fields.statusActive") : t("fields.statusInactive");
+  const roleStatusContent =
+    props.isAdminScope && canView("staff_role") ? (
+      <StaffRoleStatusView
+        status={(props.staffData.status ?? AccountStatus.Activated).toLowerCase()}
+        statusLabel={statusLabel}
+        statusFieldLabel={t("fields.status")}
+      />
+    ) : null;
 
   return (
-    <SectionPanel title={t("sections.account")}>
-      <Stack spacing={1.5}>
-        <InfoField
-          label={t("fields.displayCurrency")}
-          value={<CurrencyDisplay code={props.displayCurrency} fallback={tc("notSet")} />}
-        />
-        {props.isAdminScope ? (
-          <Stack spacing={0.25}>
-            <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
-              {t("fields.status")}
-            </Typography>
-            <StatusBadge
-              category="staffAccount"
-              status={(props.staffData.status ?? AccountStatus.Activated).toLowerCase()}
-              label={statusLabel}
-              size="small"
-            />
-          </Stack>
-        ) : null}
-      </Stack>
-    </SectionPanel>
+    <CoreIdentitySection
+      mode="view"
+      scope={props.scope}
+      name={props.staffData.name}
+      email={props.staffData.email}
+      displayCurrency={props.displayCurrency}
+      sectionTitle={t("sections.account")}
+      nameLabel={t("fields.fullName")}
+      emailLabel={t("fields.primaryEmail")}
+      currencyLabel={t("fields.displayCurrency")}
+      additionalViewContent={roleStatusContent ?? undefined}
+    />
   );
 }

@@ -51,6 +51,7 @@ export namespace StudentHistoryRepository {
         time: `${hh}:${mm}`,
         duration: r.instance.durationMinutes,
         status: r.instance.executionState,
+        outcome: r.instance.outcome,
         instructor: r.user.name,
         timeSlot: `${hh}:${mm}`,
         room: r.instance.meetingJoinUrl ?? null,

@@ -1,9 +1,11 @@
 import type { Theme } from "@mui/material";
 import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
-export { isJoinableByExecutionState as isJoinableClassSession };
+export function isJoinableClassSession(executionState?: string, outcome?: string | null): boolean {
+  return isJoinableClassInstance(executionState, outcome);
+}
 
 export interface ClassSession {
   readonly id: string;
@@ -13,6 +15,7 @@ export interface ClassSession {
   readonly duration: number;
   readonly status: AttendanceStatus;
   readonly executionState?: string;
+  readonly outcome?: string | null;
   readonly instructor: string;
   readonly timeSlot: string;
   readonly room: string;

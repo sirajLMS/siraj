@@ -156,6 +156,7 @@ export type StudentHistorySession = {
   time: string;
   duration: number;
   status: string;
+  outcome?: string | null;
   instructor: string;
   timeSlot: string;
   room: string | null;

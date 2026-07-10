@@ -627,6 +627,7 @@ export namespace StudentRepository {
     readonly gender: string | null;
     readonly language: string | null;
     readonly parentId: string;
+    readonly parentUserId: string | null;
     readonly parentName: string | null;
     readonly primaryTeacherId: string | null;
     readonly teacherUserId: string | null;
@@ -653,6 +654,7 @@ export namespace StudentRepository {
         gender: students.gender,
         language: students.language,
         parentId: students.parentId,
+        parentUserId: parentUser.id,
         parentName: parentUser.name,
         primaryTeacherId: students.primaryTeacherId,
         teacherUserId: teachers.userId,
@@ -686,6 +688,7 @@ export namespace StudentRepository {
       gender: row.gender,
       language: row.language,
       parentId: row.parentId,
+      parentUserId: row.parentUserId,
       parentName: row.parentName,
       primaryTeacherId: row.primaryTeacherId,
       teacherUserId: row.teacherUserId,

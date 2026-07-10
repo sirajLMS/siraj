@@ -1,26 +1,21 @@
 "use client";
 
-import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
-import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
-import { styled } from "@mui/material/styles";
-
-// Filter icon button with outline border matching card radius
-const StyledFilterIconButton = styled(IconButton)(({ theme }) => ({
-  border: `1px solid ${theme.palette.outlineVariant}`,
-  borderRadius: theme.layout.radius.card,
-}));
+import { SearchOutlined } from "@mui/icons-material";
+import { Box, InputAdornment, TextField } from "@mui/material";
 
 interface BillingMobileSearchBarProps {
   readonly value: string;
   readonly placeholder: string;
-  readonly filterLabel: string;
+  readonly searchingLabel?: string;
+  readonly isSearching?: boolean;
   readonly onChange: (value: string) => void;
 }
 
 export function BillingMobileSearchBar({
   value,
   placeholder,
-  filterLabel,
+  searchingLabel,
+  isSearching = false,
   onChange,
 }: Readonly<BillingMobileSearchBarProps>) {
   return (
@@ -33,6 +28,7 @@ export function BillingMobileSearchBar({
           onChange(event.target.value);
         }}
         placeholder={placeholder}
+        helperText={isSearching ? searchingLabel : undefined}
         slotProps={{
           input: {
             startAdornment: (
@@ -44,9 +40,6 @@ export function BillingMobileSearchBar({
           htmlInput: { autoComplete: "off" },
         }}
       />
-      <StyledFilterIconButton aria-label={filterLabel}>
-        <FilterListOutlined />
-      </StyledFilterIconButton>
     </Box>
   );
 }

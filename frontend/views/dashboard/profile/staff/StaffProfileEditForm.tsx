@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/staff/sections/ContactSection";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
@@ -30,6 +31,8 @@ export function StaffProfileEditForm({
   readonly onSubmit: (values: StaffAdminEditFormData) => Promise<void>;
 }) {
   const tc = useTranslations("profile");
+  const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
+  const { canEdit } = useProfileFieldAccess({ scope });
   const form = useForm<StaffAdminEditFormData>({
     resolver: zodResolver(isAdminScope ? staffAdminEditSchema : staffOwnEditSchema),
     defaultValues: {
@@ -55,6 +58,8 @@ export function StaffProfileEditForm({
     await onSubmit(values);
   };
 
+  const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
+
   return (
     <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
       <Stack spacing={3}>
@@ -68,14 +73,17 @@ export function StaffProfileEditForm({
             },
           }}
         >
-          <AccountSection
-            mode="edit"
-            staffData={staffData}
-            isAdminScope={isAdminScope}
-            register={form.register}
-            control={form.control}
-          />
-          <ContactSection mode="edit" control={form.control} />
+          {showAccountSection ? (
+            <AccountSection
+              mode="edit"
+              scope={scope}
+              staffData={staffData}
+              isAdminScope={isAdminScope}
+              register={form.register}
+              control={form.control}
+            />
+          ) : null}
+          {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {tc("actions.save")}

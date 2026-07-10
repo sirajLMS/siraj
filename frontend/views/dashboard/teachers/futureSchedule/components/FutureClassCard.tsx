@@ -8,6 +8,7 @@ import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { FutureClassCardProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
+import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {
   const dateObj = new Date(date);
@@ -73,13 +74,15 @@ function ClassInfo({ item, isMobile }: Readonly<{ item: FutureClass; isMobile: b
           </Typography>
         </Box>
         <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.onSurfaceVariant })}>
-          <MeetingJoinAction
-            variant="icon"
-            joinUrl={item.meetingJoinUrl}
-            meeting={item.effectiveMeeting}
-            emptyRole="teacher"
-            setupHref="/profile?tab=meeting"
-          />
+          {isFutureClassJoinable(item) ? (
+            <MeetingJoinAction
+              variant="icon"
+              joinUrl={item.meetingJoinUrl}
+              meeting={item.effectiveMeeting}
+              emptyRole="teacher"
+              setupHref="/profile?tab=meeting"
+            />
+          ) : null}
           <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
             {item.location}
           </Typography>

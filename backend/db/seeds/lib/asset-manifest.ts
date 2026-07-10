@@ -1,3 +1,8 @@
+import {
+  PARENT_AVATAR_FILES,
+  STUDENT_AVATAR_FILES,
+  TEACHER_AVATAR_FILES,
+} from "@/backend/db/seeds/lib/avatar-file-registry";
 import { MEETING_PROVIDER_CATALOG_SEEDS } from "@/backend/db/seeds/lib/meeting-provider-factory";
 import {
   MOBILE_WALLET_CATALOG_SEEDS,
@@ -11,15 +16,12 @@ export type SeedAssetEntry = {
   readonly description: string;
 };
 
-function avatarAssets(dir: string, count: number, required: boolean): SeedAssetEntry[] {
-  return Array.from({ length: count }, (_, index) => {
-    const fileName = `${String(index + 1).padStart(2, "0")}.png`;
-    return {
-      relativePath: `avatars/${dir}/${fileName}`,
-      required,
-      description: `${dir} avatar ${fileName}`,
-    };
-  });
+function avatarAssets(dir: string, files: readonly string[], required: boolean): SeedAssetEntry[] {
+  return files.map(fileName => ({
+    relativePath: `avatars/${dir}/${fileName}`,
+    required,
+    description: `${dir} avatar ${fileName}`,
+  }));
 }
 
 function logoAssets(category: "meeting" | "payment", slugs: readonly string[]): SeedAssetEntry[] {
@@ -39,9 +41,9 @@ const PAYMENT_LOGO_SLUGS = [
 const MEETING_LOGO_SLUGS = MEETING_PROVIDER_CATALOG_SEEDS.map(spec => spec.slug);
 
 export const SEED_ASSET_MANIFEST: readonly SeedAssetEntry[] = [
-  ...avatarAssets("teachers", 4, true),
-  ...avatarAssets("parents", 4, true),
-  ...avatarAssets("students", 8, true),
+  ...avatarAssets("teachers", TEACHER_AVATAR_FILES, true),
+  ...avatarAssets("parents", PARENT_AVATAR_FILES, true),
+  ...avatarAssets("students", STUDENT_AVATAR_FILES, true),
   ...logoAssets("meeting", MEETING_LOGO_SLUGS),
   ...logoAssets("payment", PAYMENT_LOGO_SLUGS),
   {

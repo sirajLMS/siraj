@@ -1,46 +1,46 @@
 "use client";
 
-import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control } from "react-hook-form";
-import { PhoneFormField, SectionPanel } from "@/frontend/components/ui";
-import { PhoneDisplay } from "@/frontend/components/ui/display";
+import type { ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
-import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
 import type { ParentViewData } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { CoreContactSection } from "@/frontend/views/dashboard/profile/shared/sections/CoreContactSection";
 
 type ContactSectionProps =
   | {
       readonly mode: "view";
+      readonly scope?: ProfileScope;
       readonly parentData: ParentViewData;
     }
   | {
       readonly mode: "edit";
+      readonly scope?: ProfileScope;
       readonly control: Control<ParentAdminEditFormData>;
     };
 
 export function ContactSection(props: ContactSectionProps) {
   const t = useTranslations("profile.parent");
-  const tc = useTranslations("profile");
 
   if (props.mode === "edit") {
     return (
-      <SectionPanel title={t("sections.contact")}>
-        <Stack spacing={2}>
-          <PhoneFormField name="phone" control={props.control} label={t("fields.phone")} />
-        </Stack>
-      </SectionPanel>
+      <CoreContactSection
+        mode="edit"
+        scope={props.scope}
+        sectionTitle={t("sections.contact")}
+        phoneLabel={t("fields.phone")}
+        control={props.control}
+      />
     );
   }
 
   return (
-    <SectionPanel title={t("sections.contact")}>
-      <Stack spacing={2}>
-        <InfoField
-          label={t("fields.phone")}
-          value={<PhoneDisplay phone={props.parentData.phone} fallback={tc("notSet")} />}
-        />
-      </Stack>
-    </SectionPanel>
+    <CoreContactSection
+      mode="view"
+      scope={props.scope}
+      phone={props.parentData.phone}
+      sectionTitle={t("sections.contact")}
+      phoneLabel={t("fields.phone")}
+    />
   );
 }

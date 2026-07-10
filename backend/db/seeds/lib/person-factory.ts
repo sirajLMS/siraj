@@ -1,6 +1,7 @@
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 // DEV ONLY: Never use these credentials in production
 
+import { getAvatarFileNameForPersona } from "@/backend/db/seeds/lib/avatar-file-registry";
 import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
@@ -70,6 +71,5 @@ export function pickTimezoneForIndex(index: number): string {
 }
 
 export function getStudentAvatarFileName(index: number): string {
-  const fileNumber = String((index % 8) + 1).padStart(2, "0");
-  return `${fileNumber}.png`;
+  return getAvatarFileNameForPersona("students", index);
 }

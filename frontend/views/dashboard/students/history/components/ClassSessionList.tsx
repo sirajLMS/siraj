@@ -65,7 +65,7 @@ function ClassSessionCard({
   durationLabel,
 }: Readonly<{ session: ClassSession; statusLabel: string; durationLabel: string }>) {
   const [timeValue, timePeriod] = session.time.split(" ");
-  const showJoin = isJoinableClassSession(session.executionState);
+  const showJoin = isJoinableClassSession(session.executionState, session.outcome);
 
   return (
     <Box

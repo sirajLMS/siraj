@@ -5,6 +5,7 @@ export const classList: TeacherClassListLabels = {
   pageSubtitle: "راجع حصصك الأخيرة والقادمة.",
   noClasses: "لم يتم العثور على حصص للفترة المحددة.",
   viewDetails: "عرض التفاصيل",
+  durationMinutes: "{minutes} دقيقة",
   errors: {
     failedToLoad: "فشل تحميل الحصص.",
   },

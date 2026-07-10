@@ -82,7 +82,11 @@ function RecurringMeetingConfigNewModeFields({
       {instructions ? (
         <Alert severity="info">
           {value.newProvider?.name ? (
-            <LocalizedStringDisplay value={value.newProvider.name} typographyVariant="labelMd" sx={{ fontWeight: 700 }} />
+            <LocalizedStringDisplay
+              value={value.newProvider.name}
+              typographyVariant="labelMd"
+              sx={{ fontWeight: 700 }}
+            />
           ) : null}
           <Typography sx={{ typography: "bodySm", mt: value.newProvider?.name ? 0.5 : 0 }}>{instructions}</Typography>
         </Alert>

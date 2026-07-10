@@ -65,6 +65,7 @@ function mapProfileRow(
     gender: row.gender ? (parseGender(row.gender) ?? null) : null,
     language: row.language ? (parseAppLanguage(row.language) ?? null) : null,
     parentId: row.parentId,
+    parentUserId: row.parentUserId,
     parentName: row.parentName,
     primaryTeacherId: row.primaryTeacherId,
     teacherUserId: row.teacherUserId,
@@ -127,6 +128,7 @@ export namespace StudentProfileService {
     return filterStudentProfileByFieldGroups(
       {
         ...mapProfileRow(row),
+        isAssociatedViewer,
         upcomingClasses,
         classHistory,
       },

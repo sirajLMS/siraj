@@ -2,10 +2,11 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ProfileScope, type CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/staff/sections/ContactSection";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 
 export function StaffProfileView({
   staffData,
@@ -17,6 +18,23 @@ export function StaffProfileView({
   readonly isAdminScope: boolean;
 }) {
   const t = useTranslations("profile.staff");
+  const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
+  const { canView } = useProfileFieldAccess({ scope });
+
+  const renderAccountSection = () => {
+    if (!canView("core_identity") && !(isAdminScope && canView("staff_role"))) {
+      return null;
+    }
+    return (
+      <AccountSection
+        mode="view"
+        scope={scope}
+        staffData={staffData}
+        isAdminScope={isAdminScope}
+        displayCurrency={displayCurrency}
+      />
+    );
+  };
 
   return (
     <Stack spacing={2}>
@@ -36,13 +54,8 @@ export function StaffProfileView({
           },
         }}
       >
-        <AccountSection
-          mode="view"
-          staffData={staffData}
-          isAdminScope={isAdminScope}
-          displayCurrency={displayCurrency}
-        />
-        <ContactSection mode="view" staffData={staffData} />
+        {renderAccountSection()}
+        <ContactSection mode="view" scope={scope} staffData={staffData} />
       </Box>
     </Stack>
   );

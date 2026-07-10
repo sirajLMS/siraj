@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Tab, Tabs } from "@mui/material";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { studentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-profile.documents";
 import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
@@ -33,6 +33,11 @@ export function StudentProfilePageClient() {
 
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<StudentProfileTab>(isStudentProfileTab(tabParam) ? tabParam : "status");
+
+  useEffect(() => {
+    const nextTab = searchParams.get("tab");
+    setActiveTab(isStudentProfileTab(nextTab) ? nextTab : "status");
+  }, [searchParams]);
 
   const { currentMonth } = useStudentHistoryStore();
   const year = activeTab === "history" ? currentMonth.getFullYear() : undefined;

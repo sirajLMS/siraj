@@ -1,46 +1,46 @@
 "use client";
 
-import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control } from "react-hook-form";
-import { PhoneFormField, SectionPanel } from "@/frontend/components/ui";
-import { PhoneDisplay } from "@/frontend/components/ui/display";
-import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
+import type { ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CoreContactSection } from "@/frontend/views/dashboard/profile/shared/sections/CoreContactSection";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/views/dashboard/profile/staff/staffProfileFormTypes";
 
 type ContactSectionProps =
   | {
       readonly mode: "view";
+      readonly scope?: ProfileScope;
       readonly staffData: StaffProfileData;
     }
   | {
       readonly mode: "edit";
+      readonly scope?: ProfileScope;
       readonly control: Control<StaffAdminEditFormData>;
     };
 
 export function ContactSection(props: ContactSectionProps) {
   const t = useTranslations("profile.staff");
-  const tc = useTranslations("profile");
 
   if (props.mode === "edit") {
     return (
-      <SectionPanel title={t("sections.contact")}>
-        <Stack spacing={2}>
-          <PhoneFormField name="phone" control={props.control} label={t("fields.phone")} />
-        </Stack>
-      </SectionPanel>
+      <CoreContactSection
+        mode="edit"
+        scope={props.scope}
+        sectionTitle={t("sections.contact")}
+        phoneLabel={t("fields.phone")}
+        control={props.control}
+      />
     );
   }
 
   return (
-    <SectionPanel title={t("sections.contact")}>
-      <Stack spacing={1.5}>
-        <InfoField
-          label={t("fields.phone")}
-          value={<PhoneDisplay phone={props.staffData.phone} fallback={tc("notSet")} />}
-        />
-      </Stack>
-    </SectionPanel>
+    <CoreContactSection
+      mode="view"
+      scope={props.scope}
+      phone={props.staffData.phone}
+      sectionTitle={t("sections.contact")}
+      phoneLabel={t("fields.phone")}
+    />
   );
 }

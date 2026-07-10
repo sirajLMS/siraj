@@ -40,9 +40,10 @@ export interface StudentQuotaViewProps {
   readonly isLoading: boolean;
   readonly isSaving: boolean;
   readonly isSaved: boolean;
+  readonly embedded?: boolean;
   readonly onSave: (data: StudentQuotaFormData) => Promise<void>;
   readonly onCancel: () => void;
-  readonly onEditAvatar: () => void;
+  readonly onEditAvatar?: () => void;
 }
 
 export interface LanguageOption {

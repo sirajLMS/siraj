@@ -12,6 +12,7 @@ import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/Cu
 import type { CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { ProfileFieldRow } from "@/frontend/views/dashboard/profile/shared/ProfileFieldRow";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 
 type CoreIdentityFormFields = {
@@ -31,6 +32,7 @@ type CoreIdentityViewProps = {
   readonly nameLabel: string;
   readonly emailLabel: string;
   readonly currencyLabel: string;
+  readonly additionalViewContent?: React.ReactNode;
 };
 
 type CoreIdentityEditProps = {
@@ -88,6 +90,16 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
     );
   }
 
+  const hasIdentityFields =
+    showField(props.avatarUrl ?? props.name, "core_identity") ||
+    showField(props.name, "core_identity") ||
+    showField(props.email, "core_identity") ||
+    showField(props.displayCurrency, "core_identity");
+
+  if (!hasIdentityFields && !props.additionalViewContent) {
+    return <ProfileRestrictedSection title={props.sectionTitle} />;
+  }
+
   return (
     <SectionPanel title={props.sectionTitle}>
       <Stack spacing={1}>
@@ -107,6 +119,7 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
             value={<CurrencyDisplay code={props.displayCurrency} fallback={tc("notSet")} />}
           />
         ) : null}
+        {props.additionalViewContent}
       </Stack>
     </SectionPanel>
   );

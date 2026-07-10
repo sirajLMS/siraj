@@ -1,6 +1,8 @@
 /**
  * Frontend mirror of profile field group keys.
- * Permission keys are resolved via GraphQL/codegen AppPermission strings.
+ * Backend uses dot-notation keys (profile.core_identity.view_own).
+ * Frontend user store uses GraphQL enum names (PROFILE_CORE_IDENTITY_VIEW_OWN).
+ * Resolve via shared/lib/field-group-permission-key.ts — not profileFieldPermissionKey().
  */
 export const PROFILE_FIELD_GROUP_KEYS = [
   "core_identity",

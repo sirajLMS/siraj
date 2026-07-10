@@ -1,7 +1,7 @@
 import {
   buildExtraParentUserSpecs,
   buildExtraTeacherUserSpecs,
-  getAvatarFileName,
+  getAvatarFileNameForPersona,
   loadSeedConfig,
   type SeedConfig,
   type SeedUserSpec,
@@ -51,7 +51,7 @@ export async function seedOrGet(
 
     for (let i = 0; i < results.length; i++) {
       const user = results[i];
-      const avatarFile = getAvatarFileName(i, 4);
+      const avatarFile = getAvatarFileNameForPersona("teachers", i);
 
       try {
         await seedEntityFile({
@@ -72,7 +72,7 @@ export async function seedOrGet(
       if (!profile) continue;
 
       try {
-        const avatarFile = getAvatarFileName(i, 4);
+        const avatarFile = getAvatarFileNameForPersona("teachers", i);
         await seedEntityFile({
           assetRelativePath: `avatars/teachers/${avatarFile}`,
           bucketPath: `public/avatars/staff/${avatarFile}`,

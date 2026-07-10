@@ -1407,12 +1407,14 @@ type FutureClass {
   durationMinutes: Int
   effectiveMeeting: EffectiveMeeting
   endTime: String
+  executionState: String
   id: String
   isRescheduled: Boolean
   leaveRequestDisabled: Boolean
   leaveRequestDisabledReason: String
   location: String
   meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
+  outcome: String
   scheduledDate: String
   startTime: String
   studentCount: Int
@@ -3433,6 +3435,7 @@ type StudentHistorySession {
   instructor: String
   meetingJoinUrl: String
   notes: String
+  outcome: String
   room: String
   status: String
   time: String
@@ -3472,10 +3475,12 @@ type StudentProfile {
   gender: Gender
   hoursPerWeek: Float
   id: String
+  isAssociatedViewer: Boolean
   language: AppLanguage
   name: String
   parentId: String
   parentName: String
+  parentUserId: String
   primaryTeacherId: String
   status: StudentStatus
   teacherName: String

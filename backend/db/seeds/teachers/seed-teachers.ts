@@ -6,6 +6,7 @@ import {
   pickTimezoneForIndex,
   type SeedConfig,
   shouldSeedExtendedFiles,
+  TEACHER_AVATAR_FILES,
 } from "@/backend/db/seeds/lib";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import logger from "@/backend/lib/logger";
@@ -55,7 +56,7 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneEnti
     await linkAvatarsToEntities({
       assetDir: "avatars/teachers",
       bucketDir: "public/avatars/teachers",
-      poolSize: 4,
+      poolFiles: TEACHER_AVATAR_FILES,
       referenceTable: "teachers",
       entities: results,
     });

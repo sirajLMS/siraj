@@ -32,6 +32,8 @@ export async function getTeacherFutureClasses(
       subjectAvatarUrl: classSubjects.avatarUrl,
       recurringAvatarUrl: recurringSchedules.avatarUrl,
       meetingJoinUrl: classInstances.meetingJoinUrl,
+      executionState: classInstances.executionState,
+      outcome: classInstances.outcome,
     })
     .from(classInstances)
     .innerJoin(students, eq(classInstances.studentId, students.id))

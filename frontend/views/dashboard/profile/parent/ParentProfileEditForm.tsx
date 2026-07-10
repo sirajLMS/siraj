@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ParentStatus, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import {
   type ParentAdminEditFormData,
@@ -19,6 +19,7 @@ import { BillingSection } from "@/frontend/views/dashboard/profile/parent/sectio
 import { ContactSection } from "@/frontend/views/dashboard/profile/parent/sections/ContactSection";
 import { IdentitySection } from "@/frontend/views/dashboard/profile/parent/sections/IdentitySection";
 import { SocialSection } from "@/frontend/views/dashboard/profile/parent/sections/SocialSection";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 
 export type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 
@@ -38,6 +39,8 @@ export function ParentProfileEditForm({
   readonly onSubmit: (values: ParentAdminEditFormData) => Promise<void>;
 }) {
   const tc = useTranslations("profile");
+  const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
+  const { canEdit } = useProfileFieldAccess({ scope });
   const schema = isAdminScope ? parentAdminEditSchema : parentOwnEditSchema;
   const form = useForm<ParentAdminEditFormData>({
     resolver: zodResolver(schema),
@@ -95,21 +98,30 @@ export function ParentProfileEditForm({
             },
           }}
         >
-          <AccountSection
-            mode="edit"
-            parentData={{ name: parentData.name ?? null, email: parentData.email ?? null }}
-            avatarUrl={avatarUrl}
-            register={form.register}
-            control={form.control}
-          />
-          <ContactSection mode="edit" control={form.control} />
-          <SocialSection mode="edit" register={form.register} control={form.control} />
+          {canEdit("core_identity") ? (
+            <AccountSection
+              mode="edit"
+              scope={scope}
+              parentData={{ name: parentData.name ?? null, email: parentData.email ?? null }}
+              avatarUrl={avatarUrl}
+              register={form.register}
+              control={form.control}
+            />
+          ) : null}
+          {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
+          {canEdit("parent_social") ? (
+            <SocialSection mode="edit" register={form.register} control={form.control} />
+          ) : null}
 
           {isAdminScope ? (
             <>
-              <IdentitySection mode="edit" register={form.register} control={form.control} />
+              {canEdit("parent_identity") ? (
+                <IdentitySection mode="edit" register={form.register} control={form.control} />
+              ) : null}
               {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
-              <BillingSection mode="edit" register={form.register} control={form.control} />
+              {canEdit("parent_billing") ? (
+                <BillingSection mode="edit" register={form.register} control={form.control} />
+              ) : null}
             </>
           ) : null}
         </Box>

@@ -7,6 +7,7 @@ import {
   linkAvatarsToEntities,
   loadSeedConfig,
   type SeedConfig,
+  STUDENT_AVATAR_FILES,
   seedAvatarPool,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
@@ -24,8 +25,6 @@ const DEMO_STUDENTS = [
     avatarIndex: 2,
   },
 ] as const;
-
-const STUDENT_AVATAR_POOL_SIZE = 8;
 
 function getAvatarUrl(avatarUrls: Map<string, string | null>, index: number): string | null {
   const fileName = getStudentAvatarFileName(index);
@@ -47,7 +46,7 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
     ? await seedAvatarPool({
         assetDir: "avatars/students",
         bucketDir: "public/avatars/students",
-        poolSize: STUDENT_AVATAR_POOL_SIZE,
+        poolFiles: STUDENT_AVATAR_FILES,
         referenceTable: "students",
         entities: [],
       })
@@ -99,7 +98,7 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
     await linkAvatarsToEntities({
       assetDir: "avatars/students",
       bucketDir: "public/avatars/students",
-      poolSize: STUDENT_AVATAR_POOL_SIZE,
+      poolFiles: STUDENT_AVATAR_FILES,
       referenceTable: "students",
       entities: results,
     });

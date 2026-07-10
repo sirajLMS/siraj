@@ -19,6 +19,7 @@ import {
   formatScheduleYourTime,
 } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface ScheduleOverviewCardListProps {
   readonly rows: readonly DailyScheduleRow[];
@@ -392,12 +393,14 @@ function ScheduleOverviewMobileCard({
         </StyledCardHeaderMain>
 
         <StyledCardActions>
-          <MeetingJoinAction
-            variant="icon"
-            joinUrl={row.meetingJoinUrl}
-            meeting={row.effectiveMeeting}
-            emptyRole="parent"
-          />
+          {isJoinableByExecutionState(row.executionState, row.outcome) ? (
+            <MeetingJoinAction
+              variant="icon"
+              joinUrl={row.meetingJoinUrl}
+              meeting={row.effectiveMeeting}
+              emptyRole="parent"
+            />
+          ) : null}
           {studentId ? (
             <Tooltip title={headers.history}>
               <ActionIconLink href={`${studentHref(studentId)}/history`} aria-label={headers.history}>

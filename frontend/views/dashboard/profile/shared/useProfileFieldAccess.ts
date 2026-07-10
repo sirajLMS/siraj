@@ -2,7 +2,8 @@
 
 import { type AppPermission, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { type ProfileFieldGroupKey, profileFieldPermissionKey } from "@/shared/constants/profile-field-groups";
+import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
+import { profileFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";
 
 type UseProfileFieldAccessOptions = {
   readonly scope?: ProfileScope;
@@ -15,8 +16,8 @@ export function useProfileFieldAccess(options: UseProfileFieldAccessOptions = {}
   const resolvePermission = (
     groupKey: ProfileFieldGroupKey,
     action: "view_own" | "view_other" | "edit_own" | "edit_other"
-  ) => {
-    return profileFieldPermissionKey(groupKey, action) as AppPermission;
+  ): AppPermission => {
+    return profileFieldGroupGraphqlPermission(groupKey, action) as AppPermission;
   };
 
   const canView = (groupKey: ProfileFieldGroupKey): boolean => {

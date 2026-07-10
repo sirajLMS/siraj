@@ -3,16 +3,51 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
+import { buildClassInstanceStatusLabels } from "@/frontend/views/dashboard/utils/classInstanceStatusLabels";
 import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+
+function formatClassSchedule(
+  scheduledStartAt: string | null | undefined,
+  scheduledEndAt: string | null | undefined,
+  locale: string
+): string {
+  if (!scheduledStartAt) {
+    return "";
+  }
+  const start = new Date(scheduledStartAt);
+  const datePart = start.toLocaleDateString(locale, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  const timePart = start.toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  if (!scheduledEndAt) {
+    return `${datePart} · ${timePart}`;
+  }
+  const end = new Date(scheduledEndAt);
+  const endTime = end.toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${datePart} · ${timePart} – ${endTime}`;
+}
 
 export function TeacherClassListContainer() {
   const t = useTranslations("dashboard.teacherClassList");
+  const tDashboard = useTranslations("dashboard");
+  const locale = useLocale();
+  const instanceStatusLabels = useMemo(() => buildClassInstanceStatusLabels(tDashboard), [tDashboard]);
   const { data, loading, error } = useQuery(teacherAssignedClassesQueryDocument);
   const rows = data?.teacherAssignedClasses?.rows ?? [];
 
@@ -47,14 +82,27 @@ export function TeacherClassListContainer() {
                     flexWrap: "wrap",
                   })}
                 >
-                  <Box>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
                     <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{row.studentName}</Typography>
                     <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                      {new Date(row.scheduledStartAt ?? "").toLocaleString()}
+                      {formatClassSchedule(row.scheduledStartAt, row.scheduledEndAt, locale)}
                     </Typography>
-                    <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                      {row.executionState}
-                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", mt: 0.5 }}>
+                      {row.durationMinutes ? (
+                        <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+                          {t("durationMinutes", { minutes: row.durationMinutes })}
+                        </Typography>
+                      ) : null}
+                      <ScheduleInstanceStatusBadge
+                        executionState={row.executionState}
+                        outcome={row.outcome}
+                        scheduledStartAt={row.scheduledStartAt}
+                        scheduledEndAt={row.scheduledEndAt}
+                        durationMinutes={row.durationMinutes}
+                        statusLabels={instanceStatusLabels}
+                        size="small"
+                      />
+                    </Stack>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     {isJoinableByExecutionState(row.executionState, row.outcome) ? (

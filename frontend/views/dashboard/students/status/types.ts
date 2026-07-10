@@ -21,6 +21,7 @@ export interface StudentStatusPageData {
   readonly avatarUrl: string | null;
   readonly primaryTeacherId: string | null;
   readonly teacherName: string | null;
+  readonly parentUserId?: string | null;
   readonly hoursPerWeek: string | null;
   readonly classesRemaining: number;
   readonly classesTotal: number;
@@ -31,6 +32,7 @@ export interface StudentStatusPageData {
 export interface StudentStatusViewProps {
   readonly student: StudentStatusPageData;
   readonly isUpdating: boolean;
+  readonly embedded?: boolean;
   readonly onUpdateStatus: (status: StudentStatus, reason: string) => Promise<void>;
 }
 

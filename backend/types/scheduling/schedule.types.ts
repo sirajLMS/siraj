@@ -56,6 +56,8 @@ export type FutureClassReturnType = {
   classType?: ClassType | null;
   meetingJoinUrl?: string | null;
   avatarUrl?: string | null;
+  executionState?: string | null;
+  outcome?: string | null;
 };
 
 export type TeacherFutureScheduleReturnType = {

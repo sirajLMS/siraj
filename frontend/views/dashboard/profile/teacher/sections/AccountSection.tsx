@@ -36,6 +36,7 @@ export function AccountSection(props: AccountSectionProps) {
     return (
       <CoreIdentitySection
         mode="edit"
+        scope={props.scope}
         name={props.teacherData.name}
         avatarUrl={props.avatarUrl}
         sectionTitle={t("sections.account")}
@@ -51,6 +52,7 @@ export function AccountSection(props: AccountSectionProps) {
   return (
     <CoreIdentitySection
       mode="view"
+      scope={props.scope}
       name={props.teacherData.name}
       email={props.teacherData.email}
       avatarUrl={props.avatarUrl}

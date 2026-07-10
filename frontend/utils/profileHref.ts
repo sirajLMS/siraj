@@ -3,7 +3,7 @@
  *
  * Prefer unified `/users/{userId}/profile` when userId is known.
  * Fall back to entity redirect routes for teacher/parent when only those IDs exist.
- * Students use `/students/{studentId}` (not unified profile).
+ * Students use the unified profile shell at `/students/{studentId}/profile?tab=...`.
  */
 
 export function profileHrefForUser(userId: string): string {
@@ -45,8 +45,14 @@ export function profileHrefForStaff(ids: { readonly userId?: string | null }): s
   return undefined;
 }
 
+export type StudentProfileTab = "status" | "quota" | "history";
+
 export function studentHref(studentId: string): string {
-  return `/students/${studentId}`;
+  return `/students/${studentId}/profile?tab=status`;
+}
+
+export function studentProfileTabHref(studentId: string, tab: StudentProfileTab): string {
+  return `/students/${studentId}/profile?tab=${tab}`;
 }
 
 export function classHref(classInstanceId: string): string {

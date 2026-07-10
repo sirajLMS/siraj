@@ -9,6 +9,14 @@ import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfi
 import { classHref, profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+
+function shouldShowScheduleAlertJoin(row: AcademicClassRow): boolean {
+  if (row.sessionStatus !== "upcoming" && row.sessionStatus !== "active") {
+    return false;
+  }
+  return isJoinableByExecutionState(row.executionState, row.outcome);
+}
 
 export interface AcademicScheduleDataGridLabels {
   readonly className: string;
@@ -32,6 +40,7 @@ interface AcademicScheduleDataGridProps {
   readonly pageSize?: number;
   readonly totalClasses?: number;
   readonly onLeave: (id: string) => void;
+  readonly onViewRecording: (id: string) => void;
   readonly onPageChange?: (page: number) => void;
   readonly loading?: boolean;
 }
@@ -49,6 +58,7 @@ export function AcademicScheduleDataGrid({
   totalClasses,
   labels,
   onLeave,
+  onViewRecording,
   onPageChange,
   loading = false,
 }: AcademicScheduleDataGridProps) {
@@ -125,7 +135,7 @@ export function AcademicScheduleDataGrid({
               status={row.sessionStatus}
               label={labels[SESSION_STATUS_LABELS[row.sessionStatus]]}
             />
-            {row.sessionStatus === "upcoming" || row.sessionStatus === "active" ? (
+            {shouldShowScheduleAlertJoin(row) ? (
               <MeetingJoinAction
                 variant="icon"
                 joinUrl={row.meetingJoinUrl}
@@ -134,12 +144,18 @@ export function AcademicScheduleDataGrid({
                 id={`join-session-${row.id}`}
               />
             ) : null}
-            <ClassSessionActionButton action={row.action} classId={row.id} labels={actionLabels} onLeave={onLeave} />
+            <ClassSessionActionButton
+              action={row.action}
+              classId={row.id}
+              labels={actionLabels}
+              onLeave={onLeave}
+              onViewRecording={onViewRecording}
+            />
           </Box>
         ),
       },
     ];
-  }, [labels, onLeave]);
+  }, [labels, onLeave, onViewRecording]);
 
   const isServerPagination = totalClasses !== undefined && onPageChange !== undefined;
 

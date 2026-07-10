@@ -11,7 +11,7 @@ import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "@/frontend/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
@@ -122,7 +122,7 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
                   status={cls.executionState}
                   label={cls.isFrozen ? t("table.frozen").toUpperCase() : cls.executionState}
                 />
-                {isJoinableByExecutionState(cls.executionState) ? (
+                {isJoinableClassInstance(cls.executionState, null, { isFrozen: cls.isFrozen }) ? (
                   <MeetingJoinAction
                     variant="icon"
                     joinUrl={cls.meetingJoinUrl}
@@ -297,7 +297,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
       align: "center",
       headerAlign: "center",
       renderCell: params =>
-        isJoinableByExecutionState(params.row.executionState) ? (
+        isJoinableClassInstance(params.row.executionState, null, { isFrozen: params.row.isFrozen }) ? (
           <MeetingJoinAction
             variant="icon"
             joinUrl={params.row.meetingJoinUrl}

@@ -14,6 +14,14 @@ import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfi
 import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
+import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+
+function shouldShowScheduleAlertJoin(row: AcademicClassRow): boolean {
+  if (row.sessionStatus !== "upcoming" && row.sessionStatus !== "active") {
+    return false;
+  }
+  return isJoinableByExecutionState(row.executionState, row.outcome);
+}
 
 interface AcademicScheduleCardListProps {
   readonly rows: readonly AcademicClassRow[];
@@ -30,6 +38,7 @@ interface AcademicScheduleCardListProps {
     readonly endOfSchedule: string;
   };
   readonly onLeave: (id: string) => void;
+  readonly onViewRecording: (id: string) => void;
   readonly onPageChange: (page: number) => void;
 }
 
@@ -115,10 +124,12 @@ function ClassCardActions({
   row,
   labels,
   onLeave,
+  onViewRecording,
 }: Readonly<{
   row: AcademicClassRow;
   labels: AcademicCardLabels;
   onLeave: (id: string) => void;
+  onViewRecording: (id: string) => void;
 }>) {
   const actionLabels = {
     joinSession: labels.joinSession,
@@ -133,12 +144,11 @@ function ClassCardActions({
         classId={row.id}
         labels={actionLabels}
         onLeave={onLeave}
+        onViewRecording={onViewRecording}
         fullWidth
       />
     );
   }
-
-  const showJoin = row.sessionStatus === "upcoming" || row.sessionStatus === "active";
 
   return (
     <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
@@ -147,9 +157,10 @@ function ClassCardActions({
         classId={row.id}
         labels={actionLabels}
         onLeave={onLeave}
+        onViewRecording={onViewRecording}
         fullWidth
       />
-      {showJoin ? (
+      {shouldShowScheduleAlertJoin(row) ? (
         <MeetingJoinAction
           variant="icon"
           joinUrl={row.meetingJoinUrl}
@@ -166,10 +177,12 @@ const AcademicClassCard = ({
   row,
   labels,
   onLeave,
+  onViewRecording,
 }: {
   row: AcademicClassRow;
   labels: AcademicScheduleCardListProps["labels"];
   onLeave: (id: string) => void;
+  onViewRecording: (id: string) => void;
 }) => {
   const isMissed = row.sessionStatus === "missed";
 
@@ -191,7 +204,7 @@ const AcademicClassCard = ({
       <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
         <ClassCardHeader row={row} labels={labels} />
         <ClassCardMetadata row={row} />
-        <ClassCardActions row={row} labels={labels} onLeave={onLeave} />
+        <ClassCardActions row={row} labels={labels} onLeave={onLeave} onViewRecording={onViewRecording} />
       </CardContent>
     </Card>
   );
@@ -230,6 +243,7 @@ export function AcademicScheduleCardList({
   pageSize,
   labels,
   onLeave,
+  onViewRecording,
   onPageChange,
 }: AcademicScheduleCardListProps) {
   const totalCountResolved = totalCount ?? 0;
@@ -238,7 +252,7 @@ export function AcademicScheduleCardList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {rows.map(row => (
-        <AcademicClassCard key={row.id} row={row} labels={labels} onLeave={onLeave} />
+        <AcademicClassCard key={row.id} row={row} labels={labels} onLeave={onLeave} onViewRecording={onViewRecording} />
       ))}
       <EndOfSchedule label={labels.endOfSchedule} />
       {totalCountResolved > 0 && (

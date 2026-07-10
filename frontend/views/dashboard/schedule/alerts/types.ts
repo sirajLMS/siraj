@@ -23,6 +23,8 @@ export interface AcademicClassRow {
   readonly room: string;
   readonly action: ClassSessionAction;
   readonly sessionStatus: ClassSessionStatus;
+  readonly executionState?: string | null;
+  readonly outcome?: string | null;
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 }

@@ -2,7 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ProfileScope, type CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { AccountSection } from "@/frontend/views/dashboard/profile/parent/sections/AccountSection";
 import { AssociatedStudentsSection } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsSection";
@@ -16,6 +16,26 @@ import type {
 } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/views/dashboard/profile/parent/sections/SocialSection";
 import { MeetingSummarySection } from "@/frontend/views/dashboard/profile/shared/MeetingSummarySection";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
+
+function hasParentSocialData(parentData: ParentViewData): boolean {
+  return Boolean(parentData.facebook?.trim() || parentData.whatsapp?.trim() || parentData.twitter?.trim());
+}
+
+function hasParentIdentityData(adminData: ParentAdminData): boolean {
+  return Boolean(adminData.nationality?.trim() || adminData.address?.trim());
+}
+
+function hasParentBillingData(adminData: ParentAdminData): boolean {
+  return Boolean(
+    adminData.invoiceType?.trim() ||
+      adminData.feeAmount?.trim() ||
+      adminData.currency ||
+      adminData.timezone?.trim() ||
+      adminData.lifecycleStatus
+  );
+}
 
 export function ParentProfileView({
   parentData,
@@ -39,7 +59,60 @@ export function ParentProfileView({
   readonly meetingTabHref?: string;
 }) {
   const t = useTranslations("profile.parent");
+  const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
+  const { canView } = useProfileFieldAccess({ scope });
   const adminData = isAdminScope ? (parentData as ParentAdminData) : null;
+
+  const renderSocialSection = () => {
+    if (!canView("parent_social")) {
+      return null;
+    }
+    if (!hasParentSocialData(parentData)) {
+      return <ProfileRestrictedSection title={t("sections.social")} />;
+    }
+    return <SocialSection mode="view" parentData={parentData} />;
+  };
+
+  const renderIdentitySection = () => {
+    if (!isAdminScope || !adminData || !canView("parent_identity")) {
+      return null;
+    }
+    if (!hasParentIdentityData(adminData)) {
+      return <ProfileRestrictedSection title={t("sections.identity")} />;
+    }
+    return <IdentitySection mode="view" adminData={adminData} />;
+  };
+
+  const renderBillingSection = () => {
+    if (!isAdminScope || !adminData || !canView("parent_billing")) {
+      return null;
+    }
+    if (!hasParentBillingData(adminData)) {
+      return <ProfileRestrictedSection title={t("sections.billing")} />;
+    }
+    return <BillingSection mode="view" adminData={adminData} parentId={parentId ?? adminData.id} />;
+  };
+
+  const renderAccountSection = () => (
+    <AccountSection
+      mode="view"
+      scope={scope}
+      parentData={parentData}
+      avatarUrl={avatarUrl}
+      displayCurrency={displayCurrency}
+      adminData={adminData}
+    />
+  );
+
+  const renderStudentsSection = () => {
+    if (!canView("parent_students")) {
+      return null;
+    }
+    if (!associatedStudents) {
+      return <ProfileRestrictedSection title={t("sections.students")} />;
+    }
+    return <AssociatedStudentsSection associatedStudents={associatedStudents} loading={studentsLoading} />;
+  };
 
   return (
     <Stack spacing={3}>
@@ -59,27 +132,21 @@ export function ParentProfileView({
           },
         }}
       >
-        <AccountSection
-          mode="view"
-          parentData={parentData}
-          avatarUrl={avatarUrl}
-          displayCurrency={displayCurrency}
-          adminData={adminData}
-        />
-        <ContactSection mode="view" parentData={parentData} />
-        <SocialSection mode="view" parentData={parentData} />
+        {renderAccountSection()}
+        <ContactSection mode="view" scope={scope} parentData={parentData} />
+        {renderSocialSection()}
 
         {isAdminScope && adminData ? (
           <>
-            <IdentitySection mode="view" adminData={adminData} />
+            {renderIdentitySection()}
             {targetUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={targetUserId} /> : null}
-            <BillingSection mode="view" adminData={adminData} parentId={parentId ?? adminData.id} />
+            {renderBillingSection()}
           </>
         ) : null}
         {targetUserId ? <MeetingSummarySection userId={targetUserId} meetingTabHref={meetingTabHref} /> : null}
       </Box>
 
-      <AssociatedStudentsSection associatedStudents={associatedStudents} loading={studentsLoading} />
+      {renderStudentsSection()}
     </Stack>
   );
 }

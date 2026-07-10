@@ -7,7 +7,8 @@ import { UserAvatar } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";
-import { useRouter } from "@/shared/i18n/routing";
+import { studentProfileTabHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "success",
