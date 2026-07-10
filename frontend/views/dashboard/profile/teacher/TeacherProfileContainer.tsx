@@ -46,31 +46,23 @@ function buildCoreInput(formData: TeacherOwnEditFormData | TeacherAdminEditFormD
 function buildOwnTeacherInput(formData: TeacherOwnEditFormData | TeacherAdminEditFormData) {
   return {
     phone: formData.phone || null,
-    zoomLink: formData.zoomLink || null,
   };
 }
 
 function buildAdminTeacherInput(formData: TeacherAdminEditFormData) {
-  const input = {
+  return {
     ...buildOwnTeacherInput(formData),
     nationalId: formData.nationalId || null,
     dateOfBirth: formData.dateOfBirth || null,
     gender: formData.gender ?? null,
     address: formData.address || null,
     qualifications: formData.qualifications || null,
-    zoomUsername: formData.zoomUsername || null,
     timezone: formData.timezone || null,
     hourlyRate: formData.hourlyRate || null,
     rateCurrency: formData.rateCurrency || null,
     paymentMethod: formData.paymentMethod ?? null,
     status: formData.status ?? null,
   };
-
-  if (formData.zoomPassword?.trim()) {
-    return { ...input, zoomPassword: formData.zoomPassword.trim() };
-  }
-
-  return input;
 }
 
 function buildEditSource(scope: ProfileScope, profile: ProfileData): TeacherOwnData | TeacherAdminData | null {
@@ -82,7 +74,6 @@ function buildEditData(teacherData: TeacherOwnData | TeacherAdminData) {
     name: teacherData.name,
     email: teacherData.email,
     phone: teacherData.phone,
-    zoomLink: teacherData.zoomLink,
     timezone: teacherData.timezone,
   };
 
@@ -97,7 +88,6 @@ function buildEditData(teacherData: TeacherOwnData | TeacherAdminData) {
     gender: teacherData.gender,
     address: teacherData.address,
     qualifications: teacherData.qualifications,
-    zoomUsername: teacherData.zoomUsername,
     hourlyRate: teacherData.hourlyRate,
     rateCurrency: teacherData.rateCurrency,
     paymentMethod: teacherData.paymentMethod,
@@ -245,7 +235,6 @@ export function TeacherProfileContainer({
     <TeacherAdminEditForm
       teacherData={editData}
       avatarUrl={avatarUrl}
-      hasZoomPassword={isTeacherAdminData(teacherData) ? Boolean(teacherData.hasZoomPassword) : false}
       isSaving={isSaving}
       onSubmit={onSubmitAdmin}
     />

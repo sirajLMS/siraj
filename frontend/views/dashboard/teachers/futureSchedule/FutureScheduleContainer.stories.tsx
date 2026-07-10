@@ -40,7 +40,7 @@ const MOCK_CLASSES = [
     subjectId: null,
     subjectName: null,
     classType: null,
-    zoomMeetingUrl: null,
+    meetingJoinUrl: null,
     avatarUrl: null,
   },
   {
@@ -59,7 +59,7 @@ const MOCK_CLASSES = [
     subjectId: null,
     subjectName: null,
     classType: null,
-    zoomMeetingUrl: null,
+    meetingJoinUrl: null,
     avatarUrl: null,
   },
   {
@@ -78,7 +78,7 @@ const MOCK_CLASSES = [
     subjectId: null,
     subjectName: null,
     classType: null,
-    zoomMeetingUrl: null,
+    meetingJoinUrl: null,
     avatarUrl: null,
   },
 ];

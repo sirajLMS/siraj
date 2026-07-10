@@ -1520,7 +1520,7 @@ export type UserOverrideInput = {
   state: OverrideState;
 };
 
-export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
+export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type MeQuery_Query = { me: MeQuery_me_User | null };
 
@@ -1530,7 +1530,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = MeQuery_Query;
 
-export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
+export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type UserQuery_Query = { user: UserQuery_user_User | null };
 
@@ -1542,7 +1542,7 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = UserQuery_Query;
 
-export type UsersQuery_users_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
+export type UsersQuery_users_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type UsersQuery_Query = { users: Array<UsersQuery_users_User> | null };
 
@@ -1552,7 +1552,7 @@ export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type UsersQuery = UsersQuery_Query;
 
-export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
+export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type LoginMutation_login_LoginResponse = { token: string | null, user: LoginMutation_login_LoginResponse_user_User | null };
 
@@ -1566,7 +1566,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = LoginMutation_Mutation;
 
-export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
+export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type DemoLoginMutation_demoLogin_LoginResponse = { token: string | null, user: DemoLoginMutation_demoLogin_LoginResponse_user_User | null };
 
@@ -1588,7 +1588,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = LogoutMutation_Mutation;
 
-export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
+export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, displayCurrency: Types.CurrencyCode | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
 
 export type RefreshTokenMutation_refreshToken_RefreshTokenResponse = { token: string | null, user: RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User | null };
 
@@ -1614,7 +1614,7 @@ export type ImpersonationStatusQueryVariables = Exact<{ [key: string]: never; }>
 
 export type ImpersonationStatusQuery = ImpersonationStatusQuery_Query;
 
-export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null };
+export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse = { token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User | null };
 
@@ -2779,7 +2779,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent> | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride> | null, bankingSummary: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_bankingSummary_TeacherBankingSummary | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult | null, staffProfile: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride> | null, bankingSummary: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_bankingSummary_TeacherBankingSummary | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_assignedStudents_TeacherAssignedStudentsResult | null };
 
 export type ProfileByUserIdQuery_Query = { profileByUserId: ProfileByUserIdQuery_profileByUserId_UnifiedProfile | null };
 
@@ -2797,7 +2797,7 @@ export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnPr
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null };
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, parentOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, staffProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, parentOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, staffProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 
 export type UpdateOwnProfileMutation_Mutation = { updateOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile | null };
 
@@ -2815,7 +2815,7 @@ export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdm
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null };
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, teacherAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile | null, staffProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile | null, staffProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 
 export type UpdateUserProfileMutation_Mutation = { updateUserProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile | null };
 

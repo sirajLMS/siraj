@@ -17,7 +17,6 @@ export interface ParentOnboardingInput {
   readonly facebook?: string | null;
   readonly whatsapp?: string | null;
   readonly twitter?: string | null;
-  readonly defaultZoomLink?: string | null;
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly paymentMethod?: string | null;
@@ -78,7 +77,6 @@ export namespace ParentOnboardingService {
           facebook: input.facebook ?? null,
           whatsapp: input.whatsapp ?? null,
           twitter: input.twitter ?? null,
-          defaultZoomLink: input.defaultZoomLink ?? null,
           invoiceType: input.invoiceType ?? null,
           feeAmount: input.feeAmount ?? null,
           paymentMethod: input.paymentMethod ?? null,

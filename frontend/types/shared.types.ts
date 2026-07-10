@@ -112,7 +112,7 @@ export interface TeacherScheduleRow {
   readonly isLive?: boolean;
   readonly isCurrent?: boolean;
   readonly studentId?: string;
-  readonly zoomMeetingUrl?: string | null;
+  readonly meetingJoinUrl?: string | null;
 }
 
 export interface TeacherDashboardMetrics {

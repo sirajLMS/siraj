@@ -96,7 +96,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
     studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
     teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
-    zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
     isRescheduled: t.exposeBoolean("isRescheduled"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
@@ -167,7 +167,7 @@ export const FutureClassPothosObject = FutureClassRef.implement({
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
-    zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
   }),
 });

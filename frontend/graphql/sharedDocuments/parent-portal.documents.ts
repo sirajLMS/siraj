@@ -29,7 +29,6 @@ export const parentOwnProfileQueryDocument: TypedDocumentNode<Operations.ParentO
       facebook
       whatsapp
       twitter
-      defaultZoomLink
     }
   }
 `;

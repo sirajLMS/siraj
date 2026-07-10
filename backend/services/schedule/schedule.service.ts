@@ -313,11 +313,11 @@ export namespace ScheduleService {
         leaveRequestDisabled,
         leaveRequestDisabledReason,
         studentCount: 1,
-        location: cls.zoomMeetingUrl || "Virtual",
+        location: cls.meetingJoinUrl || "Virtual",
         subjectId: cls.subjectId,
         subjectName: cls.subjectName,
         classType: cls.classType as ClassType | null | undefined,
-        zoomMeetingUrl: cls.zoomMeetingUrl ?? null,
+        meetingJoinUrl: cls.meetingJoinUrl ?? null,
         avatarUrl: resolveClassAvatarUrl(cls.recurringAvatarUrl, cls.subjectAvatarUrl),
       };
     });

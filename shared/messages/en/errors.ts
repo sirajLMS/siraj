@@ -25,7 +25,7 @@ export const errors: ErrorsLabels = {
   notificationProviderNotFound: "Notification delivery with provider message ID {providerMessageId} not found",
   teacherBooked: "Teacher is already booked for this time slot",
   studentBooked: "Student is already booked for this time slot",
-  zoomInUse: "Zoom meeting link is already in use for this time slot",
+  meetingUrlInUse: "Meeting link is already in use for this time slot",
   classInstanceNotFound: "Class {id} not found",
   originalClassNotFound: "Original class not found",
   cannotRescheduleToSelf: "Cannot reschedule class to itself",

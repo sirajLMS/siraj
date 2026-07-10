@@ -11,6 +11,7 @@ import {
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { extractMeetingId } from "@/backend/services/meeting/meeting-url-parser";
 import type {
   GroupClassAdminNoteReturnType,
   GroupClassAuditReturnType,
@@ -79,10 +80,14 @@ export namespace GroupClassService {
       timestamp: c.timestamp ? c.timestamp.toISOString() : null,
     }));
 
+    const snapshot = classInstance.meetingConfigSnapshot;
+    const joinUrl = classInstance.meetingJoinUrl ?? snapshot?.details.meetingUrl ?? null;
+    const providerSlug = snapshot?.provider.catalogSlug ?? null;
+
     const meetingInfo: GroupClassOnlineMeetingInfoReturnType = {
-      platform: "zoom",
-      meetingId: classInstance.zoomMeetingUrl ? extractZoomMeetingId(classInstance.zoomMeetingUrl) : null,
-      joinUrl: classInstance.zoomMeetingUrl ?? null,
+      platform: providerSlug ?? "unknown",
+      meetingId: joinUrl && providerSlug ? extractMeetingId(providerSlug, joinUrl) : null,
+      joinUrl,
     };
 
     const adminNote: GroupClassAdminNoteReturnType = {
@@ -185,9 +190,4 @@ function resolveGroupClassStatus(executionState: string | null | undefined): Cla
   if (state === ClassExecutionState.ACTIVATED) return ClassExecutionState.ACTIVATED;
   if (state === ClassExecutionState.RUNNING) return ClassExecutionState.RUNNING;
   return ClassExecutionState.NOT_ACTIVATED;
-}
-
-function extractZoomMeetingId(url: string): string | null {
-  const match = /\/j\/(\d+)/.exec(url);
-  return match ? match[1] : null;
 }

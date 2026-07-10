@@ -54,12 +54,6 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         description: "Teacher qualifications",
         directives: { constraint: { maxLength: 2000 } },
       }),
-      zoomLink: t.string({ description: "Teacher Zoom meeting link", directives: { constraint: { maxLength: 2000 } } }),
-      zoomUsername: t.string({ description: "Teacher Zoom username", directives: { constraint: { maxLength: 512 } } }),
-      zoomPassword: t.string({
-        description: "Teacher Zoom password (encrypted)",
-        directives: { constraint: { maxLength: 512 } },
-      }),
       countryCode: t.field({
         type: CountryCodePothosObject,
         description: "Teacher country code",

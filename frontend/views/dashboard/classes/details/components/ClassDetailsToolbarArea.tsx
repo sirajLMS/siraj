@@ -51,11 +51,11 @@ export function ClassDetailsToolbarArea({
   error,
 }: ClassDetailsToolbarAreaProps) {
   const t = useTranslations("dashboard.classDetails.liveSession");
-  const zoomMeetingUrl = instance.zoomMeetingUrl?.trim();
+  const meetingJoinUrl = instance.meetingJoinUrl?.trim();
 
   const handleJoinZoom = () => {
-    if (zoomMeetingUrl) {
-      window.open(zoomMeetingUrl, "_blank", "noopener,noreferrer");
+    if (meetingJoinUrl) {
+      window.open(meetingJoinUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -71,7 +71,7 @@ export function ClassDetailsToolbarArea({
         </RequirePermission>
       )}
 
-      {zoomMeetingUrl ? (
+      {meetingJoinUrl ? (
         <Stack direction="row" sx={classDetailsContentPaddingSx}>
           <PrimaryPageAction startIcon={<VideocamOutlined />} onClick={handleJoinZoom} id={`join-zoom-${instance.id}`}>
             {t("joinZoom")}

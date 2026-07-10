@@ -1,6 +1,6 @@
 "use client";
 
-import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined, MeetingRoomOutlined } from "@mui/icons-material";
+import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined } from "@mui/icons-material";
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
@@ -28,14 +28,12 @@ type SocialSectionProps =
 const NON_PHONE_SOCIAL_FIELDS = [
   { key: "facebook", platform: "facebook", icon: GroupsOutlined },
   { key: "twitter", platform: "twitter", icon: AlternateEmailOutlined },
-  { key: "defaultZoomLink", platform: "zoom", icon: MeetingRoomOutlined },
 ] as const;
 
 const VIEW_FIELDS = [
   { key: "facebook", platform: "facebook", icon: GroupsOutlined },
   { key: "whatsapp", platform: "whatsapp", icon: ChatOutlined },
   { key: "twitter", platform: "twitter", icon: AlternateEmailOutlined },
-  { key: "defaultZoomLink", platform: "zoom", icon: MeetingRoomOutlined },
 ] as const;
 
 export function SocialSection(props: SocialSectionProps) {

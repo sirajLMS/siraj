@@ -13,7 +13,6 @@ export interface TeacherProfileData {
   readonly baseSalary: number;
   readonly currency: CurrencyCode;
   readonly paymentMethod: PaymentMethod | null;
-  readonly zoomLink: string;
   readonly accountStatus: boolean;
   readonly updatedAt: string;
   readonly totalClasses: number;

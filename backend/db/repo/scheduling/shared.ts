@@ -65,12 +65,12 @@ export interface OverlapCheckParams {
   teacherId: string;
   startTime: Date;
   endTime: Date;
-  zoomUrl?: string | null;
+  meetingJoinUrl?: string | null;
   excludeId?: string;
 }
 
 export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams, locale?: string) {
-  const { studentId, teacherId, startTime, endTime, zoomUrl, excludeId } = params;
+  const { studentId, teacherId, startTime, endTime, meetingJoinUrl, excludeId } = params;
   const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
 
   const teacherOverlaps = await tx
@@ -107,22 +107,22 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
     throw new Error(t("studentBooked"));
   }
 
-  if (zoomUrl) {
-    const zoomOverlaps = await tx
+  if (meetingJoinUrl) {
+    const meetingUrlOverlaps = await tx
       .select({ id: classInstances.id })
       .from(classInstances)
       .where(
         and(
-          eq(classInstances.zoomMeetingUrl, zoomUrl),
+          eq(classInstances.meetingJoinUrl, meetingJoinUrl),
           isNull(classInstances.deletedAt),
           overlapCondition,
           excludeId ? ne(classInstances.id, excludeId) : undefined
         )
       )
       .limit(1);
-    if (zoomOverlaps.length > 0) {
+    if (meetingUrlOverlaps.length > 0) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("zoomInUse"));
+      throw new Error(t("meetingUrlInUse"));
     }
   }
 }
@@ -147,7 +147,7 @@ export async function performRescheduleValidations(
       teacherId: input.teacherId,
       startTime: input.scheduledStartAt,
       endTime: input.scheduledEndAt,
-      zoomUrl: input.zoomMeetingUrl,
+      meetingJoinUrl: input.meetingJoinUrl,
     },
     locale
   );

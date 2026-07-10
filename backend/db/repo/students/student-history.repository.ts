@@ -53,7 +53,7 @@ export namespace StudentHistoryRepository {
         status: r.instance.executionState,
         instructor: r.user.name,
         timeSlot: `${hh}:${mm}`,
-        room: r.instance.zoomMeetingUrl ?? null,
+        room: r.instance.meetingJoinUrl ?? null,
         notes: r.instance.remarks ?? "",
         dayOfMonth,
       };

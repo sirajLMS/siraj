@@ -48,9 +48,6 @@ export namespace TeacherRepository {
         gender: input.gender ?? null,
         address: input.address ?? null,
         qualifications: input.qualifications ?? null,
-        zoomLink: input.zoomLink ?? null,
-        zoomUsername: input.zoomUsername ?? null,
-        zoomPassword: input.zoomPassword ?? null,
         countryCode: input.countryCode ?? null,
         hourlyRate: input.hourlyRate ?? null,
         rateCurrency: input.rateCurrency ?? null,
@@ -134,7 +131,6 @@ export namespace TeacherRepository {
       email: users.email,
       avatarUrl: users.avatarUrl,
       status: teachers.status,
-      zoomLink: teachers.zoomLink,
     };
 
     let rowsQuery = queryDb
@@ -197,9 +193,6 @@ export namespace TeacherRepository {
     gender: teachers.gender,
     address: teachers.address,
     qualifications: teachers.qualifications,
-    zoomLink: teachers.zoomLink,
-    zoomUsername: teachers.zoomUsername,
-    hasZoomPassword: sql<boolean>`(${teachers.zoomPassword} IS NOT NULL)`.mapWith(Boolean),
     timezone: users.timezone,
     hourlyRate: teachers.hourlyRate,
     rateCurrency: teachers.rateCurrency,
@@ -234,9 +227,6 @@ export namespace TeacherRepository {
     gender: Gender | null;
     address: string | null;
     qualifications: string | null;
-    zoomLink: string | null;
-    zoomUsername: string | null;
-    hasZoomPassword: boolean;
     timezone: string;
     hourlyRate: string | null;
     rateCurrency: CurrencyCode | null;
@@ -255,9 +245,6 @@ export namespace TeacherRepository {
     gender: teacher.gender,
     address: teacher.address,
     qualifications: teacher.qualifications,
-    zoomLink: teacher.zoomLink,
-    zoomUsername: teacher.zoomUsername,
-    hasZoomPassword: teacher.hasZoomPassword,
     timezone: teacher.timezone as IanaTimezone,
     hourlyRate: teacher.hourlyRate,
     rateCurrency: teacher.rateCurrency,

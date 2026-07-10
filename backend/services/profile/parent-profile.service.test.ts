@@ -6,7 +6,6 @@ function buildAdminParentInput(formData: {
   facebook?: string;
   whatsapp?: string;
   twitter?: string;
-  defaultZoomLink?: string;
   nationality?: string;
   address?: string;
   invoiceType?: string;
@@ -20,7 +19,6 @@ function buildAdminParentInput(formData: {
     facebook: formData.facebook || null,
     whatsapp: formData.whatsapp || null,
     twitter: formData.twitter || null,
-    defaultZoomLink: formData.defaultZoomLink || null,
     nationality: formData.nationality || null,
     address: formData.address || null,
     invoiceType: formData.invoiceType || null,
@@ -38,7 +36,6 @@ describe("parent profile admin input builder", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      defaultZoomLink: "https://zoom.us/j/123",
       nationality: "SA",
       address: "Riyadh",
       invoiceType: "monthly",
@@ -53,7 +50,6 @@ describe("parent profile admin input builder", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      defaultZoomLink: "https://zoom.us/j/123",
       nationality: "SA",
       address: "Riyadh",
       invoiceType: "monthly",

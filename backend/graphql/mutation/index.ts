@@ -5,6 +5,7 @@
 
 import "./auth";
 import "./classes";
+import "./meeting";
 import "./notifications";
 import "./profile";
 import "./scheduling";

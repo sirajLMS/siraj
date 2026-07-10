@@ -17,7 +17,6 @@ export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"][
     baseSalary: z.coerce.number().min(0),
     currency: z.enum(CurrencyCode).nullable().optional(),
     paymentMethod: z.enum(["PAYPAL", "BANK_ACCOUNT"]),
-    zoomLink: z.url().or(z.literal("")),
     accountStatus: z.boolean(),
   });
 };

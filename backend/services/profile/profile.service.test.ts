@@ -28,7 +28,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      defaultZoomLink: "https://zoom.us/j/123",
       invoiceType: "monthly",
       feeAmount: "500",
       paymentMethod: "bank_transfer",
@@ -43,7 +42,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      defaultZoomLink: "https://zoom.us/j/123",
       invoiceType: "monthly",
       feeAmount: "500",
       paymentMethod: "bank_transfer",
@@ -58,7 +56,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      defaultZoomLink: "https://zoom.us/j/123",
     };
 
     expect(toParentRepoInput(ownInput)).toEqual({
@@ -68,7 +65,6 @@ describe("toParentRepoInput", () => {
       facebook: "fb.com/parent",
       whatsapp: "+966500000001",
       twitter: "@parent",
-      defaultZoomLink: "https://zoom.us/j/123",
       invoiceType: undefined,
       feeAmount: undefined,
       paymentMethod: undefined,

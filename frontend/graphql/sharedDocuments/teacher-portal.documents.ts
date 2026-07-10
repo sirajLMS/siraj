@@ -29,7 +29,6 @@ export const teacherOwnProfileQueryDocument: TypedDocumentNode<Operations.Teache
       hourlyRate
       rateCurrency
       paymentMethod
-      zoomLink
     }
   }
 `;

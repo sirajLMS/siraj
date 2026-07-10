@@ -80,7 +80,7 @@ export const createClassInstance = async (
         teacherId: input.teacherId,
         startTime: input.scheduledStartAt,
         endTime: input.scheduledEndAt,
-        zoomUrl: input.zoomMeetingUrl,
+        meetingJoinUrl: input.meetingJoinUrl,
       },
       locale
     );
@@ -131,7 +131,7 @@ export const updateClassInstance = async (
     const teacherId = input.teacherId ?? existing.teacherId;
     const startTime = input.scheduledStartAt ?? existing.scheduledStartAt;
     const endTime = input.scheduledEndAt ?? existing.scheduledEndAt;
-    const zoomUrl = input.zoomMeetingUrl === undefined ? existing.zoomMeetingUrl : input.zoomMeetingUrl;
+    const meetingJoinUrl = input.meetingJoinUrl === undefined ? existing.meetingJoinUrl : input.meetingJoinUrl;
     const isBeingSoftDeleted = Boolean(input.deletedAt);
 
     await acquireLocks(t, teacherId, studentId);
@@ -146,7 +146,7 @@ export const updateClassInstance = async (
           teacherId,
           startTime,
           endTime,
-          zoomUrl,
+          meetingJoinUrl,
           excludeId: id,
         },
         locale

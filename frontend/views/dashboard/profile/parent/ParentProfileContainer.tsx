@@ -44,7 +44,6 @@ function buildOwnParentInput(formData: ParentAdminEditFormData) {
     facebook: formData.facebook || null,
     whatsapp: formData.whatsapp || null,
     twitter: formData.twitter || null,
-    defaultZoomLink: formData.defaultZoomLink || null,
   };
 }
 

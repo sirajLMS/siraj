@@ -21,7 +21,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       hasTimezoneMismatch
       studentTimezone
       teacherTimezone
-      zoomMeetingUrl
+      meetingJoinUrl
       payrollCredited
       isRescheduled
       executionState
@@ -82,7 +82,7 @@ export const activateClassMutationDocument: TypedDocumentNode<
       status
       durationMinutes
       remarks
-      zoomMeetingUrl
+      meetingJoinUrl
     }
   }
 `;
@@ -98,7 +98,7 @@ export const activateOverrideClassMutationDocument: TypedDocumentNode<
       status
       durationMinutes
       remarks
-      zoomMeetingUrl
+      meetingJoinUrl
     }
   }
 `;

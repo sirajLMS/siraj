@@ -3524,6 +3524,7 @@ type UnifiedProfile {
   audience: ProfileAudience
   avatarUrl: String
   bankingSummary: TeacherBankingSummary
+  displayCurrency: CurrencyCode
   email: String
   id: String
   name: String

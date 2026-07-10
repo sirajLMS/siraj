@@ -51,7 +51,7 @@ export type ClassInstanceDetailReturnType = Omit<
   hasTimezoneMismatch: boolean;
   studentTimezone: IanaTimezone | null;
   teacherTimezone: IanaTimezone | null;
-  zoomMeetingUrl: string | null;
+  meetingJoinUrl: string | null;
   payrollCredited: boolean;
   isRescheduled: boolean;
   executionState: ClassExecutionState | null;

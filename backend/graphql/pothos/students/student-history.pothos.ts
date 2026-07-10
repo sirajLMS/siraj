@@ -65,7 +65,7 @@ export const StudentSessionDetailPothosObject = StudentSessionDetailRef.implemen
     executionState: t.exposeString("executionState"),
     outcome: t.exposeString("outcome", { nullable: true }),
     remarks: t.exposeString("remarks", { nullable: true }),
-    zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
     teacherName: t.exposeString("teacherName"),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime", nullable: true }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime", nullable: true }),

@@ -55,7 +55,7 @@ const en: MessageSchema = {
     notificationProviderNotFound: "Notification delivery with provider message id {providerMessageId} not found",
     teacherBooked: "Teacher is already booked for this time period",
     studentBooked: "Student is already booked for this time period",
-    zoomInUse: "Zoom meeting URL is already in use for this time period",
+    meetingUrlInUse: "Meeting URL is already in use for this time period",
     classInstanceNotFound: "Class instance {id} not found",
     originalClassNotFound: "Original class not found",
     cannotRescheduleToSelf: "A class cannot be rescheduled to itself",

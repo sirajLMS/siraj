@@ -1,5 +1,4 @@
 import { date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { encryptedText } from "@/backend/db/schema/custom-types";
 import {
   accountStatusEnum,
   countryCodeEnum,
@@ -30,10 +29,6 @@ export const teachers = pgTable(
     gender: genderEnum("gender"),
     address: text("address"),
     qualifications: text("qualifications"),
-    zoomLink: varchar("zoom_link", { length: 1024 }),
-    zoomUsername: varchar("zoom_username", { length: 255 }),
-    // NOTE: zoomPassword must be encrypted at the application level before saving
-    zoomPassword: encryptedText("zoom_password"),
     countryCode: countryCodeEnum("country_code"),
     hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
     rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),

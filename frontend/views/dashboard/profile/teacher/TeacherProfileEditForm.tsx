@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/teacher/sections/ContactSection";
-import { ZoomSection } from "@/frontend/views/dashboard/profile/teacher/sections/ZoomSection";
 import {
   type TeacherEditData,
   type TeacherOwnEditFormData,
@@ -35,7 +34,6 @@ export function TeacherProfileEditForm({
       name: "",
       email: "",
       phone: "",
-      zoomLink: "",
     },
   });
 
@@ -44,7 +42,6 @@ export function TeacherProfileEditForm({
       name: teacherData.name ?? "",
       email: teacherData.email ?? "",
       phone: teacherData.phone ?? "",
-      zoomLink: teacherData.zoomLink ?? "",
     });
   }, [form, teacherData]);
 
@@ -72,7 +69,6 @@ export function TeacherProfileEditForm({
             register={form.register}
           />
           <ContactSection mode="edit" isAdminScope={false} register={form.register} control={form.control} />
-          <ZoomSection mode="edit" isAdminScope={false} register={form.register} />
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {isSaving ? tc("shell.loading") : tc("actions.save")}

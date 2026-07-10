@@ -45,7 +45,6 @@ export namespace StaffDirectoryService {
           email: row.email,
           avatarUrl: row.avatarUrl,
           status: row.status,
-          zoomLink: row.zoomLink,
         })),
         totalTeachers: totalCount,
         pageInfo,

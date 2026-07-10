@@ -25,7 +25,7 @@ export const errors: ErrorsLabels = {
   notificationProviderNotFound: "توصيل الإشعار ذو معرف مزود الخدمة {providerMessageId} غير موجود",
   teacherBooked: "المعلم محجوز بالفعل لهذه الفترة الزمنية",
   studentBooked: "الطالب محجوز بالفعل لهذه الفترة الزمنية",
-  zoomInUse: "رابط اجتماع Zoom قيد الاستخدام بالفعل لهذه الفترة الزمنية",
+  meetingUrlInUse: "رابط الاجتماع قيد الاستخدام بالفعل لهذه الفترة الزمنية",
   classInstanceNotFound: "الحصة {id} غير موجودة",
   originalClassNotFound: "الحصة الأصلية غير موجودة",
   cannotRescheduleToSelf: "لا يمكن إعادة جدولة الحصة إلى نفسها",

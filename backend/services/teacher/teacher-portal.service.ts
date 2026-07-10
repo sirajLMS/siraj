@@ -51,7 +51,6 @@ export namespace TeacherPortalService {
       hourlyRate: profile.hourlyRate,
       rateCurrency: profile.rateCurrency,
       paymentMethod: profile.paymentMethod,
-      zoomLink: profile.zoomLink,
       totalClasses: profile.totalClasses,
     };
   }
@@ -96,7 +95,6 @@ export namespace TeacherPortalService {
 
     const success = await TeacherRepository.updateTeacherProfile(teacherId, {
       phone: input.phone ?? undefined,
-      zoomLink: input.zoomLink ?? undefined,
     });
 
     if (!success) {

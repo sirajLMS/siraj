@@ -10,23 +10,23 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ## Phase 1 — Enums + types + validation libs
 
-- [ ] Create `backend/enum/payment-method.enum.ts` (`PaymentMethodType`, `PaymentDirection`, `IdentifierKind`)
-- [ ] Update `backend/enum/billing.enum.ts` — **delete** `PaymentMethod` enum (keep `InvoiceStatus`, `InvoiceType`)
-- [ ] Update `backend/enum/permission.enum.ts` — `PAYMENT_METHODS_MANAGE_CATALOGS`, `PAYMENT_METHODS_VERIFY_BANK_TRANSFER`
-- [ ] Update `backend/enum/index.ts`
-- [ ] Create `backend/types/payment-method.types.ts` — includes `PaymentMethodTransactionSnapshot`
-- [ ] Update `backend/types/billing.types.ts` — `PaymentRecordInput` + snapshot fields on `PaymentSelectType`
-- [ ] Update `backend/types/teacher.types.ts` — delete banking history types; `CreateTeacherPaymentInput` uses snapshot
-- [ ] Update `backend/types/parent.types.ts` — remove scalar `paymentMethod`
-- [ ] Update `backend/types/profile.types.ts` — replace `bankingSummary` with payment methods
-- [ ] Update `backend/types/teacher-onboarding.types.ts`
-- [ ] Update `backend/types/index.ts`
-- [ ] Create `backend/lib/payment-method.validation.ts` — discriminated Zod + `localizedStringSchema` + `PaymentMethodTransactionSnapshot` schema
-- [ ] Create `backend/lib/field-encryption.ts` — extract `encryptField` / `decryptField` from `custom-types.ts`
-- [ ] Create `backend/lib/payment-method-jsonb.ts` — encrypt/decrypt `BankTransferDetails` inside JSONB
-- [ ] Update `backend/db/schema/custom-types.ts` — delegate to `field-encryption.ts`
-- [ ] Create `frontend/lib/payment-method.ts` — display helpers
-- [ ] Gate: `bun tsgo`
+- [x] Create `backend/enum/billing/payment-method.enum.ts` (`PaymentMethodType`, `PaymentDirection`, `IdentifierKind`)
+- [x] Update `backend/enum/billing/billing.enum.ts` — **delete** `PaymentMethod` enum (keep `InvoiceStatus`, `InvoiceType`)
+- [x] Update `backend/enum/permissions/permission.enum.ts` — `PAYMENT_METHODS_MANAGE_CATALOGS`, `PAYMENT_METHODS_VERIFY_BANK_TRANSFER`
+- [x] Update `backend/enum/index.ts`
+- [x] Create `backend/types/billing/payment-method.types.ts` — includes `PaymentMethodTransactionSnapshot`
+- [x] Update `backend/types/billing/billing.types.ts` — `PaymentRecordInput` + snapshot fields on `PaymentSelectType`
+- [x] Update `backend/types/teachers/teacher.types.ts` — delete banking history types; `CreateTeacherPaymentInput` uses snapshot
+- [x] Update `backend/types/parents/parent.types.ts` — remove scalar `paymentMethod`
+- [x] Update `backend/types/profile/profile.types.ts` — replace `bankingSummary` with payment methods
+- [x] Update `backend/types/teachers/teacher-onboarding.types.ts` — no Phase 1 changes needed (auto-picks-up service-layer `TeacherOnboardingResult` in Phase 4)
+- [x] Update `backend/types/index.ts`
+- [x] Create `backend/lib/payment-method.validation.ts` — discriminated Zod + `localizedStringSchema` + `PaymentMethodTransactionSnapshot` schema
+- [x] Create `backend/lib/field-encryption.ts` — extract `encryptField` / `decryptField` from `custom-types.ts`
+- [x] Create `backend/lib/payment-method-jsonb.ts` — encrypt/decrypt `BankTransferDetails` inside JSONB
+- [x] Update `backend/db/schema/custom-types.ts` — delegate to `field-encryption.ts`
+- [x] Create `frontend/lib/payment-method.ts` — display helpers
+- [x] Gate: `bun tsgo` — passes for all Phase 1 files; remaining errors are in downstream layers (Phase 2-5 scope): paymentMethod/PaymentMethod columnstash, banking-history imports, Pothos profile surfaces
 
 ## Phase 2 — Schema + migration + seeds
 

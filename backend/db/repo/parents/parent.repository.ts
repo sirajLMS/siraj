@@ -61,7 +61,6 @@ export namespace ParentRepository {
         facebook: input.facebook ?? null,
         whatsapp: input.whatsapp ?? null,
         twitter: input.twitter ?? null,
-        defaultZoomLink: input.defaultZoomLink ?? null,
         invoiceType: input.invoiceType ?? null,
         feeAmount: input.feeAmount ?? null,
         paymentMethod: input.paymentMethod ?? null,
@@ -263,7 +262,6 @@ export namespace ParentRepository {
     facebook: string | null;
     whatsapp: string | null;
     twitter: string | null;
-    defaultZoomLink: string | null;
     invoiceType: string | null;
     feeAmount: string | null;
     paymentMethod: string | null;
@@ -290,7 +288,6 @@ export namespace ParentRepository {
         facebook: parents.facebook,
         whatsapp: parents.whatsapp,
         twitter: parents.twitter,
-        defaultZoomLink: parents.defaultZoomLink,
         invoiceType: parents.invoiceType,
         feeAmount: parents.feeAmount,
         paymentMethod: parents.paymentMethod,
@@ -335,7 +332,6 @@ export namespace ParentRepository {
     if (input.facebook !== undefined) parentUpdate.facebook = input.facebook;
     if (input.whatsapp !== undefined) parentUpdate.whatsapp = input.whatsapp;
     if (input.twitter !== undefined) parentUpdate.twitter = input.twitter;
-    if (input.defaultZoomLink !== undefined) parentUpdate.defaultZoomLink = input.defaultZoomLink;
     if (input.invoiceType !== undefined) parentUpdate.invoiceType = input.invoiceType;
     if (input.feeAmount !== undefined) parentUpdate.feeAmount = input.feeAmount;
     if (input.paymentMethod !== undefined) parentUpdate.paymentMethod = input.paymentMethod;
@@ -569,7 +565,7 @@ export namespace ParentRepository {
         isRescheduled: classInstances.isRescheduled,
         executionState: classInstances.executionState,
         outcome: classInstances.outcome,
-        zoomMeetingUrl: classInstances.zoomMeetingUrl,
+        meetingJoinUrl: classInstances.meetingJoinUrl,
       })
       .from(classInstances)
       .innerJoin(students, eq(classInstances.studentId, students.id))
@@ -619,7 +615,7 @@ export namespace ParentRepository {
         bookingStatus: r.isRescheduled ? ("rescheduled" as BookingStatus) : ("confirmed" as BookingStatus),
         executionState: r.executionState as ClassExecutionState,
         outcome: r.outcome as ClassOutcome,
-        zoomMeetingUrl: r.zoomMeetingUrl ?? null,
+        meetingJoinUrl: r.meetingJoinUrl ?? null,
         classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone, locale),
       };
     });

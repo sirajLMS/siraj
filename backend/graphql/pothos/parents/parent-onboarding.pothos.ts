@@ -34,7 +34,6 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       facebook: t.string({ directives: { constraint: { maxLength: 512 } } }),
       whatsapp: t.string({ directives: { constraint: { maxLength: 512 } } }),
       twitter: t.string({ directives: { constraint: { maxLength: 512 } } }),
-      defaultZoomLink: t.string({ directives: { constraint: { maxLength: 2000 } } }),
       invoiceType: t.field({ type: InvoiceTypePothosObject }),
       feeAmount: t.string({ directives: { constraint: { maxLength: 512 } } }),
       paymentMethod: t.field({ type: PaymentMethodPothosObject }),

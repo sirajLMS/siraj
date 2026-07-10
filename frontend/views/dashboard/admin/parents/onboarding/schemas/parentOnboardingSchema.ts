@@ -14,7 +14,6 @@ export const parentOnboardingSchema = z.object({
   whatsapp: z.string().optional(),
   facebook: z.string().optional(),
   twitter: z.string().optional(),
-  defaultZoomLink: z.string().optional(),
   invoiceType: z.custom<InvoiceType>(
     val => typeof val === "string" && Object.values(InvoiceType).includes(val as InvoiceType),
     { message: "invoiceTypeRequired" }

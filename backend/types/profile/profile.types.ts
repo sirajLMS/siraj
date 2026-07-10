@@ -1,5 +1,6 @@
 import type { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { PaymentMethodDefaults, UserPaymentMethodReturnType } from "@/backend/types/billing/payment-method.types";
 import type {
   ParentAssignedStudentsResult,
   ParentOwnProfileReturnType,
@@ -10,10 +11,6 @@ import type {
   StaffPermissionGroupReturnType,
   StaffPermissionOverrideReturnType,
 } from "@/backend/types/staff/staff-profile.types";
-import type {
-  PaymentMethodDefaults,
-  UserPaymentMethodReturnType,
-} from "@/backend/types/billing/payment-method.types";
 import type {
   TeacherAssignedStudentsResult,
   TeacherOwnProfileReturnType,
@@ -54,7 +51,6 @@ export type ParentOwnProfileUpdateInput = {
   readonly facebook?: string | null;
   readonly whatsapp?: string | null;
   readonly twitter?: string | null;
-  readonly defaultZoomLink?: string | null;
 };
 
 export type ParentAdminProfileUpdateInput = ParentOwnProfileUpdateInput & {
@@ -110,4 +106,5 @@ export type UnifiedProfileReturnType = {
   readonly paymentMethods: readonly UserPaymentMethodReturnType[] | null;
   readonly paymentMethodDefaults: PaymentMethodDefaults | null;
   readonly assignedStudents: TeacherAssignedStudentsResult | null;
+  readonly displayCurrency: CurrencyCode | null;
 };

@@ -33,6 +33,7 @@ export function UserStoreInitializer({ userProfile, isSuperAdmin }: UserStoreIni
       role: userProfile.role || "",
       teacherId: userProfile.teacherId || null,
       parentId: userProfile.parentId || null,
+      displayCurrency: userProfile.displayCurrency,
     });
   }, [userProfile, setUser, setActorIsSuperAdmin, permissions, isSuperAdmin]);
 

@@ -22,7 +22,6 @@ export const teacherDirectoryQueryDocument: TypedDocumentNode<
         email
         avatarUrl
         status
-        zoomLink
       }
       totalTeachers
       pageInfo {

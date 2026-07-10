@@ -33,7 +33,6 @@ export const TeacherDirectoryRowPothosObject = TeacherDirectoryRowRef.implement(
     email: t.exposeString("email"),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     status: t.expose("status", { type: AccountStatusPothosObject }),
-    zoomLink: t.exposeString("zoomLink", { nullable: true }),
   }),
 });
 

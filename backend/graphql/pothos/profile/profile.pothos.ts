@@ -90,6 +90,7 @@ export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
     teacherId: t.exposeString("teacherId", { nullable: true }),
     parentId: t.exposeString("parentId", { nullable: true }),
     staffProfileId: t.exposeString("staffProfileId", { nullable: true }),
+    displayCurrency: t.expose("displayCurrency", { type: CurrencyCodePothosObject, nullable: true }),
     teacherOwnProfile: t.expose("teacherOwnProfile", { type: TeacherOwnProfilePothosObject, nullable: true }),
     teacherAdminProfile: t.expose("teacherAdminProfile", { type: TeacherProfileResultPothosObject, nullable: true }),
     parentOwnProfile: t.expose("parentOwnProfile", { type: ParentOwnProfilePothosObject, nullable: true }),
@@ -128,7 +129,6 @@ export const TeacherOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       phone: t.string({ required: false }),
-      zoomLink: t.string({ required: false }),
     }),
   });
 
@@ -140,7 +140,6 @@ export const ParentOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
       facebook: t.string({ required: false }),
       whatsapp: t.string({ required: false }),
       twitter: t.string({ required: false }),
-      defaultZoomLink: t.string({ required: false }),
     }),
   });
 
@@ -154,7 +153,6 @@ export const ParentAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
       facebook: t.string({ required: false }),
       whatsapp: t.string({ required: false }),
       twitter: t.string({ required: false }),
-      defaultZoomLink: t.string({ required: false }),
       invoiceType: t.string({ required: false }),
       feeAmount: t.string({ required: false }),
       paymentMethod: t.string({ required: false }),

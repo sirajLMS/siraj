@@ -11,7 +11,6 @@ import {
   isTeacherAdminData,
   type TeacherViewData,
 } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { ZoomSection } from "@/frontend/views/dashboard/profile/teacher/sections/ZoomSection";
 
 export function TeacherProfileView({
   teacherData,
@@ -45,7 +44,6 @@ export function TeacherProfileView({
       >
         <AccountSection mode="view" teacherData={teacherData} avatarUrl={avatarUrl} />
         <ContactSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
-        <ZoomSection mode="view" teacherData={teacherData} isAdminScope={isAdminScope} />
         <CompensationSection mode="view" teacherData={teacherData} />
         {isAdminScope && adminData ? <AdminOnlySection mode="view" adminData={adminData} /> : null}
       </Box>

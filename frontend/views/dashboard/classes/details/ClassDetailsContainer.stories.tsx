@@ -41,7 +41,7 @@ const mockInstance: ClassInstanceDetail = {
   hasTimezoneMismatch: true,
   studentTimezone: IanaTimezone.AfricaCairo,
   teacherTimezone: null,
-  zoomMeetingUrl: "",
+  meetingJoinUrl: "",
   executionState: ClassExecutionState.NotActivated,
   isRescheduled: false,
   outcome: ClassOutcome.Pending,

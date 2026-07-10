@@ -136,4 +136,8 @@ export enum AppPermission {
   // Payment Method Catalog Admin
   PAYMENT_METHODS_MANAGE_CATALOGS = "payment_methods.manage_catalogs",
   PAYMENT_METHODS_VERIFY_BANK_TRANSFER = "payment_methods.verify_bank_transfer",
+  // Meeting provider catalog + user configs
+  MEETING_PROVIDERS_MANAGE_CATALOG = "meeting_providers.manage_catalog",
+  MEETING_CONFIGS_MANAGE_OWN = "meeting_configs.manage_own",
+  MEETING_CONFIGS_MANAGE_OTHER = "meeting_configs.manage_other",
 }

@@ -174,6 +174,7 @@ export const AdminFullAccess: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });
@@ -203,6 +204,7 @@ export const RestrictedAccess: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });
@@ -244,6 +246,7 @@ export const EmptyData: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });
@@ -285,6 +288,7 @@ export const ApiError: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });

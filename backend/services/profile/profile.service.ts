@@ -68,7 +68,6 @@ export function toParentRepoInput(
     facebook: input.facebook,
     whatsapp: input.whatsapp,
     twitter: input.twitter,
-    defaultZoomLink: input.defaultZoomLink,
     invoiceType: "invoiceType" in input ? input.invoiceType : undefined,
     feeAmount: "feeAmount" in input ? input.feeAmount : undefined,
     paymentMethod: "paymentMethod" in input ? input.paymentMethod : undefined,
@@ -445,6 +444,7 @@ export namespace ProfileService {
       staffPermissionOverrides,
       bankingSummary,
       assignedStudents,
+      displayCurrency: user.displayCurrency,
     };
   }
 

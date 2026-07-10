@@ -32,7 +32,7 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
         durationMinutes
         executionState
         outcome
-        zoomMeetingUrl
+        meetingJoinUrl
         yourTimeFormatted
       }
       progressFeed {
@@ -112,7 +112,7 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
         subjectId
         subjectName
         classType
-        zoomMeetingUrl
+        meetingJoinUrl
         avatarUrl
       }
       importantNotes {

@@ -53,7 +53,7 @@ export type FutureClassReturnType = {
   subjectId?: string | null;
   subjectName?: string | null;
   classType?: ClassType | null;
-  zoomMeetingUrl?: string | null;
+  meetingJoinUrl?: string | null;
   avatarUrl?: string | null;
 };
 

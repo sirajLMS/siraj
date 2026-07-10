@@ -11,7 +11,6 @@ import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/secti
 import { AdminOnlySection } from "@/frontend/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/views/dashboard/profile/teacher/sections/CompensationSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/teacher/sections/ContactSection";
-import { ZoomSection } from "@/frontend/views/dashboard/profile/teacher/sections/ZoomSection";
 import {
   type TeacherAdminEditFormData,
   type TeacherEditData,
@@ -21,13 +20,11 @@ import {
 export function TeacherAdminEditForm({
   teacherData,
   avatarUrl,
-  hasZoomPassword,
   isSaving,
   onSubmit,
 }: {
   readonly teacherData: TeacherEditData;
   readonly avatarUrl?: string | null;
-  readonly hasZoomPassword?: boolean;
   readonly isSaving: boolean;
   readonly onSubmit: (values: TeacherAdminEditFormData) => Promise<void>;
 }) {
@@ -38,14 +35,11 @@ export function TeacherAdminEditForm({
       name: "",
       email: "",
       phone: "",
-      zoomLink: "",
       nationalId: "",
       dateOfBirth: "",
       gender: null,
       address: "",
       qualifications: "",
-      zoomUsername: "",
-      zoomPassword: "",
       timezone: "",
       hourlyRate: "",
       rateCurrency: undefined,
@@ -59,14 +53,11 @@ export function TeacherAdminEditForm({
       name: teacherData.name ?? "",
       email: teacherData.email ?? "",
       phone: teacherData.phone ?? "",
-      zoomLink: teacherData.zoomLink ?? "",
       nationalId: teacherData.nationalId ?? "",
       dateOfBirth: teacherData.dateOfBirth ?? "",
       gender: teacherData.gender ?? null,
       address: teacherData.address ?? "",
       qualifications: teacherData.qualifications ?? "",
-      zoomUsername: teacherData.zoomUsername ?? "",
-      zoomPassword: "",
       timezone: teacherData.timezone ?? "",
       hourlyRate: teacherData.hourlyRate ?? "",
       rateCurrency: teacherData.rateCurrency ?? undefined,
@@ -99,7 +90,6 @@ export function TeacherAdminEditForm({
             register={form.register}
           />
           <ContactSection mode="edit" isAdminScope register={form.register} control={form.control} />
-          <ZoomSection mode="edit" isAdminScope register={form.register} hasZoomPassword={hasZoomPassword} />
           <CompensationSection mode="edit" register={form.register} control={form.control} />
           <AdminOnlySection mode="edit" register={form.register} control={form.control} />
         </Box>

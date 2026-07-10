@@ -17,8 +17,6 @@ export const teacherProfileForEditQueryDocument: TypedDocumentNode<
       gender
       address
       qualifications
-      zoomLink
-      zoomUsername
       timezone
       hourlyRate
       rateCurrency
@@ -46,8 +44,6 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
       gender
       address
       qualifications
-      zoomLink
-      zoomUsername
       timezone
       hourlyRate
       rateCurrency

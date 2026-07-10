@@ -46,7 +46,7 @@ function useScheduleRows(
                 readonly bookingStatus?: string | null;
                 readonly executionState?: string | null;
                 readonly outcome?: string | null;
-                readonly zoomMeetingUrl?: string | null;
+                readonly meetingJoinUrl?: string | null;
               }[]
             | null;
           readonly totalCount?: number | null;
@@ -71,7 +71,7 @@ function useScheduleRows(
       teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
       bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
       liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),
-      videoEnabled: !!r.zoomMeetingUrl,
+      videoEnabled: !!r.meetingJoinUrl,
     }));
   }, [data]);
 }
@@ -226,7 +226,7 @@ export function ParentDashboardContainer() {
       },
       handleJoinVideo: (id: string) => {
         const row = rawScheduleRows?.find(r => r?.id === id);
-        const url = row?.zoomMeetingUrl;
+        const url = row?.meetingJoinUrl;
         if (url) {
           globalThis.open(url, "_blank");
         }

@@ -1,5 +1,7 @@
 import type { currencyExchangeRates, fxSyncRuns, invoices, payments } from "@/backend/db/schema";
 import type { CurrencyCode, FxProvider, FxSyncStatus, FxSyncTrigger, InvoiceStatus, InvoiceType } from "@/backend/enum";
+import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -29,12 +31,27 @@ export type InvoiceSubmitInput = Omit<
 export type PaymentSelectType = typeof payments.$inferSelect;
 export type PaymentInsertType = typeof payments.$inferInsert;
 
-export type PaymentReturnType = Omit<PaymentSelectType, "deletedAt" | "idempotencyKey" | "refundedAmount">;
+export type PaymentReturnType = Omit<
+  PaymentSelectType,
+  "deletedAt" | "idempotencyKey" | "refundedAmount" | "paymentMethod"
+> & {
+  paymentMethodType: PaymentMethodType | null;
+  paymentMethodSnapshot: PaymentMethodTransactionSnapshot | null;
+};
 
 export type PaymentSubmitInput = Omit<
   PaymentInsertType,
-  "id" | "createdAt" | "updatedAt" | "deletedAt" | "idempotencyKey" | "refundedAmount"
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+  | "idempotencyKey"
+  | "refundedAmount"
+  | "paymentMethod"
+  | "paymentMethodSnapshot"
 >;
+
+export type PaymentRecordInput = Omit<PaymentInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type CurrencyExchangeRateSelectType = typeof currencyExchangeRates.$inferSelect;
 export type CurrencyExchangeRateInsertType = typeof currencyExchangeRates.$inferInsert;

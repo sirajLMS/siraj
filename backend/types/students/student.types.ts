@@ -176,7 +176,7 @@ export type StudentSessionDetail = {
   executionState: string;
   outcome: string | null;
   remarks: string | null;
-  zoomMeetingUrl: string | null;
+  meetingJoinUrl: string | null;
   teacherName: string;
   scheduledStartAt: Date | string;
   scheduledEndAt: Date | string;

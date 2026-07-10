@@ -4380,6 +4380,7 @@ export type UnifiedProfile = {
   audience: Maybe<ProfileAudience>;
   avatarUrl: Maybe<Scalars['String']['output']>;
   bankingSummary: Maybe<TeacherBankingSummary>;
+  displayCurrency: Maybe<CurrencyCode>;
   email: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;

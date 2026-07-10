@@ -42,7 +42,7 @@ export type TeacherDashboardScheduleRow = {
   durationMinutes: number;
   executionState: ClassExecutionState;
   outcome: ClassOutcome | null;
-  zoomMeetingUrl: string | null;
+  meetingJoinUrl: string | null;
   yourTimeFormatted: string | null;
 };
 
@@ -84,7 +84,6 @@ export type TeacherProfileReturnType = Omit<
   | "paymentMethod"
   | "timezone"
   | "timezoneId"
-  | "zoomPassword"
   | "createdAt"
   | "dateOfBirth"
   | "updatedAt"
@@ -99,7 +98,6 @@ export type TeacherProfileReturnType = Omit<
   timezone: IanaTimezone;
   totalClasses: number;
   avgEngagementScore: number;
-  hasZoomPassword: boolean;
 };
 
 export type TeacherProfileUpdateInputType = Partial<
@@ -120,7 +118,6 @@ export type TeacherDirectoryRow = {
   email: string;
   avatarUrl: string | null;
   status: AccountStatus;
-  zoomLink: string | null;
 };
 
 export type TeacherDirectoryMetrics = {
@@ -165,13 +162,11 @@ export type TeacherOwnProfileReturnType = {
   timezone: IanaTimezone;
   hourlyRate: string | null;
   rateCurrency: CurrencyCode | null;
-  zoomLink: string | null;
   totalClasses: number;
 };
 
 export type TeacherOwnProfileUpdateInput = {
   readonly phone?: string | null;
-  readonly zoomLink?: string | null;
 };
 
 export type TeacherAssignedClassReturnType = {

@@ -162,7 +162,7 @@ export type FutureClassRow = {
   subjectName?: string | null;
   subjectAvatarUrl?: string | null;
   recurringAvatarUrl?: string | null;
-  zoomMeetingUrl?: string | null;
+  meetingJoinUrl?: string | null;
 };
 
 export type WeeklyScheduleGridRow = {

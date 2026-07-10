@@ -47,7 +47,7 @@ interface RawRow {
   readonly durationMinutes?: number | null;
   readonly executionState?: string | null;
   readonly outcome?: string | null;
-  readonly zoomMeetingUrl?: string | null;
+  readonly meetingJoinUrl?: string | null;
   readonly yourTimeFormatted?: string | null;
 }
 
@@ -134,14 +134,14 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
       status,
       executionState,
       outcome,
-      videoEnabled: !!row.zoomMeetingUrl,
+      videoEnabled: !!row.meetingJoinUrl,
       activateEnabled,
       activateDisabledReason,
       markAbsentEnabled,
       durationMinutes: row.durationMinutes ?? undefined,
       scheduledStartAt: row.scheduledStartAt ? new Date(row.scheduledStartAt) : undefined,
       scheduledEndAt: row.scheduledEndAt ? new Date(row.scheduledEndAt) : endAt,
-      zoomMeetingUrl: row.zoomMeetingUrl ?? null,
+      meetingJoinUrl: row.meetingJoinUrl ?? null,
       isLive: isLiveSession,
       isCurrent: isLiveSession,
     };
@@ -364,8 +364,8 @@ export function TeacherDashboardContainer() {
         }}
         onJoinVideo={id => {
           const row = scheduleRows.find(r => r.id === id);
-          if (row?.zoomMeetingUrl) {
-            globalThis.open(row.zoomMeetingUrl, "_blank");
+          if (row?.meetingJoinUrl) {
+            globalThis.open(row.meetingJoinUrl, "_blank");
           } else {
             showSnackbar(t("errors.meetingUrlNotAvailable"), "error");
           }

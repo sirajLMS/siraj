@@ -120,7 +120,7 @@ export async function buildClassInstanceDetail(
     hasTimezoneMismatch,
     studentTimezone,
     teacherTimezone,
-    zoomMeetingUrl: instance.zoomMeetingUrl ?? null,
+    meetingJoinUrl: instance.meetingJoinUrl ?? null,
     student: buildStudentParticipant(instance, unknownName),
     teacher: buildTeacherParticipant(instance, unknownName),
     performance: buildPerformanceBlock(perf),

@@ -6,6 +6,7 @@
 
 export * from "./auth/auth.enum";
 export * from "./billing/billing.enum";
+export * from "./billing/payment-method.enum";
 export * from "./books/book.enum";
 export * from "./classes/class-instance-detail.enum";
 export * from "./classes/dst-migration.enum";

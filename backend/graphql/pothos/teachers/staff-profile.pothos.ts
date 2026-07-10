@@ -22,8 +22,6 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     address: t.exposeString("address", { nullable: true, authScopes: { superAdmin: true } }),
     qualifications: t.exposeString("qualifications", { nullable: true }),
-    zoomLink: t.exposeString("zoomLink", { nullable: true }),
-    zoomUsername: t.exposeString("zoomUsername", { nullable: true }),
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
     hourlyRate: t.exposeString("hourlyRate", { nullable: true, authScopes: { superAdmin: true } }),
     rateCurrency: t.expose("rateCurrency", {
@@ -40,7 +38,6 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     }),
     totalClasses: t.exposeInt("totalClasses"),
     avgEngagementScore: t.exposeFloat("avgEngagementScore"),
-    hasZoomPassword: t.exposeBoolean("hasZoomPassword", { authScopes: { superAdmin: true } }),
   }),
 });
 
@@ -54,9 +51,6 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
       gender: t.field({ type: GenderPothosObject, required: false }),
       address: t.string({ required: false, directives: { constraint: { maxLength: 5000 } } }),
       qualifications: t.string({ required: false, directives: { constraint: { maxLength: 5000 } } }),
-      zoomLink: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
-      zoomUsername: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      zoomPassword: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
       hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),

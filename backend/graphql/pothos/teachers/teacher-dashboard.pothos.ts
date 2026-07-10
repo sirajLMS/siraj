@@ -32,7 +32,7 @@ export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleR
     durationMinutes: t.exposeInt("durationMinutes"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
-    zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
     yourTimeFormatted: t.exposeString("yourTimeFormatted", { nullable: true }),
   }),
 });

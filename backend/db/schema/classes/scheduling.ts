@@ -28,11 +28,14 @@ import {
   leaveRequesterTypeEnum,
   leaveRequestStatusEnum,
 } from "@/backend/db/schema/enums";
+import { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
+import { userMeetingConfigs } from "@/backend/db/schema/meeting/user-meeting-configs";
 import { timezones } from "@/backend/db/schema/shared/timezones";
 import { students } from "@/backend/db/schema/students/students";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
 import type { CurrencyCode } from "@/backend/enum";
+import type { MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
 
 /**
  * Recurring Schedules table.
@@ -140,7 +143,14 @@ export const classInstances = pgTable(
     executionState: classExecutionStateEnum("execution_state").notNull().default("NOT_ACTIVATED"),
     isRescheduled: boolean("is_rescheduled").notNull().default(false),
     isFrozen: boolean("is_frozen").notNull().default(false),
-    zoomMeetingUrl: varchar("zoom_meeting_url", { length: 1024 }),
+    meetingJoinUrl: varchar("meeting_join_url", { length: 1024 }),
+    userMeetingConfigId: uuid("user_meeting_config_id").references(() => userMeetingConfigs.id, {
+      onDelete: "set null",
+    }),
+    meetingProviderId: uuid("meeting_provider_id").references(() => meetingProviders.id, {
+      onDelete: "set null",
+    }),
+    meetingConfigSnapshot: jsonb("meeting_config_snapshot").$type<MeetingConfigSnapshot>(),
     activatedAt: timestamp("activated_at", { withTimezone: true, precision: 3 }),
     activatedByUserId: uuid("activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     forceActivated: boolean("force_activated").notNull().default(false),

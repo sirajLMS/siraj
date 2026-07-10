@@ -43,7 +43,7 @@ export const studentClassSessionDetailQueryDocument: TypedDocumentNode<
       executionState
       outcome
       remarks
-      zoomMeetingUrl
+      meetingJoinUrl
       teacherName
       scheduledStartAt
       scheduledEndAt

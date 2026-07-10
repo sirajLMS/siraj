@@ -109,40 +109,6 @@ export function TeacherDataGrid({
       ),
     },
     {
-      field: "zoomLink",
-      headerName: t("table.zoom"),
-      flex: 1,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => {
-        if (!params.value) {
-          return (
-            <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.disabled })}>
-              {t("table.linkPending")}
-            </Typography>
-          );
-        }
-        return (
-          <Link
-            href={isSafeUrl(params.value as string)}
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            variant="labelMd"
-            sx={theme => ({
-              fontWeight: 600,
-              py: 0.5,
-              px: 1,
-              backgroundColor: theme.palette.infoContainer,
-              color: theme.palette.onInfoContainer,
-            })}
-          >
-            {t("actions.joinRoom")}
-          </Link>
-        );
-      },
-    },
-    {
       field: "schedule",
       headerName: t("table.schedule"),
       width: 120,

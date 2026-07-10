@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { AppPermission, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AppPermission, CurrencyCode, User } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface UserState {
   user: User | null;
@@ -8,6 +8,7 @@ export interface UserState {
   avatarUrl: string;
   permissions: readonly AppPermission[];
   notificationCount: number;
+  displayCurrency: CurrencyCode | null;
   /** Real account flag — stays true while simulating another role. */
   actorIsSuperAdmin: boolean;
   setUser: (user: User | null) => void;
@@ -22,6 +23,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   avatarUrl: "",
   permissions: [],
   notificationCount: 0,
+  displayCurrency: null,
   actorIsSuperAdmin: false,
   setUser: user =>
     set({
@@ -31,6 +33,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       avatarUrl: user?.avatarUrl || "",
       permissions: user?.permissions ?? [],
       notificationCount: user?.notificationCount || 0,
+      displayCurrency: user?.displayCurrency ?? null,
     }),
   setActorIsSuperAdmin: actorIsSuperAdmin => set({ actorIsSuperAdmin }),
   hasPermission: permission => {

@@ -24,7 +24,7 @@ export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
         bookingStatus
         executionState
         outcome
-        zoomMeetingUrl
+        meetingJoinUrl
         classTimeFormatted
       }
       totalCount

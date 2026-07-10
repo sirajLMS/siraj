@@ -62,7 +62,6 @@ export namespace ParentPortalService {
       facebook: profile.facebook,
       whatsapp: profile.whatsapp,
       twitter: profile.twitter,
-      defaultZoomLink: profile.defaultZoomLink,
     };
   }
 

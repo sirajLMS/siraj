@@ -52,7 +52,6 @@ export namespace ParentProfileService {
       facebook: profile.facebook,
       whatsapp: profile.whatsapp,
       twitter: profile.twitter,
-      defaultZoomLink: profile.defaultZoomLink,
       invoiceType: profile.invoiceType,
       feeAmount: profile.feeAmount,
       paymentMethod: profile.paymentMethod,

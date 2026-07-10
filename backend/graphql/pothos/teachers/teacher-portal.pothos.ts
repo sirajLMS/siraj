@@ -60,7 +60,6 @@ export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
     rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
     paymentMethod: t.expose("paymentMethod", { type: PaymentMethodPothosObject, nullable: true }),
     totalClasses: t.exposeInt("totalClasses"),
-    zoomLink: t.exposeString("zoomLink", { nullable: true }),
   }),
 });
 

@@ -35,7 +35,7 @@ describe("Teacher Banking Details Versioning & History", () => {
   const expectBankingUpdateToFail = async (
     tx: DBTransaction,
     bankingId: string,
-    update: Partial<import("../../../types").TeacherBankingDetailsHistoryInsertInput>
+    update: Partial<import("@/backend/types").TeacherBankingDetailsHistoryInsertInput>
   ): Promise<Error> => {
     let errorCaught: unknown = null;
     try {

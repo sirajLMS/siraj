@@ -13,6 +13,7 @@ export * from "./classes";
 export * from "./communications";
 export * from "./custom-types";
 export * from "./enums";
+export * from "./meeting";
 export * from "./parents";
 export * from "./permissions";
 export * from "./shared";

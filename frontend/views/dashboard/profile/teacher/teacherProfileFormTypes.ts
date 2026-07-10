@@ -9,7 +9,6 @@ const coreSchema = z.object({
 
 const ownTeacherSchema = z.object({
   phone: z.string().optional(),
-  zoomLink: z.string().optional(),
 });
 
 const adminTeacherSchema = ownTeacherSchema.extend({
@@ -18,8 +17,6 @@ const adminTeacherSchema = ownTeacherSchema.extend({
   gender: z.enum(Gender).optional().nullable(),
   address: z.string().optional(),
   qualifications: z.string().optional(),
-  zoomUsername: z.string().optional(),
-  zoomPassword: z.string().optional(),
   timezone: z
     .string()
     .optional()
@@ -40,13 +37,11 @@ export type TeacherEditData = {
   readonly name?: string | null;
   readonly email?: string | null;
   readonly phone?: string | null;
-  readonly zoomLink?: string | null;
   readonly nationalId?: string | null;
   readonly dateOfBirth?: string | null;
   readonly gender?: Gender | null;
   readonly address?: string | null;
   readonly qualifications?: string | null;
-  readonly zoomUsername?: string | null;
   readonly timezone?: string | null;
   readonly hourlyRate?: string | null;
   readonly rateCurrency?: CurrencyCode | null;

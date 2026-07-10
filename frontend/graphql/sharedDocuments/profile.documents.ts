@@ -24,7 +24,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         hourlyRate
         rateCurrency
         paymentMethod
-        zoomLink
         totalClasses
       }
       teacherAdminProfile {
@@ -37,9 +36,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         gender
         address
         qualifications
-        zoomLink
-        zoomUsername
-        hasZoomPassword
         timezone
         hourlyRate
         rateCurrency
@@ -57,7 +53,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         facebook
         whatsapp
         twitter
-        defaultZoomLink
       }
       parentAdminProfile {
         id
@@ -72,7 +67,6 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         facebook
         whatsapp
         twitter
-        defaultZoomLink
         invoiceType
         feeAmount
         paymentMethod
@@ -180,7 +174,6 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         hourlyRate
         rateCurrency
         paymentMethod
-        zoomLink
         totalClasses
       }
       parentOwnProfile {
@@ -191,7 +184,6 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         facebook
         whatsapp
         twitter
-        defaultZoomLink
       }
       staffProfile {
         id
@@ -229,9 +221,6 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         gender
         address
         qualifications
-        zoomLink
-        zoomUsername
-        hasZoomPassword
         timezone
         hourlyRate
         rateCurrency
@@ -254,7 +243,6 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         facebook
         whatsapp
         twitter
-        defaultZoomLink
         invoiceType
         feeAmount
         paymentMethod

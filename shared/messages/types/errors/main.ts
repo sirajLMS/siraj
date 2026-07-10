@@ -33,7 +33,7 @@ export interface ErrorsLabels {
   readonly notificationProviderNotFound: string;
   readonly teacherBooked: string;
   readonly studentBooked: string;
-  readonly zoomInUse: string;
+  readonly meetingUrlInUse: string;
   readonly classInstanceNotFound: string;
   readonly originalClassNotFound: string;
   readonly cannotRescheduleToSelf: string;

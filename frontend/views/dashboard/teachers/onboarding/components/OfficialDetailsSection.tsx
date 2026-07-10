@@ -1,9 +1,8 @@
 "use client";
 
-import { Box, Grid, Input, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { getCountryByCode } from "@/frontend/lib/locale";
@@ -18,41 +17,16 @@ interface OfficialDetailsSectionProps {
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
   readonly labels: {
     readonly fields: {
-      readonly zoomLink: string;
       readonly country: string;
-      readonly zoomUsername: string;
-      readonly zoomPassword: string;
       readonly timezone: string;
-    };
-    readonly placeholders: {
-      readonly zoomLink: string;
-      readonly zoomUsername: string;
-      readonly zoomPassword: string;
     };
   };
 }
 
-export function OfficialDetailsSection({ register, control, errors, labels }: Readonly<OfficialDetailsSectionProps>) {
+export function OfficialDetailsSection({ control, errors, labels }: Readonly<OfficialDetailsSectionProps>) {
   return (
     <Grid container spacing={3} sx={{ p: 3 }}>
       <Grid size={{ xs: 12, md: 6 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.zoomLink}
-        </Box>
-        <Input
-          {...register("zoomLink")}
-          placeholder={labels.placeholders.zoomLink}
-          error={!!errors.zoomLink}
-          fullWidth
-          sx={standardInputSx}
-        />
-        {errors.zoomLink ? (
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.zoomLink.message}
-          </Typography>
-        ) : null}
-      </Grid>
-      <Grid size={{ xs: 12, md: 3 }}>
         <Controller
           name="countryCode"
           control={control}
@@ -72,29 +46,6 @@ export function OfficialDetailsSection({ register, control, errors, labels }: Re
               />
             );
           }}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, md: 3 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.zoomUsername}
-        </Box>
-        <Input
-          {...register("zoomUsername")}
-          placeholder={labels.placeholders.zoomUsername}
-          fullWidth
-          sx={standardInputSx}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, md: 3 }}>
-        <Box component="label" sx={labelSx}>
-          {labels.fields.zoomPassword}
-        </Box>
-        <Input
-          {...register("zoomPassword")}
-          placeholder={labels.placeholders.zoomPassword}
-          type="password"
-          fullWidth
-          sx={standardInputSx}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>

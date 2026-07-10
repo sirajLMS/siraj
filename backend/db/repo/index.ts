@@ -14,6 +14,7 @@ export {
   ComplaintResponseRepository,
 } from "@/backend/db/repo/complaints";
 export { FxSyncRepository } from "@/backend/db/repo/fx-sync.repository";
+export { MeetingProviderRepository, UserMeetingConfigRepository } from "@/backend/db/repo/meeting";
 export {
   NotificationPreferencesRepository,
   NotificationRepository,

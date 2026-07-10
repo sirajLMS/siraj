@@ -33,7 +33,7 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
     bookingStatus: t.expose("bookingStatus", { type: BookingStatusPothosObject }),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
-    zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
+    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
     classTimeFormatted: t.exposeString("classTimeFormatted"),
   }),
 });

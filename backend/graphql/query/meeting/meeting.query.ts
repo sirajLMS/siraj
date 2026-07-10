@@ -1,0 +1,64 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  MeetingProviderPothosObject,
+  UserMeetingConfigPothosObject,
+} from "@/backend/graphql/pothos/meeting/meeting.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
+import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
+
+gqlSchemaBuilder.queryField("meetingProviders", t =>
+  t.field({
+    type: [MeetingProviderPothosObject],
+    args: {
+      activeOnly: t.arg.boolean({ required: false, defaultValue: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return MeetingProviderCatalogService.listProviders(userId, args.activeOnly ?? true, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("meetingProvider", t =>
+  t.field({
+    type: MeetingProviderPothosObject,
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return MeetingProviderCatalogService.getProviderById(userId, args.id, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("userMeetingConfigs", t =>
+  t.field({
+    type: [UserMeetingConfigPothosObject],
+    args: {
+      userId: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return MeetingConfigService.listUserMeetingConfigs(actorUserId, args.userId, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("userMeetingConfig", t =>
+  t.field({
+    type: UserMeetingConfigPothosObject,
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return MeetingConfigService.getUserMeetingConfig(actorUserId, args.id, ctx.locale);
+    },
+  })
+);

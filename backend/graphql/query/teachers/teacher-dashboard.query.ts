@@ -29,7 +29,7 @@ async function resolveTeacherDashboard(
       durationMinutes: r.durationMinutes,
       executionState: r.executionState,
       outcome: r.outcome ?? null,
-      zoomMeetingUrl: r.zoomMeetingUrl ?? null,
+      meetingJoinUrl: r.meetingJoinUrl ?? null,
       yourTimeFormatted: r.yourTimeFormatted ?? null,
     })),
   };

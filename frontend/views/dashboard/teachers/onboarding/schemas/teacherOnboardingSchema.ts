@@ -34,13 +34,10 @@ export const teacherOnboardingSchema = (validationLabels: {
     }),
     address: z.string().optional(),
     qualifications: z.string().optional(),
-    zoomLink: z.url({ message: validationLabels.urlInvalid }).or(z.literal("")).optional(),
     countryCode: z.custom<CountryCode>(
       val => typeof val === "string" && Object.values(CountryCode).includes(val as CountryCode),
       { message: validationLabels.countryRequired }
     ),
-    zoomUsername: z.string().optional(),
-    zoomPassword: z.string().optional(),
     timezone: z
       .string()
       .min(1, validationLabels.timezoneRequired)

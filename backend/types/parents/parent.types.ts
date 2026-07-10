@@ -88,7 +88,7 @@ export type ParentDashboardScheduleRow = {
   bookingStatus: BookingStatus;
   executionState: ClassExecutionState;
   outcome: ClassOutcome;
-  zoomMeetingUrl: string | null;
+  meetingJoinUrl: string | null;
   classTimeFormatted: string;
 };
 
@@ -164,7 +164,6 @@ export interface ParentProfileResult {
   readonly facebook: string | null;
   readonly whatsapp: string | null;
   readonly twitter: string | null;
-  readonly defaultZoomLink: string | null;
   readonly invoiceType: string | null;
   readonly feeAmount: string | null;
   readonly currency: CurrencyCode | null;
@@ -200,7 +199,6 @@ export type ParentOwnProfileReturnType = {
   facebook: string | null;
   whatsapp: string | null;
   twitter: string | null;
-  defaultZoomLink: string | null;
 };
 
 export type ParentProfileUpdateInput = {
@@ -210,7 +208,6 @@ export type ParentProfileUpdateInput = {
   readonly facebook?: string | null;
   readonly whatsapp?: string | null;
   readonly twitter?: string | null;
-  readonly defaultZoomLink?: string | null;
   readonly invoiceType?: string | null;
   readonly feeAmount?: string | null;
   readonly currency?: CurrencyCode | null;

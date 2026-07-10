@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ResourcesView } from "@/frontend/views/dashboard/resources/ResourcesView";
@@ -150,6 +150,7 @@ export const Default: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });
@@ -182,6 +183,7 @@ export const Empty: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });
@@ -214,6 +216,7 @@ export const ListOnly: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });
@@ -248,6 +251,7 @@ export const DeleteInProgress: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });
@@ -280,6 +284,7 @@ export const UploadingState: Story = {
           updatedAt: new Date().toISOString(),
           emailVerifiedAt: new Date().toISOString(),
           email: "mock@example.com",
+          displayCurrency: CurrencyCode.Usd,
           __typename: "User",
         },
       });

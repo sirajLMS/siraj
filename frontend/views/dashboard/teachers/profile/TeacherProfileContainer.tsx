@@ -48,7 +48,6 @@ export function TeacherProfileContainer() {
             rateCurrency: formData.currency ?? CurrencyCode.Usd,
             paymentMethod: formData.paymentMethod as PaymentMethod,
             status: null,
-            zoomLink: formData.zoomLink || null,
             dateOfBirth: null,
             nationalId: null,
             qualifications: null,

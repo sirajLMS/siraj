@@ -6,6 +6,7 @@
 import "./auth";
 import "./billing";
 import "./classes";
+import "./meeting";
 import "./notifications";
 import "./parents";
 import "./profile";

@@ -18,8 +18,6 @@ const baseProfile: TeacherProfileReturnType = {
   gender: null,
   address: "Riyadh",
   qualifications: "BA",
-  zoomLink: "https://zoom.us/j/1",
-  zoomUsername: "ahmed",
   timezone: IanaTimezone.Asia_Riyadh,
   hourlyRate: "50",
   rateCurrency: CurrencyCode.USD,
@@ -28,7 +26,6 @@ const baseProfile: TeacherProfileReturnType = {
   updatedAt: "2024-01-01T00:00:00.000Z",
   totalClasses: 10,
   avgEngagementScore: 4.5,
-  hasZoomPassword: true,
 };
 
 afterEach(() => {
@@ -44,7 +41,6 @@ describe("StaffProfileService teacher profile masking", () => {
 
     const profile = await StaffProfileService.getTeacherProfileForEdit("actor-1", "teacher-1");
     expect(profile.nationalId).toBe("******7890");
-    expect(profile.hasZoomPassword).toBe(true);
   });
 });
 
@@ -58,6 +54,5 @@ describe("TeacherPortalService own profile", () => {
 
     const profile = await TeacherPortalService.getOwnProfile("user-1");
     expect(profile.totalClasses).toBe(10);
-    expect(profile.zoomLink).toBe("https://zoom.us/j/1");
   });
 });

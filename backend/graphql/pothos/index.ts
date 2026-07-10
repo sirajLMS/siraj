@@ -9,6 +9,7 @@ export * from "@/backend/graphql/pothos/billing";
 export * from "@/backend/graphql/pothos/books";
 export * from "@/backend/graphql/pothos/classes";
 export * from "@/backend/graphql/pothos/complaints";
+export * from "@/backend/graphql/pothos/meeting";
 export * from "@/backend/graphql/pothos/notifications";
 export * from "@/backend/graphql/pothos/parents";
 export * from "@/backend/graphql/pothos/permissions";
