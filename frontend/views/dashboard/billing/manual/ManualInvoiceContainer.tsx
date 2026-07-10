@@ -97,7 +97,7 @@ export function ManualInvoiceContainer() {
     void createInvoice({
       variables: {
         parentId: data.parentId,
-        studentId: "studentId" in data ? data.studentId : null,
+        studentId: ("studentId" in data ? data.studentId : null) ?? null,
         amount: data.feeAmount,
         currency: data.currency,
         invoiceType: InvoiceType.Manual,

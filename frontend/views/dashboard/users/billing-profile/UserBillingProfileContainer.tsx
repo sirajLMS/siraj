@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -11,6 +11,8 @@ import {
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { formatLockedAmount } from "@/frontend/lib/currency";
+import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
@@ -19,11 +21,6 @@ import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/bil
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
 import type { UserBillingProfileContainerProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/UserBillingProfileView";
-
-function formatCurrency(amount: string, currency: CurrencyCode | string): string {
-  const numAmount = Number(amount);
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(numAmount);
-}
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "";
@@ -36,6 +33,9 @@ function formatDate(dateStr: string | null): string {
 
 export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProfileContainerProps>) {
   const t = useTranslations("dashboard.billing");
+  const tProfile = useTranslations("profile.teacher");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
   const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
   const notifications = useNotifications();
@@ -118,23 +118,43 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         issueDate: inv.issueDate ?? "",
         dueDate: inv.dueDate ?? "",
         paidDate: inv.paidDate ?? "—",
-        fee: `${inv.currency} ${inv.amount}`,
+        fee: formatCurrencyForDisplay(
+          inv.amount ?? "0",
+          inv.currency ?? CurrencyCode.Usd,
+          inv.displayAmount
+            ? {
+                amount: inv.displayAmount.amount,
+                currency: inv.displayAmount.currency ?? CurrencyCode.Usd,
+                stale: inv.displayAmount.stale ?? true,
+              }
+            : null,
+          locale,
+          {
+            convertedAmount: values => tProfile("convertedAmount", values),
+            displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+          }
+        ),
         status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
       })),
-    [data?.parentInvoiceHistory]
+    [data?.parentInvoiceHistory, tProfile, tErrors, locale]
   );
 
   const summary = useMemo(
     () => ({
-      outstandingBalance: formatCurrency(
+      outstandingBalance: formatLockedAmount(
         summaryData?.parentBillingSummary?.outstandingBalance ?? "0.00",
-        CurrencyCode.Usd
+        CurrencyCode.Usd,
+        locale
       ),
-      paidThisTerm: formatCurrency(summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00", CurrencyCode.Usd),
+      paidThisTerm: formatLockedAmount(
+        summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00",
+        CurrencyCode.Usd,
+        locale
+      ),
       nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
     }),
-    [summaryData?.parentBillingSummary]
+    [summaryData?.parentBillingSummary, locale]
   );
 
   const isLoading = summaryLoading || loading;

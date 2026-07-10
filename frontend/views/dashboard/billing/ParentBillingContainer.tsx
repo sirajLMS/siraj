@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, CurrencyCode, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -12,6 +12,8 @@ import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parents/parent-billing-history.documents";
+import { formatLockedAmount } from "@/frontend/lib/currency";
+import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
@@ -22,11 +24,6 @@ import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/bui
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
-
-function formatCurrency(amount: string, currency: CurrencyCode | string): string {
-  const numAmount = Number(amount);
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(numAmount);
-}
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "";
@@ -39,6 +36,9 @@ function formatDate(dateStr: string | null): string {
 
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
+  const tProfile = useTranslations("profile.teacher");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
   const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
 
@@ -103,25 +103,45 @@ export function ParentBillingContainer() {
           issueDate: inv.issueDate ?? "",
           dueDate: inv.dueDate ?? "",
           paidDate: inv.paidDate ?? "—",
-          fee: `${inv.currency} ${inv.amount}`,
+          fee: formatCurrencyForDisplay(
+            inv.amount ?? "0",
+            inv.currency ?? CurrencyCode.Usd,
+            inv.displayAmount
+              ? {
+                  amount: inv.displayAmount.amount,
+                  currency: inv.displayAmount.currency ?? CurrencyCode.Usd,
+                  stale: inv.displayAmount.stale ?? true,
+                }
+              : null,
+            locale,
+            {
+              convertedAmount: values => tProfile("convertedAmount", values),
+              displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+            }
+          ),
           status: inv.status === InvoiceStatus.Paid ? InvoiceStatus.Paid : InvoiceStatus.Unpaid,
         })),
         searchQuery
       ),
-    [invoices, searchQuery]
+    [invoices, searchQuery, tProfile, tErrors, locale]
   );
 
   const summary = useMemo(
     () => ({
-      outstandingBalance: formatCurrency(
+      outstandingBalance: formatLockedAmount(
         summaryData?.parentBillingSummary?.outstandingBalance ?? "0.00",
-        CurrencyCode.Usd
+        CurrencyCode.Usd,
+        locale
       ),
-      paidThisTerm: formatCurrency(summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00", CurrencyCode.Usd),
+      paidThisTerm: formatLockedAmount(
+        summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00",
+        CurrencyCode.Usd,
+        locale
+      ),
       nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
       activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
     }),
-    [summaryData?.parentBillingSummary]
+    [summaryData?.parentBillingSummary, locale]
   );
 
   if (loading && !data) {

@@ -16,6 +16,12 @@ export const unpaidInvoicesAlertQueryDocument: TypedDocumentNode<Operations.Unpa
         currency
         overdueCount
         oldestDueDate
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
     }
   }

@@ -20,6 +20,7 @@ import {
   statusTracking,
 } from "@/shared/messages/ar/dashboard/core";
 import { managerOnboarding, managersDirectory } from "@/shared/messages/ar/dashboard/managers";
+import { meetingProviders as meetingProvidersLabels } from "@/shared/messages/ar/dashboard/meeting-providers/main";
 import {
   directory,
   onboarding,

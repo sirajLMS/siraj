@@ -1,13 +1,14 @@
 "use client";
 
 import { InputAdornment, Stack, TextField } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
+import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 import type { TeacherViewData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type { TeacherAdminEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
@@ -75,15 +76,32 @@ function CompensationEditSection({
 
 export function CompensationSection(props: CompensationSectionProps) {
   const t = useTranslations("profile.teacher");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
 
   if (props.mode === "edit") {
     return <CompensationEditSection register={props.register} control={props.control} />;
   }
 
-  const salaryLabel = t("baseSalary", {
-    amount: props.teacherData.hourlyRate ?? "0",
-    currency: props.teacherData.rateCurrency ?? CurrencyCode.Usd,
-  });
+  const lockedAmount = props.teacherData.hourlyRate ?? "0";
+  const lockedCurrency = props.teacherData.rateCurrency ?? CurrencyCode.Usd;
+  const displayAmount = props.teacherData.displayAmount;
+  const salaryLabel = formatCurrencyForDisplay(
+    lockedAmount,
+    lockedCurrency,
+    displayAmount
+      ? {
+          amount: displayAmount.amount,
+          currency: displayAmount.currency ?? lockedCurrency,
+          stale: displayAmount.stale ?? true,
+        }
+      : null,
+    locale,
+    {
+      convertedAmount: values => t("convertedAmount", values),
+      displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+    }
+  );
 
   return (
     <SectionPanel title={t("sections.compensation")}>

@@ -1,6 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { BillingMonthInputRef } from "@/backend/graphql/pothos/billing/billing-history.pothos";
 import {
+  DisplayAmountPothosObject,
+  resolveDisplayAmountField,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import {
   CurrencyCodePothosObject,
   InvoiceStatusPothosObject,
   InvoiceTypePothosObject,
@@ -32,6 +36,11 @@ export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement(
     paidDate: t.exposeString("paidDate", { nullable: true }),
     version: t.exposeInt("version"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx),
+    }),
   }),
 });
 

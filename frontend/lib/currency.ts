@@ -75,6 +75,39 @@ export function getCurrencySymbol(code: CurrencyCode | string): string {
   return getCurrencyByCode(code)?.symbol ?? (code as string);
 }
 
+/** ISO 4217 minor-unit decimals for currencies that differ from the default (2). */
+const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
+  [CurrencyCode.Jpy]: 0,
+  [CurrencyCode.Djf]: 0,
+  [CurrencyCode.Kmf]: 0,
+  [CurrencyCode.Kwd]: 3,
+  [CurrencyCode.Bhd]: 3,
+  [CurrencyCode.Omr]: 3,
+  [CurrencyCode.Jod]: 3,
+  [CurrencyCode.Iqd]: 3,
+  [CurrencyCode.Lyd]: 3,
+  [CurrencyCode.Tnd]: 3,
+};
+
+/** ISO 4217 minor-unit decimals; default 2 when not listed. */
+export function getCurrencyDecimals(code: CurrencyCode | string): number {
+  return CURRENCY_DECIMALS[code as CurrencyCode] ?? 2;
+}
+
+export function formatLockedAmount(amount: string, currency: CurrencyCode, locale = "en"): string {
+  const decimals = getCurrencyDecimals(currency);
+  const numeric = Number.parseFloat(amount);
+  if (!Number.isFinite(numeric)) {
+    return amount;
+  }
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(numeric);
+}
+
 /**
  * Resolve a localized currency display name via `Intl.DisplayNames`.
  *

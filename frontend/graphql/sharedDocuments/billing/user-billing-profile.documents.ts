@@ -36,6 +36,12 @@ export const userBillingProfileInvoiceHistoryQueryDocument: TypedDocumentNode<
         invoiceType
         studentId
         studentName
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       totalCount
       pageInfo {

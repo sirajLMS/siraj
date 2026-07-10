@@ -131,6 +131,14 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
   },
+  paymentCatalogs: {
+    key: "payment-catalogs",
+    labelKey: "dashboard.nav.paymentCatalogs",
+    icon: PaymentsOutlined,
+    href: "/payment-catalogs",
+    section: "main",
+    permission: PAGE_PERMISSIONS.paymentCatalogs,
+  },
   billingParent: {
     key: "billing-parent",
     labelKey: "dashboard.nav.billingParent",

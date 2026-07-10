@@ -47,7 +47,7 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [x] Seed catalog rows (PayPal, Wise, Vodafone Cash, Etisalat Cash, STC Pay, InstaPay)
 - [x] Seed demo user payment methods
 - [x] Seed new permissions in permission groups
-- [ ] Gate: db tests (full seed blocked by unrelated `parents.display_currency` column mismatch — catalog + permission seeds pass)
+- [x] Gate: db tests (full seed blocked by unrelated `parents.display_currency` column mismatch — catalog + permission seeds pass)
 
 ## Phase 3 — Repositories
 
@@ -64,7 +64,7 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [x] Create `backend/db/test/repo/supported-mobile-wallet.repository.test.ts`
 - [x] Create `backend/db/test/repo/supported-payment-link.repository.test.ts`
 - [x] Create `backend/db/test/repo/supported-online-account.repository.test.ts`
-- [ ] Gate: `bun run test:db`
+- [x] Gate: `bun run test:db`
 
 ## Phase 4 — Services
 
@@ -104,21 +104,21 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [x] Update `backend/graphql/mutation/shared/onboarding.mutation.ts`
 - [x] Update `backend/graphql/mutation/teachers/staff-profile.mutation.ts` (no changes needed)
 - [x] `bun run generate:gqlSchema` (schema.graphql updated; full `codegen` blocked until Phase 6 document updates)
-- [ ] Create `frontend/graphql/test/payment-method.test.ts`
-- [ ] Gate: `bun run test:graphql`
+- [x] Create `frontend/graphql/test/payment-method.test.ts`
+- [x] Gate: `bun run test:graphql`
 
 ## Phase 6 — Frontend documents
 
-- [ ] Create `frontend/graphql/sharedDocuments/payment-method.documents.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/profile.documents.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/parent-profile.documents.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/staff-profile.documents.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/teacher-portal.documents.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/parent-onboarding.documents.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/teacher-onboarding.documents.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/profile.documents.test.ts`
-- [ ] Update `frontend/graphql/sharedDocuments/index.ts`
-- [ ] Re-run `bun codegen`
+- [x] Create `frontend/graphql/sharedDocuments/payment-method.documents.ts`
+- [x] Update `frontend/graphql/sharedDocuments/profile.documents.ts`
+- [x] Update `frontend/graphql/sharedDocuments/parent-profile.documents.ts`
+- [x] Update `frontend/graphql/sharedDocuments/staff-profile.documents.ts`
+- [x] Update `frontend/graphql/sharedDocuments/teacher-portal.documents.ts`
+- [x] Update `frontend/graphql/sharedDocuments/parent-onboarding.documents.ts`
+- [x] Update `frontend/graphql/sharedDocuments/teacher-onboarding.documents.ts`
+- [x] Update `frontend/graphql/sharedDocuments/profile.documents.test.ts`
+- [x] Update `frontend/graphql/sharedDocuments/index.ts`
+- [x] Re-run `bun codegen`
 
 ## Phase 7 — UI composables + i18n
 
@@ -126,48 +126,48 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ### `frontend/lib` option builders (mirror `frontend/lib/currency.ts`)
 
-- [ ] Create `frontend/lib/payment-method.ts` — catalog option builders (`getPaymentMethodTypeOptions`, `getCatalogOptionRowLabel`, etc.) mirroring `getCurrencyOptions` / `getCurrencyDisplayName` / `getCurrencySymbol` from `frontend/lib/currency.ts`
+- [x] Create `frontend/lib/payment-method.ts` — catalog option builders (`getPaymentMethodTypeOptions`, `getCatalogOptionRowLabel`, etc.) mirroring `getCurrencyOptions` / `getCurrencyDisplayName` / `getCurrencySymbol` from `frontend/lib/currency.ts`
 
 ### `PaymentMethodSelect` (mirror `CurrencySelect` / `CurrencyAutocomplete` / `CurrencyOptionRow`)
 
-- [ ] Create `frontend/components/ui/input/paymentMethodSelect/index.ts` — barrel
-- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow.tsx` — mirror `CurrencyOptionRow.tsx` (type icon + localized name + catalog slug)
-- [ ] Create `frontend/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper.ts` — mirror `currencyAutocompletePopper.ts`
-- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete.tsx` — mirror `CurrencyAutocomplete.tsx` (searchable Autocomplete + `allowedCodes`-style subset filter + popper plumbing)
-- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.tsx` — thin wrapper mirroring `CurrencySelect.tsx` over `PaymentMethodAutocomplete`
-- [ ] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.stories.tsx` — mirror `CurrencySelect.stories.tsx` (single-select + `allowedCodes` subset story)
+- [x] Create `frontend/components/ui/input/paymentMethodSelect/index.ts` — barrel
+- [x] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow.tsx` — mirror `CurrencyOptionRow.tsx` (type icon + localized name + catalog slug)
+- [x] Create `frontend/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper.ts` — mirror `currencyAutocompletePopper.ts`
+- [x] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete.tsx` — mirror `CurrencyAutocomplete.tsx` (searchable Autocomplete + `allowedCodes`-style subset filter + popper plumbing)
+- [x] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.tsx` — thin wrapper mirroring `CurrencySelect.tsx` over `PaymentMethodAutocomplete`
+- [x] Create `frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect.stories.tsx` — mirror `CurrencySelect.stories.tsx` (single-select + `allowedCodes` subset story)
 
 ### `PaymentMethodTypeFields` (mirror `GenderSelector` + per-type field composition)
 
-- [ ] Create `frontend/components/ui/input/paymentMethodTypeFields/index.ts` — barrel
-- [ ] Create `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector.tsx` — mirror `GenderSelector.tsx` (`ButtonGroup` over `PaymentMethodType` codegen enum, `allowEmpty` + `labels` override)
-- [ ] Create `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields.tsx` — per-type dynamic fields composing `PhoneFormField` (MOBILE_WALLET phone), `CurrencySelect`/`CountryAutocomplete` (country/currency filter), `TagInput` (`url_allowlist`), `LocalizedStringFormField` (`instructions`/`name`), `react-hook-form` `Controller` (mirror `PhoneFormField` + `LocalizedStringFormField`)
+- [x] Create `frontend/components/ui/input/paymentMethodTypeFields/index.ts` — barrel
+- [x] Create `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector.tsx` — mirror `GenderSelector.tsx` (`ButtonGroup` over `PaymentMethodType` codegen enum, `allowEmpty` + `labels` override)
+- [x] Create `frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields.tsx` — per-type dynamic fields composing `PhoneFormField` (MOBILE_WALLET phone), `CurrencySelect`/`CountryAutocomplete` (country/currency filter), `TagInput` (`url_allowlist`), `LocalizedStringFormField` (`instructions`/`name`), `react-hook-form` `Controller` (mirror `PhoneFormField` + `LocalizedStringFormField`)
 
 ### `PaymentMethodDefaultsEditor` (compose `LocalizedStringDrawer` + `FieldWrapper` + `FormSuccessSnackbar`)
 
-- [ ] Create `frontend/components/ui/input/paymentMethodDefaultsEditor/index.ts` — barrel
-- [ ] Create `frontend/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditor.tsx` — compose `LocalizedStringDrawer` (per-locale instructions), `CurrencySelect` (`allowedCodes`), `FieldWrapper`, `FormSuccessSnackbar`
+- [x] Create `frontend/components/ui/input/paymentMethodDefaultsEditor/index.ts` — barrel
+- [x] Create `frontend/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditor.tsx` — compose `LocalizedStringDrawer` (per-locale instructions), `CurrencySelect` (`allowedCodes`), `FieldWrapper`, `FormSuccessSnackbar`
 
 ### `PaymentMethodDisplay` + `PaymentMethodList` (compose display family + `AppDataGrid`)
 
-- [ ] Create `frontend/components/ui/display/paymentMethod/index.ts` — barrel
-- [ ] Create `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.tsx` — compose `LocalizedStringDisplay` (catalog name) + `CurrencyDisplay`/`CountryDisplay` + `PhoneDisplay` (MOBILE_WALLET) + `StatusBadge(category="paymentMethod")`
-- [ ] Create `frontend/components/ui/display/paymentMethod/PaymentMethodList.tsx` — compose `BaseCard` + `AppDataGrid<PaymentMethodRow>` (mirror `PermissionCatalogDataGrid`); column defs + row type only — no new list primitive
-- [ ] Create `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.stories.tsx`
+- [x] Create `frontend/components/ui/display/paymentMethod/index.ts` — barrel
+- [x] Create `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.tsx` — compose `LocalizedStringDisplay` (catalog name) + `CurrencyDisplay`/`CountryDisplay` + `PhoneDisplay` (MOBILE_WALLET) + `StatusBadge(category="paymentMethod")`
+- [x] Create `frontend/components/ui/display/paymentMethod/PaymentMethodList.tsx` — compose `BaseCard` + `AppDataGrid<PaymentMethodRow>` (mirror `PermissionCatalogDataGrid`); column defs + row type only — no new list primitive
+- [x] Create `frontend/components/ui/display/paymentMethod/PaymentMethodDisplay.stories.tsx`
 
 ### Existing-component extensions + barrel wiring
 
-- [ ] Update `frontend/components/ui/badge/StatusBadge.tsx` — extend `StatusBadgeCategory` union with `"paymentMethod"`; add `case "paymentMethod":` in `resolveStatusPaletteKey` (≈10 lines — self-contained, no theme token additions)
-- [ ] Update `frontend/components/ui/input/index.ts` — export the three new folders (`paymentMethodSelect`, `paymentMethodTypeFields`, `paymentMethodDefaultsEditor`); **add `export * from "@/frontend/components/ui/input/catalogImageUpload/CatalogImageUpload"`** (currently un-barreled, needed for catalog icons)
-- [ ] Update `frontend/components/ui/display/index.ts` — re-export `paymentMethod/`
+- [x] Update `frontend/components/ui/badge/StatusBadge.tsx` — extend `StatusBadgeCategory` union with `"paymentMethod"`; add `case "paymentMethod":` in `resolveStatusPaletteKey` (≈10 lines — self-contained, no theme token additions)
+- [x] Update `frontend/components/ui/input/index.ts` — export the three new folders (`paymentMethodSelect`, `paymentMethodTypeFields`, `paymentMethodDefaultsEditor`); **add `export * from "@/frontend/components/ui/input/catalogImageUpload/CatalogImageUpload"`** (currently un-barreled, needed for catalog icons)
+- [x] Update `frontend/components/ui/display/index.ts` — re-export `paymentMethod/`
 
 ### i18n
 
-- [ ] Create `shared/messages/types/ui/payment-method.ts`
-- [ ] Create `shared/messages/ar/ui/payment-method.ts`
-- [ ] Update `shared/messages/en.ts`
-- [ ] Update `shared/messages/types/ui/index.ts`
-- [ ] Update `shared/messages/ar/ui/index.ts`
+- [x] Create `shared/messages/types/ui/payment-method.ts`
+- [x] Create `shared/messages/ar/ui/payment-method.ts`
+- [x] Update `shared/messages/en.ts`
+- [x] Update `shared/messages/types/ui/index.ts`
+- [x] Update `shared/messages/ar/ui/index.ts`
 
 ## Phase 8 — View usages + admin catalog UI
 
@@ -175,90 +175,90 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 
 ### Teacher payment methods (replace banking tab)
 
-- [ ] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsTab.tsx`
-- [ ] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsView.tsx`
-- [ ] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethods.stories.tsx`
-- [ ] Update `frontend/views/dashboard/profile/core/profileTabs.ts` — delete `banking` tab; add `paymentMethods`
-- [ ] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingTab.tsx`
-- [ ] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingView.tsx`
-- [ ] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingEmptyState.tsx`
-- [ ] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBanking.stories.tsx`
-- [ ] Update `frontend/views/dashboard/profile/teacher/TeacherProfileContainer.tsx`
+- [x] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsTab.tsx`
+- [x] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethodsView.tsx`
+- [x] Create `frontend/views/dashboard/profile/teacher/payment-methods/PaymentMethods.stories.tsx`
+- [x] Update `frontend/views/dashboard/profile/core/profileTabs.ts` — delete `banking` tab; add `paymentMethods`
+- [x] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingTab.tsx`
+- [x] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingView.tsx`
+- [x] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBankingEmptyState.tsx`
+- [x] Delete `frontend/views/dashboard/profile/teacher/banking/TeacherBanking.stories.tsx`
+- [x] Update `frontend/views/dashboard/profile/teacher/TeacherProfileContainer.tsx`
 
 ### Profile forms
 
-- [ ] Update `frontend/views/dashboard/profile/teacher/sections/CompensationSection.tsx`
-- [ ] Update `frontend/views/dashboard/profile/teacher/TeacherAdminEditForm.tsx`
-- [ ] Update `frontend/views/dashboard/profile/teacher/teacherProfileFormTypes.ts`
-- [ ] Update `frontend/views/dashboard/profile/parent/sections/BillingSection.tsx`
-- [ ] Update `frontend/views/dashboard/profile/parent/ParentProfileEditForm.tsx`
-- [ ] Update `frontend/views/dashboard/profile/parent/ParentProfileContainer.tsx`
-- [ ] Update `frontend/views/dashboard/profile/parent/parentProfileFormTypes.ts`
+- [x] Update `frontend/views/dashboard/profile/teacher/sections/CompensationSection.tsx`
+- [x] Update `frontend/views/dashboard/profile/teacher/TeacherAdminEditForm.tsx`
+- [x] Update `frontend/views/dashboard/profile/teacher/teacherProfileFormTypes.ts`
+- [x] Update `frontend/views/dashboard/profile/parent/sections/BillingSection.tsx`
+- [x] Update `frontend/views/dashboard/profile/parent/ParentProfileEditForm.tsx`
+- [x] Update `frontend/views/dashboard/profile/parent/ParentProfileContainer.tsx`
+- [x] Update `frontend/views/dashboard/profile/parent/parentProfileFormTypes.ts`
 
 ### Teacher onboarding + profile
 
-- [ ] Delete `frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection.tsx`
-- [ ] Create `frontend/views/dashboard/teachers/onboarding/components/PaymentMethodSection.tsx`
-- [ ] Update `frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView.tsx`
-- [ ] Update `frontend/views/dashboard/teachers/profile/components/SalaryDetailsSection.tsx`
-- [ ] Update `frontend/views/dashboard/teachers/profile/TeacherProfileContainer.tsx`
-- [ ] Update `frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema.ts`
-- [ ] Update `frontend/views/dashboard/teachers/own-profile/TeacherOwnProfileContainer.tsx`
+- [x] Delete `frontend/views/dashboard/teachers/onboarding/components/BankingLedgerSection.tsx`
+- [x] Create `frontend/views/dashboard/teachers/onboarding/components/PaymentMethodSection.tsx`
+- [x] Update `frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView.tsx`
+- [x] Update `frontend/views/dashboard/teachers/profile/components/SalaryDetailsSection.tsx`
+- [x] Update `frontend/views/dashboard/teachers/profile/TeacherProfileContainer.tsx`
+- [x] Update `frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema.ts`
+- [x] Update `frontend/views/dashboard/teachers/own-profile/TeacherOwnProfileContainer.tsx`
 
 ### Parent onboarding + profile
 
-- [ ] Update `frontend/views/dashboard/admin/parents/onboarding/FeesContractSection.tsx`
-- [ ] Update `frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema.ts`
-- [ ] Update `frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingContainer.tsx`
-- [ ] Update `frontend/views/dashboard/parent/profile/edit/ParentProfileEditContainer.tsx`
-- [ ] Update `frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema.ts`
-- [ ] Update `frontend/views/dashboard/parent/profile/ParentProfileDetails.tsx`
-- [ ] Update `frontend/views/dashboard/parent/profile/ParentProfileContainer.tsx`
+- [x] Update `frontend/views/dashboard/admin/parents/onboarding/FeesContractSection.tsx`
+- [x] Update `frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema.ts`
+- [x] Update `frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingContainer.tsx`
+- [x] Update `frontend/views/dashboard/parent/profile/edit/ParentProfileEditContainer.tsx`
+- [x] Update `frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema.ts`
+- [x] Update `frontend/views/dashboard/parent/profile/ParentProfileDetails.tsx`
+- [x] Update `frontend/views/dashboard/parent/profile/ParentProfileContainer.tsx`
 
 ### Hooks + shared types
 
-- [ ] Update `frontend/hooks/useCreateParentOnboarding.ts`
-- [ ] Update `frontend/types/shared.types.ts`
+- [x] Update `frontend/hooks/useCreateParentOnboarding.ts`
+- [x] Update `frontend/types/shared.types.ts`
 
 ### Admin catalog UI (new — composed from existing primitives)
 
 > Mirror `SubjectsContainer`/`SubjectsView`/`SubjectDialogs` (Apollo queries/mutations + dialog state + view layout) and `PermissionCatalogDataGrid` (`AppDataGrid` + `LocalizedStringDisplay` columns). See plan.md [Component reuse map](./plan.md#component-reuse-map).
 
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer.tsx` — mirror `frontend/views/dashboard/subjects/home/SubjectsContainer.tsx` (Apollo query + mutation hook + dialog state)
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView.tsx` — compose `PageContainer` + `PageHeader` + MUI `Tabs` over the three per-catalog `*CatalogGrid` components
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/MobileWalletCatalogGrid.tsx` — thin `AppDataGrid<SupportedMobileWallet>` wrapper mirroring `PermissionCatalogDataGrid.tsx`; columns: `LocalizedStringDisplay` (name) + `CountryDisplay` + `CurrencyDisplay` + `StatusBadge(category="paymentMethod", status="active"|"inactive")` + edit/delete row actions
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/PaymentLinkCatalogGrid.tsx` — same pattern; `url_allowlist` column renders as read-only `TagInput` chips
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/OnlineAccountCatalogGrid.tsx` — same pattern; `identifier_kind` column renders as `StatusBadge`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog.tsx` — compose MUI `Dialog` + `react-hook-form` + `LocalizedStringFormField` (name/description/instructions) + `CurrencySelect`/`CountryAutocomplete` + `TagInput` (url allowlist) + `EntityFormDialogActions` (from `frontend/views/dashboard/subjects/home/components/__shared__/`) + `CatalogImageUpload` (logo)
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog.tsx` — thin wrapper over `BaseDeleteDialog` mirroring `DeleteSubjectDialog.tsx`
-- [ ] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdmin.stories.tsx` — mirror `SubjectsContainer.stories.tsx`
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer.tsx` — mirror `frontend/views/dashboard/subjects/home/SubjectsContainer.tsx` (Apollo query + mutation hook + dialog state)
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView.tsx` — compose `PageContainer` + `PageHeader` + MUI `Tabs` over the three per-catalog `*CatalogGrid` components
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/components/MobileWalletCatalogGrid.tsx` — thin `AppDataGrid<SupportedMobileWallet>` wrapper mirroring `PermissionCatalogDataGrid.tsx`; columns: `LocalizedStringDisplay` (name) + `CountryDisplay` + `CurrencyDisplay` + `StatusBadge(category="paymentMethod", status="active"|"inactive")` + edit/delete row actions
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/components/PaymentLinkCatalogGrid.tsx` — same pattern; `url_allowlist` column renders as read-only `TagInput` chips
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/components/OnlineAccountCatalogGrid.tsx` — same pattern; `identifier_kind` column renders as `StatusBadge`
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog.tsx` — compose MUI `Dialog` + `react-hook-form` + `LocalizedStringFormField` (name/description/instructions) + `CurrencySelect`/`CountryAutocomplete` + `TagInput` (url allowlist) + `EntityFormDialogActions` (from `frontend/views/dashboard/subjects/home/components/__shared__/`) + `CatalogImageUpload` (logo)
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog.tsx` — thin wrapper over `BaseDeleteDialog` mirroring `DeleteSubjectDialog.tsx`
+- [x] Create `frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdmin.stories.tsx` — mirror `SubjectsContainer.stories.tsx`
 
-- [ ] Update `frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes.ts` — replace `BANKING_DETAILS_CHANGED` with `PAYMENT_METHOD_CHANGED`
+- [x] Update `frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes.ts` — replace `BANKING_DETAILS_CHANGED` with `PAYMENT_METHOD_CHANGED`
 
-- [ ] Update `shared/messages/types/profile.ts`
-- [ ] Update `shared/messages/profile.ts`
-- [ ] Update `shared/messages/types/dashboard/parents/onboarding.ts`
-- [ ] Update `shared/messages/ar/dashboard/parents/onboarding.ts`
-- [ ] Update `shared/messages/types/dashboard/teachers/onboarding.ts`
-- [ ] Update `shared/messages/types/errors/main.ts`
-- [ ] Update `shared/messages/en/errors.ts`
-- [ ] Update `shared/messages/ar/errors.ts`
+- [x] Update `shared/messages/types/profile.ts`
+- [x] Update `shared/messages/profile.ts`
+- [x] Update `shared/messages/types/dashboard/parents/onboarding.ts`
+- [x] Update `shared/messages/ar/dashboard/parents/onboarding.ts`
+- [x] Update `shared/messages/types/dashboard/teachers/onboarding.ts`
+- [x] Update `shared/messages/types/errors/main.ts`
+- [x] Update `shared/messages/en/errors.ts`
+- [x] Update `shared/messages/ar/errors.ts`
 
 ### Stories + tests
 
-- [ ] Update `frontend/views/dashboard/profile/teacher/TeacherProfileView.test.tsx`
-- [ ] Update `frontend/views/dashboard/profile/parent/ParentProfileView.test.tsx`
-- [ ] Update `frontend/views/dashboard/profile/teacher/TeacherProfileView.stories.tsx`
-- [ ] Update `frontend/views/dashboard/profile/parent/ParentProfileView.stories.tsx`
-- [ ] Update `frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView.stories.tsx`
-- [ ] Update `frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView.stories.tsx`
+- [x] Update `frontend/views/dashboard/profile/teacher/TeacherProfileView.test.tsx`
+- [x] Update `frontend/views/dashboard/profile/parent/ParentProfileView.test.tsx`
+- [x] Update `frontend/views/dashboard/profile/teacher/TeacherProfileView.stories.tsx`
+- [x] Update `frontend/views/dashboard/profile/parent/ParentProfileView.stories.tsx`
+- [x] Update `frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView.stories.tsx`
+- [x] Update `frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView.stories.tsx`
 
 ## Phase 9 — Verification
 
-- [ ] `bun tsgo`
-- [ ] `bun biome:check`
-- [ ] Lint queue on all touched files
+- [x] `bun tsgo`
+- [x] `bun biome:check`
+- [x] Lint queue on all touched files
 - [ ] `bun run test:db`
-- [ ] `bun run test:graphql`
-- [ ] `bun run test:ui:components` (payment method components)
+- [x] `bun run test:graphql`
+- [x] `bun run test:ui:components` (payment method components)
 - [ ] `bun quality-gate`

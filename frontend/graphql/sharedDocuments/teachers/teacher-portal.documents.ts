@@ -28,6 +28,12 @@ export const teacherOwnProfileQueryDocument: TypedDocumentNode<Operations.Teache
       timezone
       hourlyRate
       rateCurrency
+      displayAmount {
+        id
+        amount
+        currency
+        stale
+      }
     }
   }
 `;

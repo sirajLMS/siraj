@@ -18,6 +18,7 @@ const teacherOwnProfile: TeacherOwnData = {
   hourlyRate: "45.00",
   rateCurrency: CurrencyCode.Usd,
   totalClasses: 128,
+  displayAmount: null,
 };
 
 const teacherAdminProfile: TeacherAdminData = {
@@ -37,6 +38,7 @@ const teacherAdminProfile: TeacherAdminData = {
   updatedAt: "2024-06-01T00:00:00.000Z",
   totalClasses: 128,
   avgEngagementScore: 4.2,
+  displayAmount: null,
 };
 
 const meta: Meta<typeof TeacherProfileView> = {

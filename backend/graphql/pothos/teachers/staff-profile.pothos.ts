@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  DisplayAmountPothosObject,
+  resolveDisplayAmountField,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
@@ -32,6 +36,11 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     updatedAt: t.exposeString("updatedAt"),
     totalClasses: t.exposeInt("totalClasses"),
     avgEngagementScore: t.exposeFloat("avgEngagementScore"),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency"),
+    }),
   }),
 });
 

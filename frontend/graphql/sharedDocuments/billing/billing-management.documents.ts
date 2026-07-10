@@ -44,6 +44,12 @@ export const createManualInvoiceMutationDocument: TypedDocumentNode<
       paidDate
       version
       createdAt
+      displayAmount {
+        id
+        amount
+        currency
+        stale
+      }
     }
   }
 `;

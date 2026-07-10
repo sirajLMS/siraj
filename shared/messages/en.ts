@@ -44,6 +44,7 @@ const en: MessageSchema = {
     userCreateFailed: "Failed to create user with email: {email}",
     noExchangeRate: "No exchange rate found for {fromCurrency} to {toCurrency}",
     exchangeRateStale: "Exchange rate for {fromCurrency} to {toCurrency} is stale (older than 24h)",
+    displayCurrencyFallback: "Rate unavailable — showing {lockedAmount} {lockedCurrency}",
     fxSyncAlreadyRunning: "FX rate sync is already in progress",
     fxRefreshRateLimitExceeded: "FX manual refresh rate limit exceeded (3 per hour)",
     invoiceNotFound: "Invoice {id} not found",
@@ -264,6 +265,7 @@ const en: MessageSchema = {
       },
       baseSalary: "{amount} {currency}",
       paymentMethod: "{method}",
+      convertedAmount: "{lockedAmount} {lockedCurrency} (≈ {convertedApprox} {displayCurrency})",
       stats: {
         totalClasses: "Total Classes",
         avgEngagement: "Avg Engagement",
@@ -297,6 +299,7 @@ const en: MessageSchema = {
       ownSubtitle: "View and update your contact and communication details.",
       subtitle: "Manage contact and communication details for the student's primary guardian.",
       adminBanner: "Administrative view: identity and billing fields are visible.",
+      convertedAmount: "{lockedAmount} {lockedCurrency} (≈ {convertedApprox} {displayCurrency})",
       sections: {
         account: "Account",
         contact: "Contact Information",
@@ -562,6 +565,8 @@ const en: MessageSchema = {
       scheduleReschedule: "Reschedule Class",
       dstMigration: "DST Migration",
       billingAdmin: "Billing",
+      paymentCatalogs: "Payment Methods",
+      meetingProviders: "Meeting Providers",
       billingParent: "Invoices & Billing",
       billingManual: "Create Manual Invoice",
       suggestionsSubmit: "Submit Suggestion",

@@ -21,6 +21,12 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
         invoiceType
         studentId
         studentName
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       totalCount
       pageInfo {
@@ -55,6 +61,12 @@ export const adminInvoicesQueryDocument: TypedDocumentNode<
         invoiceType
         studentId
         studentName
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       totalCount
       pageInfo {

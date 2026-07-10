@@ -1,4 +1,5 @@
 import {
+  AccountBalanceWalletOutlined,
   AssessmentOutlined,
   BadgeOutlined,
   CalendarTodayOutlined,
@@ -23,6 +24,7 @@ import {
   ShareOutlined,
   TimelineOutlined,
   UpdateOutlined,
+  VideocamOutlined,
 } from "@mui/icons-material";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/types/page-permissions.types";
@@ -253,6 +255,22 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.billingAdmin,
   },
   {
+    key: "payment-catalogs",
+    labelKey: "dashboard.nav.paymentCatalogs",
+    icon: AccountBalanceWalletOutlined,
+    href: "/payment-catalogs",
+    section: "main",
+    permission: PAGE_PERMISSIONS.paymentCatalogs,
+  },
+  {
+    key: "meeting-providers",
+    labelKey: "dashboard.nav.meetingProviders",
+    icon: VideocamOutlined,
+    href: "/meeting-providers",
+    section: "main",
+    permission: PAGE_PERMISSIONS.meetingProviders,
+  },
+  {
     key: "billing-parent",
     labelKey: "dashboard.nav.invoices",
     icon: ReceiptLongOutlined,
@@ -439,6 +457,14 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/billing",
     section: "main",
     permission: PAGE_PERMISSIONS.billingAdmin,
+  },
+  {
+    key: "payment-catalogs",
+    labelKey: "dashboard.nav.paymentCatalogs",
+    icon: AccountBalanceWalletOutlined,
+    href: "/payment-catalogs",
+    section: "main",
+    permission: PAGE_PERMISSIONS.paymentCatalogs,
   },
   {
     key: "billing-parent",

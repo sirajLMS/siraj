@@ -1037,6 +1037,13 @@ input DirectoryPermissionsUpdateInput {
   permissions: DirectoryPermissionsInput!
 }
 
+type DisplayAmount {
+  amount: String
+  currency: CurrencyCode
+  id: ID
+  stale: Boolean
+}
+
 type DstCheckedEmptyItem {
   id: String
   reason: String
@@ -1902,6 +1909,7 @@ type ManualInvoiceResult {
   amount: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   dueDate: String
   id: String
   invoiceType: InvoiceType
@@ -2386,6 +2394,7 @@ type ParentInvoiceHistoryResult {
 type ParentInvoiceRow {
   amount: String
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   dueDate: String
   id: String
   invoiceType: InvoiceType
@@ -2447,6 +2456,7 @@ type ParentProfile {
   avatarUrl: String
   createdAt: DateTime
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   email: String
   facebook: String
   feeAmount: String
@@ -3652,6 +3662,7 @@ input TeacherOnboardingInput {
 }
 
 type TeacherOwnProfile {
+  displayAmount: DisplayAmount
   email: String
   hourlyRate: String
   id: String
@@ -3670,6 +3681,7 @@ type TeacherProfileResult {
   address: String
   avgEngagementScore: Float
   dateOfBirth: String
+  displayAmount: DisplayAmount
   email: String
   gender: Gender
   hourlyRate: String
@@ -3776,6 +3788,7 @@ type UnifiedProfile {
 
 type UnpaidInvoiceItem {
   currency: CurrencyCode
+  displayAmount: DisplayAmount
   id: String
   oldestDueDate: String
   overdueCount: Int

@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { profileByUserIdQueryDocument, updateUserProfileMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import {
+  profileByUserIdQueryDocument,
+  updateUserProfileMutationDocument,
+} from "@/frontend/graphql/sharedDocuments/profile/profile.documents";
 
 describe("profileByUserIdQueryDocument", () => {
   test("requests assignedStudents fields for teacher admin tab", () => {
@@ -47,10 +50,8 @@ describe("profileByUserIdQueryDocument", () => {
     expect(mutationSource).toContain("parentAdminProfile");
     expect(mutationSource).toContain("invoiceType");
     expect(mutationSource).toContain("feeAmount");
-    expect(mutationSource).toContain("paymentMethods");
-    expect(mutationSource).toContain("paymentMethodDefaults");
+    expect(mutationSource).toContain("paymentMethod");
     expect(mutationSource).toContain("currency");
-    expect(mutationSource).toContain("displayCurrency");
     expect(mutationSource).toContain("timezone");
     expect(mutationSource).toContain("status");
     expect(mutationSource).toContain("avatarUrl");

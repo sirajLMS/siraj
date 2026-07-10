@@ -30,6 +30,7 @@ const parentAdminProfile = {
   invoiceType: "Monthly",
   feeAmount: "500",
   currency: CurrencyCode.Sar,
+  displayAmount: null,
   timezone: IanaTimezone.AsiaRiyadh,
   createdAt: "2024-01-15T00:00:00.000Z",
   updatedAt: "2024-06-01T00:00:00.000Z",

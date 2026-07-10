@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  DisplayAmountPothosObject,
+  resolveDisplayAmountField,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import {
   CurrencyCodePothosObject,
   InvoiceStatusPothosObject,
   InvoiceTypePothosObject,
@@ -47,6 +51,11 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     invoiceType: t.expose("invoiceType", { type: InvoiceTypePothosObject }),
     studentId: t.exposeString("studentId", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx),
+    }),
   }),
 });
 

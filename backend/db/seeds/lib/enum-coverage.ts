@@ -69,7 +69,7 @@ export const ALL_NOTIFICATION_EVENT_TYPES = [
   NotificationEventType.CLASS_REMINDER,
   NotificationEventType.INVOICE_GENERATED,
   NotificationEventType.COMPLAINT_RESPONSE,
-  NotificationEventType.BANKING_DETAILS_CHANGED,
+  NotificationEventType.PAYMENT_METHOD_CHANGED,
   NotificationEventType.NEW_COMPLAINT,
   NotificationEventType.NEW_SUGGESTION,
   NotificationEventType.SUGGESTION_ACKNOWLEDGED,

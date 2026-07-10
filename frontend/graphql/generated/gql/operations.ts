@@ -1839,7 +1839,9 @@ export type EndPermissionGroupSimulationMutationVariables = Exact<{ [key: string
 
 export type EndPermissionGroupSimulationMutation = EndPermissionGroupSimulationMutation_Mutation;
 
-export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_items_UnpaidInvoiceItem = { id: string | null, userId: string | null, userName: string | null, userEmail: string | null, totalUnpaidAmount: string | null, currency: Types.CurrencyCode | null, overdueCount: number | null, oldestDueDate: string | null };
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_items_UnpaidInvoiceItem_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_items_UnpaidInvoiceItem = { id: string | null, userId: string | null, userName: string | null, userEmail: string | null, totalUnpaidAmount: string | null, currency: Types.CurrencyCode | null, overdueCount: number | null, oldestDueDate: string | null, displayAmount: UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_items_UnpaidInvoiceItem_displayAmount_DisplayAmount | null };
 
 export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary = { id: string | null, totalOverdueInvoices: number | null, totalOverdueAmount: string | null, items: Array<UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_items_UnpaidInvoiceItem> | null };
 
@@ -1851,7 +1853,9 @@ export type UnpaidInvoicesAlertQueryVariables = Exact<{ [key: string]: never; }>
 
 export type UnpaidInvoicesAlertQuery = UnpaidInvoicesAlertQuery_Query;
 
-export type CreateManualInvoiceMutation_createManualInvoice_ManualInvoiceResult = { id: string | null, parentId: string | null, studentId: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, version: number | null, createdAt: string | null };
+export type CreateManualInvoiceMutation_createManualInvoice_ManualInvoiceResult_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type CreateManualInvoiceMutation_createManualInvoice_ManualInvoiceResult = { id: string | null, parentId: string | null, studentId: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, version: number | null, createdAt: string | null, displayAmount: CreateManualInvoiceMutation_createManualInvoice_ManualInvoiceResult_displayAmount_DisplayAmount | null };
 
 export type CreateManualInvoiceMutation_Mutation = { createManualInvoice: CreateManualInvoiceMutation_createManualInvoice_ManualInvoiceResult | null };
 
@@ -2229,7 +2233,9 @@ export type UserBillingProfileSummaryQueryVariables = Exact<{
 
 export type UserBillingProfileSummaryQuery = UserBillingProfileSummaryQuery_Query;
 
-export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null };
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, displayAmount: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2686,7 +2692,9 @@ export type UpdateNotificationPreferencesMutationVariables = Exact<{
 
 export type UpdateNotificationPreferencesMutation = UpdateNotificationPreferencesMutation_Mutation;
 
-export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null };
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, displayAmount: ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2704,7 +2712,9 @@ export type ParentInvoiceHistoryQueryVariables = Exact<{
 
 export type ParentInvoiceHistoryQuery = ParentInvoiceHistoryQuery_Query;
 
-export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null };
+export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.InvoiceStatus | null, invoiceType: Types.InvoiceType | null, studentId: string | null, studentName: string | null, displayAmount: AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow_displayAmount_DisplayAmount | null };
 
 export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2877,7 +2887,9 @@ export type ParentHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ParentHandbookUrlQuery = ParentHandbookUrlQuery_Query;
 
-export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+export type ParentProfileQuery_parentProfile_ParentProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: ParentProfileQuery_parentProfile_ParentProfile_displayAmount_DisplayAmount | null };
 
 export type ParentProfileQuery_Query = { parentProfile: ParentProfileQuery_parentProfile_ParentProfile | null };
 
@@ -3088,13 +3100,19 @@ export type UpdateUserOverridesMutationVariables = Exact<{
 
 export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, totalClasses: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_paymentMethods_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
 
@@ -3152,7 +3170,9 @@ export type UpdateOwnProfileMutation = UpdateOwnProfileMutation_Mutation;
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethods_UserPaymentMethod = { id: string | null, userId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_UserPaymentMethod_details_PaymentMethodDetails | null };
 
@@ -4152,7 +4172,9 @@ export type TeacherAssignedStudentsQueryVariables = Exact<{ [key: string]: never
 
 export type TeacherAssignedStudentsQuery = TeacherAssignedStudentsQuery_Query;
 
-export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null };
+export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile_displayAmount_DisplayAmount | null };
 
 export type TeacherOwnProfileQuery_Query = { teacherOwnProfile: TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile | null };
 

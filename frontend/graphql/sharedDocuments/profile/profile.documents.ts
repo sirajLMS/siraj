@@ -30,6 +30,12 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         hourlyRate
         rateCurrency
         totalClasses
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       teacherAdminProfile {
         id
@@ -48,6 +54,12 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         updatedAt
         totalClasses
         avgEngagementScore
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       parentOwnProfile {
         id
@@ -77,6 +89,12 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         timezone
         createdAt
         updatedAt
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       paymentMethods {
         ...UserPaymentMethodFields
@@ -265,6 +283,12 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         timezone
         createdAt
         updatedAt
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       paymentMethods {
         ...UserPaymentMethodFields

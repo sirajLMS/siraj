@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
@@ -20,6 +20,8 @@ import {
   sendPaymentReminderMutationDocument,
   studentCreditStatusQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { formatLockedAmount } from "@/frontend/lib/currency";
+import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { logger } from "@/frontend/utils/logger";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/AdminBillingView";
@@ -41,12 +43,6 @@ function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): Adm
   if (gqlStatus === InvoiceStatus.Paid) return InvoiceStatus.Paid;
   if (dueDate && new Date(dueDate) < new Date()) return "OVERDUE";
   return "PENDING";
-}
-
-function formatCurrency(amount: string | null, currency: CurrencyCode | string | null): string {
-  const numAmount = Number(amount ?? 0);
-  const curr = currency ?? CurrencyCode.Usd;
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: curr }).format(numAmount);
 }
 
 function formatDate(dateStr: string | null): string {
@@ -71,6 +67,9 @@ function deriveInitials(name: string | null): string {
 
 export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
+  const tProfile = useTranslations("profile.teacher");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
   const tc = useTranslations("common");
   const router = useRouter();
   const labels = buildBillingLabels(t);
@@ -159,10 +158,25 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         studentName: inv.studentName ?? inv.studentId ?? "Student",
         studentInitials: deriveInitials(inv.studentName),
         dateIssued: formatDate(inv.issueDate),
-        amount: formatCurrency(inv.amount, inv.currency),
+        amount: formatCurrencyForDisplay(
+          inv.amount ?? "0",
+          inv.currency ?? CurrencyCode.Usd,
+          inv.displayAmount
+            ? {
+                amount: inv.displayAmount.amount,
+                currency: inv.displayAmount.currency ?? CurrencyCode.Usd,
+                stale: inv.displayAmount.stale ?? true,
+              }
+            : null,
+          locale,
+          {
+            convertedAmount: values => tProfile("convertedAmount", values),
+            displayCurrencyFallback: values => tErrors("displayCurrencyFallback", values),
+          }
+        ),
         status: mapInvoiceStatus(inv.status, inv.dueDate),
       })),
-    [invoicesData?.adminInvoices]
+    [invoicesData?.adminInvoices, locale, tErrors, tProfile]
   );
 
   const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
@@ -171,12 +185,16 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   const summary: AdminBillingSummary = useMemo(
     () => ({
-      totalOutstanding: formatCurrency(summaryData?.adminBillingSummary?.totalOutstanding ?? "0.00", CurrencyCode.Usd),
+      totalOutstanding: formatLockedAmount(
+        summaryData?.adminBillingSummary?.totalOutstanding ?? "0.00",
+        CurrencyCode.Usd,
+        locale
+      ),
       pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
       negativeBalanceCount: `${summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0} Students`,
-      mtdRevenue: formatCurrency(summaryData?.adminBillingSummary?.mtdRevenue ?? "0.00", CurrencyCode.Usd),
+      mtdRevenue: formatLockedAmount(summaryData?.adminBillingSummary?.mtdRevenue ?? "0.00", CurrencyCode.Usd, locale),
     }),
-    [summaryData?.adminBillingSummary]
+    [summaryData?.adminBillingSummary, locale]
   );
 
   const creditRows: StudentCreditRow[] = useMemo(

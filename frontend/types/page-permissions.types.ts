@@ -35,6 +35,8 @@ export const PAGE_PERMISSIONS = {
   booksAndBags: [AppPermission.ResourcesList] as PagePermissions,
   reports: [AppPermission.ReportGenerateCustom] as PagePermissions,
   billingAdmin: [AppPermission.BillingViewHistory] as PagePermissions,
+  paymentCatalogs: [AppPermission.PaymentMethodsManageCatalogs] as PagePermissions,
+  meetingProviders: [AppPermission.MeetingProvidersManageCatalog] as PagePermissions,
   billingParent: [AppPermission.BillingViewHistory] as PagePermissions,
   complaintsManage: [AppPermission.ComplaintsRespond, AppPermission.ComplaintsList] as PagePermissions,
   suggestionsSubmit: [AppPermission.CommunicationSubmitSuggestion] as PagePermissions,

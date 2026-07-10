@@ -179,6 +179,14 @@ export type ParentBillingSummaryResult = {
   readonly activeStudents: number;
 };
 
+/** FX-converted amount for UI display (Decision 3A read path). */
+export type DisplayAmountReturnType = {
+  readonly id: string;
+  readonly amount: string | null;
+  readonly currency: CurrencyCode;
+  readonly stale: boolean;
+};
+
 export type ManualInvoiceResult = {
   readonly id: string;
   readonly parentId: string;

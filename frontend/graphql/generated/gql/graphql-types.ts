@@ -1081,6 +1081,14 @@ export type DirectoryPermissionsUpdateInput = {
   permissions: DirectoryPermissionsInput;
 };
 
+export type DisplayAmount = {
+  __typename?: 'DisplayAmount';
+  amount: Maybe<Scalars['String']['output']>;
+  currency: Maybe<CurrencyCode>;
+  id: Maybe<Scalars['ID']['output']>;
+  stale: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type DstCheckedEmptyItem = {
   __typename?: 'DstCheckedEmptyItem';
   id: Maybe<Scalars['String']['output']>;
@@ -1966,6 +1974,7 @@ export type ManualInvoiceResult = {
   amount: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   dueDate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<InvoiceType>;
@@ -3040,6 +3049,7 @@ export type ParentInvoiceRow = {
   __typename?: 'ParentInvoiceRow';
   amount: Maybe<Scalars['String']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   dueDate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<InvoiceType>;
@@ -3104,6 +3114,7 @@ export type ParentProfile = {
   avatarUrl: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   email: Maybe<Scalars['String']['output']>;
   facebook: Maybe<Scalars['String']['output']>;
   feeAmount: Maybe<Scalars['String']['output']>;
@@ -4679,6 +4690,7 @@ export type TeacherOnboardingInput = {
 
 export type TeacherOwnProfile = {
   __typename?: 'TeacherOwnProfile';
+  displayAmount: Maybe<DisplayAmount>;
   email: Maybe<Scalars['String']['output']>;
   hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
@@ -4698,6 +4710,7 @@ export type TeacherProfileResult = {
   address: Maybe<Scalars['String']['output']>;
   avgEngagementScore: Maybe<Scalars['Float']['output']>;
   dateOfBirth: Maybe<Scalars['String']['output']>;
+  displayAmount: Maybe<DisplayAmount>;
   email: Maybe<Scalars['String']['output']>;
   gender: Maybe<Gender>;
   hourlyRate: Maybe<Scalars['String']['output']>;
@@ -4811,6 +4824,7 @@ export type UnifiedProfile = {
 export type UnpaidInvoiceItem = {
   __typename?: 'UnpaidInvoiceItem';
   currency: Maybe<CurrencyCode>;
+  displayAmount: Maybe<DisplayAmount>;
   id: Maybe<Scalars['String']['output']>;
   oldestDueDate: Maybe<Scalars['String']['output']>;
   overdueCount: Maybe<Scalars['Int']['output']>;

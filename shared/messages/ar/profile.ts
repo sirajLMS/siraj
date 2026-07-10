@@ -50,6 +50,7 @@ export const profile: ProfileLabels = {
     },
     baseSalary: "{amount} {currency}",
     paymentMethod: "{method}",
+    convertedAmount: "{lockedAmount} {lockedCurrency} (تقريباً {convertedApprox} {displayCurrency})",
     stats: {
       totalClasses: "إجمالي الحصص",
       avgEngagement: "متوسط التفاعل",
@@ -83,6 +84,7 @@ export const profile: ProfileLabels = {
     ownSubtitle: "عرض وتحديث بيانات الاتصال والتواصل الخاصة بك.",
     subtitle: "إدارة بيانات الاتصال والتواصل لولي الأمر الأساسي للطالب.",
     adminBanner: "عرض إداري: تظهر حقول الهوية والفوترة.",
+    convertedAmount: "{lockedAmount} {lockedCurrency} (تقريباً {convertedApprox} {displayCurrency})",
     sections: {
       account: "الحساب",
       contact: "Contact Information",

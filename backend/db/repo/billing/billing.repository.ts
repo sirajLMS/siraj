@@ -135,6 +135,39 @@ export namespace BillingRepository {
   };
 
   /**
+   * Soft FX read for UI display conversion only.
+   * Financial insert paths MUST use {@link getLatestExchangeRate} (throw variant).
+   */
+  export const getLatestExchangeRateForDisplay = async (
+    fromCurrency: CurrencyCode,
+    toCurrency: CurrencyCode,
+    tx?: DBTransaction,
+    _locale?: string
+  ): Promise<{ rate: string | null; stale: boolean }> => {
+    const queryDb = tx ?? db;
+    const results = await queryDb
+      .select()
+      .from(currencyExchangeRates)
+      .where(
+        and(eq(currencyExchangeRates.fromCurrency, fromCurrency), eq(currencyExchangeRates.toCurrency, toCurrency))
+      )
+      .orderBy(desc(currencyExchangeRates.effectiveDate))
+      .limit(1);
+
+    if (results.length === 0) {
+      return { rate: null, stale: true };
+    }
+
+    const latest = results[0];
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (latest.effectiveDate < twentyFourHoursAgo) {
+      return { rate: null, stale: true };
+    }
+
+    return { rate: latest.rate, stale: false };
+  };
+
+  /**
    * Inserts a new exchange rate row and audit log entry within a single transaction.
    * Shared by {@link updateExchangeRate} (own transaction) and
    * {@link updateExchangeRateInTx} (caller-provided transaction).

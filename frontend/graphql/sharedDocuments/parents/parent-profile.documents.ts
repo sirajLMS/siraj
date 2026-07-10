@@ -27,6 +27,12 @@ export const parentProfileQueryDocument: TypedDocumentNode<
       feeAmount
       currency
       timezone
+      displayAmount {
+        id
+        amount
+        currency
+        stale
+      }
       createdAt
       updatedAt
     }

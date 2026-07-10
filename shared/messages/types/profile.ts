@@ -48,6 +48,7 @@ export interface ProfileLabels {
     };
     readonly baseSalary: string;
     readonly paymentMethod: string;
+    readonly convertedAmount: string;
     readonly stats: {
       readonly totalClasses: string;
       readonly avgEngagement: string;
@@ -81,6 +82,7 @@ export interface ProfileLabels {
     readonly ownSubtitle: string;
     readonly subtitle: string;
     readonly adminBanner: string;
+    readonly convertedAmount: string;
     readonly sections: {
       readonly account: string;
       readonly contact: string;

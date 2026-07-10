@@ -1,4 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  DisplayAmountPothosObject,
+  resolveDisplayAmountField,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
 import type { EditQuotaResult } from "@/backend/services/student/student-management.service";
@@ -27,6 +31,11 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     feeAmount: t.exposeString("feeAmount", { nullable: true }),
     currency: t.expose("currency", { type: CurrencyCodePothosObject, nullable: true }),
     timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "feeAmount", "currency"),
+    }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
