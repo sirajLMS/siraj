@@ -107,7 +107,6 @@ export function MockFutureScheduleContainer() {
       onDateChange={() => {}}
       notes={MOCK_NOTES}
       contact={MOCK_CONTACT}
-      onViewMaterials={() => {}}
     />
   );
 }

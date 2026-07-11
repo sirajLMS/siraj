@@ -28,7 +28,6 @@ export interface JumpToDateHeaderProps {
 export interface FutureClassCardProps {
   readonly item: FutureClass;
   readonly onRequestLeave?: () => void;
-  readonly onViewMaterials?: () => void;
 }
 
 export interface ImportantNotesProps {
@@ -49,7 +48,6 @@ export interface FutureScheduleViewProps {
   readonly onDateChange: (date: string) => void;
   readonly notes: readonly ImportantNoteItem[];
   readonly contact: SupportContactData | null;
-  readonly onViewMaterials: () => void;
 }
 
 export interface FutureScheduleContainerProps {

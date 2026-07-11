@@ -36,6 +36,8 @@ export interface TeacherDashboardLabels {
     readonly showing: string;
     readonly noEntries: string;
     readonly sessionEnded: string;
+    readonly frozen: string;
+    readonly contactAdmin: string;
     readonly duration: string;
     readonly durationValue: string;
     readonly current: string;

@@ -136,6 +136,8 @@ function useDashboardLabels(
         duration: t("schedule.duration", { minutes: "{minutes}" }),
         teacherLabel: t("schedule.teacherLabel", { name: "{name}" }),
         joinVideo: t("schedule.joinVideo"),
+        frozen: t("schedule.frozen"),
+        contactAdmin: t("schedule.contactAdmin"),
         noEntries: t("schedule.noEntries"),
       },
       bookingStatus: {

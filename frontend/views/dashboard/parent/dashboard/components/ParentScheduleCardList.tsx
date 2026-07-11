@@ -1,7 +1,7 @@
 "use client";
 
-import { ScheduleOutlined } from "@mui/icons-material";
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { AcUnitOutlined, ScheduleOutlined } from "@mui/icons-material";
+import { Box, Card, CardContent, Stack, Tooltip, Typography } from "@mui/material";
 import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
@@ -35,8 +35,9 @@ function ScheduleCard({ row, labels }: { readonly row: ParentScheduleRow; readon
       sx={theme => ({
         borderRadius: 3,
         backgroundColor: theme.palette.surfaceContainerLowest,
-        border: `1px solid ${theme.palette.outlineVariant}`,
+        border: `1px solid ${row.isFrozen ? theme.palette.info.main : theme.palette.outlineVariant}`,
         boxShadow: theme.palette.shadow.card,
+        opacity: row.isFrozen ? 0.85 : 1,
       })}
     >
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
@@ -61,11 +62,26 @@ function ScheduleCard({ row, labels }: { readonly row: ParentScheduleRow; readon
               </Typography>
             </Box>
           </Stack>
-          <StatusBadge
-            category={row.bookingStatus === "rescheduled" ? "trackingStatus" : "session"}
-            status={row.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed"}
-            label={labels.bookingStatus[row.bookingStatus]}
-          />
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            {row.isFrozen ? (
+              <Tooltip title={labels.schedule.contactAdmin}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <AcUnitOutlined sx={theme => ({ fontSize: 18, color: theme.palette.info.main })} />
+                  <Typography
+                    variant="labelMd"
+                    sx={theme => ({ color: theme.palette.info.main, fontWeight: 700 })}
+                  >
+                    {labels.schedule.frozen}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            ) : null}
+            <StatusBadge
+              category={row.bookingStatus === "rescheduled" ? "trackingStatus" : "session"}
+              status={row.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed"}
+              label={labels.bookingStatus[row.bookingStatus]}
+            />
+          </Stack>
         </Box>
 
         <Box
@@ -105,6 +121,10 @@ function ScheduleCard({ row, labels }: { readonly row: ParentScheduleRow; readon
               label={labels.schedule.joinVideo}
               emptyRole="parent"
             />
+          ) : row.isFrozen ? (
+            <Tooltip title={labels.schedule.contactAdmin}>
+              <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
+            </Tooltip>
           ) : null}
         </Box>
       </CardContent>

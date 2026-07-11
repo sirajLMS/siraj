@@ -38,6 +38,8 @@ export const dashboard: TeacherDashboardLabels = {
     showing: "عرض {shown} من {total} حصة مجدولة لليوم.",
     noEntries: "لا توجد حصص مجدولة لليوم",
     sessionEnded: "انتهت الحصة",
+    frozen: "مجمّد",
+    contactAdmin: "تواصل مع المشرف (تجميد)",
     duration: "المدة",
     durationValue: "{minutes} دقيقة",
     current: "الحالية",

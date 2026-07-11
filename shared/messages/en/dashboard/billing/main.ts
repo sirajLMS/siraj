@@ -113,6 +113,8 @@ export const billing: BillingLabels = {
     body: "This will permanently remove invoice {invoiceId}. This action cannot be undone.",
     confirm: "Delete Invoice",
   },
+  reminderSent: "Payment reminder sent",
+  reminderFailed: "Failed to send payment reminder",
   noUnpaidInvoices: "No unpaid invoices available for payment",
   hasPaymentProofHint: "Payment proof attached",
   submitProofDialog: {

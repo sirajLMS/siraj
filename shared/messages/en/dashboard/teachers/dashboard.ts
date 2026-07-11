@@ -38,6 +38,8 @@ export const dashboard: TeacherDashboardLabels = {
     showing: "Showing {shown} of {total} scheduled classes for today.",
     noEntries: "No classes scheduled for today",
     sessionEnded: "Session ended",
+    frozen: "Frozen",
+    contactAdmin: "Contact admin (hold)",
     duration: "Duration",
     durationValue: "{minutes} min",
     current: "Current",

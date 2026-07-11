@@ -5,6 +5,7 @@ import type {
 } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
+import type { ApolloError } from "@apollo/client";
 
 export type { AdminInvoiceStatus, CoreInvoiceStatus, StudentCreditStatus };
 
@@ -87,6 +88,7 @@ export interface AdminBillingViewProps extends BillingCapabilityProps {
   readonly canDelete?: boolean;
   readonly deletingInvoice?: boolean;
   readonly creditLoading?: boolean;
+  readonly creditError?: ApolloError | Error | null;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;

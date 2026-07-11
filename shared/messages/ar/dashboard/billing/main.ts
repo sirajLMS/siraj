@@ -114,6 +114,8 @@ export const billing: BillingLabels = {
     body: "سيؤدي هذا إلى إزالة الفاتورة {invoiceId} نهائياً. لا يمكن التراجع عن هذا الإجراء.",
     confirm: "حذف الفاتورة",
   },
+  reminderSent: "تم إرسال تذكير الدفع",
+  reminderFailed: "فشل إرسال تذكير الدفع",
   hasPaymentProofHint: "إثبات دفع مرفق",
   submitProofDialog: {
     titleSubmit: "إرسال إثبات الدفع",

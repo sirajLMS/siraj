@@ -55,8 +55,6 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
     }
   };
 
-  const handleViewMaterials = () => {};
-
   if (loading && !data) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
@@ -111,7 +109,6 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
         onDateChange={setSelectedDate}
         notes={notes}
         contact={contact}
-        onViewMaterials={handleViewMaterials}
       />
     </RequirePermission>
   );

@@ -105,6 +105,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const [proofTarget, setProofTarget] = useState<MarkPaidInvoiceTarget | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<PaymentDetailsTarget | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [sendingReminderId, setSendingReminderId] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
@@ -168,7 +169,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   useRefetchOnWindowFocus(refreshBillingData);
 
-  const { data: creditData, loading: creditLoading } = useQuery(studentCreditStatusQueryDocument, {
+  const { data: creditData, loading: creditLoading, error: creditError, refetch: refetchCredit } = useQuery(studentCreditStatusQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
 
@@ -178,6 +179,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       showFeedback(labels.deleteInvoiceSuccess, "success");
       void refetchInvoices();
       void refetchSummary();
+      void refetchCredit();
     },
     onError: error => {
       logger.error("Delete invoice failed:", { error });
@@ -186,15 +188,19 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     },
   });
 
-  const [sendReminderMutation] = useMutation(sendPaymentReminderMutationDocument, {
+  const [sendReminderMutation, { loading: sendingReminder }] = useMutation(sendPaymentReminderMutationDocument, {
     onCompleted: data => {
       if (data.sendPaymentReminder?.success) {
-        showFeedback(t("reminderSent", { defaultValue: "Payment reminder sent" }), "success");
+        showFeedback(t("reminderSent"), "success");
+      } else {
+        showFeedback(data.sendPaymentReminder?.message ?? t("reminderFailed"), "error");
       }
+      setSendingReminderId(null);
     },
     onError: error => {
       logger.error("Send reminder failed:", { error });
       showFeedback(tc("operationFailed"), "error");
+      setSendingReminderId(null);
     },
   });
 
@@ -330,7 +336,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   };
 
   const handleConfirmDeleteInvoice = () => {
-    if (!deleteTargetId) {
+    if (!deleteTargetId || deletingInvoice) {
       return;
     }
     void deleteInvoiceMutation({ variables: { invoiceId: deleteTargetId } });
@@ -346,6 +352,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       showFeedback(tErrors("auth.impersonationNotAllowedDuringSession"), "error");
       return;
     }
+    setSendingReminderId(studentId);
     void sendReminderMutation({ variables: { studentId } });
   };
 
@@ -391,12 +398,27 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
           {tc("loadFailed")}
         </Alert>
       ) : null}
+      {creditError ? (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={() => void refetchCredit()}>
+              {labels.errors.retry}
+            </Button>
+          }
+        >
+          {tc("loadFailed")}
+        </Alert>
+      ) : null}
       <AdminBillingView
         labels={labels}
         summary={summary}
         summaryLoading={summaryLoading}
         invoices={invoices}
         creditRows={filteredCreditRows}
+        creditLoading={creditLoading}
+        creditError={creditError}
         searchQuery={searchQuery}
         isSearchPending={isSearchPending}
         billingActionsDisabled={billingActionsDisabled}
@@ -408,6 +430,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         canViewExchangeRates={canViewExchangeRates && !billingActionsDisabled}
         canDelete={canDelete && !billingActionsDisabled}
         creditLoading={creditLoading}
+        creditError={creditError}
         onSearchChange={handleSearchChange}
         onMarkAsPaid={handleMarkAsPaid}
         onViewPaymentDetails={setDetailsTarget}

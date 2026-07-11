@@ -103,6 +103,8 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly confirm: string;
   };
   readonly noUnpaidInvoices: string;
+  readonly reminderSent: string;
+  readonly reminderFailed: string;
   readonly submitProofDialog: {
     readonly titleSubmit: string;
     readonly titleMarkPaid: string;

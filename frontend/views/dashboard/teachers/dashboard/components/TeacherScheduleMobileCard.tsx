@@ -1,6 +1,6 @@
 "use client";
 
-import { AccessTimeOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { AccessTimeOutlined, AcUnitOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/ui";
@@ -79,9 +79,21 @@ function renderFooterAction(
     canActivate,
     videoEnabled: row.videoEnabled,
     isConnecting: row.status === "connecting",
+    isFrozen: row.isFrozen,
   });
 
   const isSessionEnded = row.executionState === ClassExecutionState.Completed || row.outcome === ClassOutcome.Taken;
+  const isFrozen = row.isFrozen === true;
+
+  if (isFrozen) {
+    return (
+      <Tooltip title={labels.schedule.contactAdmin}>
+        <Button fullWidth disabled variant="outlined" startIcon={<AcUnitOutlined />} sx={{ typography: "labelUppercase" }}>
+          {labels.schedule.frozen}
+        </Button>
+      </Tooltip>
+    );
+  }
 
   if (isSessionEnded || (!actions.activate && !actions.start && !actions.markAbsent && !actions.requestLeave)) {
     if (isSessionEnded) {
@@ -362,6 +374,7 @@ export function TeacherScheduleMobileCard({
   onRequestLeave,
 }: Readonly<TeacherScheduleMobileCardProps>) {
   const isCompleted = row.status === "completed";
+  const isFrozen = row.isFrozen === true;
   const isLive = row.isLive === true;
   const studentHrefValue = row.studentId ? studentHref(row.studentId) : undefined;
   const sessionActions = resolveTeacherScheduleSessionActions({
@@ -371,10 +384,19 @@ export function TeacherScheduleMobileCard({
     canActivate,
     videoEnabled: row.videoEnabled,
     isConnecting: row.status === "connecting",
+    isFrozen: row.isFrozen,
   });
 
   return (
-    <StyledScheduleCard elevation={0} isLive={isLive} sx={{ opacity: isCompleted ? 0.7 : 1 }}>
+    <StyledScheduleCard
+      elevation={0}
+      isLive={isLive}
+      sx={{
+        opacity: isCompleted ? 0.7 : 1,
+        borderInlineStart: isFrozen ? `4px solid` : undefined,
+        borderColor: isFrozen ? "info.main" : undefined,
+      }}
+    >
       <CardHeader row={row} labels={labels} canActivate={canActivate} isLive={isLive} studentHref={studentHrefValue} />
       <TimeHighlight row={row} labels={labels} />
       <StudentInfoRow row={row} />

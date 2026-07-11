@@ -37,6 +37,7 @@ function resolveStatusPaletteKey(
         upcoming: "pending",
         missed: "blocked",
         late: "confirmed",
+        hold: "blocked",
       };
       return map[status] ?? "pending";
     }

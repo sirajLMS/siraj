@@ -162,6 +162,8 @@ function buildSuccessAndDialogLabels(t: BillingTranslator) {
       body: t.raw("deleteInvoiceDialog.body") as string,
       confirm: t("deleteInvoiceDialog.confirm"),
     },
+    reminderSent: t("reminderSent"),
+    reminderFailed: t("reminderFailed"),
     hasPaymentProofHint: t("hasPaymentProofHint"),
     submitProofDialog: {
       titleSubmit: t("submitProofDialog.titleSubmit"),

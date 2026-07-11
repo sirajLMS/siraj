@@ -1,6 +1,6 @@
 "use client";
 
-import { HistoryOutlined } from "@mui/icons-material";
+import { AcUnitOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -158,6 +158,12 @@ export function ParentScheduleDataGrid({ rows, labels, onHistory, pagination }: 
                 label={labels.schedule.joinVideo}
                 emptyRole="parent"
               />
+            ) : row.isFrozen ? (
+              <Tooltip title={labels.schedule.contactAdmin}>
+                <AcUnitOutlined
+                  sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })}
+                />
+              </Tooltip>
             ) : null}
           </Box>
         ),
@@ -188,6 +194,17 @@ export function ParentScheduleDataGrid({ rows, labels, onHistory, pagination }: 
       rowHeight={72}
       ariaLabel="parent-schedule-table"
       emptyMessage={labels.schedule.noEntries}
+      getRowClassName={({ row }) =>
+        row.isFrozen ? "parent-schedule-row-frozen" : ""
+      }
+      sx={{
+        "& .parent-schedule-row-frozen": {
+          backgroundColor: theme => theme.palette.errorContainer,
+          "&:hover": {
+            backgroundColor: theme => theme.palette.errorContainer,
+          },
+        },
+      }}
       {...(isServerPagination
         ? {
             paginationMode: "server" as const,

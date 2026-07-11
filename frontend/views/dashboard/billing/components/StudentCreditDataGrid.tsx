@@ -1,7 +1,7 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -30,6 +30,7 @@ interface StudentCreditDataGridProps {
   readonly billingActionsDisabled?: boolean;
   readonly onSendReminder: (id: string) => void;
   readonly loading?: boolean;
+  readonly sendingReminderId?: string | null;
 }
 
 function formatClassesLeft(row: StudentCreditRow): string {
@@ -49,6 +50,7 @@ export function StudentCreditDataGrid({
   billingActionsDisabled = false,
   onSendReminder,
   loading = false,
+  sendingReminderId = null,
 }: Readonly<StudentCreditDataGridProps>) {
   const columns = useMemo<GridColDef<StudentCreditRow>[]>(
     () => [
@@ -119,6 +121,7 @@ export function StudentCreditDataGrid({
           if (!canManage || billingActionsDisabled || row.status !== "negative_balance") {
             return null;
           }
+          const isSending = sendingReminderId === row.id;
           return (
             <Button
               variant="contained"
@@ -126,14 +129,15 @@ export function StudentCreditDataGrid({
               onClick={() => {
                 onSendReminder(row.id);
               }}
+              disabled={isSending}
             >
-              {labels.sendReminder}
+              {isSending ? <CircularProgress size={18} color="inherit" /> : labels.sendReminder}
             </Button>
           );
         },
       },
     ],
-    [billingActionsDisabled, canManage, labels, onSendReminder]
+    [billingActionsDisabled, canManage, labels, onSendReminder, sendingReminderId]
   );
 
   return (

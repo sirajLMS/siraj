@@ -21,7 +21,6 @@ export function FutureScheduleView({
   onDateChange,
   notes,
   contact,
-  onViewMaterials,
 }: Readonly<FutureScheduleViewProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
   const theme = useTheme();
@@ -85,7 +84,6 @@ export function FutureScheduleView({
                 onRequestLeave={() => {
                   if (item.id) onRequestLeave(item.id);
                 }}
-                onViewMaterials={onViewMaterials}
               />
             ))}
           </Stack>

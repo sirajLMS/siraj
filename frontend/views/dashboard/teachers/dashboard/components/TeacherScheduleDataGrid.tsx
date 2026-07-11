@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { AcUnitOutlined } from "@mui/icons-material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
@@ -99,16 +100,28 @@ export function TeacherScheduleDataGrid({
         flex: 1,
         minWidth: 140,
         sortable: false,
-        renderCell: ({ row }) => (
-          <ScheduleInstanceStatusBadge
-            outcome={row.outcome}
-            executionState={row.executionState}
-            scheduledEndAt={row.scheduledEndAt}
-            scheduledStartAt={row.scheduledStartAt}
-            durationMinutes={row.durationMinutes}
-            statusLabels={instanceStatusLabels}
-          />
-        ),
+        renderCell: ({ row }) =>
+          row.isFrozen ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Tooltip title={labels.schedule.contactAdmin}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <AcUnitOutlined sx={theme => ({ fontSize: 16, color: theme.palette.info.main })} />
+                  <Typography sx={{ typography: "labelMd", color: theme => theme.palette.info.main, fontWeight: 700 }}>
+                    {labels.schedule.frozen}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            </Box>
+          ) : (
+            <ScheduleInstanceStatusBadge
+              outcome={row.outcome}
+              executionState={row.executionState}
+              scheduledEndAt={row.scheduledEndAt}
+              scheduledStartAt={row.scheduledStartAt}
+              durationMinutes={row.durationMinutes}
+              statusLabels={instanceStatusLabels}
+            />
+          ),
       },
       {
         field: "actions",
@@ -144,6 +157,12 @@ export function TeacherScheduleDataGrid({
       loading={loading}
       disableRowSelectionOnClick
       autoHeight
+      getRowClassName={({ row }) => (row.isFrozen ? "teacher-schedule-row-frozen" : "")}
+      sx={{
+        "& .teacher-schedule-row-frozen": {
+          backgroundColor: theme => theme.palette.errorContainer,
+        },
+      }}
       {...(isServerPagination
         ? {
             paginationMode: "server" as const,
