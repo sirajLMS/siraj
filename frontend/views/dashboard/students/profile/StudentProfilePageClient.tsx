@@ -147,12 +147,10 @@ export function StudentProfilePageClient() {
   const searchParams = useSearchParams();
   const studentId = typeof params?.id === "string" ? params.id : "";
 
-  const tabParam = searchParams.get("tab");
-  const initialTab = tabParam === "history" ? "history" : tabParam === "quota" ? "quota" : "status";
-
   const { currentMonth } = useStudentHistoryStore();
-  const year = initialTab === "history" ? currentMonth.getFullYear() : undefined;
-  const month = initialTab === "history" ? currentMonth.getMonth() + 1 : undefined;
+  const activeTab = searchParams.get("tab") ?? "status";
+  const year = activeTab === "history" ? currentMonth.getFullYear() : undefined;
+  const month = activeTab === "history" ? currentMonth.getMonth() + 1 : undefined;
 
   const { data, loading, refetch } = useQuery(studentProfileQueryDocument, {
     variables: { studentId, year: year ?? null, month: month ?? null },
