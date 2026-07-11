@@ -16,6 +16,7 @@ import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDo
 import { studentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-profile.documents";
 import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-status.documents";
 import { logger } from "@/frontend/utils/logger";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { StudentProfileQueryData } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 import { StudentStatusView } from "@/frontend/views/dashboard/students/status/StudentStatusView";
@@ -52,7 +53,7 @@ function mapUpcomingClasses(classes: readonly UpcomingClassInput[] | null | unde
 }
 
 type StudentById = NonNullable<GqlOperations.StudentByIdQuery["studentById"]>;
-type StudentUpcoming = GqlOperations.StudentUpcomingClassesQuery["studentUpcomingClasses"];
+type StudentUpcoming = GqlOperations.StudentUpcomingClassesQuery["studentUpcomingClasses"] | undefined;
 
 function buildStudentFromProfile(profile: NonNullable<StudentProfileQueryData>): StudentStatusPageData | null {
   if (!profile.id || !profile.name) return null;
@@ -238,6 +239,9 @@ export function StudentStatusContainer() {
   }
 
   if (!student) {
+    if (useUnifiedProfile) {
+      return <ProfileRestrictedSection title={t("sections.adminHold")} />;
+    }
     return <ErrorMessage message={t("errors.invalidId")} />;
   }
 

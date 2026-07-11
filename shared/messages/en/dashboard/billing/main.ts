@@ -178,10 +178,12 @@ export const billing: BillingLabels = {
     title: "Display Currency Not Set",
     body: "Set a display currency in your profile to see converted amounts in invoices and reports.",
     cta: "Edit Profile",
+    dismiss: "Dismiss",
     subject: {
       title: "Display Currency Not Set for This User",
       body: "This user has not set a display currency. Converted amounts will not appear until set in their profile.",
       cta: "Edit User Profile",
+      dismiss: "Dismiss",
     },
   },
   fxConversionNote: "Converted totals use your display currency ({code})",

@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
-export const statusUpdateSchema = z.object({
-  status: z.nativeEnum(StudentStatus),
-  reason: z.string().min(5, { message: "Reason must be at least 5 characters long" }),
-});
+export const createStatusUpdateSchema = (messages: MessageSchema["dashboard"]["studentStatus"]["validation"]) =>
+  z.object({
+    status: z.enum(StudentStatus),
+    reason: z.string().min(5, { message: messages.reasonMinLength }),
+  });
 
-export type StatusUpdateFormData = z.infer<typeof statusUpdateSchema>;
+export type StatusUpdateFormData = z.infer<ReturnType<typeof createStatusUpdateSchema>>;

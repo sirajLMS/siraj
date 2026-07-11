@@ -75,7 +75,7 @@ function DesktopBreadcrumbs(
 ): readonly PageHeaderBreadcrumb[] {
   return [
     { label: t("breadcrumbs.students"), href: "/students" },
-    { label: t("breadcrumbs.editProfile"), current: true },
+    { label: t("breadcrumbs.adjustQuota"), current: true },
   ];
 }
 
@@ -209,7 +209,7 @@ function QuotaFormCard({
       {!embedded ? <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} /> : null}
       {!embedded ? (
         <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
-          <PageHeader title={t("breadcrumbs.editProfile")} titleVariant="titleLg" breadcrumbs={DesktopBreadcrumbs(t)} />
+          <PageHeader title={t("breadcrumbs.adjustQuota")} titleVariant="titleLg" breadcrumbs={DesktopBreadcrumbs(t)} />
         </Box>
       ) : null}
 
@@ -288,7 +288,7 @@ function useQuotaForm(
       studentName: "",
       dateOfBirth: "",
       language: "ar",
-      gender: "MALE",
+      gender: "",
       teacher: "",
       totalClasses: 0,
       classesLeft: 0,
@@ -318,7 +318,6 @@ function useQuotaForm(
 
 export function StudentQuotaView({
   studentData,
-  isLoading,
   isSaving,
   isSaved,
   embedded = false,
@@ -334,7 +333,7 @@ export function StudentQuotaView({
 
   const { methods, onSubmit } = useQuotaForm(studentData, onSave);
 
-  if (isLoading || !studentData) {
+  if (!studentData) {
     const loadingContent = (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
         <CircularProgress />

@@ -198,13 +198,17 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
-  const { options: allOptions } = useCurrencyCatalog();
+  const { options: allOptions, loaded: catalogLoaded } = useCurrencyCatalog();
   const options = useMemo(() => {
+    if (!catalogLoaded && currency) {
+      const selected = allOptions.find(opt => opt.code === currency.code);
+      return selected ? [selected] : [];
+    }
     if (!allowedCodes || allowedCodes.length === 0) {
       return allOptions;
     }
     return allOptions.filter(option => allowedCodes.includes(option.code));
-  }, [allOptions, allowedCodes]);
+  }, [allOptions, allowedCodes, catalogLoaded, currency]);
 
   const getOptionLabel = useCallback((option: CurrencyOption) => getCurrencyOptionRowLabel(option, locale), [locale]);
 

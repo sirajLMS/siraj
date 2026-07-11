@@ -54,11 +54,23 @@ function TotalsAmount({ display }: { readonly display: { primary: string; breakd
   }
 
   return (
-    <Stack spacing={0.25} sx={{ alignItems: "flex-end" }}>
+    <Stack spacing={0.25} sx={{ alignItems: "flex-end", maxWidth: "100%" }}>
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
         {display.primary}
       </Typography>
-      <Typography variant="caption" sx={{ color: "text.secondary", textAlign: "end" }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          textAlign: "end",
+          maxWidth: 240,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+        }}
+      >
         {display.breakdown}
       </Typography>
     </Stack>

@@ -167,8 +167,6 @@ export const StaffAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       phone: t.string({ required: false }),
       status: t.string({ required: false }),
-      hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     }),
   });
 

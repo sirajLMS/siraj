@@ -81,6 +81,26 @@ export function StaffProfileContainer({
     if (loading && !profile) {
       return <StaffProfileLoadingSkeleton />;
     }
+    if (error && !profile) {
+      return (
+        <Alert
+          severity="error"
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                void refetch();
+              }}
+            >
+              {tc("actions.retry")}
+            </Button>
+          }
+        >
+          {tc("errors.failedToLoad")}
+        </Alert>
+      );
+    }
     return (
       <PermissionsSection
         permissionGroups={profile?.staffPermissionGroups ?? []}

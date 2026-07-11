@@ -1,5 +1,5 @@
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface TeacherScheduleSessionActionInput {
   readonly executionState?: string | null;
@@ -8,6 +8,7 @@ export interface TeacherScheduleSessionActionInput {
   readonly canActivate: boolean;
   readonly videoEnabled: boolean;
   readonly isConnecting?: boolean;
+  readonly isFrozen?: boolean | null;
 }
 
 export interface TeacherScheduleSessionActions {
@@ -32,8 +33,13 @@ export function resolveTeacherScheduleSessionActions(
 ): TeacherScheduleSessionActions {
   const executionState = input.executionState ?? ClassExecutionState.NOT_ACTIVATED;
   const outcome = input.outcome ?? ClassOutcome.PENDING;
+  const isFrozen = input.isFrozen === true;
   const none = { activate: false, start: false, markAbsent: false, requestLeave: false, joinVideo: false };
-  const joinVideo = isJoinableByExecutionState(executionState, outcome);
+  const joinVideo = isJoinableClassInstance(executionState, outcome, { isFrozen });
+
+  if (isFrozen) {
+    return { ...none, joinVideo };
+  }
 
   if (executionState === ClassExecutionState.COMPLETED) {
     return { ...none, joinVideo };

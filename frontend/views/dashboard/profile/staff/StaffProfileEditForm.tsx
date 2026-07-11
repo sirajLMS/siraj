@@ -33,7 +33,7 @@ export function StaffProfileEditForm({
 }) {
   const tc = useTranslations("profile");
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
-  const { canEdit } = useProfileFieldAccess({ scope });
+  const { canView, canEdit } = useProfileFieldAccess({ scope });
   const form = useForm<StaffAdminEditFormData>({
     resolver: zodResolver(isAdminScope ? staffAdminEditSchema : staffOwnEditSchema),
     defaultValues: {
@@ -64,7 +64,9 @@ export function StaffProfileEditForm({
   };
 
   const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
-  const showCompensationSection = isAdminScope && canEdit("staff_role");
+  const showCompensationViewSection =
+    canView("staff_role") && (isAdminScope || Boolean(staffData.hourlyRate || staffData.rateCurrency));
+  const showCompensationEditSection = isAdminScope && canEdit("staff_role");
 
   return (
     <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
@@ -90,8 +92,10 @@ export function StaffProfileEditForm({
             />
           ) : null}
           {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
-          {showCompensationSection ? (
+          {showCompensationEditSection ? (
             <CompensationSection mode="edit" register={form.register} control={form.control} />
+          ) : showCompensationViewSection ? (
+            <CompensationSection mode="view" staffData={staffData} subjectUserId={staffData.id ?? undefined} />
           ) : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>

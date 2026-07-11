@@ -8,8 +8,10 @@ import { useCurrencyStore } from "@/frontend/stores/currencyStore";
 export function useCurrencyCatalog(): {
   readonly options: ReturnType<typeof useCurrencyStore.getState>["options"];
   readonly loading: boolean;
+  readonly loaded: boolean;
 } {
   const options = useCurrencyStore(state => state.options);
+  const loaded = useCurrencyStore(state => state.loaded);
   const setCatalog = useCurrencyStore(state => state.setCatalog);
   const { data, loading } = useQuery(supportedCurrenciesQueryDocument, {
     variables: { activeOnly: true },
@@ -32,5 +34,5 @@ export function useCurrencyCatalog(): {
     }
   }, [data?.supportedCurrencies, setCatalog]);
 
-  return { options, loading };
+  return { options, loading, loaded };
 }

@@ -1,3 +1,5 @@
+import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
+import type { PaymentDirection } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CountryCodePothosObject,
@@ -23,6 +25,24 @@ import type {
   UserPaymentMethodReturnType,
   UserPaymentMethodSubmitInput,
 } from "@/backend/types/billing/payment-method.types";
+import type { LocalizedString } from "@/shared/types/localized-string";
+
+type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
+type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
+type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
+
+interface SupportedCommonShape {
+  id: string;
+  slug: string;
+  name: LocalizedString;
+  description: LocalizedString | null;
+  instructions: LocalizedString | null;
+  supportedDirections: PaymentDirection;
+  logoUrl: string | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 function detailField<T extends PaymentMethodDetails, K extends keyof T>(
   key: K,
@@ -126,23 +146,29 @@ export const PaymentMethodDefaultsPothosObject = PaymentMethodDefaultsRef.implem
   }),
 });
 
-const SupportedMobileWalletRef = gqlSchemaBuilder.objectRef<SupportedMobileWalletReturnType>("SupportedMobileWallet");
-
-export const SupportedMobileWalletPothosObject = SupportedMobileWalletRef.implement({
-  fields: t => ({
+function supportedObjectCommonFields(t: PothosObjectFieldBuilder<SupportedCommonShape>) {
+  return {
     id: t.exposeString("id"),
     slug: t.exposeString("slug"),
     name: t.expose("name", { type: "LocalizedString" }),
     description: t.expose("description", { type: "LocalizedString", nullable: true }),
     instructions: t.expose("instructions", { type: "LocalizedString", nullable: true }),
-    countryCode: t.exposeString("countryCode", { nullable: true }),
-    currencyCode: t.exposeString("currencyCode", { nullable: true }),
-    phoneRegion: t.exposeString("phoneRegion", { nullable: true }),
     supportedDirections: t.expose("supportedDirections", { type: PaymentDirectionPothosEnum }),
     logoUrl: t.exposeString("logoUrl", { nullable: true }),
     isActive: t.exposeBoolean("isActive"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+  };
+}
+
+const SupportedMobileWalletRef = gqlSchemaBuilder.objectRef<SupportedMobileWalletReturnType>("SupportedMobileWallet");
+
+export const SupportedMobileWalletPothosObject = SupportedMobileWalletRef.implement({
+  fields: t => ({
+    ...supportedObjectCommonFields(t),
+    countryCode: t.exposeString("countryCode", { nullable: true }),
+    currencyCode: t.exposeString("currencyCode", { nullable: true }),
+    phoneRegion: t.exposeString("phoneRegion", { nullable: true }),
   }),
 });
 
@@ -150,18 +176,9 @@ const SupportedPaymentLinkRef = gqlSchemaBuilder.objectRef<SupportedPaymentLinkR
 
 export const SupportedPaymentLinkPothosObject = SupportedPaymentLinkRef.implement({
   fields: t => ({
-    id: t.exposeString("id"),
-    slug: t.exposeString("slug"),
-    name: t.expose("name", { type: "LocalizedString" }),
-    description: t.expose("description", { type: "LocalizedString", nullable: true }),
-    instructions: t.expose("instructions", { type: "LocalizedString", nullable: true }),
+    ...supportedObjectCommonFields(t),
     urlAllowlist: t.stringList({ resolve: parent => [...parent.urlAllowlist] }),
     urlExample: t.exposeString("urlExample", { nullable: true }),
-    supportedDirections: t.expose("supportedDirections", { type: PaymentDirectionPothosEnum }),
-    logoUrl: t.exposeString("logoUrl", { nullable: true }),
-    isActive: t.exposeBoolean("isActive"),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
 });
 
@@ -170,18 +187,9 @@ const SupportedOnlineAccountRef =
 
 export const SupportedOnlineAccountPothosObject = SupportedOnlineAccountRef.implement({
   fields: t => ({
-    id: t.exposeString("id"),
-    slug: t.exposeString("slug"),
-    name: t.expose("name", { type: "LocalizedString" }),
-    description: t.expose("description", { type: "LocalizedString", nullable: true }),
-    instructions: t.expose("instructions", { type: "LocalizedString", nullable: true }),
+    ...supportedObjectCommonFields(t),
     identifierKind: t.expose("identifierKind", { type: IdentifierKindPothosEnum }),
     identifierLabel: t.expose("identifierLabel", { type: "LocalizedString" }),
-    supportedDirections: t.expose("supportedDirections", { type: PaymentDirectionPothosEnum }),
-    logoUrl: t.exposeString("logoUrl", { nullable: true }),
-    isActive: t.exposeBoolean("isActive"),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
 });
 
@@ -284,79 +292,58 @@ export const UserPaymentMethodUpdateInputPothos = gqlSchemaBuilder
     }),
   });
 
-export const SupportedMobileWalletCreateInputPothos = gqlSchemaBuilder.inputType("SupportedMobileWalletCreateInput", {
-  fields: t => ({
-    slug: t.string({ required: true }),
-    name: t.field({ type: "LocalizedString", required: true }),
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
-    countryCode: t.field({ type: CountryCodePothosObject, required: false }),
-    currencyCode: t.field({ type: CurrencyCodePothosObject, required: false }),
-    phoneRegion: t.string({ required: false }),
-    supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
-    logoUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
-  }),
-});
-
-export const SupportedMobileWalletUpdateInputPothos = gqlSchemaBuilder.inputType("SupportedMobileWalletUpdateInput", {
-  fields: t => ({
-    slug: t.string({ required: false }),
-    name: t.field({ type: "LocalizedString", required: false }),
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
-    countryCode: t.field({ type: CountryCodePothosObject, required: false }),
-    currencyCode: t.field({ type: CurrencyCodePothosObject, required: false }),
-    phoneRegion: t.string({ required: false }),
-    supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
-    logoUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
-  }),
-});
-
-export const SupportedPaymentLinkCreateInputPothos = gqlSchemaBuilder.inputType("SupportedPaymentLinkCreateInput", {
-  fields: t => ({
-    slug: t.string({ required: true }),
-    name: t.field({ type: "LocalizedString", required: true }),
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
-    urlAllowlist: t.stringList({ required: true }),
-    urlExample: t.string({ required: false }),
-    supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
-    logoUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
-  }),
-});
-
-export const SupportedPaymentLinkUpdateInputPothos = gqlSchemaBuilder.inputType("SupportedPaymentLinkUpdateInput", {
-  fields: t => ({
-    slug: t.string({ required: false }),
-    name: t.field({ type: "LocalizedString", required: false }),
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
-    urlAllowlist: t.stringList({ required: false }),
-    urlExample: t.string({ required: false }),
-    supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
-    logoUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
-  }),
-});
-
-function supportedInputCommonFields(t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]) {
+function supportedInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
+    description: t.field({ type: "LocalizedString", required }),
+    instructions: t.field({ type: "LocalizedString", required }),
     supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
     logoUrl: t.string({ required: false }),
     isActive: t.boolean({ required: false }),
   };
 }
 
+function mobileWalletInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+  return {
+    slug: t.string({ required }),
+    name: t.field({ type: "LocalizedString", required }),
+    ...supportedInputCommonFields(t, false),
+    countryCode: t.field({ type: CountryCodePothosObject, required: false }),
+    currencyCode: t.field({ type: CurrencyCodePothosObject, required: false }),
+    phoneRegion: t.string({ required: false }),
+  };
+}
+
+function paymentLinkInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+  return {
+    slug: t.string({ required }),
+    name: t.field({ type: "LocalizedString", required }),
+    ...supportedInputCommonFields(t, false),
+    urlAllowlist: t.stringList({ required }),
+    urlExample: t.string({ required: false }),
+  };
+}
+
+export const SupportedMobileWalletCreateInputPothos = gqlSchemaBuilder.inputType("SupportedMobileWalletCreateInput", {
+  fields: t => mobileWalletInputCommonFields(t, true),
+});
+
+export const SupportedMobileWalletUpdateInputPothos = gqlSchemaBuilder.inputType("SupportedMobileWalletUpdateInput", {
+  fields: t => mobileWalletInputCommonFields(t, false),
+});
+
+export const SupportedPaymentLinkCreateInputPothos = gqlSchemaBuilder.inputType("SupportedPaymentLinkCreateInput", {
+  fields: t => paymentLinkInputCommonFields(t, true),
+});
+
+export const SupportedPaymentLinkUpdateInputPothos = gqlSchemaBuilder.inputType("SupportedPaymentLinkUpdateInput", {
+  fields: t => paymentLinkInputCommonFields(t, false),
+});
+
 export const SupportedOnlineAccountCreateInputPothos = gqlSchemaBuilder.inputType("SupportedOnlineAccountCreateInput", {
   fields: t => ({
     slug: t.string({ required: true }),
     name: t.field({ type: "LocalizedString", required: true }),
-    ...supportedInputCommonFields(t),
+    ...supportedInputCommonFields(t, false),
     identifierKind: t.field({ type: IdentifierKindPothosEnum, required: true }),
     identifierLabel: t.field({ type: "LocalizedString", required: false }),
   }),
@@ -366,7 +353,7 @@ export const SupportedOnlineAccountUpdateInputPothos = gqlSchemaBuilder.inputTyp
   fields: t => ({
     slug: t.string({ required: false }),
     name: t.field({ type: "LocalizedString", required: false }),
-    ...supportedInputCommonFields(t),
+    ...supportedInputCommonFields(t, false),
     identifierKind: t.field({ type: IdentifierKindPothosEnum, required: false }),
     identifierLabel: t.field({ type: "LocalizedString", required: false }),
   }),

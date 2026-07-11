@@ -83,28 +83,31 @@ function StudentAvatar({
 
 function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
   const t = useTranslations("dashboard.studentStatus");
-  const { showField } = useStudentFieldAccess();
+  const { showField, canView } = useStudentFieldAccess();
   const showIdentity = showField(student.name, "student_identity");
   const showTeacher = showField(student.teacherName, "student_teacher");
+  const showStatus = canView("student_academic");
 
-  if (!showIdentity && !showTeacher) {
+  if (!showIdentity && !showTeacher && !showStatus) {
     return null;
   }
 
   return (
     <Box>
-      {showIdentity ? (
-        <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center", gap: 1.5 }}>
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: "center", gap: 1.5 }}>
+        {showIdentity ? (
           <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
             {student.name}
           </Typography>
+        ) : null}
+        {showStatus ? (
           <StatusBadge
             category="studentAccount"
             status={getBadgeStatusKey(student.status)}
             label={t(`statusOptions.${student.status}`)}
           />
-        </Box>
-      ) : null}
+        ) : null}
+      </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1 }}>
         {showIdentity ? (
           <Box

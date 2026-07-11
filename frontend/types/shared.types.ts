@@ -138,6 +138,7 @@ export interface TeacherScheduleRow {
   readonly studentId?: string;
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: EffectiveMeeting | null;
+  readonly isFrozen?: boolean | null;
 }
 
 export interface TeacherDashboardMetrics {

@@ -70,28 +70,39 @@ export function ProfileTabNav({ audience, scope, currentTab, onTabChange }: Prof
     >
       <Box sx={{ display: { xs: "flex", md: "none" }, overflowX: "auto", pb: 1 }}>
         <Stack direction="row" spacing={1} sx={{ minWidth: "fit-content", px: 1 }}>
-          {availableTabs.map(tab => (
-            <Chip
-              key={tab.id}
-              label={t(tab.i18nKey)}
-              onClick={() => onTabChange(tab.id)}
-              sx={theme => ({
-                ...(currentTab === tab.id
-                  ? {
-                      bgcolor: theme.palette.primary.main,
-                      color: theme.palette.onPrimary,
-                      borderColor: theme.palette.primary.dark,
-                    }
-                  : {
-                      bgcolor: "transparent",
-                      color: theme.palette.text.primary,
-                      borderColor: theme.palette.divider,
-                    }),
-                borderWidth: 1,
-                borderStyle: "solid",
-              })}
-            />
-          ))}
+          <Box component="div" role="tablist" aria-label="Profile sections">
+            {availableTabs.map(tab => (
+              <Chip
+                key={tab.id}
+                role="tab"
+                tabIndex={0}
+                aria-selected={currentTab === tab.id}
+                label={t(tab.i18nKey)}
+                onClick={() => onTabChange(tab.id)}
+                onKeyDown={event => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onTabChange(tab.id);
+                  }
+                }}
+                sx={theme => ({
+                  ...(currentTab === tab.id
+                    ? {
+                        bgcolor: theme.palette.primary.main,
+                        color: theme.palette.onPrimary,
+                        borderColor: theme.palette.primary.dark,
+                      }
+                    : {
+                        bgcolor: "transparent",
+                        color: theme.palette.text.primary,
+                        borderColor: theme.palette.divider,
+                      }),
+                  borderWidth: 1,
+                  borderStyle: "solid",
+                })}
+              />
+            ))}
+          </Box>
         </Stack>
       </Box>
 

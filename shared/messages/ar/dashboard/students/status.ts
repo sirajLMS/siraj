@@ -19,6 +19,9 @@ export const status: StudentStatusLabels = {
     statusReasonPlaceholder: "أدخل المبررات الإدارية هنا...",
     quickReasons: "أسباب سريعة",
   },
+  validation: {
+    reasonMinLength: "يجب أن يكون السبب 5 أحرف على الأقل",
+  },
   statusOptions: {
     REGULAR: "عادي / نشط",
     SUSPENDED: "موقوف (مالي/تأديبي)",

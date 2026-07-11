@@ -26,14 +26,13 @@ export function StudentHistoryDesktop({
   const t = useTranslations("dashboard.studentHistory");
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
   const yearStr = currentMonth.getFullYear();
-
   return (
     <Box sx={{ display: { xs: "none", md: "block" } }}>
       <Box sx={{ mb: 4 }}>
         <PageHeader
           title={`${t("pageTitle", { name: studentName })} ${t("pageSubtitle", {
             month: monthStr,
-          }).replace(" • Academic Year 2024/25", "")}`}
+          })}`}
           titleVariant="headlineMd"
           breadcrumbs={[{ label: t("breadcrumbs.archive") }]}
           actions={

@@ -37,6 +37,7 @@ export function TeacherScheduleSessionActionsCell({
     canActivate,
     videoEnabled: row.videoEnabled,
     isConnecting: row.status === "connecting",
+    isFrozen: row.isFrozen,
   });
 
   const tooltips = resolveTeacherScheduleActionTooltips(row, labels, labels.meetingLabels);

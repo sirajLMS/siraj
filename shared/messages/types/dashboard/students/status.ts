@@ -17,6 +17,9 @@ export interface StudentStatusLabels {
     readonly statusReasonPlaceholder: string;
     readonly quickReasons: string;
   };
+  readonly validation: {
+    readonly reasonMinLength: string;
+  };
   readonly statusOptions: {
     readonly REGULAR: string;
     readonly SUSPENDED: string;

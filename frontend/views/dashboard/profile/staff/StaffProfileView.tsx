@@ -3,6 +3,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { type CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
 import { CompensationSection } from "@/frontend/views/dashboard/profile/staff/sections/CompensationSection";
@@ -38,11 +39,22 @@ export function StaffProfileView({
   };
 
   const renderCompensationSection = () => {
-    if (!isAdminScope || !canView("staff_role")) {
+    if (!canView("staff_role")) {
       return null;
     }
-    return <CompensationSection mode="view" staffData={staffData} subjectUserId={staffData.id ?? undefined} />;
+    if (isAdminScope) {
+      return <CompensationSection mode="view" staffData={staffData} subjectUserId={staffData.id ?? undefined} />;
+    }
+    if (staffData.hourlyRate || staffData.rateCurrency) {
+      return <CompensationSection mode="view" staffData={staffData} />;
+    }
+    return null;
   };
+
+  const accountSection = renderAccountSection();
+  const compensationSection = renderCompensationSection();
+  const canViewContact = canView("core_contact");
+  const hasAnyContent = Boolean(accountSection) || Boolean(compensationSection) || canViewContact;
 
   return (
     <Stack spacing={2}>
@@ -52,20 +64,24 @@ export function StaffProfileView({
         </Typography>
       ) : null}
 
-      <Box
-        sx={{
-          display: "grid",
-          gap: 2,
-          gridTemplateColumns: {
-            xs: "minmax(0, 1fr)",
-            md: "repeat(2, minmax(0, 1fr))",
-          },
-        }}
-      >
-        {renderAccountSection()}
-        <ContactSection mode="view" scope={scope} staffData={staffData} />
-        {renderCompensationSection()}
-      </Box>
+      {hasAnyContent ? (
+        <Box
+          sx={{
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "repeat(2, minmax(0, 1fr))",
+            },
+          }}
+        >
+          {accountSection}
+          {canViewContact ? <ContactSection mode="view" scope={scope} staffData={staffData} /> : null}
+          {compensationSection}
+        </Box>
+      ) : (
+        <ProfileRestrictedSection />
+      )}
     </Stack>
   );
 }

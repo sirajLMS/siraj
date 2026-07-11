@@ -6,6 +6,7 @@ import { staticCurrencyCatalog } from "@/frontend/lib/static-currency-catalog";
 
 export interface CurrencyCatalogState {
   options: readonly CurrencyOption[];
+  /** false = using static fallback, true = DB catalog has been loaded */
   loaded: boolean;
   setCatalog: (rows: readonly SupportedCurrencyRow[]) => void;
   resetToStatic: () => void;
@@ -30,17 +31,21 @@ function toCurrencyOption(row: SupportedCurrencyRow): CurrencyOption {
   };
 }
 
+function filterActive(rows: readonly SupportedCurrencyRow[]): CurrencyOption[] {
+  return rows.filter(row => row.isActive !== false).map(toCurrencyOption);
+}
+
 export const useCurrencyStore = create<CurrencyCatalogState>(set => ({
   options: staticCurrencyCatalog,
   loaded: false,
   setCatalog: rows => {
-    const options = rows.filter(row => row.isActive !== false).map(toCurrencyOption);
+    const options = filterActive(rows);
     set({
-      options: options.length > 0 ? options : staticCurrencyCatalog,
+      options: options.length > 0 ? options : Array.from(staticCurrencyCatalog),
       loaded: true,
     });
   },
-  resetToStatic: () => set({ options: staticCurrencyCatalog, loaded: false }),
+  resetToStatic: () => set({ options: Array.from(staticCurrencyCatalog), loaded: false }),
 }));
 
 export const mockCurrencyStore = {

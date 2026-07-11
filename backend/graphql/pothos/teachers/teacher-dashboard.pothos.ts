@@ -36,6 +36,7 @@ export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleR
     durationMinutes: t.exposeInt("durationMinutes"),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
+    isFrozen: t.exposeBoolean("isFrozen"),
     meetingJoinUrl: t.string({
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",

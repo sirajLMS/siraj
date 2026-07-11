@@ -87,7 +87,7 @@ export function StudentQuotaContainer() {
   }
 
   if (!hasTabAccess) {
-    return <ProfileRestrictedSection title={t("breadcrumbs.editProfile")} />;
+    return <ProfileRestrictedSection title={t("breadcrumbs.adjustQuota")} />;
   }
 
   const unifiedLoading = Boolean(profileContext?.loading);
@@ -102,7 +102,7 @@ export function StudentQuotaContainer() {
   }
 
   if (useUnifiedProfile && !unifiedLoading && unifiedProfileMissing) {
-    return <ProfileRestrictedSection title={t("breadcrumbs.editProfile")} />;
+    return <ProfileRestrictedSection title={t("breadcrumbs.adjustQuota")} />;
   }
 
   if (!useUnifiedProfile && error) {

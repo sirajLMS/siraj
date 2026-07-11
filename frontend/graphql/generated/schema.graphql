@@ -3038,9 +3038,6 @@ type Query {
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
-
-  """Lists supported currency metadata for display and selection."""
-  supportedCurrencies(activeOnly: Boolean = true): [SupportedCurrency!]
   supportedMobileWallets(activeOnly: Boolean = true, countryCode: CountryCode, direction: PaymentDirection): [SupportedMobileWallet!]
   supportedOnlineAccounts(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedOnlineAccount!]
   supportedPaymentLinks(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedPaymentLink!]
@@ -3216,9 +3213,7 @@ type SimulatablePermissionGroup {
 }
 
 input StaffAdminProfileUpdateInput {
-  hourlyRate: String
   phone: String
-  rateCurrency: CurrencyCode
   status: String
 }
 
@@ -3678,15 +3673,6 @@ type SupportRequestResult {
   success: Boolean
 }
 
-type SupportedCurrency {
-  code: CurrencyCode
-  countryCode: CountryCode
-  decimals: Int
-  isActive: Boolean
-  sortOrder: Int
-  symbol: String
-}
-
 type SupportedMobileWallet {
   countryCode: String
   createdAt: DateTime
@@ -3897,6 +3883,7 @@ type TeacherDashboardScheduleRow {
   effectiveMeeting: EffectiveMeeting
   executionState: ClassExecutionState
   id: String
+  isFrozen: Boolean
   meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
   scheduledEndAt: DateTime

@@ -9,7 +9,7 @@ export const history: StudentHistoryLabels = {
     student: "طالب",
   },
   pageTitle: "تاريخ حصص {name}",
-  pageSubtitle: "{month} • العام الدراسي 2024/25",
+  pageSubtitle: "{month}",
   exportPdf: "تصدير PDF",
   changeMonth: "تغيير الشهر",
   metrics: {

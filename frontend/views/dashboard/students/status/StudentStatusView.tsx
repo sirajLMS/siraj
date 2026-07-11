@@ -20,10 +20,11 @@ import {
 import { StudentStatusHeader } from "@/frontend/views/dashboard/students/status/components/StudentStatusHeader";
 import { UpcomingClassesTable } from "@/frontend/views/dashboard/students/status/components/UpcomingClassesTable";
 import {
+  createStatusUpdateSchema,
   type StatusUpdateFormData,
-  statusUpdateSchema,
 } from "@/frontend/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { StudentStatusViewProps } from "@/frontend/views/dashboard/students/status/types";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",
@@ -69,6 +70,7 @@ export function StudentStatusView({
   onUpdateStatus,
 }: Readonly<StudentStatusViewProps>) {
   const t = useTranslations("dashboard.studentStatus");
+  const validationMessages = useTranslations("dashboard.studentStatus.validation");
   const { canView, canEdit } = useStudentFieldAccess();
 
   const canEditStatus = canEdit("student_academic");
@@ -76,8 +78,12 @@ export function StudentStatusView({
   const canViewSchedule = canView("student_schedule");
   const hasTabAccess = canViewStudentProfileTab("status", canView);
 
+  const schema = createStatusUpdateSchema(
+    validationMessages as unknown as MessageSchema["dashboard"]["studentStatus"]["validation"]
+  );
+
   const methods = useForm<StatusUpdateFormData>({
-    resolver: zodResolver(statusUpdateSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       status: StudentStatus.Regular,
       reason: "",

@@ -31,6 +31,7 @@ async function resolveTeacherDashboard(
       outcome: r.outcome ?? null,
       meetingJoinUrl: r.meetingJoinUrl ?? null,
       yourTimeFormatted: r.yourTimeFormatted ?? null,
+      isFrozen: r.isFrozen ?? false,
     })),
   };
 }

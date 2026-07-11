@@ -45,6 +45,7 @@ export type TeacherDashboardScheduleRow = {
   outcome: ClassOutcome | null;
   meetingJoinUrl: string | null;
   yourTimeFormatted: string | null;
+  isFrozen: boolean;
 };
 
 export type TeacherProgressFeedEventKind =

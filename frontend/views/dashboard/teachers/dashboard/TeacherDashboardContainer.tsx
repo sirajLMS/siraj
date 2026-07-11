@@ -46,6 +46,7 @@ interface RawRow {
   readonly durationMinutes?: number | null;
   readonly executionState?: string | null;
   readonly outcome?: string | null;
+  readonly isFrozen?: boolean | null;
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: EffectiveMeeting | null;
   readonly yourTimeFormatted?: string | null;
@@ -163,6 +164,7 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
       scheduledEndAt: row.scheduledEndAt ? new Date(row.scheduledEndAt) : endAt,
       meetingJoinUrl: joinUrl,
       effectiveMeeting: row.effectiveMeeting ?? null,
+      isFrozen: row.isFrozen ?? false,
       isLive: isLiveSession,
       isCurrent: isLiveSession,
     };

@@ -460,7 +460,7 @@ function ScheduleOverviewMobileCard({
           row={row}
           headers={headers}
           detailsLabel={detailsLabel}
-          studentId={studentId}
+          studentId={studentId ?? undefined}
           classId={classId}
         />
       </StyledCardHeader>

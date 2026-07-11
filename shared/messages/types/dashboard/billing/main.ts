@@ -167,10 +167,12 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly title: string;
     readonly body: string;
     readonly cta: string;
+    readonly dismiss: string;
     readonly subject: {
       readonly title: string;
       readonly body: string;
       readonly cta: string;
+      readonly dismiss: string;
     };
   };
   readonly fxConversionNote: string;

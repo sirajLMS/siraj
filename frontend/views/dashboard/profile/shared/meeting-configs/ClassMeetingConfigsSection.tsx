@@ -111,21 +111,7 @@ function ErrorSection({
   );
 }
 
-export function ClassMeetingConfigsSection({
-  classInstanceId,
-  recurringScheduleId,
-  canManage,
-  effectiveMeeting,
-}: ClassMeetingConfigsSectionProps) {
-  const t = useTranslations("ui.meetingConfig.classScope");
-  const tManager = useTranslations("ui.meetingConfig.manager");
-  const locale = useLocale();
-  const { hasPermission } = useUserStore();
-  const resolvedCanManage = canManage ?? hasPermission(AppPermission.MeetingConfigsManageClass);
-
-  const isClassScope = Boolean(classInstanceId);
-  const scopeId = classInstanceId ?? recurringScheduleId ?? "";
-
+function useScopeQueries(scopeId: string, isClassScope: boolean) {
   const {
     data: classData,
     loading: classLoading,
@@ -154,20 +140,18 @@ export function ClassMeetingConfigsSection({
     [isClassScope, classData?.classMeetingConfigs, recurringData?.recurringMeetingConfigs]
   );
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editConfig, setEditConfig] = useState<ClassMeetingConfigFieldsFragment | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  return { loading, error, refetch, configs };
+}
 
+function useMeetingConfigMutations(
+  deleteId: string | null,
+  refetch: () => Promise<unknown>,
+  setDeleteId: (id: string | null) => void,
+  setErrorMessage: (msg: string | null) => void,
+  tManager: ReturnType<typeof useTranslations>
+) {
   const [deleteConfig, { loading: deleting }] = useMutation(deleteClassMeetingConfigMutationDocument);
   const [setDefault, { loading: settingDefault }] = useMutation(setDefaultClassMeetingConfigMutationDocument);
-
-  const deleteLabel = useMemo(() => {
-    if (!deleteId) return "";
-    const config = configs.find(c => c.id === deleteId);
-    return config ? configLabel(config as ClassMeetingConfigFieldsFragment, locale) : "";
-  }, [configs, deleteId, locale]);
 
   const handleSetDefault = useCallback(
     async (id: string) => {
@@ -178,7 +162,7 @@ export function ClassMeetingConfigsSection({
         setErrorMessage(tManager("saveError"));
       }
     },
-    [setDefault, refetch, tManager]
+    [setDefault, refetch, tManager, setErrorMessage]
   );
 
   const handleDelete = useCallback(async () => {
@@ -190,7 +174,128 @@ export function ClassMeetingConfigsSection({
     } catch {
       setErrorMessage(tManager("deleteError"));
     }
-  }, [deleteId, deleteConfig, refetch, tManager]);
+  }, [deleteId, deleteConfig, refetch, tManager, setDeleteId, setErrorMessage]);
+
+  return { deleting, settingDefault, handleSetDefault, handleDelete };
+}
+
+function ClassMeetingConfigDialogs({
+  resolvedCanManage,
+  formOpen,
+  editConfig,
+  deleteId,
+  deleteLabel,
+  deleting,
+  showSuccess,
+  errorMessage,
+  classInstanceId,
+  recurringScheduleId,
+  configsCount,
+  tManager,
+  setFormOpen,
+  setEditConfig,
+  setDeleteId,
+  setShowSuccess,
+  setErrorMessage,
+  refetch,
+  handleDelete,
+}: {
+  readonly resolvedCanManage: boolean;
+  readonly formOpen: boolean;
+  readonly editConfig: ClassMeetingConfigFieldsFragment | null;
+  readonly deleteId: string | null;
+  readonly deleteLabel: string;
+  readonly deleting: boolean;
+  readonly showSuccess: boolean;
+  readonly errorMessage: string | null;
+  readonly classInstanceId?: string;
+  readonly recurringScheduleId?: string;
+  readonly configsCount: number;
+  readonly tManager: ReturnType<typeof useTranslations>;
+  readonly setFormOpen: (open: boolean) => void;
+  readonly setEditConfig: (config: ClassMeetingConfigFieldsFragment | null) => void;
+  readonly setDeleteId: (id: string | null) => void;
+  readonly setShowSuccess: (show: boolean) => void;
+  readonly setErrorMessage: (msg: string | null) => void;
+  readonly refetch: () => Promise<unknown>;
+  readonly handleDelete: () => Promise<void>;
+}) {
+  return (
+    <>
+      {resolvedCanManage ? (
+        <ClassMeetingConfigFormDialog
+          open={formOpen}
+          classInstanceId={classInstanceId}
+          recurringScheduleId={recurringScheduleId}
+          editConfig={editConfig}
+          existingCount={configsCount}
+          createMutation={createClassMeetingConfigMutationDocument}
+          updateMutation={updateClassMeetingConfigMutationDocument}
+          onClose={() => {
+            setFormOpen(false);
+            setEditConfig(null);
+          }}
+          onSaved={async () => {
+            setShowSuccess(true);
+            await refetch();
+          }}
+        />
+      ) : null}
+
+      <MeetingConfigDeleteDialog
+        open={deleteId != null}
+        configLabel={deleteLabel}
+        isLoading={deleting}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+      />
+
+      <FormSuccessSnackbar open={showSuccess} message={tManager("saved")} onClose={() => setShowSuccess(false)} />
+      <FormErrorSnackbar
+        open={errorMessage != null}
+        message={errorMessage ?? ""}
+        onClose={() => setErrorMessage(null)}
+      />
+    </>
+  );
+}
+
+export function ClassMeetingConfigsSection({
+  classInstanceId,
+  recurringScheduleId,
+  canManage,
+  effectiveMeeting,
+}: ClassMeetingConfigsSectionProps) {
+  const t = useTranslations("ui.meetingConfig.classScope");
+  const tManager = useTranslations("ui.meetingConfig.manager");
+  const locale = useLocale();
+  const { hasPermission } = useUserStore();
+  const resolvedCanManage = canManage ?? hasPermission(AppPermission.MeetingConfigsManageClass);
+
+  const isClassScope = Boolean(classInstanceId);
+  const scopeId = classInstanceId ?? recurringScheduleId ?? "";
+
+  const { loading, error, refetch, configs } = useScopeQueries(scopeId, isClassScope);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editConfig, setEditConfig] = useState<ClassMeetingConfigFieldsFragment | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { deleting, settingDefault, handleSetDefault, handleDelete } = useMeetingConfigMutations(
+    deleteId,
+    refetch,
+    setDeleteId,
+    setErrorMessage,
+    tManager
+  );
+
+  const deleteLabel = useMemo(() => {
+    if (!deleteId) return "";
+    const config = configs.find(c => c.id === deleteId);
+    return config ? configLabel(config as ClassMeetingConfigFieldsFragment, locale) : "";
+  }, [configs, deleteId, locale]);
 
   const handleEdit = useCallback((config: unknown) => {
     setEditConfig(config as ClassMeetingConfigFieldsFragment);
@@ -235,39 +340,26 @@ export function ClassMeetingConfigsSection({
         onDelete={id => setDeleteId(id)}
       />
 
-      {resolvedCanManage ? (
-        <ClassMeetingConfigFormDialog
-          open={formOpen}
-          classInstanceId={classInstanceId}
-          recurringScheduleId={recurringScheduleId}
-          editConfig={editConfig}
-          existingCount={configs.length}
-          createMutation={createClassMeetingConfigMutationDocument}
-          updateMutation={updateClassMeetingConfigMutationDocument}
-          onClose={() => {
-            setFormOpen(false);
-            setEditConfig(null);
-          }}
-          onSaved={async () => {
-            setShowSuccess(true);
-            await refetch();
-          }}
-        />
-      ) : null}
-
-      <MeetingConfigDeleteDialog
-        open={deleteId != null}
-        configLabel={deleteLabel}
-        isLoading={deleting}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-      />
-
-      <FormSuccessSnackbar open={showSuccess} message={tManager("saved")} onClose={() => setShowSuccess(false)} />
-      <FormErrorSnackbar
-        open={errorMessage != null}
-        message={errorMessage ?? ""}
-        onClose={() => setErrorMessage(null)}
+      <ClassMeetingConfigDialogs
+        resolvedCanManage={resolvedCanManage}
+        formOpen={formOpen}
+        editConfig={editConfig}
+        deleteId={deleteId}
+        deleteLabel={deleteLabel}
+        deleting={deleting}
+        showSuccess={showSuccess}
+        errorMessage={errorMessage}
+        classInstanceId={classInstanceId}
+        recurringScheduleId={recurringScheduleId}
+        configsCount={configs.length}
+        tManager={tManager}
+        setFormOpen={setFormOpen}
+        setEditConfig={setEditConfig}
+        setDeleteId={setDeleteId}
+        setShowSuccess={setShowSuccess}
+        setErrorMessage={setErrorMessage}
+        refetch={refetch}
+        handleDelete={handleDelete}
       />
     </SectionPanel>
   );

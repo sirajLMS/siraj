@@ -3,7 +3,6 @@ export { ImpersonationRepository } from "@/backend/db/repo/auth";
 export {
   BillingRepository,
   InvoicePaymentSubmissionRepository,
-  SupportedCurrencyRepository,
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,
   SupportedPaymentLinkRepository,

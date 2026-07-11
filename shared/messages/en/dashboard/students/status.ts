@@ -19,6 +19,9 @@ export const status: StudentStatusLabels = {
     statusReasonPlaceholder: "Enter administrative justification...",
     quickReasons: "Quick Reasons",
   },
+  validation: {
+    reasonMinLength: "Reason must be at least 5 characters long",
+  },
   statusOptions: {
     REGULAR: "Regular / Active",
     SUSPENDED: "Suspended (Financial/Disciplinary)",

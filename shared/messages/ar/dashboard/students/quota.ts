@@ -9,7 +9,7 @@ export const quota: StudentQuotaLabels = {
   },
   breadcrumbs: {
     students: "الطلاب",
-    editProfile: "تعديل الملف الشخصي",
+    adjustQuota: "تعديل الحصة",
   },
   sections: {
     studentInfo: "معلومات الطالب",

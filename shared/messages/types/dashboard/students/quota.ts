@@ -7,7 +7,7 @@ export interface StudentQuotaLabels {
   };
   readonly breadcrumbs: {
     readonly students: string;
-    readonly editProfile: string;
+    readonly adjustQuota: string;
   };
   readonly sections: {
     readonly studentInfo: string;

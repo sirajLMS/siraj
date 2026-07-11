@@ -16,6 +16,8 @@ import {
   TeacherPortalService,
 } from "@/backend/services";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
+import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import {
   canEditProfileFieldGroup,
   collectProfileEditGroupsFromUpdate,
@@ -628,8 +630,6 @@ export namespace ProfileService {
       roleIds.staffProfileId,
       {
         status: adminInput.status as import("@/backend/enum").AccountStatus | null | undefined,
-        hourlyRate: adminInput.hourlyRate ?? undefined,
-        rateCurrency: adminInput.rateCurrency ?? undefined,
       },
       locale
     );

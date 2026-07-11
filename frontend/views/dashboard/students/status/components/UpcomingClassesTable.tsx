@@ -181,19 +181,21 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
           {t("table.footerInfo", { id: formatStudentDisplayId(studentId) })}
         </Typography>
       </Box>
-      <Box
-        sx={theme => ({
-          backgroundColor: theme.palette.primaryContainer,
-          color: theme.palette.onPrimaryContainer,
-          px: 1.5,
-          py: 0.5,
-          borderRadius: 1,
-        })}
-      >
-        <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
-          {t("table.pendingHolds", { count: pendingCount })}
-        </Typography>
-      </Box>
+      {pendingCount > 0 ? (
+        <Box
+          sx={theme => ({
+            backgroundColor: theme.palette.primaryContainer,
+            color: theme.palette.onPrimaryContainer,
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 1,
+          })}
+        >
+          <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
+            {t("table.pendingHolds", { count: pendingCount })}
+          </Typography>
+        </Box>
+      ) : null}
     </Box>
   );
 }
@@ -344,7 +346,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
         overflow: "hidden",
       })}
     >
-      <DesktopHeader studentId={studentId} pendingCount={classes.length} />
+      <DesktopHeader studentId={studentId} pendingCount={classes.filter(c => c.isFrozen).length} />
       <AppDataGrid
         rows={classes}
         columns={columns}
