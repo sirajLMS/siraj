@@ -21,6 +21,9 @@ export function StudentHistoryView({
   onPrevMonth,
   onNextMonth,
   onPrint,
+  enrollmentMonth,
+  nowMonth,
+  locale,
 }: Readonly<StudentHistoryViewProps>) {
   const t = useTranslations("dashboard.studentHistory");
   const { canView } = useStudentFieldAccess();
@@ -35,6 +38,9 @@ export function StudentHistoryView({
         onPrevMonth={onPrevMonth}
         onNextMonth={onNextMonth}
         onPrint={onPrint}
+        enrollmentMonth={enrollmentMonth}
+        nowMonth={nowMonth}
+        locale={locale}
       />
       <StudentHistoryMobile
         studentName={studentName}
@@ -48,6 +54,9 @@ export function StudentHistoryView({
         onPrevMonth={onPrevMonth}
         onNextMonth={onNextMonth}
         onPrint={onPrint}
+        enrollmentMonth={enrollmentMonth}
+        nowMonth={nowMonth}
+        locale={locale}
       />
     </>
   ) : (

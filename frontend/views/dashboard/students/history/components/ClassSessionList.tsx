@@ -63,7 +63,8 @@ function ClassSessionCard({
   session,
   statusLabel,
   durationLabel,
-}: Readonly<{ session: ClassSession; statusLabel: string; durationLabel: string }>) {
+  t,
+}: Readonly<{ session: ClassSession; statusLabel: string; durationLabel: string; t: ReturnType<typeof useTranslations> }>) {
   const [timeValue, timePeriod] = session.time.split(" ");
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 
@@ -152,6 +153,7 @@ function ClassSessionCard({
           joinUrl={session.meetingJoinUrl}
           meeting={session.effectiveMeeting}
           emptyRole="parent"
+          label={t("classDetails.joinSession")}
         />
       ) : null}
     </Box>
@@ -179,6 +181,7 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
             session={session}
             statusLabel={t(`status.${session.status}`)}
             durationLabel={formatDuration(session.duration)}
+            t={t}
           />
         ))
       )}

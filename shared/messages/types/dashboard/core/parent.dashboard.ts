@@ -25,6 +25,8 @@ export interface ParentDashboardLabels {
     readonly duration: string;
     readonly teacherLabel: string;
     readonly joinVideo: string;
+    readonly frozen: string;
+    readonly contactAdmin: string;
     readonly noEntries: string;
   };
   readonly bookingStatus: {

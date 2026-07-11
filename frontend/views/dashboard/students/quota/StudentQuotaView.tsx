@@ -143,6 +143,7 @@ function FormActions({
             type="button"
             variant="text"
             onClick={onCancel}
+            disabled={isSaving}
             sx={theme => ({
               height: { xs: 48, md: 48 },
               px: { xs: 0, md: 4 },
@@ -159,17 +160,19 @@ function FormActions({
         ) : null}
       </Box>
 
-      <Box
-        sx={theme => ({
-          display: { xs: "none", md: "flex" },
-          alignItems: "center",
-          gap: 1,
-          color: theme.palette.onSurfaceVariant,
-        })}
-      >
-        <ScheduleOutlined sx={{ fontSize: 14 }} />
-        <Typography variant="labelMd">{t("actions.lastEditedAt", { time: studentData.lastEditedTime })}</Typography>
-      </Box>
+      {studentData.lastEditedTime && (
+        <Box
+          sx={theme => ({
+            display: { xs: "none", md: "flex" },
+            alignItems: "center",
+            gap: 1,
+            color: theme.palette.onSurfaceVariant,
+          })}
+        >
+          <ScheduleOutlined sx={{ fontSize: 14 }} />
+          <Typography variant="labelMd">{t("actions.lastEditedAt", { time: studentData.lastEditedTime })}</Typography>
+        </Box>
+      )}
     </Box>
   );
 }

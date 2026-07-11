@@ -240,7 +240,11 @@ export function StudentStatusContainer() {
 
   if (!student) {
     if (useUnifiedProfile) {
-      return <ProfileRestrictedSection title={t("sections.adminHold")} />;
+      if (!profileContext?.profile) {
+        return <ProfileRestrictedSection title={t("sections.adminHold")} />;
+      }
+      // Profile exists but missing id/name → incomplete profile
+      return <ProfileRestrictedSection title={t("errors.invalidId")} />;
     }
     return <ErrorMessage message={t("errors.invalidId")} />;
   }

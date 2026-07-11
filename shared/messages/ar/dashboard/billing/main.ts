@@ -21,6 +21,7 @@ export const billing: BillingLabels = {
   billingProfileTitle: "الملف المالي للمستخدم",
   profileForUser: "تفاصيل الملف المالي للمستخدم {userId}",
   reminderSent: "تم إرسال تذكير الدفع",
+  reminderFailed: "فشل إرسال تذكير الدفع",
   adminMetrics: {
     totalOutstanding: "إجمالي المستحقات",
     pendingInvoices: "الفواتير المعلقة",
@@ -114,8 +115,6 @@ export const billing: BillingLabels = {
     body: "سيؤدي هذا إلى إزالة الفاتورة {invoiceId} نهائياً. لا يمكن التراجع عن هذا الإجراء.",
     confirm: "حذف الفاتورة",
   },
-  reminderSent: "تم إرسال تذكير الدفع",
-  reminderFailed: "فشل إرسال تذكير الدفع",
   hasPaymentProofHint: "إثبات دفع مرفق",
   submitProofDialog: {
     titleSubmit: "إرسال إثبات الدفع",

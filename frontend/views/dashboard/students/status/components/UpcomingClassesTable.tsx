@@ -131,6 +131,7 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
                     joinUrl={cls.meetingJoinUrl}
                     meeting={cls.effectiveMeeting}
                     emptyRole="parent"
+                    label={t("table.joinSession")}
                   />
                 ) : null}
               </Box>
@@ -308,6 +309,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
             joinUrl={params.row.meetingJoinUrl}
             meeting={params.row.effectiveMeeting}
             emptyRole="parent"
+            label={t("table.joinSession")}
           />
         ) : (
           <Tooltip title={t("table.sessionEnded")}>

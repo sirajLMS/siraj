@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
 import { studentClassHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-history.documents";
 import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
@@ -20,6 +20,7 @@ export function StudentHistoryContainer() {
   const useUnifiedProfile = profileContext != null;
   const t = useTranslations("dashboard.studentHistory");
   const notifications = useNotifications();
+  const locale = useLocale();
 
   const { currentMonth, selectedWeek, selectedDay, setCurrentMonth, setSelectedWeek, setSelectedDay } =
     useStudentHistoryStore();
@@ -27,6 +28,9 @@ export function StudentHistoryContainer() {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth() + 1;
   const studentId = useUnifiedProfile ? (profileContext?.studentId ?? "") : (params?.id ?? "");
+
+  const now = new Date();
+  const nowMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const { data, loading, error } = useQuery(studentClassHistoryQueryDocument, {
     variables: { studentId, year, month },
@@ -84,15 +88,31 @@ export function StudentHistoryContainer() {
     return result;
   }, [historyData, t]);
 
+  const enrollmentMonth =
+    useUnifiedProfile && profileContext?.profile?.createdAt
+      ? (() => {
+          const d = new Date(profileContext.profile.createdAt);
+          d.setDate(1);
+          d.setHours(0, 0, 0, 0);
+          return d;
+        })()
+      : undefined;
+
   const handlePrevMonth = useCallback(() => {
+    if (enrollmentMonth && currentMonth <= enrollmentMonth) {
+      return;
+    }
     const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
     setCurrentMonth(prev);
-  }, [currentMonth, setCurrentMonth]);
+  }, [currentMonth, setCurrentMonth, enrollmentMonth]);
 
   const handleNextMonth = useCallback(() => {
+    if (currentMonth >= nowMonth) {
+      return;
+    }
     const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
     setCurrentMonth(next);
-  }, [currentMonth, setCurrentMonth]);
+  }, [currentMonth, setCurrentMonth, nowMonth]);
 
   const handlePrint = useCallback(() => {
     globalThis.print();
@@ -127,6 +147,9 @@ export function StudentHistoryContainer() {
       onPrevMonth={handlePrevMonth}
       onNextMonth={handleNextMonth}
       onPrint={handlePrint}
+      enrollmentMonth={enrollmentMonth}
+      nowMonth={nowMonth}
+      locale={locale}
     />
   );
 }

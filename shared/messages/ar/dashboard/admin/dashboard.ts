@@ -22,6 +22,7 @@ export const admin: AdminDashboardLabels = {
   actions: "الإجراءات",
   history: "السجل",
   details: "التفاصيل",
+  joinVideo: "الانضمام للحصة",
   showingOf: "عرض {shown} من {total} حصة",
   noClasses: "لا توجد حصص",
   today: "اليوم",

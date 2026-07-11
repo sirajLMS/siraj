@@ -50,6 +50,7 @@ export interface StudentStatusLabels {
     readonly active: string;
     readonly minutesShort: string;
     readonly sessionEnded: string;
+    readonly joinSession: string;
   };
   readonly policies: {
     readonly suspensionTitle: string;

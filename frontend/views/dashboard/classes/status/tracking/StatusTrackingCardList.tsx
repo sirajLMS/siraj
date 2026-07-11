@@ -129,6 +129,7 @@ function getCardActionButton(
             joinUrl={row.meetingJoinUrl}
             meeting={row.effectiveMeeting}
             emptyRole="class"
+            label={labels.joinSession}
             setupHref={`/classes/${rowId}#meeting-configs`}
             id={`mobile-join-${rowId}`}
           />

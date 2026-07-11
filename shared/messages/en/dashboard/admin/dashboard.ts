@@ -22,6 +22,7 @@ export const admin: AdminDashboardLabels = {
   actions: "Actions",
   history: "History",
   details: "Details",
+  joinVideo: "Join Class Session",
   showingOf: "Showing {shown} of {total} classes",
   noClasses: "No classes",
   today: "Today",

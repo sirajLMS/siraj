@@ -32,6 +32,7 @@ interface ScheduleOverviewCardListProps {
     readonly duration: string;
     readonly status: string;
     readonly history: string;
+    readonly joinVideo: string;
   };
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
@@ -360,7 +361,8 @@ function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }:
           variant="icon"
           joinUrl={row.meetingJoinUrl}
           meeting={row.effectiveMeeting}
-          emptyRole="parent"
+          label={headers.joinVideo}
+          emptyRole="class"
         />
       ) : null}
       {studentId ? (

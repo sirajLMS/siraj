@@ -15,6 +15,7 @@ export const useAdminDashboardLabels = () => {
     status: t("admin.status"),
     actions: t("admin.actions"),
     history: t("admin.history"),
+    joinVideo: t("admin.joinVideo"),
   };
 
   const statusLabels = buildClassInstanceStatusLabels(t);

@@ -9,7 +9,7 @@ import {
   VerifiedUser,
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ClassSessionList } from "@/frontend/views/dashboard/students/history/components/ClassSessionList";
@@ -20,6 +20,7 @@ import type {
   MobileMetricProps,
   StudentHistoryMobileProps,
 } from "@/frontend/views/dashboard/students/history/types";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 function deriveStreakDays(
   classes: Readonly<Partial<Record<number, ClassSession>>>,
@@ -63,8 +64,12 @@ export function StudentHistoryMobile({
   onPrevMonth,
   onNextMonth,
   onPrint,
+  enrollmentMonth,
+  nowMonth,
+  locale,
 }: Readonly<StudentHistoryMobileProps>) {
-  const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
+  const t = useTranslations("dashboard.studentHistory");
+  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
 
   const selectedDaySessions: ClassSession[] = useMemo(() => {
     if (selectedDay === null) return [];
@@ -72,26 +77,28 @@ export function StudentHistoryMobile({
     return session ? [session] : [];
   }, [selectedDay, classes]);
 
-  const dateStr = selectedDay === null ? `${monthStr}` : `Day ${selectedDay} of ${monthStr}`;
+  const dateStr = selectedDay === null ? monthStr : t("dayOfMonth", { day: selectedDay, month: monthStr });
 
   const streakDays = useMemo(
     () => deriveStreakDays(classes, currentMonth, selectedWeek),
     [classes, currentMonth, selectedWeek]
   );
 
+  const canGoPrev = !enrollmentMonth || currentMonth > enrollmentMonth;
+  const canGoNext = !nowMonth || currentMonth < nowMonth;
+
   return (
     <Box sx={{ display: { xs: "block", md: "none" } }}>
       <HistoryMobileHeader studentName={studentName} monthStr={monthStr} />
-
       <HistoryMobileMetricsGrid metrics={metrics} />
-
       <HistoryMobileActions
         currentMonth={currentMonth}
         onPrevMonth={onPrevMonth}
         onNextMonth={onNextMonth}
         onPrint={onPrint}
+        canGoPrev={canGoPrev}
+        canGoNext={canGoNext}
       />
-
       <MobileWeeklyScroller
         selectedWeek={selectedWeek}
         selectedDay={selectedDay}
@@ -226,14 +233,19 @@ function HistoryMobileActions({
   onPrevMonth,
   onNextMonth,
   onPrint,
+  canGoPrev,
+  canGoNext,
 }: Readonly<{
   currentMonth: Date;
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onPrint: () => void;
+  canGoPrev: boolean;
+  canGoNext: boolean;
 }>) {
   const t = useTranslations("dashboard.studentHistory");
-  const monthStr = currentMonth.toLocaleString("en-US", { month: "long" }).toUpperCase();
+  const locale = useLocale();
+  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();
 
   return (
@@ -249,12 +261,15 @@ function HistoryMobileActions({
         <IconButton
           onClick={onPrevMonth}
           size="small"
+          disabled={!canGoPrev}
           sx={theme => ({
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
+            backgroundColor: canGoPrev ? theme.palette.primary.main : theme.palette.action.disabledBackground,
+            color: canGoPrev ? theme.palette.onPrimary : theme.palette.action.disabled,
             borderRadius: 2,
             transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            "&:hover": { backgroundColor: theme.palette.primary.dark },
+            "&:hover": {
+              backgroundColor: canGoPrev ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
+            },
           })}
         >
           <ChevronLeft sx={{ fontSize: 18 }} />
@@ -277,12 +292,15 @@ function HistoryMobileActions({
         <IconButton
           onClick={onNextMonth}
           size="small"
+          disabled={!canGoNext}
           sx={theme => ({
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
+            backgroundColor: canGoNext ? theme.palette.primary.main : theme.palette.action.disabledBackground,
+            color: canGoNext ? theme.palette.onPrimary : theme.palette.action.disabled,
             borderRadius: 2,
             transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            "&:hover": { backgroundColor: theme.palette.primary.dark },
+            "&:hover": {
+              backgroundColor: canGoNext ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
+            },
           })}
         >
           <ChevronRight sx={{ fontSize: 18 }} />

@@ -20,7 +20,6 @@ export const billing: BillingLabels = {
   invalidUserId: "Invalid user ID",
   billingProfileTitle: "User Billing Profile",
   profileForUser: "Billing profile details for user {userId}",
-  reminderSent: "Payment reminder sent",
   adminMetrics: {
     totalOutstanding: "Total Outstanding",
     pendingInvoices: "Pending Invoices",

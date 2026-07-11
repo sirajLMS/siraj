@@ -40,6 +40,8 @@ function buildScheduleLabels(t: TeacherDashboardTranslator): TeacherDashboardLab
     showing: t.raw("schedule.showing") as string,
     noEntries: t("schedule.noEntries"),
     sessionEnded: t("schedule.sessionEnded"),
+    frozen: t("schedule.frozen"),
+    contactAdmin: t("schedule.contactAdmin"),
     duration: t("schedule.duration"),
     durationValue: t.raw("schedule.durationValue") as string,
     current: t("schedule.current"),

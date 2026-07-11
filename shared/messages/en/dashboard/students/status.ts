@@ -52,6 +52,7 @@ export const status: StudentStatusLabels = {
     active: "Active",
     minutesShort: "{minutes}m",
     sessionEnded: "Session ended",
+    joinSession: "Join Session",
   },
   policies: {
     suspensionTitle: "Suspension",

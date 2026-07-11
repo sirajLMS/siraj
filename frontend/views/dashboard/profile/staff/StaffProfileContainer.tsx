@@ -13,6 +13,8 @@ import { syncSubjectProfileCache } from "@/frontend/lib/sync-subject-profile";
 import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { StaffProfileEditForm } from "@/frontend/views/dashboard/profile/staff/StaffProfileEditForm";
 import { StaffProfileView } from "@/frontend/views/dashboard/profile/staff/StaffProfileView";
 import { PermissionsSection } from "@/frontend/views/dashboard/profile/staff/sections/PermissionsSection";
@@ -62,6 +64,7 @@ export function StaffProfileContainer({
   const activeTab = _activeTab;
   const router = useRouter();
   const client = useApolloClient();
+  const { canView } = useProfileFieldAccess({ scope });
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
     variables: { userId: targetUserId },
@@ -161,6 +164,10 @@ export function StaffProfileContainer({
   }
 
   if (!profile?.staffProfile) {
+    const canViewIdentity = canView("core_identity");
+    if (!canViewIdentity) {
+      return <ProfileRestrictedSection />;
+    }
     return <Alert severity="warning">{tc("errors.notFound")}</Alert>;
   }
 

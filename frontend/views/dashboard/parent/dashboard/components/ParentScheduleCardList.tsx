@@ -67,10 +67,7 @@ function ScheduleCard({ row, labels }: { readonly row: ParentScheduleRow; readon
               <Tooltip title={labels.schedule.contactAdmin}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                   <AcUnitOutlined sx={theme => ({ fontSize: 18, color: theme.palette.info.main })} />
-                  <Typography
-                    variant="labelMd"
-                    sx={theme => ({ color: theme.palette.info.main, fontWeight: 700 })}
-                  >
+                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.info.main, fontWeight: 700 })}>
                     {labels.schedule.frozen}
                   </Typography>
                 </Box>

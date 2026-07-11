@@ -40,6 +40,7 @@ export const history: StudentHistoryLabels = {
     contentNotes: "محتوى وملاحظات الحصة",
     viewAssignments: "عرض الواجبات",
     downloadLogs: "تنزيل السجلات",
+    joinSession: "الانضمام للحصة",
     status: {
       present: "حاضر",
       absent: "غائب",
@@ -54,6 +55,7 @@ export const history: StudentHistoryLabels = {
       COMPLETED: "مكتمل",
     },
     noSessions: "لا توجد حصص مجدولة لهذا التاريخ.",
+    dayOfMonth: "يوم {day} من {month}",
   },
   performanceStreak: {
     title: "سلسلة الأداء",

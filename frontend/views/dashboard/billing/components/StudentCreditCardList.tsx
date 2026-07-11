@@ -19,6 +19,7 @@ interface StudentCreditCardListProps {
   readonly billingActionsDisabled?: boolean;
   readonly onSendReminder: (id: string) => void;
   readonly loading?: boolean;
+  readonly sendingReminderId?: string | null;
 }
 
 function formatClassesLeft(row: StudentCreditRow): string {
@@ -51,6 +52,7 @@ export function StudentCreditCardList({
   billingActionsDisabled = false,
   onSendReminder,
   loading = false,
+  sendingReminderId = null,
 }: Readonly<StudentCreditCardListProps>) {
   if (loading && rows.length === 0) {
     return (
@@ -111,8 +113,9 @@ export function StudentCreditCardList({
                 onClick={() => {
                   onSendReminder(row.id);
                 }}
+                disabled={sendingReminderId === row.id}
               >
-                {labels.sendReminder}
+                {sendingReminderId === row.id ? <CircularProgress size={18} color="inherit" /> : labels.sendReminder}
               </Button>
             )}
           </StyledCreditCard>

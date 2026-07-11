@@ -151,6 +151,7 @@ export function StatusTrackingDataGrid({
                   joinUrl={row.meetingJoinUrl}
                   meeting={row.effectiveMeeting}
                   emptyRole="class"
+                  label={labels.joinSession}
                   setupHref={`/classes/${row.id}#meeting-configs`}
                 />
               </Box>

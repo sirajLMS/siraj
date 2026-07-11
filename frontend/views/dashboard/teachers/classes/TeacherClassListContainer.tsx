@@ -129,6 +129,7 @@ export function TeacherClassListContainer() {
                         joinUrl={row.meetingJoinUrl}
                         meeting={row.effectiveMeeting}
                         emptyRole="teacher"
+                        label={tDashboard("actions.joinVideo")}
                         setupHref="/profile?tab=meeting"
                       />
                     ) : (

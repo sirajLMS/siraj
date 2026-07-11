@@ -34,4 +34,7 @@ export const futureSchedule: TeacherFutureScheduleLabels = {
     supportRequestSent: "Support request sent.",
     leaveRequested: "Leave request submitted.",
   },
+  actions: {
+    joinVideo: "Join Video",
+  },
 };

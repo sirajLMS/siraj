@@ -133,20 +133,19 @@ function StudentCreditSection({
   onSendReminder,
   onViewAllNegativeBalance,
   onClearCreditFilter,
-}: Readonly<
-  Pick<
-    AdminBillingViewProps,
-    | "labels"
-    | "creditRows"
-    | "canManage"
-    | "billingActionsDisabled"
-    | "creditFilter"
-    | "creditLoading"
-    | "onSendReminder"
-    | "onViewAllNegativeBalance"
-    | "onClearCreditFilter"
-  >
->) {
+  sendingReminderId,
+}: {
+  readonly labels: AdminBillingViewProps["labels"];
+  readonly creditRows: AdminBillingViewProps["creditRows"];
+  readonly canManage: boolean;
+  readonly billingActionsDisabled?: boolean;
+  readonly creditFilter: AdminBillingViewProps["creditFilter"];
+  readonly creditLoading?: boolean;
+  readonly onSendReminder: (id: string) => void;
+  readonly onViewAllNegativeBalance: () => void;
+  readonly onClearCreditFilter: () => void;
+  readonly sendingReminderId?: string | null;
+}) {
   return (
     <SectionPanel
       id="student-credit-section"
@@ -164,6 +163,7 @@ function StudentCreditSection({
         billingActionsDisabled={billingActionsDisabled}
         onSendReminder={onSendReminder}
         loading={creditLoading && creditRows.length === 0}
+        sendingReminderId={sendingReminderId}
         labels={{
           classesLeft: labels.creditTable.classesLeft,
           sendReminder: labels.creditTable.sendReminder,
@@ -227,6 +227,7 @@ export function AdminBillingMobileView({
   totalCount,
   onPageChange,
   loading = false,
+  sendingReminderId,
 }: Readonly<AdminBillingViewProps>) {
   return (
     <>
@@ -268,6 +269,7 @@ export function AdminBillingMobileView({
             onSendReminder={onSendReminder}
             onViewAllNegativeBalance={onViewAllNegativeBalance}
             onClearCreditFilter={onClearCreditFilter}
+            sendingReminderId={sendingReminderId}
           />
         )}
       </PageContainer>

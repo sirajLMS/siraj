@@ -107,6 +107,10 @@ function ExchangeRatesViewContent({
   showFeedback,
   snackbarState,
   onSnackbarClose,
+  ratesError,
+  syncError,
+  refetchRates,
+  refetchSync,
 }: Readonly<{
   labels: ExchangeRatesLabels;
   rates: ExchangeRateRow[];
@@ -127,6 +131,10 @@ function ExchangeRatesViewContent({
   showFeedback: FeedbackFn;
   snackbarState: SnackbarState;
   onSnackbarClose: () => void;
+  ratesError?: Error | null;
+  syncError?: Error | null;
+  refetchRates: () => void;
+  refetchSync: () => void;
 }>) {
   return (
     <PageContainer>
@@ -144,6 +152,32 @@ function ExchangeRatesViewContent({
       />
 
       <RequirePermission permissions={AppPermission.BillingViewExchangeRates}>
+        {ratesError ? (
+          <Alert
+            severity="warning"
+            sx={{ mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={() => void refetchRates()}>
+                {labels.errors.retry}
+              </Button>
+            }
+          >
+            {labels.errors.loadFailed}
+          </Alert>
+        ) : null}
+        {syncError ? (
+          <Alert
+            severity="warning"
+            sx={{ mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={() => void refetchSync()}>
+                {labels.errors.retry}
+              </Button>
+            }
+          >
+            {labels.errors.loadFailed}
+          </Alert>
+        ) : null}
         {showStaleWarning ? (
           <Alert severity="warning" sx={{ mb: 2 }}>
             {labels.staleWarning}
@@ -321,6 +355,7 @@ export function ExchangeRatesContainer() {
   const {
     data: ratesData,
     loading: ratesLoading,
+    error: ratesError,
     refetch: refetchRates,
   } = useQuery(latestExchangeRatesQueryDocument, {
     variables: { paginationArgs: null },
@@ -330,6 +365,7 @@ export function ExchangeRatesContainer() {
   const {
     data: syncData,
     loading: syncLoading,
+    error: syncError,
     refetch: refetchSync,
   } = useQuery(latestFxSyncRunQueryDocument, { fetchPolicy: "cache-and-network" });
 
@@ -379,6 +415,10 @@ export function ExchangeRatesContainer() {
       showFeedback={showFeedback}
       snackbarState={{ open: snackbarOpen, message: snackbarMessage, severity: snackbarSeverity }}
       onSnackbarClose={() => setSnackbarOpen(false)}
+      ratesError={ratesError}
+      syncError={syncError}
+      refetchRates={refetchRates}
+      refetchSync={refetchSync}
     />
   );
 }

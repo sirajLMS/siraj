@@ -27,6 +27,8 @@ export const parentDashboard: ParentDashboardLabels = {
     duration: "Duration: {minutes} min",
     teacherLabel: "Teacher: {name}",
     joinVideo: "Join Video Session",
+    frozen: "Frozen",
+    contactAdmin: "Contact admin (hold)",
     noEntries: "No classes scheduled for today",
   },
   bookingStatus: {

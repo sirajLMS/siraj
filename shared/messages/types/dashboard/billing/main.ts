@@ -20,6 +20,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly billingProfileTitle: string;
   readonly profileForUser: string;
   readonly reminderSent: string;
+  readonly reminderFailed: string;
   readonly adminMetrics: {
     readonly totalOutstanding: string;
     readonly pendingInvoices: string;
@@ -103,8 +104,6 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly confirm: string;
   };
   readonly noUnpaidInvoices: string;
-  readonly reminderSent: string;
-  readonly reminderFailed: string;
   readonly submitProofDialog: {
     readonly titleSubmit: string;
     readonly titleMarkPaid: string;

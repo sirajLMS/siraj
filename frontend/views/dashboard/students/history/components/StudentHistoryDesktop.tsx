@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { ExportButton, MetricCard, PageHeader } from "@/frontend/components/ui";
 import { CalendarGrid } from "@/frontend/views/dashboard/students/history/components/CalendarGrid";
 import type { StudentHistoryDesktopProps } from "@/frontend/views/dashboard/students/history/types";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export function StudentHistoryDesktop({
   studentName,
@@ -22,17 +23,23 @@ export function StudentHistoryDesktop({
   onPrevMonth,
   onNextMonth,
   onPrint,
+  enrollmentMonth,
+  nowMonth,
+  locale,
 }: Readonly<StudentHistoryDesktopProps>) {
   const t = useTranslations("dashboard.studentHistory");
-  const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
+  const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" });
   const yearStr = currentMonth.getFullYear();
+
+  const canGoPrev = !enrollmentMonth || currentMonth > enrollmentMonth;
+  const canGoNext = !nowMonth || currentMonth < nowMonth;
+
   return (
     <Box sx={{ display: { xs: "none", md: "block" } }}>
       <Box sx={{ mb: 4 }}>
         <PageHeader
-          title={`${t("pageTitle", { name: studentName })} ${t("pageSubtitle", {
-            month: monthStr,
-          })}`}
+          title={t("pageTitle", { name: studentName })}
+          subtitle={t("pageSubtitle", { month: monthStr })}
           titleVariant="headlineMd"
           breadcrumbs={[{ label: t("breadcrumbs.archive") }]}
           actions={
@@ -46,8 +53,11 @@ export function StudentHistoryDesktop({
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 4, gap: 2 }}>
         <IconButton
           onClick={onPrevMonth}
+          disabled={!canGoPrev}
           sx={theme => ({
             transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+            opacity: canGoPrev ? 1 : 0.5,
+            pointerEvents: canGoPrev ? "auto" : "none",
           })}
         >
           <ChevronLeft />
@@ -60,8 +70,11 @@ export function StudentHistoryDesktop({
         </Box>
         <IconButton
           onClick={onNextMonth}
+          disabled={!canGoNext}
           sx={theme => ({
             transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+            opacity: canGoNext ? 1 : 0.5,
+            pointerEvents: canGoNext ? "auto" : "none",
           })}
         >
           <ChevronRight />

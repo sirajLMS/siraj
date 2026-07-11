@@ -65,4 +65,8 @@ export const exchangeRates: ExchangeRatesLabels = {
     failed: "تعذر حفظ سعر الصرف اليدوي",
     cancel: "إلغاء",
   },
+  errors: {
+    loadFailed: "فشل تحميل البيانات",
+    retry: "إعادة المحاولة",
+  },
 };

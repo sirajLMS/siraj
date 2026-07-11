@@ -64,6 +64,7 @@ function StudentCreditSection({
   onSendReminder,
   onViewAllNegativeBalance,
   onClearCreditFilter,
+  sendingReminderId,
 }: {
   readonly labels: AdminBillingViewProps["labels"];
   readonly creditRows: AdminBillingViewProps["creditRows"];
@@ -74,6 +75,7 @@ function StudentCreditSection({
   readonly onSendReminder: (id: string) => void;
   readonly onViewAllNegativeBalance: () => void;
   readonly onClearCreditFilter: () => void;
+  readonly sendingReminderId?: string | null;
 }) {
   const isNegativeFilter = creditFilter === "negative_balance";
 
@@ -97,6 +99,7 @@ function StudentCreditSection({
         onSendReminder={onSendReminder}
         labels={getStudentCreditGridLabels(labels)}
         loading={creditLoading && creditRows.length === 0}
+        sendingReminderId={sendingReminderId}
       />
       <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
         {isNegativeFilter ? (
@@ -141,6 +144,7 @@ export function AdminBillingDesktopView({
   pageSize,
   totalCount,
   onPageChange,
+  sendingReminderId,
 }: Readonly<AdminBillingViewProps>) {
   const adminMetrics = buildAdminMetrics(summary, labels);
 
@@ -201,6 +205,7 @@ export function AdminBillingDesktopView({
           onSendReminder={onSendReminder}
           onViewAllNegativeBalance={onViewAllNegativeBalance}
           onClearCreditFilter={onClearCreditFilter}
+          sendingReminderId={sendingReminderId}
         />
       )}
     </PageContainer>

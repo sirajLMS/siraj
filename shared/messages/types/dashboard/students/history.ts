@@ -38,6 +38,7 @@ export interface StudentHistoryLabels {
     readonly contentNotes: string;
     readonly viewAssignments: string;
     readonly downloadLogs: string;
+    readonly joinSession: string;
     readonly status: {
       readonly present: string;
       readonly absent: string;
@@ -52,6 +53,7 @@ export interface StudentHistoryLabels {
       readonly COMPLETED: string;
     };
     readonly noSessions: string;
+    readonly dayOfMonth: string;
   };
   readonly performanceStreak: {
     readonly title: string;

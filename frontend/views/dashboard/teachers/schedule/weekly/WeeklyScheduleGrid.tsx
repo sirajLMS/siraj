@@ -98,6 +98,7 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
               joinUrl={classItem.meetingJoinUrl}
               meeting={classItem.effectiveMeeting}
               emptyRole="teacher"
+              label={t("actions.joinVideo")}
               setupHref="/profile?tab=meeting"
             />
           ) : isTerminal ? (

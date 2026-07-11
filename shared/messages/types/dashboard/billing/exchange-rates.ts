@@ -63,4 +63,8 @@ export interface ExchangeRatesLabels {
     readonly failed: string;
     readonly cancel: string;
   };
+  readonly errors: {
+    readonly loadFailed: string;
+    readonly retry: string;
+  };
 }

@@ -34,4 +34,7 @@ export const futureSchedule: TeacherFutureScheduleLabels = {
     supportRequestSent: "تم إرسال طلب الدعم بنجاح.",
     leaveRequested: "تم طلب الإجازة بنجاح.",
   },
+  actions: {
+    joinVideo: "الانضمام للفيديو",
+  },
 };

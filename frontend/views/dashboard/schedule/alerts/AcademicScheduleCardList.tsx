@@ -184,7 +184,7 @@ function ClassCardActions({
           variant="icon"
           joinUrl={row.meetingJoinUrl}
           meeting={row.effectiveMeeting}
-          emptyRole="parent"
+          emptyRole="class"
           label={labels.joinSession}
           id={`join-session-${row.id}`}
         />

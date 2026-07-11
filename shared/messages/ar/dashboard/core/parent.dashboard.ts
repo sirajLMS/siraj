@@ -27,6 +27,8 @@ export const parentDashboard: ParentDashboardLabels = {
     duration: "المدة: {minutes} دقيقة",
     teacherLabel: "المعلم: {name}",
     joinVideo: "الانضمام للجلسة المرئية",
+    frozen: "مجمّد",
+    contactAdmin: "تواصل مع المشرف (تجميد)",
     noEntries: "لا توجد حصص مجدولة لليوم",
   },
   bookingStatus: {

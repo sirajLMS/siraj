@@ -40,6 +40,7 @@ export const history: StudentHistoryLabels = {
     contentNotes: "Content & Notes",
     viewAssignments: "View Assignments",
     downloadLogs: "Download Session Logs",
+    joinSession: "Join Session",
     status: {
       present: "Present",
       absent: "Absent",
@@ -54,6 +55,7 @@ export const history: StudentHistoryLabels = {
       COMPLETED: "Completed",
     },
     noSessions: "No class sessions found for this date.",
+    dayOfMonth: "Day {day} of {month}",
   },
   performanceStreak: {
     title: "Performance Streak",

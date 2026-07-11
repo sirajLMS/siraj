@@ -32,4 +32,7 @@ export interface TeacherFutureScheduleLabels {
     readonly supportRequestSent: string;
     readonly leaveRequested: string;
   };
+  readonly actions: {
+    readonly joinVideo: string;
+  };
 }

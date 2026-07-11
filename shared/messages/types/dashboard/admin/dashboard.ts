@@ -20,6 +20,7 @@ export interface AdminDashboardLabels {
   readonly actions: string;
   readonly history: string;
   readonly details: string;
+  readonly joinVideo: string;
   readonly showingOf: string;
   readonly noClasses: string;
   readonly today: string;

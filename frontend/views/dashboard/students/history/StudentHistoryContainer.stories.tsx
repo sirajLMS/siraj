@@ -229,6 +229,7 @@ function MockStudentHistoryContainer() {
       onPrevMonth={handlePrevMonth}
       onNextMonth={handleNextMonth}
       onPrint={handlePrint}
+      locale="en"
     />
   );
 }

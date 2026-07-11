@@ -80,6 +80,7 @@ function ClassInfo({ item, isMobile }: Readonly<{ item: FutureClass; isMobile: b
               joinUrl={item.meetingJoinUrl}
               meeting={item.effectiveMeeting}
               emptyRole="teacher"
+              label={t("actions.joinVideo")}
               setupHref="/profile?tab=meeting"
             />
           ) : null}

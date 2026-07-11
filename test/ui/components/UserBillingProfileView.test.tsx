@@ -32,6 +32,7 @@ const mockLabels: BillingLabels = {
   billingProfileTitle: "User Billing Profile",
   profileForUser: "Billing profile details for user {userId}",
   reminderSent: "Payment reminder sent",
+  reminderFailed: "Failed to send payment reminder",
   adminMetrics: {
     totalOutstanding: "Total Outstanding",
     pendingInvoices: "Pending Invoices",
@@ -291,6 +292,10 @@ const mockLabels: BillingLabels = {
       success: "Saved",
       failed: "Failed",
       cancel: "Cancel",
+    },
+    errors: {
+      loadFailed: "Failed to load data",
+      retry: "Retry",
     },
   },
   fxStaleBanner: {

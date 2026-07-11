@@ -36,6 +36,7 @@ interface UseScheduleColumnsParams {
     readonly status: string;
     readonly actions: string;
     readonly history: string;
+    readonly joinVideo: string;
   };
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
@@ -229,7 +230,8 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
                 variant="icon"
                 joinUrl={row.meetingJoinUrl}
                 meeting={row.effectiveMeeting}
-                emptyRole="parent"
+                label={headers.joinVideo}
+                emptyRole="class"
               />
             ) : null}
           </Box>

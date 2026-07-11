@@ -88,7 +88,13 @@ function renderFooterAction(
   if (isFrozen) {
     return (
       <Tooltip title={labels.schedule.contactAdmin}>
-        <Button fullWidth disabled variant="outlined" startIcon={<AcUnitOutlined />} sx={{ typography: "labelUppercase" }}>
+        <Button
+          fullWidth
+          disabled
+          variant="outlined"
+          startIcon={<AcUnitOutlined />}
+          sx={{ typography: "labelUppercase" }}
+        >
           {labels.schedule.frozen}
         </Button>
       </Tooltip>

@@ -124,7 +124,7 @@ export function StudentQuotaContainer() {
           totalClasses: s.classesTotal ?? 0,
           classesLeft: s.classesRemaining ?? 0,
           profileImage: useUnifiedProfile ? (profile?.avatarUrl ?? "") : "",
-          lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : tc("notSet"),
+          lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
           primaryTeacherId: s.primaryTeacherId ?? null,
         }
       : null;

@@ -169,7 +169,12 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
 
   useRefetchOnWindowFocus(refreshBillingData);
 
-  const { data: creditData, loading: creditLoading, error: creditError, refetch: refetchCredit } = useQuery(studentCreditStatusQueryDocument, {
+  const {
+    data: creditData,
+    loading: creditLoading,
+    error: creditError,
+    refetch: refetchCredit,
+  } = useQuery(studentCreditStatusQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
 
@@ -188,12 +193,12 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
     },
   });
 
-  const [sendReminderMutation, { loading: sendingReminder }] = useMutation(sendPaymentReminderMutationDocument, {
+  const [sendReminderMutation] = useMutation(sendPaymentReminderMutationDocument, {
     onCompleted: data => {
       if (data.sendPaymentReminder?.success) {
         showFeedback(t("reminderSent"), "success");
       } else {
-        showFeedback(data.sendPaymentReminder?.message ?? t("reminderFailed"), "error");
+        showFeedback(t("reminderFailed"), "error");
       }
       setSendingReminderId(null);
     },
@@ -419,6 +424,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         creditRows={filteredCreditRows}
         creditLoading={creditLoading}
         creditError={creditError}
+        sendingReminderId={sendingReminderId}
         searchQuery={searchQuery}
         isSearchPending={isSearchPending}
         billingActionsDisabled={billingActionsDisabled}
@@ -429,8 +435,6 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         canCreate={canCreate && !billingActionsDisabled}
         canViewExchangeRates={canViewExchangeRates && !billingActionsDisabled}
         canDelete={canDelete && !billingActionsDisabled}
-        creditLoading={creditLoading}
-        creditError={creditError}
         onSearchChange={handleSearchChange}
         onMarkAsPaid={handleMarkAsPaid}
         onViewPaymentDetails={setDetailsTarget}

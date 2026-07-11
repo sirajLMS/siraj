@@ -49,6 +49,9 @@ export interface StudentHistoryViewProps {
   readonly onPrevMonth: () => void;
   readonly onNextMonth: () => void;
   readonly onPrint: () => void;
+  readonly enrollmentMonth?: Date;
+  readonly nowMonth?: Date;
+  readonly locale: string;
 }
 
 export interface StudentHistoryDesktopProps {
@@ -59,6 +62,9 @@ export interface StudentHistoryDesktopProps {
   readonly onPrevMonth: () => void;
   readonly onNextMonth: () => void;
   readonly onPrint: () => void;
+  readonly enrollmentMonth?: Date;
+  readonly nowMonth?: Date;
+  readonly locale: string;
 }
 
 export interface StudentHistoryMobileProps {
@@ -73,6 +79,9 @@ export interface StudentHistoryMobileProps {
   readonly onPrevMonth: () => void;
   readonly onNextMonth: () => void;
   readonly onPrint: () => void;
+  readonly enrollmentMonth?: Date;
+  readonly nowMonth?: Date;
+  readonly locale: string;
 }
 
 export interface CalendarGridProps {

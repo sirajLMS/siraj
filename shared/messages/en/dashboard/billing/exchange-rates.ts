@@ -65,4 +65,8 @@ export const exchangeRates: ExchangeRatesLabels = {
     failed: "Failed to apply override",
     cancel: "Cancel",
   },
+  errors: {
+    loadFailed: "Failed to load data",
+    retry: "Retry",
+  },
 };
