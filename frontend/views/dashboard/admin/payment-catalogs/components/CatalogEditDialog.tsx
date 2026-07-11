@@ -14,10 +14,10 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 import { CatalogImageUpload } from "@/frontend/components/ui/input/catalogImageUpload/CatalogImageUpload";
 import { CountryAutocomplete } from "@/frontend/components/ui/input/countrySelect/CountryAutocomplete";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
@@ -39,6 +39,8 @@ import {
 } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
 import { type CurrencyOption, getCurrencyOptions } from "@/frontend/lib/currency";
 import { type CountryType, countries } from "@/frontend/lib/locale";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import { logger } from "@/frontend/utils/logger";
 import type { CatalogEditDialogProps } from "@/frontend/views/dashboard/admin/payment-catalogs/types";
 import { EntityFormDialogActions } from "@/frontend/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
 
@@ -92,6 +94,7 @@ function resolveCurrency(code: string | null | undefined): CurrencyOption | null
 
 export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonly<CatalogEditDialogProps>) {
   const t = useTranslations("dashboard.paymentCatalogs");
+  const notifications = useNotifications();
   const isEdit = Boolean(row?.id);
 
   const [createWallet, { loading: creatingWallet }] = useMutation(createSupportedMobileWalletMutationDocument);
@@ -101,7 +104,14 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
   const [createAccount, { loading: creatingAccount }] = useMutation(createSupportedOnlineAccountMutationDocument);
   const [updateAccount, { loading: updatingAccount }] = useMutation(updateSupportedOnlineAccountMutationDocument);
 
-  const { control, handleSubmit, reset, watch, setValue } = useForm<CatalogFormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<CatalogFormValues>({
     defaultValues: defaultValues(),
   });
 
@@ -135,16 +145,19 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
 
   const title = useMemo(() => (isEdit ? t("editTitle") : t("createTitle")), [isEdit, t]);
 
-  const onSubmit = handleSubmit(async values => {
-    const shared = {
-      slug: values.slug,
-      name: values.name,
-      description: values.description.en || values.description.ar ? values.description : null,
-      instructions: values.instructions.en || values.instructions.ar ? values.instructions : null,
-      supportedDirections: values.supportedDirections,
-      logoUrl: values.logoUrl || null,
-      isActive: values.isActive,
-    };
+  const buildSharedInput = (values: CatalogFormValues) => ({
+    slug: values.slug,
+    name: values.name,
+    description: values.description.en || values.description.ar ? values.description : null,
+    instructions: values.instructions.en || values.instructions.ar ? values.instructions : null,
+    supportedDirections: values.supportedDirections,
+    logoUrl: values.logoUrl || null,
+    isActive: values.isActive,
+  });
+
+  const executeMutation = async (values: CatalogFormValues): Promise<void> => {
+    const shared = buildSharedInput(values);
+    const editId = isEdit ? row?.id : null;
 
     if (kind === "mobileWallet") {
       const input = {
@@ -153,47 +166,57 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
         currencyCode: values.currencyCode || null,
         phoneRegion: values.phoneRegion || null,
       };
-      if (isEdit && row?.id) {
-        await updateWallet({ variables: { id: row.id, input } });
+      if (editId) {
+        await updateWallet({ variables: { id: editId, input } });
       } else {
         await createWallet({ variables: { input } });
       }
+      return;
     }
 
     if (kind === "paymentLink") {
-      const input = {
-        ...shared,
-        urlAllowlist: values.urlAllowlist,
-        urlExample: values.urlExample || null,
-      };
-      if (isEdit && row?.id) {
-        await updateLink({ variables: { id: row.id, input } });
+      const input = { ...shared, urlAllowlist: values.urlAllowlist, urlExample: values.urlExample || null };
+      if (editId) {
+        await updateLink({ variables: { id: editId, input } });
       } else {
         await createLink({ variables: { input } });
       }
+      return;
     }
 
-    if (kind === "onlineAccount") {
-      const input = {
-        ...shared,
-        identifierKind: values.identifierKind,
-        identifierLabel: values.identifierLabel.en || values.identifierLabel.ar ? values.identifierLabel : null,
-      };
-      if (isEdit && row?.id) {
-        await updateAccount({ variables: { id: row.id, input } });
-      } else {
-        await createAccount({ variables: { input } });
-      }
+    const input = {
+      ...shared,
+      identifierKind: values.identifierKind,
+      identifierLabel: values.identifierLabel.en || values.identifierLabel.ar ? values.identifierLabel : null,
+    };
+    if (editId) {
+      await updateAccount({ variables: { id: editId, input } });
+    } else {
+      await createAccount({ variables: { input } });
+    }
+  };
+
+  const onSubmit = handleSubmit(async values => {
+    const hasName = Boolean(values.name.en?.trim() || values.name.ar?.trim());
+    if (!hasName) {
+      notifications.show(t("errors.nameRequired"), { severity: "error" });
+      return;
     }
 
-    await onSaved();
+    try {
+      await executeMutation(values);
+      await onSaved();
+    } catch (error) {
+      logger.error("Failed to save catalog entry", { error });
+      notifications.show(t("saveError"), { severity: "error" });
+    }
   });
 
   const countryCode = watch("countryCode");
   const currencyCode = watch("currencyCode");
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={isSaving ? undefined : onClose} fullWidth maxWidth="sm">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Stack
@@ -209,26 +232,58 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
           <Controller
             name="slug"
             control={control}
-            render={({ field }) => (
-              <TextField {...field} label={t("fields.slug")} fullWidth required disabled={isEdit} />
+            rules={{ required: t("errors.slugRequired") }}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                label={t("fields.slug")}
+                fullWidth
+                required
+                disabled={isEdit}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+              />
             )}
           />
 
-          <LocalizedStringFormField name="name" control={control} label={t("fields.name")} required />
+          <LocalizedStringFormField
+            name="name"
+            control={control}
+            label={t("fields.name")}
+            required
+            errorMessage={errors.name?.message}
+          />
           <LocalizedStringFormField name="description" control={control} label={t("fields.description")} />
           <LocalizedStringFormField name="instructions" control={control} label={t("fields.instructions")} />
+
+          <Controller
+            name="supportedDirections"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth>
+                <InputLabel id="supported-directions-label">{t("fields.supportedDirections")}</InputLabel>
+                <Select {...field} labelId="supported-directions-label" label={t("fields.supportedDirections")}>
+                  <MenuItem value={PaymentDirection.Payin}>{t("directions.payin")}</MenuItem>
+                  <MenuItem value={PaymentDirection.Payout}>{t("directions.payout")}</MenuItem>
+                  <MenuItem value={PaymentDirection.Both}>{t("directions.both")}</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+          />
 
           {kind === "mobileWallet" ? (
             <>
               <CountryAutocomplete
                 country={resolveCountry(countryCode)}
                 onChangeAction={country => setValue("countryCode", country.code as CountryCode)}
+                onClearAction={() => setValue("countryCode", "")}
                 label={t("fields.countryCode")}
                 fullWidth
               />
               <CurrencySelect
                 currency={resolveCurrency(currencyCode)}
                 setCurrencyAction={currency => setValue("currencyCode", currency.code)}
+                onClearAction={() => setValue("currencyCode", "")}
                 label={t("fields.currencyCode")}
                 fullWidth
               />
@@ -300,8 +355,13 @@ export function CatalogEditDialog({ open, kind, row, onClose, onSaved }: Readonl
             control={control}
             render={({ field }) => (
               <FormControlLabel
+                sx={theme => ({
+                  justifyContent: "flex-start",
+                  gap: 1,
+                  color: field.value ? theme.palette.text.primary : theme.palette.text.secondary,
+                })}
                 control={<Checkbox checked={field.value} onChange={event => field.onChange(event.target.checked)} />}
-                label={t("fields.isActive")}
+                label={`${t("fields.isActive")}: ${field.value ? t("active") : t("inactive")}`}
               />
             )}
           />

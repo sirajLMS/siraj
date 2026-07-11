@@ -1,7 +1,5 @@
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { CurrencyCode as CurrencyCodeEnum } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { FxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { formatLockedAmount } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 
 export interface BillingCurrencyBucket {
@@ -53,7 +51,7 @@ export function formatBillingCurrencyTotals(
   messages: FxDisplayMessages
 ): BillingCurrencyTotalsDisplay {
   if (buckets.length === 0) {
-    return { primary: formatLockedAmount("0.00", CurrencyCodeEnum.Usd, locale) };
+    return { primary: "—" };
   }
 
   const formattedBuckets = buckets.map(bucket =>
@@ -98,6 +96,24 @@ export function formatBillingCurrencyTotals(
 
       return { primary, breakdown };
     }
+
+    // All buckets have displayAmount but currencies differ
+    const lockedPrimary = formattedBuckets.join(" · ");
+    const mixedMessage = messages.displayCurrencyMixed({
+      lockedAmount: lockedPrimary,
+      lockedCurrency: "",
+    });
+    return { primary: mixedMessage, breakdown: formattedBuckets.join(" · ") };
+  }
+
+  // Some buckets have no displayAmount or are stale
+  if (convertibleBuckets.length > 0 && convertibleBuckets.length < buckets.length) {
+    const lockedPrimary = formattedBuckets.join(" · ");
+    const mixedMessage = messages.displayCurrencyMixed({
+      lockedAmount: lockedPrimary,
+      lockedCurrency: "",
+    });
+    return { primary: mixedMessage, breakdown: formattedBuckets.join(" · ") };
   }
 
   return { primary: formattedBuckets.join(" · ") };

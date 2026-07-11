@@ -9,10 +9,15 @@ export interface PaymentCatalogsLabels {
   readonly deleteConfirm: string;
   readonly active: string;
   readonly inactive: string;
+  readonly notSet: string;
   readonly cancel: string;
   readonly save: string;
   readonly edit: string;
   readonly delete: string;
+  readonly saveSuccess: string;
+  readonly saveError: string;
+  readonly deactivateSuccess: string;
+  readonly deactivateError: string;
   readonly tabs: {
     readonly mobileWallets: string;
     readonly paymentLinks: string;
@@ -26,6 +31,7 @@ export interface PaymentCatalogsLabels {
     readonly status: string;
     readonly urlAllowlist: string;
     readonly identifierKind: string;
+    readonly supportedDirections: string;
     readonly actions: string;
   };
   readonly fields: {
@@ -44,6 +50,15 @@ export interface PaymentCatalogsLabels {
     readonly supportedDirections: string;
     readonly logoUrl: string;
     readonly isActive: string;
+  };
+  readonly directions: {
+    readonly payin: string;
+    readonly payout: string;
+    readonly both: string;
+  };
+  readonly errors: {
+    readonly nameRequired: string;
+    readonly slugRequired: string;
   };
   readonly identifierKinds: {
     readonly email: string;

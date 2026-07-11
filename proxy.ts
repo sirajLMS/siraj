@@ -30,12 +30,12 @@ export default function proxy(request: NextRequest) {
   const isDev = process.env.NODE_ENV === "development";
   const cspValue =
     `default-src 'self'; ` +
-    `script-src 'self' 'nonce-${nonce}'` +
+    `script-src 'self' 'nonce-${nonce}' https://vercel.live` +
     (isDev ? " 'unsafe-eval' 'unsafe-inline'" : "") +
     `; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ` +
     `font-src 'self' https://fonts.gstatic.com; ` +
-    `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; ` +
-    `connect-src 'self' https://*.upstash.com; ` +
+    `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com https://*.blob.vercel-storage.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; ` +
+    `connect-src 'self' https://*.upstash.com https://vercel.live https://*.blob.vercel-storage.com; ` +
     `frame-ancestors 'none';`;
 
   intlResponse.headers.forEach((value, key) => {

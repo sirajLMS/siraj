@@ -14,22 +14,34 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import type { LocalizedString } from "@/backend/types/shared/localized-string.types";
 import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
 import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import { updateMeetingProviderMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
 import { isUrlAllowedByProvider } from "@/frontend/lib/meeting-config";
+import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import { logger } from "@/frontend/utils/logger";
 
 type EditMeetingProviderDialogProps = {
   readonly open: boolean;
   readonly provider: MeetingProviderFieldsFragment | null;
   readonly onClose: () => void;
   readonly onSaved: () => void | Promise<void>;
+  readonly onError: (message: string) => void;
 };
 
-export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: EditMeetingProviderDialogProps) {
+export function EditMeetingProviderDialog({
+  open,
+  provider,
+  onClose,
+  onSaved,
+  onError,
+}: EditMeetingProviderDialogProps) {
   const t = useTranslations("dashboard.meetingProviders");
-  const [updateProvider, { loading }] = useMutation(updateMeetingProviderMutationDocument);
+  const [updateProvider, { loading }] = useMutation(updateMeetingProviderMutationDocument, {
+    onError: error => {
+      logger.error("Update meeting provider failed:", { error });
+    },
+  });
   const [slug, setSlug] = useState("");
   const [name, setName] = useState<LocalizedString>({ en: "", ar: "" });
   const [urlAllowlist, setUrlAllowlist] = useState("");
@@ -38,6 +50,7 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
   const [supportsUsername, setSupportsUsername] = useState(false);
   const [supportsPassword, setSupportsPassword] = useState(false);
   const [supportsTenantId, setSupportsTenantId] = useState(false);
+  const [urlAllowlistError, setUrlAllowlistError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!provider) return;
@@ -49,9 +62,8 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
     setSupportsUsername(provider.fieldSchema?.supportsUsername === true);
     setSupportsPassword(provider.fieldSchema?.supportsPassword === true);
     setSupportsTenantId(provider.fieldSchema?.supportsTenantId === true);
+    setUrlAllowlistError(null);
   }, [provider]);
-
-  const [urlAllowlistError, setUrlAllowlistError] = useState<string | null>(null);
 
   const parsedAllowlist = urlAllowlist
     .split(",")
@@ -71,31 +83,39 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
     return false;
   };
 
+  const canSave =
+    !loading && Boolean(provider?.id) && slug.trim() !== "" && Boolean(name.en?.trim()) && parsedAllowlist.length > 0;
+
   const handleSave = async () => {
     if (!provider?.id) return;
     if (!validateUrlExample()) return;
-    await updateProvider({
-      variables: {
-        id: provider.id,
-        input: {
-          slug,
-          name,
-          description: provider.description ?? null,
-          instructions: provider.instructions ?? null,
-          logoUrl: provider.logoUrl ?? null,
-          urlAllowlist: parsedAllowlist,
-          urlExample: urlExample || null,
-          isActive,
-          fieldSchema: {
-            requiresMeetingUrl: true,
-            supportsUsername,
-            supportsPassword,
-            supportsTenantId,
+    try {
+      await updateProvider({
+        variables: {
+          id: provider.id,
+          input: {
+            slug,
+            name,
+            description: provider.description ?? null,
+            instructions: provider.instructions ?? null,
+            logoUrl: provider.logoUrl ?? null,
+            urlAllowlist: parsedAllowlist,
+            urlExample: urlExample || null,
+            isActive,
+            fieldSchema: {
+              requiresMeetingUrl: true,
+              supportsUsername,
+              supportsPassword,
+              supportsTenantId,
+            },
           },
         },
-      },
-    });
-    await onSaved();
+      });
+      await onSaved();
+    } catch (error) {
+      logger.error("Update meeting provider mutation failed:", { error });
+      onError(t("operationFailed"));
+    }
   };
 
   return (
@@ -103,12 +123,25 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
       <DialogTitle>{t("editTitle")}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
-          <TextField label={t("fields.slug")} value={slug} onChange={e => setSlug(e.target.value)} fullWidth />
-          <LocalizedStringInput label={t("fields.name")} value={name} onChangeAction={setName} />
+          <TextField label={t("fields.slug")} value={slug} onChange={e => setSlug(e.target.value)} fullWidth disabled />
+          <LocalizedStringInput
+            label={t("fields.name")}
+            value={name}
+            onChangeAction={setName}
+            required
+            requiredLocales={["en"]}
+          />
           <TextField
             label={t("fields.urlAllowlist")}
+            helperText={parsedAllowlist.length === 0 ? t("fields.urlAllowlistRequired") : t("fields.urlAllowlistHelp")}
             value={urlAllowlist}
-            onChange={e => setUrlAllowlist(e.target.value)}
+            onChange={e => {
+              setUrlAllowlist(e.target.value);
+              if (urlAllowlistError !== null) {
+                setUrlAllowlistError(null);
+              }
+            }}
+            error={parsedAllowlist.length === 0}
             fullWidth
           />
           <TextField
@@ -142,9 +175,11 @@ export function EditMeetingProviderDialog({ open, provider, onClose, onSaved }: 
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t("cancel")}</Button>
-        <Button variant="contained" disabled={loading || !provider?.id} onClick={handleSave}>
-          {t("save")}
+        <Button onClick={onClose} disabled={loading}>
+          {t("cancel")}
+        </Button>
+        <Button variant="contained" disabled={!canSave} onClick={handleSave}>
+          {loading ? "..." : t("save")}
         </Button>
       </DialogActions>
     </Dialog>

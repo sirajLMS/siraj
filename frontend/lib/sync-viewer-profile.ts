@@ -1,6 +1,7 @@
 import type { ApolloClient } from "@apollo/client";
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth/auth.documents";
+import { fxSyncHealthQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/fx-sync-health.documents";
 import { broadcastSubjectCurrencyChanged } from "@/frontend/lib/sync-subject-profile";
 import { useUserStore } from "@/frontend/stores/userStore";
 
@@ -33,4 +34,9 @@ export function syncViewerFromProfile(
   }
 
   broadcastSubjectCurrencyChanged(currentUser.id ?? "");
+
+  // Same-tab refetch for reactive consumers (e.g., FxStaleBanner, DisplayCurrencyHint)
+  void client.refetchQueries({
+    include: [meQueryDocument, fxSyncHealthQueryDocument],
+  });
 }

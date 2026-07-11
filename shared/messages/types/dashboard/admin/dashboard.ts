@@ -1,4 +1,5 @@
 export interface AdminDashboardLabels {
+  readonly pageTitle: string;
   readonly roleLabel: string;
   readonly todayClasses: string;
   readonly updatedMinutesAgo: string;

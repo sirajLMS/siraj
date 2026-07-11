@@ -2,9 +2,11 @@
 
 import CheckCircleOutlined from "@mui/icons-material/CheckCircleOutlined";
 import ShieldOutlined from "@mui/icons-material/ShieldOutlined";
-import { Box, Chip, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
-import { SectionPanel } from "@/frontend/components/ui";
+import { useMemo } from "react";
+import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import { OverrideState } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   StaffPermissionGroups,
@@ -16,6 +18,53 @@ type PermissionsSectionProps = {
   readonly permissionOverrides: StaffPermissionOverrides;
   readonly isOwnScope?: boolean;
 };
+
+type StaffPermissionOverride = NonNullable<StaffPermissionOverrides>[number];
+
+interface PermissionsOverridesGridProps {
+  readonly overrides: readonly StaffPermissionOverride[];
+}
+
+function PermissionsOverridesGrid({ overrides }: Readonly<PermissionsOverridesGridProps>) {
+  const tp = useTranslations("profile.staff.permissions");
+
+  const columns = useMemo<GridColDef<StaffPermissionOverride>[]>(
+    () => [
+      {
+        field: "resource",
+        headerName: tp("columns.resource"),
+        flex: 1,
+        minWidth: 120,
+      },
+      {
+        field: "action",
+        headerName: tp("columns.action"),
+        flex: 1,
+        minWidth: 120,
+      },
+      {
+        field: "state",
+        headerName: tp("columns.state"),
+        width: 120,
+        renderCell: params => {
+          const state = params.value as OverrideState | null;
+          return state === OverrideState.Granted ? tp("states.granted") : tp("states.denied");
+        },
+      },
+    ],
+    [tp]
+  );
+
+  return (
+    <AppDataGrid<StaffPermissionOverride>
+      rows={overrides as StaffPermissionOverride[]}
+      columns={columns}
+      getRowId={row => row.id ?? ""}
+      hideFooter
+      autoHeight
+    />
+  );
+}
 
 export function PermissionsSection({
   permissionGroups,
@@ -74,28 +123,7 @@ export function PermissionsSection({
         {hasOverrides ? (
           <Box>
             <Typography sx={{ typography: "labelMd", mb: 1.5 }}>{tp("directOverrides")}</Typography>
-            <Box sx={{ overflowX: "auto" }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{tp("columns.resource")}</TableCell>
-                    <TableCell>{tp("columns.action")}</TableCell>
-                    <TableCell>{tp("columns.state")}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {overrides.map(override => (
-                    <TableRow key={override.id}>
-                      <TableCell>{override.resource}</TableCell>
-                      <TableCell>{override.action}</TableCell>
-                      <TableCell>
-                        {override.state === OverrideState.Granted ? tp("states.granted") : tp("states.denied")}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
+            <PermissionsOverridesGrid overrides={overrides} />
           </Box>
         ) : null}
       </Stack>

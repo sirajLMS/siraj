@@ -1,6 +1,7 @@
 import type { PermissionsLabels } from "@/shared/messages/types/dashboard/permissions";
 
 export const permissions: PermissionsLabels = {
+  pageTitle: "Permission Management",
   title: "Permission Management",
   subtitle: "Configure role-based access control, manage permission groups, and set user-level overrides.",
   groupsTab: "Permission Groups",

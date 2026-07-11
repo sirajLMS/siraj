@@ -18,6 +18,7 @@ import { type CountryType, countries } from "@/frontend/lib/locale";
 export type CountryAutocompleteProps = {
   readonly country?: CountryType;
   readonly onChangeAction: (country: CountryType) => void;
+  readonly onClearAction?: () => void;
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;
   readonly required?: boolean;
@@ -123,6 +124,7 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
 export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
   country,
   onChangeAction,
+  onClearAction,
   autoComplete = "country",
   fullWidth,
   required,
@@ -179,6 +181,8 @@ export const CountryAutocomplete: React.FC<CountryAutocompleteProps> = ({
       onChange={(_, newValue) => {
         if (newValue) {
           onChangeAction(newValue);
+        } else if (onClearAction) {
+          onClearAction();
         }
       }}
       onBlur={onBlur}

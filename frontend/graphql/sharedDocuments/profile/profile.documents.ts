@@ -130,6 +130,14 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         status
         roleSlug
         roleName
+        hourlyRate
+        rateCurrency
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       staffPermissionGroups {
         id
@@ -226,6 +234,14 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
         email
         phone
         status
+        hourlyRate
+        rateCurrency
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
     }
   }
@@ -305,6 +321,14 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
         email
         phone
         status
+        hourlyRate
+        rateCurrency
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
     }
   }

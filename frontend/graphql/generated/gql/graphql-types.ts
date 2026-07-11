@@ -3775,7 +3775,6 @@ export type Query = {
   students: StudentsWithFiltersResponse;
   /** Returns contributor statistics for the suggestion social proof display. */
   suggestionContributorStats: Maybe<SuggestionContributorStats>;
-  /** Lists supported currency metadata for display and selection. */
   supportedCurrencies: Maybe<Array<SupportedCurrency>>;
   supportedMobileWallets: Maybe<Array<SupportedMobileWallet>>;
   supportedOnlineAccounts: Maybe<Array<SupportedOnlineAccount>>;
@@ -4123,7 +4122,7 @@ export type QuerySuggestionContributorStatsArgs = {
 
 
 export type QuerySupportedCurrenciesArgs = {
-  activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
+  activeOnly: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -4384,9 +4383,7 @@ export type SimulatablePermissionGroup = {
 };
 
 export type StaffAdminProfileUpdateInput = {
-  hourlyRate: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
-  rateCurrency: InputMaybe<CurrencyCode>;
   status: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -5100,6 +5097,7 @@ export type TeacherDashboardScheduleRow = {
   effectiveMeeting: Maybe<EffectiveMeeting>;
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
   /** @deprecated Use effectiveMeeting.joinUrl */
   meetingJoinUrl: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;

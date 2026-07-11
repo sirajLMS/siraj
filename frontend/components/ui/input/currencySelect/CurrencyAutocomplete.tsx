@@ -25,6 +25,7 @@ import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/fro
 export type CurrencyAutocompleteProps = {
   readonly currency?: CurrencyOption | null;
   readonly onChangeAction: (currency: CurrencyOption) => void;
+  readonly onClearAction?: () => void;
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;
   readonly required?: boolean;
@@ -173,6 +174,7 @@ const buildAutocompleteSx = (
 export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
   currency,
   onChangeAction,
+  onClearAction,
   autoComplete = "off",
   fullWidth,
   required,
@@ -230,9 +232,11 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
     (_: React.SyntheticEvent, newValue: CurrencyOption | null) => {
       if (newValue) {
         onChangeAction(newValue);
+      } else if (onClearAction) {
+        onClearAction();
       }
     },
-    [onChangeAction]
+    [onChangeAction, onClearAction]
   );
 
   const showRequiredError = Boolean(required) && !currency;

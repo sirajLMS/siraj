@@ -53,6 +53,68 @@ describe("filterProfileByFieldGroups", () => {
     expect(filtered.email).toBe("ada@example.com");
   });
 
+  test("allows viewing own core_contact (phone) with role-specific view_own permission", () => {
+    const payload = {
+      teacherOwnProfile: { phone: "+1234567890" },
+      parentOwnProfile: { phone: "+1987654321" },
+    };
+
+    // Teacher viewing own profile
+    const teacherFiltered = filterProfileByFieldGroups(payload, {
+      actorUserId: "teacher-1",
+      targetUserId: "teacher-1",
+      scope: ProfileScope.OWN,
+      audience: ProfileAudience.TEACHER,
+      permissions: new Set<AppPermission>([AppPermission.TEACHER_VIEW_OWN_PROFILE]),
+    });
+
+    expect(teacherFiltered.teacherOwnProfile?.phone).toBe("+1234567890");
+
+    // Parent viewing own profile
+    const parentFiltered = filterProfileByFieldGroups(payload, {
+      actorUserId: "parent-1",
+      targetUserId: "parent-1",
+      scope: ProfileScope.OWN,
+      audience: ProfileAudience.PARENT,
+      permissions: new Set<AppPermission>([AppPermission.PARENT_VIEW_OWN_PROFILE]),
+    });
+
+    expect(parentFiltered.parentOwnProfile?.phone).toBe("+1987654321");
+  });
+
+  test("allows viewing own core_identity with role-specific view_own permission", () => {
+    const payload = {
+      name: "Test User",
+      email: "test@example.com",
+      avatarUrl: "https://example.com/avatar.png",
+      displayCurrency: "USD",
+    };
+
+    // Teacher viewing own profile
+    const teacherFiltered = filterProfileByFieldGroups(payload, {
+      actorUserId: "teacher-1",
+      targetUserId: "teacher-1",
+      scope: ProfileScope.OWN,
+      audience: ProfileAudience.TEACHER,
+      permissions: new Set<AppPermission>([AppPermission.TEACHER_VIEW_OWN_PROFILE]),
+    });
+
+    expect(teacherFiltered.name).toBe("Test User");
+    expect(teacherFiltered.email).toBe("test@example.com");
+
+    // Parent viewing own profile
+    const parentFiltered = filterProfileByFieldGroups(payload, {
+      actorUserId: "parent-1",
+      targetUserId: "parent-1",
+      scope: ProfileScope.OWN,
+      audience: ProfileAudience.PARENT,
+      permissions: new Set<AppPermission>([AppPermission.PARENT_VIEW_OWN_PROFILE]),
+    });
+
+    expect(parentFiltered.name).toBe("Test User");
+    expect(parentFiltered.email).toBe("test@example.com");
+  });
+
   test("nulls assignedStudents when teacher_students view_other denied", () => {
     const payload = {
       assignedStudents: { rows: [{ id: "s1" }], totalCount: 1 },

@@ -11,10 +11,15 @@ export const paymentCatalogs: PaymentCatalogsLabels = {
   deleteConfirm: "إلغاء التفعيل",
   active: "نشط",
   inactive: "غير نشط",
+  notSet: "—",
   cancel: "إلغاء",
   save: "حفظ",
   edit: "تعديل",
   delete: "إلغاء التفعيل",
+  saveSuccess: "تم حفظ عنصر الكتالوج بنجاح.",
+  saveError: "فشل حفظ عنصر الكتالوج. يرجى المحاولة مرة أخرى.",
+  deactivateSuccess: "تم إلغاء تفعيل عنصر الكتالوج بنجاح.",
+  deactivateError: "فشل إلغاء تفعيل عنصر الكتالوج. يرجى المحاولة مرة أخرى.",
   tabs: {
     mobileWallets: "محافظ الجوال",
     paymentLinks: "روابط الدفع",
@@ -28,6 +33,7 @@ export const paymentCatalogs: PaymentCatalogsLabels = {
     status: "الحالة",
     urlAllowlist: "قائمة الروابط",
     identifierKind: "نوع المعرّف",
+    supportedDirections: "الاتجاهات",
     actions: "الإجراءات",
   },
   fields: {
@@ -46,6 +52,15 @@ export const paymentCatalogs: PaymentCatalogsLabels = {
     supportedDirections: "الاتجاهات المدعومة",
     logoUrl: "الشعار",
     isActive: "نشط",
+  },
+  directions: {
+    payin: "تحصيل",
+    payout: "صرف",
+    both: "كلاهما",
+  },
+  errors: {
+    nameRequired: "الاسم مطلوب.",
+    slugRequired: "المعرّف مطلوب.",
   },
   identifierKinds: {
     email: "بريد إلكتروني",

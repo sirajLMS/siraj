@@ -2,6 +2,7 @@ import type { AuthLabels } from "@/shared/messages/types/auth";
 
 export const auth: AuthLabels = {
   login: {
+    pageTitle: "Login",
     title: "Siraj LMS",
     subtitle: "Education Management System",
     email: "Email",

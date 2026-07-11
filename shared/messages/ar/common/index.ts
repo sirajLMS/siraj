@@ -4,6 +4,7 @@ export const common: CommonLabels = {
   title: "سراج",
   description:
     "مرحبًا بك في سراج. تم تهيئة هذا التطبيق بنجاح مع Next.js و Material-UI وتم تخصيصه بالكامل بجماليات علامتك التجارية الفاخرة.",
+  documentTitleTemplate: "%s | سراج",
   welcome: "مرحبًا بالعالم!",
   subtitle: "نظام تصميم سراج",
   toggleTheme: "تغيير المظهر",

@@ -1,6 +1,18 @@
 import { Box, CircularProgress } from "@mui/material";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { DashboardContainer } from "@/frontend/views/dashboard/dashboard/DashboardContainer";
+
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ readonly locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "common" });
+  return { title: t("title") };
+}
 
 export default function DashboardPage() {
   return (

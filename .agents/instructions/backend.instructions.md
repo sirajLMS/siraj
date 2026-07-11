@@ -105,7 +105,7 @@ applyTo: "backend/**/*.ts"
 - `seedOrGet` must be idempotent: `onConflictDoUpdate` / `onConflictDoNothing` - safe to re-run without creating duplicates
 - Check constraints before seeding (e.g., `class_instances_state_machine_chk`) - read `backend/db/schema/*.ts`
 - Match PostgreSQL enums EXACTLY from `backend/db/schema/enums.ts` or `shared/lib/enum.ts` - never guess valid statuses (e.g., use `"ACTIVATED"` not `"ACTIVE"`, `"REGULAR"` not `"NORMAL"`)
-- Schema changes: MUST run `bun run scripts/dbActions.ts push` before `bun run db seed`
+- Schema changes: MUST run `bun run scripts/dbActions.ts push` before `bun run db seed`. **Note: `db reset` and `db cleanGenerate` are permanently disabled by repo policy** — use `db push` for schema changes and `db migrate` for migration management.
 - Return seeded entities for downstream seeders - other seeders should not need to re-query
 - Dependencies passed via controller context (`index.ts`) - call other `seedOrGet` functions or accept as parameter
 - If strict Entity types unavailable: create new types in `backend/types/`, update `index.ts` - never use `any` or inline types

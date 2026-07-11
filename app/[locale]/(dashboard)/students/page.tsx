@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cache } from "react";
 import { AppPermission } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
@@ -10,9 +10,15 @@ import { StudentsContainer } from "@/frontend/views/dashboard/admin/parents/stud
 import { ParentStudentsContainer } from "@/frontend/views/dashboard/parent/students/ParentStudentsContainer";
 import { TeacherStudentsContainer } from "@/frontend/views/dashboard/teachers/students/TeacherStudentsContainer";
 
-export const metadata: Metadata = {
-  title: "Your Students - Siraj LMS",
-};
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ readonly locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.studentDirectory" });
+  return { title: t("pageTitle") };
+}
 
 type StudentsAudience = "parent" | "teacher" | "admin";
 

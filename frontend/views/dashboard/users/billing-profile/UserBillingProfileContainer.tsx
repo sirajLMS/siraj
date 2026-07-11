@@ -12,6 +12,7 @@ import {
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
 import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
@@ -53,6 +54,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   const labels = buildBillingLabels(t);
   const { isImpersonating } = useImpersonation();
   const billingActionsDisabled = isImpersonating;
+  useDocumentTitle(null, "dashboard.billing", "billingProfileTitle");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

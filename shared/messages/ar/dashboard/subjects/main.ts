@@ -38,6 +38,7 @@ export const subjects: SubjectsLabels = {
   categoryUpdated: "تم تحديث الفئة بنجاح",
   categoryDeleted: "تم حذف الفئة بنجاح",
   detail: {
+    pageTitle: "{name}",
     resourcesTitle: "الموارد",
     resourcesSubtitle: "{count} مورد مرفق",
     noResources: "لا توجد موارد مرفقة بهذه المادة.",

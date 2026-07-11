@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classSubjectByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/classes/class-subject.documents";
+import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
 import { logger } from "@/frontend/utils/logger";
 import { SubjectDetailView } from "@/frontend/views/dashboard/subjects/detail/SubjectDetailView";
 import type {
@@ -26,6 +27,8 @@ export function SubjectDetailContainer({ subjectId }: Readonly<SubjectDetailCont
   });
 
   const subject = data?.classSubject ?? null;
+
+  useDocumentTitle(subject?.name, "dashboard.subjects", "pageTitle");
 
   const resources = useMemo<readonly SubjectResourceItem[]>(() => {
     if (!subject?.resources) return [];

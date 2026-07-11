@@ -18,6 +18,10 @@ export const meetingProviders: MeetingProvidersLabels = {
   emptyCatalogBody:
     "أضف مزوداً نشطاً واحداً على الأقل قبل أن يتمكن المستخدمون من إنشاء إعدادات الاجتماع. يحتاج المعلمون وأولياء الأمور إلى إدخال في الكتالوج لربط روابط Zoom أو Google Meet أو Teams.",
   urlAllowlistInvalid: "أحد عناوين URL المثال لا يطابق أنماط القائمة المسموحة",
+  operationFailed: "فشلت العملية. يرجى المحاولة مرة أخرى.",
+  createSuccess: "تم إنشاء مزود الاجتماع بنجاح.",
+  updateSuccess: "تم تحديث مزود الاجتماع بنجاح.",
+  deleteSuccess: "تم حذف مزود الاجتماع بنجاح.",
   columns: {
     slug: "المعرّف",
     name: "الاسم",
@@ -26,9 +30,12 @@ export const meetingProviders: MeetingProvidersLabels = {
   },
   fields: {
     slug: "المعرّف",
+    slugRequired: "المعرّف مطلوب",
+    slugInvalidFormat: "استخدم أحرفاً صغيرة وأرقاماً وشرطات سفلية فقط",
     name: "الاسم",
     urlAllowlist: "قائمة المضيفات المسموحة",
     urlAllowlistHelp: "أنماط مضيف مفصولة بفواصل",
+    urlAllowlistRequired: "نمط مضيف واحد على الأقل مطلوب",
     urlExample: "مثال على الرابط",
     isActive: "نشط",
     supportsUsername: "يدعم اسم المستخدم",

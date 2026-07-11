@@ -1,8 +1,33 @@
+import { networkInterfaces } from "node:os";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 function getEnv(name: string, defaultValue: string): string {
   return process.env[name] || defaultValue;
+}
+
+function getLanIpAddresses(): string[] {
+  const nets = networkInterfaces();
+  const addresses: string[] = [];
+  for (const interfaces of Object.values(nets)) {
+    if (!interfaces) continue;
+    for (const iface of interfaces) {
+      if (iface.family === "IPv4" && !iface.internal) {
+        addresses.push(iface.address);
+      }
+    }
+  }
+  return addresses;
+}
+
+function buildDevOrigins(): string[] {
+  const origins = ["127.0.0.1", "localhost"];
+  if (getEnv("NODE_ENV", "development") === "development") {
+    origins.push(...getLanIpAddresses());
+    const envOrigin = getEnv("DEV_ORIGIN", "");
+    if (envOrigin) origins.push(envOrigin);
+  }
+  return origins.filter(Boolean);
 }
 
 /** @type {import('next').NextConfig} */
@@ -15,7 +40,7 @@ const nextConfig: NextConfig = {
       "next-intl/config": "./shared/i18n/request.ts",
     },
   },
-  allowedDevOrigins: ["127.0.0.1", "localhost", getEnv("DEV_ORIGIN", "")].filter(Boolean), // NoSonar
+  allowedDevOrigins: buildDevOrigins(), // NoSonar
   async headers() {
     return [
       {
@@ -64,6 +89,16 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "flagcdn.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.blob.vercel-storage.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "vercel.live",
         pathname: "/**",
       },
     ],

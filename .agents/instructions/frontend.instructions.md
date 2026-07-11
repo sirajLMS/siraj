@@ -205,7 +205,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Format: `bun run format` (Biome) / `bun run biome:check` (Biome lint + format + unsafe fixes)
 - Quality: `bun quality-gate` / `bun quality-gate:fresh`
 - GraphQL: `bun run generate:gqlSchema` then `bun codegen`
-- Database: `bun run db` (via scripts/dbActions.ts)
+- Database: `bun run db` (via scripts/dbActions.ts — generate, push, migrate, seed, studio — reset & cleanGenerate disabled by repo policy)
 - Layer-specific test scripts:
   - `bun run test:graphql` - GraphQL integration tests
   - `bun run test:ui:components` - UI component tests

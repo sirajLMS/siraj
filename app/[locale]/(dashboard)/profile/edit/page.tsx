@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   toGqlProfileAudience,
   toGqlProfileMode,
@@ -17,9 +17,11 @@ import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
 
-export const metadata: Metadata = {
-  title: "Edit Profile - Siraj LMS",
-};
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "profile" });
+  return { title: t("editTitle") };
+}
 
 interface PageProps {
   readonly params: Promise<{ readonly locale: string }>;

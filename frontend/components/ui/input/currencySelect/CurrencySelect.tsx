@@ -10,6 +10,7 @@ import type { CurrencyOption } from "@/frontend/lib/currency";
 export type CurrencySelectProps = {
   readonly currency?: CurrencyOption | null;
   readonly setCurrencyAction: (currency: CurrencyOption) => void;
+  readonly onClearAction?: () => void;
   readonly autoComplete?: string;
   readonly fullWidth?: boolean;
   readonly required?: boolean;
@@ -36,12 +37,14 @@ export type CurrencySelectProps = {
  */
 export const CurrencySelect: React.FC<CurrencySelectProps> = ({
   currency,
-  setCurrencyAction,
+  setCurrencyAction: onChangeAction,
+  onClearAction,
   ...props
 }: CurrencySelectProps): React.ReactNode => {
   const autocompleteProps: CurrencyAutocompleteProps = {
     currency,
-    onChangeAction: setCurrencyAction,
+    onChangeAction,
+    onClearAction,
     matchAnchorWidth: true,
     showSymbol: true,
     ...props,

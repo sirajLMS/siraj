@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+import { PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { SupportedPaymentLinkFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/views/dashboard/admin/payment-catalogs/types";
 
@@ -54,6 +55,18 @@ export function PaymentLinkCatalogGrid({
         ),
       },
       {
+        field: "supportedDirections",
+        headerName: t("columns.supportedDirections"),
+        width: 120,
+        renderCell: ({ row }) => {
+          const dir = row.supportedDirections;
+          if (!dir) return t("notSet");
+          if (dir === PaymentDirection.Payin) return t("directions.payin");
+          if (dir === PaymentDirection.Payout) return t("directions.payout");
+          return t("directions.both");
+        },
+      },
+      {
         field: "isActive",
         headerName: t("columns.status"),
         width: 120,
@@ -87,7 +100,7 @@ export function PaymentLinkCatalogGrid({
   );
 
   return (
-    <Box sx={{ width: "100%", height: 560 }}>
+    <Box sx={{ width: "100%", minHeight: 400, height: { xs: 480, md: 560 } }}>
       <AppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
     </Box>
   );

@@ -1,13 +1,13 @@
 "use client";
 
 import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, IconButton, Stack } from "@mui/material";
+import { Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
-import { IdentifierKind } from "@/frontend/graphql/generated/gql/graphql-types";
+import { IdentifierKind, PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/views/dashboard/admin/payment-catalogs/types";
 
@@ -28,7 +28,7 @@ function resolveIdentifierKindLabel(
     case IdentifierKind.EmailOrHandle:
       return t("identifierKinds.emailOrHandle");
     default:
-      return kind ?? "";
+      return t("notSet");
   }
 }
 
@@ -59,12 +59,20 @@ export function OnlineAccountCatalogGrid({
         headerName: t("columns.identifierKind"),
         width: 180,
         renderCell: ({ row }) => (
-          <StatusBadge
-            category="paymentMethod"
-            status="active"
-            label={resolveIdentifierKindLabel(row.identifierKind, t)}
-          />
+          <Chip size="small" label={resolveIdentifierKindLabel(row.identifierKind, t)} variant="outlined" />
         ),
+      },
+      {
+        field: "supportedDirections",
+        headerName: t("columns.supportedDirections"),
+        width: 120,
+        renderCell: ({ row }) => {
+          const dir = row.supportedDirections;
+          if (!dir) return t("notSet");
+          if (dir === PaymentDirection.Payin) return t("directions.payin");
+          if (dir === PaymentDirection.Payout) return t("directions.payout");
+          return t("directions.both");
+        },
       },
       {
         field: "isActive",
@@ -100,7 +108,7 @@ export function OnlineAccountCatalogGrid({
   );
 
   return (
-    <Box sx={{ width: "100%", height: 560 }}>
+    <Box sx={{ width: "100%", minHeight: 400, height: { xs: 480, md: 560 } }}>
       <AppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
     </Box>
   );

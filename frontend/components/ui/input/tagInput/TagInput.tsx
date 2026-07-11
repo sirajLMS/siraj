@@ -131,6 +131,15 @@ export function TagInput({ label, placeholder, onChange, initialTags = [] }: Tag
   });
   const deletion = useTagInputDeletion(setTags);
 
+  const lastSyncedInitial = useRef<string>(JSON.stringify(initialTags));
+  useEffect(() => {
+    const serializedInitial = JSON.stringify(initialTags);
+    if (serializedInitial !== lastSyncedInitial.current) {
+      lastSyncedInitial.current = serializedInitial;
+      setTags(initialTags);
+    }
+  }, [initialTags]);
+
   useEffect(() => {
     if (onChange) {
       onChange(tags);

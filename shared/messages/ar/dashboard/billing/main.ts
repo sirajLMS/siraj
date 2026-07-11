@@ -190,6 +190,7 @@ export const billing: BillingLabels = {
   fxConversionNote: "تستخدم الإجماليات المحوّلة عملة العرض الخاصة بك ({code})",
   fxConversionNoteSubject: "تستخدم المبالغ المحوّلة عملة عرض هذا المستخدم ({code})",
   adminBillingFxNote: "تستخدم المقاييس عملة العرض الخاصة بك؛ تستخدم كل فاتورة عملة ولي الأمر",
+  displayCurrencyMixed: "تم اكتشاف عدة عملات عرض؛ عرض المبالغ المقفلة فقط: {lockedAmount}",
   currencyHedges,
   supportedCurrencies,
 };

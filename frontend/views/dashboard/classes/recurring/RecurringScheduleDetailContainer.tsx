@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ErrorState, LoadingState, PageContainer, PageHeader } from "@/frontend/components/ui";
 import { recurringScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
+import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
 import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 
 export function RecurringScheduleDetailContainer() {
@@ -19,6 +20,8 @@ export function RecurringScheduleDetailContainer() {
     variables: { id },
     skip: !id,
   });
+
+  useDocumentTitle(data?.recurringSchedule?.studentName, "common", "title");
 
   if (!id) {
     return (

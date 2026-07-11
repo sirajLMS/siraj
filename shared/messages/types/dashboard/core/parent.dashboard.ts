@@ -1,4 +1,5 @@
 export interface ParentDashboardLabels {
+  readonly pageTitle: string;
   readonly welcome: string;
   readonly welcomeBack: string;
   readonly pendingMessages: string;

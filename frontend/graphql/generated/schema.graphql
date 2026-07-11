@@ -3038,6 +3038,7 @@ type Query {
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
+  supportedCurrencies(activeOnly: Boolean): [SupportedCurrency!]
   supportedMobileWallets(activeOnly: Boolean = true, countryCode: CountryCode, direction: PaymentDirection): [SupportedMobileWallet!]
   supportedOnlineAccounts(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedOnlineAccount!]
   supportedPaymentLinks(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedPaymentLink!]
@@ -3671,6 +3672,15 @@ type SupportContact {
 type SupportRequestResult {
   id: String
   success: Boolean
+}
+
+type SupportedCurrency {
+  code: CurrencyCode
+  countryCode: CountryCode
+  decimals: Int
+  isActive: Boolean
+  sortOrder: Int
+  symbol: String
 }
 
 type SupportedMobileWallet {

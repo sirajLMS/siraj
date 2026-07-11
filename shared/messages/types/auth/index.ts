@@ -1,4 +1,5 @@
 export interface AuthLoginLabels {
+  readonly pageTitle: string;
   readonly title: string;
   readonly subtitle: string;
   readonly email: string;

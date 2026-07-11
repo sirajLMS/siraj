@@ -1,6 +1,7 @@
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/dashboard/classes";
 
 export const createRecurringClass: CreateRecurringClassLabels = {
+  pageTitle: "إضافة حصة متكررة",
   title: "إضافة حصة متكررة",
   subtitle: "تكوين الجدول للجلسات الأسبوعية التلقائية",
   breadcrumbs: {

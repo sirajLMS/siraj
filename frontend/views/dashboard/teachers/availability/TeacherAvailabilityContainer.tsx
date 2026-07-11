@@ -11,6 +11,7 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/graphql/generated/gql/graphql";
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
 import { logger } from "@/frontend/utils/logger";
 import { TeacherAvailabilityView } from "@/frontend/views/dashboard/teachers/availability/TeacherAvailabilityView";
 import type {
@@ -131,6 +132,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
   const t = useTranslations("dashboard.teacherAvailability");
   const tc = useTranslations("common");
   const notifications = useNotifications();
+  useDocumentTitle(null, "dashboard.teacherAvailability", "pageTitle");
 
   const [searchInput, setSearchInput] = useState<AvailabilitySearchFormData>({
     fromTime: null,

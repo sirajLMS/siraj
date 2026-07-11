@@ -39,6 +39,7 @@ export const subjects: SubjectsLabels = {
   categoryUpdated: "Category updated successfully",
   categoryDeleted: "Category deleted successfully",
   detail: {
+    pageTitle: "{name}",
     resourcesTitle: "Resources",
     resourcesSubtitle: "{count} attached resource",
     noResources: "No resources attached to this subject.",

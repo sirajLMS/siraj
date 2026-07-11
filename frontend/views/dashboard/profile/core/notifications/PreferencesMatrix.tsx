@@ -1,20 +1,11 @@
 "use client";
 
-import {
-  Box,
-  Paper,
-  Skeleton,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Switch, Typography } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
-import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
+import { useMemo } from "react";
+import { AppDataGrid } from "@/frontend/components/ui";
+import type { NotificationChannel, NotificationEventType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   buildPreferenceMap,
   NOTIFICATION_CHANNELS,
@@ -24,24 +15,52 @@ import {
 
 type PreferencesMatrixProps = {
   readonly preferences: readonly NotificationPrefRow[];
-  readonly onToggle: (
-    channel: Types.NotificationChannel,
-    eventType: Types.NotificationEventType,
-    enabled: boolean
-  ) => void;
+  readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
   readonly disabled?: boolean;
   readonly loading?: boolean;
 };
 
-function MatrixSkeleton() {
+interface PreferenceMatrixRow {
+  readonly id: string;
+  readonly eventType: NotificationEventType;
+  readonly enabledMap: Record<string, boolean>;
+}
+
+interface ChannelCellProps {
+  readonly row: PreferenceMatrixRow;
+  readonly channel: NotificationChannel;
+  readonly disabled: boolean;
+  readonly channelLabel: string;
+  readonly eventLabel: string;
+  readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
+}
+
+function ChannelSwitchCell({ row, channel, disabled, channelLabel, eventLabel, onToggle }: Readonly<ChannelCellProps>) {
+  const enabled = row.enabledMap[channel] ?? true;
+  const ariaLabel = `${channelLabel} — ${eventLabel}`;
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-      <Skeleton variant="rounded" height={48} />
-      {["row-a", "row-b", "row-c", "row-d"].map(id => (
-        <Skeleton key={id} variant="rounded" height={56} />
-      ))}
-    </Box>
+    <Switch
+      checked={enabled}
+      disabled={disabled}
+      slotProps={{
+        input: {
+          "aria-label": ariaLabel,
+        },
+      }}
+      onChange={(_, checked) => {
+        onToggle(channel, row.eventType, checked);
+      }}
+    />
   );
+}
+
+interface EventTypeCellProps {
+  readonly label: string;
+}
+
+function EventTypeCell({ label }: Readonly<EventTypeCellProps>) {
+  return <Typography sx={{ fontWeight: 600, typography: "bodyMd" }}>{label}</Typography>;
 }
 
 export function PreferencesMatrix({
@@ -49,84 +68,69 @@ export function PreferencesMatrix({
   onToggle,
   disabled = false,
   loading = false,
-}: PreferencesMatrixProps) {
+}: Readonly<PreferencesMatrixProps>) {
   const t = useTranslations("profile.notifications");
   const preferenceMap = buildPreferenceMap(preferences);
 
-  if (loading && preferences.length === 0) {
-    return <MatrixSkeleton />;
-  }
+  const rows = useMemo<PreferenceMatrixRow[]>(() => {
+    return NOTIFICATION_EVENT_TYPES.map(eventType => {
+      const enabledMap: Record<string, boolean> = {};
+      for (const channel of NOTIFICATION_CHANNELS) {
+        const pref = preferenceMap.get(`${channel}:${eventType}`);
+        enabledMap[channel] = pref?.enabled ?? true;
+      }
+      return { id: eventType, eventType, enabledMap };
+    });
+  }, [preferenceMap]);
+
+  const columns = useMemo<GridColDef<PreferenceMatrixRow>[]>(() => {
+    const channelColumns: GridColDef<PreferenceMatrixRow>[] = NOTIFICATION_CHANNELS.map(channel => ({
+      field: channel,
+      headerName: t(`channels.${channel}`),
+      width: 120,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+      renderCell: params => {
+        const row = params.row as PreferenceMatrixRow;
+        return (
+          <ChannelSwitchCell
+            row={row}
+            channel={channel}
+            disabled={disabled}
+            channelLabel={t(`channels.${channel}`)}
+            eventLabel={t(`events.${row.eventType}`)}
+            onToggle={onToggle}
+          />
+        );
+      },
+    }));
+
+    return [
+      {
+        field: "eventType",
+        headerName: "",
+        flex: 1,
+        minWidth: 200,
+        sortable: false,
+        renderCell: params => {
+          const row = params.row as PreferenceMatrixRow;
+          return <EventTypeCell label={t(`events.${row.eventType}`)} />;
+        },
+      },
+      ...channelColumns,
+    ];
+  }, [t, disabled, onToggle]);
 
   return (
-    <TableContainer
-      component={Paper}
-      variant="outlined"
-      sx={theme => ({
-        borderRadius: 2,
-        borderColor: theme.palette.divider,
-      })}
-    >
-      <Table
-        aria-label={t("title")}
-        sx={{
-          "& .MuiTableCell-root": {
-            py: 1.75,
-            px: 2,
-          },
-          "& .MuiTableCell-head": {
-            py: 1.5,
-          },
-        }}
-      >
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ fontWeight: 600, minWidth: 200 }} />
-            {NOTIFICATION_CHANNELS.map(channel => (
-              <TableCell key={channel} align="center" sx={{ fontWeight: 600, minWidth: 100 }}>
-                <Typography sx={{ typography: "labelSm" }}>{t(`channels.${channel}`)}</Typography>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {NOTIFICATION_EVENT_TYPES.map((eventType, index) => (
-            <TableRow
-              key={eventType}
-              sx={theme => ({
-                backgroundColor: index % 2 === 1 ? theme.palette.action.hover : "transparent",
-              })}
-            >
-              <TableCell component="th" scope="row" sx={{ fontWeight: 600 }}>
-                <Typography sx={{ typography: "bodyMd" }}>{t(`events.${eventType}`)}</Typography>
-              </TableCell>
-              {NOTIFICATION_CHANNELS.map(channel => {
-                const pref = preferenceMap.get(`${channel}:${eventType}`);
-                const enabled = pref?.enabled ?? true;
-                const channelLabel = t(`channels.${channel}`);
-                const eventLabel = t(`events.${eventType}`);
-                const ariaLabel = `${channelLabel} — ${eventLabel}`;
-
-                return (
-                  <TableCell key={`${channel}-${eventType}`} align="center">
-                    <Switch
-                      checked={enabled}
-                      disabled={disabled}
-                      slotProps={{
-                        input: {
-                          "aria-label": ariaLabel,
-                        },
-                      }}
-                      onChange={(_, checked) => {
-                        onToggle(channel, eventType, checked);
-                      }}
-                    />
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <AppDataGrid<PreferenceMatrixRow>
+      rows={rows}
+      columns={columns}
+      getRowId={row => row.id}
+      loading={loading && preferences.length === 0}
+      hideFooter
+      autoHeight
+      ariaLabel={t("title")}
+    />
   );
 }

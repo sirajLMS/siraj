@@ -1,17 +1,28 @@
 // cspell:disable
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { TeacherAvailabilityContainer } from "@/frontend/views/dashboard/teachers/availability/TeacherAvailabilityContainer";
-
-export const metadata: Metadata = {
-  title: "Teacher Availability | Siraj LMS",
-  description: "Visualize and search available time slots across the faculty.",
-};
 
 interface PageProps {
   readonly params: Promise<{
     readonly id: string;
     readonly locale: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ readonly id: string; readonly locale: string }>;
+}): Promise<Metadata> {
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.teacherAvailability" });
+  const teacherName = await getTeacherPageTitle(id);
+  if (teacherName) {
+    return { title: `${teacherName} — ${t("pageTitle")}` };
+  }
+  return { title: t("pageTitle") };
 }
 
 export default async function TeacherAvailabilityPage({ params }: PageProps) {

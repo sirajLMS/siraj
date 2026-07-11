@@ -21,12 +21,16 @@ const PARENT_VIEW_OTHER_GROUPS: readonly ProfileFieldGroupKey[] = [
 ];
 
 const TEACHER_VIEW_OWN_GROUPS: readonly ProfileFieldGroupKey[] = [
+  "core_identity",
+  "core_contact",
   "teacher_professional",
   "payment_methods",
   "meeting_configs",
 ];
 
 const PARENT_VIEW_OWN_GROUPS: readonly ProfileFieldGroupKey[] = [
+  "core_identity",
+  "core_contact",
   "parent_social",
   "parent_students",
   "payment_methods",
@@ -100,11 +104,11 @@ function hasLegacyProfileGroupViewOwn(
   audience: ProfileAudience,
   groupKey: ProfileFieldGroupKey
 ): boolean {
-  if (
-    permissionsInclude(permissions, AppPermission.AUTH_VIEW_OWN_PROFILE) &&
-    (groupKey === "core_identity" || groupKey === "core_contact")
-  ) {
-    return true;
+  // Users should always be able to view their own core identity and contact info
+  if (groupKey === "core_identity" || groupKey === "core_contact") {
+    if (permissionsInclude(permissions, AppPermission.AUTH_VIEW_OWN_PROFILE)) {
+      return true;
+    }
   }
 
   if (
@@ -120,14 +124,27 @@ function hasLegacyProfileGroupViewOwn(
     return true;
   }
 
-  return matchPermission(
-    permissions,
-    audience,
-    ProfileAudience.PARENT,
-    AppPermission.PARENT_VIEW_OWN_PROFILE,
-    groupKey,
-    PARENT_VIEW_OWN_GROUPS
-  );
+  if (
+    matchPermission(
+      permissions,
+      audience,
+      ProfileAudience.PARENT,
+      AppPermission.PARENT_VIEW_OWN_PROFILE,
+      groupKey,
+      PARENT_VIEW_OWN_GROUPS
+    )
+  ) {
+    return true;
+  }
+
+  // Staff users should also be able to view their own core profile fields
+  if (audience === ProfileAudience.STAFF && (groupKey === "core_identity" || groupKey === "core_contact")) {
+    if (permissionsInclude(permissions, AppPermission.STAFF_EDIT_PROFILE)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function hasLegacyProfileGroupViewOther(

@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { ParentsContainer } from "@/frontend/views/dashboard/admin/parents/home/ParentsContainer";
 
-export const metadata: Metadata = {
-  title: "Parents Directory | Siraj LMS",
-  description: "Manage guardian profiles and financial records.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ readonly locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.parentsDirectory" });
+  return { title: t("pageTitle") };
+}
 
 export default function ParentsPage() {
   return <ParentsContainer />;

@@ -15,9 +15,9 @@ export const profile: ProfileLabels = {
       retry: "أعد المحاولة",
     },
   },
-  pageTitle: "Profile",
-  editTitle: "Edit Profile",
-  notSet: "Not set",
+  pageTitle: "الملف الشخصي",
+  editTitle: "تعديل الملف الشخصي",
+  notSet: "غير محدد",
   adminEditHint: "Use the staff profile tools for full administrative editing.",
   role: {
     teacher: "معلم",

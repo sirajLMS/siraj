@@ -11,10 +11,15 @@ export const paymentCatalogs: PaymentCatalogsLabels = {
   deleteConfirm: "Deactivate",
   active: "Active",
   inactive: "Inactive",
+  notSet: "—",
   cancel: "Cancel",
   save: "Save",
   edit: "Edit",
   delete: "Deactivate",
+  saveSuccess: "Catalog entry saved successfully.",
+  saveError: "Failed to save catalog entry. Please try again.",
+  deactivateSuccess: "Catalog entry deactivated successfully.",
+  deactivateError: "Failed to deactivate catalog entry. Please try again.",
   tabs: {
     mobileWallets: "Mobile Wallets",
     paymentLinks: "Payment Links",
@@ -28,6 +33,7 @@ export const paymentCatalogs: PaymentCatalogsLabels = {
     status: "Status",
     urlAllowlist: "Allowed URLs",
     identifierKind: "Identifier Type",
+    supportedDirections: "Directions",
     actions: "Actions",
   },
   fields: {
@@ -46,6 +52,15 @@ export const paymentCatalogs: PaymentCatalogsLabels = {
     supportedDirections: "Supported Directions",
     logoUrl: "Logo",
     isActive: "Active",
+  },
+  directions: {
+    payin: "Pay In",
+    payout: "Pay Out",
+    both: "Both",
+  },
+  errors: {
+    nameRequired: "Name is required.",
+    slugRequired: "ID is required.",
   },
   identifierKinds: {
     email: "Email",

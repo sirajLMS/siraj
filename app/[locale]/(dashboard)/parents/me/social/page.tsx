@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ParentSocialContainer } from "@/frontend/views/dashboard/parent/social/ParentSocialContainer";
 
-export const metadata: Metadata = {
-  title: "Social Media - Siraj LMS",
-};
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ readonly locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.parentSocial" });
+  return { title: t("pageTitle") };
+}
 
 interface PageProps {
   readonly params: Promise<{ readonly locale: string }>;

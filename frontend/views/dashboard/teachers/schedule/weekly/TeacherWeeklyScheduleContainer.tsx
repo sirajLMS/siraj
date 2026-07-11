@@ -12,6 +12,7 @@ import {
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";
@@ -54,6 +55,8 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
 
   const teacherName =
     directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name || loggedInUserName || "";
+
+  useDocumentTitle(teacherName, "dashboard.teacherWeeklySchedule", "pageTitle");
 
   const handleRemoveClass = async (classInstanceId: string) => {
     try {

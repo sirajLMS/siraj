@@ -18,6 +18,10 @@ export const meetingProviders: MeetingProvidersLabels = {
   emptyCatalogBody:
     "Add at least one active provider before users can create meeting settings. Teachers and parents need catalog entries to link Zoom, Google Meet, or Teams URLs.",
   urlAllowlistInvalid: "One of the example URLs does not match allowed patterns",
+  operationFailed: "Operation failed. Please try again.",
+  createSuccess: "Meeting provider created successfully.",
+  updateSuccess: "Meeting provider updated successfully.",
+  deleteSuccess: "Meeting provider deleted successfully.",
   columns: {
     slug: "ID",
     name: "Name",
@@ -26,9 +30,12 @@ export const meetingProviders: MeetingProvidersLabels = {
   },
   fields: {
     slug: "ID",
+    slugRequired: "ID is required",
+    slugInvalidFormat: "Use lowercase letters, numbers, and underscores only",
     name: "Name",
     urlAllowlist: "Allowed Hosts List",
     urlAllowlistHelp: "Comma-separated host patterns",
+    urlAllowlistRequired: "At least one host pattern is required",
     urlExample: "Example URL",
     isActive: "Active",
     supportsUsername: "Supports Username",

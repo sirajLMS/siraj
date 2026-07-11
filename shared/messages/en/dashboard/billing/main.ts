@@ -190,6 +190,7 @@ export const billing: BillingLabels = {
   fxConversionNote: "Converted totals use your display currency ({code})",
   fxConversionNoteSubject: "Converted amounts use this user's display currency ({code})",
   adminBillingFxNote: "Metrics use your display currency; each invoice uses its parent's currency",
+  displayCurrencyMixed: "Multiple display currencies detected; showing locked amounts only: {lockedAmount}",
   currencyHedges,
   supportedCurrencies,
 };

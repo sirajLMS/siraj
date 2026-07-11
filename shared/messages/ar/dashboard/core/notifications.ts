@@ -7,6 +7,7 @@ export const notifications: NotificationsLabels = {
   unpaidInvoicesTitle: "الفواتير غير المدفوعة",
   totalOverdueLabel: "إجمالي المتأخر",
   unpaidInvoicesFxNote: "يستخدم الإجمالي عملة العرض الخاصة بك؛ يستخدم كل صف عملة ذلك المستخدم",
+  noDisplayCurrencyNote: "(عيّن عملة العرض للتحويلات)",
   noUnpaidInvoices: "لا توجد فواتير بحاجة للدفع.",
   loadingBilling: "جاري تحميل بيانات الفواتير...",
   newUnansweredComplaint: "شكوى جديدة غير مجاب عليها",

@@ -1,6 +1,7 @@
 export interface CommonLabels {
   readonly title: string;
   readonly description: string;
+  readonly documentTitleTemplate: string;
   readonly welcome: string;
   readonly subtitle: string;
   readonly toggleTheme: string;

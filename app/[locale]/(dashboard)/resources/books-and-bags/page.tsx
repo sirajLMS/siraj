@@ -1,4 +1,5 @@
-import { setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { BookService } from "@/backend/services/resource/book.service";
 import { AvailabilityStatus } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -11,6 +12,16 @@ function mapAvailabilityStatus(status: string): AvailabilityStatus {
     return AvailabilityStatus.OutOfStock;
   }
   return AvailabilityStatus.Available;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ readonly locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.booksAndBags" });
+  return { title: t("pageTitle") };
 }
 
 export default async function BooksAndBagsPage({ params }: BooksAndBagsPageProps) {

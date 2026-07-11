@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   toGqlProfileAudience,
   toGqlProfileMode,
@@ -8,6 +8,7 @@ import {
 import { ProfileMode } from "@/backend/enum";
 import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { getUserPageTitle } from "@/backend/lib/titles/cached-page-title";
 import type {
   ProfileMode as GqlProfileMode,
   ProfileScope as GqlProfileScope,
@@ -17,9 +18,15 @@ import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
 
-export const metadata: Metadata = {
-  title: "Edit User Profile - Siraj LMS",
-};
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "profile" });
+  const userName = await getUserPageTitle(id);
+  if (userName) {
+    return { title: `${userName} — ${t("editTitle")}` };
+  }
+  return { title: t("editTitle") };
+}
 
 interface PageProps {
   readonly params: Promise<{ readonly id: string; readonly locale: string }>;

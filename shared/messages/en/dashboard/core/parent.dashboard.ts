@@ -1,6 +1,7 @@
 import type { ParentDashboardLabels } from "@/shared/messages/types/dashboard/core";
 
 export const parentDashboard: ParentDashboardLabels = {
+  pageTitle: "Dashboard",
   welcome: "Welcome, {name}",
   welcomeBack: "Welcome back,",
   pendingMessages: "{count} pending messages from teachers",

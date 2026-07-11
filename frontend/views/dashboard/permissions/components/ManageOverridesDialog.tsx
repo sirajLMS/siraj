@@ -5,8 +5,8 @@ import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from 
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import { OverridesDataGrid } from "@/frontend/views/dashboard/permissions/components/OverridesDataGrid";
 import { OverridesDialogFooter } from "@/frontend/views/dashboard/permissions/components/OverridesDialogFooter";
-import { OverridesTable } from "@/frontend/views/dashboard/permissions/components/OverridesTable";
 import { OverridesToolbar } from "@/frontend/views/dashboard/permissions/components/OverridesToolbar";
 import { OverridesUserSidebar } from "@/frontend/views/dashboard/permissions/components/OverridesUserSidebar";
 import { useManageOverridesState } from "@/frontend/views/dashboard/permissions/components/useManageOverridesState";
@@ -127,7 +127,7 @@ export function ManageOverridesDialog({
             onSearchChange={setSearchQuery}
           />
 
-          <OverridesTable
+          <OverridesDataGrid
             filteredPermissions={filteredPermissions}
             userGroups={userGroups}
             localOverrides={localOverrides}

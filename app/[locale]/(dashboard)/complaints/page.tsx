@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { getCachedParentIdForComplaints } from "@/backend/lib/auth/cached-parent";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
 import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { ParentComplaintsContainer } from "@/frontend/views/dashboard/complaints/ParentComplaintsContainer";
 import { redirect } from "@/shared/i18n/routing";
+
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ readonly locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.complaints.parent" });
+  return { title: t("pageTitle") };
+}
 
 export default async function ComplaintsPage({ params }: { readonly params: Promise<{ locale: string }> }) {
   const { userId } = await getServerUserContext();

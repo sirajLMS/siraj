@@ -33,6 +33,24 @@ export function DisplayCurrencyHint({
     fetchPolicy: "cache-first",
   });
 
+  const dismissButton = (
+    <IconButton
+      aria-label={t("dismiss")}
+      size="small"
+      onClick={dismiss}
+      sx={theme => ({
+        ml: theme.direction === "rtl" ? 0 : 0.5,
+        mr: theme.direction === "rtl" ? 0.5 : 0,
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.primary.main}`,
+          outlineOffset: 2,
+        },
+      })}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  );
+
   if (mode === "viewer") {
     if (viewerDisplayCurrency || dismissed) {
       return null;
@@ -43,9 +61,7 @@ export function DisplayCurrencyHint({
         <Button component={Link} href="/profile/edit" color="inherit" size="small">
           {t("cta")}
         </Button>
-        <IconButton aria-label={t("dismiss")} size="small" onClick={dismiss} sx={{ ml: 0.5 }}>
-          <CloseIcon fontSize="small" />
-        </IconButton>
+        {dismissButton}
       </>
     );
 
@@ -82,9 +98,12 @@ export function DisplayCurrencyHint({
       severity="info"
       sx={{ mb: 2 }}
       action={
-        <Button component={Link} href={editHref} color="inherit" size="small">
-          {t("subject.cta")}
-        </Button>
+        <>
+          <Button component={Link} href={editHref} color="inherit" size="small">
+            {t("subject.cta")}
+          </Button>
+          {dismissButton}
+        </>
       }
     >
       <strong>{t("subject.title")}</strong>

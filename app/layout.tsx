@@ -1,12 +1,14 @@
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/lib/theme-detection";
 import MuiProvider from "@/frontend/providers/theme/MuiProvider";
-import "./index.css";
+import "@/app/index.css";
 import { AppApolloProvider } from "@/frontend/context";
 import { AuthProvider } from "@/frontend/providers/apollo/AuthProvider";
 
@@ -19,11 +21,27 @@ async function getLocale() {
   return "ar";
 }
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
   return {
-    title: t("welcome"),
+    metadataBase: new URL(NEXT_PUBLIC_BASE_URL),
+    title: {
+      default: t("title"),
+      template: t("documentTitleTemplate"),
+    },
     description: t("description"),
+    applicationName: t("title"),
+    openGraph: {
+      title: t("title"),
+      description: t("description"),
+      siteName: t("title"),
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: t("title"),
+      description: t("description"),
+    },
   };
 }
 

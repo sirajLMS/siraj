@@ -1,6 +1,7 @@
 import type { AdminDashboardLabels } from "@/shared/messages/types/dashboard/admin";
 
 export const admin: AdminDashboardLabels = {
+  pageTitle: "لوحة التحكم",
   roleLabel: "لوحة تحكم المدير",
   todayClasses: "حصص اليوم",
   updatedMinutesAgo: "تم التحديث منذ {minutes, plural, =1 {دقيقة} other {# دقائق}}",

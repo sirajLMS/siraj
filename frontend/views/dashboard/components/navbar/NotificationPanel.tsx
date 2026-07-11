@@ -90,8 +90,9 @@ export function NotificationPanel() {
 
       <Divider />
 
+      <DisplayCurrencyHint variant="compact" />
+
       <RequirePermission permissions={[AppPermission.BillingViewUnpaidInvoices]}>
-        <DisplayCurrencyHint variant="compact" />
         <UnpaidInvoicesSection />
         <Divider />
       </RequirePermission>

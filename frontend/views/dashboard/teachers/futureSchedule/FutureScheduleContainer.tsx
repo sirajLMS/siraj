@@ -11,6 +11,7 @@ import {
   teacherFutureScheduleQueryDocument,
   updateSessionStatusLeaveMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
 import { useFutureScheduleDateStore } from "@/frontend/stores/futureScheduleDateStore";
 import { logger } from "@/frontend/utils/logger";
 import { FutureScheduleView } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleView";
@@ -24,6 +25,7 @@ import { getErrorMessage } from "@/shared/utils/error";
 export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleContainerProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
   const notifications = useNotifications();
+  useDocumentTitle(null, "dashboard.teacherFutureSchedule", "pageTitle");
   const { data, loading, error, refetch } = useQuery(teacherFutureScheduleQueryDocument, {
     variables: { teacherId },
   });

@@ -20,13 +20,23 @@ export function UnpaidInvoicesSection() {
   const router = useRouter();
   const displayCurrency = useUserStore(state => state.displayCurrency);
 
-  const { data, loading } = useQuery(unpaidInvoicesAlertQueryDocument);
+  const { data, loading, error } = useQuery(unpaidInvoicesAlertQueryDocument);
 
   if (loading) {
     return (
       <Box sx={{ px: 2, py: 1.5 }}>
         <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
           {t("loadingBilling")}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
+          {t("errorLoading")}
         </Typography>
       </Box>
     );
@@ -88,7 +98,14 @@ export function UnpaidInvoicesSection() {
         >
           {t("unpaidInvoicesFxNote")}
         </Typography>
-      ) : null}
+      ) : (
+        <Typography
+          variant="caption"
+          sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary, fontStyle: "italic" })}
+        >
+          ({t("noDisplayCurrencyNote")})
+        </Typography>
+      )}
 
       <List disablePadding dense>
         {items.map(item => {

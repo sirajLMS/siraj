@@ -249,6 +249,7 @@ function buildFxAndCurrencyLabels(t: BillingTranslator) {
     fxConversionNote: t("fxConversionNote"),
     fxConversionNoteSubject: t("fxConversionNoteSubject"),
     adminBillingFxNote: t("adminBillingFxNote"),
+    displayCurrencyMixed: t("displayCurrencyMixed"),
     currencyHedges: t.raw("currencyHedges") as CurrencyHedgesLabels,
     supportedCurrencies: t.raw("supportedCurrencies") as SupportedCurrenciesLabels,
   };

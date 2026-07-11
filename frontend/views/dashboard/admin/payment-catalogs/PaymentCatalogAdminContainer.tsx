@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useLocale } from "next-intl";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -18,6 +19,7 @@ import {
   supportedOnlineAccountsQueryDocument,
   supportedPaymentLinksQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
+import { logger } from "@/frontend/utils/logger";
 import { CatalogDeleteDialog } from "@/frontend/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog";
 import { CatalogEditDialog } from "@/frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog";
 import { PaymentCatalogAdminView } from "@/frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView";
@@ -31,10 +33,13 @@ function resolveEntryName(row: PaymentCatalogRow | null, locale: string): string
 
 export function PaymentCatalogAdminContainer() {
   const locale = useLocale();
+  const t = useTranslations("dashboard.paymentCatalogs");
+  const notifications = useNotifications();
   const [activeTab, setActiveTab] = useState<PaymentCatalogKind>("mobileWallet");
   const [editOpen, setEditOpen] = useState(false);
   const [editRow, setEditRow] = useState<PaymentCatalogRow | null>(null);
   const [deleteRow, setDeleteRow] = useState<PaymentCatalogRow | null>(null);
+  const [isDeactivating, setIsDeactivating] = useState(false);
 
   const {
     data: walletData,
@@ -42,25 +47,28 @@ export function PaymentCatalogAdminContainer() {
     refetch: refetchWallets,
   } = useQuery(supportedMobileWalletsQueryDocument, {
     variables: { activeOnly: false, countryCode: null, direction: null },
+    skip: activeTab !== "mobileWallet",
   });
   const {
     data: linkData,
     loading: linksLoading,
     refetch: refetchLinks,
-  } = useQuery(supportedPaymentLinksQueryDocument, { variables: { activeOnly: false, direction: null } });
+  } = useQuery(supportedPaymentLinksQueryDocument, {
+    variables: { activeOnly: false, direction: null },
+    skip: activeTab !== "paymentLink",
+  });
   const {
     data: accountData,
     loading: accountsLoading,
     refetch: refetchAccounts,
-  } = useQuery(supportedOnlineAccountsQueryDocument, { variables: { activeOnly: false, direction: null } });
+  } = useQuery(supportedOnlineAccountsQueryDocument, {
+    variables: { activeOnly: false, direction: null },
+    skip: activeTab !== "onlineAccount",
+  });
 
-  const [deactivateWallet, { loading: deactivatingWallet }] = useMutation(
-    deactivateSupportedMobileWalletMutationDocument
-  );
-  const [deactivateLink, { loading: deactivatingLink }] = useMutation(deactivateSupportedPaymentLinkMutationDocument);
-  const [deactivateAccount, { loading: deactivatingAccount }] = useMutation(
-    deactivateSupportedOnlineAccountMutationDocument
-  );
+  const [deactivateWallet] = useMutation(deactivateSupportedMobileWalletMutationDocument);
+  const [deactivateLink] = useMutation(deactivateSupportedPaymentLinkMutationDocument);
+  const [deactivateAccount] = useMutation(deactivateSupportedOnlineAccountMutationDocument);
 
   const mobileWallets = useMemo(
     () => (walletData?.supportedMobileWallets ?? []) as SupportedMobileWalletFieldsFragment[],
@@ -75,8 +83,10 @@ export function PaymentCatalogAdminContainer() {
     [accountData?.supportedOnlineAccounts]
   );
 
-  const loading = walletsLoading || linksLoading || accountsLoading;
-  const isDeleting = deactivatingWallet || deactivatingLink || deactivatingAccount;
+  const loading =
+    (activeTab === "mobileWallet" && walletsLoading) ||
+    (activeTab === "paymentLink" && linksLoading) ||
+    (activeTab === "onlineAccount" && accountsLoading);
 
   const refetchActive = async () => {
     if (activeTab === "mobileWallet") await refetchWallets();
@@ -87,22 +97,32 @@ export function PaymentCatalogAdminContainer() {
   const handleSaved = async () => {
     setEditOpen(false);
     setEditRow(null);
+    notifications.show(t("saveSuccess"), { severity: "success" });
     await refetchActive();
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteRow?.id) return;
-    if (activeTab === "mobileWallet") {
-      await deactivateWallet({ variables: { id: deleteRow.id } });
+    setIsDeactivating(true);
+    try {
+      if (activeTab === "mobileWallet") {
+        await deactivateWallet({ variables: { id: deleteRow.id } });
+      } else if (activeTab === "paymentLink") {
+        await deactivateLink({ variables: { id: deleteRow.id } });
+      } else if (activeTab === "onlineAccount") {
+        await deactivateAccount({ variables: { id: deleteRow.id } });
+      } else {
+        return;
+      }
+      notifications.show(t("deactivateSuccess"), { severity: "success" });
+      await refetchActive();
+    } catch (error) {
+      logger.error("Failed to deactivate catalog entry", { error });
+      notifications.show(t("deactivateError"), { severity: "error" });
+    } finally {
+      setIsDeactivating(false);
+      setDeleteRow(null);
     }
-    if (activeTab === "paymentLink") {
-      await deactivateLink({ variables: { id: deleteRow.id } });
-    }
-    if (activeTab === "onlineAccount") {
-      await deactivateAccount({ variables: { id: deleteRow.id } });
-    }
-    setDeleteRow(null);
-    await refetchActive();
   };
 
   return (
@@ -139,7 +159,7 @@ export function PaymentCatalogAdminContainer() {
       <CatalogDeleteDialog
         open={Boolean(deleteRow)}
         entryName={resolveEntryName(deleteRow, locale)}
-        isLoading={isDeleting}
+        isLoading={isDeactivating}
         onClose={() => setDeleteRow(null)}
         onConfirm={handleConfirmDelete}
       />

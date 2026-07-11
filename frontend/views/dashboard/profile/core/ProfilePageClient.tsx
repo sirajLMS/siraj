@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileByUserIdQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
@@ -34,6 +35,8 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   });
 
   const profile = data?.profileByUserId;
+
+  useDocumentTitle(profile?.name, "profile", mode === ProfileMode.Edit ? "editTitle" : "pageTitle");
 
   const editHref = scope === ProfileScope.Own ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
   const cancelHref = scope === ProfileScope.Own ? ownProfileHref() : profileHrefForUser(targetUserId);

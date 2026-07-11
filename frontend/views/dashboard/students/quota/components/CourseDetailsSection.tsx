@@ -50,28 +50,35 @@ function TeacherField() {
       <Controller
         name="teacher"
         control={control}
-        render={({ field }) => (
-          <FormControl fullWidth error={!!errors.teacher}>
-            <Select {...field} displayEmpty disabled sx={quotaInputSx}>
-              {loading && (
-                <MenuItem disabled value="">
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <CircularProgress size={16} />
-                    <Typography variant="bodyMd">{t("fields.loadingTeachers")}</Typography>
-                  </Box>
-                </MenuItem>
-              )}
-              {teachers.map(teacher =>
-                teacher?.name ? (
-                  <MenuItem key={teacher.id ?? ""} value={teacher.name}>
-                    {teacher.name}
+        render={({ field }) => {
+          const currentValue = field.value ?? "";
+          const isInOptions = teachers.some(teacher => teacher?.name === currentValue);
+          const showCurrentAsExtra = !loading && currentValue !== "" && !isInOptions;
+
+          return (
+            <FormControl fullWidth error={!!errors.teacher}>
+              <Select {...field} displayEmpty disabled sx={quotaInputSx}>
+                {loading && (
+                  <MenuItem disabled value="">
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CircularProgress size={16} />
+                      <Typography variant="bodyMd">{t("fields.loadingTeachers")}</Typography>
+                    </Box>
                   </MenuItem>
-                ) : null
-              )}
-            </Select>
-            {errors.teacher && <FormHelperText>{errors.teacher.message}</FormHelperText>}
-          </FormControl>
-        )}
+                )}
+                {showCurrentAsExtra && <MenuItem value={currentValue}>{currentValue}</MenuItem>}
+                {teachers.map(teacher =>
+                  teacher?.name ? (
+                    <MenuItem key={teacher.id ?? ""} value={teacher.name}>
+                      {teacher.name}
+                    </MenuItem>
+                  ) : null
+                )}
+              </Select>
+              {errors.teacher && <FormHelperText>{errors.teacher.message}</FormHelperText>}
+            </FormControl>
+          );
+        }}
       />
     </QuotaFormField>
   );

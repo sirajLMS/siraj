@@ -1,4 +1,5 @@
 export interface CreateRecurringClassLabels {
+  readonly pageTitle: string;
   readonly title: string;
   readonly subtitle: string;
   readonly breadcrumbs: {

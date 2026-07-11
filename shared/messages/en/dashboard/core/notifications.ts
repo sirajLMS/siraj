@@ -7,6 +7,7 @@ export const notifications: NotificationsLabels = {
   unpaidInvoicesTitle: "Unpaid Invoices",
   totalOverdueLabel: "Total Overdue",
   unpaidInvoicesFxNote: "Total uses your display currency; each row uses that user's currency",
+  noDisplayCurrencyNote: "(set display currency for conversions)",
   noUnpaidInvoices: "No invoices requiring payment.",
   loadingBilling: "Loading billing data...",
   newUnansweredComplaint: "New unanswered complaint",

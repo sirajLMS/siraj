@@ -1,4 +1,5 @@
 export interface SubjectDetailLabels {
+  readonly pageTitle: string;
   readonly resourcesTitle: string;
   readonly resourcesSubtitle: string;
   readonly noResources: string;

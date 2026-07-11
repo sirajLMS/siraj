@@ -53,7 +53,7 @@ bun quality-gate               # Automated quality verification (tsgo → biome 
 bun quality-gate:fresh         # Reset state and run fresh
 
 # Database
-bun run db                     # Database actions via scripts/dbActions/
+bun run db                      # Database actions via scripts/dbActions/ (generate, push, migrate, seed, studio — reset & cleanGenerate disabled by repo policy)
 ```
 
 ## Architecture Layers

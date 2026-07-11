@@ -1,6 +1,11 @@
 import type { Interface } from "node:readline";
 import { cleanGenerate } from "@/scripts/dbActions/cleanGenerate";
-import { isDestructiveActionBlocked, printDestructiveActionBlock } from "@/scripts/dbActions/destructive";
+import {
+  isDestructiveActionBlocked,
+  isPermanentlyDisabled,
+  printDestructiveActionBlock,
+  printPermanentlyDisabledBlock,
+} from "@/scripts/dbActions/destructive";
 import { runBunCommand } from "@/scripts/dbActions/runCommand";
 
 export const ACTIONS: Record<string, { label: string; name: string }> = {
@@ -29,6 +34,12 @@ export async function askQuestion(rl: Interface, query: string): Promise<string>
  * Dispatches the action based on internal key (1-8).
  */
 export async function dispatchAction(key: string): Promise<number> {
+  // Check for permanently disabled actions first
+  if (isPermanentlyDisabled(key)) {
+    printPermanentlyDisabledBlock(key);
+    return 1;
+  }
+
   if (isDestructiveActionBlocked(key)) {
     printDestructiveActionBlock();
     return 1;
@@ -63,6 +74,18 @@ export async function dispatchAction(key: string): Promise<number> {
 export async function executeAction(key: string, rl?: Interface): Promise<void> {
   const action = ACTIONS[key];
   if (!action) return;
+
+  // Check for permanently disabled actions first
+  if (isPermanentlyDisabled(key)) {
+    globalThis.console.log(`\nRunning: ${action.label}...\n`);
+    printPermanentlyDisabledBlock(key);
+    globalThis.console.log("\n✗ Failed (code 1)");
+
+    if (rl) {
+      await askQuestion(rl, "\nPress Enter to continue...");
+    }
+    return;
+  }
 
   if (isDestructiveActionBlocked(key)) {
     globalThis.console.log(`\nRunning: ${action.label}...\n`);

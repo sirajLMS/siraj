@@ -10,6 +10,7 @@ export type FxDisplayMessages = {
   readonly convertedTotalApprox: (values: { convertedApprox: string; displayCurrency: string }) => string;
   readonly displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) => string;
   readonly displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  readonly displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) => string;
 };
 
 export function buildFxDisplayMessages(
@@ -23,5 +24,6 @@ export function buildFxDisplayMessages(
     convertedTotalApprox: values => totalT("convertedTotalApprox", values),
     displayCurrencyNotSet: values => tErrors("displayCurrencyNotSet", values),
     displayCurrencyStale: values => tErrors("displayCurrencyStale", values),
+    displayCurrencyMixed: values => tErrors("displayCurrencyMixed", values),
   };
 }

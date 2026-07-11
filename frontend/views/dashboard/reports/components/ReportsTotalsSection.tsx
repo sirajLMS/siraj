@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -25,7 +25,7 @@ function useTotalsDisplay(rows: readonly ReportLedgerRow[]) {
   return useMemo(() => {
     const paidTotals = aggregatePaidAmountTotals(rows);
     if (paidTotals.length === 0) {
-      return { primary: "—" };
+      return { primary: "—", ariaLabel: tProfile("notSet") };
     }
 
     const buckets: BillingCurrencyBucket[] = paidTotals.map(paid => ({
@@ -44,10 +44,20 @@ function useTotalsDisplay(rows: readonly ReportLedgerRow[]) {
   }, [rows, locale, tProfile, tErrors]);
 }
 
-function TotalsAmount({ display }: { readonly display: { primary: string; breakdown?: string } }) {
+function TotalsAmount({
+  display,
+  variant,
+}: {
+  readonly display: { primary: string; breakdown?: string; ariaLabel?: string };
+  readonly variant: "desktop" | "mobile";
+}) {
   if (!display.breakdown) {
     return (
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
+      <Typography
+        variant="bodyMd"
+        sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}
+        aria-label={display.ariaLabel}
+      >
         {display.primary}
       </Typography>
     );
@@ -58,21 +68,23 @@ function TotalsAmount({ display }: { readonly display: { primary: string; breakd
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
         {display.primary}
       </Typography>
-      <Typography
-        variant="caption"
-        sx={{
-          color: "text.secondary",
-          textAlign: "end",
-          maxWidth: 240,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-        }}
-      >
-        {display.breakdown}
-      </Typography>
+      <Tooltip title={display.breakdown} arrow>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            textAlign: "end",
+            maxWidth: variant === "mobile" ? "100%" : 240,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {display.breakdown}
+        </Typography>
+      </Tooltip>
     </Stack>
   );
 }
@@ -106,7 +118,7 @@ export function ReportsTotalsSection({ summary, rows, totalsLabel, variant }: Re
             <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
               {summary.totalHours}
             </Typography>
-            <TotalsAmount display={totalsDisplay} />
+            <TotalsAmount display={totalsDisplay} variant="mobile" />
           </Stack>
         </Stack>
       </Box>
@@ -118,7 +130,7 @@ export function ReportsTotalsSection({ summary, rows, totalsLabel, variant }: Re
       sx={theme => ({
         display: "grid",
         gridTemplateColumns: showFinancials
-          ? "minmax(0, 1.4fr) repeat(4, 90px) 100px minmax(180px, 1fr)"
+          ? "minmax(0, 1.4fr) repeat(4, 90px) 120px minmax(180px, 1fr)"
           : "minmax(0, 1.4fr) repeat(4, 90px)",
         alignItems: "center",
         px: 3,
@@ -138,7 +150,7 @@ export function ReportsTotalsSection({ summary, rows, totalsLabel, variant }: Re
             {summary.totalHours}
           </Typography>
           <Box sx={{ textAlign: "end" }}>
-            <TotalsAmount display={totalsDisplay} />
+            <TotalsAmount display={totalsDisplay} variant="desktop" />
           </Box>
         </>
       )}

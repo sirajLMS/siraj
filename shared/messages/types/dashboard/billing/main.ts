@@ -179,6 +179,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly fxConversionNote: string;
   readonly fxConversionNoteSubject: string;
   readonly adminBillingFxNote: string;
+  readonly displayCurrencyMixed: string;
   readonly currencyHedges: CurrencyHedgesLabels;
   readonly supportedCurrencies: SupportedCurrenciesLabels;
 }

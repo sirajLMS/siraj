@@ -1,17 +1,20 @@
-import { getMessages } from "next-intl/server";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { getUserPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { UserBillingProfileContainer } from "@/frontend/views/dashboard/users/billing-profile/UserBillingProfileContainer";
-import type { MessageSchema } from "@/shared/messages/types/message";
 
 interface BillingProfilePageProps {
   readonly params: Promise<{ id: string; locale: string }>;
 }
 
-export async function generateMetadata({ params }: BillingProfilePageProps) {
-  const { locale } = await params;
-  const messages = (await getMessages({ locale })) as unknown as MessageSchema;
-  return {
-    title: `${messages.dashboard.billing.billingProfileTitle} | Siraj LMS`,
-  };
+export async function generateMetadata({ params }: BillingProfilePageProps): Promise<Metadata> {
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.billing" });
+  const userName = await getUserPageTitle(id);
+  if (userName) {
+    return { title: `${userName} — ${t("billingProfileTitle")}` };
+  }
+  return { title: t("billingProfileTitle") };
 }
 
 export default async function BillingProfilePage({ params }: Readonly<BillingProfilePageProps>) {

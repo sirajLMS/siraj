@@ -15,15 +15,7 @@ The **root blocker on a clean database** was `CREATE INDEX CONCURRENTLY` in `bac
 
 ## Migration pipeline
 
-Siraj does **not** run `drizzle-kit migrate` directly. Use `bun db`:
-
-```bash
-bun db migrate          # Apply pending migrations
-bun db reset            # Drop/recreate DB, then migrate
-bun db cleanGenerate    # Reset → regenerate drizzle folders → migrate → seed
-```
-
-`cleanGenerate` (in `scripts/dbActions.ts`) produces three drizzle migration folders in order:
+`cleanGenerate` (in `scripts/dbActions.ts`) **is permanently disabled by repo policy**. The migration pipeline produces three drizzle migration folders in order:
 
 1. **`extensions`** — content from `backend/db/migration/1-extensions.sql` (`pg_trgm`, `is_valid_timezone()`)
 2. **Schema migration** — `drizzle-kit generate` from `backend/db/schema/`
@@ -31,15 +23,17 @@ bun db cleanGenerate    # Reset → regenerate drizzle folders → migrate → s
 
 Custom SQL lives in `backend/db/migration/`. Generated artifacts live in `backend/drizzle/`.
 
+**Note:** `db reset` and `db cleanGenerate` are permanently disabled by repo policy. Use `db push` for schema changes and `db migrate` for migration management.
+
 ## Safety guard
 
-Destructive commands — `reset`, `drop`, and `cleanGenerate` — are **disabled** when the current environment looks like production or cloud infrastructure. The guard in [`scripts/lib/destructiveDbGuard.ts`](../scripts/lib/destructiveDbGuard.ts) checks signals such as:
+Destructive commands — `reset`, `drop`, and `cleanGenerate` — are **permanently disabled by repo policy** for this repository. The guard in [`scripts/lib/destructiveDbGuard.ts`](../scripts/lib/destructiveDbGuard.ts) checks signals such as:
 
 - `NODE_ENV=production`
 - Cloud providers (`DB_PROVIDER=neon`, non-local `STORAGE_PROVIDER`, Upstash Redis, GCP/Vercel Blob config)
 - Managed Postgres hosts in `DATABASE_URL` (e.g. `neon.tech`, `supabase.co`, `rds.amazonaws.com`)
 
-Blocked commands remain listed in `bun db` but exit with a clear error. Use a local `.env` (`postgres` + `local` storage + localhost `DATABASE_URL`) for destructive workflows.
+Blocked commands remain listed in `bun db` but exit with a clear error. Use a local `.env` (`postgres` + `local` storage + localhost `DATABASE_URL`) for destructive workflows if absolutely needed in a different repository.
 
 ## The block: `CREATE INDEX CONCURRENTLY` inside a transaction
 
@@ -149,7 +143,10 @@ Files in `backend/db/migration/` are combined using `localeCompare` (alphabetica
 
 ```bash
 bun db migrate --help
-bun db reset
-bun db cleanGenerate
-bun db seed
+bun db push          # Apply schema changes directly (no migration journal)
+bun db migrate       # Apply pending migrations
+bun db seed          # Seed database
+bun db studio        # Open Drizzle Studio
 ```
+
+**Note:** `bun db reset` and `bun db cleanGenerate` are permanently disabled by repo policy.

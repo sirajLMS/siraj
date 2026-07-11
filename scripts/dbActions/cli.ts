@@ -1,6 +1,11 @@
 import { createInterface } from "node:readline";
 import { ACTIONS, askQuestion, executeAction, findActionKey } from "@/scripts/dbActions/actions";
-import { DISABLED_ACTION_SUFFIX, isDestructiveActionBlocked } from "@/scripts/dbActions/destructive";
+import {
+  DISABLED_ACTION_SUFFIX,
+  isDestructiveActionBlocked,
+  isPermanentlyDisabled,
+  PERMANENTLY_DISABLED_SUFFIX,
+} from "@/scripts/dbActions/destructive";
 
 /**
  * Displays the interactive menu.
@@ -8,7 +13,12 @@ import { DISABLED_ACTION_SUFFIX, isDestructiveActionBlocked } from "@/scripts/db
 export function displayMenu(): void {
   globalThis.console.log("\n--- Database Actions ---");
   for (const [key, action] of Object.entries(ACTIONS)) {
-    const suffix = isDestructiveActionBlocked(key) ? DISABLED_ACTION_SUFFIX : "";
+    let suffix = "";
+    if (isPermanentlyDisabled(key)) {
+      suffix = PERMANENTLY_DISABLED_SUFFIX;
+    } else if (isDestructiveActionBlocked(key)) {
+      suffix = DISABLED_ACTION_SUFFIX;
+    }
     globalThis.console.log(`${key}. ${action.label}${suffix}`);
   }
   globalThis.console.log("0. Exit");

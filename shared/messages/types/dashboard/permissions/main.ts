@@ -1,4 +1,5 @@
 export interface PermissionsLabels {
+  pageTitle: string;
   title: string;
   subtitle: string;
   groupsTab: string;

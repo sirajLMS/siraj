@@ -1,7 +1,18 @@
-import { setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
 import { MeetingProvidersContainer } from "@/frontend/views/dashboard/admin/meeting-providers/MeetingProvidersContainer";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ readonly locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "dashboard.meetingProviders" });
+  return { title: t("pageTitle") };
+}
 
 export default async function MeetingProvidersPage({
   params,

@@ -4,6 +4,7 @@ export const common: CommonLabels = {
   title: "Siraj",
   description:
     "Welcome to Siraj. This app is successfully initialized with Next.js and Material-UI, fully customized with your brand aesthetics.",
+  documentTitleTemplate: "%s | Siraj",
   welcome: "Welcome!",
   subtitle: "Siraj Design System",
   toggleTheme: "Toggle theme",
