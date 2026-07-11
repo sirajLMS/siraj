@@ -149,7 +149,7 @@ function buildPaymentLabels(t: BillingTranslator) {
   };
 }
 
-function _buildSuccessMessagesAndDeleteDialog(t: BillingTranslator) {
+function buildSuccessMessagesAndDeleteDialog(t: BillingTranslator) {
   return {
     manual: buildManualInvoiceLabels((key: string) => {
       if (key === "createSuccess") return t.raw(`manual.${key}`) as string;
@@ -170,7 +170,7 @@ function _buildSuccessMessagesAndDeleteDialog(t: BillingTranslator) {
   };
 }
 
-function _buildSubmitProofDialogLabels(t: BillingTranslator) {
+function buildSubmitProofDialogLabels(t: BillingTranslator) {
   return {
     submitProofDialog: {
       titleSubmit: t("submitProofDialog.titleSubmit"),
@@ -195,7 +195,7 @@ function _buildSubmitProofDialogLabels(t: BillingTranslator) {
   };
 }
 
-function _buildPaymentDetailsDialogLabels(t: BillingTranslator) {
+function buildPaymentDetailsDialogLabels(t: BillingTranslator) {
   return {
     paymentDetailsDialog: {
       title: t("paymentDetailsDialog.title"),
@@ -224,7 +224,7 @@ function _buildPaymentDetailsDialogLabels(t: BillingTranslator) {
   };
 }
 
-function _buildNotificationsAndErrorLabels(t: BillingTranslator) {
+function buildNotificationsAndErrorLabels(t: BillingTranslator) {
   return {
     notifications: {
       popupBlocked: t("notifications.popupBlocked"),

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/views/dashboard/profile/staff/StaffProfileView";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -14,6 +14,9 @@ const staffProfile = {
   status: AccountStatus.Activated,
   roleSlug: "senior-admin",
   roleName: "Senior Administrator",
+  hourlyRate: "50.00",
+  rateCurrency: CurrencyCode.Usd,
+  displayAmount: null,
 };
 
 afterEach(() => {

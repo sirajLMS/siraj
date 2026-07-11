@@ -104,7 +104,17 @@ function useJoinContext(props: MeetingJoinActionProps) {
   const buttonLabel = props.label ?? t("joinMeeting");
   const tooltip = resolveTooltip({ hasUrl, meeting: props.meeting, locale, t, tDisplay, emptyRole: props.emptyRole });
   const providerLogo = props.meeting?.logoUrl?.trim() || null;
-  return { t, hasUrl, resolvedUrl, buttonLabel, tooltip, id: props.id, providerLogo, onJoinAction: props.onJoinAction };
+  return {
+    t,
+    tDisplay,
+    hasUrl,
+    resolvedUrl,
+    buttonLabel,
+    tooltip,
+    id: props.id,
+    providerLogo,
+    onJoinAction: props.onJoinAction,
+  };
 }
 
 function makeHandleJoin(resolvedUrl: string | null, onJoinAction?: () => void): () => void {

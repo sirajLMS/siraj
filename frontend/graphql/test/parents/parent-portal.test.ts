@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
+import type { ApolloQueryResult, OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   parentAssignedStudentsQueryDocument,
   parentHandbookUrlQueryDocument,
@@ -16,12 +16,13 @@ import { testClient } from "@/frontend/graphql/test/testClient";
 async function queryAsDemoUser<TData, TVars extends OperationVariables = OperationVariables>(
   groupSlug: string,
   document: TypedDocumentNode<TData, TVars>
-) {
+): Promise<ApolloQueryResult<TData>> {
   const token = await loginDemoUser(groupSlug);
-  return testClient.query({
+  const result = await testClient.query({
     query: document,
     context: { headers: { Authorization: `Bearer ${token}` } },
   } as Parameters<typeof testClient.query>[0]);
+  return result as ApolloQueryResult<TData>;
 }
 
 /**
@@ -35,7 +36,7 @@ async function expectQueryDenied<TData, TVars extends OperationVariables = Opera
 ) {
   const result = await queryAsDemoUser(groupSlug, document);
   expect(result.error).toBeDefined();
-  expect(result.data?.[dataKey]).toBeNull();
+  expect((result.data as Record<string, unknown> | null | undefined)?.[dataKey as string]).toBeNull();
 }
 
 describe("GraphQL Parent Portal Integration Tests", () => {

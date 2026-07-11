@@ -8,6 +8,7 @@ import {
 
 const sampleRow = (overrides: Partial<DailyScheduleRow>): DailyScheduleRow => ({
   id: "1",
+  isFrozen: null,
   yourTime: "10:00 AM",
   teacherTime: null,
   studentTime: null,

@@ -49,13 +49,8 @@ const filterOptions = createFilterOptions<PaymentMethodCatalogOption>({
   stringify: option => `${option.displayName} ${option.slug}`,
 });
 
-type OptionRenderProps = {
-  readonly key: React.Key;
-  readonly [key: string]: unknown;
-};
-
 const PaymentMethodOption: React.FC<{
-  readonly props: OptionRenderProps;
+  readonly props: React.HTMLAttributes<HTMLLIElement> & { readonly key?: React.Key };
   readonly entry: PaymentMethodCatalogOption;
   readonly type?: PaymentMethodType | null;
   readonly showSlug: boolean;
@@ -238,7 +233,7 @@ export const PaymentMethodAutocomplete: React.FC<PaymentMethodAutocompleteProps>
   );
 
   const renderOption = useCallback(
-    (props: OptionRenderProps, entry: PaymentMethodCatalogOption) => (
+    (props: React.HTMLAttributes<HTMLLIElement> & { readonly key?: React.Key }, entry: PaymentMethodCatalogOption) => (
       <PaymentMethodOption props={props} entry={entry} type={type} showSlug={showSlug} />
     ),
     [type, showSlug]

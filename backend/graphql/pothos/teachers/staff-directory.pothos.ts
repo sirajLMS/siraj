@@ -86,8 +86,7 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent, _args, ctx) =>
-        resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency", parent.id),
+      resolve: (parent, _args, ctx) => resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency", parent.id),
     }),
   }),
 });

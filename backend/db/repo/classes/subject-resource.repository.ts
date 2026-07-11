@@ -121,7 +121,13 @@ export namespace SubjectResourceRepository {
           learningResourceId: result.learningResourceId,
         });
 
-        return mapRowToReturnType(result as SubjectResourceRow);
+        const [row] = await t
+          .select(resourceSelectColumns)
+          .from(subjectResources)
+          .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
+          .where(eq(subjectResources.id, result.id));
+
+        return mapRowToReturnType(row);
       });
     } catch (error) {
       logger.error("Error attaching resource to subject:", error);
@@ -218,7 +224,15 @@ export namespace SubjectResourceRepository {
             .limit(1);
 
           if (existing) {
-            results.push(mapRowToReturnType(existing as SubjectResourceRow));
+            const [row] = await t
+              .select(resourceSelectColumns)
+              .from(subjectResources)
+              .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
+              .where(eq(subjectResources.id, existing.id));
+
+            if (row) {
+              results.push(mapRowToReturnType(row));
+            }
             continue;
           }
 
@@ -233,7 +247,15 @@ export namespace SubjectResourceRepository {
             .returning();
 
           if (created) {
-            results.push(mapRowToReturnType(created as SubjectResourceRow));
+            const [row] = await t
+              .select(resourceSelectColumns)
+              .from(subjectResources)
+              .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
+              .where(eq(subjectResources.id, created.id));
+
+            if (row) {
+              results.push(mapRowToReturnType(row));
+            }
           }
         }
 

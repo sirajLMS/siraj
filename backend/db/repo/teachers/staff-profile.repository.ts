@@ -369,7 +369,9 @@ export namespace StaffProfileRepository {
           .update(staffProfiles)
           .set({
             ...(input.hourlyRateIsSet ? { hourlyRate: input.hourlyRate ?? null } : {}),
-            ...(input.rateCurrencyIsSet ? { rateCurrency: input.rateCurrency as ManagerDirectoryRow["rateCurrency"] } : {}),
+            ...(input.rateCurrencyIsSet
+              ? { rateCurrency: input.rateCurrency as ManagerDirectoryRow["rateCurrency"] }
+              : {}),
             updatedAt: new Date(),
           })
           .where(eq(staffProfiles.id, staffProfileId));

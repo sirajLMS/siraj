@@ -18,6 +18,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type {
+  FutureClassRow,
   PaginationArgs,
   RescheduleTrackingInput,
   SupportContactReturnType,

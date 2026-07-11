@@ -20,6 +20,7 @@ export interface DailyScheduleRowOverrides {
   readonly studentTimezone?: IanaTimezone | null;
   readonly meetingJoinUrl?: string | null;
   readonly effectiveMeeting?: DailyScheduleRow["effectiveMeeting"];
+  readonly isFrozen?: boolean | null;
 }
 
 export function createDailyScheduleRow(overrides: DailyScheduleRowOverrides): DailyScheduleRow {
@@ -42,5 +43,6 @@ export function createDailyScheduleRow(overrides: DailyScheduleRowOverrides): Da
     studentTimezone: overrides.studentTimezone ?? null,
     meetingJoinUrl: overrides.meetingJoinUrl ?? null,
     effectiveMeeting: overrides.effectiveMeeting ?? null,
+    isFrozen: overrides.isFrozen ?? null,
   };
 }

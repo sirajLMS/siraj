@@ -4,6 +4,7 @@ import { seedOrGet as seedOrGetMeetingPermissions } from "@/backend/db/seeds/aut
 import { seedOrGet as seedOrGetPaymentMethodPermissions } from "@/backend/db/seeds/auth/seed-payment-method-permissions";
 import { seedOrGet as seedOrGetProfileFieldPermissions } from "@/backend/db/seeds/auth/seed-profile-field-permissions";
 import { seedOrGet as seedOrGetUserPermissionOverrides } from "@/backend/db/seeds/auth/seed-user-permission-overrides";
+import { seedOrGet as seedOrGetSupportedCurrencies } from "@/backend/db/seeds/billing/seed-currencies";
 import { seedOrGet as seedOrGetCurrencyExchangeAuditLogs } from "@/backend/db/seeds/billing/seed-currency-exchange-audit-logs";
 import { seedOrGet as seedOrGetCurrencyExchangeRates } from "@/backend/db/seeds/billing/seed-currency-exchange-rates";
 import { seedOrGet as seedOrGetCurrencyHedges } from "@/backend/db/seeds/billing/seed-currency-hedges";
@@ -11,7 +12,6 @@ import { seedOrGet as seedOrGetInvoiceCoverageMonths } from "@/backend/db/seeds/
 import { seedOrGet as seedOrGetInvoicePaymentSubmissions } from "@/backend/db/seeds/billing/seed-invoice-payment-submissions";
 import { seedOrGet as seedOrGetInvoices } from "@/backend/db/seeds/billing/seed-invoices";
 import { seedOrGet as seedOrGetPayments } from "@/backend/db/seeds/billing/seed-payments";
-import { seedOrGet as seedOrGetSupportedCurrencies } from "@/backend/db/seeds/billing/seed-currencies";
 import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds/billing/seed-supported-mobile-wallets";
 import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
 import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";

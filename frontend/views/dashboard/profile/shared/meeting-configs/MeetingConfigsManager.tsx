@@ -6,7 +6,10 @@ import { Button, Stack } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/components/ui";
-import { MeetingConfigList } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
+import {
+  MeetingConfigList,
+  type MeetingConfigListItem,
+} from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
 import {
   deleteUserMeetingConfigMutationDocument,
@@ -91,8 +94,8 @@ function useMeetingConfigsState(targetUserId: string) {
     setFormOpen(true);
   };
 
-  const openEditForm = (config: UserMeetingConfigFieldsFragment) => {
-    setEditConfig(config);
+  const openEditForm = (config: MeetingConfigListItem) => {
+    setEditConfig(config as UserMeetingConfigFieldsFragment);
     setFormOpen(true);
   };
 

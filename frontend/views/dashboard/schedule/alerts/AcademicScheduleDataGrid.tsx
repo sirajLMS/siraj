@@ -70,7 +70,9 @@ export function AcademicScheduleDataGrid({
     const actionLabels = {
       joinSession: labels.joinSession,
       leaveClass: labels.leaveClass,
+      leaveDisabledReason: labels.leaveDisabledReason,
       viewClassAudit: labels.viewClassAudit,
+      contactAdmin: labels.contactAdmin,
     };
 
     return [

@@ -9,8 +9,8 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
-import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
 import { syncSubjectProfileCache } from "@/frontend/lib/sync-subject-profile";
+import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StaffProfileEditForm } from "@/frontend/views/dashboard/profile/staff/StaffProfileEditForm";

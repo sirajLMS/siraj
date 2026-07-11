@@ -16,6 +16,9 @@ type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
 interface MeetingConfigBaseShape {
   providerId: string;
   details: MeetingConfigDetails;
+  hasSecret?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 async function resolveMeetingProvider(parent: MeetingConfigBaseShape, _args: unknown, ctx: BaseContext) {

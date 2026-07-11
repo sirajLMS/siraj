@@ -1,10 +1,14 @@
 "use client";
 
-import { useApolloClient, useMutation } from "@apollo/client/react";
+import { type MutationTuple, useApolloClient, useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
+import type {
+  CreateRecurringClassInput,
+  MutationCreateRecurringClassArgs,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-class.documents";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/userStore";
@@ -87,7 +91,10 @@ interface SubmitHookParams {
   readonly tClassScope: TranslationFn;
   readonly client: ReturnType<typeof useApolloClient>;
   readonly router: ReturnType<typeof useRouter>;
-  readonly createClassMutation: ReturnType<typeof useMutation<typeof createRecurringClassMutationDocument>>[0];
+  readonly createClassMutation: MutationTuple<
+    Operations.CreateRecurringClassMutation,
+    MutationCreateRecurringClassArgs
+  >[0];
   readonly setSubmitting: (value: boolean) => void;
   readonly resetSuccess: () => void;
   readonly clearError: () => void;

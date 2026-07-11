@@ -31,10 +31,13 @@ interface AcademicScheduleCardListProps {
   readonly labels: {
     readonly joinSession: string;
     readonly leaveClass: string;
+    readonly leaveDisabledReason: string;
     readonly viewClassAudit: string;
+    readonly contactAdmin: string;
     readonly active: string;
     readonly upcoming: string;
     readonly missed: string;
+    readonly hold: string;
     readonly endOfSchedule: string;
   };
   readonly onLeave: (id: string) => void;
@@ -135,7 +138,9 @@ function ClassCardActions({
   const actionLabels = {
     joinSession: labels.joinSession,
     leaveClass: labels.leaveClass,
+    leaveDisabledReason: labels.leaveDisabledReason,
     viewClassAudit: labels.viewClassAudit,
+    contactAdmin: labels.contactAdmin,
   };
 
   if (row.sessionStatus === "missed") {

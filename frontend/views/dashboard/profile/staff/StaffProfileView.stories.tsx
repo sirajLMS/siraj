@@ -17,6 +17,9 @@ const staffProfile = {
   status: AccountStatus.Activated,
   roleSlug: "senior-admin",
   roleName: "Senior Administrator",
+  hourlyRate: null,
+  rateCurrency: null,
+  displayAmount: null,
 };
 
 type StaffProfileViewStoryProps = ComponentProps<typeof StaffProfileView> & {

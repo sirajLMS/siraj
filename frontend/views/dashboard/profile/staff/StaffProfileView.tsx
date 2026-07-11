@@ -41,13 +41,7 @@ export function StaffProfileView({
     if (!isAdminScope || !canView("staff_role")) {
       return null;
     }
-    return (
-      <CompensationSection
-        mode="view"
-        staffData={staffData}
-        subjectUserId={staffData.id}
-      />
-    );
+    return <CompensationSection mode="view" staffData={staffData} subjectUserId={staffData.id ?? undefined} />;
   };
 
   return (

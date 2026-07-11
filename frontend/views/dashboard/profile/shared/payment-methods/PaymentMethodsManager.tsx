@@ -93,7 +93,7 @@ function PaymentMethodFormDialogWrapped({
 }: {
   formOpen: boolean;
   targetUserId: string;
-  slotDirection: PaymentDirection;
+  slotDirection: PaymentDirection.Payin | PaymentDirection.Payout;
   allowedDirections: readonly PaymentDirection[];
   editMethod: UserPaymentMethodFieldsFragment | null;
   setFormOpen: (open: boolean) => void;
@@ -191,7 +191,8 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
   const { hasPermission } = useUserStore();
   const canVerify = hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
 
-  const slotDirection = slot === "payin" ? PaymentDirection.Payin : PaymentDirection.Payout;
+  const slotDirection: PaymentDirection.Payin | PaymentDirection.Payout =
+    slot === "payin" ? PaymentDirection.Payin : PaymentDirection.Payout;
   const allowedDirections =
     slot === "payin"
       ? ([PaymentDirection.Payin, PaymentDirection.Both] as const)
@@ -207,7 +208,10 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
 
   const methods = usePaymentMethods(data, slot);
   const methodById = useMethodById(data);
-  const mutations = useMethodMutations(refetch);
+  const refetchData = async () => {
+    await refetch();
+  };
+  const mutations = useMethodMutations(refetchData);
   const deleteLabel = useDeleteLabel(deleteId, methods, tType);
 
   const handleConfirmDelete = async () => {
@@ -284,7 +288,7 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
         editMethod={editMethod}
         setFormOpen={setFormOpen}
         setEditMethod={setEditMethod}
-        onSaved={refetch}
+        onSaved={refetchData}
       />
 
       <PaymentMethodDeleteDialog
