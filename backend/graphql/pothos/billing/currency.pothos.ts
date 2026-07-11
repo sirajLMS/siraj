@@ -1,5 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CountryCodePothosObject, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { CurrencyCatalogService as CurrencyService } from "@/backend/services/billing/currency.service";
 import type { SupportedCurrencyReturnType } from "@/backend/types/billing/currency.types";
 
 const SupportedCurrencyRef = gqlSchemaBuilder.objectRef<SupportedCurrencyReturnType>("SupportedCurrency");
@@ -14,3 +15,13 @@ export const SupportedCurrencyPothosObject = SupportedCurrencyRef.implement({
     isActive: t.exposeBoolean("isActive"),
   }),
 });
+
+gqlSchemaBuilder.queryField("supportedCurrencies", t =>
+  t.field({
+    type: [SupportedCurrencyPothosObject],
+    args: {
+      activeOnly: t.arg.boolean({ required: false }),
+    },
+    resolve: (_root, args) => CurrencyService.listSupportedCurrencies(args.activeOnly ?? true),
+  })
+);

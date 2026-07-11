@@ -5,7 +5,7 @@ import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
-  displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
+  displayCurrency: z.enum(CurrencyCode).nullable().optional(),
 });
 
 const ownTeacherSchema = z.object({

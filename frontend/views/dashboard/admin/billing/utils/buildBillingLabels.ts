@@ -250,10 +250,12 @@ function buildFxAndCurrencyLabels(t: BillingTranslator) {
       title: t("displayCurrencyHint.title"),
       body: t("displayCurrencyHint.body"),
       cta: t("displayCurrencyHint.cta"),
+      dismiss: t("displayCurrencyHint.dismiss"),
       subject: {
         title: t("displayCurrencyHint.subject.title"),
         body: t("displayCurrencyHint.subject.body"),
         cta: t("displayCurrencyHint.subject.cta"),
+        dismiss: t("displayCurrencyHint.subject.dismiss"),
       },
     },
     fxConversionNote: t("fxConversionNote"),

@@ -19,8 +19,8 @@ const detailsSchema = z.object({
 
 export const paymentMethodFormSchema = z
   .object({
-    type: z.nativeEnum(PaymentMethodType),
-    direction: z.nativeEnum(PaymentDirection),
+    type: z.enum(PaymentMethodType),
+    direction: z.enum(PaymentDirection),
     label: z.string().optional(),
     isDefault: z.boolean(),
     details: detailsSchema,

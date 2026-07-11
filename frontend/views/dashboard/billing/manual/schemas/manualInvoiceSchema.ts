@@ -15,7 +15,7 @@ export const manualInvoiceSchema = (labels: BillingManualValidationLabels) =>
           const parsed = Number(value);
           return !Number.isNaN(parsed) && parsed > 0;
         }, labels.feeAmountPositive),
-      currency: z.nativeEnum(CurrencyCode),
+      currency: z.enum(CurrencyCode),
       issueDate: z.string().min(1, labels.issueDateRequired),
       dueDate: z.string().min(1, labels.dueDateRequired),
       billingMonths: z.array(z.enum(BILLING_MONTH_IDS)).min(1, labels.billingMonthsRequired),

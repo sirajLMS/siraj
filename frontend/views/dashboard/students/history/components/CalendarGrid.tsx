@@ -86,6 +86,19 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
             <ScheduleOutlined sx={{ fontSize: 10 }} />
             <Typography sx={{ typography: "labelSm" }}>{session.time}</Typography>
           </Box>
+          {session.instructor ? (
+            <Typography
+              sx={theme => ({
+                typography: "labelSm",
+                color: theme.palette.onSurfaceVariant,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              })}
+            >
+              {session.instructor}
+            </Typography>
+          ) : null}
         </Box>
       )}
     </>

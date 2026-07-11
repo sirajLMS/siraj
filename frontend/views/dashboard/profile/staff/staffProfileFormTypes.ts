@@ -4,14 +4,14 @@ import { AccountStatus, CurrencyCode } from "@/frontend/graphql/generated/gql/gr
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
-  displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
+  displayCurrency: z.enum(CurrencyCode).nullable().optional(),
   phone: z.string().optional(),
 });
 
 const adminStaffSchema = z.object({
   status: z.enum(AccountStatus).optional(),
   hourlyRate: z.string().optional(),
-  rateCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
+  rateCurrency: z.enum(CurrencyCode).nullable().optional(),
 });
 
 export const staffOwnEditSchema = coreSchema;

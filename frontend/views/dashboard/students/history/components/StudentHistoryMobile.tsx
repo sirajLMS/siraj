@@ -120,7 +120,12 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
         })}
       >
         <Typography variant="labelMd">{t("breadcrumbs.archive")}</Typography>
-        <ChevronRight sx={{ fontSize: 16 }} />
+        <ChevronRight
+          sx={{
+            fontSize: 16,
+            transform: theme => (theme.direction === "rtl" ? "scaleX(-1)" : undefined),
+          }}
+        />
         <Typography
           variant="labelMd"
           sx={theme => ({
@@ -227,6 +232,7 @@ function HistoryMobileActions({
   onNextMonth: () => void;
   onPrint: () => void;
 }>) {
+  const t = useTranslations("dashboard.studentHistory");
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();
 
@@ -284,6 +290,8 @@ function HistoryMobileActions({
       </Box>
       <Box
         component="button"
+        type="button"
+        aria-label={t("exportPdf")}
         onClick={onPrint}
         sx={theme => ({
           width: 40,

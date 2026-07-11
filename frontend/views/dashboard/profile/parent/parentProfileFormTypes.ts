@@ -5,7 +5,7 @@ import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
-  displayCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
+  displayCurrency: z.enum(CurrencyCode).nullable().optional(),
 });
 
 const ownParentSchema = z.object({
@@ -16,7 +16,7 @@ const ownParentSchema = z.object({
 });
 
 const adminParentSchema = ownParentSchema.extend({
-  lifecycleStatus: z.nativeEnum(ParentStatus).optional(),
+  lifecycleStatus: z.enum(ParentStatus).optional(),
   nationality: z.string().optional(),
   address: z.string().optional(),
   invoiceType: z.string().optional(),

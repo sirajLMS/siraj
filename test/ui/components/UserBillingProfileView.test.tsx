@@ -303,10 +303,12 @@ const mockLabels: BillingLabels = {
     title: "No display currency",
     body: "Set display currency",
     cta: "Edit profile",
+    dismiss: "Dismiss",
     subject: {
       title: "No display currency for user",
       body: "User has no display currency",
       cta: "Edit user profile",
+      dismiss: "Dismiss",
     },
   },
   fxConversionNote: "Converted totals use your display currency ({code})",
