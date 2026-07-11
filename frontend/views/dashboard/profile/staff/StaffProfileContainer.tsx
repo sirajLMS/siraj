@@ -20,6 +20,10 @@ import { StaffProfileView } from "@/frontend/views/dashboard/profile/staff/Staff
 import { PermissionsSection } from "@/frontend/views/dashboard/profile/staff/sections/PermissionsSection";
 import { StaffProfileLoadingSkeleton } from "@/frontend/views/dashboard/profile/staff/sections/StaffProfileLoadingSkeleton";
 import type {
+  StaffPermissionGroups,
+  StaffPermissionOverrides,
+} from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
+import type {
   StaffAdminEditFormData,
   StaffOwnEditFormData,
 } from "@/frontend/views/dashboard/profile/staff/staffProfileFormTypes";
@@ -53,6 +57,61 @@ function buildAdminStaffInput(formData: StaffAdminEditFormData) {
   };
 }
 
+function ProfileErrorAlert({
+  message,
+  retryLabel,
+  onRetry,
+}: {
+  readonly message: string;
+  readonly retryLabel: string;
+  readonly onRetry: () => void;
+}) {
+  return (
+    <Alert
+      severity="error"
+      action={
+        <Button color="inherit" size="small" onClick={onRetry}>
+          {retryLabel}
+        </Button>
+      }
+    >
+      {message}
+    </Alert>
+  );
+}
+
+function PermissionsTabContent({
+  permissionGroups,
+  permissionOverrides,
+  loading,
+  error,
+  hasProfile,
+  refetch,
+}: {
+  readonly permissionGroups: StaffPermissionGroups;
+  readonly permissionOverrides: StaffPermissionOverrides;
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly hasProfile: boolean;
+  readonly refetch: () => void;
+}) {
+  const tc = useTranslations("profile");
+
+  if (loading && !hasProfile) {
+    return <StaffProfileLoadingSkeleton />;
+  }
+  if (error && !hasProfile) {
+    return (
+      <ProfileErrorAlert
+        message={tc("errors.failedToLoad")}
+        retryLabel={tc("actions.retry")}
+        onRetry={() => void refetch()}
+      />
+    );
+  }
+  return <PermissionsSection permissionGroups={permissionGroups} permissionOverrides={permissionOverrides} />;
+}
+
 export function StaffProfileContainer({
   scope,
   mode,
@@ -74,40 +133,21 @@ export function StaffProfileContainer({
   const [updateOwnProfile, { loading: savingOwn }] = useMutation(updateOwnProfileMutationDocument);
   const [updateUserProfile, { loading: savingOther }] = useMutation(updateUserProfileMutationDocument);
   const isSaving = savingOwn || savingOther;
-  const profile = data?.profileByUserId;
+  const profile = data?.profileByUserId ?? undefined;
 
   if (activeTab === "notifications" && scope === ProfileScope.Own) {
     return <NotificationPreferencesTab isActive />;
   }
 
   if (activeTab === "permissions" && isAdminScope) {
-    if (loading && !profile) {
-      return <StaffProfileLoadingSkeleton />;
-    }
-    if (error && !profile) {
-      return (
-        <Alert
-          severity="error"
-          action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={() => {
-                void refetch();
-              }}
-            >
-              {tc("actions.retry")}
-            </Button>
-          }
-        >
-          {tc("errors.failedToLoad")}
-        </Alert>
-      );
-    }
     return (
-      <PermissionsSection
+      <PermissionsTabContent
         permissionGroups={profile?.staffPermissionGroups ?? []}
         permissionOverrides={profile?.staffPermissionOverrides ?? []}
+        loading={loading}
+        error={error}
+        hasProfile={Boolean(profile)}
+        refetch={refetch}
       />
     );
   }
@@ -123,7 +163,7 @@ export function StaffProfileContainer({
     if (scope === ProfileScope.Own) {
       const result = await updateOwnProfile({ variables: { input: { core: coreInput, staff: staffInput } } });
       syncViewerFromProfile(client, {
-        displayCurrency: result.data?.updateOwnProfile?.displayCurrency,
+        displayCurrency: result.data?.updateOwnProfile?.displayCurrency ?? null,
       });
       router.push(ownProfileHref());
       return;
@@ -133,7 +173,7 @@ export function StaffProfileContainer({
       variables: { userId: targetUserId, input: { core: coreInput, staff: staffInput } },
     });
     syncSubjectProfileCache(client, targetUserId, {
-      displayCurrency: result.data?.updateUserProfile?.displayCurrency,
+      displayCurrency: result.data?.updateUserProfile?.displayCurrency ?? null,
     });
     router.push(profileHrefForUser(targetUserId));
   };
@@ -144,22 +184,11 @@ export function StaffProfileContainer({
 
   if (error && !profile) {
     return (
-      <Alert
-        severity="error"
-        action={
-          <Button
-            color="inherit"
-            size="small"
-            onClick={() => {
-              void refetch();
-            }}
-          >
-            {tc("actions.retry")}
-          </Button>
-        }
-      >
-        {tc("errors.failedToLoad")}
-      </Alert>
+      <ProfileErrorAlert
+        message={tc("errors.failedToLoad")}
+        retryLabel={tc("actions.retry")}
+        onRetry={() => void refetch()}
+      />
     );
   }
 
@@ -172,7 +201,6 @@ export function StaffProfileContainer({
   }
 
   const staffData = profile.staffProfile;
-
   const displayCurrency = profile.displayCurrency;
 
   if (mode === ProfileMode.View) {
