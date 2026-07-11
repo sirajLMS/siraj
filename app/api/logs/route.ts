@@ -80,10 +80,10 @@ function stripAnsiEscapes(str: string): string {
 function sanitizeForRendering(str: string): string {
   const withoutAnsi = stripAnsiEscapes(str);
   return withoutAnsi
-    .replaceAll(/&/g, "\x26amp;")
-    .replaceAll(/</g, "\x26lt;")
-    .replaceAll(/>/g, "\x26gt;")
-    .replaceAll(/"/g, "\x26quot;");
+    .replace(/&/g, "\x26amp;")
+    .replace(/</g, "\x26lt;")
+    .replace(/>/g, "\x26gt;")
+    .replace(/"/g, "\x26quot;");
 }
 
 async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void> {

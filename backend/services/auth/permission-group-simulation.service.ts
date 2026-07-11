@@ -312,30 +312,30 @@ export namespace PermissionGroupSimulationService {
       };
     };
 
+    const hasActiveGroupSimulation = payload.groupSimulation && payload.groupSimulationSlug;
+    const noSimulationResult = (): ResolvedGroupSimulation => ({
+      realUserId: payload.userId,
+      isSimulatingGroup: false,
+    });
+
+    const rejectSimWithGroupSession = (): ResolvedGroupSimulation | null =>
+      hasActiveGroupSimulation ? null : noSimulationResult();
+
     if (!rawSessionId) {
-      if (payload.groupSimulation && payload.groupSimulationSlug) {
-        return null;
-      }
-      return { realUserId: payload.userId, isSimulatingGroup: false };
+      return rejectSimWithGroupSession();
     }
 
     const session = await SessionRepository.findSessionById(rawSessionId);
     if (!session?.userId) {
-      if (payload.groupSimulation && payload.groupSimulationSlug) {
-        return null;
-      }
-      return { realUserId: payload.userId, isSimulatingGroup: false };
+      return rejectSimWithGroupSession();
     }
     if (session.userId !== payload.userId) {
-      if (payload.groupSimulation && payload.groupSimulationSlug) {
-        return null;
-      }
-      return { realUserId: payload.userId, isSimulatingGroup: false };
+      return rejectSimWithGroupSession();
     }
 
     if (!payload.groupSimulation || !payload.groupSimulationSlug) {
       const fromSession = await resolveActiveSessionSimulation(payload.userId, rawSessionId);
-      return fromSession ?? { realUserId: payload.userId, isSimulatingGroup: false };
+      return fromSession ?? noSimulationResult();
     }
 
     if (payload.groupSimulationExpiresAt && payload.groupSimulationExpiresAt * 1000 <= Date.now()) {

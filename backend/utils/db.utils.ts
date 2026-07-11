@@ -5,9 +5,5 @@ export function createPgEnumFromEnum(enumName: string, enumObject: Record<string
 }
 
 export function escapeLikeWildcards(input: string): string {
-  const backslashPattern = new RegExp(String.raw`\\`, "g");
-  return input
-    .replaceAll(backslashPattern, String.raw`\\`)
-    .replaceAll("%", "\\%")
-    .replaceAll("_", "\\_");
+  return input.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_"); // NoSonar - string escapes are intentional for LIKE wildcard escaping
 }
