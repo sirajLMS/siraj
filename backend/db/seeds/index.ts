@@ -11,6 +11,7 @@ import { seedOrGet as seedOrGetInvoiceCoverageMonths } from "@/backend/db/seeds/
 import { seedOrGet as seedOrGetInvoicePaymentSubmissions } from "@/backend/db/seeds/billing/seed-invoice-payment-submissions";
 import { seedOrGet as seedOrGetInvoices } from "@/backend/db/seeds/billing/seed-invoices";
 import { seedOrGet as seedOrGetPayments } from "@/backend/db/seeds/billing/seed-payments";
+import { seedOrGet as seedOrGetSupportedCurrencies } from "@/backend/db/seeds/billing/seed-currencies";
 import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds/billing/seed-supported-mobile-wallets";
 import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
 import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";
@@ -126,6 +127,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await step("profile-field-permissions", () => seedOrGetProfileFieldPermissions());
   await step("meeting-permissions", () => seedOrGetMeetingPermissions());
 
+  await step("supported-currencies", () => seedOrGetSupportedCurrencies());
   await step("supported-mobile-wallets", () => seedOrGetSupportedMobileWallets());
   await step("supported-payment-links", () => seedOrGetSupportedPaymentLinks());
   await step("supported-online-accounts", () => seedOrGetSupportedOnlineAccounts());

@@ -9,14 +9,17 @@ import { profileHrefForUser } from "@/frontend/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 
 type DisplayCurrencyHintMode = "viewer" | "subject";
+type DisplayCurrencyHintVariant = "full" | "compact";
 
 interface DisplayCurrencyHintProps {
   readonly mode?: DisplayCurrencyHintMode;
+  readonly variant?: DisplayCurrencyHintVariant;
   readonly subjectUserId?: string;
 }
 
 export function DisplayCurrencyHint({
   mode = "viewer",
+  variant = "full",
   subjectUserId,
 }: Readonly<DisplayCurrencyHintProps>): React.ReactNode {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
@@ -31,6 +34,22 @@ export function DisplayCurrencyHint({
   if (mode === "viewer") {
     if (viewerDisplayCurrency) {
       return null;
+    }
+
+    if (variant === "compact") {
+      return (
+        <Alert
+          severity="info"
+          sx={{ mx: 2, my: 1 }}
+          action={
+            <Button component={Link} href="/profile/edit" color="inherit" size="small">
+              {t("cta")}
+            </Button>
+          }
+        >
+          <strong>{t("title")}</strong>
+        </Alert>
+      );
     }
 
     return (

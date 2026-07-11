@@ -70,6 +70,7 @@ export function StudentHistoryContainer() {
             status: mapStatusToAttendance(session.status ?? "present"),
             executionState: session.status ?? "",
             outcome: session.outcome ?? null,
+            isFrozen: session.isFrozen ?? false,
             instructor: session.instructor ?? "",
             timeSlot: session.timeSlot ?? "",
             room: session.room ?? "",

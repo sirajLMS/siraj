@@ -10,6 +10,8 @@ const coreSchema = z.object({
 
 const adminStaffSchema = z.object({
   status: z.enum(AccountStatus).optional(),
+  hourlyRate: z.string().optional(),
+  rateCurrency: z.nativeEnum(CurrencyCode).nullable().optional(),
 });
 
 export const staffOwnEditSchema = coreSchema;

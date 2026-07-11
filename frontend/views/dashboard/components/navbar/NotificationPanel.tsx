@@ -17,6 +17,7 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { notificationAlertsQueryDocument } from "@/frontend/graphql/sharedDocuments/notifications/notification-alerts.documents";
+import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { UnpaidInvoicesSection } from "@/frontend/views/dashboard/components/navbar/UnpaidInvoicesSection";
 
 function getSeverityColor(
@@ -90,6 +91,7 @@ export function NotificationPanel() {
       <Divider />
 
       <RequirePermission permissions={[AppPermission.BillingViewUnpaidInvoices]}>
+        <DisplayCurrencyHint variant="compact" />
         <UnpaidInvoicesSection />
         <Divider />
       </RequirePermission>

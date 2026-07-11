@@ -45,6 +45,7 @@ export const statusTracking: StatusTrackingLabels = {
     reschedule: "إعادة جدولة",
     verifyDocuments: "التحقق من الوثائق",
     sessionLocked: "الحصة مقفلة",
+    sessionEnded: "انتهت الحصة",
   },
   noEntries: "لا توجد حصص",
   analytics: {

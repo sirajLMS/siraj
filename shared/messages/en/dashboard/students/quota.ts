@@ -38,7 +38,7 @@ export const quota: StudentQuotaLabels = {
     saving: "Saving...",
     saved: "Saved!",
     saveSuccess: "Student quota updated successfully.",
-    lastEdited: "Last edited {time} by {user}",
+    lastEditedAt: "Last edited {time}",
   },
   info: {
     quotaTitle: "Quota Management",

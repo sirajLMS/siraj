@@ -130,6 +130,14 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         status
         roleSlug
         roleName
+        hourlyRate
+        rateCurrency
+        displayAmount {
+          id
+          amount
+          currency
+          stale
+        }
       }
       staffPermissionGroups {
         id

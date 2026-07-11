@@ -8,6 +8,7 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/schedule.documents";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
+import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { StatusTrackingView } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingView";
@@ -19,6 +20,7 @@ import { useRouter } from "@/shared/i18n/routing";
 export function StatusTrackingContainer() {
   const router = useRouter();
   const setRescheduleSession = useRescheduleStore(state => state.setSession);
+  const hasPermission = useUserStore(state => state.hasPermission);
   const labels = useStatusTrackingLabels();
   const notifications = useNotifications();
 
@@ -46,10 +48,17 @@ export function StatusTrackingContainer() {
         teacherTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     }
-    router.push("/reschedule");
+    router.push(`/reschedule?classInstanceId=${id}`);
   };
 
   const handleActivate = (id: string) => {
+    if (!hasPermission(AppPermission.SessionActivateClass)) {
+      return;
+    }
+    const row = rows.find(session => session.id === id);
+    if (!row || row.isFrozen) {
+      return;
+    }
     router.push(`/classes/${id}`);
   };
 

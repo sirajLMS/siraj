@@ -11,6 +11,7 @@ export const status: StudentStatusLabels = {
     adminHold: "Administrative Hold",
     policyOverview: "Policy Overview",
     upcomingClasses: "Upcoming Classes",
+    upcomingClassesMobile: "Upcoming Classes",
   },
   fields: {
     accountStatus: "New Account Status",
@@ -47,6 +48,7 @@ export const status: StudentStatusLabels = {
     frozen: "Frozen",
     active: "Active",
     minutesShort: "{minutes}m",
+    sessionEnded: "Session ended",
   },
   policies: {
     suspensionTitle: "Suspension",

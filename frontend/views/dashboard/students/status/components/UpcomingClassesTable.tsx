@@ -1,5 +1,5 @@
-import { CalendarTodayOutlined, PersonOutlined } from "@mui/icons-material";
-import { Box, Button, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { CalendarTodayOutlined, PersonOutlined, VideocamOffOutlined } from "@mui/icons-material";
+import { Box, Button, Paper, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
@@ -7,6 +7,7 @@ import { PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { formatStudentDisplayId } from "@/frontend/utils/formatStudentDisplayId";
 import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
@@ -46,7 +47,7 @@ function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesT
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t("sections.upcomingClasses").split(" Schedule")[0]}
+          {t("sections.upcomingClassesMobile")}
         </Typography>
         <Button
           onClick={handleViewAll}
@@ -177,7 +178,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
           {t("sections.upcomingClasses")}
         </Typography>
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t("table.footerInfo", { id: studentId })}
+          {t("table.footerInfo", { id: formatStudentDisplayId(studentId) })}
         </Typography>
       </Box>
       <Box
@@ -210,7 +211,7 @@ function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontStyle: "italic" })}>
-        {t("table.footerInfo", { id: studentId })}
+        {t("table.footerInfo", { id: formatStudentDisplayId(studentId) })}
       </Typography>
     </Box>
   );
@@ -306,7 +307,15 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
             meeting={params.row.effectiveMeeting}
             emptyRole="parent"
           />
-        ) : null,
+        ) : (
+          <Tooltip title={t("table.sessionEnded")}>
+            <Box
+              sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
+            >
+              <VideocamOffOutlined sx={theme => ({ fontSize: 20, color: theme.palette.text.disabled })} />
+            </Box>
+          </Tooltip>
+        ),
     },
     {
       field: "executionState",

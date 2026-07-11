@@ -342,17 +342,23 @@ export const SupportedPaymentLinkUpdateInputPothos = gqlSchemaBuilder.inputType(
   }),
 });
 
+function supportedInputCommonFields(t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]) {
+  return {
+    description: t.field({ type: "LocalizedString", required: false }),
+    instructions: t.field({ type: "LocalizedString", required: false }),
+    supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
+    logoUrl: t.string({ required: false }),
+    isActive: t.boolean({ required: false }),
+  };
+}
+
 export const SupportedOnlineAccountCreateInputPothos = gqlSchemaBuilder.inputType("SupportedOnlineAccountCreateInput", {
   fields: t => ({
     slug: t.string({ required: true }),
     name: t.field({ type: "LocalizedString", required: true }),
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
+    ...supportedInputCommonFields(t),
     identifierKind: t.field({ type: IdentifierKindPothosEnum, required: true }),
     identifierLabel: t.field({ type: "LocalizedString", required: false }),
-    supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
-    logoUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
   }),
 });
 
@@ -360,12 +366,8 @@ export const SupportedOnlineAccountUpdateInputPothos = gqlSchemaBuilder.inputTyp
   fields: t => ({
     slug: t.string({ required: false }),
     name: t.field({ type: "LocalizedString", required: false }),
-    description: t.field({ type: "LocalizedString", required: false }),
-    instructions: t.field({ type: "LocalizedString", required: false }),
+    ...supportedInputCommonFields(t),
     identifierKind: t.field({ type: IdentifierKindPothosEnum, required: false }),
     identifierLabel: t.field({ type: "LocalizedString", required: false }),
-    supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
-    logoUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
   }),
 });

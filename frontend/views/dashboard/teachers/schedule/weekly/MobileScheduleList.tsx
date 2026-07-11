@@ -15,12 +15,21 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   MobileScheduleListProps,
   ScheduledClass,
 } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+
+function isTerminalClassInstance(executionState?: ClassExecutionState | null, outcome?: ClassOutcome | null): boolean {
+  return (
+    executionState === ClassExecutionState.Completed ||
+    outcome === ClassOutcome.Taken ||
+    outcome === ClassOutcome.Absent ||
+    outcome === ClassOutcome.Leave
+  );
+}
 
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
@@ -44,6 +53,12 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
     setOpen(false);
   };
 
+  const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
+    isFrozen: classItem.isFrozen ?? false,
+  });
+  const isTerminal = isTerminalClassInstance(classItem.executionState, classItem.outcome);
+  const showDelete = !classItem.isFrozen && !isTerminal;
+
   return (
     <>
       <Box
@@ -66,7 +81,7 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {isJoinableByExecutionState(classItem.executionState, classItem.outcome) ? (
+          {canJoin ? (
             <MeetingJoinAction
               variant="icon"
               joinUrl={classItem.meetingJoinUrl}
@@ -74,21 +89,27 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
               emptyRole="teacher"
               setupHref="/profile?tab=meeting"
             />
+          ) : isTerminal ? (
+            <Typography variant="labelMd" sx={{ opacity: 0.7, color: "inherit", fontSize: 10 }}>
+              {t("grid.sessionEnded")}
+            </Typography>
           ) : null}
-          <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
-            <Box
-              component="span"
-              className="material-symbols-outlined"
-              sx={theme => ({
-                fontSize: 20,
-                cursor: "pointer",
-                "&:hover": { color: theme.palette.error.light },
-              })}
-              onClick={handleDeleteClick}
-            >
-              delete
-            </Box>
-          </RequirePermission>
+          {showDelete ? (
+            <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
+              <Box
+                component="span"
+                className="material-symbols-outlined"
+                sx={theme => ({
+                  fontSize: 20,
+                  cursor: "pointer",
+                  "&:hover": { color: theme.palette.error.light },
+                })}
+                onClick={handleDeleteClick}
+              >
+                delete
+              </Box>
+            </RequirePermission>
+          ) : null}
         </Box>
       </Box>
 

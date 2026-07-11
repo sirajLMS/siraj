@@ -35,6 +35,10 @@ export interface ManagerProfileUpdateInput {
   readonly phoneIsSet?: boolean;
   readonly status?: string | null;
   readonly statusIsSet?: boolean;
+  readonly hourlyRate?: string | null;
+  readonly hourlyRateIsSet?: boolean;
+  readonly rateCurrency?: string | null;
+  readonly rateCurrencyIsSet?: boolean;
 }
 
 export namespace StaffProfileRepository {
@@ -113,6 +117,8 @@ export namespace StaffProfileRepository {
     status: users.status,
     roleSlug: permissionGroups.slug,
     roleNameMap: permissionGroups.name,
+    hourlyRate: staffProfiles.hourlyRate,
+    rateCurrency: staffProfiles.rateCurrency,
   } as const;
 
   function mapManagerDirectoryRow(
@@ -126,6 +132,8 @@ export namespace StaffProfileRepository {
       status: string;
       roleSlug: string | null;
       roleNameMap: LocalizedString | null;
+      hourlyRate: string | null;
+      rateCurrency: string | null;
     },
     locale?: string
   ): ManagerDirectoryRow {
@@ -139,6 +147,8 @@ export namespace StaffProfileRepository {
       status: parseAccountStatus(row.status),
       roleSlug: row.roleSlug,
       roleName: row.roleNameMap ? resolveLocalized(row.roleNameMap, locale) : null,
+      hourlyRate: row.hourlyRate,
+      rateCurrency: row.rateCurrency as ManagerDirectoryRow["rateCurrency"],
     };
   }
 
@@ -343,6 +353,7 @@ export namespace StaffProfileRepository {
 
       const profile = existing[0];
       const hasUserFieldUpdate = input.phoneIsSet || input.statusIsSet;
+      const hasStaffFieldUpdate = input.hourlyRateIsSet || input.rateCurrencyIsSet;
 
       if (input.phoneIsSet) {
         await UserRepository.updateProfileFields(profile.userId, { phone: input.phone ?? null }, locale, t);
@@ -353,7 +364,16 @@ export namespace StaffProfileRepository {
         await UserRepository.updateStatus(profile.userId, status, t, locale);
       }
 
-      if (hasUserFieldUpdate) {
+      if (hasStaffFieldUpdate) {
+        await t
+          .update(staffProfiles)
+          .set({
+            ...(input.hourlyRateIsSet ? { hourlyRate: input.hourlyRate ?? null } : {}),
+            ...(input.rateCurrencyIsSet ? { rateCurrency: input.rateCurrency as ManagerDirectoryRow["rateCurrency"] } : {}),
+            updatedAt: new Date(),
+          })
+          .where(eq(staffProfiles.id, staffProfileId));
+      } else if (hasUserFieldUpdate) {
         await t.update(staffProfiles).set({ updatedAt: new Date() }).where(eq(staffProfiles.id, staffProfileId));
       }
 

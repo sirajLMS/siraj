@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { type CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
+import { CompensationSection } from "@/frontend/views/dashboard/profile/staff/sections/CompensationSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/staff/sections/ContactSection";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
 
@@ -36,6 +37,19 @@ export function StaffProfileView({
     );
   };
 
+  const renderCompensationSection = () => {
+    if (!isAdminScope || !canView("staff_role")) {
+      return null;
+    }
+    return (
+      <CompensationSection
+        mode="view"
+        staffData={staffData}
+        subjectUserId={staffData.id}
+      />
+    );
+  };
+
   return (
     <Stack spacing={2}>
       {isAdminScope ? (
@@ -56,6 +70,7 @@ export function StaffProfileView({
       >
         {renderAccountSection()}
         <ContactSection mode="view" scope={scope} staffData={staffData} />
+        {renderCompensationSection()}
       </Box>
     </Stack>
   );

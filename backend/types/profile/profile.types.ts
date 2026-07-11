@@ -69,6 +69,8 @@ export type StaffOwnProfileUpdateInput = {
 
 export type StaffAdminProfileUpdateInput = {
   readonly status?: string | null;
+  readonly hourlyRate?: string | null;
+  readonly rateCurrency?: import("@/backend/enum").CurrencyCode | null;
 };
 
 export type UpdateOwnProfileInput = {

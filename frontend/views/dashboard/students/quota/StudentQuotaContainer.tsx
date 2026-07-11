@@ -119,12 +119,11 @@ export function StudentQuotaContainer() {
           studentName: s.name ?? tc("notSet"),
           dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
           language: s.language === "en" ? "en" : "ar",
-          gender: resolveGenderLabel(s.gender) ?? "MALE",
+          gender: resolveGenderLabel(s.gender) ?? "",
           teacher: s.teacherName ?? "",
           totalClasses: s.classesTotal ?? 0,
           classesLeft: s.classesRemaining ?? 0,
           profileImage: useUnifiedProfile ? (profile?.avatarUrl ?? "") : "",
-          lastEditedBy: t("common.system"),
           lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : tc("notSet"),
           primaryTeacherId: s.primaryTeacherId ?? null,
         }

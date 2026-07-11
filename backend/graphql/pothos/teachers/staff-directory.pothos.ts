@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { AccountStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  DisplayAmountPothosObject,
+  resolveDisplayAmountField,
+} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { AccountStatusPothosObject, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
@@ -73,6 +77,18 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     status: t.expose("status", { type: AccountStatusPothosObject }),
     roleSlug: t.exposeString("roleSlug", { nullable: true }),
     roleName: t.exposeString("roleName", { nullable: true }),
+    hourlyRate: t.exposeString("hourlyRate", { nullable: true, authScopes: { superAdmin: true } }),
+    rateCurrency: t.expose("rateCurrency", {
+      type: CurrencyCodePothosObject,
+      nullable: true,
+      authScopes: { superAdmin: true },
+    }),
+    displayAmount: t.field({
+      type: DisplayAmountPothosObject,
+      nullable: true,
+      resolve: (parent, _args, ctx) =>
+        resolveDisplayAmountField(parent, ctx, "hourlyRate", "rateCurrency", parent.id),
+    }),
   }),
 });
 
@@ -183,6 +199,8 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       phone: t.string({ required: false }),
       status: t.field({ type: AccountStatusPothosObject, required: false }),
+      hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     }),
   });
 

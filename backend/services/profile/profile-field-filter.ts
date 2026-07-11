@@ -205,6 +205,9 @@ export function collectProfileEditGroupsFromUpdate(
     if (staffKeys.includes("status")) {
       groups.add("staff_role");
     }
+    if (staffKeys.some(key => ["hourlyRate", "rateCurrency"].includes(key))) {
+      groups.add("staff_role");
+    }
   }
 
   return [...groups];

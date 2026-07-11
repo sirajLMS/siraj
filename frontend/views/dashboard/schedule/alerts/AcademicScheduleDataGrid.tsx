@@ -145,6 +145,7 @@ export function AcademicScheduleDataGrid({
                 joinUrl={row.meetingJoinUrl}
                 meeting={row.effectiveMeeting}
                 emptyRole="parent"
+                label={labels.joinSession}
                 id={`join-session-${row.id}`}
               />
             ) : null}

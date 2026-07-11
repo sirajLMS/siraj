@@ -9,7 +9,7 @@ import { ClassAuditDetailsCard } from "@/frontend/views/dashboard/classes/audit/
 import { CommunicationLogCard } from "@/frontend/views/dashboard/classes/audit/CommunicationLogCard";
 import { OnlineMeetingCard } from "@/frontend/views/dashboard/classes/audit/OnlineMeetingCard";
 import { RegisteredStudentsSection } from "@/frontend/views/dashboard/classes/audit/RegisteredStudentsSection";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface ClassAuditLabels {
   readonly breadcrumbs: {
@@ -170,7 +170,7 @@ export function ClassAuditView({
           <OnlineMeetingCard
             meetingInfo={audit.meetingInfo}
             labels={labels.meetingInfo}
-            showJoin={isJoinableByExecutionState(audit.status, audit.outcome)}
+            showJoin={isJoinableClassInstance(audit.status, audit.outcome, { isFrozen: audit.isFrozen ?? false })}
           />
         </Grid>
 

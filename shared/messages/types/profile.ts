@@ -158,6 +158,7 @@ export interface ProfileLabels {
       readonly account: string;
       readonly contact: string;
       readonly role: string;
+      readonly compensation: string;
       readonly permissions: string;
     };
     readonly fields: {
@@ -171,6 +172,8 @@ export interface ProfileLabels {
       readonly statusActive: string;
       readonly statusInactive: string;
       readonly displayCurrency: string;
+      readonly hourlyRate: string;
+      readonly currency: string;
     };
     readonly permissions: {
       readonly inheritedGroups: string;

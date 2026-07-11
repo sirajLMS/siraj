@@ -8,6 +8,8 @@ import type { ManagerDirectoryRow } from "@/backend/types";
 export interface UpdateManagerProfileInput {
   readonly phone?: string | null;
   readonly status?: AccountStatus | null;
+  readonly hourlyRate?: string | null;
+  readonly rateCurrency?: import("@/backend/enum").CurrencyCode | null;
 }
 
 export namespace ManagerProfileService {
@@ -86,6 +88,19 @@ export namespace ManagerProfileService {
         targetRow.id,
         parseAccountStatus(input.status ?? AccountStatus.ACTIVATED),
         undefined,
+        locale
+      );
+    }
+
+    if (input.hourlyRate !== undefined || input.rateCurrency !== undefined) {
+      await StaffProfileRepository.updateManagerProfile(
+        targetStaffProfileId,
+        {
+          hourlyRate: input.hourlyRate ?? null,
+          hourlyRateIsSet: input.hourlyRate !== undefined,
+          rateCurrency: input.rateCurrency ?? null,
+          rateCurrencyIsSet: input.rateCurrency !== undefined,
+        },
         locale
       );
     }

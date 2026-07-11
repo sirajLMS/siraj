@@ -55,9 +55,7 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
     }
   };
 
-  const handleViewMaterials = () => {
-    notifications.show(t("notifications.noSubjectAssigned"), { severity: "info" });
-  };
+  const handleViewMaterials = () => {};
 
   if (loading && !data) {
     return (

@@ -5,12 +5,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
+import { type BillingCurrencyBucket, formatBillingCurrencyTotals } from "@/frontend/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
-import {
-  aggregatePaidAmountTotals,
-  formatReportPaidAmounts,
-} from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
+import { aggregatePaidAmountTotals } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 
 interface ReportsTotalsSectionProps {
   readonly summary: ReportsSummary;
@@ -19,21 +17,58 @@ interface ReportsTotalsSectionProps {
   readonly variant: "desktop" | "mobile";
 }
 
-function useTotalsText(rows: readonly ReportLedgerRow[]) {
+function useTotalsDisplay(rows: readonly ReportLedgerRow[]) {
   const locale = useLocale();
   const tProfile = useTranslations("profile");
   const tErrors = useTranslations("errors");
 
   return useMemo(() => {
     const paidTotals = aggregatePaidAmountTotals(rows);
-    return formatReportPaidAmounts(paidTotals, locale, buildFxDisplayMessages(tProfile, tErrors));
+    if (paidTotals.length === 0) {
+      return { primary: "—" };
+    }
+
+    const buckets: BillingCurrencyBucket[] = paidTotals.map(paid => ({
+      amount: paid.amount,
+      currency: paid.currency,
+      displayAmount: paid.displayAmount
+        ? {
+            amount: paid.displayAmount.amount,
+            currency: paid.displayAmount.currency,
+            stale: paid.displayAmount.stale,
+          }
+        : null,
+    }));
+
+    return formatBillingCurrencyTotals(buckets, locale, buildFxDisplayMessages(tProfile, tErrors));
   }, [rows, locale, tProfile, tErrors]);
+}
+
+function TotalsAmount({ display }: { readonly display: { primary: string; breakdown?: string } }) {
+  if (!display.breakdown) {
+    return (
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
+        {display.primary}
+      </Typography>
+    );
+  }
+
+  return (
+    <Stack spacing={0.25} sx={{ alignItems: "flex-end" }}>
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
+        {display.primary}
+      </Typography>
+      <Typography variant="caption" sx={{ color: "text.secondary", textAlign: "end" }}>
+        {display.breakdown}
+      </Typography>
+    </Stack>
+  );
 }
 
 export function ReportsTotalsSection({ summary, rows, totalsLabel, variant }: Readonly<ReportsTotalsSectionProps>) {
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
-  const totalsText = useTotalsText(rows);
+  const totalsDisplay = useTotalsDisplay(rows);
 
   if (variant === "mobile") {
     if (!showFinancials) {
@@ -59,9 +94,7 @@ export function ReportsTotalsSection({ summary, rows, totalsLabel, variant }: Re
             <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
               {summary.totalHours}
             </Typography>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
-              {totalsText}
-            </Typography>
+            <TotalsAmount display={totalsDisplay} />
           </Stack>
         </Stack>
       </Box>
@@ -92,9 +125,9 @@ export function ReportsTotalsSection({ summary, rows, totalsLabel, variant }: Re
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, textAlign: "center" })}>
             {summary.totalHours}
           </Typography>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
-            {totalsText}
-          </Typography>
+          <Box sx={{ textAlign: "end" }}>
+            <TotalsAmount display={totalsDisplay} />
+          </Box>
         </>
       )}
     </Box>

@@ -45,6 +45,7 @@ export const statusTracking: StatusTrackingLabels = {
     reschedule: "Reschedule",
     verifyDocuments: "Verify Documents",
     sessionLocked: "Session Locked",
+    sessionEnded: "Session ended",
   },
   noEntries: "No classes found",
   analytics: {

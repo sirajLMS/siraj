@@ -22,6 +22,7 @@ export const weeklySchedule: TeacherWeeklyScheduleLabels = {
     bookedClass: "Booked",
     availableSlot: "Available Slot",
     lastUpdated: "Last Updated: {date}",
+    sessionEnded: "Session ended",
   },
   days: {
     monday: "Monday",

@@ -14,6 +14,8 @@ const targetRow = {
   status: AccountStatus.ACTIVATED,
   roleSlug: "staff",
   roleName: "Staff",
+  hourlyRate: null,
+  rateCurrency: null,
 };
 
 const updatedRow = {

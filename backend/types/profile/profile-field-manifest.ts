@@ -177,7 +177,7 @@ export const PROFILE_FIELD_GROUPS: readonly ProfileFieldGroupDefinition[] = [
   },
   {
     groupKey: "staff_role",
-    paths: ["staffProfile.roleName", "staffProfile.roleSlug", "staffProfile.status"],
+    paths: ["staffProfile.roleName", "staffProfile.roleSlug", "staffProfile.status", "staffProfile.hourlyRate", "staffProfile.rateCurrency"],
     audiences: [ProfileAudience.STAFF],
     scopes: [ProfileScope.OWN, ProfileScope.OTHER],
     viewOwn: profilePerm("staff_role", "view_own"),

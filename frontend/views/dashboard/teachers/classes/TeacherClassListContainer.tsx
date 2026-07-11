@@ -11,8 +11,10 @@ import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfi
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
+import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import { buildClassInstanceStatusLabels } from "@/frontend/views/dashboard/utils/classInstanceStatusLabels";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useRouter } from "@/shared/i18n/routing";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 function formatClassSchedule(
   scheduledStartAt: string | null | undefined,
@@ -47,9 +49,25 @@ export function TeacherClassListContainer() {
   const t = useTranslations("dashboard.teacherClassList");
   const tDashboard = useTranslations("dashboard");
   const locale = useLocale();
+  const router = useRouter();
   const instanceStatusLabels = useMemo(() => buildClassInstanceStatusLabels(tDashboard), [tDashboard]);
   const { data, loading, error } = useQuery(teacherAssignedClassesQueryDocument);
   const rows = data?.teacherAssignedClasses?.rows ?? [];
+
+  const handleViewClassAudit = (id: string) => {
+    router.push(`/classes/${id}/audit`);
+  };
+
+  const actionLabels = useMemo(
+    () => ({
+      joinSession: "",
+      leaveClass: "",
+      leaveDisabledReason: "",
+      viewClassAudit: t("viewClassAudit"),
+      contactAdmin: "",
+    }),
+    [t]
+  );
 
   return (
     <RequirePermission permissions={[AppPermission.SessionViewDetails]}>
@@ -105,7 +123,7 @@ export function TeacherClassListContainer() {
                     </Stack>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    {isJoinableByExecutionState(row.executionState, row.outcome) ? (
+                    {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false }) ? (
                       <MeetingJoinAction
                         variant="icon"
                         joinUrl={row.meetingJoinUrl}
@@ -113,7 +131,15 @@ export function TeacherClassListContainer() {
                         emptyRole="teacher"
                         setupHref="/profile?tab=meeting"
                       />
-                    ) : null}
+                    ) : (
+                      <ClassSessionActionButton
+                        action="view_class_audit"
+                        classId={row.id ?? ""}
+                        labels={actionLabels}
+                        onLeave={() => {}}
+                        onViewClassAudit={handleViewClassAudit}
+                      />
+                    )}
                     <Button component={Link} href={`/classes/${row.id}`} variant="outlined" size="small">
                       {t("viewDetails")}
                     </Button>

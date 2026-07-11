@@ -57,6 +57,7 @@ function MobileLayout({
   labels,
   cardListLabels,
   onActivate,
+  onReschedule,
   onVerify,
   onNewReport,
   onSeeAll,
@@ -73,6 +74,7 @@ function MobileLayout({
           totalSessions={totalSessions}
           labels={cardListLabels}
           onActivate={onActivate}
+          onReschedule={onReschedule}
           onVerify={onVerify}
           onSeeAll={onSeeAll}
         />
@@ -143,6 +145,7 @@ function DesktopLayout({
             suspendedPending: labels.suspendedPending,
             onLeave: labels.onLeave,
             pendingVerification: labels.pendingVerification,
+            sessionEnded: labels.sessionEnded,
             noEntries: labels.noEntries,
           }}
           onActivate={onActivate}
@@ -168,8 +171,10 @@ export function StatusTrackingView(props: StatusTrackingViewProps) {
   const cardListLabels: CardListLabels = {
     joinSession: labels.joinSession,
     activate: labels.activate,
+    reschedule: labels.reschedule,
     verifyDocuments: labels.verifyDocuments,
     sessionLocked: labels.sessionLocked,
+    sessionEnded: labels.sessionEnded,
     seeAll: labels.seeAll,
     todaysSchedule: labels.todaysSchedule,
     regular: labels.regular,

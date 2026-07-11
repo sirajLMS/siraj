@@ -1476,7 +1476,9 @@ export type RevokePermissionGroupFromUserInput = {
 };
 
 export type StaffAdminProfileUpdateInput = {
+  hourlyRate: string | null | undefined;
   phone: string | null | undefined;
+  rateCurrency: CurrencyCode | null | undefined;
   status: string | null | undefined;
 };
 
@@ -1711,7 +1713,9 @@ export type TeacherProgressFeedEventKind =
   | 'started';
 
 export type UpdateManagerProfileInput = {
+  hourlyRate: string | null | undefined;
   phone: string | null | undefined;
+  rateCurrency: CurrencyCode | null | undefined;
   status: AccountStatus | null | undefined;
 };
 
@@ -2156,6 +2160,20 @@ export type CreateTeacherPaymentMutationVariables = Exact<{
 
 
 export type CreateTeacherPaymentMutation = CreateTeacherPaymentMutation_Mutation;
+
+export type SupportedCurrencyFieldsFragment = { code: Types.CurrencyCode | null, symbol: string | null, countryCode: Types.CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null };
+
+export type SupportedCurrenciesQuery_supportedCurrencies_SupportedCurrency = { code: Types.CurrencyCode | null, symbol: string | null, countryCode: Types.CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null };
+
+export type SupportedCurrenciesQuery_Query = { supportedCurrencies: Array<SupportedCurrenciesQuery_supportedCurrencies_SupportedCurrency> | null };
+
+
+export type SupportedCurrenciesQueryVariables = Exact<{
+  activeOnly: boolean | null | undefined;
+}>;
+
+
+export type SupportedCurrenciesQuery = SupportedCurrenciesQuery_Query;
 
 export type LatestExchangeRatesQuery_latestExchangeRates_ExchangeRate = { id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null };
 
@@ -3604,7 +3622,9 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStuden
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStudents_ParentAssignedStudentsResult_rows_ParentAssignedStudent> | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, roleSlug: string | null, roleName: string | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
+
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, roleSlug: string | null, roleName: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null };
 

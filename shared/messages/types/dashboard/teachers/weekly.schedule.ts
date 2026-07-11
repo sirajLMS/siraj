@@ -20,6 +20,7 @@ export interface TeacherWeeklyScheduleLabels {
     readonly bookedClass: string;
     readonly availableSlot: string;
     readonly lastUpdated: string;
+    readonly sessionEnded: string;
   };
   readonly days: {
     readonly monday: string;

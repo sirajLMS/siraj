@@ -10,6 +10,7 @@ import {
   updateUserProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
+import { syncSubjectProfileCache } from "@/frontend/lib/sync-subject-profile";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StaffProfileEditForm } from "@/frontend/views/dashboard/profile/staff/StaffProfileEditForm";
@@ -45,6 +46,8 @@ function buildOwnStaffInput() {
 function buildAdminStaffInput(formData: StaffAdminEditFormData) {
   return {
     status: formData.status ?? null,
+    hourlyRate: formData.hourlyRate || null,
+    rateCurrency: formData.rateCurrency || null,
   };
 }
 
@@ -103,8 +106,11 @@ export function StaffProfileContainer({
       return;
     }
 
-    await updateUserProfile({
+    const result = await updateUserProfile({
       variables: { userId: targetUserId, input: { core: coreInput, staff: staffInput } },
+    });
+    syncSubjectProfileCache(client, targetUserId, {
+      displayCurrency: result.data?.updateUserProfile?.displayCurrency,
     });
     router.push(profileHrefForUser(targetUserId));
   };

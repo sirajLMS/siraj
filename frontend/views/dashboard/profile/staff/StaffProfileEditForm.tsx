@@ -9,6 +9,7 @@ import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AccountStatus, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/staff/sections/AccountSection";
+import { CompensationSection } from "@/frontend/views/dashboard/profile/staff/sections/CompensationSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/staff/sections/ContactSection";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";
 import {
@@ -41,6 +42,8 @@ export function StaffProfileEditForm({
       phone: "",
       status: AccountStatus.Activated,
       displayCurrency: null,
+      hourlyRate: "",
+      rateCurrency: null,
     },
   });
 
@@ -51,6 +54,8 @@ export function StaffProfileEditForm({
       phone: staffData.phone ?? "",
       status: staffData.status ?? AccountStatus.Activated,
       displayCurrency: displayCurrency ?? null,
+      hourlyRate: staffData.hourlyRate ?? "",
+      rateCurrency: staffData.rateCurrency ?? null,
     });
   }, [displayCurrency, form, staffData]);
 
@@ -59,6 +64,7 @@ export function StaffProfileEditForm({
   };
 
   const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
+  const showCompensationSection = isAdminScope && canEdit("staff_role");
 
   return (
     <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
@@ -84,6 +90,9 @@ export function StaffProfileEditForm({
             />
           ) : null}
           {canEdit("core_contact") ? <ContactSection mode="edit" scope={scope} control={form.control} /> : null}
+          {showCompensationSection ? (
+            <CompensationSection mode="edit" register={form.register} control={form.control} />
+          ) : null}
         </Box>
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {tc("actions.save")}

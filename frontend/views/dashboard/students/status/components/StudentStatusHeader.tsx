@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { UserAvatar } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { formatStudentDisplayId } from "@/frontend/utils/formatStudentDisplayId";
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/utils/profileHref";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";
@@ -117,7 +118,7 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["
           >
             <Fingerprint sx={{ fontSize: 16 }} />
             <Typography variant="labelMd" sx={{ letterSpacing: "0.05em" }}>
-              {t("studentId", { id: student.id.replace("STU-", "") })}
+              {t("studentId", { id: formatStudentDisplayId(student.id) })}
             </Typography>
           </Box>
         ) : null}

@@ -9,6 +9,7 @@ export interface StudentStatusLabels {
     readonly adminHold: string;
     readonly policyOverview: string;
     readonly upcomingClasses: string;
+    readonly upcomingClassesMobile: string;
   };
   readonly fields: {
     readonly accountStatus: string;
@@ -45,6 +46,7 @@ export interface StudentStatusLabels {
     readonly frozen: string;
     readonly active: string;
     readonly minutesShort: string;
+    readonly sessionEnded: string;
   };
   readonly policies: {
     readonly suspensionTitle: string;

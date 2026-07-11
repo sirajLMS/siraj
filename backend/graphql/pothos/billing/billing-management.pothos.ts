@@ -1,6 +1,6 @@
 import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
-import gqlSchemaBuilder from "@/backend/graphql/gqlSchemaBuilder";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { BillingMonthInputRef } from "@/backend/graphql/pothos/billing/billing-history.pothos";
 import {
   DisplayAmountPothosObject,
@@ -48,15 +48,15 @@ function flattenDeleteInvoiceResult(result: DeleteInvoiceResult): DeleteInvoiceR
   };
 }
 
-// Shared resolver factory: authenticates, calls the service, and flattens the result.
+// Shared resolver helper: authenticates and calls the service, then flattens the result.
 // Eliminates duplicated resolver bodies across the four MarkInvoicePaid mutations.
 
-function markInvoicePaidResolver(
-  serviceCall: (userId: string, locale: string | undefined) => Promise<MarkInvoicePaidResult>
+function markInvoicePaidResolver<TArgs extends Record<string, unknown>>(
+  serviceCall: (userId: string, args: TArgs, locale?: string) => Promise<MarkInvoicePaidResult>
 ) {
-  return async (_root: unknown, _args: object, ctx: BaseContext) => {
+  return async (_root: unknown, args: TArgs, ctx: BaseContext): Promise<MarkInvoicePaidReturnType> => {
     const userId = await requireAuth(ctx);
-    const result = await serviceCall(userId, ctx.locale);
+    const result = await serviceCall(userId, args, ctx.locale);
     return flattenMarkInvoicePaidResult(result);
   };
 }

@@ -33,6 +33,7 @@ export interface StatusTrackingLabels {
   readonly reschedule: string;
   readonly verifyDocuments: string;
   readonly sessionLocked: string;
+  readonly sessionEnded: string;
   readonly administrativeHold: string;
   readonly holdDescription: string;
   readonly seeAll: string;
@@ -73,14 +74,17 @@ export interface StatusTrackingDataGridLabels {
   readonly suspendedPending: string;
   readonly onLeave: string;
   readonly pendingVerification: string;
+  readonly sessionEnded: string;
   readonly noEntries: string;
 }
 
 export interface CardListLabels {
   readonly joinSession: string;
   readonly activate: string;
+  readonly reschedule: string;
   readonly verifyDocuments: string;
   readonly sessionLocked: string;
+  readonly sessionEnded: string;
   readonly seeAll: string;
   readonly todaysSchedule: string;
   readonly regular: string;
@@ -152,6 +156,7 @@ export interface StatusTrackingCardListProps {
   readonly totalSessions: number;
   readonly labels: CardListLabels;
   readonly onActivate: (id: string) => void;
+  readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
   readonly onSeeAll: () => void;
 }

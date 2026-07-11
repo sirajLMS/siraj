@@ -4,6 +4,7 @@ export {
   BillingRepository,
   InvoicePaymentSubmissionRepository,
   SupportedMobileWalletRepository,
+  SupportedCurrencyRepository,
   SupportedOnlineAccountRepository,
   SupportedPaymentLinkRepository,
   UserPaymentMethodRepository,

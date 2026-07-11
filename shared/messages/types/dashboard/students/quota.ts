@@ -36,7 +36,7 @@ export interface StudentQuotaLabels {
     readonly saving: string;
     readonly saved: string;
     readonly saveSuccess: string;
-    readonly lastEdited: string;
+    readonly lastEditedAt: string;
   };
   readonly info: {
     readonly quotaTitle: string;

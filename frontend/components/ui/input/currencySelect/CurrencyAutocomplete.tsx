@@ -19,7 +19,8 @@ import {
   getCurrencyAutocompletePopperSlotProps,
 } from "@/frontend/components/ui/input/currencySelect/currencyAutocompletePopper";
 import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyByCode, getCurrencyOptions, getCurrencySymbol } from "@/frontend/lib/currency";
+import { useCurrencyCatalog } from "@/frontend/hooks/useCurrencyCatalog";
+import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 
 export type CurrencyAutocompleteProps = {
   readonly currency?: CurrencyOption | null;
@@ -197,7 +198,7 @@ export const CurrencyAutocomplete: React.FC<CurrencyAutocompleteProps> = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
-  const allOptions = useMemo(() => getCurrencyOptions(), []);
+  const { options: allOptions } = useCurrencyCatalog();
   const options = useMemo(() => {
     if (!allowedCodes || allowedCodes.length === 0) {
       return allOptions;

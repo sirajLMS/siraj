@@ -1,7 +1,7 @@
 "use client";
 
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { alpha, Box, Button, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
@@ -102,8 +102,7 @@ function ActionButtons({
   item,
   isMobile,
   onRequestLeave,
-  onViewMaterials,
-}: Readonly<{ item: FutureClass; isMobile: boolean; onRequestLeave?: () => void; onViewMaterials?: () => void }>) {
+}: Readonly<{ item: FutureClass; isMobile: boolean; onRequestLeave?: () => void }>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
 
   return (
@@ -156,30 +155,31 @@ function ActionButtons({
           {t("requestLeave")}
         </Button>
       )}
-      <Button
-        variant="contained"
-        onClick={() => onViewMaterials?.()}
-        sx={theme => ({
-          borderRadius: 2,
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: "0.05em",
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          px: isMobile ? 2 : 3,
-          flex: isMobile ? 1 : "initial",
-          "&:hover": {
-            backgroundColor: theme.palette.primary.dark,
-          },
-        })}
-      >
-        {t("viewMaterials")}
-      </Button>
+      <Tooltip title={t("notifications.noSubjectAssigned")}>
+        <span>
+          <Button
+            variant="contained"
+            disabled
+            sx={theme => ({
+              borderRadius: 2,
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.onPrimary,
+              px: isMobile ? 2 : 3,
+              flex: isMobile ? 1 : "initial",
+            })}
+          >
+            {t("viewMaterials")}
+          </Button>
+        </span>
+      </Tooltip>
     </Stack>
   );
 }
 
-export function FutureClassCard({ item, onRequestLeave, onViewMaterials }: Readonly<FutureClassCardProps>) {
+export function FutureClassCard({ item, onRequestLeave }: Readonly<FutureClassCardProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isRescheduled = item.isRescheduled === true;
@@ -203,12 +203,7 @@ export function FutureClassCard({ item, onRequestLeave, onViewMaterials }: Reado
           <DateSquare date={item.scheduledDate ?? ""} isRescheduled={isRescheduled} />
           <ClassInfo item={item} isMobile={isMobile} />
         </Stack>
-        <ActionButtons
-          item={item}
-          isMobile={isMobile}
-          onRequestLeave={onRequestLeave}
-          onViewMaterials={onViewMaterials}
-        />
+        <ActionButtons item={item} isMobile={isMobile} onRequestLeave={onRequestLeave} />
       </Stack>
     </BaseCard>
   );

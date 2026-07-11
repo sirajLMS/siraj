@@ -1,5 +1,7 @@
-import { index, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, numeric, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import { currencyCodeEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
+import type { CurrencyCode } from "@/backend/enum";
 
 /**
  * Thin staff membership marker (Decision 6A).
@@ -14,6 +16,8 @@ export const staffProfiles = pgTable(
       .notNull()
       .unique()
       .references(() => users.id, { onDelete: "restrict" }),
+    hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
+    rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

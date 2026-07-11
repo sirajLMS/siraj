@@ -34,6 +34,7 @@ export interface StatusTrackingActionsLabels {
   readonly reschedule: string;
   readonly verifyDocuments: string;
   readonly sessionLocked: string;
+  readonly sessionEnded: string;
 }
 
 export interface StatusTrackingAnalyticsLabels {

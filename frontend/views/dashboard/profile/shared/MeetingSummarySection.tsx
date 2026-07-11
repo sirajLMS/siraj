@@ -40,12 +40,16 @@ export function MeetingSummarySection({ userId, meetingTabHref }: MeetingSummary
         {loading ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
             <CircularProgress size={18} />
-            <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t("loading")}</Typography>
+            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onSurfaceVariant })}>
+              {t("loading")}
+            </Typography>
           </Box>
         ) : defaultConfig ? (
           <MeetingConfigDisplay config={toDisplayData(defaultConfig as UserMeetingConfigFieldsFragment)} compact />
         ) : (
-          <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t("empty")}</Typography>
+          <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onSurfaceVariant })}>
+            {t("empty")}
+          </Typography>
         )}
         {meetingTabHref ? (
           <Link href={meetingTabHref} underline="hover" sx={{ typography: "labelMd" }}>

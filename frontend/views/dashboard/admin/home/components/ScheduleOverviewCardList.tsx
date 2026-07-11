@@ -19,7 +19,7 @@ import {
   formatScheduleYourTime,
 } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface ScheduleOverviewCardListProps {
   readonly rows: readonly DailyScheduleRow[];
@@ -355,7 +355,7 @@ interface ScheduleCardActionsProps {
 function ScheduleCardActions({ row, headers, detailsLabel, studentId, classId }: ScheduleCardActionsProps) {
   return (
     <StyledCardActions>
-      {isJoinableByExecutionState(row.executionState, row.outcome) ? (
+      {isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false }) ? (
         <MeetingJoinAction
           variant="icon"
           joinUrl={row.meetingJoinUrl}

@@ -5,7 +5,6 @@ import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/q
 export interface StudentProfileData extends StudentQuotaFormData {
   readonly id: string;
   readonly profileImage: string;
-  readonly lastEditedBy: string;
   readonly lastEditedTime: string;
   readonly primaryTeacherId: string | null;
 }

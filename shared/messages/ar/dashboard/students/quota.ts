@@ -38,7 +38,7 @@ export const quota: StudentQuotaLabels = {
     saving: "جاري الحفظ...",
     saved: "تم الحفظ!",
     saveSuccess: "تم تحديث الحصة بنجاح.",
-    lastEdited: "آخر تعديل: قبل {time} بواسطة {user}",
+    lastEditedAt: "آخر تعديل: {time}",
   },
   info: {
     quotaTitle: "إدارة الحصص",

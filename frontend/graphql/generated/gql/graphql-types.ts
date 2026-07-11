@@ -2162,10 +2162,13 @@ export type ManagerDirectoryResult = {
 export type ManagerDirectoryRow = {
   __typename?: 'ManagerDirectoryRow';
   avatarUrl: Maybe<Scalars['String']['output']>;
+  displayAmount: Maybe<DisplayAmount>;
   email: Maybe<Scalars['String']['output']>;
+  hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   phone: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<CurrencyCode>;
   roleName: Maybe<Scalars['String']['output']>;
   roleSlug: Maybe<Scalars['String']['output']>;
   staffProfileId: Maybe<Scalars['String']['output']>;
@@ -3772,6 +3775,8 @@ export type Query = {
   students: StudentsWithFiltersResponse;
   /** Returns contributor statistics for the suggestion social proof display. */
   suggestionContributorStats: Maybe<SuggestionContributorStats>;
+  /** Lists supported currency metadata for display and selection. */
+  supportedCurrencies: Maybe<Array<SupportedCurrency>>;
   supportedMobileWallets: Maybe<Array<SupportedMobileWallet>>;
   supportedOnlineAccounts: Maybe<Array<SupportedOnlineAccount>>;
   supportedPaymentLinks: Maybe<Array<SupportedPaymentLink>>;
@@ -4117,6 +4122,11 @@ export type QuerySuggestionContributorStatsArgs = {
 };
 
 
+export type QuerySupportedCurrenciesArgs = {
+  activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
 export type QuerySupportedMobileWalletsArgs = {
   activeOnly?: InputMaybe<Scalars['Boolean']['input']>;
   countryCode: InputMaybe<CountryCode>;
@@ -4374,7 +4384,9 @@ export type SimulatablePermissionGroup = {
 };
 
 export type StaffAdminProfileUpdateInput = {
+  hourlyRate: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
   status: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -4854,6 +4866,16 @@ export type SupportRequestResult = {
   __typename?: 'SupportRequestResult';
   id: Maybe<Scalars['String']['output']>;
   success: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type SupportedCurrency = {
+  __typename?: 'SupportedCurrency';
+  code: Maybe<CurrencyCode>;
+  countryCode: Maybe<CountryCode>;
+  decimals: Maybe<Scalars['Int']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  sortOrder: Maybe<Scalars['Int']['output']>;
+  symbol: Maybe<Scalars['String']['output']>;
 };
 
 export type SupportedMobileWallet = {
@@ -5367,7 +5389,9 @@ export type UnpaidInvoicesSummary = {
 };
 
 export type UpdateManagerProfileInput = {
+  hourlyRate: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
+  rateCurrency: InputMaybe<CurrencyCode>;
   status: InputMaybe<AccountStatus>;
 };
 

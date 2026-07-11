@@ -6,7 +6,7 @@ export const createStudentQuotaSchema = (messages: MessageSchema["dashboard"]["s
     studentName: z.string().min(1, messages.nameRequired),
     dateOfBirth: z.string().min(1, messages.dobRequired),
     language: z.enum(["ar", "en"] as const, { message: messages.languageRequired }),
-    gender: z.enum(["MALE", "FEMALE"] as const, { message: messages.genderRequired }),
+    gender: z.union([z.enum(["MALE", "FEMALE"] as const), z.literal("")]),
     teacher: z.string().min(1, messages.teacherRequired),
     totalClasses: z.coerce.number({ message: messages.totalClassesRequired }).min(0, messages.totalClassesMin),
     classesLeft: z.coerce.number({ message: messages.classesLeftRequired }).min(0, messages.classesLeftMin),

@@ -2089,10 +2089,13 @@ type ManagerDirectoryResult {
 
 type ManagerDirectoryRow {
   avatarUrl: String
+  displayAmount: DisplayAmount
   email: String
+  hourlyRate: String
   id: String
   name: String
   phone: String
+  rateCurrency: CurrencyCode
   roleName: String
   roleSlug: String
   staffProfileId: String
@@ -3035,6 +3038,9 @@ type Query {
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
+
+  """Lists supported currency metadata for display and selection."""
+  supportedCurrencies(activeOnly: Boolean = true): [SupportedCurrency!]
   supportedMobileWallets(activeOnly: Boolean = true, countryCode: CountryCode, direction: PaymentDirection): [SupportedMobileWallet!]
   supportedOnlineAccounts(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedOnlineAccount!]
   supportedPaymentLinks(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedPaymentLink!]
@@ -3210,7 +3216,9 @@ type SimulatablePermissionGroup {
 }
 
 input StaffAdminProfileUpdateInput {
+  hourlyRate: String
   phone: String
+  rateCurrency: CurrencyCode
   status: String
 }
 
@@ -3668,6 +3676,15 @@ type SupportContact {
 type SupportRequestResult {
   id: String
   success: Boolean
+}
+
+type SupportedCurrency {
+  code: CurrencyCode
+  countryCode: CountryCode
+  decimals: Int
+  isActive: Boolean
+  sortOrder: Int
+  symbol: String
 }
 
 type SupportedMobileWallet {
@@ -4169,7 +4186,9 @@ type UnpaidInvoicesSummary {
 }
 
 input UpdateManagerProfileInput {
+  hourlyRate: String
   phone: String
+  rateCurrency: CurrencyCode
   status: AccountStatus
 }
 

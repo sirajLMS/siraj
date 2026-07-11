@@ -1,6 +1,12 @@
 "use client";
 
-import { BlockOutlined, PersonOutlined, ScheduleOutlined, WarningAmberOutlined } from "@mui/icons-material";
+import {
+  BlockOutlined,
+  EventRepeatOutlined,
+  PersonOutlined,
+  ScheduleOutlined,
+  WarningAmberOutlined,
+} from "@mui/icons-material";
 import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
 import { useLocale } from "next-intl";
@@ -14,7 +20,7 @@ import {
   type StatusTrackingCardListProps,
   type StatusTrackingRow,
 } from "@/frontend/views/dashboard/classes/status/tracking/types";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
   [SessionStatus.REGULAR]: "regular",
@@ -109,25 +115,30 @@ function getCardActionButton(
   sessionStatus: SessionStatus,
   labels: CardListLabels,
   onActivate: (id: string) => void,
+  onReschedule: (id: string) => void,
   onVerify: (id: string) => void
 ) {
   const rowId = row.id ?? "";
 
   if (sessionStatus === SessionStatus.REGULAR) {
-    if (!isJoinableByExecutionState(row.executionState, row.outcome)) {
-      return null;
+    if (isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false })) {
+      return (
+        <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+          <MeetingJoinAction
+            variant="icon"
+            joinUrl={row.meetingJoinUrl}
+            meeting={row.effectiveMeeting}
+            emptyRole="class"
+            setupHref={`/classes/${rowId}#meeting-configs`}
+            id={`mobile-join-${rowId}`}
+          />
+        </Box>
+      );
     }
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-        <MeetingJoinAction
-          variant="icon"
-          joinUrl={row.meetingJoinUrl}
-          meeting={row.effectiveMeeting}
-          emptyRole="class"
-          setupHref={`/classes/${rowId}#meeting-configs`}
-          id={`mobile-join-${rowId}`}
-        />
-      </Box>
+      <StyledCardActionButtonBase id={`mobile-session-ended-${rowId}`} fullWidth disabled>
+        {labels.sessionEnded}
+      </StyledCardActionButtonBase>
     );
   }
 
@@ -148,9 +159,17 @@ function getCardActionButton(
 
   if (sessionStatus === SessionStatus.ON_LEAVE) {
     return (
-      <StyledCardActionButtonBase id={`mobile-locked-${rowId}`} fullWidth disabled>
-        {labels.sessionLocked}
-      </StyledCardActionButtonBase>
+      <StyledActivateActionButton
+        id={`mobile-reschedule-${rowId}`}
+        fullWidth
+        variant="outlined"
+        startIcon={<EventRepeatOutlined />}
+        onClick={() => {
+          onReschedule(rowId);
+        }}
+      >
+        {labels.reschedule}
+      </StyledActivateActionButton>
     );
   }
 
@@ -197,11 +216,13 @@ function StatusTrackingCard({
   row,
   labels,
   onActivate,
+  onReschedule,
   onVerify,
 }: {
   readonly row: StatusTrackingRow;
   readonly labels: CardListLabels;
   readonly onActivate: (id: string) => void;
+  readonly onReschedule: (id: string) => void;
   readonly onVerify: (id: string) => void;
 }) {
   const theme = useTheme();
@@ -253,7 +274,7 @@ function StatusTrackingCard({
           </Box>
         </Box>
 
-        {getCardActionButton(row, sessionStatus, labels, onActivate, onVerify)}
+        {getCardActionButton(row, sessionStatus, labels, onActivate, onReschedule, onVerify)}
       </CardContent>
     </Card>
   );
@@ -264,6 +285,7 @@ export function StatusTrackingCardList({
   totalSessions,
   labels,
   onActivate,
+  onReschedule,
   onVerify,
   onSeeAll,
 }: StatusTrackingCardListProps) {
@@ -295,6 +317,7 @@ export function StatusTrackingCardList({
             row={row}
             labels={labels}
             onActivate={onActivate}
+            onReschedule={onReschedule}
             onVerify={onVerify}
           />
         ))}

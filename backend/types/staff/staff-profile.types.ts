@@ -36,6 +36,8 @@ export interface ManagerDirectoryRow {
   readonly status: AccountStatus;
   readonly roleSlug: string | null;
   readonly roleName: string | null;
+  readonly hourlyRate: string | null;
+  readonly rateCurrency: import("@/backend/enum").CurrencyCode | null;
 }
 
 export interface ManagerDirectoryFilters {
@@ -53,6 +55,8 @@ export interface OnboardingMetricsResult {
 export interface UpdateManagerProfileInput {
   phone?: string | null;
   status?: AccountStatus | null;
+  hourlyRate?: string | null;
+  rateCurrency?: import("@/backend/enum").CurrencyCode | null;
 }
 
 export interface StaffPermissionGroupReturnType {

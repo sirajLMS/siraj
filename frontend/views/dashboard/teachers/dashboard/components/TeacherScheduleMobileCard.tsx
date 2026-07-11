@@ -5,6 +5,7 @@ import { alpha, Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/mate
 import { styled } from "@mui/material/styles";
 import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -80,11 +81,10 @@ function renderFooterAction(
     isConnecting: row.status === "connecting",
   });
 
-  if (
-    row.status === "completed" ||
-    (!actions.activate && !actions.start && !actions.markAbsent && !actions.requestLeave)
-  ) {
-    if (row.status === "completed") {
+  const isSessionEnded = row.executionState === ClassExecutionState.Completed || row.outcome === ClassOutcome.Taken;
+
+  if (isSessionEnded || (!actions.activate && !actions.start && !actions.markAbsent && !actions.requestLeave)) {
+    if (isSessionEnded) {
       return (
         <Button fullWidth disabled variant="outlined" sx={{ typography: "labelUppercase" }}>
           {labels.schedule.sessionEnded}

@@ -245,7 +245,7 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
     executeManagerUpdate(
       updateProfile,
       manager.staffProfileId,
-      { phone: editPhone || null, status: null },
+      { phone: editPhone || null, status: null, hourlyRate: null, rateCurrency: null },
       () => setEditDialogOpen(false),
       "Manager profile updated",
       { staffProfileId: manager.staffProfileId }

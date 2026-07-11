@@ -1,7 +1,7 @@
 "use client";
 
-import { BlockOutlined, WarningAmberOutlined } from "@mui/icons-material";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { BlockOutlined, VideocamOffOutlined, WarningAmberOutlined } from "@mui/icons-material";
+import { Box, Tooltip, useMediaQuery, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
@@ -20,7 +20,7 @@ import {
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/views/dashboard/classes/status/tracking/types";
-import { isJoinableByExecutionState } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {
   [SessionStatus.REGULAR]: "regular",
@@ -141,19 +141,29 @@ export function StatusTrackingDataGrid({
         renderCell: ({ row }) => {
           const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
           if (sessionStatus !== SessionStatus.REGULAR) return null;
-          if (!isJoinableByExecutionState(row.executionState, row.outcome)) return null;
+          if (isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false })) {
+            return (
+              <Box
+                sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
+              >
+                <MeetingJoinAction
+                  variant="icon"
+                  joinUrl={row.meetingJoinUrl}
+                  meeting={row.effectiveMeeting}
+                  emptyRole="class"
+                  setupHref={`/classes/${row.id}#meeting-configs`}
+                />
+              </Box>
+            );
+          }
           return (
-            <Box
-              sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
-            >
-              <MeetingJoinAction
-                variant="icon"
-                joinUrl={row.meetingJoinUrl}
-                meeting={row.effectiveMeeting}
-                emptyRole="class"
-                setupHref={`/classes/${row.id}#meeting-configs`}
-              />
-            </Box>
+            <Tooltip title={labels.sessionEnded}>
+              <Box
+                sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
+              >
+                <VideocamOffOutlined sx={theme => ({ fontSize: 20, color: theme.palette.text.disabled })} />
+              </Box>
+            </Tooltip>
           );
         },
       },

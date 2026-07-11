@@ -25,6 +25,7 @@ export function useStatusTrackingLabels() {
     reschedule: t("actions.reschedule"),
     verifyDocuments: t("actions.verifyDocuments"),
     sessionLocked: t("actions.sessionLocked"),
+    sessionEnded: t("actions.sessionEnded"),
     administrativeHold: t("administrativeHold"),
     holdDescription: t("holdDescription"),
     seeAll: t("seeAll"),

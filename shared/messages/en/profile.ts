@@ -162,6 +162,7 @@ export const profile: ProfileLabels = {
       account: "Account Information",
       contact: "Contact Information",
       role: "Role Information",
+      compensation: "Compensation",
       permissions: "Effective Permissions",
     },
     fields: {
@@ -175,6 +176,8 @@ export const profile: ProfileLabels = {
       statusActive: "Active",
       statusInactive: "Inactive",
       displayCurrency: "Display Currency",
+      hourlyRate: "Hourly Rate",
+      currency: "Currency",
     },
     permissions: {
       inheritedGroups: "Permission Groups",

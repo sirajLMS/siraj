@@ -11,6 +11,7 @@ export const status: StudentStatusLabels = {
     adminHold: "تجميد إداري",
     policyOverview: "نظرة عامة على السياسة",
     upcomingClasses: "جدول الحصص القادمة",
+    upcomingClassesMobile: "الحصص القادمة",
   },
   fields: {
     accountStatus: "حالة الحساب الجديدة",
@@ -47,6 +48,7 @@ export const status: StudentStatusLabels = {
     frozen: "مجمّد",
     active: "نشط",
     minutesShort: "{minutes} د",
+    sessionEnded: "انتهت الحصة",
   },
   policies: {
     suspensionTitle: "الإيقاف",

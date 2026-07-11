@@ -5,6 +5,7 @@ export const classList: TeacherClassListLabels = {
   pageSubtitle: "View and manage your scheduled classes",
   noClasses: "No classes found.",
   viewDetails: "View Details",
+  viewClassAudit: "View Class Audit",
   durationMinutes: "{minutes} min",
   errors: {
     failedToLoad: "Failed to load classes.",

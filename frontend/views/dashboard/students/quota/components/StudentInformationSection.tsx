@@ -121,39 +121,49 @@ function GenderField() {
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
   return (
-    <QuotaFormField label={t("fields.gender")}>
-      <Controller
-        name="gender"
-        control={control}
-        render={({ field }) => (
-          <FormControl
-            error={!!errors.gender}
-            sx={{ height: "48px", justifyContent: "center", px: { xs: 0.5, md: 0 } }}
-          >
-            <RadioGroup {...field} row>
-              {GENDER_OPTIONS.map(option => (
-                <FormControlLabel
-                  key={option.value}
-                  value={option.value}
-                  disabled
-                  control={
-                    <Radio
-                      sx={theme => ({
-                        color: theme.palette.border.main,
-                        "&.Mui-checked": { color: theme.palette.primary.main },
-                      })}
+    <Controller
+      name="gender"
+      control={control}
+      render={({ field }) => {
+        const hasGender = field.value === "MALE" || field.value === "FEMALE";
+
+        return (
+          <QuotaFormField label={t("fields.gender")}>
+            {hasGender ? (
+              <FormControl
+                error={!!errors.gender}
+                sx={{ height: "48px", justifyContent: "center", px: { xs: 0.5, md: 0 } }}
+              >
+                <RadioGroup {...field} row>
+                  {GENDER_OPTIONS.map(option => (
+                    <FormControlLabel
+                      key={option.value}
+                      value={option.value}
+                      disabled
+                      control={
+                        <Radio
+                          sx={theme => ({
+                            color: theme.palette.border.main,
+                            "&.Mui-checked": { color: theme.palette.primary.main },
+                          })}
+                        />
+                      }
+                      label={<Typography variant="bodyMd">{t(`fields.${option.labelKey}`)}</Typography>}
+                      sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
                     />
-                  }
-                  label={<Typography variant="bodyMd">{t(`fields.${option.labelKey}`)}</Typography>}
-                  sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
-                />
-              ))}
-            </RadioGroup>
-            {errors.gender && <FormHelperText>{errors.gender.message}</FormHelperText>}
-          </FormControl>
-        )}
-      />
-    </QuotaFormField>
+                  ))}
+                </RadioGroup>
+                {errors.gender ? <FormHelperText>{errors.gender.message}</FormHelperText> : null}
+              </FormControl>
+            ) : (
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 1.5 })}>
+                {t("common.notSet")}
+              </Typography>
+            )}
+          </QuotaFormField>
+        );
+      }}
+    />
   );
 }
 

@@ -162,6 +162,7 @@ export const profile: ProfileLabels = {
       account: "معلومات الحساب",
       contact: "معلومات الاتصال",
       role: "معلومات الدور",
+      compensation: "التعويض",
       permissions: "الصلاحيات الفعّالة",
     },
     fields: {
@@ -175,6 +176,8 @@ export const profile: ProfileLabels = {
       statusActive: "نشط",
       statusInactive: "غير نشط",
       displayCurrency: "عملة العرض",
+      hourlyRate: "الأجر بالساعة",
+      currency: "العملة",
     },
     permissions: {
       inheritedGroups: "مجموعات الصلاحيات",

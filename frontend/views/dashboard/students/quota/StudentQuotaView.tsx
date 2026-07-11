@@ -13,6 +13,7 @@ import {
   PrimaryPageAction,
   UserAvatar,
 } from "@/frontend/components/ui";
+import { formatStudentDisplayId } from "@/frontend/utils/formatStudentDisplayId";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import { ContextualHelperCards } from "@/frontend/views/dashboard/students/quota/components/ContextualHelperCards";
 import { CourseDetailsSection } from "@/frontend/views/dashboard/students/quota/components/CourseDetailsSection";
@@ -63,7 +64,7 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
         ) : null}
       </Box>
       <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-        {t("studentId", { id: studentData.id.replace("SRJ-", "") })}
+        {t("studentId", { id: formatStudentDisplayId(studentData.id) })}
       </Typography>
     </Box>
   );
@@ -167,9 +168,7 @@ function FormActions({
         })}
       >
         <ScheduleOutlined sx={{ fontSize: 14 }} />
-        <Typography variant="labelMd">
-          {t("actions.lastEdited", { time: studentData.lastEditedTime, user: studentData.lastEditedBy })}
-        </Typography>
+        <Typography variant="labelMd">{t("actions.lastEditedAt", { time: studentData.lastEditedTime })}</Typography>
       </Box>
     </Box>
   );

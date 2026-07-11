@@ -628,6 +628,8 @@ export namespace ProfileService {
       roleIds.staffProfileId,
       {
         status: adminInput.status as import("@/backend/enum").AccountStatus | null | undefined,
+        hourlyRate: adminInput.hourlyRate ?? undefined,
+        rateCurrency: adminInput.rateCurrency ?? undefined,
       },
       locale
     );

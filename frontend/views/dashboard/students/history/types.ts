@@ -3,8 +3,12 @@ import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
-export function isJoinableClassSession(executionState?: string, outcome?: string | null): boolean {
-  return isJoinableClassInstance(executionState, outcome);
+export function isJoinableClassSession(
+  executionState?: string,
+  outcome?: string | null,
+  options?: { readonly isFrozen?: boolean }
+): boolean {
+  return isJoinableClassInstance(executionState, outcome, options);
 }
 
 export interface ClassSession {
@@ -16,6 +20,7 @@ export interface ClassSession {
   readonly status: AttendanceStatus;
   readonly executionState?: string;
   readonly outcome?: string | null;
+  readonly isFrozen?: boolean;
   readonly instructor: string;
   readonly timeSlot: string;
   readonly room: string;

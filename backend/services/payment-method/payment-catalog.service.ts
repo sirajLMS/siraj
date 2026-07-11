@@ -33,37 +33,20 @@ async function assertCatalogAdmin(actorUserId: string, locale?: string): Promise
   }
 }
 
-interface CatalogListOps<TListAllItem, TListActiveFilters> {
-  listAll: (tx?: DBTransaction) => Promise<TListAllItem[]>;
-  listActive: (filters: TListActiveFilters, tx?: DBTransaction) => Promise<TListAllItem[]>;
-}
-
-async function listCatalogEntries<TListAllItem, TListActiveFilters>(
-  actorUserId: string,
-  filters: { activeOnly?: boolean },
-  activeFilters: TListActiveFilters,
-  ops: CatalogListOps<TListAllItem, TListActiveFilters>,
-  locale?: string
-): Promise<TListAllItem[]> {
-  if (filters.activeOnly === false) {
-    await assertCatalogAdmin(actorUserId, locale);
-    return ops.listAll(undefined);
-  }
-  return ops.listActive(activeFilters, undefined);
-}
-
 export namespace PaymentCatalogService {
-  export function listMobileWallets(
+  // ─── Mobile Wallets ──────────────────────────────────────────────────────
+  export async function listMobileWallets(
     actorUserId: string,
     filters?: { countryCode?: CountryCode; direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
   ) {
-    return listCatalogEntries(
-      actorUserId,
-      { activeOnly: filters?.activeOnly },
+    await assertCatalogAdmin(actorUserId, locale);
+    if (filters?.activeOnly === false) {
+      return SupportedMobileWalletRepository.listAll(undefined);
+    }
+    return SupportedMobileWalletRepository.listActive(
       { countryCode: filters?.countryCode, direction: filters?.direction },
-      { listAll: SupportedMobileWalletRepository.listAll, listActive: SupportedMobileWalletRepository.listActive },
-      locale
+      undefined
     );
   }
 
@@ -91,18 +74,17 @@ export namespace PaymentCatalogService {
     return SupportedMobileWalletRepository.deactivate(id, undefined, locale);
   }
 
-  export function listPaymentLinks(
+  // ─── Payment Links ───────────────────────────────────────────────────────
+  export async function listPaymentLinks(
     actorUserId: string,
     filters?: { direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
   ) {
-    return listCatalogEntries(
-      actorUserId,
-      { activeOnly: filters?.activeOnly },
-      { direction: filters?.direction },
-      { listAll: SupportedPaymentLinkRepository.listAll, listActive: SupportedPaymentLinkRepository.listActive },
-      locale
-    );
+    await assertCatalogAdmin(actorUserId, locale);
+    if (filters?.activeOnly !== false) {
+      return SupportedPaymentLinkRepository.listActive({ direction: filters?.direction }, undefined);
+    }
+    return SupportedPaymentLinkRepository.listAll(undefined);
   }
 
   export async function createPaymentLink(
@@ -129,18 +111,17 @@ export namespace PaymentCatalogService {
     return SupportedPaymentLinkRepository.deactivate(id, undefined, locale);
   }
 
-  export function listOnlineAccounts(
+  // ─── Online Accounts ─────────────────────────────────────────────────────
+  export async function listOnlineAccounts(
     actorUserId: string,
     filters?: { direction?: PaymentDirection; activeOnly?: boolean },
     locale?: string
   ) {
-    return listCatalogEntries(
-      actorUserId,
-      { activeOnly: filters?.activeOnly },
-      { direction: filters?.direction },
-      { listAll: SupportedOnlineAccountRepository.listAll, listActive: SupportedOnlineAccountRepository.listActive },
-      locale
-    );
+    await assertCatalogAdmin(actorUserId, locale);
+    const showAll = filters?.activeOnly === false;
+    return showAll
+      ? SupportedOnlineAccountRepository.listAll(undefined)
+      : SupportedOnlineAccountRepository.listActive({ direction: filters?.direction }, undefined);
   }
 
   export async function createOnlineAccount(
