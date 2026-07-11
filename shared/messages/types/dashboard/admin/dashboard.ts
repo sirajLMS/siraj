@@ -23,6 +23,7 @@ export interface AdminDashboardLabels {
   readonly joinVideo: string;
   readonly showingOf: string;
   readonly noClasses: string;
+  readonly loading: string;
   readonly today: string;
   readonly previousDay: string;
   readonly nextDay: string;

@@ -17,59 +17,66 @@ const detailsSchema = z.object({
   note: z.string().optional(),
 });
 
-export const paymentMethodFormSchema = z
-  .object({
-    type: z.enum(PaymentMethodType),
-    direction: z.enum(PaymentDirection),
-    label: z.string().optional(),
-    isDefault: z.boolean(),
-    details: detailsSchema,
-  })
-  .superRefine((value, ctx) => {
-    const { type, details } = value;
+const paymentMethodBaseSchema = z.object({
+  type: z.enum(PaymentMethodType),
+  direction: z.enum(PaymentDirection),
+  label: z.string().optional(),
+  isDefault: z.boolean(),
+  details: detailsSchema,
+});
 
-    if (type === PaymentMethodType.MobileWallet) {
-      if (!details.walletId?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "walletId"] });
-      }
-      if (!details.phone?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "phone"] });
-      }
-    }
+const paymentMethodRefinement = (
+  value: Pick<z.infer<typeof paymentMethodBaseSchema>, "type" | "details">,
+  ctx: z.RefinementCtx
+) => {
+  const { type, details } = value;
 
-    if (type === PaymentMethodType.PaymentLink) {
-      if (!details.paymentLinkId?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "paymentLinkId"] });
-      }
-      if (!details.url?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "url"] });
-      }
+  if (type === PaymentMethodType.MobileWallet) {
+    if (!details.walletId?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "walletId"] });
     }
+    if (!details.phone?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "phone"] });
+    }
+  }
 
-    if (type === PaymentMethodType.OnlineAccount) {
-      if (!details.onlineAccountId?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "onlineAccountId"] });
-      }
-      if (!details.identifier?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "identifier"] });
-      }
+  if (type === PaymentMethodType.PaymentLink) {
+    if (!details.paymentLinkId?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "paymentLinkId"] });
     }
+    if (!details.url?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "url"] });
+    }
+  }
 
-    if (type === PaymentMethodType.BankTransfer) {
-      const hasRouting =
-        Boolean(details.iban?.trim()) ||
-        Boolean(details.accountNumber?.trim()) ||
-        Boolean(details.bankName?.trim()) ||
-        Boolean(details.beneficiaryName?.trim());
-      if (!hasRouting) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "iban"] });
-      }
+  if (type === PaymentMethodType.OnlineAccount) {
+    if (!details.onlineAccountId?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "onlineAccountId"] });
     }
-  });
+    if (!details.identifier?.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "identifier"] });
+    }
+  }
+
+  if (type === PaymentMethodType.BankTransfer) {
+    const hasRouting =
+      Boolean(details.iban?.trim()) ||
+      Boolean(details.accountNumber?.trim()) ||
+      Boolean(details.bankName?.trim()) ||
+      Boolean(details.beneficiaryName?.trim());
+    if (!hasRouting) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "iban"] });
+    }
+  }
+};
+
+export const paymentMethodFormSchema = paymentMethodBaseSchema.superRefine(paymentMethodRefinement);
 
 export type PaymentMethodFormValues = z.infer<typeof paymentMethodFormSchema>;
 
-export const onboardingPaymentMethodSchema = paymentMethodFormSchema.omit({ direction: true, isDefault: true });
+export const onboardingPaymentMethodSchema = paymentMethodBaseSchema
+  .omit({ direction: true, isDefault: true })
+  .superRefine(paymentMethodRefinement);
 
 export type OnboardingPaymentMethodFormValues = z.infer<typeof onboardingPaymentMethodSchema>;
 

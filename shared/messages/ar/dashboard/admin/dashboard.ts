@@ -25,6 +25,7 @@ export const admin: AdminDashboardLabels = {
   joinVideo: "الانضمام للحصة",
   showingOf: "عرض {shown} من {total} حصة",
   noClasses: "لا توجد حصص",
+  loading: "جاري التحميل...",
   today: "اليوم",
   previousDay: "اليوم السابق",
   nextDay: "اليوم التالي",

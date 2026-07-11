@@ -25,6 +25,7 @@ export const admin: AdminDashboardLabels = {
   joinVideo: "Join Class Session",
   showingOf: "Showing {shown} of {total} classes",
   noClasses: "No classes",
+  loading: "Loading...",
   today: "Today",
   previousDay: "Previous Day",
   nextDay: "Next Day",
