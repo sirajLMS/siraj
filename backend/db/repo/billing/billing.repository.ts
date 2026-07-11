@@ -345,12 +345,7 @@ export namespace BillingRepository {
         .orderBy(desc(currencyExchangeRates.effectiveDate))
         .limit(100);
 
-      return {
-        id: historyId,
-        rows: rows.map(mapExchangeRateHistoryRow),
-        totalCount: rows.length,
-        pageInfo: null,
-      };
+      return _buildUnpaginatedResult(historyId, rows.map(mapExchangeRateHistoryRow));
     }
 
     const cap = Math.min(pagination.perPage, 100);
@@ -376,16 +371,7 @@ export namespace BillingRepository {
       id: historyId,
       rows,
       totalCount,
-      pageInfo: {
-        count: rows.length,
-        currentPage,
-        firstItem: rows.length > 0 ? offset + 1 : null,
-        lastItem: rows.length > 0 ? offset + rows.length : null,
-        hasMorePages: currentPage < lastPage,
-        lastPage,
-        perPage: cap,
-        total: totalCount,
-      },
+      pageInfo: _buildPageInfo(rows.length, currentPage, offset, totalCount, cap, lastPage),
     };
   };
 
@@ -532,6 +518,33 @@ export namespace BillingRepository {
       currency,
       amount: amount.toFixed(2),
     }));
+  }
+
+  function _buildPageInfo(
+    rowCount: number,
+    currentPage: number,
+    offset: number,
+    totalCount: number,
+    perPage: number,
+    lastPage: number
+  ): Types.PageInfo {
+    return {
+      count: rowCount,
+      currentPage,
+      firstItem: rowCount > 0 ? offset + 1 : null,
+      lastItem: rowCount > 0 ? offset + rowCount : null,
+      hasMorePages: currentPage < lastPage,
+      lastPage,
+      perPage,
+      total: totalCount,
+    };
+  }
+
+  function _buildUnpaginatedResult<TRow>(
+    id: string,
+    rows: TRow[]
+  ): { id: string; rows: TRow[]; totalCount: number; pageInfo: null } {
+    return { id, rows, totalCount: rows.length, pageInfo: null };
   }
 
   async function fetchOverdueInvoices(t: DBTransaction | typeof db): Promise<OverdueInvoiceRow[]> {
@@ -743,24 +756,10 @@ export namespace BillingRepository {
     );
 
     if (!pagination) {
-      const rows = await queryDb
-        .select(invoiceBaseFields)
-        .from(invoices)
-        .leftJoin(students, eq(invoices.studentId, students.id))
-        .leftJoin(parents, eq(invoices.parentId, parents.id))
-        .where(whereCondition)
-        .orderBy(desc(invoices.issueDate))
-        .limit(200);
-
-      return {
-        id: `parent-invoice-history-${parentId}`,
-        rows: rows.map(mapInvoiceRow),
-        totalCount: rows.length,
-        pageInfo: null,
-      };
+      return fetchUnpaginatedInvoices(queryDb, whereCondition, `parent-invoice-history-${parentId}`);
     }
 
-    return fetchInvoicesPaginated(queryDb, parentId, whereCondition, pagination);
+    return fetchInvoicesPaginatedData(queryDb, `parent-invoice-history-${parentId}`, whereCondition, pagination);
   };
 
   async function countInvoicesWithJoin(
@@ -775,9 +774,26 @@ export namespace BillingRepository {
     return countResult[0]?.count ?? 0;
   }
 
-  async function fetchInvoicesPaginated(
+  async function fetchUnpaginatedInvoices(
     queryDb: DBTransaction | typeof db,
-    parentId: string,
+    whereCondition: SQL | undefined,
+    resultId: string
+  ): Promise<Types.InvoiceHistoryPaginatedResult> {
+    const rows = await queryDb
+      .select(invoiceBaseFields)
+      .from(invoices)
+      .leftJoin(students, eq(invoices.studentId, students.id))
+      .leftJoin(parents, eq(invoices.parentId, parents.id))
+      .where(whereCondition)
+      .orderBy(desc(invoices.issueDate))
+      .limit(200);
+
+    return _buildUnpaginatedResult(resultId, rows.map(mapInvoiceRow));
+  }
+
+  async function fetchInvoicesPaginatedData(
+    queryDb: DBTransaction | typeof db,
+    resultId: string,
     whereCondition: SQL | undefined,
     pagination: Types.PaginationArgs
   ): Promise<Types.InvoiceHistoryPaginatedResult> {
@@ -802,19 +818,10 @@ export namespace BillingRepository {
     const rows: Types.InvoiceHistoryRow[] = dataRows.map(mapInvoiceRow);
 
     return {
-      id: `parent-invoice-history-${parentId}`,
+      id: resultId,
       rows,
       totalCount,
-      pageInfo: {
-        count: rows.length,
-        currentPage,
-        firstItem: rows.length > 0 ? offset + 1 : null,
-        lastItem: rows.length > 0 ? offset + rows.length : null,
-        hasMorePages: currentPage < lastPage,
-        lastPage,
-        perPage,
-        total: totalCount,
-      },
+      pageInfo: _buildPageInfo(rows.length, currentPage, offset, totalCount, perPage, lastPage),
     };
   }
 
@@ -827,58 +834,10 @@ export namespace BillingRepository {
     const whereCondition = mergeWhereConditions(isNull(invoices.deletedAt), buildInvoiceSearchCondition(search));
 
     if (!pagination) {
-      const rows = await queryDb
-        .select(invoiceBaseFields)
-        .from(invoices)
-        .leftJoin(students, eq(invoices.studentId, students.id))
-        .leftJoin(parents, eq(invoices.parentId, parents.id))
-        .where(whereCondition)
-        .orderBy(desc(invoices.issueDate))
-        .limit(200);
-
-      return {
-        id: "admin-invoice-history",
-        rows: rows.map(mapInvoiceRow),
-        totalCount: rows.length,
-        pageInfo: null,
-      };
+      return fetchUnpaginatedInvoices(queryDb, whereCondition, "admin-invoice-history");
     }
 
-    const perPage = pagination.perPage;
-    const currentPage = pagination.currentPage;
-    const offset = pagination.offset;
-
-    const [dataRows, totalCount] = await Promise.all([
-      queryDb
-        .select(invoiceBaseFields)
-        .from(invoices)
-        .leftJoin(students, eq(invoices.studentId, students.id))
-        .leftJoin(parents, eq(invoices.parentId, parents.id))
-        .where(whereCondition)
-        .orderBy(desc(invoices.issueDate))
-        .limit(perPage)
-        .offset(offset),
-      countInvoicesWithJoin(queryDb, whereCondition),
-    ]);
-
-    const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
-    const rows: Types.InvoiceHistoryRow[] = dataRows.map(mapInvoiceRow);
-
-    return {
-      id: "admin-invoice-history",
-      rows,
-      totalCount,
-      pageInfo: {
-        count: rows.length,
-        currentPage,
-        firstItem: rows.length > 0 ? offset + 1 : null,
-        lastItem: rows.length > 0 ? offset + rows.length : null,
-        hasMorePages: currentPage < lastPage,
-        lastPage,
-        perPage,
-        total: totalCount,
-      },
-    };
+    return fetchInvoicesPaginatedData(queryDb, "admin-invoice-history", whereCondition, pagination);
   };
 
   export const getAdminBillingSummary = async (tx?: DBTransaction): Promise<Types.AdminBillingSummaryResult> => {
@@ -1205,38 +1164,55 @@ export namespace BillingRepository {
       .where(inArray(invoices.idempotencyKey, [...keys]));
   };
 
-  export const upsertManyInvoices = async (
-    inputs: readonly InvoiceCreateInput[],
+  async function upsertMany<TInput, TOutput>(
+    inputs: readonly TInput[],
+    table: PgTable,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    conflictTarget: any,
+    buildSetClause: (input: TInput) => Record<string, unknown>,
     tx?: DBTransaction
-  ): Promise<Types.InvoiceSelectType[]> => {
+  ): Promise<TOutput[]> {
     if (inputs.length === 0) return [];
     const now = new Date();
 
     const runner = async (t: DBTransaction) => {
-      const results: Types.InvoiceSelectType[] = [];
+      const results: TOutput[] = [];
       for (const input of inputs) {
-        const [row] = await t
-          .insert(invoices)
+        const inserted = (await t
+          .insert(table)
           .values({
             ...input,
             createdAt: now,
             updatedAt: now,
           })
           .onConflictDoUpdate({
-            target: invoices.idempotencyKey,
-            set: {
-              status: input.status,
-              paidDate: input.paidDate ?? null,
-              updatedAt: now,
-            },
+            target: conflictTarget,
+            set: buildSetClause(input),
           })
-          .returning();
-        if (row) results.push(row);
+          .returning()) as TOutput[];
+        if (inserted[0]) results.push(inserted[0]);
       }
       return results;
     };
 
     return tx ? runner(tx) : db.transaction(runner);
+  }
+
+  export const upsertManyInvoices = async (
+    inputs: readonly InvoiceCreateInput[],
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceSelectType[]> => {
+    return upsertMany(
+      inputs,
+      invoices,
+      invoices.idempotencyKey,
+      input => ({
+        status: input.status,
+        paidDate: input.paidDate ?? null,
+        updatedAt: new Date(),
+      }),
+      tx
+    );
   };
 
   export const findPaymentsByIdempotencyKeys = async (
@@ -1255,30 +1231,15 @@ export namespace BillingRepository {
     inputs: readonly PaymentRecordInput[],
     tx?: DBTransaction
   ): Promise<Types.PaymentSelectType[]> => {
-    if (inputs.length === 0) return [];
-    const now = new Date();
-
-    const runner = async (t: DBTransaction) => {
-      const results: Types.PaymentSelectType[] = [];
-      for (const input of inputs) {
-        const [row] = await t
-          .insert(payments)
-          .values({
-            ...input,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: payments.idempotencyKey,
-            set: { updatedAt: now },
-          })
-          .returning();
-        if (row) results.push(row);
-      }
-      return results;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    return upsertMany(
+      inputs,
+      payments,
+      payments.idempotencyKey,
+      () => ({
+        updatedAt: new Date(),
+      }),
+      tx
+    );
   };
 
   export const upsertManyExchangeRates = async (

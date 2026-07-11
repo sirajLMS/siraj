@@ -193,3 +193,61 @@ bun quality-gate
 - **Actions:** Use `PrimaryPageAction`, `FilterButton`, `ExportButton` presets.
 - **Typography:** Use theme variants (`headlineLg`, `titleLg`, `labelUppercase`, `bodyMd`) — avoid hardcoded font `sx`.
 - **Exceptions:** Embedded tables (e.g. `RegisteredStudentsSection`) may use MUI `Table` styled to `palette.table.header` tokens.
+
+## Mobile vs Desktop Isolation
+
+- **File naming**: `.mobile.tsx` for mobile views/components, `.desktop.tsx` for desktop views/components. No suffix for shared components.
+- **Directory structure**: Place versioned files in `mobile/` and `desktop/` subdirectories under each domain. Shared components in `shared/`.
+- **Zero `useMediaQuery`**: `.mobile.tsx` and `.desktop.tsx` files must never import or call `useMediaQuery` (ESLint enforced).
+- **Zero viewport context**: `.mobile.tsx` and `.desktop.tsx` files must never import `useViewport` or `ViewportContext` (ESLint enforced).
+- **No cross-imports**: `.mobile.tsx` must not import `.desktop.tsx` and vice versa (ESLint enforced).
+- **ViewModel pattern**: Business logic lives in `useXxViewModel()` hooks. All mutable state in Zustand stores (survives viewport tier switching). `File` objects in `useRef` in the hook, not Zustand (serialization safety).
+- **Switcher only**: Only the thin `xxView.tsx` switcher reads `useViewport()` and renders `.mobile.tsx` or `.desktop.tsx`.
+- **Shared components**: Non-versioned components (e.g., `StatusBadge`, `MetricCard`, `BaseCard`) used by both tiers. They contain NO `useMediaQuery` and NO viewport logic.
+- **Component directory convention**:
+  ```
+  <domain>/
+    mobile/
+      xx.mobile.tsx
+      components/
+        xxCard.mobile.tsx
+    desktop/
+      xx.desktop.tsx
+      components/
+        xxGrid.desktop.tsx
+    shared/
+      xxShared.tsx
+    useXxViewModel.ts
+    xxView.tsx
+  ```
+
+## Mobile vs Desktop Isolation
+
+- **File naming**: `.mobile.tsx` for mobile views/components, `.desktop.tsx` for desktop views/components. No suffix for shared components.
+- **Directory structure**: Place versioned files in `mobile/` and `desktop/` subdirectories under their domain. Shared components in `shared/` subdirectory.
+- **Zero useMediaQuery**: `.mobile.tsx` and `.desktop.tsx` files must NEVER import or call `useMediaQuery` — viewport tier is decided by the parent switcher (`View.tsx`).
+- **Zero viewport context**: `.mobile.tsx` and `.desktop.tsx` files must NEVER import `useViewport` or `ViewportContext` — they are already tier-specific.
+- **No cross-imports**: `.mobile.tsx` must not import `.desktop.tsx` and vice versa (ESLint enforced via `no-restricted-imports`).
+- **ViewModel pattern**: Business logic lives in `useXxViewModel()` hooks, not in view components or Context.
+- **Zustand for state**: All UI state (filters, pagination, dialog open, form values) lives in Zustand stores so it survives viewport tier switching during resize.
+- **Only `View.tsx` reads viewport**: The switcher component is the only place that reads `useViewport()` — it renders either `.mobile.tsx` or `.desktop.tsx`.
+- **Serialization safety**: Non-serializable values (`File`, `Blob`, `FormData`, `Promise`) must NOT be stored in `persist`-enabled Zustand stores. Use a non-persisted store, `partialize` to exclude them, or keep them in a `useRef` in the ViewModel hook.
+- **Component directory layout**:
+  ```
+  <domain>/
+    mobile/
+      xx.mobile.tsx
+      components/
+        xxCard.mobile.tsx
+    desktop/
+      xx.desktop.tsx
+      components/
+        xxGrid.desktop.tsx
+    shared/
+      xxShared.tsx
+    useXxViewModel.ts
+    xxView.tsx          (switcher)
+  ```
+- **ESLint enforcement**: `no-restricted-imports` rules block cross-imports and `useMediaQuery` usage in versioned files (see `eslint.config.mjs`).
+- **Existing patterns**: See `frontend/views/AGENTS.md` for ViewModel conventions and `frontend/stores/AGENTS.md` for serialization rules.
+- **Cross-reference**: See `frontend/views/AGENTS.md`, `frontend/stores/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`.

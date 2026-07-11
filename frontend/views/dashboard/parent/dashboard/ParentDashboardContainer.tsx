@@ -110,6 +110,7 @@ function useDashboardLabels(
 ) {
   return useMemo(
     () => ({
+      pageTitle: t("pageTitle"),
       welcome: t("welcome", { name: userName }),
       welcomeBack: t("welcomeBack"),
       pendingMessages: t("pendingMessages", { count: pendingMessages }),

@@ -1,16 +1,14 @@
 "use client";
 
-import { InputAdornment, Stack, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
-import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
+import { CompensationEditFields } from "@/frontend/views/dashboard/profile/__shared__/CompensationSectionBase";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 import type { TeacherViewData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import type { TeacherAdminEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
@@ -27,63 +25,19 @@ type CompensationSectionProps =
       readonly control: Control<TeacherAdminEditFormData>;
     };
 
-function CompensationEditSection({
-  register,
-  control,
-}: {
-  readonly register: UseFormRegister<TeacherAdminEditFormData>;
-  readonly control: Control<TeacherAdminEditFormData>;
-}) {
-  const t = useTranslations("profile.teacher");
-  const rateCurrency = useWatch({ control, name: "rateCurrency" });
-  const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
-
-  return (
-    <SectionPanel title={t("sections.compensation")}>
-      <Stack spacing={2}>
-        <TextField
-          label={t("fields.hourlyRate")}
-          fullWidth
-          size="small"
-          {...register("hourlyRate")}
-          slotProps={{
-            input: {
-              startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>,
-            },
-          }}
-        />
-        <Controller
-          name="rateCurrency"
-          control={control}
-          render={({ field, fieldState }) => {
-            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
-            return (
-              <CurrencySelect
-                currency={option}
-                setCurrencyAction={selected => {
-                  field.onChange(selected.code);
-                }}
-                onBlurAction={field.onBlur}
-                label={t("fields.currency")}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                fullWidth
-              />
-            );
-          }}
-        />
-      </Stack>
-    </SectionPanel>
-  );
-}
-
 export function CompensationSection(props: CompensationSectionProps) {
   const t = useTranslations("profile.teacher");
   const tErrors = useTranslations("errors");
   const locale = useLocale();
 
   if (props.mode === "edit") {
-    return <CompensationEditSection register={props.register} control={props.control} />;
+    return (
+      <CompensationEditFields
+        register={props.register}
+        control={props.control}
+        translationNamespace="profile.teacher"
+      />
+    );
   }
 
   const lockedAmount = props.teacherData.hourlyRate ?? "0";

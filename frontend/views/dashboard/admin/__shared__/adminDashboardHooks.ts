@@ -8,16 +8,12 @@ import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/fr
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { AdminMetricKey } from "@/frontend/types/shared.types";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
-import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
-import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import { resolveDailyScheduleMetricFilter } from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
-import { DashboardView } from "@/frontend/views/dashboard/dashboard/DashboardView";
 
-const PAGE_SIZE = 10;
+export const ADMIN_DASHBOARD_PAGE_SIZE = 10;
 
 /** Tracks when dashboard data first arrives and computes an elapsed-time label that updates every minute. */
-function useLastUpdatedLabel(data: unknown) {
+export function useLastUpdatedLabel(data: unknown) {
   const t = useTranslations("dashboard");
 
   const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
@@ -50,7 +46,7 @@ function useLastUpdatedLabel(data: unknown) {
 }
 
 /** Fetches the admin dashboard schedule with pagination and filter variables derived from the dashboard store. */
-function useAdminScheduleQuery() {
+export function useAdminScheduleQuery() {
   const { filters } = useDashboardStore();
   const [page, setPage] = useState(0);
   const selectedMetricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
@@ -67,7 +63,7 @@ function useAdminScheduleQuery() {
         search: filters.searchQuery || null,
         metricFilter: selectedMetricFilter,
         paginationArgs: {
-          first: PAGE_SIZE,
+          first: ADMIN_DASHBOARD_PAGE_SIZE,
           page: page + 1,
           skip: null,
           after: null,
@@ -84,7 +80,7 @@ function useAdminScheduleQuery() {
 }
 
 /** Fetches the teacher list for the filter dropdown. */
-function useTeachers() {
+export function useTeachers() {
   const [teacherSearchQuery] = useState("");
   const { data: teachersData } = useQuery(teachersQueryDocument, {
     variables: { search: teacherSearchQuery, limit: 10 },
@@ -97,7 +93,7 @@ function useTeachers() {
 }
 
 /** Groups the filter-change handlers so they stay cohesive and the container stays small. */
-function useAdminDashboardHandlers(setPage: (p: number) => void) {
+export function useAdminDashboardHandlers(setPage: (p: number) => void) {
   const { hasPermission } = useUserStore();
   const { filters, setDateFilter, setTeacherFilter, setSearchQuery, setSelectedStatus } = useDashboardStore();
 
@@ -129,67 +125,4 @@ function useAdminDashboardHandlers(setPage: (p: number) => void) {
   };
 
   return { filters, handleDateChange, handleTeacherChange, handleSearchChange, handleMetricClick };
-}
-
-// Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
-export function AdminDashboardContainer() {
-  const t = useTranslations("dashboard");
-  const { headers, statusLabels } = useAdminDashboardLabels();
-
-  const { dashboardData, loading, refetch, page, setPage } = useAdminScheduleQuery();
-  const teachers = useTeachers();
-  const lastUpdated = useLastUpdatedLabel(dashboardData);
-
-  const { filters, handleDateChange, handleTeacherChange, handleSearchChange, handleMetricClick } =
-    useAdminDashboardHandlers(setPage);
-
-  const handleSubmit = () => {
-    void refetch();
-  };
-
-  const scheduleResult = dashboardData?.adminDashboardSchedule;
-  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null);
-  const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
-  const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
-
-  const selectedMetricLabel = filters.selectedStatus
-    ? t(`admin.metrics.${filters.selectedStatus}` as "admin.metrics.total")
-    : null;
-
-  return (
-    <DashboardView
-      loading={loading}
-      todayClassesTitle={t("admin.todayClasses")}
-      lastUpdated={lastUpdated}
-      metrics={metricsList}
-      onMetricClick={handleMetricClick}
-      selectedMetricKey={filters.selectedStatus ?? undefined}
-      scheduleTitle={t("admin.scheduleOverview")}
-      selectedMetricLabel={selectedMetricLabel}
-      todayLabel={t("admin.today")}
-      previousDayLabel={t("admin.previousDay")}
-      nextDayLabel={t("admin.nextDay")}
-      searchPlaceholder={t("admin.searchPlaceholder")}
-      searchValue={filters.searchQuery}
-      dateLabel={t("admin.listOfClassesOn")}
-      dateValue={filters.date}
-      teacherPlaceholder={t("admin.selectTeacher")}
-      teacherValue={filters.teacherId}
-      submitLabel={t("admin.submit")}
-      teachers={teachers}
-      rows={rows}
-      headers={headers}
-      statusLabels={statusLabels}
-      detailsLabel={t("admin.details")}
-      emptyMessage={loading ? "Loading..." : t("admin.noClasses")}
-      page={page}
-      pageSize={PAGE_SIZE}
-      totalCount={totalCount}
-      onPageChange={setPage}
-      onSearchChange={handleSearchChange}
-      onDateChange={handleDateChange}
-      onTeacherChange={handleTeacherChange}
-      onSubmit={handleSubmit}
-    />
-  );
 }

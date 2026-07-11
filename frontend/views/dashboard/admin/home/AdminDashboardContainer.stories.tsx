@@ -1,67 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import type { AdminMetricKey } from "@/frontend/types/shared.types";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
-import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
 import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
+import { buildAdminDashboardViewLabels } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardViewLabels";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
 } from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
 import { DashboardView } from "@/frontend/views/dashboard/dashboard/DashboardView";
-import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-
-const MOCK_TEACHERS: TeacherFilterItem[] = [
-  { id: "teacher-ahmed", name: "Ahmed Mohammed" },
-  { id: "teacher-sarah", name: "Sarah Johnson" },
-];
-
-const MOCK_SCHEDULE: DailyScheduleRow[] = [
-  createDailyScheduleRow({
-    id: "9082",
-    yourTime: "10:00 AM - 11:00 AM",
-    teacherTime: "11:00 AM - 12:00 PM",
-    studentTime: "10:00 AM - 11:00 AM",
-    duration: 60,
-    scheduledStartAt: "2028-01-01T10:00:00.000Z",
-    scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    outcome: ClassOutcome.Pending,
-    executionState: ClassExecutionState.NotActivated,
-    student: { id: "student-1", name: "Omar Khalid", avatarUrl: null },
-    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed", avatarUrl: null },
-  }),
-  createDailyScheduleRow({
-    id: "9083",
-    yourTime: "11:30 AM - 12:30 PM",
-    teacherTime: "12:30 PM - 01:30 PM",
-    studentTime: "11:30 AM - 12:30 PM",
-    duration: 60,
-    scheduledStartAt: "2028-01-01T10:00:00.000Z",
-    scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    outcome: ClassOutcome.Pending,
-    executionState: ClassExecutionState.Running,
-    student: { id: "student-2", name: "Layla Ismail", avatarUrl: null },
-    teacher: { id: "teacher-sarah", name: "Sarah Johnson", avatarUrl: null },
-  }),
-  createDailyScheduleRow({
-    id: "9084",
-    yourTime: "02:00 PM - 03:00 PM",
-    teacherTime: "03:00 PM - 04:00 PM",
-    studentTime: "02:00 PM - 03:00 PM",
-    duration: 60,
-    scheduledStartAt: "2028-01-01T10:00:00.000Z",
-    scheduledEndAt: "2028-01-01T11:00:00.000Z",
-    outcome: ClassOutcome.Taken,
-    executionState: ClassExecutionState.Completed,
-    student: { id: "student-3", name: "Omar Ahmed", avatarUrl: null },
-    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed", avatarUrl: null },
-  }),
-];
+import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
 export function MockAdminDashboardContainer() {
   const t = useTranslations("dashboard");
@@ -141,31 +92,33 @@ export function MockAdminDashboardContainer() {
     }
   };
 
+  const viewLabels = buildAdminDashboardViewLabels(t);
+
   return (
     <DashboardView
-      todayClassesTitle={t("admin.todayClasses")}
+      todayClassesTitle={viewLabels.todayClassesTitle}
       lastUpdated={translatedLastUpdated}
       metrics={metrics}
       onMetricClick={handleMetricClick}
       selectedMetricKey={filters.selectedStatus ?? undefined}
-      scheduleTitle={t("admin.scheduleOverview")}
+      scheduleTitle={viewLabels.scheduleTitle}
       selectedMetricLabel={selectedMetricLabel}
-      todayLabel={t("admin.today")}
-      previousDayLabel={t("admin.previousDay")}
-      nextDayLabel={t("admin.nextDay")}
-      searchPlaceholder={t("admin.searchPlaceholder")}
+      todayLabel={viewLabels.todayLabel}
+      previousDayLabel={viewLabels.previousDayLabel}
+      nextDayLabel={viewLabels.nextDayLabel}
+      searchPlaceholder={viewLabels.searchPlaceholder}
       searchValue={filters.searchQuery}
-      dateLabel={t("admin.listOfClassesOn")}
+      dateLabel={viewLabels.dateLabel}
       dateValue={filters.date}
-      teacherPlaceholder={t("admin.selectTeacher")}
+      teacherPlaceholder={viewLabels.teacherPlaceholder}
       teacherValue={filters.teacherId}
-      submitLabel={t("admin.submit")}
+      submitLabel={viewLabels.submitLabel}
       teachers={teachers}
       rows={paginatedRows}
       headers={headers}
       statusLabels={statusLabels}
-      detailsLabel={t("admin.details")}
-      emptyMessage={t("admin.noClasses")}
+      detailsLabel={viewLabels.detailsLabel}
+      emptyMessage={viewLabels.emptyMessage}
       page={page}
       pageSize={pageSize}
       totalCount={filteredRows.length}

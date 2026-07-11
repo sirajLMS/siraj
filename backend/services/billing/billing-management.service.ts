@@ -119,6 +119,21 @@ function mapMarkPaidResult(
   };
 }
 
+async function fetchInvoicePendingReview(invoiceId: string, locale?: string): Promise<Types.InvoiceSelectType> {
+  const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
+  if (!existingInvoice) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
+  }
+
+  if (existingInvoice.status !== "PAYMENT_PENDING") {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("invoiceNotPendingReview", { id: invoiceId }));
+  }
+
+  return existingInvoice;
+}
+
 async function finalizeInvoicePaid(
   actorUserId: string,
   invoiceId: string,
@@ -252,16 +267,7 @@ export namespace BillingManagementService {
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, locale);
 
-    const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
-    if (!existingInvoice) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
-    }
-
-    if (existingInvoice.status !== "PAYMENT_PENDING") {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invoiceNotPendingReview", { id: invoiceId }));
-    }
+    await fetchInvoicePendingReview(invoiceId, locale);
 
     const pending = await InvoicePaymentSubmissionRepository.getPendingByInvoiceId(invoiceId);
     if (!pending) {
@@ -308,16 +314,7 @@ export namespace BillingManagementService {
   ): Promise<Types.MarkInvoicePaidResult> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, locale);
 
-    const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
-    if (!existingInvoice) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
-    }
-
-    if (existingInvoice.status !== "PAYMENT_PENDING") {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invoiceNotPendingReview", { id: invoiceId }));
-    }
+    await fetchInvoicePendingReview(invoiceId, locale);
 
     try {
       const updated = await db.transaction(async tx => {
@@ -428,7 +425,7 @@ export namespace BillingManagementService {
         invoice: {
           id: deleted.id,
           parentId: deleted.parentId,
-          deletedAt: deleted.deletedAt ? deleted.deletedAt.toISOString() : null,
+          deletedAt: deleted.deletedAt?.toISOString() ?? null,
           version: deleted.version,
         },
         notificationSummaryUpdated: syncResult !== null,

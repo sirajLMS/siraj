@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
+import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -35,6 +36,7 @@ const cacheRtl = createCache({
 export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: StoryContext }) => {
   const locale = (context.globals.locale as string | undefined) ?? "ar";
   const themeMode = (context.globals.theme as PaletteMode | undefined) ?? "dark";
+  const _viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
   const messages: MessageSchema = locale === "ar" ? ar : en;
 
@@ -153,6 +155,9 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
 
   const content = <RenderStory Story={Story} context={context} />;
 
+  // Calculate maxWidth based on viewport global
+  const maxWidth = _viewport === "mobile" ? 600 : _viewport === "tablet" ? 900 : "none";
+
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>
       <ThemeContext.Provider value={themeContextValue}>
@@ -186,23 +191,25 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
                 },
               })}
             />
-            {isUiComponent ? (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  minHeight: "100vh",
-                  width: "100%",
-                  padding: 4,
-                  boxSizing: "border-box",
-                }}
-              >
-                {content}
-              </Box>
-            ) : (
-              content
-            )}
+            <ViewportProvider>
+              {isUiComponent ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "100vh",
+                    width: "100%",
+                    padding: 4,
+                    boxSizing: "border-box",
+                  }}
+                >
+                  {content}
+                </Box>
+              ) : (
+                content
+              )}
+            </ViewportProvider>
           </ThemeProvider>
         </CacheProvider>
       </ThemeContext.Provider>

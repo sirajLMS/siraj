@@ -10,6 +10,7 @@ import { type ReactElement, type ReactNode, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
+import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createAppTheme } from "@/frontend/providers/theme/theme";
 import { useUserStore } from "@/frontend/stores/userStore";
@@ -87,7 +88,9 @@ export function TestWrapper({
         <CacheProvider value={cache}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <ApolloProvider client={apolloClient}>{children}</ApolloProvider>
+            <ViewportProvider>
+              <ApolloProvider client={apolloClient}>{children}</ApolloProvider>
+            </ViewportProvider>
           </ThemeProvider>
         </CacheProvider>
       </ThemeContext.Provider>

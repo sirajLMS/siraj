@@ -16,7 +16,7 @@ import {
 import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics } from "@/frontend/graphql/generated/gql/operations";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
-type RawMetrics =
+export type RawMetrics =
   | AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics
   | null
   | undefined;

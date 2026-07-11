@@ -32,6 +32,7 @@ type TranslationFn = ReturnType<typeof useTranslations>;
 function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
   return useMemo(
     () => ({
+      pageTitle: t("pageTitle"),
       title: t("title"),
       subtitle: t("subtitle"),
       breadcrumbs: {

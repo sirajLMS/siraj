@@ -7,11 +7,9 @@ import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
 import { CurrencyCode, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
@@ -20,6 +18,7 @@ import {
   type ParentAdminData,
   toDisplayValue,
 } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { CurrencyControllerField } from "@/frontend/views/dashboard/profile/shared/CurrencyControllerField";
 import { Link } from "@/shared/i18n/routing";
 
 type BillingSectionProps =
@@ -81,26 +80,7 @@ function BillingEditSection({
         />
         <TextField label={t("fields.invoiceType")} fullWidth size="small" {...register("invoiceType")} />
         <TextField label={t("fields.feeAmount")} fullWidth size="small" {...register("feeAmount")} />
-        <Controller
-          name="currency"
-          control={control}
-          render={({ field, fieldState }) => {
-            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
-            return (
-              <CurrencySelect
-                currency={option}
-                setCurrencyAction={selected => {
-                  field.onChange(selected.code);
-                }}
-                onBlurAction={field.onBlur}
-                label={t("fields.currency")}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                fullWidth
-              />
-            );
-          }}
-        />
+        <CurrencyControllerField control={control} name="currency" label={t("fields.currency")} />
         <Controller
           name="timezone"
           control={control}

@@ -9,6 +9,7 @@ import type {
   ClassMeetingConfigSelectType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
+import { upsertManyWith } from "./upsert-utils";
 
 type ClassScope = { readonly classInstanceId: string };
 type RecurringScope = { readonly recurringScheduleId: string };
@@ -247,41 +248,28 @@ export namespace ClassMeetingConfigRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ClassMeetingConfigSelectType[]> {
-    if (inputs.length === 0) return [];
-
-    const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType[]> => {
-      const results: ClassMeetingConfigSelectType[] = [];
-
-      for (const input of inputs) {
+    return upsertManyWith(
+      inputs,
+      (input, t) => {
         const scope = resolveScope(input);
-        const existing = await findByScopeProviderLabel(scope, input.providerId, input.label, t);
-
-        if (existing) {
-          const updated = await update(
-            existing.id,
-            {
-              label: input.label,
-              isDefault: input.isDefault,
-              details: input.details,
-              encryptedSecret: input.encryptedSecret,
-              providerId: input.providerId,
-            },
-            t,
-            locale
-          );
-          results.push(updated);
-          continue;
-        }
-
-        results.push(await create(input, t, locale));
-      }
-
-      return results;
-    };
-
-    if (tx) {
-      return run(tx);
-    }
-    return db.transaction(run);
+        return findByScopeProviderLabel(scope, input.providerId, input.label, t);
+      },
+      create,
+      (id, input, t, loc) =>
+        update(
+          id,
+          {
+            label: input.label,
+            isDefault: input.isDefault,
+            details: input.details,
+            encryptedSecret: input.encryptedSecret,
+            providerId: input.providerId,
+          },
+          t,
+          loc
+        ),
+      tx,
+      locale
+    );
   }
 }

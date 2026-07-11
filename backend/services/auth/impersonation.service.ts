@@ -54,7 +54,7 @@ async function writeAdminAuditLog(
 async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, locale?: string): Promise<void> {
   const t = await getBackendTranslations({ locale, namespace: "errors" });
   const session = await SessionRepository.findSessionById(rawSessionId);
-  if (!session?.userId || session.userId !== actorUserId) {
+  if (session?.userId !== actorUserId) {
     throw new Error(t("auth.impersonationSessionInvalid"));
   }
 }
@@ -311,7 +311,7 @@ export namespace ImpersonationService {
 
   export async function issueAccessTokenForSession(actorUserId: string, rawSessionId: string): Promise<string | null> {
     const session = await SessionRepository.findSessionById(rawSessionId);
-    if (!session?.userId || session.userId !== actorUserId) {
+    if (session?.userId !== actorUserId) {
       return null;
     }
 

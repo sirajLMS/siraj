@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  commonClassUpdateInputFields,
+  registerDeleteEntityMutation,
+} from "@/backend/graphql/mutation/classes/__shared__/class-mutation-helpers";
+import {
   ClassCategoryCreateInputPothos,
   ClassCategoryPothosObject,
   ClassCategoryUpdateInputPothos,
@@ -47,9 +51,7 @@ gqlSchemaBuilder.mutationField("updateClassCategory", t =>
         {
           name: args.input.name ?? undefined,
           slug: args.input.slug ?? undefined,
-          description: args.input.description,
-          isActive: args.input.isActive ?? undefined,
-          sortOrder: args.input.sortOrder ?? undefined,
+          ...commonClassUpdateInputFields(args.input),
         },
         ctx.locale
       );
@@ -57,17 +59,4 @@ gqlSchemaBuilder.mutationField("updateClassCategory", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("deleteClassCategory", t =>
-  t.field({
-    type: "Boolean",
-    args: {
-      id: t.arg.id({ required: true }),
-    },
-    authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      await ClassCategoryService.deleteCategory(userId, args.id, ctx.locale);
-      return true;
-    },
-  })
-);
+registerDeleteEntityMutation("deleteClassCategory", ClassCategoryService.deleteCategory.bind(ClassCategoryService));

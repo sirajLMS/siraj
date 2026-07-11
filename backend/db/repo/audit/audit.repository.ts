@@ -55,6 +55,28 @@ export namespace AuditRepository {
   };
 
   /**
+   * Maps CreateAuditLogInput[] to insert row objects.
+   */
+  function mapAuditLogRows(inputs: readonly Types.CreateAuditLogInput[]) {
+    const now = new Date();
+    return inputs.map(input => ({
+      actorUserId: input.actorUserId ?? null,
+      actorType: input.actorType,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      action: input.action,
+      description: input.description ?? null,
+      previousState: input.previousState ?? null,
+      newState: input.newState ?? null,
+      changes: input.changes ?? null,
+      ipAddress: sanitizeIpAddress(input.ipAddress),
+      userAgent: input.userAgent ?? null,
+      metadata: input.metadata ?? null,
+      createdAt: input.createdAt ?? now,
+    }));
+  }
+
+  /**
    * Bulk-insert audit log entries. Chunks large batches and returns inserted rows.
    */
   export const createManyAuditLogs = async (
@@ -64,22 +86,7 @@ export namespace AuditRepository {
     if (inputs.length === 0) return [];
 
     const run = async (t: DBTransaction): Promise<Types.AuditLogEntity[]> => {
-      const now = new Date();
-      const rows = inputs.map(input => ({
-        actorUserId: input.actorUserId ?? null,
-        actorType: input.actorType,
-        entityType: input.entityType,
-        entityId: input.entityId,
-        action: input.action,
-        description: input.description ?? null,
-        previousState: input.previousState ?? null,
-        newState: input.newState ?? null,
-        changes: input.changes ?? null,
-        ipAddress: sanitizeIpAddress(input.ipAddress),
-        userAgent: input.userAgent ?? null,
-        metadata: input.metadata ?? null,
-        createdAt: input.createdAt ?? now,
-      }));
+      const rows = mapAuditLogRows(inputs);
 
       const results: Types.AuditLogEntity[] = [];
       for (let i = 0; i < rows.length; i += DEFAULT_BULK_CHUNK_SIZE) {
@@ -103,22 +110,7 @@ export namespace AuditRepository {
     if (inputs.length === 0) return;
 
     const run = async (t: DBTransaction): Promise<void> => {
-      const now = new Date();
-      const rows = inputs.map(input => ({
-        actorUserId: input.actorUserId ?? null,
-        actorType: input.actorType,
-        entityType: input.entityType,
-        entityId: input.entityId,
-        action: input.action,
-        description: input.description ?? null,
-        previousState: input.previousState ?? null,
-        newState: input.newState ?? null,
-        changes: input.changes ?? null,
-        ipAddress: sanitizeIpAddress(input.ipAddress),
-        userAgent: input.userAgent ?? null,
-        metadata: input.metadata ?? null,
-        createdAt: input.createdAt ?? now,
-      }));
+      const rows = mapAuditLogRows(inputs);
 
       await bulkInsertOnConflictDoNothing(auditLogs, rows, { tx: t });
     };

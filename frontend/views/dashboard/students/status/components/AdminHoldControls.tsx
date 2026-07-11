@@ -1,8 +1,7 @@
-import { AdminPanelSettingsOutlined } from "@mui/icons-material";
 import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
-import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
+import { AdminControlPanel, FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/views/dashboard/students/status/types";
@@ -157,27 +156,12 @@ export function AdminHoldControls({ isUpdating }: Readonly<AdminHoldControlsProp
   const t = useTranslations("dashboard.studentStatus");
 
   return (
-    <Box
-      sx={theme => ({
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: "xl",
-        boxShadow: theme.palette.shadow.card,
-        p: { xs: 3, md: 4 },
-        border: `1px solid ${theme.palette.border.main}`,
-      })}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 4 }}>
-        <AdminPanelSettingsOutlined sx={theme => ({ color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t("sections.adminHold")}
-        </Typography>
-      </Box>
-
+    <AdminControlPanel title={t("sections.adminHold")}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <StatusSelectionField />
         <ReasonEntryField />
         <SubmitStatusButton isUpdating={isUpdating} />
       </Box>
-    </Box>
+    </AdminControlPanel>
   );
 }

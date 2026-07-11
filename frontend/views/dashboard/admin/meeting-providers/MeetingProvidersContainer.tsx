@@ -5,7 +5,7 @@ import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import {
   AppDataGrid,
@@ -29,84 +29,135 @@ import { logger } from "@/frontend/utils/logger";
 import { CreateMeetingProviderDialog } from "@/frontend/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 
-export function MeetingProvidersContainer() {
-  const t = useTranslations("dashboard.meetingProviders");
-  const locale = useLocale();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editProvider, setEditProvider] = useState<MeetingProviderFieldsFragment | null>(null);
-  const [deleteProvider, setDeleteProvider] = useState<MeetingProviderFieldsFragment | null>(null);
+type MeetingProviderLabels = {
+  readonly slug: string;
+  readonly name: string;
+  readonly active: string;
+  readonly inactive: string;
+  readonly actions: string;
+  readonly edit: string;
+  readonly delete: string;
+};
 
+function buildMeetingProviderColumns(
+  labels: MeetingProviderLabels,
+  onEdit: (row: MeetingProviderFieldsFragment) => void,
+  onDelete: (row: MeetingProviderFieldsFragment) => void
+): GridColDef<MeetingProviderFieldsFragment>[] {
+  return [
+    {
+      field: "slug",
+      headerName: labels.slug,
+      flex: 1,
+      minWidth: 140,
+    },
+    {
+      field: "name",
+      headerName: labels.name,
+      flex: 1.5,
+      minWidth: 180,
+      renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
+    },
+    {
+      field: "isActive",
+      headerName: labels.active,
+      width: 120,
+      renderCell: ({ value }) => (
+        <Chip size="small" color={value ? "success" : "default"} label={value ? labels.active : labels.inactive} />
+      ),
+    },
+    {
+      field: "actions",
+      headerName: labels.actions,
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: ({ row }) => (
+        <Stack direction="row" spacing={0.5}>
+          <IconButton size="small" aria-label={labels.edit} onClick={() => onEdit(row)}>
+            <EditOutlined fontSize="small" />
+          </IconButton>
+          <IconButton size="small" aria-label={labels.delete} onClick={() => onDelete(row)}>
+            <DeleteOutlined fontSize="small" />
+          </IconButton>
+        </Stack>
+      ),
+    },
+  ];
+}
+
+function MeetingProvidersEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
+  return (
+    <Alert severity="info" sx={{ mb: 2 }}>
+      <Stack spacing={0.5}>
+        <Box sx={{ typography: "titleSm" }}>{title}</Box>
+        <Box sx={{ typography: "bodySm" }}>{body}</Box>
+      </Stack>
+    </Alert>
+  );
+}
+
+function useNotificationState() {
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successOpen, setSuccessOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
-  const showError = (message: string) => {
+  const showError = useCallback((message: string) => {
     setErrorMsg(message);
     setErrorOpen(true);
-  };
+  }, []);
 
-  const showSuccess = (message: string) => {
+  const showSuccess = useCallback((message: string) => {
     setSuccessMsg(message);
     setSuccessOpen(true);
-  };
+  }, []);
 
-  const { data, loading, refetch } = useQuery(meetingProvidersQueryDocument, {
-    variables: { activeOnly: false },
-  });
-  const [deleteMeetingProvider, { loading: deleting }] = useMutation(deleteMeetingProviderMutationDocument, {
-    onError: error => {
-      logger.error("Delete meeting provider failed:", { error });
-      showError(t("operationFailed"));
-    },
-  });
+  const closeError = useCallback(() => setErrorOpen(false), []);
+  const closeSuccess = useCallback(() => setSuccessOpen(false), []);
 
-  const rows = useMemo(() => data?.meetingProviders ?? [], [data?.meetingProviders]);
+  return { errorOpen, errorMsg, successOpen, successMsg, showError, showSuccess, closeError, closeSuccess };
+}
 
-  const columns = useMemo<GridColDef<MeetingProviderFieldsFragment>[]>(
-    () => [
-      {
-        field: "slug",
-        headerName: t("columns.slug"),
-        flex: 1,
-        minWidth: 140,
-      },
-      {
-        field: "name",
-        headerName: t("columns.name"),
-        flex: 1.5,
-        minWidth: 180,
-        renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
-      },
-      {
-        field: "isActive",
-        headerName: t("columns.active"),
-        width: 120,
-        renderCell: ({ value }) => (
-          <Chip size="small" color={value ? "success" : "default"} label={value ? t("active") : t("inactive")} />
-        ),
-      },
-      {
-        field: "actions",
-        headerName: t("columns.actions"),
-        width: 120,
-        sortable: false,
-        filterable: false,
-        renderCell: ({ row }) => (
-          <Stack direction="row" spacing={0.5}>
-            <IconButton size="small" aria-label={t("edit")} onClick={() => setEditProvider(row)}>
-              <EditOutlined fontSize="small" />
-            </IconButton>
-            <IconButton size="small" aria-label={t("delete")} onClick={() => setDeleteProvider(row)}>
-              <DeleteOutlined fontSize="small" />
-            </IconButton>
-          </Stack>
-        ),
-      },
-    ],
-    [t]
-  );
+type MeetingProvidersViewProps = {
+  readonly t: ReturnType<typeof useTranslations<"dashboard.meetingProviders">>;
+  readonly locale: string;
+  readonly rows: MeetingProviderFieldsFragment[];
+  readonly columns: GridColDef<MeetingProviderFieldsFragment>[];
+  readonly loading: boolean;
+  readonly createOpen: boolean;
+  readonly editProvider: MeetingProviderFieldsFragment | null;
+  readonly deleteProvider: MeetingProviderFieldsFragment | null;
+  readonly deleting: boolean;
+  readonly notifications: ReturnType<typeof useNotificationState>;
+  readonly onCreateOpen: () => void;
+  readonly onCreateClose: () => void;
+  readonly onCreateSaved: () => Promise<void>;
+  readonly onEditClose: () => void;
+  readonly onEditSaved: () => Promise<void>;
+  readonly onDeleteClose: () => void;
+  readonly onDeleteConfirm: () => Promise<void>;
+};
 
+function MeetingProvidersView({
+  t,
+  locale,
+  rows,
+  columns,
+  loading,
+  createOpen,
+  editProvider,
+  deleteProvider,
+  deleting,
+  notifications,
+  onCreateOpen,
+  onCreateClose,
+  onCreateSaved,
+  onEditClose,
+  onEditSaved,
+  onDeleteClose,
+  onDeleteConfirm,
+}: Readonly<MeetingProvidersViewProps>) {
   return (
     <RequirePermission permissions={AppPermission.MeetingProvidersManageCatalog}>
       <PageContainer>
@@ -114,18 +165,13 @@ export function MeetingProvidersContainer() {
           title={t("pageTitle")}
           subtitle={t("pageSubtitle")}
           actions={
-            <PrimaryPageAction onClick={() => setCreateOpen(true)} startIcon={<AddOutlined />}>
+            <PrimaryPageAction onClick={onCreateOpen} startIcon={<AddOutlined />}>
               {t("addProvider")}
             </PrimaryPageAction>
           }
         />
         {!loading && rows.length === 0 ? (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            <Stack spacing={0.5}>
-              <Box sx={{ typography: "titleSm" }}>{t("emptyCatalogTitle")}</Box>
-              <Box sx={{ typography: "bodySm" }}>{t("emptyCatalogBody")}</Box>
-            </Stack>
-          </Alert>
+          <MeetingProvidersEmptyState title={t("emptyCatalogTitle")} body={t("emptyCatalogBody")} />
         ) : null}
         <Box sx={{ height: 560 }}>
           <AppDataGrid rows={rows} columns={columns} loading={loading} getRowId={row => row.id ?? ""} />
@@ -133,39 +179,21 @@ export function MeetingProvidersContainer() {
 
         <CreateMeetingProviderDialog
           open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          onSaved={async () => {
-            setCreateOpen(false);
-            await refetch();
-            showSuccess(t("createSuccess"));
-          }}
-          onError={showError}
+          onClose={onCreateClose}
+          onSaved={onCreateSaved}
+          onError={notifications.showError}
         />
         <EditMeetingProviderDialog
           open={Boolean(editProvider)}
           provider={editProvider}
-          onClose={() => setEditProvider(null)}
-          onSaved={async () => {
-            setEditProvider(null);
-            await refetch();
-            showSuccess(t("updateSuccess"));
-          }}
-          onError={showError}
+          onClose={onEditClose}
+          onSaved={onEditSaved}
+          onError={notifications.showError}
         />
         <BaseDeleteDialog
           open={Boolean(deleteProvider)}
-          onClose={() => setDeleteProvider(null)}
-          onConfirm={async () => {
-            if (!deleteProvider?.id) return;
-            try {
-              await deleteMeetingProvider({ variables: { id: deleteProvider.id } });
-              setDeleteProvider(null);
-              await refetch();
-              showSuccess(t("deleteSuccess"));
-            } catch {
-              showError(t("operationFailed"));
-            }
-          }}
+          onClose={onDeleteClose}
+          onConfirm={onDeleteConfirm}
           isLoading={deleting}
           title={t("deleteTitle")}
           body={`${t("deleteConfirm")} ${resolveLocalizedString(
@@ -176,9 +204,99 @@ export function MeetingProvidersContainer() {
           confirmLabel={t("delete")}
         />
 
-        <FormErrorSnackbar open={errorOpen} message={errorMsg} onClose={() => setErrorOpen(false)} />
-        <FormSuccessSnackbar open={successOpen} message={successMsg} onClose={() => setSuccessOpen(false)} />
+        <FormErrorSnackbar
+          open={notifications.errorOpen}
+          message={notifications.errorMsg}
+          onClose={notifications.closeError}
+        />
+        <FormSuccessSnackbar
+          open={notifications.successOpen}
+          message={notifications.successMsg}
+          onClose={notifications.closeSuccess}
+        />
       </PageContainer>
     </RequirePermission>
+  );
+}
+
+export function MeetingProvidersContainer() {
+  const t = useTranslations("dashboard.meetingProviders");
+  const locale = useLocale();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editProvider, setEditProvider] = useState<MeetingProviderFieldsFragment | null>(null);
+  const [deleteProvider, setDeleteProvider] = useState<MeetingProviderFieldsFragment | null>(null);
+  const notifications = useNotificationState();
+
+  const { data, loading, refetch } = useQuery(meetingProvidersQueryDocument, {
+    variables: { activeOnly: false },
+  });
+  const [deleteMeetingProvider, { loading: deleting }] = useMutation(deleteMeetingProviderMutationDocument, {
+    onError: error => {
+      logger.error("Delete meeting provider failed:", { error });
+      notifications.showError(t("operationFailed"));
+    },
+  });
+
+  const rows = useMemo(() => data?.meetingProviders ?? [], [data?.meetingProviders]);
+
+  const labels = useMemo<MeetingProviderLabels>(
+    () => ({
+      slug: t("columns.slug"),
+      name: t("columns.name"),
+      active: t("active"),
+      inactive: t("inactive"),
+      actions: t("columns.actions"),
+      edit: t("edit"),
+      delete: t("delete"),
+    }),
+    [t]
+  );
+
+  const columns = useMemo(() => buildMeetingProviderColumns(labels, setEditProvider, setDeleteProvider), [labels]);
+
+  const handleCreateSaved = useCallback(async () => {
+    setCreateOpen(false);
+    await refetch();
+    notifications.showSuccess(t("createSuccess"));
+  }, [refetch, notifications, t]);
+
+  const handleEditSaved = useCallback(async () => {
+    setEditProvider(null);
+    await refetch();
+    notifications.showSuccess(t("updateSuccess"));
+  }, [refetch, notifications, t]);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteProvider?.id) return;
+    try {
+      await deleteMeetingProvider({ variables: { id: deleteProvider.id } });
+      setDeleteProvider(null);
+      await refetch();
+      notifications.showSuccess(t("deleteSuccess"));
+    } catch {
+      notifications.showError(t("operationFailed"));
+    }
+  }, [deleteProvider, deleteMeetingProvider, refetch, notifications, t]);
+
+  return (
+    <MeetingProvidersView
+      t={t}
+      locale={locale}
+      rows={rows}
+      columns={columns}
+      loading={loading}
+      createOpen={createOpen}
+      editProvider={editProvider}
+      deleteProvider={deleteProvider}
+      deleting={deleting}
+      notifications={notifications}
+      onCreateOpen={() => setCreateOpen(true)}
+      onCreateClose={() => setCreateOpen(false)}
+      onCreateSaved={handleCreateSaved}
+      onEditClose={() => setEditProvider(null)}
+      onEditSaved={handleEditSaved}
+      onDeleteClose={() => setDeleteProvider(null)}
+      onDeleteConfirm={handleDeleteConfirm}
+    />
   );
 }

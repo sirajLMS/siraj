@@ -6,6 +6,33 @@ import {
   filterProfileByFieldGroups,
 } from "@/backend/services/profile/profile-field-filter";
 
+type OwnViewCase = {
+  audience: ProfileAudience;
+  permission: AppPermission;
+  userId: string;
+};
+
+const ownViewCases: OwnViewCase[] = [
+  { audience: ProfileAudience.TEACHER, permission: AppPermission.TEACHER_VIEW_OWN_PROFILE, userId: "teacher-1" },
+  { audience: ProfileAudience.PARENT, permission: AppPermission.PARENT_VIEW_OWN_PROFILE, userId: "parent-1" },
+];
+
+const buildOwnFilterCtx = (c: OwnViewCase, perms: Set<AppPermission>) => ({
+  actorUserId: c.userId,
+  targetUserId: c.userId,
+  scope: ProfileScope.OWN,
+  audience: c.audience,
+  permissions: perms,
+});
+
+const buildEditCtx = (targetUserId: string, audience: ProfileAudience, permission: AppPermission) => ({
+  actorUserId: "admin-1",
+  targetUserId,
+  scope: ProfileScope.OTHER,
+  audience,
+  permissions: new Set<AppPermission>([permission]),
+});
+
 describe("filterProfileByFieldGroups", () => {
   test("nulls core identity fields when view_own denied", () => {
     const payload = {
@@ -53,36 +80,23 @@ describe("filterProfileByFieldGroups", () => {
     expect(filtered.email).toBe("ada@example.com");
   });
 
-  test("allows viewing own core_contact (phone) with role-specific view_own permission", () => {
+  test.each(
+    ownViewCases
+  )("allows viewing own core_contact (phone) with $audience role-specific view_own permission", c => {
     const payload = {
       teacherOwnProfile: { phone: "+1234567890" },
       parentOwnProfile: { phone: "+1987654321" },
     };
 
-    // Teacher viewing own profile
-    const teacherFiltered = filterProfileByFieldGroups(payload, {
-      actorUserId: "teacher-1",
-      targetUserId: "teacher-1",
-      scope: ProfileScope.OWN,
-      audience: ProfileAudience.TEACHER,
-      permissions: new Set<AppPermission>([AppPermission.TEACHER_VIEW_OWN_PROFILE]),
-    });
+    const filtered = filterProfileByFieldGroups(payload, buildOwnFilterCtx(c, new Set<AppPermission>([c.permission])));
 
-    expect(teacherFiltered.teacherOwnProfile?.phone).toBe("+1234567890");
-
-    // Parent viewing own profile
-    const parentFiltered = filterProfileByFieldGroups(payload, {
-      actorUserId: "parent-1",
-      targetUserId: "parent-1",
-      scope: ProfileScope.OWN,
-      audience: ProfileAudience.PARENT,
-      permissions: new Set<AppPermission>([AppPermission.PARENT_VIEW_OWN_PROFILE]),
-    });
-
-    expect(parentFiltered.parentOwnProfile?.phone).toBe("+1987654321");
+    const profileGroup =
+      c.audience === ProfileAudience.TEACHER ? filtered.teacherOwnProfile : filtered.parentOwnProfile;
+    const expectedPhone = c.audience === ProfileAudience.TEACHER ? "+1234567890" : "+1987654321";
+    expect(profileGroup?.phone).toBe(expectedPhone);
   });
 
-  test("allows viewing own core_identity with role-specific view_own permission", () => {
+  test.each(ownViewCases)("allows viewing own core_identity with $audience role-specific view_own permission", c => {
     const payload = {
       name: "Test User",
       email: "test@example.com",
@@ -90,29 +104,10 @@ describe("filterProfileByFieldGroups", () => {
       displayCurrency: "USD",
     };
 
-    // Teacher viewing own profile
-    const teacherFiltered = filterProfileByFieldGroups(payload, {
-      actorUserId: "teacher-1",
-      targetUserId: "teacher-1",
-      scope: ProfileScope.OWN,
-      audience: ProfileAudience.TEACHER,
-      permissions: new Set<AppPermission>([AppPermission.TEACHER_VIEW_OWN_PROFILE]),
-    });
+    const filtered = filterProfileByFieldGroups(payload, buildOwnFilterCtx(c, new Set<AppPermission>([c.permission])));
 
-    expect(teacherFiltered.name).toBe("Test User");
-    expect(teacherFiltered.email).toBe("test@example.com");
-
-    // Parent viewing own profile
-    const parentFiltered = filterProfileByFieldGroups(payload, {
-      actorUserId: "parent-1",
-      targetUserId: "parent-1",
-      scope: ProfileScope.OWN,
-      audience: ProfileAudience.PARENT,
-      permissions: new Set<AppPermission>([AppPermission.PARENT_VIEW_OWN_PROFILE]),
-    });
-
-    expect(parentFiltered.name).toBe("Test User");
-    expect(parentFiltered.email).toBe("test@example.com");
+    expect(filtered.name).toBe("Test User");
+    expect(filtered.email).toBe("test@example.com");
   });
 
   test("nulls assignedStudents when teacher_students view_other denied", () => {
@@ -132,13 +127,7 @@ describe("filterProfileByFieldGroups", () => {
   });
 
   test("legacy USER_EDIT_PROFILE grants edit for applicable other-scope groups", () => {
-    const ctx = {
-      actorUserId: "admin-1",
-      targetUserId: "teacher-1",
-      scope: ProfileScope.OTHER,
-      audience: ProfileAudience.TEACHER,
-      permissions: new Set<AppPermission>([AppPermission.USER_EDIT_PROFILE]),
-    };
+    const ctx = buildEditCtx("teacher-1", ProfileAudience.TEACHER, AppPermission.USER_EDIT_PROFILE);
 
     expect(canEditProfileFieldGroup(ctx, "core_identity")).toBe(true);
     expect(canEditProfileFieldGroup(ctx, "teacher_professional")).toBe(true);
@@ -146,13 +135,7 @@ describe("filterProfileByFieldGroups", () => {
   });
 
   test("legacy STAFF_EDIT_PROFILE grants staff edit groups only", () => {
-    const ctx = {
-      actorUserId: "admin-1",
-      targetUserId: "staff-1",
-      scope: ProfileScope.OTHER,
-      audience: ProfileAudience.STAFF,
-      permissions: new Set<AppPermission>([AppPermission.STAFF_EDIT_PROFILE]),
-    };
+    const ctx = buildEditCtx("staff-1", ProfileAudience.STAFF, AppPermission.STAFF_EDIT_PROFILE);
 
     expect(canEditProfileFieldGroup(ctx, "staff_role")).toBe(true);
     expect(canEditProfileFieldGroup(ctx, "staff_permissions")).toBe(true);
@@ -161,16 +144,18 @@ describe("filterProfileByFieldGroups", () => {
   });
 
   test("legacy student permissions grant edit for matching groups", () => {
-    const academicCtx = {
+    const baseStudentCtx = {
       actorUserId: "admin-1",
       studentId: "student-1",
       isAssociatedViewer: false,
+    };
+
+    const academicCtx = {
+      ...baseStudentCtx,
       permissions: new Set<AppPermission>([AppPermission.STUDENT_MANAGE_STATUS]),
     };
     const quotaCtx = {
-      actorUserId: "admin-1",
-      studentId: "student-1",
-      isAssociatedViewer: false,
+      ...baseStudentCtx,
       permissions: new Set<AppPermission>([AppPermission.STUDENT_EDIT_QUOTA]),
     };
 

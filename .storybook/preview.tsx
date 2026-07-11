@@ -16,6 +16,7 @@ const preview: Preview = {
   initialGlobals: {
     locale: "ar",
     theme: "dark",
+    viewport: "desktop",
   },
   globalTypes: {
     locale: {
@@ -37,6 +38,18 @@ const preview: Preview = {
         items: [
           { value: "light", icon: "circlehollow", title: "Light" },
           { value: "dark", icon: "circle", title: "Dark" },
+        ],
+      },
+    },
+    viewport: {
+      description: "Viewport breakpoint for previewing responsive layouts",
+      defaultValue: "desktop",
+      toolbar: {
+        icon: "browser",
+        items: [
+          { value: "mobile", icon: "mobile", title: "Mobile" },
+          { value: "tablet", icon: "tablet", title: "Tablet" },
+          { value: "desktop", icon: "browser", title: "Desktop" },
         ],
       },
     },

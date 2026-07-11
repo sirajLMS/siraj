@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AdminPanelSettingsOutlined, PersonOutlined } from "@mui/icons-material";
+import { PersonOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
@@ -9,6 +9,7 @@ import { Controller, FormProvider, useForm, useFormContext } from "react-hook-fo
 import { PageContainer, PageHeader, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
+import { AdminControlCard } from "@/frontend/views/dashboard/parents/lifecycle/components/__shared__";
 import {
   type LifecycleUpdateFormData,
   lifecycleUpdateSchema,
@@ -59,22 +60,7 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
   const { control, register } = useFormContext<LifecycleUpdateFormData>();
 
   return (
-    <Box
-      sx={theme => ({
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: "xl",
-        boxShadow: theme.palette.shadow.card,
-        p: { xs: 3, md: 4 },
-        border: `1px solid ${theme.palette.border.main}`,
-      })}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 4 }}>
-        <AdminPanelSettingsOutlined sx={theme => ({ color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t("sections.adminControls")}
-        </Typography>
-      </Box>
-
+    <AdminControlCard title={t("sections.adminControls")}>
       <Stack spacing={3}>
         <Box>
           <Typography
@@ -111,7 +97,7 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
           {t("actions.applyChange")}
         </PrimaryPageAction>
       </Stack>
-    </Box>
+    </AdminControlCard>
   );
 }
 

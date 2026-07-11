@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { registerDeleteMutation } from "@/backend/graphql/mutation/classes/class-shared.helpers";
 import {
   AttachSubjectResourceInputPothos,
   ClassSubjectCreateInputPothos,
@@ -61,19 +62,8 @@ gqlSchemaBuilder.mutationField("updateClassSubject", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("deleteClassSubject", t =>
-  t.field({
-    type: "Boolean",
-    args: {
-      id: t.arg.id({ required: true }),
-    },
-    authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      await ClassSubjectService.deleteSubject(userId, args.id, ctx.locale);
-      return true;
-    },
-  })
+registerDeleteMutation("deleteClassSubject", (userId, id, locale) =>
+  ClassSubjectService.deleteSubject(userId, id, locale)
 );
 
 gqlSchemaBuilder.mutationField("attachSubjectResource", t =>

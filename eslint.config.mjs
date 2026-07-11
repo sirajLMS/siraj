@@ -309,6 +309,71 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+
+  // Mobile files must not import desktop files (and vice versa).
+  // IMPORTANT: no-restricted-imports matches the raw import specifier string (the `from` value).
+  // TypeScript imports omit the .tsx extension, so patterns must match extensionless imports.
+  // Use regex for precise matching instead of glob group to catch both "foo.desktop" and "foo.desktop.tsx".
+  {
+    files: ["**/*.mobile.tsx", "**/*.mobile.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "\\.desktop(\\.tsx?)?$",
+              message: "Mobile components must not import desktop components — see architecture rules in AGENTS.md",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["**/*.desktop.tsx", "**/*.desktop.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "\\.mobile(\\.tsx?)?$",
+              message: "Desktop components must not import mobile components — see architecture rules in AGENTS.md",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Mobile and desktop files must not use useMediaQuery or useViewport.
+  // They are pure presentation — the viewport tier is decided by the parent switcher.
+  // `paths` and `patterns` coexist in the same rule entry (both fire independently).
+  {
+    files: ["**/*.mobile.tsx", "**/*.desktop.tsx", "**/*.mobile.ts", "**/*.desktop.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@mui/material",
+              importNames: ["useMediaQuery"],
+              allowTypeImports: true,
+              message: "Mobile/desktop components must not use useMediaQuery — viewport tier is decided by the parent View switcher",
+            },
+          ],
+          patterns: [
+            {
+              group: ["@/frontend/hooks/useViewport", "@/frontend/context/ViewportContext"],
+              message: "Mobile/desktop components must not read viewport context — they are already tier-specific",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
