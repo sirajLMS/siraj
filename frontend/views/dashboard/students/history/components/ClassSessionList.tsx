@@ -64,7 +64,12 @@ function ClassSessionCard({
   statusLabel,
   durationLabel,
   t,
-}: Readonly<{ session: ClassSession; statusLabel: string; durationLabel: string; t: ReturnType<typeof useTranslations> }>) {
+}: Readonly<{
+  session: ClassSession;
+  statusLabel: string;
+  durationLabel: string;
+  t: ReturnType<typeof useTranslations>;
+}>) {
   const [timeValue, timePeriod] = session.time.split(" ");
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 

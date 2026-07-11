@@ -18,7 +18,7 @@ type StringEnum = Record<string, string>;
 function parseEnumValue<T extends StringEnum>(
   enumObject: T,
   value: string | null | undefined,
-  fallback: T[keyof T] | null = null,
+  fallback: T[keyof T] | null = null
 ): T[keyof T] | null {
   if (value === null || value === undefined) {
     return fallback;
@@ -37,36 +37,33 @@ export const parseCurrencyCode = (value: string | null | undefined): CurrencyCod
 
 export const parseParentStatus = (
   value: string | null | undefined,
-  fallback: ParentStatus = ParentStatus.Regular,
+  fallback: ParentStatus = ParentStatus.Regular
 ): ParentStatus => parseEnumValue(ParentStatus, value, fallback) ?? fallback;
 
 export const parseStudentStatus = (
   value: string | null | undefined,
-  fallback: StudentStatus = StudentStatus.Regular,
+  fallback: StudentStatus = StudentStatus.Regular
 ): StudentStatus => parseEnumValue(StudentStatus, value, fallback) ?? fallback;
 
-export const parseGender = (value: string | null | undefined): Gender | null =>
-  parseEnumValue(Gender, value);
+export const parseGender = (value: string | null | undefined): Gender | null => parseEnumValue(Gender, value);
 
 export const parseAccountStatus = (
   value: string | null | undefined,
-  fallback: AccountStatus = AccountStatus.Activated,
+  fallback: AccountStatus = AccountStatus.Activated
 ): AccountStatus => parseEnumValue(AccountStatus, value, fallback) ?? fallback;
 
 export const parseAppLanguage = (value: string | null | undefined): AppLanguage | null =>
   parseEnumValue(AppLanguage, value);
 
-export const parseClassType = (
-  value: string | null | undefined,
-  fallback: ClassType = ClassType.Regular,
-): ClassType => parseEnumValue(ClassType, value, fallback) ?? fallback;
+export const parseClassType = (value: string | null | undefined, fallback: ClassType = ClassType.Regular): ClassType =>
+  parseEnumValue(ClassType, value, fallback) ?? fallback;
 
 export const parseClassOutcome = (value: string | null | undefined): ClassOutcome | null =>
   parseEnumValue(ClassOutcome, value);
 
 export const parseClassExecutionState = (
   value: string | null | undefined,
-  fallback: ClassExecutionState = ClassExecutionState.NotActivated,
+  fallback: ClassExecutionState = ClassExecutionState.NotActivated
 ): ClassExecutionState => parseEnumValue(ClassExecutionState, value, fallback) ?? fallback;
 
 export const parsePaymentMethodType = (value: string | null | undefined): PaymentMethodType | null =>
@@ -74,8 +71,7 @@ export const parsePaymentMethodType = (value: string | null | undefined): Paymen
 
 export const parsePaymentDirection = (
   value: string | null | undefined,
-  fallback: PaymentDirection = PaymentDirection.Both,
+  fallback: PaymentDirection = PaymentDirection.Both
 ): PaymentDirection => parseEnumValue(PaymentDirection, value, fallback) ?? fallback;
 
-export const parseDayOfWeek = (value: string | null | undefined): DayOfWeek | null =>
-  parseEnumValue(DayOfWeek, value);
+export const parseDayOfWeek = (value: string | null | undefined): DayOfWeek | null => parseEnumValue(DayOfWeek, value);

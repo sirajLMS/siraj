@@ -57,6 +57,7 @@ const createMockProps = (overrides: Partial<ScheduleOverviewSectionProps> = {}):
     status: "Status",
     actions: "Actions",
     history: "History",
+    joinVideo: "Join Video",
   },
   statusLabels,
   detailsLabel: "View Details",

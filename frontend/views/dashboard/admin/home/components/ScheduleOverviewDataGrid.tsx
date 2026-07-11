@@ -25,6 +25,7 @@ interface ScheduleOverviewDataGridProps {
     readonly status: string;
     readonly actions: string;
     readonly history: string;
+    readonly joinVideo: string;
   };
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;

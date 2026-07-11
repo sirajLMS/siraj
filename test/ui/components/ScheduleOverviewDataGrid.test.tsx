@@ -61,6 +61,7 @@ const headers = {
   status: "Status",
   actions: "Actions",
   history: "History",
+  joinVideo: "Join Video",
 };
 
 const mockRows: readonly DailyScheduleRow[] = [

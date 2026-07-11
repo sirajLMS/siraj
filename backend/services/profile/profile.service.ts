@@ -15,9 +15,8 @@ import {
   StaffProfileService,
   TeacherPortalService,
 } from "@/backend/services";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
-import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
+import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import {
   canEditProfileFieldGroup,
   collectProfileEditGroupsFromUpdate,
@@ -33,6 +32,7 @@ import type {
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
 } from "@/backend/types";
+import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";

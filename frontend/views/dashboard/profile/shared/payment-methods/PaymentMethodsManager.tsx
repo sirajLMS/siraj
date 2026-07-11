@@ -191,7 +191,8 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
   const { hasPermission } = useUserStore();
   const canVerify = hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
 
-  const slotDirection: PaymentDirection.Payin | PaymentDirection.Payout = slot === "payin" ? PaymentDirection.Payin : PaymentDirection.Payout;
+  const slotDirection: PaymentDirection.Payin | PaymentDirection.Payout =
+    slot === "payin" ? PaymentDirection.Payin : PaymentDirection.Payout;
   const allowedDirections =
     slot === "payin"
       ? ([PaymentDirection.Payin, PaymentDirection.Both] as const)
@@ -207,7 +208,9 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
 
   const methods = usePaymentMethods(data, slot);
   const methodById = useMethodById(data);
-  const refetchData = async () => { await refetch(); };
+  const refetchData = async () => {
+    await refetch();
+  };
   const mutations = useMethodMutations(refetchData);
   const deleteLabel = useDeleteLabel(deleteId, methods, tType);
 
