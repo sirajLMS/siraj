@@ -95,16 +95,15 @@ export class SessionRedisService {
     if (!this.isPlainObject(obj.impersonation)) {
       return false;
     }
-    const imp = obj.impersonation;
     if (
-      typeof imp.targetUserId !== "string" ||
-      typeof imp.startedAt !== "string" ||
-      typeof imp.expiresAt !== "string" ||
-      typeof imp.impersonationSessionId !== "string"
+      typeof obj.impersonation.targetUserId !== "string" ||
+      typeof obj.impersonation.startedAt !== "string" ||
+      typeof obj.impersonation.expiresAt !== "string" ||
+      typeof obj.impersonation.impersonationSessionId !== "string"
     ) {
       return false;
     }
-    return imp.reason === undefined || typeof imp.reason === "string";
+    return obj.impersonation.reason === undefined || typeof obj.impersonation.reason === "string";
   }
 
   /**
@@ -117,8 +116,11 @@ export class SessionRedisService {
     if (!this.isPlainObject(obj.groupSimulation)) {
       return false;
     }
-    const sim = obj.groupSimulation;
-    return typeof sim.groupSlug === "string" && typeof sim.startedAt === "string" && typeof sim.expiresAt === "string";
+    return (
+      typeof obj.groupSimulation.groupSlug === "string" &&
+      typeof obj.groupSimulation.startedAt === "string" &&
+      typeof obj.groupSimulation.expiresAt === "string"
+    );
   }
 
   /**

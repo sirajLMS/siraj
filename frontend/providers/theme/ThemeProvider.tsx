@@ -7,8 +7,8 @@ import { useLocale } from "next-intl";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
 import { setThemePreference } from "@/frontend/lib/theme-detection";
-import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
 import { createAppCssVarsTheme } from "@/frontend/providers/theme/theme";
+import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
 
 interface AppThemeProviderProps {
   readonly children: ReactNode;

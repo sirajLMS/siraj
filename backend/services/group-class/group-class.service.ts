@@ -6,11 +6,10 @@ import {
   AppPermission,
   ClassExecutionState,
   ClassOutcome,
-  type GroupClassAttendanceStatus,
   NotificationChannel,
   NotificationEventType,
 } from "@/backend/enum";
-import { parseClassExecutionState, parseClassOutcome } from "@/backend/lib/enum";
+import { parseClassExecutionState, parseClassOutcome, parseGroupClassAttendanceStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -69,7 +68,7 @@ export namespace GroupClassService {
         .join("")
         .toUpperCase()
         .slice(0, 2),
-      attendanceStatus: e.attendanceStatus as GroupClassAttendanceStatus,
+      attendanceStatus: parseGroupClassAttendanceStatus(e.attendanceStatus),
       avatarUrl: e.studentAvatarUrl,
     }));
   }

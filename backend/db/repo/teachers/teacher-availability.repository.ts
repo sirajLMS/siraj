@@ -241,12 +241,12 @@ interface FindGapsForCalendarDateOptions {
   dayWindows: Types.TeacherAvailabilityWindowSelectType[];
   dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[];
   extraBlocked: { start: number; end: number }[];
-  timeRange: MinuteRange;
+  searchRange: MinuteRange;
 }
 
 function findGapsForCalendarDate(options: FindGapsForCalendarDateOptions): Types.TeacherAvailabilityGap[] {
-  const { teacher, calendarDate, day, dayWindows, dayUnavail, extraBlocked, timeRange } = options;
-  const { from: fromMinutes, to: toMinutes } = timeRange;
+  const { teacher, calendarDate, day, dayWindows, dayUnavail, extraBlocked, searchRange } = options;
+  const { from: fromMinutes, to: toMinutes } = searchRange;
   const gaps: Types.TeacherAvailabilityGap[] = [];
   const effectiveWindows = dayWindows.filter(window =>
     isWithinEffectiveRange(calendarDate, window.effectiveFrom, window.effectiveUntil)
@@ -869,7 +869,7 @@ export namespace TeacherAvailabilityRepository {
           dayWindows,
           dayUnavail,
           extraBlocked,
-          timeRange,
+          searchRange: timeRange,
         });
         gaps.push(...dayGaps);
       }

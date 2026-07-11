@@ -38,7 +38,10 @@ export class PostgresCacheAdapter implements ICacheService {
   async get(key: string): Promise<string | null> {
     try {
       const entry = await CacheDbRepository.get(key);
-      return entry?.value || null;
+      if (!entry) {
+        return null;
+      }
+      return entry.value;
     } catch (error) {
       logger.error("Postgres cache get error:", error);
       return null;

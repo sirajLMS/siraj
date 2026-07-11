@@ -7,7 +7,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
-import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -16,6 +15,7 @@ import {
   CurrencyCode as CurrencyCodeEnum,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createAppTheme } from "@/frontend/providers/theme/theme";
+import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
 import { useUserStore } from "@/frontend/stores/userStore";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
@@ -202,6 +202,8 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
                     width: "100%",
                     padding: 4,
                     boxSizing: "border-box",
+                    maxWidth: maxWidth === "none" ? "100%" : maxWidth,
+                    mx: "auto",
                   }}
                 >
                   {content}

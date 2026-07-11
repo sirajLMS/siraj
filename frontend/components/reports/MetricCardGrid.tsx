@@ -4,7 +4,8 @@ import type { Breakpoint } from "@mui/material";
 import { Box } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
 import { useTranslations } from "next-intl";
-import { HorizontalScrollRow, MetricCard } from "@/frontend/components/ui";
+import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
+import { HorizontalScrollRow } from "@/frontend/components/ui/container/HorizontalScrollRow";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };

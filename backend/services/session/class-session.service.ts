@@ -62,7 +62,7 @@ export namespace ClassSessionService {
     }
 
     const parent = await ParentRepository.findByUserId(userId);
-    if (parent && instance.student?.parentId === parent.id) {
+    if (parent?.id === instance.student?.parentId) {
       return;
     }
 

@@ -66,6 +66,7 @@ async function expectRejection(fn: () => Promise<unknown>) {
   return error as Error;
 }
 
+// Test helper functions
 function mockActorAndTarget(
   actorType: "superAdmin" | "nonSuperAdmin",
   targetOverrides: Parameters<typeof mockTargetUser>[0],

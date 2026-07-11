@@ -2,14 +2,8 @@
 
 import { FileDownloadOutlined, FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, Grid, IconButton, type Theme, Typography, useMediaQuery } from "@mui/material";
-import {
-  ExportButton,
-  FilterButton,
-  MetricCard,
-  PageContainer,
-  PageHeader,
-  SectionPanel,
-} from "@/frontend/components/ui";
+import { ExportButton, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
 import { AcademicScheduleCardList } from "@/frontend/views/dashboard/schedule/alerts/AcademicScheduleCardList";
 import {
   AcademicScheduleDataGrid,

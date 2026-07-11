@@ -95,8 +95,8 @@ export namespace StorageUtils {
     return path
       .replaceAll("\0", "")
       .replaceAll("\\", "/")
-      .replace(/\/+/g, "/")
-      .replace(/(?:^\/|\/(?=$))/g, "");
+      .replaceAll(/\/\/+/g, "/")
+      .replaceAll(/(?:^\/|\/(?=$))/g, "");
   };
 
   export const blobToFileInfo = (blob: Types.BlobMetadata, baseUrl: string): Types.BucketFile => {

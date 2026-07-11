@@ -1,7 +1,7 @@
 import { CancelOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { MetricCard } from "@/frontend/components/ui";
+import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
 
 interface TeacherMetricsRowProps {
   readonly metrics:

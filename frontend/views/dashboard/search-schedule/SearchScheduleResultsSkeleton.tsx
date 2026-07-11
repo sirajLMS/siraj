@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Skeleton } from "@mui/material";
-import { HorizontalScrollRow } from "@/frontend/components/ui";
+import { HorizontalScrollRow } from "@/frontend/components/ui/container/HorizontalScrollRow";
 import { edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/utils/sx/mergeSx";
 

@@ -6,8 +6,11 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { AttendanceReportResult } from "@/backend/types/books/report.types";
 
-export type { AttendanceReportFilters, AttendanceReportRow } from "@/backend/db/repo/books/report.repository";
-export { ReportGroupingMode } from "@/backend/db/repo/books/report.repository";
+export {
+  type AttendanceReportFilters,
+  type AttendanceReportRow,
+  ReportGroupingMode,
+} from "@/backend/db/repo/books/report.repository";
 
 export namespace ReportService {
   export async function generateAttendanceReport(

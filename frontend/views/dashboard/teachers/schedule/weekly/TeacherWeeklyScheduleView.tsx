@@ -18,7 +18,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { MetricCard, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui/container";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import MobileScheduleList from "@/frontend/views/dashboard/teachers/schedule/weekly/MobileScheduleList";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";

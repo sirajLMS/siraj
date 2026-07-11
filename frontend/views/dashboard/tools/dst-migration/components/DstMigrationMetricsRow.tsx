@@ -3,7 +3,7 @@
 import { AnalyticsOutlined, ErrorOutlined, HistoryOutlined, VerifiedOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { MetricCard } from "@/frontend/components/ui";
+import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
 import type { DstMigrationMetrics } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {

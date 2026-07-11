@@ -361,7 +361,8 @@ const eslintConfig = defineConfig([
               name: "@mui/material",
               importNames: ["useMediaQuery"],
               allowTypeImports: true,
-              message: "Mobile/desktop components must not use useMediaQuery — viewport tier is decided by the parent View switcher",
+              message:
+                "Mobile/desktop components must not use useMediaQuery — viewport tier is decided by the parent View switcher",
             },
           ],
           patterns: [
