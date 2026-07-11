@@ -23,9 +23,8 @@ export default async function DashboardLayout({
   const { userId, context, isImpersonating, isSimulatingGroup } = await getServerUserContext();
   let { locale } = await params;
 
-  if (!locales.includes(locale as AppLocale)) {
-    locale = locales[0];
-  }
+  const isValidLocale = locales.includes(locale as AppLocale);
+  locale = isValidLocale ? locale : locales[0];
 
   if (!userId || !context) {
     const reason = userId ? "missing permission context" : "missing userId";

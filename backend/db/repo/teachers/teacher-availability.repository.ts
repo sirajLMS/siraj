@@ -229,6 +229,11 @@ function getBookingBlockedRangesForDate(
   return blocked;
 }
 
+interface MinuteRange {
+  from: number;
+  to: number;
+}
+
 interface FindGapsForCalendarDateOptions {
   teacher: TeacherShortInfo;
   calendarDate: string;
@@ -236,12 +241,12 @@ interface FindGapsForCalendarDateOptions {
   dayWindows: Types.TeacherAvailabilityWindowSelectType[];
   dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[];
   extraBlocked: { start: number; end: number }[];
-  fromMinutes: number;
-  toMinutes: number;
+  timeRange: MinuteRange;
 }
 
 function findGapsForCalendarDate(options: FindGapsForCalendarDateOptions): Types.TeacherAvailabilityGap[] {
-  const { teacher, calendarDate, day, dayWindows, dayUnavail, extraBlocked, fromMinutes, toMinutes } = options;
+  const { teacher, calendarDate, day, dayWindows, dayUnavail, extraBlocked, timeRange } = options;
+  const { from: fromMinutes, to: toMinutes } = timeRange;
   const gaps: Types.TeacherAvailabilityGap[] = [];
   const effectiveWindows = dayWindows.filter(window =>
     isWithinEffectiveRange(calendarDate, window.effectiveFrom, window.effectiveUntil)
@@ -801,34 +806,36 @@ export namespace TeacherAvailabilityRepository {
       );
   }
 
-  interface BuildTeacherSearchResultsOptions {
-    allTeachers: TeacherShortInfo[];
+  interface TeacherAvailabilityData {
     windowsByTeacher: Map<string, Types.TeacherAvailabilityWindowSelectType[]>;
     unavailabilitiesByTeacher: Map<string, Types.TeacherRecurringUnavailabilitySelectType[]>;
     vacationsByTeacher: Map<string, { startAt: Date; endAt: Date }[]>;
     bookingsByTeacher: Map<string, { scheduledStartAt: Date; scheduledEndAt: Date }[]>;
+  }
+
+  interface DateFilterCriteria {
     calendarDates: string[];
     allowedDays: Set<DayOfWeek> | null;
-    fromMinutes: number;
-    toMinutes: number;
+  }
+
+  interface MinResultCriteria {
     minAvailableDays: number | null | undefined;
     minTotalGaps: number | null | undefined;
   }
 
+  interface BuildTeacherSearchResultsOptions {
+    allTeachers: TeacherShortInfo[];
+    availabilityData: TeacherAvailabilityData;
+    dateFilter: DateFilterCriteria;
+    timeRange: MinuteRange;
+    minResultCriteria: MinResultCriteria;
+  }
+
   function buildTeacherSearchResults(options: BuildTeacherSearchResultsOptions): Types.AvailabilitySearchTeacher[] {
-    const {
-      allTeachers,
-      windowsByTeacher,
-      unavailabilitiesByTeacher,
-      vacationsByTeacher,
-      bookingsByTeacher,
-      calendarDates,
-      allowedDays,
-      fromMinutes,
-      toMinutes,
-      minAvailableDays,
-      minTotalGaps,
-    } = options;
+    const { allTeachers, availabilityData, dateFilter, timeRange, minResultCriteria } = options;
+    const { windowsByTeacher, unavailabilitiesByTeacher, vacationsByTeacher, bookingsByTeacher } = availabilityData;
+    const { calendarDates, allowedDays } = dateFilter;
+    const { minAvailableDays, minTotalGaps } = minResultCriteria;
     const result: Types.AvailabilitySearchTeacher[] = [];
 
     for (const teacher of allTeachers) {
@@ -862,8 +869,7 @@ export namespace TeacherAvailabilityRepository {
           dayWindows,
           dayUnavail,
           extraBlocked,
-          fromMinutes,
-          toMinutes,
+          timeRange,
         });
         gaps.push(...dayGaps);
       }
@@ -887,6 +893,49 @@ export namespace TeacherAvailabilityRepository {
     return result;
   }
 
+  interface BuildSearchOptionsParams {
+    t: DBTransaction | typeof db;
+    input: Types.CrossStaffSearchInput;
+    allTeachers: TeacherShortInfo[];
+    calendarDates: string[];
+    allowedDays: Set<DayOfWeek> | null;
+    timeRange: MinuteRange;
+    rangeStart: Date;
+    rangeEnd: Date;
+  }
+
+  async function buildSearchOptions(
+    params: BuildSearchOptionsParams
+  ): Promise<{ options: Omit<BuildTeacherSearchResultsOptions, "allTeachers"> }> {
+    const { t, input, allTeachers, calendarDates, allowedDays, timeRange, rangeStart, rangeEnd } = params;
+    const teacherIds = allTeachers.map(teacher => teacher.teacherId);
+    const { windowsByTeacher, unavailabilitiesByTeacher } = await fetchTeacherAvailabilityData(t, teacherIds);
+    const vacations = await fetchApprovedVacations(t, teacherIds, rangeStart, rangeEnd);
+    const bookings = await fetchTeacherBookings(t, teacherIds, rangeStart, rangeEnd);
+
+    const vacationsByTeacher = groupByTeacherId(vacations);
+    const bookingsByTeacher = groupByTeacherId(bookings);
+
+    const options: Omit<BuildTeacherSearchResultsOptions, "allTeachers"> = {
+      availabilityData: {
+        windowsByTeacher,
+        unavailabilitiesByTeacher,
+        vacationsByTeacher,
+        bookingsByTeacher,
+      },
+      dateFilter: {
+        calendarDates,
+        allowedDays,
+      },
+      timeRange,
+      minResultCriteria: {
+        minAvailableDays: input.minAvailableDays,
+        minTotalGaps: input.minTotalGaps,
+      },
+    };
+    return { options };
+  }
+
   export const searchCrossStaffAvailability = async (
     input: Types.CrossStaffSearchInput,
     tx?: DBTransaction
@@ -895,6 +944,7 @@ export namespace TeacherAvailabilityRepository {
 
     const fromMinutes = timeToMinutes(input.fromTime);
     const toMinutes = timeToMinutes(input.toTime);
+    const timeRange: MinuteRange = { from: fromMinutes, to: toMinutes };
 
     if (fromMinutes >= toMinutes) {
       const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
@@ -930,28 +980,18 @@ export namespace TeacherAvailabilityRepository {
       };
     }
 
-    const teacherIds = allTeachers.map(teacher => teacher.teacherId);
-    const { windowsByTeacher, unavailabilitiesByTeacher } = await fetchTeacherAvailabilityData(t, teacherIds);
-    const vacations = await fetchApprovedVacations(t, teacherIds, rangeStart, rangeEnd);
-    const bookings = await fetchTeacherBookings(t, teacherIds, rangeStart, rangeEnd);
-
-    const vacationsByTeacher = groupByTeacherId(vacations);
-    const bookingsByTeacher = groupByTeacherId(bookings);
-
-    const matchedTeachers = buildTeacherSearchResults({
+    const { options } = await buildSearchOptions({
+      t,
+      input,
       allTeachers,
-      windowsByTeacher,
-      unavailabilitiesByTeacher,
-      vacationsByTeacher,
-      bookingsByTeacher,
       calendarDates,
       allowedDays,
-      fromMinutes,
-      toMinutes,
-      minAvailableDays: input.minAvailableDays,
-      minTotalGaps: input.minTotalGaps,
+      timeRange,
+      rangeStart,
+      rangeEnd,
     });
 
+    const matchedTeachers = buildTeacherSearchResults({ allTeachers, ...options });
     const sortedTeachers = sortTeachers(matchedTeachers, input.sortBy);
     const totalGaps = sortedTeachers.reduce((sum, teacher) => sum + teacher.gaps.length, 0);
     const pagination = input.paginationArgs ? new PaginationArgs(input.paginationArgs) : new PaginationArgs();

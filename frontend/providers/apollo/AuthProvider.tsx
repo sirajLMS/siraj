@@ -16,15 +16,13 @@ import { buildLoginHrefFromWindow, isSafeRedirect } from "@/frontend/lib/safeRed
 import { getGraphQLErrorMessage } from "@/frontend/utils/errorUtils";
 
 // A simple UI for the initial loading state
-function LoadingUI({
-  onRetry,
-  error,
-  t,
-}: Readonly<{
-  onRetry: () => void;
-  error?: string | null;
-  t: ReturnType<typeof useTranslations<"auth.login">>;
-}>) {
+interface LoadingUIProps {
+  readonly onRetry: () => void;
+  readonly error?: string | null;
+  readonly t: ReturnType<typeof useTranslations<"auth.login">>;
+}
+
+function LoadingUI({ onRetry, error, t }: LoadingUIProps) {
   return (
     <Box
       sx={{
@@ -63,7 +61,11 @@ function LoadingUI({
   );
 }
 
-export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
+interface AuthProviderProps {
+  readonly children: React.ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const t = useTranslations("auth.login");
   const { updateAuthToken, clearAuthData } = useAuthToken();
   const client = useApolloClient();

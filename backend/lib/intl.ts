@@ -113,9 +113,15 @@ export async function getBackendTranslations(opts?: {
       Array.isArray(process.argv) &&
       process.argv.some(arg => arg.includes("test") || arg.endsWith("test") || arg.includes("vitest")));
 
-  const locale = opts?.locale || (isTest ? "en" : "ar");
+  const isSeedScript =
+    process.env.SEED_MODE === "true" ||
+    (typeof process !== "undefined" &&
+      Array.isArray(process.argv) &&
+      process.argv.some(arg => arg.includes("drizzleSeed")));
 
-  if (isTest) {
+  const locale = opts?.locale || (isTest || isSeedScript ? "en" : "ar");
+
+  if (isTest || isSeedScript) {
     return getManualTranslations(locale, namespace);
   }
 

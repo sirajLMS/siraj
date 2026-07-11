@@ -5,5 +5,9 @@ export function createPgEnumFromEnum(enumName: string, enumObject: Record<string
 }
 
 export function escapeLikeWildcards(input: string): string {
-  return input.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+  const backslashPattern = new RegExp(String.raw`\\`, "g");
+  return input
+    .replaceAll(backslashPattern, String.raw`\\`)
+    .replaceAll("%", "\\%")
+    .replaceAll("_", "\\_");
 }

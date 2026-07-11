@@ -198,12 +198,12 @@ const AcademicClassCard = ({
   labels,
   onLeave,
   onViewClassAudit,
-}: {
+}: Readonly<{
   row: AcademicClassRow;
   labels: AcademicScheduleCardListProps["labels"];
   onLeave: (id: string) => void;
   onViewClassAudit: (id: string) => void;
-}) => {
+}>) => {
   const isMissed = row.sessionStatus === "missed";
 
   return (
@@ -230,7 +230,7 @@ const AcademicClassCard = ({
   );
 };
 
-const EndOfSchedule = ({ label }: { label: string }) => {
+const EndOfSchedule = ({ label }: Readonly<{ label: string }>) => {
   return (
     <Box sx={{ py: 4, textAlign: "center" }}>
       <Box

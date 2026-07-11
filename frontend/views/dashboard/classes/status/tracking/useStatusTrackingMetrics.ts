@@ -16,7 +16,7 @@ import {
   type StatusTrackingRow,
 } from "@/frontend/views/dashboard/classes/status/tracking/types";
 
-const METRIC_DEFINITIONS: readonly Omit<RawMetric, "count">[] = [
+const METRIC_DEFINITIONS: readonly (Omit<RawMetric, "count"> & { readonly key: keyof MetricCounts })[] = [
   { key: "regular", labelKey: "dashboard.statusTracking.metrics.regular", icon: CheckCircleOutlineOutlined },
   { key: "pending", labelKey: "dashboard.statusTracking.metrics.pending", icon: PendingActionsOutlined },
   {
@@ -43,7 +43,7 @@ function computeMetricCounts(rows: readonly StatusTrackingRow[]): MetricCounts {
 function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>): readonly RawMetric[] {
   return METRIC_DEFINITIONS.map(def => ({
     ...def,
-    count: counts[def.key as keyof MetricCounts],
+    count: counts[def.key],
     subLabel: subLabelMap[def.key],
   }));
 }

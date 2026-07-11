@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useTeacherDirectoryStore } from "@/frontend/stores/teacherDirectoryStore";
@@ -49,7 +48,7 @@ export function TeachersContainer() {
     <RequirePermission permissions={[AppPermission.StaffViewDirectory]}>
       <TeachersView
         metrics={directory.metrics}
-        rows={(directory.rows ?? []) as readonly TeacherDirectoryRow[]}
+        rows={directory.rows ?? []}
         totalTeachers={directory.totalTeachers || 0}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

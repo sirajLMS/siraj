@@ -218,7 +218,7 @@ export function TeacherProfileContainer({
         message={tc("errors.failedToLoad")}
         retryLabel={tc("actions.retry")}
         onRetry={() => {
-          void refetch();
+          refetch();
         }}
       />
     );

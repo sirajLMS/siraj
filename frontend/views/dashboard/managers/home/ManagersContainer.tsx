@@ -27,6 +27,9 @@ export function ManagersContainer() {
   const pageSize = useManagersDirectoryStore(state => state.pageSize);
   const setPage = useManagersDirectoryStore(state => state.setPage);
 
+  const resolvedRoleFilter = roleFilter !== "all" ? roleFilter : null;
+  const resolvedStatusFilter = statusFilter !== "all" ? statusFilter : null;
+
   const { data, loading } = useQuery(managerDirectoryQueryDocument, {
     variables: {
       paginationArgs: {
@@ -38,8 +41,8 @@ export function ManagersContainer() {
         last: null,
         maxCount: null,
       },
-      roleFilter: roleFilter === "all" ? null : roleFilter,
-      statusFilter: statusFilter === "all" ? null : statusFilter,
+      roleFilter: resolvedRoleFilter,
+      statusFilter: resolvedStatusFilter,
     },
     fetchPolicy: "cache-and-network",
   });

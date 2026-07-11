@@ -509,7 +509,7 @@ export function UserMenuButton({
 
         {showGroupSimulationEntry ? <Divider sx={{ my: 1 }} /> : null}
 
-        {isImpersonating ? null : (
+        {!isImpersonating && (
           <>
             <Divider sx={{ my: 1 }} />
             <LogoutButton onClick={handleLogoutClick} {...slotProps.logoutButton} />

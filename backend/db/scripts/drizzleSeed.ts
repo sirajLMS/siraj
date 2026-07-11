@@ -3,6 +3,8 @@ import { validateSeedAssetsOrThrow } from "@/backend/db/seeds/lib/validate-seed-
 import logger from "@/backend/lib/logger";
 import { runAllSeeds } from "../seeds/index";
 
+process.env.SEED_MODE = "true";
+
 async function runSeed(): Promise<void> {
   if (process.env.NODE_ENV === "production") {
     logger.error("Seeding is not allowed in production environment");

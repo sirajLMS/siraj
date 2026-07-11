@@ -6,9 +6,14 @@ import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 
+/* Test constants */
+
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
 const TARGET_ID = "22222222-2222-2222-2222-222222222222";
 const SUPER_TARGET_ID = "33333333-3333-3333-3333-333333333333";
+const LOCALE = "en";
+
+/* Test fixtures */
 
 function mockSuperAdminActor() {
   return spyOn(PermissionsService, "getUserContext").mockResolvedValue({
@@ -50,7 +55,7 @@ function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; status: stri
   });
 }
 
-async function expectRejection(fn: () => Promise<unknown>): Promise<Error> {
+async function expectRejection(fn: () => Promise<unknown>) {
   let error: unknown = null;
   try {
     await fn();
@@ -60,8 +65,6 @@ async function expectRejection(fn: () => Promise<unknown>): Promise<Error> {
   expect(error).not.toBeNull();
   return error as Error;
 }
-
-const LOCALE = "en";
 
 function mockActorAndTarget(
   actorType: "superAdmin" | "nonSuperAdmin",

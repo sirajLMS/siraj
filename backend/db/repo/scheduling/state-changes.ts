@@ -120,8 +120,6 @@ async function validateStateTransition(
 async function runStateChange(
   id: string,
   actorUserId: string,
-  tx: DBTransaction | undefined,
-  locale: string | undefined,
   logic: (
     t: DBTransaction,
     existing: Types.ClassInstanceEntity
@@ -132,7 +130,9 @@ async function runStateChange(
       toState: Record<string, unknown>;
       description: string;
     };
-  }>
+  }>,
+  tx?: DBTransaction,
+  locale?: string
 ): Promise<Types.ClassInstanceEntity | null> {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
@@ -157,22 +157,28 @@ async function transitionToCompleted(
   tx?: DBTransaction,
   locale?: string
 ) {
-  return runStateChange(id, actorUserId, tx, locale, async (_, existing) => {
-    const now = new Date();
-    return {
-      state: {
-        executionState: "COMPLETED",
-        outcome,
-        actualStartAt: existing.actualStartAt ?? now,
-        actualEndAt: now,
-      },
-      event: {
-        fromState: { executionState: existing.executionState, outcome: existing.outcome },
-        toState: { executionState: "COMPLETED", outcome },
-        description,
-      },
-    };
-  });
+  return runStateChange(
+    id,
+    actorUserId,
+    async (_, existing) => {
+      const now = new Date();
+      return {
+        state: {
+          executionState: "COMPLETED",
+          outcome,
+          actualStartAt: existing.actualStartAt ?? now,
+          actualEndAt: now,
+        },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "COMPLETED", outcome },
+          description,
+        },
+      };
+    },
+    tx,
+    locale
+  );
 }
 
 async function getRequesterTypeForUser(t: DBTransaction, actorUserId: string): Promise<"TEACHER" | "PARENT" | "ADMIN"> {
@@ -268,8 +274,12 @@ async function executeProcessClassLeave(
     locale
   );
 
-  const updated = await runStateChange(id, actorUserId, t, locale, async () =>
-    buildLeaveStateChangePayload(existing, successor.id, reason, locale)
+  const updated = await runStateChange(
+    id,
+    actorUserId,
+    async () => buildLeaveStateChangePayload(existing, successor.id, reason, locale),
+    t,
+    locale
   );
 
   const originalId = updated?.id ?? id;
@@ -386,23 +396,29 @@ export const activateClassInstance = async (
   tx?: DBTransaction,
   locale?: string
 ) => {
-  return runStateChange(id, actorUserId, tx, locale, async () => {
-    const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
-    return {
-      state: {
-        executionState: "ACTIVATED",
-        activatedAt: new Date(),
-        activatedByUserId: actorUserId,
-        forceActivated: options.force,
-        forceActivatedByUserId: options.force ? actorUserId : null,
-      },
-      event: {
-        fromState: { executionState: "NOT_ACTIVATED" },
-        toState: { executionState: "ACTIVATED" },
-        description: options.force ? tFuncSession("forceActivateDescription") : tFuncSession("activateDescription"),
-      },
-    };
-  });
+  return runStateChange(
+    id,
+    actorUserId,
+    async () => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      return {
+        state: {
+          executionState: "ACTIVATED",
+          activatedAt: new Date(),
+          activatedByUserId: actorUserId,
+          forceActivated: options.force,
+          forceActivatedByUserId: options.force ? actorUserId : null,
+        },
+        event: {
+          fromState: { executionState: "NOT_ACTIVATED" },
+          toState: { executionState: "ACTIVATED" },
+          description: options.force ? tFuncSession("forceActivateDescription") : tFuncSession("activateDescription"),
+        },
+      };
+    },
+    tx,
+    locale
+  );
 };
 
 export const stopClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
@@ -411,39 +427,51 @@ export const stopClassInstance = async (id: string, actorUserId: string, tx?: DB
 };
 
 export const startClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-  return runStateChange(id, actorUserId, tx, locale, async (_, existing) => {
-    const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
-    return {
-      state: { executionState: "RUNNING", outcome: "PENDING", actualStartAt: new Date() },
-      event: {
-        fromState: { executionState: existing.executionState, outcome: existing.outcome },
-        toState: { executionState: "RUNNING", outcome: "PENDING" },
-        description: tFuncSession("startDescription"),
-      },
-    };
-  });
+  return runStateChange(
+    id,
+    actorUserId,
+    async (_, existing) => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      return {
+        state: { executionState: "RUNNING", outcome: "PENDING", actualStartAt: new Date() },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "RUNNING", outcome: "PENDING" },
+          description: tFuncSession("startDescription"),
+        },
+      };
+    },
+    tx,
+    locale
+  );
 };
 
 export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-  return runStateChange(id, actorUserId, tx, locale, async (_, existing) => {
-    const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
-    const now = new Date();
-    return {
-      state: {
-        executionState: "COMPLETED",
-        outcome: "ABSENT",
-        actualStartAt: existing.actualStartAt ?? now,
-        actualEndAt: now,
-        payrollCredited: true,
-        remarks: existing.remarks ?? tFuncSession("absentEventDescription"),
-      },
-      event: {
-        fromState: { executionState: existing.executionState, outcome: existing.outcome },
-        toState: { executionState: "COMPLETED", outcome: "ABSENT" },
-        description: tFuncSession("absentEventDescription"),
-      },
-    };
-  });
+  return runStateChange(
+    id,
+    actorUserId,
+    async (_, existing) => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      const now = new Date();
+      return {
+        state: {
+          executionState: "COMPLETED",
+          outcome: "ABSENT",
+          actualStartAt: existing.actualStartAt ?? now,
+          actualEndAt: now,
+          payrollCredited: true,
+          remarks: existing.remarks ?? tFuncSession("absentEventDescription"),
+        },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "COMPLETED", outcome: "ABSENT" },
+          description: tFuncSession("absentEventDescription"),
+        },
+      };
+    },
+    tx,
+    locale
+  );
 };
 
 export const markClassMissedBySystem = async (
@@ -493,38 +521,44 @@ export const processClassLeave = async (
 };
 
 export const resetClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-  return runStateChange(id, actorUserId, tx, locale, async (t, existing) => {
-    const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
-    if (existing.quotaDeducted) {
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-        .where(eq(students.id, existing.studentId));
-    }
-    return {
-      state: {
-        executionState: "NOT_ACTIVATED",
-        outcome: "PENDING",
-        classType: "REGULAR",
-        actualStartAt: null,
-        actualEndAt: null,
-        activatedAt: null,
-        activatedByUserId: null,
-        forceActivated: false,
-        forceActivatedByUserId: null,
-        payrollCredited: false,
-        quotaDeducted: false,
-        isRescheduled: false,
-        remarks: null,
-        adminNotes: null,
-      },
-      event: {
-        fromState: { executionState: existing.executionState, outcome: existing.outcome },
-        toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
-        description: tFuncSession("resetDescription"),
-      },
-    };
-  });
+  return runStateChange(
+    id,
+    actorUserId,
+    async (t, existing) => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      if (existing.quotaDeducted) {
+        await t
+          .update(students)
+          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+          .where(eq(students.id, existing.studentId));
+      }
+      return {
+        state: {
+          executionState: "NOT_ACTIVATED",
+          outcome: "PENDING",
+          classType: "REGULAR",
+          actualStartAt: null,
+          actualEndAt: null,
+          activatedAt: null,
+          activatedByUserId: null,
+          forceActivated: false,
+          forceActivatedByUserId: null,
+          payrollCredited: false,
+          quotaDeducted: false,
+          isRescheduled: false,
+          remarks: null,
+          adminNotes: null,
+        },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
+          description: tFuncSession("resetDescription"),
+        },
+      };
+    },
+    tx,
+    locale
+  );
 };
 
 export function buildRescheduledClassInput(
@@ -641,8 +675,11 @@ export async function processAutomatedClassLeave(
     const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
     const successor = await createRescheduledSuccessor(t, existing, offsetDays, "Automated leave reschedule");
 
-    const updated = await runStateChange(id, actorUserId, t, undefined, async () =>
-      buildLeaveStateChangePayload(existing, successor.id, reason)
+    const updated = await runStateChange(
+      id,
+      actorUserId,
+      async () => buildLeaveStateChangePayload(existing, successor.id, reason),
+      t
     );
 
     const originalId = updated?.id ?? id;

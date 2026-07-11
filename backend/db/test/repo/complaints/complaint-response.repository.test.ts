@@ -51,13 +51,13 @@ async function setupComplaintForResponse(tx: DBTransaction, namePrefix: string) 
   return { user, parent, complaint };
 }
 
-type CreateResponseInput = Parameters<typeof ComplaintResponseRepository.createResponse>[0];
+type SetupResponseOverrides = {
+  body: string;
+  emailSent: boolean;
+  responderUserId?: string | null;
+};
 
-async function setupAndCreateResponse(
-  tx: DBTransaction,
-  namePrefix: string,
-  overrides: Partial<CreateResponseInput> & { body: string; emailSent: boolean }
-) {
+async function setupAndCreateResponse(tx: DBTransaction, namePrefix: string, overrides: SetupResponseOverrides) {
   const { complaint, user } = await setupComplaintForResponse(tx, namePrefix);
   const result = await ComplaintResponseRepository.createResponse(
     {

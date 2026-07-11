@@ -12,6 +12,7 @@ import {
   Menu,
   MenuItem,
   Stack,
+  type Theme,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -135,29 +136,27 @@ function DeactivateDialog({
 }: Readonly<DeactivateDialogProps>) {
   const t = useTranslations("dashboard.managersDirectory");
 
+  const dialogTitle = isDeactivate ? t("actions.deactivate") : t("actions.activate");
+  const confirmationLabel = isDeactivate
+    ? t("actions.deactivateConfirmation", { name: manager.name })
+    : t("actions.activateConfirmation", { name: manager.name });
+  const submitButtonSx = (theme: Theme) => {
+    const baseColor = isDeactivate ? theme.palette.error : theme.palette.success;
+    return {
+      backgroundColor: baseColor.main,
+      "&:hover": { backgroundColor: baseColor.dark },
+    };
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{isDeactivate ? t("actions.deactivate") : t("actions.activate")}</DialogTitle>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent>
-        <Typography variant="bodyMd">
-          {isDeactivate
-            ? t("actions.deactivateConfirmation", { name: manager.name })
-            : t("actions.activateConfirmation", { name: manager.name })}
-        </Typography>
+        <Typography variant="bodyMd">{confirmationLabel}</Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t("actions.cancel")}</Button>
-        <Button
-          onClick={onSubmit}
-          variant="contained"
-          disabled={updateLoading}
-          sx={theme => ({
-            backgroundColor: isDeactivate ? theme.palette.error.main : theme.palette.success.main,
-            "&:hover": {
-              backgroundColor: isDeactivate ? theme.palette.error.dark : theme.palette.success.dark,
-            },
-          })}
-        >
+        <Button onClick={onSubmit} variant="contained" disabled={updateLoading} sx={submitButtonSx}>
           {resolveSubmitLabel({ updateLoading, isDeactivate }, t)}
         </Button>
       </DialogActions>

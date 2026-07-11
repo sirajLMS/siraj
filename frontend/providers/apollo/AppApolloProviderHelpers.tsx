@@ -5,15 +5,13 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import type { useTranslations } from "next-intl";
 
 // Loading UI shown during initial connectivity check
-export function InitializingUI({
-  error,
-  onRetry,
-  t,
-}: Readonly<{
-  error?: boolean;
-  onRetry?: () => void;
-  t: ReturnType<typeof useTranslations<"common">>;
-}>) {
+interface InitializingUIProps {
+  readonly error?: boolean;
+  readonly onRetry?: () => void;
+  readonly t: ReturnType<typeof useTranslations<"common">>;
+}
+
+export function InitializingUI({ error, onRetry, t }: InitializingUIProps) {
   return (
     <Box
       sx={{

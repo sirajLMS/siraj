@@ -57,14 +57,7 @@ export function SectionPanel({ id, title, subTitle, actions, children, edgeToEdg
                 flexWrap: "wrap",
               }}
             >
-              {title &&
-                (typeof title === "string" ? (
-                  <Typography variant="titleLg" sx={{ color: theme => theme.palette.onSurface }}>
-                    {title}
-                  </Typography>
-                ) : (
-                  title
-                ))}
+              {title && renderTitle(title)}
             </Box>
             {subTitle && (
               <Typography
@@ -103,4 +96,15 @@ export function SectionPanel({ id, title, subTitle, actions, children, edgeToEdg
       </Box>
     );
   }
+}
+
+function renderTitle(title: ReactNode) {
+  if (typeof title === "string") {
+    return (
+      <Typography variant="titleLg" sx={{ color: theme => theme.palette.onSurface }}>
+        {title}
+      </Typography>
+    );
+  }
+  return title;
 }

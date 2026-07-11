@@ -10,14 +10,14 @@ import Typography, { type TypographyProps } from "@mui/material/Typography";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
 type EditableTypographyProps = {
-  typography: TypographyProps;
-  textField: TextFieldProps;
-  onSaveAction: (value: string) => undefined | string | Promise<undefined | string>;
-  doubleClickToEdit?: boolean;
-  startEditing?: boolean;
-  value: string;
-  isValidAction?: (value: string) => string | undefined | null;
-  onCancelAction?: () => void;
+  readonly typography: TypographyProps;
+  readonly textField: TextFieldProps;
+  readonly onSaveAction: (value: string) => undefined | string | Promise<undefined | string>;
+  readonly doubleClickToEdit?: boolean;
+  readonly startEditing?: boolean;
+  readonly value: string;
+  readonly isValidAction?: (value: string) => string | undefined | null;
+  readonly onCancelAction?: () => void;
 };
 
 const HoverTypography = styled(Typography)(({ theme }) => ({

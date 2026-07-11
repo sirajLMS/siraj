@@ -79,6 +79,13 @@ const statusAltStyle: CellStyle = {
   fill: { fgColor: { rgb: "F5F5FA" } },
 };
 
+function resolveStatusValue(status: string | null | undefined, statusLabels: Record<string, string>): string {
+  if (status === undefined || status === null) {
+    return "";
+  }
+  return statusLabels[status] ?? String(status);
+}
+
 export async function exportRescheduleTracking(data: TrackingExportData): Promise<void> {
   const XLSX = await import("xlsx-js-style");
 
@@ -113,7 +120,7 @@ export async function exportRescheduleTracking(data: TrackingExportData): Promis
     const r = dataStartRow + idx;
     const isAlt = idx % 2 === 1;
 
-    const statusValue = row.status == null ? "" : (labels.statusLabels[row.status] ?? String(row.status));
+    const statusValue = resolveStatusValue(row.status, labels.statusLabels);
     const values: string[] = [
       row.teacherName ?? "",
       row.studentName ?? "",

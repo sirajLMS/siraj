@@ -66,7 +66,7 @@ export async function createTestUser(
       password: overrides.password || randomUUID(),
       rememberTokenHash: overrides.rememberTokenHash || null,
       avatarFilePath: overrides.avatarFilePath || null,
-      avatarUrl: overrides.avatarUrl || null,
+      avatarUrl: overrides.avatarUrl ?? null,
       status: overrides.status ?? AccountStatus.ACTIVATED,
       isSuperAdmin: overrides.isSuperAdmin || false,
       lastLoginAt: overrides.lastLoginAt || null,

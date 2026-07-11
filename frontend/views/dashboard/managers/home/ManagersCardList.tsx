@@ -95,6 +95,7 @@ export function ManagersCardList({
     <StyledCardListWrapper spacing={2}>
       {managers.map(manager => {
         const isStaff = manager.role === "staff";
+        const avatarFallback = manager.avatarUrl ? undefined : manager.name.charAt(0).toUpperCase();
         return (
           <StyledManagerCard key={manager.userId}>
             <StyledCardActionsBox>
@@ -104,7 +105,7 @@ export function ManagersCardList({
             <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", mb: 3 }}>
               <Box sx={{ position: "relative" }}>
                 <StyledProfileAvatar src={manager.avatarUrl || undefined} alt={manager.name}>
-                  {manager.avatarUrl ? undefined : manager.name.charAt(0).toUpperCase()}
+                  {avatarFallback}
                 </StyledProfileAvatar>
                 <StyledStatusIndicator status={manager.status === "active" ? "active" : "blocked"} />
               </Box>

@@ -20,8 +20,10 @@ export type BaseAvatarProps = {
 const ROUNDED_BORDER_RADIUS = 1.5;
 
 export function BaseAvatar({ src, label = "", size = 40, variant = "circular", sx, children }: BaseAvatarProps) {
-  const initials = children ?? (label ? avatarInitials(label) : "");
-  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  const initials = children ?? avatarInitials(label);
+  const normalizedSx = Array.isArray(sx) ? sx : ([sx].filter(Boolean) as SxProps<Theme>[]);
+  const roundedStyle = variant === "rounded" ? { borderRadius: ROUNDED_BORDER_RADIUS } : {};
+  const avatarContent = getAvatarContent(src, initials);
 
   return (
     <Avatar
@@ -33,12 +35,19 @@ export function BaseAvatar({ src, label = "", size = 40, variant = "circular", s
           width: size,
           height: size,
           flexShrink: 0,
-          ...(variant === "rounded" ? { borderRadius: ROUNDED_BORDER_RADIUS } : {}),
+          ...roundedStyle,
         },
         ...normalizedSx,
       ]}
     >
-      {src ? null : initials}
+      {avatarContent}
     </Avatar>
   );
+}
+
+function getAvatarContent(src: string | null | undefined, initials: ReactNode) {
+  if (src) {
+    return null;
+  }
+  return initials;
 }

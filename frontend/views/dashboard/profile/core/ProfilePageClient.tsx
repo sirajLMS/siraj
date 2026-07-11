@@ -60,33 +60,42 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   const showParentAccountActions =
     audience === ProfileAudience.Parent && scope === ProfileScope.Other && mode === ProfileMode.View;
 
+  const isViewMode = mode === ProfileMode.View;
   const shellProps = {
     audience,
     scope,
     mode,
-    currentTab: mode === ProfileMode.View ? activeTab : undefined,
-    onTabChange: mode === ProfileMode.View ? setCurrentTab : undefined,
+    currentTab: isViewMode ? activeTab : undefined,
+    onTabChange: isViewMode ? setCurrentTab : undefined,
     onRetry: handleRetry,
     name: profile?.name ?? "",
     email: profile?.email ?? "",
     roleLabel,
     avatarUrl: profile?.avatarUrl,
-    actions:
-      mode === ProfileMode.View ? (
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <ProfileActionBar mode={ProfileMode.View} editHref={editHref} />
-          {showParentAccountActions && profile?.parentId ? (
-            <ParentAccountActions
-              parentId={profile.parentId}
-              targetUserId={targetUserId}
-              accountStatus={profile.parentAdminProfile?.accountStatus}
-            />
-          ) : null}
-        </Stack>
-      ) : (
-        <ProfileActionBar mode={ProfileMode.Edit} cancelHref={cancelHref} />
-      ),
+    actions: renderActions(),
   };
+
+  function renderActions() {
+    if (!isViewMode) {
+      return <ProfileActionBar mode={ProfileMode.Edit} cancelHref={cancelHref} />;
+    }
+
+    const parentActions =
+      showParentAccountActions && profile?.parentId ? (
+        <ParentAccountActions
+          parentId={profile.parentId}
+          targetUserId={targetUserId}
+          accountStatus={profile.parentAdminProfile?.accountStatus}
+        />
+      ) : null;
+
+    return (
+      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+        <ProfileActionBar mode={ProfileMode.View} editHref={editHref} />
+        {parentActions}
+      </Stack>
+    );
+  }
 
   if (loading && !data) {
     return (

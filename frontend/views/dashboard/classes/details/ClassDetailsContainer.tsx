@@ -20,7 +20,11 @@ import { useEventLogDownload } from "@/frontend/views/dashboard/classes/details/
 import { formatClassDetailDate } from "@/frontend/views/dashboard/classes/details/types";
 import { useRouter } from "@/shared/i18n/routing";
 
-function InvalidIdState({ t }: { readonly t: ReturnType<typeof useTranslations> }) {
+interface InvalidIdStateProps {
+  readonly t: ReturnType<typeof useTranslations>;
+}
+
+function InvalidIdState({ t }: InvalidIdStateProps) {
   return (
     <Box sx={theme => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>
       {t("invalidClassId")}

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ImpersonationRepository } from "@/backend/db/repo";
+import { TEST_IP_PRIVATE, TEST_IP_WITH_PORT } from "@/backend/db/test/const";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { StartImpersonationInput } from "@/backend/types";
@@ -53,7 +54,7 @@ function buildSessionInput(
     targetUserId,
     sessionId: `sess-${randomUUID()}`,
     reason: "Support investigation",
-    ipAddress: "192.168.1.10", // NOSONAR
+    ipAddress: TEST_IP_PRIVATE,
     userAgent: "TestAgent/1.0",
     ...overrides,
   };
@@ -75,7 +76,7 @@ describe("ImpersonationRepository", () => {
     expect(created.isActive).toBe(true);
     expect(created.endedAt).toBeNull();
     expect(created.startedAt).toBeInstanceOf(Date);
-    expect(String(created.ipAddress)).toBe("192.168.1.10"); // NOSONAR
+    expect(String(created.ipAddress)).toBe(TEST_IP_PRIVATE);
   });
 
   impersonationTest("createSession sanitizes invalid IP addresses to 127.0.0.1", async tx => {
@@ -89,11 +90,11 @@ describe("ImpersonationRepository", () => {
 
   impersonationTest("createSession strips IPv4 from IPv4:port form", async tx => {
     const { actor, target } = await setupActorAndTarget(tx);
-    const input = buildSessionInput(actor.id, target.id, { ipAddress: "10.0.0.5:443" });
+    const input = buildSessionInput(actor.id, target.id, { ipAddress: `${TEST_IP_WITH_PORT}:443` });
 
     const created = await ImpersonationRepository.createSession(input, tx);
 
-    expect(String(created.ipAddress)).toBe("10.0.0.5"); // NOSONAR
+    expect(String(created.ipAddress)).toBe(TEST_IP_WITH_PORT);
   });
 
   impersonationTest("createSession stores null IP when omitted", async tx => {

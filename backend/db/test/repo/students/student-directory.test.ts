@@ -9,14 +9,8 @@ import type { StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 
 function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
-  test(name, async () => {
-    let completed = false;
-    await runInRollback(async tx => {
-      await fn(tx);
-      completed = true;
-    });
-    expect(completed).toBe(true);
-  });
+  // eslint-disable-next-line sonarjs/assertions-in-tests -- assertions are inside fn
+  test(name, () => runInRollback(fn));
 }
 
 async function createStudentWithTeacher(tx: DBTransaction, studentName: string, teacherName: string) {
