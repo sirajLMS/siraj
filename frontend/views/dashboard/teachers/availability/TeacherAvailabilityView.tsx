@@ -1,19 +1,22 @@
 // cspell:disable
 "use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
-import { useTranslations } from "next-intl";
-import { FormProvider, useForm } from "react-hook-form";
-import { ExportButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { AvailabilityInsights } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilityInsights";
-import { AvailabilitySearchForm } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
-import { WeeklyAvailabilityGrid } from "@/frontend/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
-import { availabilitySearchSchema } from "@/frontend/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+
+import { useViewport } from "@/frontend/hooks/useViewport";
+import { TeacherAvailabilityDesktopView } from "@/frontend/views/dashboard/teachers/availability/teacherAvailabilityView.desktop";
+import { TeacherAvailabilityMobileView } from "@/frontend/views/dashboard/teachers/availability/teacherAvailabilityView.mobile";
 import type {
   AvailabilityEntry,
   AvailabilitySearchFormData,
-  TeacherAvailabilityViewProps,
+  TeacherAvailabilityInsights,
+  WeeklyAvailability,
 } from "@/frontend/views/dashboard/teachers/availability/types";
+import {
+  type TeacherAvailabilityViewModel,
+  useTeacherAvailabilityViewModel,
+} from "@/frontend/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
+
+export type { TeacherAvailabilityViewProps } from "@/frontend/views/dashboard/teachers/availability/types";
+export type { TeacherAvailabilityViewModel };
 
 export function TeacherAvailabilityView({
   availability,
@@ -23,70 +26,30 @@ export function TeacherAvailabilityView({
   onExportPdf,
   onSearch,
   onBlockClick,
-}: Readonly<
-  TeacherAvailabilityViewProps & {
-    onSearch?: (formData: AvailabilitySearchFormData) => void;
-    onBlockClick?: (entry: AvailabilityEntry) => void;
-  }
->) {
-  const t = useTranslations("dashboard.teacherAvailability");
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  const methods = useForm<AvailabilitySearchFormData>({
-    resolver: zodResolver(availabilitySearchSchema),
-    defaultValues: defaultFilters,
+}: Readonly<{
+  availability: WeeklyAvailability;
+  insights: TeacherAvailabilityInsights;
+  defaultFilters: AvailabilitySearchFormData;
+  loading?: boolean;
+  onExportPdf?: () => void;
+  onSearch?: (formData: AvailabilitySearchFormData) => void;
+  onBlockClick?: (entry: AvailabilityEntry) => void;
+}>) {
+  const viewModel = useTeacherAvailabilityViewModel({
+    availability,
+    insights,
+    defaultFilters,
+    loading,
+    onExportPdf,
+    onSearch,
+    onBlockClick,
   });
 
-  const tableLabels = {
-    time: t("table.time"),
-    monday: t("table.monday"),
-    tuesday: t("table.tuesday"),
-    wednesday: t("table.wednesday"),
-    thursday: t("table.thursday"),
-    friday: t("table.friday"),
-    saturday: t("table.saturday"),
-    sunday: t("table.sunday"),
-    mon: t("table.mon"),
-    tue: t("table.tue"),
-    wed: t("table.wed"),
-    thu: t("table.thu"),
-    fri: t("table.fri"),
-    sat: t("table.sat"),
-    sun: t("table.sun"),
-  };
+  const { isMobile } = useViewport();
 
-  return (
-    <PageContainer>
-      <PageHeader
-        title={isMobile ? t("mobile.pageTitle") : t("pageTitle")}
-        subtitle={isMobile ? t("mobile.pageSubtitle") : t("pageSubtitle")}
-        breadcrumbs={[
-          { label: t("breadcrumbs.teachers"), href: "/teachers" },
-          { label: t("breadcrumbs.availability"), current: true },
-        ]}
-        actions={<ExportButton onClick={onExportPdf}>{t("exportPdf")}</ExportButton>}
-      />
-
-      <Box sx={{ mb: 4 }}>
-        <SectionPanel title={t("searchTitle")}>
-          <FormProvider {...methods}>
-            <AvailabilitySearchForm onSearch={onSearch} />
-          </FormProvider>
-        </SectionPanel>
-      </Box>
-
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
-      {!loading && (
-        <WeeklyAvailabilityGrid availability={availability} labels={tableLabels} onBlockClick={onBlockClick} />
-      )}
-
-      {!isMobile && <AvailabilityInsights insights={insights} />}
-    </PageContainer>
+  return isMobile ? (
+    <TeacherAvailabilityMobileView {...viewModel} />
+  ) : (
+    <TeacherAvailabilityDesktopView {...viewModel} />
   );
 }

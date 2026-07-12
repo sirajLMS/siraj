@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
-import type { ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import { ReportsView } from "@/frontend/views/dashboard/reports/reportsView";
+import type { ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 const mockLabels = {
   pageTitle: "Attendance Reports",
@@ -63,14 +63,14 @@ const mockTeachers = [
   { id: "teacher-2", name: "Jane Smith" },
 ];
 
-const mockRows = [
+const mockRows: readonly ReportLedgerRow[] = [
   {
     id: "2024-05-01",
     entityId: null,
     name: "May 1, 2024",
     studentName: "",
     avatarInitials: "M1",
-    status: "active" as const,
+    status: "active",
     taken: 15,
     absent: 2,
     leave: 1,
@@ -84,7 +84,7 @@ const mockRows = [
     name: "May 2, 2024",
     studentName: "",
     avatarInitials: "M2",
-    status: "active" as const,
+    status: "active",
     taken: 10,
     absent: 0,
     leave: 0,
@@ -103,26 +103,11 @@ const mockSummary = {
 
 const baseArgs = {
   labels: mockLabels,
-  fromDate: "2023-08-01",
-  toDate: "2023-08-31",
-  teacherId: "",
-  reportType: "by_teacher" as const,
   teachers: mockTeachers,
   rows: mockRows,
   summary: mockSummary,
   canGenerate: true,
-  onFromDateChange: (date: string) => {
-    logger.info("onFromDateChange:", date);
-  },
-  onToDateChange: (date: string) => {
-    logger.info("onToDateChange:", date);
-  },
-  onTeacherChange: (teacherId: string) => {
-    logger.info("onTeacherChange:", teacherId);
-  },
-  onReportTypeChange: (type: ReportType) => {
-    logger.info("onReportTypeChange:", type);
-  },
+  loading: false,
   onSubmit: () => {
     logger.info("onSubmit clicked");
   },
@@ -146,33 +131,35 @@ const meta: Meta<typeof ReportsView> = {
 export default meta;
 type Story = StoryObj<typeof ReportsView>;
 
+function seedPermissions(perms: AppPermission[]) {
+  useUserStore.setState({
+    permissions: perms,
+    user: {
+      id: "mock-id",
+      name: "Mock User",
+      role: "Mock Role",
+      avatarUrl: "",
+      permissions: perms,
+      notificationCount: 0,
+      teacherId: null,
+      parentId: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      emailVerifiedAt: new Date().toISOString(),
+      email: "mock@example.com",
+      phone: null,
+      status: AccountStatus.Activated,
+      displayCurrency: CurrencyCode.Usd,
+      __typename: "User",
+    },
+  });
+}
+
 export const AdminFullAccess: Story = {
   args: baseArgs,
   decorators: [
     Story => {
-      const perms = [AppPermission.ReportGenerateCustom, AppPermission.ReportViewFinancials];
-      useUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          teacherId: null,
-          parentId: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          phone: null,
-          status: AccountStatus.Activated,
-          displayCurrency: CurrencyCode.Usd,
-          __typename: "User",
-        },
-      });
-
+      seedPermissions([AppPermission.ReportGenerateCustom, AppPermission.ReportViewFinancials]);
       return <Story />;
     },
   ],
@@ -182,29 +169,7 @@ export const RestrictedAccess: Story = {
   args: baseArgs,
   decorators: [
     Story => {
-      const perms = [AppPermission.ReportGenerateCustom];
-      useUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          teacherId: null,
-          parentId: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          phone: null,
-          status: AccountStatus.Activated,
-          displayCurrency: CurrencyCode.Usd,
-          __typename: "User",
-        },
-      });
-
+      seedPermissions([AppPermission.ReportGenerateCustom]);
       return <Story />;
     },
   ],
@@ -223,29 +188,7 @@ export const EmptyData: Story = {
   },
   decorators: [
     Story => {
-      const perms = [AppPermission.ReportGenerateCustom, AppPermission.ReportViewFinancials];
-      useUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          teacherId: null,
-          parentId: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          phone: null,
-          status: AccountStatus.Activated,
-          displayCurrency: CurrencyCode.Usd,
-          __typename: "User",
-        },
-      });
-
+      seedPermissions([AppPermission.ReportGenerateCustom, AppPermission.ReportViewFinancials]);
       return <Story />;
     },
   ],
@@ -264,29 +207,20 @@ export const ApiError: Story = {
   },
   decorators: [
     Story => {
-      const perms = [AppPermission.ReportGenerateCustom, AppPermission.ReportViewFinancials];
-      useUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          teacherId: null,
-          parentId: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          phone: null,
-          status: AccountStatus.Activated,
-          displayCurrency: CurrencyCode.Usd,
-          __typename: "User",
-        },
-      });
+      seedPermissions([AppPermission.ReportGenerateCustom, AppPermission.ReportViewFinancials]);
+      return <Story />;
+    },
+  ],
+};
 
+export const Loading: Story = {
+  args: {
+    ...baseArgs,
+    loading: true,
+  },
+  decorators: [
+    Story => {
+      seedPermissions([AppPermission.ReportGenerateCustom, AppPermission.ReportViewFinancials]);
       return <Story />;
     },
   ],

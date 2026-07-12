@@ -15,7 +15,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
 import { logger } from "@/frontend/utils/logger";
-import { ParentComplaintsView } from "@/frontend/views/dashboard/complaints/ParentComplaintsView";
+import { ParentComplaintsView } from "@/frontend/views/dashboard/complaints/parentComplaintsView";
 import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
 import type {
   ParentComplaintRecord,

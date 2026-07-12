@@ -1,5 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { registerDeleteMutation } from "@/backend/graphql/mutation/classes/class-shared.helpers";
+import {
+  commonClassUpdateInputFields,
+  registerDeleteEntityMutation,
+} from "@/backend/graphql/mutation/classes/__shared__/class-mutation-helpers";
 import {
   AttachSubjectResourceInputPothos,
   ClassSubjectCreateInputPothos,
@@ -52,9 +55,7 @@ gqlSchemaBuilder.mutationField("updateClassSubject", t =>
           name: args.input.name ?? undefined,
           slug: args.input.slug ?? undefined,
           categoryId: args.input.categoryId ?? undefined,
-          description: args.input.description,
-          isActive: args.input.isActive ?? undefined,
-          sortOrder: args.input.sortOrder ?? undefined,
+          ...commonClassUpdateInputFields(args.input),
         },
         ctx.locale
       );
@@ -62,9 +63,7 @@ gqlSchemaBuilder.mutationField("updateClassSubject", t =>
   })
 );
 
-registerDeleteMutation("deleteClassSubject", (userId, id, locale) =>
-  ClassSubjectService.deleteSubject(userId, id, locale)
-);
+registerDeleteEntityMutation("deleteClassSubject", ClassSubjectService.deleteSubject.bind(ClassSubjectService));
 
 gqlSchemaBuilder.mutationField("attachSubjectResource", t =>
   t.field({

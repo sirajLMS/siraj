@@ -1,21 +1,7 @@
 "use client";
 
-import { ArrowDropDown } from "@mui/icons-material";
-import {
-  Box,
-  type BoxProps,
-  IconButton,
-  Popover,
-  Stack,
-  styled,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useState } from "react";
-import { LocaleEmoji } from "@/frontend/components/ui/display/localeEmoji/LocaleEmoji";
-import { getLanguageDisplayName, getLanguageEmoji, languages } from "@/frontend/lib/locale";
+import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
 import type { AppLocale } from "@/shared/i18n/routing";
 
 export type LocaleAdornmentSwitchProps = {
@@ -37,27 +23,16 @@ export type LocaleAdornmentSwitchProps = {
   readonly ariaLabel?: string;
 };
 
-interface LanguageOptionProps extends BoxProps {
-  readonly isSelected: boolean;
-  readonly isLastItem: boolean;
-}
-
-const LanguageOption = styled(Box, {
-  shouldForwardProp: prop => prop !== "isSelected" && prop !== "isLastItem" && prop !== "isTouch",
-})<LanguageOptionProps & { readonly isTouch?: boolean }>(({ theme, isSelected, isLastItem, isTouch }) => ({
-  padding: theme.spacing(isTouch ? 2 : 1.5),
-  minHeight: isTouch ? 48 : undefined,
-  cursor: "pointer",
-  transition: "background-color 0.2s ease-in-out",
-  backgroundColor: isSelected ? theme.palette.action.selected : "transparent",
-  borderBottom: isLastItem ? "none" : `1px solid ${theme.palette.outlineVariant}`,
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1.5),
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
+const lazyViews = createLazyView<LocaleAdornmentSwitchProps>(
+  () =>
+    import("@/frontend/components/ui/input/localizedString/localeAdornmentSwitch.mobile").then(m => ({
+      default: m.LocaleAdornmentSwitchMobile,
+    })),
+  () =>
+    import("@/frontend/components/ui/input/localizedString/localeAdornmentSwitch.desktop").then(m => ({
+      default: m.LocaleAdornmentSwitchDesktop,
+    }))
+);
 
 /**
  * Reusable start-adornment switcher for the localized-string inline input.
@@ -72,158 +47,12 @@ const LanguageOption = styled(Box, {
  * `backend/enum/auth.enum.ts` (`AppLanguage`) +
  * `frontend/lib/locale/language/languages.ts`; this adornment then lists it
  * automatically.
+ *
+ * This file is the viewport-aware switcher — it lazy-loads
+ * `LocaleAdornmentSwitchMobile` or `LocaleAdornmentSwitchDesktop` via
+ * `ResponsiveViewSwitch`. The mobile and desktop variants contain no
+ * viewport logic.
  */
-type LocaleListProps = {
-  readonly activeLocale: AppLocale;
-  readonly ariaLabel?: string;
-  readonly isMobile: boolean;
-  readonly onPick: (locale: AppLocale) => void;
-};
-
-const LocaleList: React.FC<LocaleListProps> = ({ activeLocale, ariaLabel, isMobile, onPick }) => {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
-
-  return (
-    <Stack role="listbox" aria-label={ariaLabel ?? t("selectLocale")}>
-      {languages.map((language, index, array) => {
-        const isSelected = language.code === activeLocale;
-        const isLastItem = index === array.length - 1;
-        return (
-          <LanguageOption
-            key={language.code}
-            role="option"
-            aria-selected={isSelected}
-            isSelected={isSelected}
-            isLastItem={isLastItem}
-            isTouch={isMobile}
-            onClick={() => onPick(language.code as AppLocale)}
-          >
-            <LocaleEmoji emoji={language.emoji} />
-            <Typography component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>
-              {getLanguageDisplayName(language.code, uiLocale)}
-            </Typography>
-            {isSelected ? (
-              <Box
-                aria-hidden
-                sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  backgroundColor: theme => theme.palette.primary.main,
-                }}
-              />
-            ) : null}
-          </LanguageOption>
-        );
-      })}
-    </Stack>
-  );
-};
-
-export const LocaleAdornmentSwitch: React.FC<LocaleAdornmentSwitchProps> = ({
-  activeLocale,
-  onChangeAction,
-  disabled = false,
-  variant = "adornment",
-  compact = false,
-  successSwitch = false,
-  ariaLabel,
-}) => {
-  const t = useTranslations("ui.localizedString");
-  const uiLocale = useLocale();
-  const theme = useTheme();
-  const isPopoverMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
-  const handleOpen = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.stopPropagation();
-      if (disabled) {
-        return;
-      }
-      setAnchorEl(event.currentTarget);
-    },
-    [disabled]
-  );
-
-  const handleClose = useCallback(() => setAnchorEl(null), []);
-
-  const handlePick = useCallback(
-    (locale: AppLocale) => {
-      if (locale === activeLocale) {
-        handleClose();
-        return;
-      }
-      onChangeAction(locale);
-      handleClose();
-    },
-    [activeLocale, onChangeAction, handleClose]
-  );
-
-  const open = Boolean(anchorEl);
-  const emoji = getLanguageEmoji(activeLocale);
-  const label = getLanguageDisplayName(activeLocale, uiLocale);
-
-  return (
-    <>
-      <IconButton
-        aria-label={ariaLabel ?? t("selectLocale")}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        disabled={disabled}
-        onClick={handleOpen}
-        size="small"
-        sx={[
-          {
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            padding: 0.5,
-            flexShrink: 0,
-            borderRadius: 1,
-            "&:hover": { backgroundColor: theme => theme.palette.action.hover },
-          },
-          variant === "adornment" && {
-            marginInlineEnd: 0.5,
-          },
-          successSwitch && {
-            color: theme => theme.palette.success.main,
-            backgroundColor: theme => theme.palette.success.main,
-          },
-        ]}
-      >
-        <LocaleEmoji emoji={emoji} />
-        {compact ? null : (
-          <Typography component="span" sx={{ whiteSpace: "nowrap", fontSize: "0.875rem" }}>
-            {label}
-          </Typography>
-        )}
-        <ArrowDropDown fontSize="small" />
-      </IconButton>
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: isPopoverMobile ? "center" : "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: isPopoverMobile ? "center" : "left",
-        }}
-        disableAutoFocus
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: isPopoverMobile ? "min(100vw - 32px, 320px)" : 220,
-            },
-          },
-        }}
-      >
-        <LocaleList activeLocale={activeLocale} ariaLabel={ariaLabel} isMobile={isPopoverMobile} onPick={handlePick} />
-      </Popover>
-    </>
-  );
-};
+export const LocaleAdornmentSwitch: React.FC<LocaleAdornmentSwitchProps> = props => (
+  <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />
+);

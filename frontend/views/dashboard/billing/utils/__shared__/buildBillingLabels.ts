@@ -1,4 +1,5 @@
 import type { useTranslations } from "next-intl";
+import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type { CurrencyHedgesLabels } from "@/shared/messages/types/dashboard/billing/currency-hedges";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
@@ -323,5 +324,25 @@ export function buildManualInvoiceLabels(t: (key: string) => string): BillingMan
         body: t("manual.support.draftMode.body"),
       },
     },
+  };
+}
+
+export function buildBillingLabels(t: BillingTranslator): BillingLabels {
+  return {
+    ...buildPageLabels(t),
+    ...buildMetricLabels(t),
+    ...buildSectionAndSearchLabels(t),
+    ...buildTableLabels(t),
+    ...buildStatusLabels(t),
+    ...buildPaymentLabels(t),
+    ...buildSuccessLabels(t),
+    ...buildSubmitProofDialogLabels(t),
+    ...buildPaymentDetailsDialogLabels(t),
+    ...buildNotificationAndErrorLabels(t),
+    ...buildFxAndCurrencyLabels(t),
+    manual: buildManualInvoiceLabels((key: string) => {
+      if (key === "createSuccess") return t.raw(`manual.${key}`) as string;
+      return t(`manual.${key}`);
+    }),
   };
 }

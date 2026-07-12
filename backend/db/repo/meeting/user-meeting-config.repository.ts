@@ -1,6 +1,7 @@
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { userMeetingConfigs } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
@@ -202,40 +203,25 @@ export namespace UserMeetingConfigRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserMeetingConfigSelectType[]> {
-    if (inputs.length === 0) return [];
-
-    const run = async (t: DBTransaction): Promise<UserMeetingConfigSelectType[]> => {
-      const results: UserMeetingConfigSelectType[] = [];
-
-      for (const input of inputs) {
-        const existing = await findByUserProviderLabel(input.userId, input.providerId, input.label, t);
-
-        if (existing) {
-          const updated = await update(
-            existing.id,
-            {
-              label: input.label,
-              isDefault: input.isDefault,
-              details: input.details,
-              encryptedSecret: input.encryptedSecret,
-              providerId: input.providerId,
-            },
-            t,
-            locale
-          );
-          results.push(updated);
-          continue;
-        }
-
-        results.push(await create(input, t, locale));
-      }
-
-      return results;
-    };
-
-    if (tx) {
-      return run(tx);
-    }
-    return db.transaction(run);
+    return upsertManyWith(
+      inputs,
+      (input, t) => findByUserProviderLabel(input.userId, input.providerId, input.label, t),
+      create,
+      (id, input, t, loc) =>
+        update(
+          id,
+          {
+            label: input.label,
+            isDefault: input.isDefault,
+            details: input.details,
+            encryptedSecret: input.encryptedSecret,
+            providerId: input.providerId,
+          },
+          t,
+          loc
+        ),
+      tx,
+      locale
+    );
   }
 }

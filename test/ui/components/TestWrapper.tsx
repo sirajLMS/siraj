@@ -10,6 +10,7 @@ import { type ReactElement, type ReactNode, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
+import type { ViewportTier } from "@/frontend/context/ViewportContext";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createAppTheme } from "@/frontend/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
@@ -34,6 +35,7 @@ interface TestWrapperProps {
   readonly themeMode?: "dark" | "light";
   readonly permissions?: readonly AppPermission[];
   readonly mocks?: readonly MockLink.MockedResponse[];
+  readonly viewport?: ViewportTier;
   readonly children: ReactNode;
 }
 
@@ -42,6 +44,7 @@ export function TestWrapper({
   themeMode = "dark",
   permissions = [],
   mocks = [],
+  viewport,
   children,
 }: TestWrapperProps) {
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
@@ -88,7 +91,7 @@ export function TestWrapper({
         <CacheProvider value={cache}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <ViewportProvider>
+            <ViewportProvider viewport={viewport}>
               <ApolloProvider client={apolloClient}>{children}</ApolloProvider>
             </ViewportProvider>
           </ThemeProvider>
@@ -103,14 +106,15 @@ interface RenderOptions {
   themeMode?: "dark" | "light";
   permissions?: AppPermission[];
   mocks?: MockLink.MockedResponse[];
+  viewport?: ViewportTier;
 }
 
 export function renderWithWrapper(ui: ReactElement, options: RenderOptions = {}): RenderResult {
-  const { locale = "ar", themeMode = "dark", permissions = [], mocks = [] } = options;
+  const { locale = "ar", themeMode = "dark", permissions = [], mocks = [], viewport } = options;
 
   return render(ui, {
     wrapper: ({ children }) => (
-      <TestWrapper locale={locale} themeMode={themeMode} permissions={permissions} mocks={mocks}>
+      <TestWrapper locale={locale} themeMode={themeMode} permissions={permissions} mocks={mocks} viewport={viewport}>
         {children}
       </TestWrapper>
     ),

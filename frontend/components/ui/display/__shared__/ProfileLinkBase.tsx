@@ -6,6 +6,7 @@ import { Link } from "@/shared/i18n/routing";
 export type ProfileLinkBaseProps = {
   readonly href?: string | null;
   readonly name: string;
+  readonly avatarUrl?: string | null;
   readonly showAvatar?: boolean;
   readonly avatarSize?: number;
   readonly fallbackInitial?: string;
@@ -15,7 +16,12 @@ export type ProfileLinkBaseProps = {
   /** When true, use primary color for the name (linked look). Default true when href is set. */
   readonly emphasizeLink?: boolean;
   /** Renders the avatar node (receives resolved avatar props). */
-  readonly renderAvatar: (args: { name: string; fallbackInitial: string; size: number }) => ReactNode;
+  readonly renderAvatar: (args: {
+    src: string | null;
+    name: string;
+    fallbackInitial: string;
+    size: number;
+  }) => ReactNode;
 };
 
 /**
@@ -26,6 +32,7 @@ export type ProfileLinkBaseProps = {
 export function ProfileLinkBase({
   href,
   name,
+  avatarUrl,
   showAvatar = true,
   avatarSize = 28,
   fallbackInitial = "?",
@@ -52,7 +59,7 @@ export function ProfileLinkBase({
 
   const content = (
     <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
-      {showAvatar ? renderAvatar({ name, fallbackInitial, size: avatarSize }) : null}
+      {showAvatar ? renderAvatar({ src: avatarUrl ?? null, name, fallbackInitial, size: avatarSize }) : null}
       <Stack spacing={0.25} sx={{ minWidth: 0 }}>
         {label ? (
           <Typography sx={{ typography: "labelSm", color: theme => theme.palette.text.secondary }}>{label}</Typography>

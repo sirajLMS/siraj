@@ -1,6 +1,7 @@
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { classMeetingConfigs } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
@@ -9,7 +10,6 @@ import type {
   ClassMeetingConfigSelectType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
-import { upsertManyWith } from "./upsert-utils";
 
 type ClassScope = { readonly classInstanceId: string };
 type RecurringScope = { readonly recurringScheduleId: string };

@@ -26,7 +26,7 @@ import {
 } from "@/frontend/views/dashboard/billing/components/SubmitPaymentProofDialog";
 import { useBillingPollInterval } from "@/frontend/views/dashboard/billing/hooks/useBillingPollInterval";
 import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
-import { ParentBillingView } from "@/frontend/views/dashboard/billing/ParentBillingView";
+import { ParentBillingView } from "@/frontend/views/dashboard/billing/parentBillingView";
 import type {
   MarkPaidInvoiceTarget,
   ParentBillingViewProps,

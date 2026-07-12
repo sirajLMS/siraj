@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
-import { AdminComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/AdminComplaintsDesktopView";
+import { AdminComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/desktop/adminComplaints.desktop";
 import type {
   AdminComplaintRow,
   AdminComplaintsSummary,
@@ -67,6 +67,12 @@ const mockActions = {
   onPageChange: (page: number) => {
     logger.info("onPageChange:", page);
   },
+  onDeleteDialogClose: () => {
+    logger.info("onDeleteDialogClose");
+  },
+  onDeleteDialogConfirm: () => {
+    logger.info("onDeleteDialogConfirm");
+  },
 };
 
 interface AdminComplaintsDesktopStoryProps {
@@ -80,6 +86,9 @@ interface AdminComplaintsDesktopStoryProps {
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount: number;
+  readonly deleteDialogOpen: boolean;
+  readonly deleteComplaintId: string | null;
+  readonly isDeletingComplaint: boolean;
 }
 
 function AdminComplaintsDesktopStoryRenderer({
@@ -93,6 +102,9 @@ function AdminComplaintsDesktopStoryRenderer({
   page,
   pageSize,
   totalCount,
+  deleteDialogOpen,
+  deleteComplaintId,
+  isDeletingComplaint,
 }: Readonly<AdminComplaintsDesktopStoryProps>) {
   const t = useTranslations("dashboard.complaints");
   const labels = buildComplaintsLabels(t).admin;
@@ -110,6 +122,9 @@ function AdminComplaintsDesktopStoryRenderer({
       page={page}
       pageSize={pageSize}
       totalCount={totalCount}
+      deleteDialogOpen={deleteDialogOpen}
+      deleteComplaintId={deleteComplaintId}
+      isDeletingComplaint={isDeletingComplaint}
       {...mockActions}
     />
   );
@@ -140,6 +155,9 @@ export const Default: Story = {
     page: 0,
     pageSize: 10,
     totalCount: 2,
+    deleteDialogOpen: false,
+    deleteComplaintId: null,
+    isDeletingComplaint: false,
   },
 };
 

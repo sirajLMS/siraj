@@ -15,7 +15,7 @@ import {
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { studentProfileTabHref } from "@/frontend/utils/profileHref";
-import { ParentDashboardView } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
+import { ParentDashboardView } from "@/frontend/views/dashboard/parent/dashboard/parentDashboardView";
 import type {
   ParentDashboardMetrics,
   ParentScheduleRow,

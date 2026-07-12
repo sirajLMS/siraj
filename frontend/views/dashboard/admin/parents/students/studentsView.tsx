@@ -1,0 +1,22 @@
+"use client";
+
+import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import type { StudentsViewModel } from "@/frontend/views/dashboard/admin/parents/students/useStudentsViewModel";
+
+export type { StudentsViewModel };
+
+const lazyViews = createLazyView<StudentsViewModel>(
+  () =>
+    import("@/frontend/views/dashboard/admin/parents/students/mobile/students.mobile").then(m => ({
+      default: m.StudentsMobileView,
+    })),
+  () =>
+    import("@/frontend/views/dashboard/admin/parents/students/desktop/students.desktop").then(m => ({
+      default: m.StudentsDesktopView,
+    }))
+);
+
+export function StudentsView(props: Readonly<StudentsViewModel>) {
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
+}

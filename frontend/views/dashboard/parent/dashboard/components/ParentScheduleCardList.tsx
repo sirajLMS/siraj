@@ -5,9 +5,9 @@ import { Box, Card, CardContent, Stack, Tooltip, Typography } from "@mui/materia
 import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
-import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
 import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface ParentScheduleCardListProps {

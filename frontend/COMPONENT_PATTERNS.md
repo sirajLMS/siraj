@@ -299,4 +299,223 @@ When building or refactoring a dashboard page:
 ## Remaining work
 
 1. Add RTL `localeText` to `AppDataGrid` when Arabic DataGrid labels are needed
-2. ESLint custom rules (optional, deferred)
+2. ESLint custom rules (mobile/desktop isolation — see "Mobile/Desktop Isolation" section below; implemented in Phase 0)
+
+---
+
+## Mobile/Desktop Isolation
+
+**Related docs:**
+
+- [`.agents/instructions/mobile-desktop.instructions.md`](../.agents/instructions/mobile-desktop.instructions.md) — ESLint-enforced rules and full spec
+- [`frontend/views/AGENTS.md`](../frontend/views/AGENTS.md) — ViewModel hook conventions
+- [`frontend/stores/AGENTS.md`](../frontend/stores/AGENTS.md) — Zustand serialization rules
+
+Siraj renders distinct component trees for mobile (`< md`) and desktop (`≥ md`) viewports. The two tiers are **fully isolated** — no shared render code, no `useMediaQuery` branching inside views. A thin switcher picks the tier; everything below it is tier-specific.
+
+### File naming convention
+
+| File | Role |
+| --- | --- |
+| `*.mobile.tsx` | Mobile-only view or component (rendered when `isMobile`) |
+| `*.desktop.tsx` | Desktop-only view or component (rendered when `!isMobile`) |
+| `*.tsx` (no suffix) | Truly viewport-agnostic primitive (e.g., `StatusBadge.tsx`, `MetricCard.tsx`) |
+| `useXxViewModel.ts` | Business-logic hook (viewport-agnostic) |
+| `xxView.tsx` | Switcher — the ONLY page-level file that reads `useViewport()` |
+| `xxContainer.tsx` | Container — calls the ViewModel hook and passes the result to `XxView` |
+
+### Directory structure per domain
+
+```
+<domain>/
+  mobile/
+    xx.mobile.tsx              (main mobile view)
+    components/
+      xxCard.mobile.tsx        (mobile-specific card content)
+  desktop/
+    xx.desktop.tsx             (main desktop view)
+    components/
+      xxGrid.desktop.tsx       (desktop-specific grid/data components)
+  shared/
+    xxShared.tsx               (truly viewport-agnostic primitives)
+  useXxViewModel.ts            (business logic hook)
+  xxContainer.tsx              (calls hook, passes view model down)
+  xxView.tsx                   (switcher — reads viewport)
+```
+
+### ViewModel pattern
+
+The `useXxViewModel()` hook encapsulates ALL business logic for a page/domain. It returns a **flat plain object** (the "view model") consumed by both mobile and desktop views — same interface for both tiers.
+
+```tsx
+// useXxViewModel.ts
+import { useTranslations } from "next-intl";
+import { useXxStore } from "@/frontend/stores/xxStore";
+
+export function useXxViewModel(): XxViewModel {
+  const t = useTranslations("xx");
+  const store = useXxStore();
+  // Apollo hooks, derived values, handlers, etc.
+  return {
+    rows: store.rows,
+    loading: store.loading,
+    onFilterChange: store.setFilter,
+    labels: { title: t("title"), empty: t("empty") },
+  };
+}
+```
+
+Rules:
+
+- **No viewport logic in the hook**: never import `useMediaQuery`, `useViewport`, or `ViewportContext` inside `useXxViewModel.ts`.
+- **All mutable state in Zustand**: filters, pagination, dialog open, form values — all in stores so they survive the tier switch (React unmounts one tier tree and mounts the other during resize).
+- **Ephemeral state only in `useState`**: tooltip/popover open state may use `useState` inside a tier component — it resets on tier switch, which is acceptable for pure UI hover states.
+- **Serialization safety**: non-serializable values (`File`, `Blob`, `FormData`, `Promise`) must NOT be stored in `persist`-enabled Zustand stores. Use a non-persisted store, `partialize` exclusion, or `useRef` inside the ViewModel hook.
+- **Container calls the hook**: `xxContainer.tsx` calls `useXxViewModel()` and passes the result to `<XxView {...viewModel} />`. The Container itself is viewport-agnostic.
+
+### Switcher pattern
+
+The switcher (`xxView.tsx`) is the ONLY page-level file that reads viewport. It must be a client component.
+
+```tsx
+// xxView.tsx — the switcher (uses ResponsiveViewSwitch for lazy loading)
+"use client";
+import { createLazyView, ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { type XxViewModel, useXxViewModel } from "./useXxViewModel";
+
+// createLazyView MUST be at module top level (required by next/dynamic).
+// Static import paths only — no variables or template strings.
+const lazyViews = createLazyView<XxViewModel>(
+  () => import("./mobile/xx.mobile").then(m => ({ default: m.XxMobileView })),
+  () => import("./desktop/xx.desktop").then(m => ({ default: m.XxDesktopView })),
+);
+
+export function XxView(props: Readonly<XxViewModel>) {
+  const viewModel = useXxViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+}
+```
+
+### Tier isolation rules (ESLint enforced)
+
+**NEVER inside `.mobile.tsx` or `.desktop.tsx` files:**
+
+- `import { useMediaQuery } from "@mui/material"` — the tier is decided by the parent switcher
+- `import { useViewport } from "@/frontend/hooks/useViewport"` — already tier-specific
+- `import { ViewportContext } from "@/frontend/context/ViewportContext"` — never read context directly
+- Cross-tier imports: `.mobile.tsx` must not import `.desktop.tsx` and vice versa
+
+**ONLY in `xxView.tsx` switcher and `ResponsiveViewSwitch`:**
+
+- `ResponsiveViewSwitch` internally reads `useViewport()` — the switcher file itself does not import `useViewport` directly
+- `createLazyView` wraps the mobile/desktop components with `next/dynamic` for code splitting
+
+**ONLY in infrastructure components:**
+
+- `DashboardLayout`, `Sidebar`, `BottomNavbar` may read viewport for layout decisions (sidebar vs bottom-nav)
+- Prefer CSS `sx` responsive props where possible: `sx={{ display: { xs: "block", md: "none" } }}`
+
+### ESLint boundary rules
+
+These three rule blocks live in `eslint.config.mjs` and enforce the isolation:
+
+```javascript
+// 1. Block mobile → desktop imports
+{
+  files: ["**/*.mobile.tsx", "**/*.mobile.ts"],
+  rules: {
+    "no-restricted-imports": ["error", {
+      patterns: [{ regex: "\\.desktop(\\.tsx?)?$", message: "Mobile must not import desktop" }],
+    }],
+  },
+},
+
+// 2. Block desktop → mobile imports
+{
+  files: ["**/*.desktop.tsx", "**/*.desktop.ts"],
+  rules: {
+    "no-restricted-imports": ["error", {
+      patterns: [{ regex: "\\.mobile(\\.tsx?)?$", message: "Desktop must not import mobile" }],
+    }],
+  },
+},
+
+// 3. Block useMediaQuery / viewport context in versioned files
+{
+  files: ["**/*.mobile.tsx", "**/*.desktop.tsx", "**/*.mobile.ts", "**/*.desktop.ts"],
+  rules: {
+    "no-restricted-imports": ["error", {
+      paths: [{ name: "@mui/material", importNames: ["useMediaQuery"], allowTypeImports: true, message: "Versioned files must not use useMediaQuery" }],
+      patterns: [{ group: ["@/frontend/hooks/useViewport", "@/frontend/context/ViewportContext"], message: "Versioned files must not read viewport context" }],
+    }],
+  },
+},
+```
+
+### Mobile shared component catalog
+
+These non-versioned components live in `@/frontend/components/ui/` and are used **BY mobile views** (not by both tiers). They contain no `useMediaQuery` and no viewport logic — they are simply mobile-shaped UI primitives.
+
+| Component | Purpose | Key props |
+| --- | --- | --- |
+| `ResponsiveViewSwitch` | Lazy-loads and switches between mobile/desktop subtrees. Internally calls `useViewport()`, wraps in `Suspense` + `ErrorBoundary`. | `mobile`, `desktop` (ComponentType), `props` (T), `fallback`?, `errorFallback`? |
+| `MobilePageHeader` | Wraps `PageHeader` with `titleVariant="headlineMd"`, edge-to-edge padding. | `title`, `subtitle`, `actions?` |
+| `MobileContentStack` | Flex column container with configurable gap/paddingBottom for mobile page bodies. | `gap`, `paddingBottom` |
+| `MobileCardList<T>` | Generic list container — handles loading spinner, empty state, pagination, row mapping via `renderItem`. | `items`, `renderItem`, `loading`, `emptyMessage`, `onLoadMore?` |
+| `MobileCardListItem` | Generic card shell with `edge-to-edge` or `rounded` variant, `dimmed`, `accentBorder`, `interactive` flags. | `variant`, `dimmed`, `accentBorder`, `interactive` |
+| `MobileMetricCardGrid` | 2-column grid (or horizontal scroll) of `MetricCard` for mobile. | `metrics`, `scroll?` |
+| `MobileFab` | Fixed floating action button with theme colors. | `onClick`, `icon`, `label` |
+| `MobileEmptyState` | Centered title + subtitle box for empty lists/pages. | `title`, `subtitle?` |
+
+Example usage:
+
+```tsx
+// resources.mobile.tsx
+import { MobilePageHeader, MobileContentStack, MobileCardList, MobileCardListItem } from "@/frontend/components/ui";
+import { logger } from "@/frontend/utils/logger";
+
+export function ResourcesMobileView({ rows, loading, labels, onOpen }: Readonly<ResourcesViewModel>) {
+  return (
+    <>
+      <MobilePageHeader title={labels.title} subtitle={labels.subtitle} />
+      <MobileContentStack>
+        <MobileCardList
+          items={rows}
+          loading={loading}
+          emptyMessage={labels.empty}
+          renderItem={(row) => <MobileCardListItem key={row.id} variant="edge-to-edge">{row.name}</MobileCardListItem>}
+        />
+      </MobileContentStack>
+    </>
+  );
+}
+```
+
+### Desktop shared components (unchanged)
+
+`PageHeader` (default `headlineLg`), `Grid`, `SectionPanel`, `AppDataGrid`, `MetricCardGrid`, `PaginationControls` — used directly by `.desktop.tsx` views. See the "Architecture" and "Tables" sections above.
+
+### Truly shared (viewport-agnostic) components
+
+Non-versioned components imported by BOTH `.mobile.tsx` and `.desktop.tsx`:
+
+- `StatusBadge`, `MetricCard`, `BaseCard`, `ActionIconLink`, `PersonProfileLink`, `PaginationControls`
+
+These contain **NO** `useMediaQuery`, **NO** `useViewport`, **NO** viewport logic. They render identically on any viewport.
+
+### Mobile/desktop migration checklist
+
+When refactoring a page to mobile/desktop isolation:
+
+- [ ] Create `useXxViewModel.ts` — extract all business logic into the hook
+- [ ] Create `xxContainer.tsx` — calls the hook, renders `<XxView {...viewModel} />`
+- [ ] Create `xxView.tsx` switcher — uses `ResponsiveViewSwitch` or ternary
+- [ ] Create `mobile/xx.mobile.tsx` and `desktop/xx.desktop.tsx` — pure presentation
+- [ ] Move all mutable state into Zustand stores (survives tier switch)
+- [ ] Keep `File`/`Blob` state in `useRef` inside the ViewModel hook (serialization safety)
+- [ ] Verify NO `useMediaQuery` / `useViewport` imports inside `.mobile.tsx` or `.desktop.tsx`
+- [ ] Verify NO cross-tier imports (`.mobile` ↔ `.desktop`)
+- [ ] Use `MobilePageHeader` + `MobileContentStack` + `MobileCardList` on mobile (no hand-built shells)
+- [ ] Use `PageHeader` + `SectionPanel` + `AppDataGrid` on desktop
+- [ ] Both tiers share the same `StatusBadge`, `MetricCard`, `BaseCard` primitives
+- [ ] `bun tsgo`, `bun biome:check`, lint queue, and manual resize test all pass

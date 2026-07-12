@@ -7,9 +7,24 @@ import { ViewportContext, type ViewportContextType, type ViewportTier } from "@/
 
 interface ViewportProviderProps {
   readonly children: ReactNode;
+  /**
+   * Forces a specific viewport tier instead of detecting it via `useMediaQuery`.
+   * Tests use this to simulate a specific tier without resizing the window.
+   * When omitted, the tier is detected from the current MUI breakpoints.
+   */
+  readonly viewport?: ViewportTier;
 }
 
-export function ViewportProvider({ children }: ViewportProviderProps) {
+function tierToContext(tier: ViewportTier): ViewportContextType {
+  return {
+    tier,
+    isMobile: tier === "mobile" || tier === "tablet", // down("md") equivalent
+    isTablet: tier === "tablet",
+    isDesktop: tier === "desktop",
+  };
+}
+
+export function ViewportProvider({ children, viewport }: ViewportProviderProps) {
   const theme = useTheme();
 
   // MUI default breakpoints: sm=600, md=900, lg=1200, xl=1536
@@ -17,21 +32,13 @@ export function ViewportProvider({ children }: ViewportProviderProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true });
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"), { noSsr: true });
 
-  const tier = useMemo<ViewportTier>(() => {
-    if (isMobile) return "mobile";
-    if (isTablet) return "tablet";
-    return "desktop";
-  }, [isMobile, isTablet]);
-
-  const value = useMemo<ViewportContextType>(
-    () => ({
-      tier,
-      isMobile: tier === "mobile" || tier === "tablet", // down("md") equivalent
-      isTablet: tier === "tablet",
-      isDesktop: tier === "desktop",
-    }),
-    [tier]
-  );
+  const value = useMemo<ViewportContextType>(() => {
+    if (viewport) {
+      return tierToContext(viewport);
+    }
+    const detected: ViewportTier = isMobile ? "mobile" : isTablet ? "tablet" : "desktop";
+    return tierToContext(detected);
+  }, [viewport, isMobile, isTablet]);
 
   return <ViewportContext.Provider value={value}>{children}</ViewportContext.Provider>;
 }

@@ -13,7 +13,7 @@ import {
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
-  createManualClassEntry,
+  createManualClassEntryWithAssertions,
   loginAndProvision,
   provisionTestSuperAdmin,
 } from "@/frontend/graphql/test/helpers";
@@ -55,18 +55,7 @@ describe("GraphQL: Group Class integration tests", () => {
 
     if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
 
-    const now = new Date();
-    const end = new Date(now.getTime() + 60 * 60 * 1000);
-    const createRes = await createManualClassEntry(
-      teacherToken,
-      studentId,
-      teacherId,
-      now.toISOString(),
-      end.toISOString()
-    );
-    expect(createRes.error).toBeUndefined();
-    classInstanceId = createRes.data?.createTeacherManualClassEntry?.id ?? null;
-    expect(classInstanceId).toBeTruthy();
+    classInstanceId = await createManualClassEntryWithAssertions(teacherToken, studentId, teacherId);
 
     if (!adminToken || !classInstanceId) throw new Error("Missing admin token or classInstanceId");
 

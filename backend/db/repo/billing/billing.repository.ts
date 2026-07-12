@@ -1,5 +1,5 @@
 import { and, asc, count, desc, eq, inArray, isNull, ne, or, type SQL, sql } from "drizzle-orm";
-import type { PgTable } from "drizzle-orm/pg-core";
+import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -1167,8 +1167,7 @@ export namespace BillingRepository {
   async function upsertMany<TInput, TOutput>(
     inputs: readonly TInput[],
     table: PgTable,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    conflictTarget: any,
+    conflictTarget: PgColumn,
     buildSetClause: (input: TInput) => Record<string, unknown>,
     tx?: DBTransaction
   ): Promise<TOutput[]> {

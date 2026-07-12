@@ -202,7 +202,7 @@ bun quality-gate
 - **Zero viewport context**: `.mobile.tsx` and `.desktop.tsx` files must never import `useViewport` or `ViewportContext` (ESLint enforced).
 - **No cross-imports**: `.mobile.tsx` must not import `.desktop.tsx` and vice versa (ESLint enforced).
 - **ViewModel pattern**: Business logic lives in `useXxViewModel()` hooks. All mutable state in Zustand stores (survives viewport tier switching). `File` objects in `useRef` in the hook, not Zustand (serialization safety).
-- **Switcher only**: Only the thin `xxView.tsx` switcher reads `useViewport()` and renders `.mobile.tsx` or `.desktop.tsx`.
+- **Switcher uses `ResponsiveViewSwitch` with lazy loading**: The `xxView.tsx` switcher calls `createLazyView()` at module top level (static import paths required by `next/dynamic`) and passes lazy component refs to `<ResponsiveViewSwitch>`. Only the matching tier's code is downloaded. `ResponsiveViewSwitch` internally reads `useViewport()` and wraps in `Suspense` + `ErrorBoundary`.
 - **Shared components**: Non-versioned components (e.g., `StatusBadge`, `MetricCard`, `BaseCard`) used by both tiers. They contain NO `useMediaQuery` and NO viewport logic.
 - **Component directory convention**:
   ```
@@ -230,7 +230,7 @@ bun quality-gate
 - **No cross-imports**: `.mobile.tsx` must not import `.desktop.tsx` and vice versa (ESLint enforced via `no-restricted-imports`).
 - **ViewModel pattern**: Business logic lives in `useXxViewModel()` hooks, not in view components or Context.
 - **Zustand for state**: All UI state (filters, pagination, dialog open, form values) lives in Zustand stores so it survives viewport tier switching during resize.
-- **Only `View.tsx` reads viewport**: The switcher component is the only place that reads `useViewport()` — it renders either `.mobile.tsx` or `.desktop.tsx`.
+- **Only `ResponsiveViewSwitch` reads viewport**: The switcher component delegates to `ResponsiveViewSwitch` (which reads `useViewport()` internally) — the switcher file itself no longer imports `useViewport`. Only the matching `.mobile.tsx` or `.desktop.tsx` is lazy-loaded.
 - **Serialization safety**: Non-serializable values (`File`, `Blob`, `FormData`, `Promise`) must NOT be stored in `persist`-enabled Zustand stores. Use a non-persisted store, `partialize` to exclude them, or keep them in a `useRef` in the ViewModel hook.
 - **Component directory layout**:
   ```

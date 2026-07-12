@@ -1,0 +1,27 @@
+"use client";
+
+import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import {
+  type ParentDashboardViewModel,
+  type UseParentDashboardViewModelProps,
+  useParentDashboardViewModel,
+} from "@/frontend/views/dashboard/parent/dashboard/useParentDashboardViewModel";
+
+export type { ParentDashboardViewModel };
+
+const lazyViews = createLazyView<ParentDashboardViewModel>(
+  () =>
+    import("@/frontend/views/dashboard/parent/dashboard/mobile/parentDashboard.mobile").then(m => ({
+      default: m.ParentDashboardMobileView,
+    })),
+  () =>
+    import("@/frontend/views/dashboard/parent/dashboard/desktop/parentDashboard.desktop").then(m => ({
+      default: m.ParentDashboardDesktopView,
+    }))
+);
+
+export function ParentDashboardView(props: Readonly<UseParentDashboardViewModelProps>) {
+  const viewModel = useParentDashboardViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+}

@@ -338,6 +338,39 @@ export async function createManualClassEntry(
 }
 
 /**
+ * Creates a manual class entry scheduled from `startOffsetMs` to `endOffsetMs`
+ * (milliseconds relative to now), performs the standard data/error assertions,
+ * and returns the created class instance ID. Throws when the entry isn't created.
+ *
+ * @param token - The Bearer token to include in the Authorization header.
+ * @param studentId - The student ID for the manual class entry.
+ * @param teacherId - The teacher ID for the manual class entry.
+ * @param startOffsetMs - Start time offset in ms from now (default 0 = now).
+ * @param endOffsetMs - End time offset in ms from now (default 60 minutes).
+ * @returns The created class instance ID.
+ */
+export async function createManualClassEntryWithAssertions(
+  token: string,
+  studentId: string,
+  teacherId: string,
+  startOffsetMs = 0,
+  endOffsetMs = 60 * 60 * 1000
+): Promise<string> {
+  const start = new Date(Date.now() + startOffsetMs);
+  const end = new Date(Date.now() + endOffsetMs);
+
+  const createRes = await createManualClassEntry(token, studentId, teacherId, start.toISOString(), end.toISOString());
+
+  expect(createRes.data).toBeDefined();
+  expect(createRes.error).toBeUndefined();
+
+  const classInstanceId = createRes.data?.createTeacherManualClassEntry?.id;
+  expect(classInstanceId).toBeDefined();
+  if (!classInstanceId) throw new Error("No classInstanceId created");
+  return classInstanceId;
+}
+
+/**
  * Asserts that a recurring class creation request is denied (raises error).
  */
 export async function expectMutationError<TData, TVars extends OperationVariables>(

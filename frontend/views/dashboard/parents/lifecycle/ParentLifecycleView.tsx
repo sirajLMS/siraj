@@ -6,10 +6,9 @@ import { Box, Button, Grid, MenuItem, Select, Stack, TextField, Typography } fro
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form";
-import { PageContainer, PageHeader, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import { AdminControlPanel, PageContainer, PageHeader, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/utils/profileHref";
-import { AdminControlCard } from "@/frontend/views/dashboard/parents/lifecycle/components/__shared__";
 import {
   type LifecycleUpdateFormData,
   lifecycleUpdateSchema,
@@ -60,7 +59,7 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
   const { control, register } = useFormContext<LifecycleUpdateFormData>();
 
   return (
-    <AdminControlCard title={t("sections.adminControls")}>
+    <AdminControlPanel title={t("sections.adminControls")}>
       <Stack spacing={3}>
         <Box>
           <Typography
@@ -97,7 +96,7 @@ function LifecycleControls({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
           {t("actions.applyChange")}
         </PrimaryPageAction>
       </Stack>
-    </AdminControlCard>
+    </AdminControlPanel>
   );
 }
 

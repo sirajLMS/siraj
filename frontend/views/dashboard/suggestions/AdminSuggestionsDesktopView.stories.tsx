@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { AppPermission, SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
 import { createMockAdminDecorator } from "@/frontend/views/dashboard/components/createMockAdminDecorator";
-import { AdminSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/AdminSuggestionsDesktopView";
+import { AdminSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/desktop/adminSuggestions.desktop";
 import type {
   AdminSuggestionRow,
   AdminSuggestionsSummary,

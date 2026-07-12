@@ -1,20 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -25,7 +15,7 @@ import {
 import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { AdminComplaintsView } from "@/frontend/views/dashboard/complaints/AdminComplaintsView";
+import { AdminComplaintsView } from "@/frontend/views/dashboard/complaints/adminComplaintsView";
 import type {
   AdminComplaintRow,
   AdminComplaintsSummary,
@@ -45,14 +35,13 @@ export function AdminComplaintsContainer() {
   const searchQuery = useAdminComplaintsStore(state => state.searchQuery);
   const activeTab = useAdminComplaintsStore(state => state.activeTab);
   const draftResponses = useAdminComplaintsStore(state => state.draftResponses);
-  const setSearchQuery = useAdminComplaintsStore(state => state.setSearchQuery);
-  const setActiveTab = useAdminComplaintsStore(state => state.setActiveTab);
-  const setDraftResponse = useAdminComplaintsStore(state => state.setDraftResponse);
   const clearDraftResponse = useAdminComplaintsStore(state => state.clearDraftResponse);
   const resetResponding = useAdminComplaintsStore(state => state.resetResponding);
   const page = useAdminComplaintsStore(state => state.page);
   const pageSize = useAdminComplaintsStore(state => state.pageSize);
-  const setPage = useAdminComplaintsStore(state => state.setPage);
+  const setDeleteDialogOpen = useAdminComplaintsStore(state => state.setDeleteDialogOpen);
+  const setDeleteComplaintId = useAdminComplaintsStore(state => state.setDeleteComplaintId);
+  const closeDeleteDialog = useAdminComplaintsStore(state => state.closeDeleteDialog);
 
   const { data, loading, error, refetch } = useQuery(adminComplaintQueueQueryDocument, {
     variables: {
@@ -114,18 +103,13 @@ export function AdminComplaintsContainer() {
   const canManage = hasPermission(AppPermission.ComplaintsRespond);
   const canDelete = hasPermission(AppPermission.ComplaintsDelete);
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteComplaintId, setDeleteComplaintId] = useState<string | null>(null);
-
   const [deleteComplaint, { loading: isDeletingComplaint }] = useMutation(deleteComplaintMutationDocument, {
     onCompleted: () => {
-      setDeleteDialogOpen(false);
-      setDeleteComplaintId(null);
+      closeDeleteDialog();
       void refetch();
     },
     onError: () => {
-      setDeleteDialogOpen(false);
-      setDeleteComplaintId(null);
+      closeDeleteDialog();
     },
   });
 
@@ -147,6 +131,7 @@ export function AdminComplaintsContainer() {
   };
 
   const handleDeleteConfirm = () => {
+    const deleteComplaintId = useAdminComplaintsStore.getState().deleteComplaintId;
     if (deleteComplaintId) {
       void deleteComplaint({
         variables: {
@@ -175,35 +160,17 @@ export function AdminComplaintsContainer() {
         labels={labels.admin}
         summary={summary}
         rows={rows}
-        searchQuery={searchQuery}
-        activeTab={activeTab}
-        draftResponses={draftResponses}
         canManage={canManage}
         canDelete={canDelete}
-        page={page}
-        pageSize={pageSize}
         totalCount={totalCount}
-        onSearchChange={setSearchQuery}
-        onTabChange={setActiveTab}
-        onDraftChange={setDraftResponse}
+        isDeletingComplaint={isDeletingComplaint}
         onAnswer={handleAnswer}
-        onDelete={handleDeleteRequest}
-        onPageChange={setPage}
+        onDeleteRequest={handleDeleteRequest}
+        onDeleteConfirm={handleDeleteConfirm}
+        onRefetch={() => {
+          void refetch();
+        }}
       />
-      {canDelete ? (
-        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
-          <DialogTitle>{labels.admin.queue.deleteConfirmTitle}</DialogTitle>
-          <DialogContent>
-            <DialogContentText>{labels.admin.queue.deleteConfirmBody}</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteDialogOpen(false)}>{labels.admin.queue.deleteConfirmCancel}</Button>
-            <Button onClick={handleDeleteConfirm} color="error" variant="contained" disabled={isDeletingComplaint}>
-              {labels.admin.queue.deleteConfirmConfirm}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      ) : null}
     </RequirePermission>
   );
 }

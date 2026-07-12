@@ -124,23 +124,22 @@ export function useAppDataGridViewModel() {
 }
 ```
 
-**Switcher Component Template (ONLY viewport consumer):**
+**Switcher Component Template (lazy loading via ResponsiveViewSwitch):**
 
 ```tsx
 // frontend/components/ui/dataGrid/AppDataGridView.tsx
-import { useViewport } from '@/frontend/hooks/useViewport';
-import { AppDataGridDesktop } from './desktop/AppDataGrid.desktop';
-import { AppDataGridMobile } from './mobile/AppDataGrid.mobile';
-import { useAppDataGridViewModel } from './useAppDataGridViewModel';
+import { createLazyView, ResponsiveViewSwitch } from '@/frontend/components/ui/container/ResponsiveViewSwitch';
+import { type AppDataGridViewModel, useAppDataGridViewModel } from './useAppDataGridViewModel';
+
+// createLazyView MUST be at module top level (required by next/dynamic).
+const lazyViews = createLazyView<AppDataGridViewModel>(
+  () => import('./mobile/AppDataGrid.mobile').then(m => ({ default: m.AppDataGridMobile })),
+  () => import('./desktop/AppDataGrid.desktop').then(m => ({ default: m.AppDataGridDesktop })),
+);
 
 export function AppDataGridView() {
   const viewModel = useAppDataGridViewModel();
-  const { isMobile } = useViewport(); // ONLY place useViewport is called
-
-  if (isMobile) {
-    return <AppDataGridMobile {...viewModel} />;
-  }
-  return <AppDataGridDesktop {...viewModel} />;
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 ```
 

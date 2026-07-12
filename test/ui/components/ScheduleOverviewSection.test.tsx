@@ -21,8 +21,8 @@ expect.extend(matchers);
 
 import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ScheduleOverviewSectionProps } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewSection";
-import { ScheduleOverviewSection } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewSection";
+import { ScheduleOverviewView } from "@/frontend/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView";
+import type { UseScheduleOverviewViewModelProps } from "@/frontend/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -41,7 +41,9 @@ const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
   [ClassExecutionState.Completed]: "Completed",
 };
 
-const createMockProps = (overrides: Partial<ScheduleOverviewSectionProps> = {}): ScheduleOverviewSectionProps => ({
+const createMockProps = (
+  overrides: Partial<UseScheduleOverviewViewModelProps> = {}
+): UseScheduleOverviewViewModelProps => ({
   title: "Schedule Overview",
   searchPlaceholder: "Search by student name",
   searchValue: "",
@@ -85,7 +87,7 @@ const createMockProps = (overrides: Partial<ScheduleOverviewSectionProps> = {}):
 describe("ScheduleOverviewSection", () => {
   test("search input visible with DashboardSearch permission", () => {
     const props = createMockProps();
-    renderWithWrapper(<ScheduleOverviewSection {...props} />, {
+    renderWithWrapper(<ScheduleOverviewView {...props} />, {
       permissions: [AppPermission.DashboardSearch],
     });
 
@@ -96,14 +98,14 @@ describe("ScheduleOverviewSection", () => {
 
   test("search input hidden without DashboardSearch permission", () => {
     const props = createMockProps({ searchPlaceholder: "Search by student name" });
-    renderWithWrapper(<ScheduleOverviewSection {...props} />, { permissions: [] });
+    renderWithWrapper(<ScheduleOverviewView {...props} />, { permissions: [] });
 
     expect(screen.queryByPlaceholderText("Search by student name")).toBeNull();
   });
 
   test("search input has correct placeholder", () => {
     const props = createMockProps({ searchPlaceholder: "Search by student name" });
-    renderWithWrapper(<ScheduleOverviewSection {...props} />, {
+    renderWithWrapper(<ScheduleOverviewView {...props} />, {
       permissions: [AppPermission.DashboardSearch],
     });
 
@@ -113,7 +115,7 @@ describe("ScheduleOverviewSection", () => {
 
   test("section title renders correctly", () => {
     const props = createMockProps({ title: "Schedule Overview" });
-    renderWithWrapper(<ScheduleOverviewSection {...props} />, { permissions: [] });
+    renderWithWrapper(<ScheduleOverviewView {...props} />, { permissions: [] });
 
     const titles = screen.getAllByText("Schedule Overview");
     expect(titles.length).toBeGreaterThan(0);
@@ -122,7 +124,7 @@ describe("ScheduleOverviewSection", () => {
 
   test("empty message shown when no rows", () => {
     const props = createMockProps({ rows: [], emptyMessage: "No classes scheduled" });
-    renderWithWrapper(<ScheduleOverviewSection {...props} />, { permissions: [] });
+    renderWithWrapper(<ScheduleOverviewView {...props} />, { permissions: [] });
 
     const messages = screen.getAllByText("No classes scheduled");
     expect(messages.length).toBeGreaterThan(0);

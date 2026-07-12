@@ -1,22 +1,17 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { logger } from "@/frontend/utils/logger";
 import { RescheduleView } from "@/frontend/views/dashboard/reschedule/home/RescheduleView";
-import {
-  type RescheduleFormData,
-  rescheduleSchema,
-} from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
+import type { RescheduleFormData } from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import { combineDateTime } from "@/frontend/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { useRouter } from "@/shared/i18n/routing";
 
@@ -25,9 +20,8 @@ export function RescheduleContainer() {
   const searchParams = useSearchParams();
   const t = useTranslations("dashboard.rescheduleForm");
   const storeSession = useRescheduleStore(state => state.session);
+  const setShowSuccess = useRescheduleStore(state => state.setShowSuccess);
   const classInstanceId = searchParams.get("classInstanceId") || storeSession.sessionId || "";
-
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data, loading, error } = useQuery(classInstanceQueryDocument, {
     variables: { id: classInstanceId },
@@ -38,29 +32,9 @@ export function RescheduleContainer() {
 
   const classInstance = data?.classInstance;
 
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    getValues,
-    formState: { errors },
-    reset,
-  } = useForm<RescheduleFormData>({
-    resolver: zodResolver(rescheduleSchema),
-    defaultValues: {
-      newDate: "",
-      newTime: "",
-    },
-  });
-
   useEffect(() => {
-    if (classInstance) {
-      reset({
-        newDate: classInstance.scheduledDate ?? "",
-        newTime: classInstance.startTime ?? "",
-      });
-    }
-  }, [classInstance, reset]);
+    setShowSuccess(false);
+  }, [setShowSuccess]);
 
   const fallbackSession = useMemo(
     () => ({
@@ -81,6 +55,9 @@ export function RescheduleContainer() {
         effectiveMeeting: classInstance.effectiveMeeting ?? null,
       }
     : fallbackSession;
+
+  const defaultDate = classInstance?.scheduledDate ?? "";
+  const defaultTime = classInstance?.startTime ?? "";
 
   if (loading && !data) {
     return (
@@ -135,18 +112,11 @@ export function RescheduleContainer() {
     <RequirePermission permissions={[AppPermission.SessionReschedule]}>
       <RescheduleView
         session={session}
-        control={control}
-        errors={errors}
-        setValue={setValue}
-        getValues={getValues}
-        handleSubmit={handleSubmit}
+        defaultDate={defaultDate}
+        defaultTime={defaultTime}
         isSubmitting={isSubmitting}
-        showSuccess={showSuccess}
         onSubmit={onSubmit}
         onCancel={onCancel}
-        onDismissSuccess={() => {
-          setShowSuccess(false);
-        }}
       />
     </RequirePermission>
   );

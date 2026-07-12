@@ -1,0 +1,81 @@
+// cspell:disable
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, CircularProgress } from "@mui/material";
+import { useTranslations } from "next-intl";
+import { FormProvider, useForm } from "react-hook-form";
+import { ExportButton, MobilePageHeader, PageContainer, SectionPanel } from "@/frontend/components/ui";
+import { useTeacherAvailabilityStore } from "@/frontend/stores/teacherAvailabilityStore";
+import { AvailabilitySearchForm } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
+import { WeeklyAvailabilityGrid } from "@/frontend/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
+import { availabilitySearchSchema } from "@/frontend/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import type {
+  AvailabilitySearchFormData,
+  TeacherAvailabilityInsights,
+} from "@/frontend/views/dashboard/teachers/availability/types";
+import type { TeacherAvailabilityViewModel } from "@/frontend/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
+
+interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityViewModel, "insights"> {
+  readonly insights?: TeacherAvailabilityInsights;
+}
+
+function resolveDefaultFilters(
+  propFilters: AvailabilitySearchFormData,
+  storeFilters: { readonly fromTime: Date | null; readonly toTime: Date | null; readonly gender: unknown }
+): AvailabilitySearchFormData {
+  const storeHasDraft = storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
+  return storeHasDraft ? (storeFilters as AvailabilitySearchFormData) : propFilters;
+}
+
+export function TeacherAvailabilityMobileView({
+  availability,
+  defaultFilters,
+  loading,
+  onExportPdf,
+  onSearch,
+  onBlockClick,
+  tableLabels,
+}: Readonly<TeacherAvailabilityMobileViewProps>) {
+  const t = useTranslations("dashboard.teacherAvailability");
+  const storeFilters = useTeacherAvailabilityStore(
+    (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
+  );
+
+  const methods = useForm<AvailabilitySearchFormData>({
+    resolver: zodResolver(availabilitySearchSchema),
+    defaultValues: resolveDefaultFilters(defaultFilters, storeFilters),
+  });
+
+  return (
+    <PageContainer>
+      <MobilePageHeader
+        title={t("mobile.pageTitle")}
+        subtitle={t("mobile.pageSubtitle")}
+        breadcrumbs={[
+          { label: t("breadcrumbs.teachers"), href: "/teachers" },
+          { label: t("breadcrumbs.availability"), current: true },
+        ]}
+        actions={<ExportButton onClick={onExportPdf}>{t("exportPdf")}</ExportButton>}
+      />
+
+      <Box sx={{ mb: 2 }}>
+        <SectionPanel title={t("searchTitle")} edgeToEdge>
+          <FormProvider {...methods}>
+            <AvailabilitySearchForm onSearch={onSearch} />
+          </FormProvider>
+        </SectionPanel>
+      </Box>
+
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {!loading && (
+        <WeeklyAvailabilityGrid availability={availability} labels={tableLabels} onBlockClick={onBlockClick} />
+      )}
+    </PageContainer>
+  );
+}

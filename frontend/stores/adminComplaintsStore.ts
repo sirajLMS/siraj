@@ -11,6 +11,9 @@ interface AdminComplaintsState {
   readonly isResponding: boolean;
   readonly page: number;
   readonly pageSize: number;
+  readonly deleteDialogOpen: boolean;
+  readonly deleteComplaintId: string | null;
+  readonly isDeletingComplaint: boolean;
   setSearchQuery: (query: string) => void;
   setActiveTab: (tab: ComplaintStatus) => void;
   setDraftResponse: (id: string, text: string) => void;
@@ -19,6 +22,11 @@ interface AdminComplaintsState {
   setIsResponding: (value: boolean) => void;
   resetResponding: () => void;
   setPage: (page: number) => void;
+  openDeleteDialog: (id: string) => void;
+  closeDeleteDialog: () => void;
+  setDeleteDialogOpen: (open: boolean) => void;
+  setDeleteComplaintId: (id: string | null) => void;
+  setIsDeletingComplaint: (value: boolean) => void;
 }
 
 export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
@@ -29,6 +37,9 @@ export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
   isResponding: false,
   page: 0,
   pageSize: DEFAULT_PAGE_SIZE,
+  deleteDialogOpen: false,
+  deleteComplaintId: null,
+  isDeletingComplaint: false,
   setSearchQuery: query => {
     set({ searchQuery: query, page: 0 });
   },
@@ -56,5 +67,20 @@ export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
   },
   setPage: page => {
     set({ page });
+  },
+  openDeleteDialog: id => {
+    set({ deleteComplaintId: id, deleteDialogOpen: true });
+  },
+  closeDeleteDialog: () => {
+    set({ deleteDialogOpen: false, deleteComplaintId: null });
+  },
+  setDeleteDialogOpen: open => {
+    set({ deleteDialogOpen: open });
+  },
+  setDeleteComplaintId: id => {
+    set({ deleteComplaintId: id });
+  },
+  setIsDeletingComplaint: value => {
+    set({ isDeletingComplaint: value });
   },
 }));

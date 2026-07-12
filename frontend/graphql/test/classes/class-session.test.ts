@@ -15,9 +15,14 @@ import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
-import { authenticatedRequest, createManualClassEntry, loginAndProvision } from "../helpers";
-import { setupTestServerLifecycle } from "../lifecycle";
-import { testClient } from "../testClient";
+import {
+  authenticatedRequest,
+  createManualClassEntry,
+  createManualClassEntryWithAssertions,
+  loginAndProvision,
+} from "@/frontend/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+import { testClient } from "@/frontend/graphql/test/testClient";
 
 const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
@@ -70,6 +75,37 @@ describe("GraphQL Class Session Integration Tests", () => {
   let outsideClassInstanceId: string | null = null;
   let outsideDate: string | null = null;
 
+  async function activateAndVerifyExecutionState(
+    activateMutation: typeof activateClassMutationDocument | typeof activateOverrideClassMutationDocument,
+    actorToken: string,
+    classInstanceId: string,
+    expectedDate: string,
+    expectedState: ClassExecutionState
+  ): Promise<void> {
+    const activateRes = await testClient.mutate({
+      mutation: activateMutation,
+      variables: { classInstanceId },
+      errorPolicy: "all",
+      context: { headers: { Authorization: `Bearer ${actorToken}` } },
+    });
+
+    expect(activateRes.data).toBeDefined();
+    expect(activateRes.error).toBeUndefined();
+
+    const dashboardResult = await testClient.query({
+      query: teacherDashboardQueryDocument,
+      variables: { date: expectedDate, pagination: null },
+      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    });
+
+    expect(dashboardResult.data).toBeDefined();
+    const rows = dashboardResult.data?.teacherDashboard?.scheduleRows || [];
+    const activatedRow = rows.find(r => r?.id === classInstanceId);
+    expect(activatedRow).toBeDefined();
+    if (!activatedRow) throw new Error("No activatedRow found");
+    expect(activatedRow.executionState).toBe(expectedState);
+  }
+
   test("login as academy_admin and teacher", async () => {
     const r = await loginAndProvision("SessionIntTest");
     expect(r.adminToken).toBeTruthy();
@@ -101,60 +137,16 @@ describe("GraphQL Class Session Integration Tests", () => {
     if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
 
     // 1. Create a new class instance within window (start = now, end = now + 1 hour)
-    const now = new Date();
-    const end = new Date(now.getTime() + 60 * 60 * 1000);
+    const classInstanceId = await createManualClassEntryWithAssertions(teacherToken, studentId, teacherId);
 
-    const createRes = await createManualClassEntry(
+    // 2. Activate as teacher and verify executionState changes to ACTIVATED
+    await activateAndVerifyExecutionState(
+      activateClassMutationDocument,
       teacherToken,
-      studentId,
-      teacherId,
-      now.toISOString(),
-      end.toISOString()
+      classInstanceId,
+      testDate,
+      ClassExecutionState.Activated
     );
-
-    expect(createRes.data).toBeDefined();
-    expect(createRes.error).toBeUndefined();
-    const classInstanceId = createRes.data?.createTeacherManualClassEntry?.id;
-    expect(classInstanceId).toBeDefined();
-    if (!classInstanceId) throw new Error("No classInstanceId created");
-
-    // 2. Activate as teacher
-    const activateRes = await testClient.mutate({
-      mutation: activateClassMutationDocument,
-      variables: {
-        classInstanceId,
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-    });
-
-    expect(activateRes.data).toBeDefined();
-    expect(activateRes.error).toBeUndefined();
-
-    // 3. Verify executionState changes to ACTIVATED via teacher dashboard query
-    const dashboardResult = await testClient.query({
-      query: teacherDashboardQueryDocument,
-      variables: {
-        date: testDate,
-        pagination: null,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-    });
-
-    expect(dashboardResult.data).toBeDefined();
-    const rows = dashboardResult.data?.teacherDashboard?.scheduleRows || [];
-    const activatedRow = rows.find(r => r?.id === classInstanceId);
-    expect(activatedRow).toBeDefined();
-    if (!activatedRow) throw new Error("No activatedRow found");
-    expect(activatedRow.executionState).toBe(ClassExecutionState.Activated);
   });
 
   test("teacher activation outside window fails with YOU MISSED THE CLASS TIME message", async () => {
@@ -201,43 +193,14 @@ describe("GraphQL Class Session Integration Tests", () => {
   test("academy admin forceActivateClass outside window succeeds", async () => {
     if (!adminToken || !teacherToken || !outsideClassInstanceId) throw new Error("Missing test context");
 
-    // Call forceActivateClass as academy admin on the class instance created in the previous test
-    const forceRes = await testClient.mutate({
-      mutation: activateOverrideClassMutationDocument,
-      variables: {
-        classInstanceId: outsideClassInstanceId,
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
-      },
-    });
-
-    expect(forceRes.data).toBeDefined();
-    expect(forceRes.error).toBeUndefined();
-
-    // Verify executionState changes to ACTIVATED via teacher dashboard query
-    const dashboardResult = await testClient.query({
-      query: teacherDashboardQueryDocument,
-      variables: {
-        date: outsideDate || testDate,
-        pagination: null,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-    });
-
-    expect(dashboardResult.data).toBeDefined();
-    const rows = dashboardResult.data?.teacherDashboard?.scheduleRows || [];
-    const activatedRow = rows.find(r => r?.id === outsideClassInstanceId);
-    expect(activatedRow).toBeDefined();
-    if (!activatedRow) throw new Error("No activatedRow found");
-    expect(activatedRow.executionState).toBe(ClassExecutionState.Activated);
+    // Call forceActivateClass as academy admin and verify executionState changes to ACTIVATED
+    await activateAndVerifyExecutionState(
+      activateOverrideClassMutationDocument,
+      adminToken,
+      outsideClassInstanceId,
+      outsideDate || testDate,
+      ClassExecutionState.Activated
+    );
   });
 
   test("session lifecycle: start, reset, restart, and leave flow", async () => {

@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useClassDetailsStore } from "@/frontend/stores/classDetailsStore";
 import type { ActionFeedbackState } from "@/frontend/views/dashboard/classes/details/types";
 
 export function useClassDetailsContainerState() {
-  const [isWarningDismissed, setIsWarningDismissed] = useState(false);
-  const [feedbackState, setFeedbackState] = useState<ActionFeedbackState | null>(null);
-  const [shouldLoadEvents, setShouldLoadEvents] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const isWarningDismissed = useClassDetailsStore(state => state.isWarningDismissed);
+  const feedbackState = useClassDetailsStore(state => state.feedbackState);
+  const shouldLoadEvents = useClassDetailsStore(state => state.shouldLoadEvents);
+  const deleteDialogOpen = useClassDetailsStore(state => state.deleteDialogOpen);
+  const setIsWarningDismissed = useClassDetailsStore(state => state.setIsWarningDismissed);
+  const setFeedbackState = useClassDetailsStore(state => state.setFeedbackState);
+  const setShouldLoadEvents = useClassDetailsStore(state => state.setShouldLoadEvents);
+  const setDeleteDialogOpen = useClassDetailsStore(state => state.setDeleteDialogOpen);
 
   return {
     isWarningDismissed,
@@ -18,3 +22,5 @@ export function useClassDetailsContainerState() {
     setDeleteDialogOpen,
   };
 }
+
+export type { ActionFeedbackState };

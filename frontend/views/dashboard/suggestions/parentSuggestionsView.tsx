@@ -1,0 +1,27 @@
+"use client";
+
+import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import {
+  type ParentSuggestionsViewModel,
+  type UseParentSuggestionsViewModelProps,
+  useParentSuggestionsViewModel,
+} from "@/frontend/views/dashboard/suggestions/useParentSuggestionsViewModel";
+
+export type { ParentSuggestionsViewModel };
+
+const lazyViews = createLazyView<ParentSuggestionsViewModel>(
+  () =>
+    import("@/frontend/views/dashboard/suggestions/mobile/parentSuggestions.mobile").then(m => ({
+      default: m.ParentSuggestionsMobileView,
+    })),
+  () =>
+    import("@/frontend/views/dashboard/suggestions/desktop/parentSuggestions.desktop").then(m => ({
+      default: m.ParentSuggestionsDesktopView,
+    }))
+);
+
+export function ParentSuggestionsView(props: Readonly<UseParentSuggestionsViewModelProps>) {
+  const viewModel = useParentSuggestionsViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+}

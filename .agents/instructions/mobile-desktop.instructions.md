@@ -59,22 +59,62 @@ Each domain feature follows this structure:
 - **Serialization safety**: Non-serializable values (`File`, `Blob`, `FormData`, `Promise`) must NOT be in `persist`-enabled stores. Use: non-persisted store, `partialize` exclusion, or `useRef` in ViewModel hook
 - **Container calls hook**: The Container component calls `useXxViewModel()` and passes the result to `<XxView {...viewModel} />`
 
-### Switcher Pattern
+### Switcher Pattern (Lazy Loading)
+
+The switcher uses `createLazyView` + `ResponsiveViewSwitch` to **lazy-load** only the needed tier.
+Mobile devices never download the desktop component code, and vice versa.
 
 ```tsx
-// xxView.tsx — the ONLY file that reads viewport
+// xxView.tsx — the ONLY file that reads viewport (via ResponsiveViewSwitch)
 "use client";
-import { useViewport } from "@/frontend/hooks/useViewport";
-import { XxMobileView } from "./mobile/xx.mobile";
-import { XxDesktopView } from "./desktop/xx.desktop";
-import { ResponsiveViewSwitch } from "@/frontend/components/ui";
+import { createLazyView, ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { type XxViewModel, type UseXxViewModelProps, useXxViewModel } from "./useXxViewModel";
 
-export function XxView(props: Readonly<XxViewModel>) {
-  const { isMobile } = useViewport();
-  return isMobile ? <XxMobileView {...props} /> : <XxDesktopView {...props} />;
-  // Or: return <ResponsiveViewSwitch mobile={<XxMobileView {...props} />} desktop={<XxDesktopView {...props} />} />;
+// createLazyView MUST be called at module top level (required by next/dynamic).
+// Static import paths only — no variables or template strings.
+const lazyViews = createLazyView<XxViewModel>(
+  () => import("./mobile/xx.mobile").then(m => ({ default: m.XxMobileView })),
+  () => import("./desktop/xx.desktop").then(m => ({ default: m.XxDesktopView })),
+);
+
+export function XxView(props: Readonly<UseXxViewModelProps>) {
+  const viewModel = useXxViewModel(props);
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 ```
+
+**For components without a ViewModel hook** (pass props directly):
+
+```tsx
+const lazyViews = createLazyView<XxProps>(
+  () => import("./mobile/xx.mobile").then(m => ({ default: m.XxMobileView })),
+  () => import("./desktop/xx.desktop").then(m => ({ default: m.XxDesktopView })),
+);
+
+export function XxView(props: Readonly<XxProps>) {
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
+}
+```
+
+**For complex switchers** (surrounding JSX like dialogs/snackbars around the mobile/desktop render):
+
+```tsx
+export function XxView(props: Readonly<UseXxViewModelProps>) {
+  const viewModel = useXxViewModel(props);
+  return (
+    <>
+      <SomeNotice />
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
+      <SomeDialog open={...} onClose={...} />
+    </>
+  );
+}
+```
+
+**API Reference:**
+
+- `createLazyView<T>(mobileImporter, desktopImporter, options?)` — Returns `{ mobile, desktop }` lazy component references. Uses `next/dynamic` internally. `options.ssr` defaults to `true`.
+- `<ResponsiveViewSwitch mobile={...} desktop={...} props={...} fallback={...} errorFallback={...} />` — Reads `useViewport()` internally (the ONLY component that does), wraps in `Suspense` with a `CircularProgress` fallback by default, and an `ErrorBoundary` with a retry button by default. Both `fallback` and `errorFallback` are optional.
 
 ### Mobile Shared Components (`frontend/components/ui/`)
 

@@ -5,6 +5,18 @@ export type NotificationPrefRow = NonNullable<
   Operations.NotificationPreferencesQuery["notificationPreferences"]
 >[number];
 
+export interface NotificationPreferencesTabVariantProps {
+  readonly preferences: readonly NotificationPrefRow[];
+  readonly onToggle: (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => void;
+  readonly disabled: boolean;
+  readonly loading: boolean;
+  readonly snackbarOpen: boolean;
+  readonly snackbarMessage: string;
+  readonly snackbarSeverity: "success" | "error";
+  readonly onSnackbarClose: () => void;
+  readonly errorLoading: boolean;
+}
+
 export const NOTIFICATION_CHANNELS = [
   NotificationChannel.Email,
   NotificationChannel.Sms,

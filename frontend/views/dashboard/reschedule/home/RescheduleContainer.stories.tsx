@@ -1,14 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { RescheduleView } from "@/frontend/views/dashboard/reschedule/home/RescheduleView";
-import {
-  type RescheduleFormData,
-  rescheduleSchema,
-} from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 
 useRescheduleStore.setState({
   session: {
@@ -22,35 +15,15 @@ useRescheduleStore.setState({
 export function MockRescheduleContainer() {
   const session = useRescheduleStore(state => state.session);
   const isSubmitting = useRescheduleStore(state => state.isSubmitting);
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    getValues,
-    formState: { errors },
-  } = useForm<RescheduleFormData>({
-    resolver: zodResolver(rescheduleSchema),
-    defaultValues: {
-      newDate: "2023-10-24",
-      newTime: "22:30",
-    },
-  });
 
   return (
     <RescheduleView
       session={session}
-      control={control}
-      errors={errors}
-      setValue={setValue}
-      getValues={getValues}
-      handleSubmit={handleSubmit}
+      defaultDate="2023-10-24"
+      defaultTime="22:30"
       isSubmitting={isSubmitting}
-      showSuccess={showSuccess}
       onSubmit={() => {}}
       onCancel={() => {}}
-      onDismissSuccess={() => setShowSuccess(false)}
     />
   );
 }

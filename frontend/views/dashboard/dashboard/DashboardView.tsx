@@ -3,8 +3,8 @@
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { ScheduleOverviewSection } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewSection";
 import { TodayClassesSection } from "@/frontend/views/dashboard/admin/home/components/TodayClassesSection";
+import { ScheduleOverviewView } from "@/frontend/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView";
 import type { MetricItem, ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
 
 interface AdminDashboardViewProps extends ScheduleOverviewData {
@@ -69,7 +69,7 @@ export function DashboardView({
 
       {/* Schedule Overview Section - desktop data grid or mobile card list with filters and search, requires ScheduleViewList permission */}
       <RequirePermission permissions={[AppPermission.ScheduleViewList]}>
-        <ScheduleOverviewSection
+        <ScheduleOverviewView
           title={scheduleTitle}
           selectedMetricLabel={selectedMetricLabel}
           todayLabel={todayLabel}

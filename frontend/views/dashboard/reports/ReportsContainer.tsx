@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { AttendanceReportRow, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission, ReportGroupingMode } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -11,6 +11,8 @@ import { generateAttendanceReportQueryDocument, teachersQueryDocument } from "@/
 import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
 import { getCurrencyDisplayName } from "@/frontend/lib/currency";
 import type { FormatCurrencyMessages } from "@/frontend/lib/fx-render";
+import type { ReportsActiveFilters } from "@/frontend/stores/reportsStore";
+import { useReportsStore } from "@/frontend/stores/reportsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
@@ -18,7 +20,7 @@ import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/utils/p
 import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
-import { ReportsView } from "@/frontend/views/dashboard/reports/ReportsView";
+import { ReportsView } from "@/frontend/views/dashboard/reports/reportsView";
 import type {
   ReportLedgerRow,
   ReportPaidAmount,
@@ -99,17 +101,10 @@ interface ReportsMainContentProps {
       }
     | undefined;
   readonly summary: ReportsSummary;
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly teacherId: string;
   readonly reportType: ReportType;
   readonly teachers: readonly { readonly id: string; readonly name: string }[];
   readonly canGenerate: boolean;
   readonly loading?: boolean;
-  readonly onFromDateChange: (date: string) => void;
-  readonly onToDateChange: (date: string) => void;
-  readonly onTeacherChange: (id: string) => void;
-  readonly onReportTypeChange: (type: ReportType) => void;
   readonly onSubmit: () => void;
   readonly onExportCsv: () => void;
   readonly onPrintReport: () => void;
@@ -120,17 +115,10 @@ function ReportsMainContent({
   showFinancials,
   reportData,
   summary,
-  fromDate,
-  toDate,
-  teacherId,
   reportType,
   teachers,
   canGenerate,
   loading,
-  onFromDateChange,
-  onToDateChange,
-  onTeacherChange,
-  onReportTypeChange,
   onSubmit,
   onExportCsv,
   onPrintReport,
@@ -204,23 +192,15 @@ function ReportsMainContent({
       ) : null}
       <ReportsView
         labels={labels}
-        fromDate={fromDate}
-        toDate={toDate}
-        teacherId={teacherId}
-        reportType={reportType}
         teachers={teachers}
         rows={rows}
         summary={summary}
         canGenerate={canGenerate}
         loading={loading}
-        onFromDateChange={onFromDateChange}
-        onToDateChange={onToDateChange}
-        onTeacherChange={onTeacherChange}
-        onReportTypeChange={onReportTypeChange}
         onSubmit={onSubmit}
         onExportCsv={onExportCsv}
         onPrintReport={onPrintReport}
-        onRowClick={onRowClick}
+        onRowClick={reportType === "by_date" ? undefined : onRowClick}
       />
     </>
   );
@@ -230,38 +210,6 @@ function mapReportTypeToGroupingMode(reportType: ReportType): ReportGroupingMode
   if (reportType === "by_date") return ReportGroupingMode.Date;
   if (reportType === "by_student") return ReportGroupingMode.Student;
   return ReportGroupingMode.Teacher;
-}
-
-function useReportFilters() {
-  const [fromDate, setFromDate] = useState("2023-08-01");
-  const [toDate, setToDate] = useState("2023-08-31");
-  const [teacherId, setTeacherId] = useState("");
-  const [reportType, setReportType] = useState<ReportType>("by_teacher");
-
-  const [activeFilters, setActiveFilters] = useState<{
-    readonly fromDate: string;
-    readonly toDate: string;
-    readonly teacherId: string | null;
-    readonly groupBy: ReportGroupingMode;
-  }>({
-    fromDate: "2023-08-01",
-    toDate: "2023-08-31",
-    teacherId: null,
-    groupBy: ReportGroupingMode.Teacher,
-  });
-
-  return {
-    fromDate,
-    toDate,
-    teacherId,
-    reportType,
-    activeFilters,
-    setActiveFilters,
-    setFromDate,
-    setToDate,
-    setTeacherId,
-    setReportType,
-  };
 }
 
 function useReportData(
@@ -467,18 +415,12 @@ export function ReportsContainer() {
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
-  const {
-    fromDate,
-    toDate,
-    teacherId,
-    reportType,
-    activeFilters,
-    setActiveFilters,
-    setFromDate,
-    setToDate,
-    setTeacherId,
-    setReportType,
-  } = useReportFilters();
+  const fromDate = useReportsStore(state => state.fromDate);
+  const toDate = useReportsStore(state => state.toDate);
+  const teacherId = useReportsStore(state => state.teacherId);
+  const reportType = useReportsStore(state => state.reportType);
+  const activeFilters = useReportsStore(state => state.activeFilters);
+  const setActiveFilters = useReportsStore(state => state.setActiveFilters);
 
   const fxMessages = useMemo(() => buildFxDisplayMessages(t, tErrors), [t, tErrors]);
 
@@ -500,7 +442,7 @@ export function ReportsContainer() {
     rows,
     summary,
     showFinancials,
-    setActiveFilters,
+    setActiveFilters: setActiveFilters as (filters: ReportsActiveFilters) => void,
     locale,
     exportLabels: {
       pageTitle: t("export.pageTitle"),
@@ -529,21 +471,14 @@ export function ReportsContainer() {
         showFinancials={showFinancials}
         reportData={reportData}
         summary={summary}
-        fromDate={fromDate}
-        toDate={toDate}
-        teacherId={teacherId}
         reportType={reportType}
         teachers={teachers}
         canGenerate={canGenerate}
         loading={reportLoading}
-        onFromDateChange={setFromDate}
-        onToDateChange={setToDate}
-        onTeacherChange={setTeacherId}
-        onReportTypeChange={setReportType}
         onSubmit={handleSubmit}
         onExportCsv={handleExportCsv}
         onPrintReport={handlePrintReport}
-        onRowClick={reportType === "by_date" ? undefined : handleRowClick}
+        onRowClick={handleRowClick}
       />
     </RequirePermission>
   );

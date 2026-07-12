@@ -8,12 +8,12 @@ import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from 
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
 import { ParentClassStatusIndicator } from "@/frontend/views/dashboard/parent/dashboard/components/ParentClassStatusIndicator";
-import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardView";
 import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type {
   ParentBookingStatus,
   ParentScheduleRow,
 } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import type { SchedulePagination } from "@/frontend/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 interface ParentScheduleDataGridProps {

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { buildProfileLinkStories } from "@/frontend/components/ui/display/__shared__/profileLinkStories";
 import { PersonProfileLink } from "@/frontend/components/ui/display/personProfileLink/PersonProfileLink";
 
 const meta: Meta<typeof PersonProfileLink> = {
@@ -19,44 +20,22 @@ const meta: Meta<typeof PersonProfileLink> = {
 export default meta;
 type Story = StoryObj<typeof PersonProfileLink>;
 
-export const Linked: Story = {};
+const stories = buildProfileLinkStories({
+  plainTextName: "Sara Al-Rashid",
+  withAvatarImageName: "Ahmed Hassan",
+  withAvatarImageHref: "/teachers/456",
+  withAvatarImageUrl: "https://i.pravatar.cc/150?u=ahmed",
+  noAvatarName: "Khalid Mohammed",
+  noAvatarHref: "/parents/789",
+  fallbackHref: "/students/999",
+  arabicName: "سارة الراشد",
+  arabicHref: "/ar/students/123",
+  arabicLabel: "طالب",
+});
 
-export const PlainText: Story = {
-  args: {
-    href: undefined,
-    name: "Sara Al-Rashid",
-  },
-};
-
-export const WithAvatarImage: Story = {
-  args: {
-    name: "Ahmed Hassan",
-    href: "/teachers/456",
-    avatarUrl: "https://i.pravatar.cc/150?u=ahmed",
-  },
-};
-
-export const NoAvatar: Story = {
-  args: {
-    name: "Khalid Mohammed",
-    href: "/parents/789",
-    showAvatar: false,
-  },
-};
-
-export const WithFallbackInitial: Story = {
-  args: {
-    name: "",
-    href: "/students/999",
-    fallbackInitial: "?",
-  },
-};
-
-export const Arabic: Story = {
-  globals: { locale: "ar" },
-  args: {
-    name: "سارة الراشد",
-    href: "/ar/students/123",
-    label: "طالب",
-  },
-};
+export const Linked: Story = stories.Linked;
+export const PlainText: Story = stories.PlainText;
+export const WithAvatarImage: Story = stories.WithAvatarImage;
+export const NoAvatar: Story = stories.NoAvatar;
+export const WithFallbackInitial: Story = stories.WithFallbackInitial;
+export const Arabic: Story = stories.Arabic;

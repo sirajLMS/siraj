@@ -13,7 +13,7 @@
 - **Zustand for all state**: All mutable state (filters, pagination, dialog open, form values, File objects) lives in Zustand stores so it survives viewport tier switching during resize (when React unmounts the desktop tree and mounts the mobile tree).
 - **Ephemeral state only**: Truly ephemeral presentation state (e.g., tooltip open, popover hover) may use `useState` — it resets on tier switch but that's acceptable for pure UI hover states.
 - **Container calls hook**: The Container component calls the ViewModel hook and passes the view model to the switcher `View.tsx`.
-- **Switcher is the ONLY viewport consumer**: The `View.tsx` switcher component is the ONLY file that reads `useViewport()` and decides which tier to render. It delegates to `ResponsiveViewSwitch` or uses a simple ternary.
+- **Switcher uses `ResponsiveViewSwitch` with lazy loading**: The `View.tsx` switcher component calls `createLazyView()` at module top level to create lazy-loaded mobile/desktop component references, then passes them to `<ResponsiveViewSwitch>`. The switcher file no longer directly imports `useViewport` — `ResponsiveViewSwitch` reads it internally. Only the matching tier's code is fetched (mobile devices never download desktop component code).
 - **Mobile/desktop views are pure presentation**: `.mobile.tsx` and `.desktop.tsx` files contain ZERO business logic, ZERO hooks (except for purely local UI state), and ZERO viewport branching. They only render the props passed from the view model.
 - **Directory structure per domain**:
   ```

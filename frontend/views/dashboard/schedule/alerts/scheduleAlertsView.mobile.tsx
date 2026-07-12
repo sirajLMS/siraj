@@ -1,0 +1,227 @@
+"use client";
+
+import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
+import { Box, Grid, IconButton, Typography } from "@mui/material";
+import { MobileContentStack, MobilePageHeader, PageContainer } from "@/frontend/components/ui";
+import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
+import { AcademicScheduleCardList } from "@/frontend/views/dashboard/schedule/alerts/AcademicScheduleCardList";
+import { InstitutionalReportCard } from "@/frontend/views/dashboard/schedule/alerts/InstitutionalReportCard";
+import { ScheduleAlertBanners } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertBanners";
+import type {
+  CardListLabels,
+  ScheduleAlertsLabels,
+} from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertsView";
+import type { AcademicClassRow, AlertsMetric, ScheduleAlert } from "@/frontend/views/dashboard/schedule/alerts/types";
+
+export interface ScheduleAlertsViewMobileProps {
+  readonly alerts: readonly ScheduleAlert[];
+  readonly metrics: readonly AlertsMetric[];
+  readonly metricLabels: Record<string, { label: string; subLabel: string }>;
+  readonly classes: readonly AcademicClassRow[];
+  readonly totalClasses?: number;
+  readonly currentPage: number;
+  readonly pageSize: number;
+  readonly labels: ScheduleAlertsLabels;
+  readonly onLeave: (id: string) => void;
+  readonly onViewClassAudit: (id: string) => void;
+  readonly onPageChange: (page: number) => void;
+  readonly loading?: boolean;
+  readonly onDownloadReport: () => void;
+  readonly onFilter: () => void;
+  readonly onExport: () => void;
+}
+
+function MobileMetricsSection({
+  metrics,
+  metricLabels,
+  labels,
+  onDownloadReport,
+}: {
+  readonly metrics: readonly AlertsMetric[];
+  readonly metricLabels: Record<string, { label: string; subLabel: string }>;
+  readonly labels: ScheduleAlertsLabels;
+  readonly onDownloadReport: () => void;
+}) {
+  return (
+    <Grid container spacing={2}>
+      {metrics.map(metric => {
+        const metricLabel = metricLabels[metric.key];
+        return (
+          <Grid key={metric.key} size={{ xs: 6 }}>
+            <MetricCard
+              icon={metric.icon}
+              label={metricLabel.label}
+              value={metric.value}
+              subLabel={metricLabel.subLabel}
+              variant="compact"
+            />
+          </Grid>
+        );
+      })}
+      <Grid size={{ xs: 12 }}>
+        <InstitutionalReportCard
+          title={labels.reportTitle}
+          description={labels.reportDescriptionMobile}
+          downloadLabel={labels.downloadPdf}
+          onDownload={onDownloadReport}
+        />
+      </Grid>
+    </Grid>
+  );
+}
+
+function MobileAlertsBody({
+  loading,
+  labels,
+  classes,
+  totalClasses,
+  currentPage,
+  pageSize,
+  onFilter,
+  onExport,
+  onLeave,
+  onViewClassAudit,
+  onPageChange,
+  cardListLabels,
+}: {
+  readonly loading: boolean | undefined;
+  readonly labels: ScheduleAlertsLabels;
+  readonly classes: readonly AcademicClassRow[];
+  readonly totalClasses?: number;
+  readonly currentPage: number;
+  readonly pageSize: number;
+  readonly onFilter: () => void;
+  readonly onExport: () => void;
+  readonly onLeave: (id: string) => void;
+  readonly onViewClassAudit: (id: string) => void;
+  readonly onPageChange: (page: number) => void;
+  readonly cardListLabels: CardListLabels;
+}) {
+  if (loading) {
+    return (
+      <Box
+        sx={theme => ({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 8,
+          color: theme.palette.text.secondary,
+        })}
+      >
+        <Typography variant="bodyLg">{labels.loading}</Typography>
+      </Box>
+    );
+  }
+  return (
+    <Box>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
+          {labels.sectionTitle}
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <IconButton
+            id="schedule-alerts-filter-mobile"
+            onClick={onFilter}
+            sx={theme => ({
+              width: 40,
+              height: 40,
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.border.light}`,
+              color: theme.palette.primary.main,
+            })}
+            aria-label={labels.filter}
+          >
+            <FilterListOutlined />
+          </IconButton>
+          <IconButton
+            id="schedule-alerts-export-mobile"
+            onClick={onExport}
+            sx={theme => ({
+              width: 40,
+              height: 40,
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.border.light}`,
+              color: theme.palette.primary.main,
+            })}
+            aria-label={labels.export}
+          >
+            <IosShareOutlined />
+          </IconButton>
+        </Box>
+      </Box>
+      <AcademicScheduleCardList
+        rows={classes}
+        totalCount={totalClasses}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        labels={cardListLabels}
+        onLeave={onLeave}
+        onViewClassAudit={onViewClassAudit}
+        onPageChange={onPageChange}
+      />
+    </Box>
+  );
+}
+
+export function ScheduleAlertsViewMobile({
+  alerts,
+  metrics,
+  metricLabels,
+  classes,
+  totalClasses,
+  currentPage,
+  pageSize,
+  labels,
+  onLeave,
+  onViewClassAudit,
+  onPageChange,
+  loading = false,
+  onDownloadReport,
+  onFilter,
+  onExport,
+}: Readonly<ScheduleAlertsViewMobileProps>) {
+  const cardListLabels: CardListLabels = {
+    joinSession: labels.joinSession,
+    leaveClass: labels.leaveClass,
+    leaveDisabledReason: labels.leaveDisabledReason,
+    viewClassAudit: labels.viewClassAudit,
+    contactAdmin: labels.contactAdmin,
+    active: labels.active,
+    upcoming: labels.upcoming,
+    missed: labels.missed,
+    hold: labels.hold,
+    endOfSchedule: labels.endOfSchedule,
+  };
+
+  return (
+    <PageContainer>
+      <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
+
+      <MobileContentStack gap={2} paddingBottom={4}>
+        <ScheduleAlertBanners alerts={alerts} labels={labels.alertMessages} />
+
+        <MobileMetricsSection
+          metrics={metrics}
+          metricLabels={metricLabels}
+          labels={labels}
+          onDownloadReport={onDownloadReport}
+        />
+
+        <MobileAlertsBody
+          loading={loading}
+          labels={labels}
+          classes={classes}
+          totalClasses={totalClasses}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onFilter={onFilter}
+          onExport={onExport}
+          onLeave={onLeave}
+          onViewClassAudit={onViewClassAudit}
+          onPageChange={onPageChange}
+          cardListLabels={cardListLabels}
+        />
+      </MobileContentStack>
+    </PageContainer>
+  );
+}

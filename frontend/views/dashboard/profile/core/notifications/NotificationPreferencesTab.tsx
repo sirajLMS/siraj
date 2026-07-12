@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Alert, Box, Snackbar, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -10,15 +9,16 @@ import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useViewport } from "@/frontend/hooks/useViewport";
 import { logger } from "@/frontend/utils/logger";
+import { NotificationPreferencesTabDesktop } from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferencesTab.desktop";
+import { NotificationPreferencesTabMobile } from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile";
 import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENT_TYPES,
   type NotificationPrefRow,
   preferenceKey,
 } from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
-import { PreferencesChannelTabs } from "@/frontend/views/dashboard/profile/core/notifications/PreferencesChannelTabs";
-import { PreferencesMatrix } from "@/frontend/views/dashboard/profile/core/notifications/PreferencesMatrix";
 
 type NotificationPreferencesTabProps = {
   readonly isActive: boolean;
@@ -37,10 +37,8 @@ function buildDefaultPreferences(): NotificationPrefRow[] {
   );
 }
 
-export function NotificationPreferencesTab({ isActive }: NotificationPreferencesTabProps) {
+export function NotificationPreferencesTab({ isActive }: Readonly<NotificationPreferencesTabProps>) {
   const t = useTranslations("profile.notifications");
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [localPreferences, setLocalPreferences] = useState<NotificationPrefRow[]>(buildDefaultPreferences);
   const pendingChangesRef = useRef<Map<string, PendingChange>>(new Map());
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -105,38 +103,27 @@ export function NotificationPreferencesTab({ isActive }: NotificationPreferences
     [debouncedSave]
   );
 
-  if (error) {
-    return <Typography sx={{ typography: "bodyMd", color: theme.palette.error.main }}>{t("errorLoading")}</Typography>;
-  }
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbarOpen(false);
+  }, []);
 
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Box>
-        <Typography sx={{ typography: "titleLg", mb: 1 }}>{t("title")}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme.palette.text.secondary }}>{t("description")}</Typography>
-      </Box>
+  const { isMobile } = useViewport();
 
-      {isMobile ? (
-        <PreferencesChannelTabs
-          preferences={localPreferences}
-          onToggle={handleToggle}
-          disabled={saving}
-          loading={loading}
-        />
-      ) : (
-        <PreferencesMatrix preferences={localPreferences} onToggle={handleToggle} disabled={saving} loading={loading} />
-      )}
+  const variantProps = {
+    preferences: localPreferences,
+    onToggle: handleToggle,
+    disabled: saving,
+    loading,
+    snackbarOpen,
+    snackbarMessage,
+    snackbarSeverity,
+    onSnackbarClose: handleSnackbarClose,
+    errorLoading: Boolean(error),
+  };
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: "100%" }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
+  return isMobile ? (
+    <NotificationPreferencesTabMobile {...variantProps} />
+  ) : (
+    <NotificationPreferencesTabDesktop {...variantProps} />
   );
 }

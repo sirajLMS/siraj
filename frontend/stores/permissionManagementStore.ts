@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import type { Permission, PermissionGroup, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
 
+export type PermissionManagementTab = "groups" | "catalog" | "overrides";
+
 interface PermissionManagementState {
   // Data
   permissions: Permission[];
@@ -25,6 +27,10 @@ interface PermissionManagementState {
   isAssignDialogOpen: boolean;
   isBulkRemoveUsersOpen: boolean;
   isManageOverridesOpen: boolean;
+
+  // Mobile/desktop tier-shared state (survives viewport tier switching)
+  activeTab: PermissionManagementTab;
+  selectedUserIdForOverrides: string | null;
 
   // Setters
   setPermissions: (permissions: Permission[]) => void;
@@ -54,6 +60,10 @@ interface PermissionManagementState {
   openManageOverrides: () => void;
   closeManageOverrides: () => void;
 
+  // Tier-shared state setters
+  setActiveTab: (tab: PermissionManagementTab) => void;
+  setSelectedUserIdForOverrides: (id: string | null) => void;
+
   reset: () => void;
 }
 
@@ -74,6 +84,8 @@ const initialState = {
   isAssignDialogOpen: false,
   isBulkRemoveUsersOpen: false,
   isManageOverridesOpen: false,
+  activeTab: "groups" as PermissionManagementTab,
+  selectedUserIdForOverrides: null,
 };
 
 export const usePermissionManagementStore = create<PermissionManagementState>(set => ({
@@ -107,6 +119,9 @@ export const usePermissionManagementStore = create<PermissionManagementState>(se
 
   openManageOverrides: () => set({ isManageOverridesOpen: true }),
   closeManageOverrides: () => set({ isManageOverridesOpen: false }),
+
+  setActiveTab: tab => set({ activeTab: tab }),
+  setSelectedUserIdForOverrides: id => set({ selectedUserIdForOverrides: id }),
 
   reset: () => set(initialState),
 }));

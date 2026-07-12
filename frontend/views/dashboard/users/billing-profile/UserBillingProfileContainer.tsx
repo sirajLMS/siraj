@@ -38,7 +38,7 @@ import { deriveParentInvoiceDisplayStatus } from "@/frontend/views/dashboard/bil
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
 import type { UserBillingProfileContainerProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
-import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/UserBillingProfileView";
+import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/userBillingProfileView";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,

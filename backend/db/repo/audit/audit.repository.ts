@@ -119,6 +119,23 @@ export namespace AuditRepository {
   };
 
   /**
+   * Maps CreateAdminAuditLogInput[] to insert row objects.
+   */
+  function mapAdminAuditLogRows(inputs: readonly Types.CreateAdminAuditLogInput[]) {
+    const now = new Date();
+    return inputs.map(input => ({
+      actorUserId: input.actorUserId,
+      targetUserId: input.targetUserId ?? null,
+      action: input.action,
+      description: input.description ?? null,
+      previousState: input.previousState ?? null,
+      newState: input.newState ?? null,
+      ipAddress: sanitizeIpAddress(input.ipAddress),
+      createdAt: input.createdAt ?? now,
+    }));
+  }
+
+  /**
    * Bulk-insert admin audit log entries.
    */
   export const createManyAdminAuditLogs = async (
@@ -128,17 +145,7 @@ export namespace AuditRepository {
     if (inputs.length === 0) return [];
 
     const run = async (t: DBTransaction): Promise<Types.AdminAuditLogSelectType[]> => {
-      const now = new Date();
-      const rows = inputs.map(input => ({
-        actorUserId: input.actorUserId,
-        targetUserId: input.targetUserId ?? null,
-        action: input.action,
-        description: input.description ?? null,
-        previousState: input.previousState ?? null,
-        newState: input.newState ?? null,
-        ipAddress: sanitizeIpAddress(input.ipAddress),
-        createdAt: input.createdAt ?? now,
-      }));
+      const rows = mapAdminAuditLogRows(inputs);
 
       const results: Types.AdminAuditLogSelectType[] = [];
       for (let i = 0; i < rows.length; i += DEFAULT_BULK_CHUNK_SIZE) {
@@ -162,17 +169,7 @@ export namespace AuditRepository {
     if (inputs.length === 0) return;
 
     const run = async (t: DBTransaction): Promise<void> => {
-      const now = new Date();
-      const rows = inputs.map(input => ({
-        actorUserId: input.actorUserId,
-        targetUserId: input.targetUserId ?? null,
-        action: input.action,
-        description: input.description ?? null,
-        previousState: input.previousState ?? null,
-        newState: input.newState ?? null,
-        ipAddress: sanitizeIpAddress(input.ipAddress),
-        createdAt: input.createdAt ?? now,
-      }));
+      const rows = mapAdminAuditLogRows(inputs);
 
       await bulkInsertOnConflictDoNothing(adminAuditLogs, rows, { tx: t });
     };

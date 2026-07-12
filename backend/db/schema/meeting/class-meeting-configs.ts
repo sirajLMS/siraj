@@ -1,10 +1,16 @@
 import { sql } from "drizzle-orm";
-import { check, index, pgTable, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { check, index, pgTable, uuid } from "drizzle-orm/pg-core";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { meetingConfigSharedColumns } from "@/backend/db/schema/meeting/__shared__/meeting-config-columns";
+import {
+  meetingConfigOneDefaultPerNullableScopeIndex,
+  meetingConfigProviderIndex,
+} from "@/backend/db/schema/meeting/__shared__/meeting-config-indexes";
+
+const TABLE_NAME = "class_meeting_configs";
 
 export const classMeetingConfigs = pgTable(
-  "class_meeting_configs",
+  TABLE_NAME,
   {
     id: uuid("id").defaultRandom().primaryKey(),
     classInstanceId: uuid("class_instance_id").references(() => classInstances.id, { onDelete: "cascade" }),
@@ -12,17 +18,18 @@ export const classMeetingConfigs = pgTable(
     ...meetingConfigSharedColumns(),
   },
   table => [
-    index("class_meeting_configs_class_instance_id_idx").on(table.classInstanceId),
-    index("class_meeting_configs_recurring_schedule_id_idx").on(table.recurringScheduleId),
-    index("class_meeting_configs_provider_id_idx").on(table.providerId),
-    uniqueIndex("class_meeting_configs_one_default_per_instance_idx")
-      .on(table.classInstanceId)
-      .where(sql`${table.isDefault} = true AND ${table.classInstanceId} IS NOT NULL`),
-    uniqueIndex("class_meeting_configs_one_default_per_recurring_idx")
-      .on(table.recurringScheduleId)
-      .where(sql`${table.isDefault} = true AND ${table.recurringScheduleId} IS NOT NULL`),
+    index(`${TABLE_NAME}_class_instance_id_idx`).on(table.classInstanceId),
+    index(`${TABLE_NAME}_recurring_schedule_id_idx`).on(table.recurringScheduleId),
+    meetingConfigProviderIndex(TABLE_NAME, table),
+    meetingConfigOneDefaultPerNullableScopeIndex(TABLE_NAME, "per_instance", table.classInstanceId, table.isDefault),
+    meetingConfigOneDefaultPerNullableScopeIndex(
+      TABLE_NAME,
+      "per_recurring",
+      table.recurringScheduleId,
+      table.isDefault
+    ),
     check(
-      "class_meeting_configs_scope_chk",
+      `${TABLE_NAME}_scope_chk`,
       sql`(
         (${table.classInstanceId} IS NOT NULL AND ${table.recurringScheduleId} IS NULL)
         OR (${table.classInstanceId} IS NULL AND ${table.recurringScheduleId} IS NOT NULL)

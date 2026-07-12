@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { ResourcesView } from "@/frontend/views/dashboard/resources/ResourcesView";
+import { ResourcesView } from "@/frontend/views/dashboard/resources/resourcesView";
 import type { ResourceFilterType, ResourceSortBy } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 const mockLabels = {

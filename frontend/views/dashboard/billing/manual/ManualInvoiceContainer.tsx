@@ -14,7 +14,7 @@ import {
 import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { logger } from "@/frontend/utils/logger";
 import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
-import { ManualInvoiceView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceView";
+import { ManualInvoiceView } from "@/frontend/views/dashboard/billing/manual/manualInvoiceView";
 import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type {
   ParentInvoiceOption,

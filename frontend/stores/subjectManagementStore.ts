@@ -9,6 +9,7 @@ interface SubjectManagementState {
   isDeleteDialogOpen: boolean;
   pendingDeleteId: string | null;
   dialogTarget: DialogTarget;
+  categoriesSectionOpen: boolean;
 
   openCreateDialog: (target: DialogTarget) => void;
   closeCreateDialog: () => void;
@@ -16,6 +17,7 @@ interface SubjectManagementState {
   closeEditDialog: () => void;
   openDeleteDialog: (id: string, target: DialogTarget) => void;
   closeDeleteDialog: () => void;
+  toggleCategoriesSection: () => void;
   reset: () => void;
 }
 
@@ -26,6 +28,7 @@ const initialState = {
   isDeleteDialogOpen: false,
   pendingDeleteId: null as string | null,
   dialogTarget: null as DialogTarget,
+  categoriesSectionOpen: false,
 };
 
 export const useSubjectManagementStore = create<SubjectManagementState>(set => ({
@@ -41,6 +44,8 @@ export const useSubjectManagementStore = create<SubjectManagementState>(set => (
   openDeleteDialog: (id: string, target: DialogTarget) =>
     set({ isDeleteDialogOpen: true, pendingDeleteId: id, dialogTarget: target }),
   closeDeleteDialog: () => set({ isDeleteDialogOpen: false, pendingDeleteId: null, dialogTarget: null }),
+
+  toggleCategoriesSection: () => set(state => ({ categoriesSectionOpen: !state.categoriesSectionOpen })),
 
   reset: () => set(initialState),
 }));

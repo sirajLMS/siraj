@@ -21,7 +21,7 @@ import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStor
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ManualClassEntryDialog } from "@/frontend/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
-import { TeacherDashboardView } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardView";
+import { TeacherDashboardView } from "@/frontend/views/dashboard/teachers/dashboard/teacherDashboardView";
 import { buildStudentProgressFeedItems } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildStudentProgressFeedItems";
 import { buildTeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
