@@ -25,7 +25,7 @@ async function expectMutationError<TData, TVars extends OperationVariables>(
     mutation,
     variables,
     context: { headers: { Authorization: `Bearer ${token}` } },
-  } as Parameters<typeof testClient.mutate>[0]);
+  });
   expect(result.error).toBeDefined();
 }
 

@@ -16,7 +16,7 @@ import {
   teacherOwnEditSchema,
 } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
-export type { TeacherOwnEditFormData } from "@/frontend/views/dashboard/profile/teacher/teacherProfileFormTypes";
+export type { TeacherEditData, TeacherOwnEditFormData };
 
 export function TeacherProfileEditForm({
   teacherData,

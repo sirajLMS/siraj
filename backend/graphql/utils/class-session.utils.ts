@@ -45,10 +45,7 @@ function truncateQualifications(value: string | null | undefined, maxLength = 80
 }
 
 function resolveInstanceAvatarUrl(instance: ClassInstanceWithRelations): string | null {
-  return resolveClassAvatarUrl(
-    (instance as { recurring?: { avatarUrl?: string | null } }).recurring?.avatarUrl,
-    (instance as { subject?: { avatarUrl?: string | null } }).subject?.avatarUrl
-  );
+  return resolveClassAvatarUrl(instance.recurring?.avatarUrl, instance.subject?.avatarUrl);
 }
 
 function buildStudentParticipant(instance: ClassInstanceWithRelations, unknownName: string) {

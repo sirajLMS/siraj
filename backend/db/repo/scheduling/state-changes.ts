@@ -669,7 +669,7 @@ export async function processAutomatedClassLeave(
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
     if (!existing) {
-      const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
+      const tFunc = await getBackendTranslations({ namespace: "errors" });
       throw new Error(tFunc("classInstanceNotFound", { id }));
     }
     const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);

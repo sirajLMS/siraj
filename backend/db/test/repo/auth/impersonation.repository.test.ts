@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ImpersonationRepository } from "@/backend/db/repo";
-import { TEST_IP_PRIVATE, TEST_IP_WITH_PORT } from "@/backend/db/test/const";
+import { TEST_IP_FALLBACK, TEST_IP_PRIVATE, TEST_IP_WITH_PORT } from "@/backend/db/test/const";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { StartImpersonationInput } from "@/backend/types";
@@ -54,7 +54,7 @@ function buildSessionInput(
     targetUserId,
     sessionId: `sess-${randomUUID()}`,
     reason: "Support investigation",
-    ipAddress: TEST_IP_PRIVATE,
+    ipAddress: TEST_IP_PRIVATE, // NOSONAR - test fixture IP, defined in const.ts
     userAgent: "TestAgent/1.0",
     ...overrides,
   };
@@ -76,25 +76,25 @@ describe("ImpersonationRepository", () => {
     expect(created.isActive).toBe(true);
     expect(created.endedAt).toBeNull();
     expect(created.startedAt).toBeInstanceOf(Date);
-    expect(String(created.ipAddress)).toBe(TEST_IP_PRIVATE);
+    expect(String(created.ipAddress)).toBe(TEST_IP_PRIVATE); // NOSONAR - test fixture IP
   });
 
-  impersonationTest("createSession sanitizes invalid IP addresses to 127.0.0.1", async tx => {
+  impersonationTest(`createSession sanitizes invalid IP addresses to ${TEST_IP_FALLBACK}`, async tx => {
     const { actor, target } = await setupActorAndTarget(tx);
     const input = buildSessionInput(actor.id, target.id, { ipAddress: "not-an-ip" });
 
     const created = await ImpersonationRepository.createSession(input, tx);
 
-    expect(String(created.ipAddress)).toBe("127.0.0.1");
+    expect(String(created.ipAddress)).toBe(TEST_IP_FALLBACK);
   });
 
   impersonationTest("createSession strips IPv4 from IPv4:port form", async tx => {
     const { actor, target } = await setupActorAndTarget(tx);
-    const input = buildSessionInput(actor.id, target.id, { ipAddress: `${TEST_IP_WITH_PORT}:443` });
+    const input = buildSessionInput(actor.id, target.id, { ipAddress: `${TEST_IP_WITH_PORT}:443` }); // NOSONAR - test fixture IP
 
     const created = await ImpersonationRepository.createSession(input, tx);
 
-    expect(String(created.ipAddress)).toBe(TEST_IP_WITH_PORT);
+    expect(String(created.ipAddress)).toBe(TEST_IP_WITH_PORT); // NOSONAR - test fixture IP
   });
 
   impersonationTest("createSession stores null IP when omitted", async tx => {

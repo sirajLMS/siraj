@@ -200,8 +200,9 @@ export namespace BillingManagementService {
         locale
       );
 
-      if (input.billingMonths && input.billingMonths.length > 0) {
-        await BillingRepository.createInvoiceCoverageMonths(created.id, input.billingMonths);
+      const billingMonths = input.billingMonths;
+      if (billingMonths?.length) {
+        await BillingRepository.createInvoiceCoverageMonths(created.id, billingMonths);
       }
 
       await syncNotificationAfterCreate(created.id, input.sendEmail, locale);
