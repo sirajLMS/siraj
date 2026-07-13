@@ -22,3 +22,9 @@ export interface TeacherMonthlyReportReturnType {
   totalPaidAmount: number;
   currency: CurrencyCode;
 }
+
+export interface TeacherPendingDuesSummaryReturnType {
+  totalCount: number;
+  totalAmount: number;
+  currency: CurrencyCode;
+}

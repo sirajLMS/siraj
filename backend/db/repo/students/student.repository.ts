@@ -91,6 +91,12 @@ export namespace StudentRepository {
     });
   };
 
+  export const getStudentIdByUserId = async (userId: string, tx?: DBTransaction): Promise<string | null> => {
+    const executor = tx ?? db;
+    const [row] = await executor.select({ id: students.id }).from(students).where(eq(students.userId, userId)).limit(1);
+    return row?.id ?? null;
+  };
+
   export const create = async (
     input: Types.StudentCreateInput,
     locale?: string,

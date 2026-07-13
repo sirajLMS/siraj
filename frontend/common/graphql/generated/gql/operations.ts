@@ -262,6 +262,11 @@ export type AttachSubjectResourceInput = {
   subjectId: string;
 };
 
+export type AttendanceEvaluation =
+  | 'ABSENT'
+  | 'LATE'
+  | 'PRESENT';
+
 /** Filters applied to the dynamic attendance query engine. */
 export type AttendanceReportFiltersInput = {
   /** ISO Date String representing start bound */
@@ -698,6 +703,12 @@ export type CreateTeacherNoteInput = {
   startsAt: string | null | undefined;
   title: string;
 };
+
+export type CreditReason =
+  | 'ADJUSTMENT'
+  | 'DEDUCTION'
+  | 'PURCHASE'
+  | 'REFUND';
 
 export type CurrencyCode =
   | 'AED'
@@ -1251,6 +1262,21 @@ export type LeaveRequestStatus =
   | 'PENDING'
   | 'RESCHEDULED';
 
+export type LessonReportStatus =
+  | 'APPROVED'
+  | 'DRAFT'
+  | 'PENDING_REVIEW'
+  | 'REJECTED';
+
+/** Input for submitting a lesson report for a completed class instance */
+export type LessonReportSubmitInput = {
+  attendanceEvaluation: AttendanceEvaluation;
+  classInstanceId: string | number;
+  completionPercentage: number;
+  durationMinutes: number;
+  teacherNotes: string | null | undefined;
+};
+
 export type LogSupportRequestInput = {
   reason: string;
 };
@@ -1666,6 +1692,10 @@ export type SupportedPaymentLinkUpdateInput = {
   urlAllowlist: Array<string> | null | undefined;
   urlExample: string | null | undefined;
 };
+
+export type TeacherDueStatus =
+  | 'PAID'
+  | 'PENDING';
 
 /** Input for creating a new teacher account with comprehensive profile */
 export type TeacherOnboardingInput = {
@@ -2174,6 +2204,45 @@ export type CreateTeacherPaymentMutationVariables = Exact<{
 
 
 export type CreateTeacherPaymentMutation = CreateTeacherPaymentMutation_Mutation;
+
+export type StudentCreditBalanceQuery_studentCreditBalance_CreditBalance = { studentId: string | null, classesRemaining: number | null, classesTotal: number | null };
+
+export type StudentCreditBalanceQuery_Query = { studentCreditBalance: StudentCreditBalanceQuery_studentCreditBalance_CreditBalance | null };
+
+
+export type StudentCreditBalanceQueryVariables = Exact<{
+  studentId: string | number;
+}>;
+
+
+export type StudentCreditBalanceQuery = StudentCreditBalanceQuery_Query;
+
+export type StudentCreditTransactionsQuery_studentCreditTransactions_CreditTransaction = { id: string | null, studentId: string | null, changeAmount: number | null, reason: Types.CreditReason | null, sourcePaymentId: string | null, classInstanceId: string | null, notes: string | null, creditedByUserId: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentCreditTransactionsQuery_Query = { studentCreditTransactions: Array<StudentCreditTransactionsQuery_studentCreditTransactions_CreditTransaction> | null };
+
+
+export type StudentCreditTransactionsQueryVariables = Exact<{
+  studentId: string | number;
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type StudentCreditTransactionsQuery = StudentCreditTransactionsQuery_Query;
+
+export type RecordCreditPurchaseMutation_recordCreditPurchase_CreditPurchaseResult = { id: string | null, studentId: string | null, changeAmount: number | null, reason: Types.CreditReason | null, sourcePaymentId: string | null, classInstanceId: string | null, notes: string | null, creditedByUserId: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type RecordCreditPurchaseMutation_Mutation = { recordCreditPurchase: RecordCreditPurchaseMutation_recordCreditPurchase_CreditPurchaseResult | null };
+
+
+export type RecordCreditPurchaseMutationVariables = Exact<{
+  studentId: string | number;
+  hours: number;
+  notes: string | null | undefined;
+}>;
+
+
+export type RecordCreditPurchaseMutation = RecordCreditPurchaseMutation_Mutation;
 
 export type SupportedCurrencyFieldsFragment = { code: Types.CurrencyCode | null, symbol: string | null, countryCode: Types.CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null };
 
@@ -2832,6 +2901,96 @@ export type ResendClassNotificationsMutationVariables = Exact<{
 
 
 export type ResendClassNotificationsMutation = ResendClassNotificationsMutation_Mutation;
+
+export type LessonReportQuery_lessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type LessonReportQuery_Query = { lessonReport: LessonReportQuery_lessonReport_LessonReport | null };
+
+
+export type LessonReportQueryVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type LessonReportQuery = LessonReportQuery_Query;
+
+export type PendingLessonReportsQuery_pendingLessonReports_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type PendingLessonReportsQuery_Query = { pendingLessonReports: Array<PendingLessonReportsQuery_pendingLessonReports_LessonReport> | null };
+
+
+export type PendingLessonReportsQueryVariables = Exact<{
+  teacherId: string | number | null | undefined;
+  studentId: string | number | null | undefined;
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type PendingLessonReportsQuery = PendingLessonReportsQuery_Query;
+
+export type LessonReportCountQuery_lessonReportCount_PendingReviewCount = { pendingCount: number | null };
+
+export type LessonReportCountQuery_Query = { lessonReportCount: LessonReportCountQuery_lessonReportCount_PendingReviewCount | null };
+
+
+export type LessonReportCountQueryVariables = Exact<{
+  teacherId: string | number | null | undefined;
+  studentId: string | number | null | undefined;
+}>;
+
+
+export type LessonReportCountQuery = LessonReportCountQuery_Query;
+
+export type SubmitLessonReportMutation_submitLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SubmitLessonReportMutation_Mutation = { submitLessonReport: SubmitLessonReportMutation_submitLessonReport_LessonReport | null };
+
+
+export type SubmitLessonReportMutationVariables = Exact<{
+  classInstanceId: string | number;
+  input: Types.LessonReportSubmitInput;
+}>;
+
+
+export type SubmitLessonReportMutation = SubmitLessonReportMutation_Mutation;
+
+export type ApproveLessonReportMutation_approveLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type ApproveLessonReportMutation_Mutation = { approveLessonReport: ApproveLessonReportMutation_approveLessonReport_LessonReport | null };
+
+
+export type ApproveLessonReportMutationVariables = Exact<{
+  reportId: string | number;
+}>;
+
+
+export type ApproveLessonReportMutation = ApproveLessonReportMutation_Mutation;
+
+export type RejectLessonReportMutation_rejectLessonReport_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type RejectLessonReportMutation_Mutation = { rejectLessonReport: RejectLessonReportMutation_rejectLessonReport_LessonReport | null };
+
+
+export type RejectLessonReportMutationVariables = Exact<{
+  reportId: string | number;
+  rejectionReason: string;
+}>;
+
+
+export type RejectLessonReportMutation = RejectLessonReportMutation_Mutation;
+
+export type SubmitStudentLessonReportReflectionMutation_submitStudentLessonReportReflection_LessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: Types.AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: Types.LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SubmitStudentLessonReportReflectionMutation_Mutation = { submitStudentLessonReportReflection: SubmitStudentLessonReportReflectionMutation_submitStudentLessonReportReflection_LessonReport | null };
+
+
+export type SubmitStudentLessonReportReflectionMutationVariables = Exact<{
+  classInstanceId: string | number;
+  studentNotes: string;
+}>;
+
+
+export type SubmitStudentLessonReportReflectionMutation = SubmitStudentLessonReportReflectionMutation_Mutation;
 
 export type ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_complaints_Complaint_responses_ComplaintResponse = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
 
@@ -3713,6 +3872,20 @@ export type UpdateUserProfileMutationVariables = Exact<{
 
 export type UpdateUserProfileMutation = UpdateUserProfileMutation_Mutation;
 
+export type StudentMonthlyReportQuery_studentMonthlyReport_StudentMonthlyReport = { id: string | null, studentId: string | null, studentName: string | null, year: number | null, month: number | null, totalLessons: number | null, completedLessons: number | null, cancelledLessons: number | null, presentCount: number | null, absentCount: number | null, lateCount: number | null, totalHours: number | null, creditsPurchased: number | null, creditsDeducted: number | null, creditsRefunded: number | null, creditsBalance: number | null };
+
+export type StudentMonthlyReportQuery_Query = { studentMonthlyReport: StudentMonthlyReportQuery_studentMonthlyReport_StudentMonthlyReport | null };
+
+
+export type StudentMonthlyReportQueryVariables = Exact<{
+  studentId: string | number;
+  year: number;
+  month: number;
+}>;
+
+
+export type StudentMonthlyReportQuery = StudentMonthlyReportQuery_Query;
+
 export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow_paidAmounts_AttendanceReportPaidAmount_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
 export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow_paidAmounts_AttendanceReportPaidAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, displayAmount: GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow_paidAmounts_AttendanceReportPaidAmount_displayAmount_DisplayAmount | null };
@@ -4366,7 +4539,7 @@ export type StudentProfileQuery_Query = { studentProfile: StudentProfileQuery_st
 
 
 export type StudentProfileQueryVariables = Exact<{
-  studentId: string;
+  studentId: string | null | undefined;
   year: number | null | undefined;
   month: number | null | undefined;
 }>;
@@ -4696,6 +4869,55 @@ export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type TeacherHandbookUrlQuery = TeacherHandbookUrlQuery_Query;
+
+export type TeacherPendingDuesQuery_teacherPendingDues_TeacherDue = { id: string | null, teacherId: string | null, classInstanceId: string | null, studentId: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type TeacherPendingDuesQuery_Query = { teacherPendingDues: Array<TeacherPendingDuesQuery_teacherPendingDues_TeacherDue> | null };
+
+
+export type TeacherPendingDuesQueryVariables = Exact<{
+  teacherId: string | number | null | undefined;
+}>;
+
+
+export type TeacherPendingDuesQuery = TeacherPendingDuesQuery_Query;
+
+export type TeacherPendingDuesSummaryQuery_teacherPendingDuesSummary_TeacherPendingDuesSummary = { totalCount: number | null, totalAmount: number | null, currency: Types.CurrencyCode | null };
+
+export type TeacherPendingDuesSummaryQuery_Query = { teacherPendingDuesSummary: TeacherPendingDuesSummaryQuery_teacherPendingDuesSummary_TeacherPendingDuesSummary | null };
+
+
+export type TeacherPendingDuesSummaryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeacherPendingDuesSummaryQuery = TeacherPendingDuesSummaryQuery_Query;
+
+export type TeacherMonthlyReportQuery_teacherMonthlyReport_TeacherMonthlyReport = { teacherId: string | null, teacherName: string | null, year: number | null, month: number | null, lessonsTaught: number | null, approvedCount: number | null, cancelledCount: number | null, totalAccruedHours: number | null, totalDueAmount: number | null, totalPaidAmount: number | null, currency: Types.CurrencyCode | null };
+
+export type TeacherMonthlyReportQuery_Query = { teacherMonthlyReport: TeacherMonthlyReportQuery_teacherMonthlyReport_TeacherMonthlyReport | null };
+
+
+export type TeacherMonthlyReportQueryVariables = Exact<{
+  teacherId: string | number;
+  year: number;
+  month: number;
+}>;
+
+
+export type TeacherMonthlyReportQuery = TeacherMonthlyReportQuery_Query;
+
+export type MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue = { id: string | null, teacherId: string | null, classInstanceId: string | null, studentId: string | null, hours: string | null, amount: string | null, currency: Types.CurrencyCode | null, status: Types.TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type MarkTeacherDuesPaidMutation_Mutation = { markTeacherDuesPaid: Array<MarkTeacherDuesPaidMutation_markTeacherDuesPaid_TeacherDue> | null };
+
+
+export type MarkTeacherDuesPaidMutationVariables = Exact<{
+  dueIds: Array<string | number> | string | number;
+  teacherPaymentId: string | number;
+}>;
+
+
+export type MarkTeacherDuesPaidMutation = MarkTeacherDuesPaidMutation_Mutation;
 
 export type TeacherImportantNoteFieldsFragment = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
 

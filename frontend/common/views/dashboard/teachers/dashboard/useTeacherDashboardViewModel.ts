@@ -35,6 +35,11 @@ export interface TeacherDashboardViewModel {
   readonly canManualEntry: boolean;
   readonly canPrintSchedule: boolean;
   readonly loading?: boolean;
+  // --- lesson report submission ------------------------------------------------
+  readonly lessonReportDialogOpen: boolean;
+  readonly lessonReportSelectedClassInstanceId: string | null;
+  readonly lessonReportDefaultDurationMinutes?: number;
+  readonly lessonReportLabels: import("@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes").LessonReportFormLabels;
   // --- handlers ---------------------------------------------------------------
   readonly onPrintSchedule: () => void;
   readonly onManualEntry: () => void;
@@ -43,6 +48,11 @@ export interface TeacherDashboardViewModel {
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
   readonly onRequestLeave?: (id: string) => void;
+  readonly onMarkClassCompleted?: (classInstanceId: string) => void;
+  readonly onLessonReportDialogClose: () => void;
+  readonly onLessonReportSubmit: (
+    input: import("@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes").LessonReportFormSubmitInput
+  ) => Promise<void>;
   readonly onViewAll?: () => void;
   readonly onDownloadHandbook: () => void;
   readonly onContactCoordinator: () => void;

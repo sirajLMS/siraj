@@ -44,6 +44,10 @@ import {
   resources as resourcesLabels,
 } from "@/shared/messages/ar/dashboard/resources";
 import {
+  studentCredits as spStudentCredits,
+  studentDashboard as spStudentDashboard,
+} from "@/shared/messages/ar/dashboard/studentPortal";
+import {
   directory as studentDirectory,
   history as studentHistory,
   onboarding as studentOnboarding,
@@ -53,6 +57,12 @@ import {
 } from "@/shared/messages/ar/dashboard/students";
 import { subjects as subjectsLabels } from "@/shared/messages/ar/dashboard/subjects";
 import { suggestions as suggestionsLabels } from "@/shared/messages/ar/dashboard/suggestions";
+import {
+  supervisorDashboard as supDashboard,
+  supervisorMonthlyReports as supMonthlyReports,
+  pendingReviews as supPendingReviews,
+  supervisorTeacherDues as supTeacherDues,
+} from "@/shared/messages/ar/dashboard/supervisorPortal";
 import {
   availability as teacherAvailability,
   classList as teacherClassList,
@@ -182,6 +192,16 @@ export const arTranslations = {
       lessonReports: lmsLessonReports,
       teacherDues: lmsTeacherDues,
       monthlyReports: lmsMonthlyReports,
+    },
+    studentPortal: {
+      dashboard: spStudentDashboard,
+      credits: spStudentCredits,
+    },
+    supervisorPortal: {
+      dashboard: supDashboard,
+      pendingReviews: supPendingReviews,
+      teacherDues: supTeacherDues,
+      monthlyReports: supMonthlyReports,
     },
   },
 };

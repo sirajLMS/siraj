@@ -40,6 +40,7 @@ export const lessonReports = pgTable(
     durationMinutes: integer("duration_minutes").notNull(),
     attendanceEvaluation: attendanceEvaluationEnum("attendance_evaluation").notNull(),
     teacherNotes: text("teacher_notes"),
+    studentNotes: text("student_notes"),
     completionPercentage: integer("completion_percentage").notNull().default(0),
     status: lessonReportStatusEnum("status").notNull().default(LessonReportStatus.PENDING_REVIEW),
     submittedByUserId: uuid("submitted_by_user_id")

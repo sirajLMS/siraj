@@ -102,4 +102,21 @@ export namespace LessonReportRepository {
       .from(lessonReports)
       .where(inArray(lessonReports.idempotencyKey, [...keys]));
   }
+
+  export async function updateStudentNotes(
+    classInstanceId: string,
+    studentNotes: string,
+    tx?: DBTransaction
+  ): Promise<LessonReportSelectType | null> {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .update(lessonReports)
+      .set({
+        studentNotes,
+        updatedAt: new Date(),
+      })
+      .where(eq(lessonReports.classInstanceId, classInstanceId))
+      .returning();
+    return row ?? null;
+  }
 }

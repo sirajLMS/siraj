@@ -41,6 +41,10 @@ import { permissions } from "@/shared/messages/en/dashboard/permissions";
 import { reports } from "@/shared/messages/en/dashboard/reports";
 import { booksAndBags, resources } from "@/shared/messages/en/dashboard/resources";
 import {
+  studentCredits as spStudentCredits,
+  studentDashboard as spStudentDashboard,
+} from "@/shared/messages/en/dashboard/studentPortal";
+import {
   directory as studentDirectory,
   history as studentHistory,
   onboarding as studentOnboarding,
@@ -50,6 +54,12 @@ import {
 } from "@/shared/messages/en/dashboard/students";
 import { subjects } from "@/shared/messages/en/dashboard/subjects";
 import { suggestions } from "@/shared/messages/en/dashboard/suggestions";
+import {
+  supervisorDashboard as supDashboard,
+  supervisorMonthlyReports as supMonthlyReports,
+  pendingReviews as supPendingReviews,
+  supervisorTeacherDues as supTeacherDues,
+} from "@/shared/messages/en/dashboard/supervisorPortal";
 import {
   classList,
   futureSchedule,
@@ -179,6 +189,16 @@ export const enTranslations = {
       lessonReports: lmsLessonReports,
       teacherDues: lmsTeacherDues,
       monthlyReports: lmsMonthlyReports,
+    },
+    studentPortal: {
+      dashboard: spStudentDashboard,
+      credits: spStudentCredits,
+    },
+    supervisorPortal: {
+      dashboard: supDashboard,
+      pendingReviews: supPendingReviews,
+      teacherDues: supTeacherDues,
+      monthlyReports: supMonthlyReports,
     },
   },
 };

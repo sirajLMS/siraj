@@ -2126,6 +2126,7 @@ type LessonReport {
   reviewedByUserId: String
   status: LessonReportStatus
   studentId: String
+  studentNotes: String
   submittedAt: DateTime
   submittedByUserId: String
   teacherId: String
@@ -2454,6 +2455,9 @@ type Mutation {
 
   """Marks a suggestion as reviewed (admin only)."""
   markSuggestionReviewed(suggestionId: String!): Suggestion
+
+  """Mark pending teacher dues as paid (batch operation)"""
+  markTeacherDuesPaid(dueIds: [ID!]!, teacherPaymentId: ID!): [TeacherDue!]
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
@@ -2497,6 +2501,9 @@ type Mutation {
   """Submit a lesson report for a completed class instance (teacher action)"""
   submitLessonReport(classInstanceId: ID!, input: LessonReportSubmitInput!): LessonReport
   submitPaymentProof(expectedVersion: Int, invoiceId: String!, proofFileId: ID!): MarkInvoicePaidResult
+
+  """Student adds their reflection/notes to an existing lesson report"""
+  submitStudentLessonReportReflection(classInstanceId: ID!, studentNotes: String!): LessonReport
 
   """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
@@ -3174,7 +3181,7 @@ type Query {
   ): StorageStats
   student(id: String!): Student
   studentById(studentId: String!): AssociatedStudent
-  studentClassHistory(month: Int!, studentId: ID!, year: Int!): StudentClassHistory
+  studentClassHistory(month: Int!, studentId: ID, year: Int!): StudentClassHistory
   studentClassSessionDetail(classInstanceId: ID!): StudentSessionDetail
 
   """Get the credit balance (classes total and remaining) for a student"""
@@ -3193,7 +3200,7 @@ type Query {
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
-  studentProfile(month: Int, studentId: String!, year: Int): StudentProfile
+  studentProfile(month: Int, studentId: String, year: Int): StudentProfile
   studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
 
@@ -3222,6 +3229,9 @@ type Query {
   Get pending (unpaid) teacher due entries, optionally filtered by teacher
   """
   teacherPendingDues(teacherId: ID): [TeacherDue!]
+
+  """Get summary of pending teacher dues (count + total amount)"""
+  teacherPendingDuesSummary: TeacherPendingDuesSummary
   teacherProfileForEdit(teacherId: ID!): TeacherProfileResult
   teacherWeeklyScheduleGrid(teacherId: String, weekDate: String!): WeeklyScheduleGrid
   teacherWorkloadMetrics(teacherId: String, weekDate: String!): WeeklyWorkloadMetrics
@@ -4302,6 +4312,13 @@ type TeacherPayment {
   paymentMethodType: PaymentMethodType
   teacherId: String
   userPaymentMethodId: String
+}
+
+"""Summary of pending teacher dues (total count and amount)"""
+type TeacherPendingDuesSummary {
+  currency: CurrencyCode
+  totalAmount: Float
+  totalCount: Int
 }
 
 type TeacherProfileResult {

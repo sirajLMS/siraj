@@ -2198,6 +2198,7 @@ export type LessonReport = {
   reviewedByUserId: Maybe<Scalars['String']['output']>;
   status: Maybe<LessonReportStatus>;
   studentId: Maybe<Scalars['String']['output']>;
+  studentNotes: Maybe<Scalars['String']['output']>;
   submittedAt: Maybe<Scalars['DateTime']['output']>;
   submittedByUserId: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
@@ -2508,6 +2509,8 @@ export type Mutation = {
   markSuggestionDuplicate: Maybe<Suggestion>;
   /** Marks a suggestion as reviewed (admin only). */
   markSuggestionReviewed: Maybe<Suggestion>;
+  /** Mark pending teacher dues as paid (batch operation) */
+  markTeacherDuesPaid: Maybe<Array<TeacherDue>>;
   moveStorageItems: Maybe<BulkOperationResult>;
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
@@ -2543,6 +2546,8 @@ export type Mutation = {
   /** Submit a lesson report for a completed class instance (teacher action) */
   submitLessonReport: Maybe<LessonReport>;
   submitPaymentProof: Maybe<MarkInvoicePaidResult>;
+  /** Student adds their reflection/notes to an existing lesson report */
+  submitStudentLessonReportReflection: Maybe<LessonReport>;
   /** Submits a new suggestion from the authenticated parent. */
   submitSuggestion: Maybe<Suggestion>;
   updateClassAdminNote: Maybe<GroupClassAudit>;
@@ -2980,6 +2985,12 @@ export type MutationMarkSuggestionReviewedArgs = {
 };
 
 
+export type MutationMarkTeacherDuesPaidArgs = {
+  dueIds: Array<Scalars['ID']['input']>;
+  teacherPaymentId: Scalars['ID']['input'];
+};
+
+
 export type MutationMoveStorageItemsArgs = {
   input: StorageItemsMoveInput;
 };
@@ -3133,6 +3144,12 @@ export type MutationSubmitPaymentProofArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   invoiceId: Scalars['String']['input'];
   proofFileId: Scalars['ID']['input'];
+};
+
+
+export type MutationSubmitStudentLessonReportReflectionArgs = {
+  classInstanceId: Scalars['ID']['input'];
+  studentNotes: Scalars['String']['input'];
 };
 
 
@@ -3956,6 +3973,8 @@ export type Query = {
   teacherOwnProfile: Maybe<TeacherOwnProfile>;
   /** Get pending (unpaid) teacher due entries, optionally filtered by teacher */
   teacherPendingDues: Maybe<Array<TeacherDue>>;
+  /** Get summary of pending teacher dues (count + total amount) */
+  teacherPendingDuesSummary: Maybe<TeacherPendingDuesSummary>;
   teacherProfileForEdit: Maybe<TeacherProfileResult>;
   teacherWeeklyScheduleGrid: Maybe<WeeklyScheduleGrid>;
   teacherWorkloadMetrics: Maybe<WeeklyWorkloadMetrics>;
@@ -4268,7 +4287,7 @@ export type QueryStudentByIdArgs = {
 
 export type QueryStudentClassHistoryArgs = {
   month: Scalars['Int']['input'];
-  studentId: Scalars['ID']['input'];
+  studentId: InputMaybe<Scalars['ID']['input']>;
   year: Scalars['Int']['input'];
 };
 
@@ -4305,7 +4324,7 @@ export type QueryStudentMonthlyReportArgs = {
 
 export type QueryStudentProfileArgs = {
   month: InputMaybe<Scalars['Int']['input']>;
-  studentId: Scalars['String']['input'];
+  studentId: InputMaybe<Scalars['String']['input']>;
   year: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -5538,6 +5557,14 @@ export type TeacherPayment = {
   paymentMethodType: Maybe<PaymentMethodType>;
   teacherId: Maybe<Scalars['String']['output']>;
   userPaymentMethodId: Maybe<Scalars['String']['output']>;
+};
+
+/** Summary of pending teacher dues (total count and amount) */
+export type TeacherPendingDuesSummary = {
+  __typename?: 'TeacherPendingDuesSummary';
+  currency: Maybe<CurrencyCode>;
+  totalAmount: Maybe<Scalars['Float']['output']>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 export type TeacherProfileResult = {

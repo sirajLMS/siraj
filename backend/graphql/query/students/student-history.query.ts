@@ -1,3 +1,4 @@
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   StudentClassHistoryPothosObject,
@@ -10,7 +11,7 @@ gqlSchemaBuilder.queryField("studentClassHistory", t =>
   t.field({
     type: StudentClassHistoryPothosObject,
     args: {
-      studentId: t.arg.id({ required: true }),
+      studentId: t.arg.id({ required: false }),
       year: t.arg.int({ required: true }),
       month: t.arg.int({ required: true }),
     },
@@ -20,13 +21,15 @@ gqlSchemaBuilder.queryField("studentClassHistory", t =>
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      return StudentHistoryService.getStudentClassHistory(
-        ctx.user.id,
-        args.studentId,
-        args.year,
-        args.month,
-        ctx.locale
-      );
+      let studentId = args.studentId;
+      if (!studentId) {
+        studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
+        if (!studentId) {
+          const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+          throw new Error(tFunc("studentNotFound", { id: ctx.user.id }));
+        }
+      }
+      return StudentHistoryService.getStudentClassHistory(ctx.user.id, studentId, args.year, args.month, ctx.locale);
     },
   })
 );

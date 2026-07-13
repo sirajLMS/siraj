@@ -1,0 +1,17 @@
+import type { SupervisorDashboardLabels } from "@/shared/messages/types/dashboard/supervisorPortal/supervisorDashboard";
+
+export const supervisorDashboard: SupervisorDashboardLabels = {
+  pageTitle: "لوحة المشرف",
+  welcomeMessage: "أهلًا، {name}",
+  pendingReviewsHero: "لديك {count} مراجعات معلقة بحاجة إلى اهتمامك",
+  pendingReviewsSubtitle: "راجع تقارير الحصص المقدّمة من المعلمين",
+  goToReviews: "انتقل إلى المراجعات",
+  teacherDuesSummary: "ملخص مستحقات المعلمين",
+  totalPendingDues: "إجمالي المستحقات المعلقة",
+  goToDues: "عرض مستحقات المعلمين",
+  monthlyReportsShortcut: "التقارير الشهرية",
+  goToMonthlyReports: "عرض التقارير الشهرية",
+  recentApprovals: "الموافقات الأخيرة",
+  noRecentApprovals: "لا توجد موافقات حديثة",
+  loadingMessage: "جارٍ التحميل...",
+};

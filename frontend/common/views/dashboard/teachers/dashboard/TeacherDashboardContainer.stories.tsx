@@ -200,10 +200,30 @@ export function MockTeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
   const dashboardT = useTranslations("dashboard");
   const tJoin = useTranslations("ui.meetingConfig.join");
+  const lessonReportI18n = useTranslations("dashboard.lms.lessonReports");
   const userName = useUserStore(state => state.name);
   const store = useTeacherDashboardStore();
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
   const metricItems = buildTeacherActiveMetricItems(MOCK_RAW_METRICS, labels.activeMetrics);
+  const lessonReportLabels = {
+    attendanceEvaluation: lessonReportI18n("attendanceEvaluation"),
+    durationMinutes: lessonReportI18n("durationMinutes"),
+    completionPercentage: lessonReportI18n("completionPercentage"),
+    teacherNotes: lessonReportI18n("teacherNotes"),
+    present: lessonReportI18n("present"),
+    absent: lessonReportI18n("absent"),
+    late: lessonReportI18n("late"),
+    submit: lessonReportI18n("submit"),
+    dialogTitle: lessonReportI18n("dialogTitle"),
+    cancel: lessonReportI18n("cancel"),
+    submitting: lessonReportI18n("submitting"),
+    submitFailed: lessonReportI18n("submitFailed"),
+    attendanceRequired: lessonReportI18n("attendanceRequired"),
+    durationMin: lessonReportI18n("durationMin"),
+    durationMax: lessonReportI18n("durationMax"),
+    completionMin: lessonReportI18n("completionMin"),
+    completionMax: lessonReportI18n("completionMax"),
+  };
 
   return (
     <TeacherDashboardView
@@ -233,6 +253,11 @@ export function MockTeacherDashboardContainer() {
       onSupport={() => alert("Live support clicked")}
       dateValue={getTodayScheduleFilterDate()}
       onDateChange={() => {}}
+      lessonReportDialogOpen={false}
+      lessonReportSelectedClassInstanceId={null}
+      lessonReportLabels={lessonReportLabels}
+      onLessonReportDialogClose={() => {}}
+      onLessonReportSubmit={async () => {}}
     />
   );
 }

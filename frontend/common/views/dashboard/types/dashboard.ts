@@ -15,7 +15,7 @@ export type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from
 
 export type DailyScheduleRow = DailyScheduleList;
 
-export type NavAudience = "teacher" | "parent";
+export type NavAudience = "teacher" | "parent" | "student" | "supervisor";
 
 export interface NavItem {
   readonly key: string;

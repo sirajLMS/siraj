@@ -1,5 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { TeacherDuePothosObject } from "@/backend/graphql/pothos/teachers/teacher-due.pothos";
+import {
+  TeacherDuePothosObject,
+  TeacherPendingDuesSummaryPothosObject,
+} from "@/backend/graphql/pothos/teachers/teacher-due.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 
@@ -14,6 +17,18 @@ gqlSchemaBuilder.queryField("teacherPendingDues", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       return TeacherDueService.getPendingDues(actorUserId, args.teacherId ?? undefined, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("teacherPendingDuesSummary", t =>
+  t.field({
+    type: TeacherPendingDuesSummaryPothosObject,
+    description: "Get summary of pending teacher dues (count + total amount)",
+    authScopes: { loggedIn: true },
+    resolve: async (_root, _args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      return TeacherDueService.getPendingDuesSummary(actorUserId, ctx.locale);
     },
   })
 );

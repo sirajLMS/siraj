@@ -8,7 +8,7 @@ export const studentProfileQueryDocument: TypedDocumentNode<
   Types.QueryStudentProfileArgs
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
-  query StudentProfile($studentId: String!, $year: Int, $month: Int) {
+  query StudentProfile($studentId: String, $year: Int, $month: Int) {
     studentProfile(studentId: $studentId, year: $year, month: $month) {
       id
       name

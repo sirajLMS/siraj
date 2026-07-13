@@ -48,4 +48,13 @@ export const PAGE_PERMISSIONS = {
   complaintsSubmit: [AppPermission.SupportSubmitComplaint] as PagePermissions,
   dstMigration: [AppPermission.SystemBulkUpdateDst] as PagePermissions,
   permissions: [AppPermission.PermissionGroupsManage] as PagePermissions,
+  studentSelfDashboard: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
+  studentCredits: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
+  studentOwnHistory: [AppPermission.StudentViewOwnDashboard] as PagePermissions,
+  studentSelfProfile: [AppPermission.StudentViewOwnDashboard, AppPermission.AuthViewOwnProfile] as PagePermissions,
+  supervisorDashboard: [AppPermission.SupervisorViewDashboard] as PagePermissions,
+  lessonReportsReview: [AppPermission.LessonReportsReview, AppPermission.LessonReportsApprove] as PagePermissions,
+  teacherDuesView: [AppPermission.TeacherDuesView] as PagePermissions,
+  monthlyReportsView: [AppPermission.MonthlyReportsView] as PagePermissions,
+  lessonReportsSubmit: [AppPermission.LessonReportsSubmit] as PagePermissions,
 } as const;

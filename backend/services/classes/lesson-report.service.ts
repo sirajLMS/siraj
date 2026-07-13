@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/repo/classes/lesson-report.repository";
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
 import { AppPermission, type AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -301,5 +302,40 @@ export namespace LessonReportService {
     await requirePermission(actorUserId, AppPermission.LESSON_REPORTS_REVIEW, locale);
     const pendingCount = await LessonReportRepository.countPendingReviews(filters);
     return { pendingCount };
+  }
+
+  export async function submitStudentReflection(
+    actorUserId: string,
+    classInstanceId: string,
+    studentNotes: string,
+    locale?: string
+  ): Promise<LessonReportReturnType> {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_OWN_DASHBOARD);
+    if (!hasPermission) {
+      throw new Error(t("insufficientPermissions"));
+    }
+
+    if (!studentNotes || studentNotes.trim().length === 0) {
+      throw new Error(t("invalidInput"));
+    }
+
+    const report = await LessonReportRepository.findByClassInstanceId(classInstanceId);
+    if (!report) {
+      throw new Error(t("lessonReport.notFound"));
+    }
+
+    const studentId = await StudentRepository.getStudentIdByUserId(actorUserId);
+    if (!studentId || studentId !== report.studentId) {
+      throw new Error(t("unauthorizedAction"));
+    }
+
+    const updated = await LessonReportRepository.updateStudentNotes(classInstanceId, studentNotes);
+    if (!updated) {
+      throw new Error(t("lessonReport.notFound"));
+    }
+
+    return toReturnType(updated);
   }
 }

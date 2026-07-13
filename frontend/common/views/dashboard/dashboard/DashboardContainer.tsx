@@ -8,6 +8,8 @@ import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { AdminDashboardContainer } from "@/frontend/common/views/dashboard/admin/home/AdminDashboardContainer";
 import { ParentDashboardContainer } from "@/frontend/common/views/dashboard/parent/dashboard/ParentDashboardContainer";
+import { StudentDashboardContainer } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
+import { SupervisorDashboardContainer } from "@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
@@ -19,6 +21,20 @@ function shouldShowParentDashboard(permissions: readonly AppPermission[]): boole
 function shouldShowTeacherDashboard(permissions: readonly AppPermission[]): boolean {
   return (
     permissions.includes(AppPermission.TeacherViewDashboard) &&
+    !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
+}
+
+function shouldShowStudentDashboard(permissions: readonly AppPermission[]): boolean {
+  return (
+    permissions.includes(AppPermission.StudentViewOwnDashboard) &&
+    !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
+}
+
+function shouldShowSupervisorDashboard(permissions: readonly AppPermission[]): boolean {
+  return (
+    permissions.includes(AppPermission.SupervisorViewDashboard) &&
     !permissions.includes(AppPermission.DashboardViewMetrics)
   );
 }
@@ -49,6 +65,14 @@ export function DashboardContainer() {
 
   if (shouldShowTeacherDashboard(permissions)) {
     return <TeacherDashboardContainer />;
+  }
+
+  if (shouldShowStudentDashboard(permissions)) {
+    return <StudentDashboardContainer />;
+  }
+
+  if (shouldShowSupervisorDashboard(permissions)) {
+    return <SupervisorDashboardContainer />;
   }
 
   return <AdminDashboardContainer />;

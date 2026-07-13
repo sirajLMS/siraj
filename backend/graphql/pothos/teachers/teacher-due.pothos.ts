@@ -1,6 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject, TeacherDueStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { TeacherDueReturnType, TeacherMonthlyReportReturnType } from "@/backend/types";
+import type {
+  TeacherDueReturnType,
+  TeacherMonthlyReportReturnType,
+  TeacherPendingDuesSummaryReturnType,
+} from "@/backend/types";
 
 const TeacherDueRef = gqlSchemaBuilder.objectRef<TeacherDueReturnType>("TeacherDue");
 
@@ -38,6 +42,18 @@ export const TeacherMonthlyReportPothosObject = TeacherMonthlyReportRef.implemen
     totalAccruedHours: t.exposeFloat("totalAccruedHours"),
     totalDueAmount: t.exposeFloat("totalDueAmount"),
     totalPaidAmount: t.exposeFloat("totalPaidAmount"),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject }),
+  }),
+});
+
+const TeacherPendingDuesSummaryRef =
+  gqlSchemaBuilder.objectRef<TeacherPendingDuesSummaryReturnType>("TeacherPendingDuesSummary");
+
+export const TeacherPendingDuesSummaryPothosObject = TeacherPendingDuesSummaryRef.implement({
+  description: "Summary of pending teacher dues (total count and amount)",
+  fields: t => ({
+    totalCount: t.exposeInt("totalCount"),
+    totalAmount: t.exposeFloat("totalAmount"),
     currency: t.expose("currency", { type: CurrencyCodePothosObject }),
   }),
 });

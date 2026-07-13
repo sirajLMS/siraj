@@ -13,6 +13,7 @@ import type {
   TeacherDueReturnType,
   TeacherDueSelectType,
   TeacherMonthlyReportReturnType,
+  TeacherPendingDuesSummaryReturnType,
 } from "@/backend/types";
 
 export namespace TeacherDueService {
@@ -156,6 +157,37 @@ export namespace TeacherDueService {
     }
     const rows = await TeacherDueRepository.getPendingDues(teacherId);
     return rows.map(row => ({
+      ...row,
+      status: row.status as TeacherDueStatus,
+      currency: row.currency as CurrencyCode,
+    }));
+  }
+
+  export async function getPendingDuesSummary(
+    actorUserId: string,
+    locale?: string
+  ): Promise<TeacherPendingDuesSummaryReturnType> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
+    if (!hasPermission) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("insufficientPermissions"));
+    }
+    return TeacherDueRepository.getPendingDuesSummary();
+  }
+
+  export async function markAsPaid(
+    actorUserId: string,
+    dueIds: readonly string[],
+    teacherPaymentId: string,
+    locale?: string
+  ): Promise<TeacherDueReturnType[]> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.TEACHER_DUES_VIEW);
+    if (!hasPermission) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("insufficientPermissions"));
+    }
+    const updated = await TeacherDueRepository.markAsPaid([...dueIds], teacherPaymentId);
+    return updated.map(row => ({
       ...row,
       status: row.status as TeacherDueStatus,
       currency: row.currency as CurrencyCode,

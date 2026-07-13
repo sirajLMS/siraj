@@ -18,6 +18,7 @@ import {
   NotificationsActiveOutlined,
   PaymentsOutlined,
   PersonOutlineOutlined,
+  RateReviewOutlined,
   ReceiptLongOutlined,
   ReportProblemOutlined,
   SchoolOutlined,
@@ -152,6 +153,87 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "footer",
     permission: PAGE_PERMISSIONS.parentOwnProfile,
     audience: "parent",
+  },
+  {
+    key: "student-today-classes",
+    labelKey: "dashboard.nav.studentTodayClasses",
+    icon: CalendarTodayOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.studentSelfDashboard,
+    audience: "student",
+  },
+  {
+    key: "student-schedule",
+    labelKey: "dashboard.nav.studentSchedule",
+    icon: EventRepeatOutlined,
+    href: "/students/me/history",
+    section: "main",
+    permission: PAGE_PERMISSIONS.studentOwnHistory,
+    audience: "student",
+  },
+  {
+    key: "student-credits",
+    labelKey: "dashboard.nav.studentCredits",
+    icon: AccountBalanceWalletOutlined,
+    href: "/students/me/credits",
+    section: "main",
+    permission: PAGE_PERMISSIONS.studentCredits,
+    audience: "student",
+  },
+  {
+    key: "student-profile",
+    labelKey: "dashboard.nav.studentProfile",
+    icon: PersonOutlineOutlined,
+    href: "/students/me/profile",
+    section: "main",
+    permission: PAGE_PERMISSIONS.studentSelfProfile,
+    audience: "student",
+  },
+  {
+    key: "supervisor-home",
+    labelKey: "dashboard.nav.supervisorHome",
+    icon: DashboardOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.supervisorDashboard,
+    audience: "supervisor",
+  },
+  {
+    key: "pending-reviews",
+    labelKey: "dashboard.nav.pendingReviews",
+    icon: RateReviewOutlined,
+    href: "/lesson-reports",
+    section: "main",
+    permission: PAGE_PERMISSIONS.lessonReportsReview,
+    audience: "supervisor",
+  },
+  {
+    key: "teacher-dues",
+    labelKey: "dashboard.nav.teacherDues",
+    icon: PaymentsOutlined,
+    href: "/supervisor/teacher-dues",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherDuesView,
+    audience: "supervisor",
+  },
+  {
+    key: "monthly-reports",
+    labelKey: "dashboard.nav.monthlyReports",
+    icon: AssessmentOutlined,
+    href: "/supervisor/monthly-reports",
+    section: "main",
+    permission: PAGE_PERMISSIONS.monthlyReportsView,
+    audience: "supervisor",
+  },
+  {
+    key: "supervisor-profile",
+    labelKey: "dashboard.nav.supervisorProfile",
+    icon: PersonOutlineOutlined,
+    href: "/supervisor/profile",
+    section: "main",
+    permission: PAGE_PERMISSIONS.profile,
+    audience: "supervisor",
   },
   {
     key: "search-schedule",
@@ -587,6 +669,24 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     audience: "parent",
   },
   {
+    key: "student-today-classes",
+    labelKey: "dashboard.nav.studentTodayClasses",
+    icon: CalendarTodayOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.studentSelfDashboard,
+    audience: "student",
+  },
+  {
+    key: "supervisor-home",
+    labelKey: "dashboard.nav.supervisorHome",
+    icon: DashboardOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.supervisorDashboard,
+    audience: "supervisor",
+  },
+  {
     key: "complaints-submit",
     labelKey: "dashboard.nav.complaintsSubmit",
     icon: ReportProblemOutlined,
@@ -628,6 +728,8 @@ export function getNavItemsForPermissions(items: readonly NavItem[], permissions
   const filtered = items.filter(item => {
     if (item.audience === "teacher" && !isTeacherPortalUser(permissions)) return false;
     if (item.audience === "parent" && !isParentPortalUser(permissions)) return false;
+    if (item.audience === "student" && !isStudentPortalUser(permissions)) return false;
+    if (item.audience === "supervisor" && !isSupervisorPortalUser(permissions)) return false;
     if (!item.permission) return true;
     if (typeof item.permission === "string") {
       return permissions.includes(item.permission);
@@ -636,13 +738,24 @@ export function getNavItemsForPermissions(items: readonly NavItem[], permissions
   });
 
   return applyProfileNavOverrides(
-    applyParentNavOverrides(applyTeacherNavOverrides(filtered, permissions), permissions),
+    applySupervisorNavOverrides(
+      applyStudentNavOverrides(
+        applyParentNavOverrides(applyTeacherNavOverrides(filtered, permissions), permissions),
+        permissions
+      ),
+      permissions
+    ),
     permissions
   );
 }
 
 function applyProfileNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
-  if (isTeacherPortalUser(permissions) || isParentPortalUser(permissions)) {
+  if (
+    isTeacherPortalUser(permissions) ||
+    isParentPortalUser(permissions) ||
+    isStudentPortalUser(permissions) ||
+    isSupervisorPortalUser(permissions)
+  ) {
     return items.filter(item => item.key !== "own-profile");
   }
 
@@ -677,5 +790,47 @@ export function applyTeacherNavOverrides(items: readonly NavItem[], permissions:
   }
 
   const hiddenKeys = new Set(["home", "books-and-bags"]);
+  return items.filter(item => !hiddenKeys.has(item.key));
+}
+
+function isStudentPortalUser(permissions: readonly AppPermission[]): boolean {
+  return (
+    permissions.includes(AppPermission.StudentViewOwnDashboard) &&
+    !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
+}
+
+export function applyStudentNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
+  if (!isStudentPortalUser(permissions)) {
+    return [...items];
+  }
+  // Student portal: hide admin-focused items
+  const hiddenKeys = new Set([
+    "home",
+    "search-schedule",
+    "schedule-tracking",
+    "status-tracking",
+    "schedule-alerts",
+    "own-profile",
+  ]);
+  return items.filter(item => !hiddenKeys.has(item.key));
+}
+
+function isSupervisorPortalUser(permissions: readonly AppPermission[]): boolean {
+  return (
+    permissions.includes(AppPermission.SupervisorViewDashboard) &&
+    !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
+}
+
+export function applySupervisorNavOverrides(
+  items: readonly NavItem[],
+  permissions: readonly AppPermission[]
+): NavItem[] {
+  if (!isSupervisorPortalUser(permissions)) {
+    return [...items];
+  }
+  // Supervisor portal: hide admin-specific items, keep supervisor items
+  const hiddenKeys = new Set(["home", "own-profile"]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

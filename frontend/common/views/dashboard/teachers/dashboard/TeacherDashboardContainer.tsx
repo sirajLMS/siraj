@@ -11,6 +11,7 @@ import {
   activateClassMutationDocument,
   createTeacherManualClassEntryMutationDocument,
   logTeacherSupportRequestMutationDocument,
+  submitLessonReportMutationDocument,
   teacherDashboardQueryDocument,
   teacherHandbookUrlQueryDocument,
   updateSessionStatusAbsentMutationDocument,
@@ -20,8 +21,13 @@ import {
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
+import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import { TeacherDashboardView } from "@/frontend/common/views/dashboard/teachers/dashboard/teacherDashboardView";
+import type {
+  LessonReportFormLabels,
+  LessonReportFormSubmitInput,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
 import { buildStudentProgressFeedItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildStudentProgressFeedItems";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";
@@ -195,6 +201,8 @@ export function TeacherDashboardContainer() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("info");
+  const [lessonReportOpen, setLessonReportOpen] = useState(false);
+  const [lessonReportClassInstanceId, setLessonReportClassInstanceId] = useState<string | null>(null);
 
   const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
 
@@ -251,8 +259,32 @@ export function TeacherDashboardContainer() {
   const [requestLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
   const [createManualEntry] = useMutation(createTeacherManualClassEntryMutationDocument);
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
+  const [submitLessonReport] = useMutation(submitLessonReportMutationDocument);
 
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin("emptyTeacher"));
+  const lessonReportI18n = useTranslations("dashboard.lms.lessonReports");
+  const lessonReportLabels: LessonReportFormLabels = useMemo(
+    () => ({
+      attendanceEvaluation: lessonReportI18n("attendanceEvaluation"),
+      durationMinutes: lessonReportI18n("durationMinutes"),
+      completionPercentage: lessonReportI18n("completionPercentage"),
+      teacherNotes: lessonReportI18n("teacherNotes"),
+      present: lessonReportI18n("present"),
+      absent: lessonReportI18n("absent"),
+      late: lessonReportI18n("late"),
+      submit: lessonReportI18n("submit"),
+      dialogTitle: lessonReportI18n("dialogTitle"),
+      cancel: lessonReportI18n("cancel"),
+      submitting: lessonReportI18n("submitting"),
+      submitFailed: lessonReportI18n("submitFailed"),
+      attendanceRequired: lessonReportI18n("attendanceRequired"),
+      durationMin: lessonReportI18n("durationMin"),
+      durationMax: lessonReportI18n("durationMax"),
+      completionMin: lessonReportI18n("completionMin"),
+      completionMax: lessonReportI18n("completionMax"),
+    }),
+    [lessonReportI18n]
+  );
   const canActivate = permissions.includes(Types.AppPermission.SessionActivateClass);
 
   const dashboardId = dashboardData?.teacherDashboard?.id || "";
@@ -293,6 +325,39 @@ export function TeacherDashboardContainer() {
   const handleDateChange = (date: string) => {
     setFilterDate(date);
   };
+
+  const handleMarkClassCompleted = (classInstanceId: string) => {
+    setLessonReportClassInstanceId(classInstanceId);
+    setLessonReportOpen(true);
+  };
+
+  const handleLessonReportClose = () => {
+    setLessonReportOpen(false);
+    setLessonReportClassInstanceId(null);
+  };
+
+  const handleLessonReportSubmit = async (input: LessonReportFormSubmitInput) => {
+    await submitLessonReport({
+      variables: {
+        classInstanceId: input.classInstanceId,
+        input: {
+          classInstanceId: input.classInstanceId,
+          attendanceEvaluation: input.attendanceEvaluation as Types.AttendanceEvaluation,
+          durationMinutes: input.durationMinutes,
+          completionPercentage: input.completionPercentage,
+          teacherNotes: input.teacherNotes ?? null,
+        },
+      },
+    });
+    setSnackbarMessage(lessonReportI18n("submitReport"));
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
+    await refetch();
+  };
+
+  const selectedLessonReportRow = lessonReportClassInstanceId
+    ? scheduleRows.find(r => r.classId === lessonReportClassInstanceId)
+    : null;
 
   const handleActivate = async (id: string) => {
     setActivationError(null);
@@ -407,6 +472,7 @@ export function TeacherDashboardContainer() {
             logger.error("Error requesting leave:", err);
           }
         }}
+        onMarkClassCompleted={handleMarkClassCompleted}
         onViewAll={() => {
           router.push("/schedule");
         }}
@@ -421,6 +487,12 @@ export function TeacherDashboardContainer() {
         pageSize={pageSize}
         totalCount={totalCount}
         onPageChange={setPage}
+        lessonReportDialogOpen={lessonReportOpen}
+        lessonReportSelectedClassInstanceId={lessonReportClassInstanceId}
+        lessonReportDefaultDurationMinutes={selectedLessonReportRow?.durationMinutes}
+        lessonReportLabels={lessonReportLabels}
+        onLessonReportDialogClose={handleLessonReportClose}
+        onLessonReportSubmit={handleLessonReportSubmit}
       />
       <ManualClassEntryDialog
         open={manualEntryOpen}
@@ -429,6 +501,16 @@ export function TeacherDashboardContainer() {
         onSubmit={handleFormSubmit => handleManualEntrySubmit(handleFormSubmit)}
         defaultActive={manualEntryDefaultActive}
       />
+      {lessonReportClassInstanceId && (
+        <LessonReportSubmitDialog
+          open={lessonReportOpen}
+          onClose={handleLessonReportClose}
+          classInstanceId={lessonReportClassInstanceId}
+          defaultDurationMinutes={selectedLessonReportRow?.durationMinutes}
+          labels={lessonReportLabels}
+          onSubmit={handleLessonReportSubmit}
+        />
+      )}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}

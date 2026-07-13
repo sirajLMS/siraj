@@ -24,4 +24,17 @@ export interface LessonReportLabels {
   readonly notEligibleForReview: string;
   readonly alreadyReviewed: string;
   readonly pendingCount: string;
+  readonly markCompletedButton: string;
+  readonly dialogTitle: string;
+  readonly cancel: string;
+  readonly submitting: string;
+  readonly submitFailed: string;
+  readonly attendanceRequired: string;
+  readonly durationMin: string;
+  readonly durationMax: string;
+  readonly completionMin: string;
+  readonly completionMax: string;
+  readonly filterAll: string;
+  readonly noReports: string;
+  readonly historyTitle: string;
 }

@@ -4,7 +4,12 @@ import { db } from "@/backend/db/drizzleDb";
 import { classInstances, teacherDues, teachers, users } from "@/backend/db/schema";
 import { ClassExecutionState, ClassOutcome, CurrencyCode, TeacherDueStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import type { TeacherDueInsertType, TeacherDueSelectType, TeacherMonthlyReportReturnType } from "@/backend/types";
+import type {
+  TeacherDueInsertType,
+  TeacherDueSelectType,
+  TeacherMonthlyReportReturnType,
+  TeacherPendingDuesSummaryReturnType,
+} from "@/backend/types";
 
 export namespace TeacherDueRepository {
   export async function create(input: TeacherDueInsertType, tx?: DBTransaction): Promise<TeacherDueSelectType> {
@@ -130,18 +135,24 @@ export namespace TeacherDueRepository {
     };
   }
 
-  export async function markAsPaid(dueIds: string[], teacherPaymentId: string, tx?: DBTransaction): Promise<void> {
-    if (dueIds.length === 0) return;
+  export async function markAsPaid(
+    dueIds: string[],
+    teacherPaymentId: string,
+    tx?: DBTransaction
+  ): Promise<TeacherDueSelectType[]> {
+    if (dueIds.length === 0) return [];
     const executor = tx ?? db;
-    await executor
+    const updated = await executor
       .update(teacherDues)
       .set({
         status: TeacherDueStatus.PAID,
         teacherPaymentId,
         updatedAt: new Date(),
       })
-      .where(inArray(teacherDues.id, dueIds));
+      .where(inArray(teacherDues.id, dueIds))
+      .returning();
     logger.info("Marked teacher dues as paid", { count: dueIds.length, teacherPaymentId });
+    return updated;
   }
 
   export async function getPendingDues(
@@ -158,5 +169,17 @@ export namespace TeacherDueRepository {
       .from(teacherDues)
       .where(and(...conditions))
       .orderBy(teacherDues.approvedAt);
+  }
+
+  export async function getPendingDuesSummary(tx?: DBTransaction): Promise<TeacherPendingDuesSummaryReturnType> {
+    const executor = tx ?? db;
+    const rows = await executor
+      .select({ amount: teacherDues.amount, currency: teacherDues.currency })
+      .from(teacherDues)
+      .where(eq(teacherDues.status, TeacherDueStatus.PENDING));
+    const totalCount = rows.length;
+    const totalAmount = rows.reduce((sum, row) => sum + Number.parseFloat(row.amount), 0);
+    const currency: CurrencyCode = rows.length > 0 ? (rows[0].currency as CurrencyCode) : CurrencyCode.SAR;
+    return { totalCount, totalAmount, currency };
   }
 }

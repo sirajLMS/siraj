@@ -42,6 +42,7 @@ import type { PaymentCatalogsLabels } from "@/shared/messages/types/dashboard/pa
 import type { PermissionsLabels } from "@/shared/messages/types/dashboard/permissions";
 import type { ReportsLabels } from "@/shared/messages/types/dashboard/reports";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/messages/types/dashboard/resources";
+import type { StudentCreditsLabels, StudentDashboardLabels } from "@/shared/messages/types/dashboard/studentPortal";
 import type {
   StudentDirectoryLabels,
   StudentHistoryLabels,
@@ -51,6 +52,12 @@ import type {
 } from "@/shared/messages/types/dashboard/students";
 import type { SubjectsLabels } from "@/shared/messages/types/dashboard/subjects";
 import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions";
+import type {
+  PendingReviewsLabels,
+  SupervisorDashboardLabels,
+  SupervisorMonthlyReportsLabels,
+  SupervisorTeacherDuesLabels,
+} from "@/shared/messages/types/dashboard/supervisorPortal";
 import type {
   TeacherAvailabilityLabels,
   TeacherCreateRecurringClassLabels,
@@ -91,11 +98,14 @@ export type {
   ParentOnboardingLabels,
   ParentProfileLabels,
   ParentsDirectoryLabels,
+  PendingReviewsLabels,
   ReportsLabels,
   RescheduleFormLabels,
   RescheduleTrackingLabels,
   ResourcesLabels,
   ScheduleAlertsLabels,
+  StudentCreditsLabels,
+  StudentDashboardLabels,
   StudentDirectoryLabels,
   StudentHistoryLabels,
   StudentOnboardingLabels,
@@ -103,6 +113,9 @@ export type {
   StudentStatusLabels,
   SubjectsLabels,
   SuggestionsLabels,
+  SupervisorDashboardLabels,
+  SupervisorMonthlyReportsLabels,
+  SupervisorTeacherDuesLabels,
   TeacherAvailabilityLabels,
   TeacherCreateRecurringClassLabels,
   TeacherDashboardLabels,
@@ -179,6 +192,16 @@ export type MessageSchema = {
       readonly lessonReports: LessonReportLabels;
       readonly teacherDues: TeacherDueLabels;
       readonly monthlyReports: MonthlyReportLabels;
+    };
+    readonly studentPortal: {
+      readonly dashboard: StudentDashboardLabels;
+      readonly credits: StudentCreditsLabels;
+    };
+    readonly supervisorPortal: {
+      readonly dashboard: SupervisorDashboardLabels;
+      readonly pendingReviews: PendingReviewsLabels;
+      readonly teacherDues: SupervisorTeacherDuesLabels;
+      readonly monthlyReports: SupervisorMonthlyReportsLabels;
     };
   };
 };
