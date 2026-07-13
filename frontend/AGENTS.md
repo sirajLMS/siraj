@@ -186,7 +186,7 @@ bun quality-gate
 **Use [.github/CODE_REVIEW_CHECKLIST.md](.github/CODE_REVIEW_CHECKLIST.md) when reviewing code.**
 
 - **Layout:** Use `PageContainer` inside views — never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`).
-- **Tables:** Use `AppDataGrid` (`@mui/x-data-grid`) via feature `*DataGrid` wrappers for desktop list pages. Mobile uses `*CardList` components.
+- **Tables:** Use `AppDataGrid` (`@mui/x-data-grid`) via feature `*DataGrid` wrappers for desktop list pages. Mobile uses `*CardList` components (from `@/frontend/mobile/components/ui`).
 - **Metrics:** Use shared `MetricCard` from `@/frontend/components/ui` — do not create per-feature metric card components.
 - **Status:** Use shared `StatusBadge` with the correct `category` prop — no inline status chips.
 - **Headers:** Use `PageHeader` + `SectionPanel` — not ad-hoc flex title blocks.

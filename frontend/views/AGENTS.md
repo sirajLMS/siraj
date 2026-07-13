@@ -9,31 +9,41 @@
 ## ViewModel Pattern
 
 - **ViewModel hooks**: Each page/domain gets a `useXxViewModel()` hook that encapsulates ALL business logic (data fetching, state, handlers, derived values). The hook returns a flat plain object (the "view model") — same interface for both mobile and desktop views.
+- **Hook location**: `useXxViewModel.ts` lives at `frontend/common/views/dashboard/<domain>/` (the tier-neutral home). Tier view files import the ViewModel **type** from `@/frontend/common/views/dashboard/<domain>/useXxViewModel`.
 - **No useMediaQuery/viewport**: ViewModel hooks must NEVER import or call `useMediaQuery` or `useViewport`. They are viewport-agnostic.
-- **Zustand for all state**: All mutable state (filters, pagination, dialog open, form values, File objects) lives in Zustand stores so it survives viewport tier switching during resize (when React unmounts the desktop tree and mounts the mobile tree).
+- **Zustand for all state**: All mutable state (filters, pagination, dialog open, form values, File objects) lives in Zustand stores (`frontend/common/stores/`) so it survives viewport tier switching during resize (when React unmounts the desktop tree and mounts the mobile tree).
 - **Ephemeral state only**: Truly ephemeral presentation state (e.g., tooltip open, popover hover) may use `useState` — it resets on tier switch but that's acceptable for pure UI hover states.
-- **Container calls hook**: The Container component calls the ViewModel hook and passes the view model to the switcher `View.tsx`.
-- **Switcher uses `ResponsiveViewSwitch` with lazy loading**: The `View.tsx` switcher component calls `createLazyView()` at module top level to create lazy-loaded mobile/desktop component references, then passes them to `<ResponsiveViewSwitch>`. The switcher file no longer directly imports `useViewport` — `ResponsiveViewSwitch` reads it internally. Only the matching tier's code is fetched (mobile devices never download desktop component code).
-- **Mobile/desktop views are pure presentation**: `.mobile.tsx` and `.desktop.tsx` files contain ZERO business logic, ZERO hooks (except for purely local UI state), and ZERO viewport branching. They only render the props passed from the view model.
-- **Directory structure per domain**:
+- **Container calls hook**: The Container component (`frontend/common/views/dashboard/<domain>/XxxContainer.tsx`) calls the ViewModel hook and passes the view model to the switcher (`XxView.tsx`).
+- **Switcher uses `ResponsiveViewSwitch` with lazy loading**: The `XxView.tsx` switcher (in `frontend/common/views/dashboard/<domain>/`) calls `createLazyView()` at module top level to create lazy-loaded mobile/desktop component references, then passes them to `<ResponsiveViewSwitch>`. The switcher file no longer directly imports `useViewport` — `ResponsiveViewSwitch` reads it internally. Only the matching tier's code is fetched (mobile devices never download desktop component code).
+- **Switcher lazy imports**: The switcher imports mobile and desktop tier views via:
+  ```tsx
+  () => import("@/frontend/mobile/views/dashboard/<domain>/xx.mobile").then(m => ({ default: m.XxMobileView })),
+  () => import("@/frontend/desktop/views/dashboard/<domain>/xx.desktop").then(m => ({ default: m.XxDesktopView })),
   ```
-  <domain>/
-    mobile/
-      xx.mobile.tsx
-      components/
-        xxCard.mobile.tsx
-    desktop/
-      xx.desktop.tsx
-      components/
-        xxGrid.desktop.tsx
-    shared/
-      xxShared.tsx
+- **Mobile/desktop views are pure presentation**: `.mobile.tsx` and `.desktop.tsx` files (in `frontend/mobile/views/` and `frontend/desktop/views/`) contain ZERO business logic, ZERO hooks (except for purely local UI state), and ZERO viewport branching. They only render the props passed from the view model.
+- **Directory structure** (per domain, across the three top-level modules):
+  ```
+  frontend/common/views/dashboard/<domain>/   # tier-neutral home
     useXxViewModel.ts
-    xxView.tsx          (switcher)
+    xxView.tsx                                 # switcher
+    xxContainer.tsx
+    types/, schemas/, utils/
+    components/                                # shared non-tiered
+
+  frontend/mobile/views/dashboard/<domain>/
+    xx.mobile.tsx                              # mobile tier view
+    components/
+      xxCard.mobile.tsx
+
+  frontend/desktop/views/dashboard/<domain>/
+    xx.desktop.tsx                             # desktop tier view
+    components/
+      xxGrid.desktop.tsx
   ```
+  > Note: `frontend/views/` is DEPRECATED. Switchers, Containers, ViewModels, schemas, types, utils, and shared non-tiered components have been relocated to `frontend/common/views/`. Tier views moved to `frontend/mobile/views/` and `frontend/desktop/views/`. Only `frontend/views/dashboard/config/` (navigationConfig) and any residual non-switcher view trees remain.
 - **ESLint enforcement**: `no-restricted-imports` rules block `useMediaQuery` and `useViewport` imports in `.mobile.tsx`/`.desktop.tsx` files.
 - **State serialization**: Non-serializable values (`File`, `Blob`, `FormData`, `Promise`) must NOT be stored in `persist`-enabled Zustand stores. Use `partialize` to exclude them or keep in a `useRef` in the ViewModel hook.
-- **Cross-reference**: See `frontend/components/ui/AGENTS.md`, `frontend/stores/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`.
+- **Cross-reference**: See `frontend/common/components/ui/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`.
 
 ## Storybook Best Practices
 

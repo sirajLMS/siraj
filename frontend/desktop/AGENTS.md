@@ -5,40 +5,49 @@ This document provides essential context for AI agents working in the `frontend/
 ## Module Overview
 
 The `frontend/desktop/` module is the **desktop-only UI layer** containing:
-- **Desktop UIKit primitives** (`components/ui/`) - components that render ONLY on desktop (`>= 768px`) and return `null` on mobile
-- **Desktop view components** (`views/dashboard/**/`) - complete page-level desktop views, mirroring the `frontend/views/dashboard/` hierarchy minus the `desktop/` segment
+- **Desktop UIKit primitives** (`components/ui/`) - ONLY the 3 tier-paired `.desktop.*` variants (`DateNavigatorDesktop`, `LocaleAdornmentSwitchDesktop`, `LocalizedStringDrawerDesktop`). No standalone `Desktop*`-prefixed primitives exist, and none use `useViewport`/null-return (the parent switcher already guarantees the tier).
+- **Desktop view components** (`views/dashboard/**/`) - complete page-level desktop views, mirroring the `frontend/common/views/dashboard/` hierarchy minus the `desktop/` segment. Desktop views consume shared primitives directly from `@/frontend/common/components/ui` (`AppDataGrid`, `PageHeader`, `SectionPanel`, `MetricCardGrid`, `StatusBadge`, `BaseCard`, `PageContainer`, …).
 
 ## Architecture Rules
 
 ### 1. Desktop-Only Primitives (`components/ui/`)
+- The desktop `components/ui/` directory holds ONLY the 3 tier-paired `.desktop.*` variants (no standalone `Desktop*`-prefixed primitives exist):
+  - `filter/dateNavigator.desktop.tsx` → `DateNavigatorDesktop`
+  - `input/localizedString/localeAdornmentSwitch.desktop.tsx` → `LocaleAdornmentSwitchDesktop`
+  - `input/localizedString/localizedStringDrawer.desktop.tsx` → `LocalizedStringDrawerDesktop`
 - Components in this directory **MUST NOT** be used in mobile code
-- All components use `useViewport()` internally and return `null` when `isMobile`
+- None use `useViewport` or null-return — the parent switcher already guarantees the tier
 - Export via per-group barrels + top-level `components/ui/index.ts`
 - **NEVER** export Desktop* components from `frontend/common/components/ui/`
 
 ### 2. Desktop Views (`views/dashboard/**/`)
-- Mirror the `frontend/views/dashboard/` structure exactly (minus the `desktop/` segment)
+- Mirror the `frontend/common/views/dashboard/` structure exactly (minus the `desktop/` segment)
 - Each `.desktop.tsx` file moved from `frontend/views/**/desktop/` → `frontend/desktop/views/**/`
 - Import paths rewritten: `@/frontend/views/**/desktop/...` → `@/frontend/desktop/views/**/...`
-- Switchers in `frontend/views/` dynamically import from `@/frontend/desktop/views/...`
+- Switchers in `frontend/common/views/...` dynamically import from `@/frontend/desktop/views/...`
 
 ### 3. Import Conventions
 ```typescript
-// ✅ CORRECT - Desktop views import desktop primitives
-import { DesktopDateNavigator, DesktopCardGrid } from "@/frontend/desktop/components/ui";
+// ✅ CORRECT - Desktop views import desktop tier-paired primitives
+import { DateNavigatorDesktop } from "@/frontend/desktop/components/ui/filter";
 
-// ✅ CORRECT - Mobile views import common primitives
+// ✅ CORRECT - Desktop views ALSO consume shared (viewport-agnostic) primitives from common
+import { AppDataGrid, PageHeader, SectionPanel, StatusBadge, BaseCard, PageContainer } from "@/frontend/common/components/ui";
+
+// ✅ CORRECT - Mobile views import common primitives (non-Mobile*)
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 
-// ❌ WRONG - Desktop views importing from common (Desktop* removed from common)
-import { DesktopDateNavigator } from "@/frontend/common/components/ui";
+// ❌ WRONG - Desktop views importing Desktop* from common (Desktop* removed from common)
+import { DateNavigatorDesktop } from "@/frontend/common/components/ui/filter";
+
+// ❌ WRONG - DesktopCardGrid does NOT exist — there are no standalone Desktop*-prefixed primitives
 ```
 
 ### 4. Switcher Pattern (ResponsiveViewSwitch)
-- Parent switchers remain in `frontend/views/**/*.tsx`
-- Desktop variants: dynamically imported from `frontend/desktop/views/**/*.desktop.tsx`
-- Mobile variants: dynamically imported from `frontend/mobile/views/**/*.mobile.tsx`
-- Use `createLazyView` from `@/frontend/common/components/ui/container/createLazyView`
+- Parent switchers live at `frontend/common/views/dashboard/<domain>/XxView.tsx` (the tier-neutral home)
+- Desktop variants: dynamically imported from `frontend/desktop/views/dashboard/<domain>/*.desktop.tsx`
+- Mobile variants: dynamically imported from `frontend/mobile/views/dashboard/<domain>/*.mobile.tsx`
+- Use `createLazyView` from `@/frontend/common/components/ui/container/ResponsiveViewSwitch`
 
 ### 5. Type Definitions
 - Desktop primitives use their own type definitions (co-located with components)
@@ -180,8 +189,8 @@ frontend/desktop/
 When making changes to this module:
 
 1. **No Desktop* exports in common** - Verify `frontend/common/components/ui/**/index.ts` don't export Desktop* components
-2. **Import paths correct** - Desktop views import from `@/frontend/desktop/components/ui`
-3. **Switchers updated** - Mobile view files import desktop variants from `@/frontend/desktop/views/...`
+2. **Import paths correct** - Desktop views import tier-paired primitives from `@/frontend/desktop/components/ui` and shared primitives from `@/frontend/common/components/ui`
+3. **Switchers updated** - Switchers in `frontend/common/views/...` import desktop variants from `@/frontend/desktop/views/...`
 4. **Storybook paths** - Stories in `desktop/components/ui/**/*.stories.tsx` import from desktop paths
 5. **TypeScript passes** - Run `bun tsgo` to verify
 6. **Lint passes** - Run lint queue for modified files

@@ -5,22 +5,37 @@ This document provides essential context for AI agents working in the `frontend/
 ## Module Overview
 
 The `frontend/mobile/` module is the **mobile-only UI layer** containing:
-- **Mobile UIKit primitives** (`components/ui/`) - components that render ONLY on mobile (`< 768px`) and return `null` on desktop
-- **Mobile view components** (`views/dashboard/**/`) - complete page-level mobile views, mirroring the `frontend/views/dashboard/` hierarchy minus the `mobile/` segment
+- **Mobile UIKit primitives** (`components/ui/`) - `Mobile*`-prefixed primitives in three behavioral categories: viewport-gated null-return, hybrid responsive, and pure presentational (see Section 1)
+- **Mobile view components** (`views/dashboard/**/`) - complete page-level mobile views, mirroring the `frontend/common/views/dashboard/` hierarchy minus the `mobile/` segment
 
 ## Architecture Rules
 
 ### 1. Mobile-Only Primitives (`components/ui/`)
 - Components in this directory **MUST NOT** be used in desktop code
-- All components use `useViewport()` internally and return `null` when `!isMobile`
 - Export via per-group barrels + top-level `components/ui/index.ts`
 - **NEVER** export Mobile* components from `frontend/common/components/ui/`
 
+Mobile primitives split into **three** behavioral categories (NOT all null-return):
+
+| Primitive | Group | Category | Behavior |
+|---|---|---|---|
+| `MobileFab` | `button/` | **viewport-gated null-return** | `useViewport()`; `if (!isMobile) return null` |
+| `MobileMetricCardGrid` | `card/` | **hybrid responsive** | `useViewport()`; 2-col grid on mobile, delegates to `MetricCardGrid` on desktop — does NOT null-return |
+| `MobileCardListItem` | `card/` | **pure presentational** | no `useViewport`, no null-return |
+| `MobileCardList` | `container/` | pure presentational | no `useViewport`, no null-return |
+| `MobileContentStack` | `container/` | pure presentational | no `useViewport`, no null-return |
+| `MobilePageHeader` | `container/page/` | pure presentational | no `useViewport`, no null-return (wraps `PageHeader`) |
+| `MobileEmptyState` | `state/` | pure presentational | no `useViewport`, no null-return |
+| `dateNavigator.mobile.tsx` | `filter/` | tier-paired variant | paired with `DateNavigator.tsx` parent in `common` |
+| `localeAdornmentSwitch.mobile.tsx`, `localizedStringDrawer.mobile.tsx` | `input/localizedString/` | tier-paired variant | paired with parents in `common` |
+
+> **Do NOT "fix" pure-presentational primitives** by adding `useViewport()` null-return — they are intentionally presentational-only.
+
 ### 2. Mobile Views (`views/dashboard/**/`)
-- Mirror the `frontend/views/dashboard/` structure exactly (minus the `mobile/` segment)
+- Mirror the `frontend/common/views/dashboard/` structure exactly (minus the `mobile/` segment)
 - Each `.mobile.tsx` file moved from `frontend/views/**/mobile/` → `frontend/mobile/views/**/`
 - Import paths rewritten: `@/frontend/views/**/mobile/...` → `@/frontend/mobile/views/**/...`
-- Switchers in `frontend/views/` dynamically import from `@/frontend/mobile/views/...`
+- Switchers in `frontend/common/views/...` dynamically import from `@/frontend/mobile/views/...`
 
 ### 3. Import Conventions
 ```typescript
@@ -35,10 +50,10 @@ import { MobileCardList } from "@/frontend/common/components/ui";
 ```
 
 ### 4. Switcher Pattern (ResponsiveViewSwitch)
-- Parent switchers remain in `frontend/views/**/*.tsx`
-- Desktop variants: `frontend/views/**/desktop/*.desktop.tsx`
-- Mobile variants: dynamically imported from `frontend/mobile/views/**/*.mobile.tsx`
-- Use `createLazyView` from `@/frontend/common/components/ui/container/createLazyView`
+- Parent switchers live at `frontend/common/views/dashboard/<domain>/XxView.tsx` (the tier-neutral home)
+- Mobile variants: dynamically imported from `frontend/mobile/views/dashboard/<domain>/*.mobile.tsx`
+- Desktop variants: dynamically imported from `frontend/desktop/views/dashboard/<domain>/*.desktop.tsx`
+- Use `createLazyView` from `@/frontend/common/components/ui/container/ResponsiveViewSwitch`
 
 ### 5. Type Definitions
 - Mobile primitives use their own type definitions (co-located with components)

@@ -27,7 +27,7 @@ DashboardLayout (pageMargin only)
               └── *CardList (mobile, < md)
 ```
 
-**Import from:** `@/frontend/components/ui`
+**Import from:** `@/frontend/common/components/ui`
 
 ---
 
@@ -63,7 +63,7 @@ DashboardLayout (pageMargin only)
 
 ## Tables — AppDataGrid
 
-**Default:** Use `@mui/x-data-grid` via [`AppDataGrid`](src/components/ui/AppDataGrid.tsx). Do **not** hand-build MUI `Table` for list pages.
+**Default:** Use `@mui/x-data-grid` via [`AppDataGrid`](@/frontend/common/components/ui/dataGrid/AppDataGrid.tsx). Do **not** hand-build MUI `Table` for list pages.
 
 ### Wrapper features
 
@@ -75,7 +75,7 @@ DashboardLayout (pageMargin only)
 
 ### Page-specific DataGrid components
 
-Place column definitions in `src/views/dashboard/<feature>/components/*DataGrid.tsx`:
+Place column definitions in `frontend/common/views/dashboard/<feature>/components/*DataGrid.tsx`:
 
 | Component                    | Route                           | Pagination                         |
 | ---------------------------- | ------------------------------- | ---------------------------------- |

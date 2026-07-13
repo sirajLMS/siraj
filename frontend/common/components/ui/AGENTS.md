@@ -1,37 +1,28 @@
-# Frontend UI Components Layer Rules
+# Frontend Common UI Components Layer Rules
 
-### Component Directory Structure (Mobile/Desktop/Shared)
+This document governs the **viewport-agnostic** (shared) UI primitives in `frontend/common/components/ui/`. These primitives are imported by BOTH mobile and desktop tier views — they contain no viewport logic.
 
-All shared UI components MUST follow the mobile/desktop/shared directory convention:
+For tier-specific primitives, see:
+- [`frontend/mobile/AGENTS.md`](../../mobile/AGENTS.md) — `Mobile*`-prefixed primitives (3 behavioral categories)
+- [`frontend/desktop/AGENTS.md`](../../desktop/AGENTS.md) — tier-paired `.desktop.*` variants only
+
+### Component Directory Structure
 
 ```
-frontend/components/ui/<component-name>/
-├── mobile/
-│   ├── <ComponentName>.mobile.tsx
-│   ├── <ComponentName>.mobile.stories.tsx
-│   └── components/
-│       └── <SubComponent>.mobile.tsx
-├── desktop/
-│   ├── <ComponentName>.desktop.tsx
-│   ├── <ComponentName>.desktop.stories.tsx
-│   └── components/
-│       └── <SubComponent>.desktop.tsx
-├── shared/
-│   ├── <ComponentName>.shared.tsx
-│   ├── <ComponentName>.shared.stories.tsx
-│   └── components/
-│       └── <SubComponent>.shared.tsx
-├── use<ComponentName>ViewModel.ts      # ViewModel hook (viewport-agnostic)
-├── <ComponentName>View.tsx              # Switcher component (ONLY viewport consumer)
-├── index.ts                             # Barrel export
-└── index.stories.tsx                    # Storybook entry (optional)
+frontend/common/components/ui/<component-name>/
+├── <ComponentName>.tsx           # Viewport-agnostic primitive (both tiers use)
+├── <ComponentName>.stories.tsx   # Storybook entry (optional)
+├── index.ts                      # Barrel export (named exports only)
+└── components/                    # Sub-components (also viewport-agnostic)
+    └── <SubComponent>.tsx
 ```
 
 **Rules:**
-- **ALWAYS** create `mobile/`, `desktop/`, and `shared/` subdirectories for new components
-- **NEVER** create flat `.tsx` files directly under `frontend/components/ui/<component-name>/`
+- **NEVER** create `mobile/` or `desktop/` subdirectories under `frontend/common/components/ui/<component-name>/` — tier-specific variants live in `frontend/mobile/components/ui/` or `frontend/desktop/components/ui/`
+- **NEVER** create flat `.tsx` files directly under `frontend/common/components/ui/` — always group in a component directory with `index.ts`
 - **ALWAYS** export from `index.ts` using named exports only
 - **NEVER** use default exports for components
+- **NEVER** re-export `Mobile*` or `Desktop*`-prefixed primitives from this layer — they belong in `frontend/mobile/components/ui` / `frontend/desktop/components/ui`
 
 ### Mobile vs Desktop Isolation Rules
 
@@ -44,7 +35,7 @@ frontend/components/ui/<component-name>/
 - **NEVER** import or use `useMediaQuery` in `.mobile.tsx` or `.desktop.tsx` files
 - **NEVER** import or use `useViewport` in `.mobile.tsx` or `.desktop.tsx` files
 - **NEVER** add viewport branching logic (`if (isMobile) ...`) in versioned files
-- **ONLY** the switcher component (`<ComponentName>View.tsx`) may consume `useViewport()`
+- **ONLY** the switcher component (`<ComponentName>View.tsx`, which lives in `frontend/common/views/`) may consume `useViewport()` via `ResponsiveViewSwitch`
 - Mobile and desktop components must be **pure presentation** — zero business logic, zero hooks (except purely local UI state like tooltip/popover open state)
 
 **ESLint Configuration Pattern (already enforced):**
@@ -52,7 +43,7 @@ frontend/components/ui/<component-name>/
 ```javascript
 // eslint.config.mjs
 {
-  files: ['frontend/components/ui/**/*.mobile.tsx', 'frontend/components/ui/**/*.desktop.tsx'],
+  files: ['frontend/**/*.mobile.tsx', 'frontend/**/*.desktop.tsx'],
   rules: {
     'no-restricted-imports': [
       'error',
@@ -71,7 +62,7 @@ frontend/components/ui/<component-name>/
 **ALL business logic MUST live in ViewModel hooks.** Components receive a flat plain object (the "view model") via props.
 
 **Rules:**
-- **ALWAYS** create `use<ComponentName>ViewModel.ts` for components with business logic
+- **ALWAYS** create `use<ComponentName>ViewModel.ts` for components with business logic (this file lives in `frontend/common/views/dashboard/<domain>/`)
 - **NEVER** put data fetching, state management, handlers, or derived values in components
 - **ALWAYS** return a plain object from the ViewModel hook — same interface for mobile and desktop
 - **NEVER** call `useMediaQuery` or `useViewport` inside ViewModel hooks — they are viewport-agnostic
@@ -82,8 +73,8 @@ frontend/components/ui/<component-name>/
 **ViewModel Hook Template:**
 
 ```typescript
-// frontend/components/ui/dataGrid/useAppDataGridViewModel.ts
-import { useAppDataGridStore } from '@/frontend/stores/appDataGridStore';
+// frontend/common/views/dashboard/dataGrid/useAppDataGridViewModel.ts
+import { useAppDataGridStore } from '@/frontend/common/stores/appDataGridStore';
 import { useQuery } from '@apollo/client/react';
 import { AppDataGridQueryDocument } from '@/frontend/common/graphql/sharedDocuments/appDataGrid.documents';
 
@@ -126,15 +117,17 @@ export function useAppDataGridViewModel() {
 
 **Switcher Component Template (lazy loading via ResponsiveViewSwitch):**
 
+The switcher lives in `frontend/common/views/dashboard/<domain>/` (post-Block-2 relocation). It dynamically imports mobile and desktop tier views:
+
 ```tsx
-// frontend/components/ui/dataGrid/AppDataGridView.tsx
-import { createLazyView, ResponsiveViewSwitch } from '@/frontend/components/ui/container/ResponsiveViewSwitch';
+// frontend/common/views/dashboard/dataGrid/AppDataGridView.tsx
+import { createLazyView, ResponsiveViewSwitch } from '@/frontend/common/components/ui/container/ResponsiveViewSwitch';
 import { type AppDataGridViewModel, useAppDataGridViewModel } from './useAppDataGridViewModel';
 
 // createLazyView MUST be at module top level (required by next/dynamic).
 const lazyViews = createLazyView<AppDataGridViewModel>(
-  () => import('./mobile/AppDataGrid.mobile').then(m => ({ default: m.AppDataGridMobile })),
-  () => import('./desktop/AppDataGrid.desktop').then(m => ({ default: m.AppDataGridDesktop })),
+  () => import("@/frontend/mobile/views/dashboard/dataGrid/AppDataGrid.mobile").then(m => ({ default: m.AppDataGridMobileView })),
+  () => import("@/frontend/desktop/views/dashboard/dataGrid/AppDataGrid.desktop").then(m => ({ default: m.AppDataGridDesktopView })),
 );
 
 export function AppDataGridView() {
@@ -147,63 +140,40 @@ export function AppDataGridView() {
 
 | File Type | Suffix | Example |
 |-----------|--------|---------|
-| Mobile component | `.mobile.tsx` | `AppDataGrid.mobile.tsx` |
-| Desktop component | `.desktop.tsx` | `AppDataGrid.desktop.tsx` |
-| Shared component | `.shared.tsx` | `MetricCard.shared.tsx` |
-| Mobile Storybook | `.mobile.stories.tsx` | `AppDataGrid.mobile.stories.tsx` |
-| Desktop Storybook | `.desktop.stories.tsx` | `AppDataGrid.desktop.stories.tsx` |
-| Shared Storybook | `.shared.stories.tsx` | `MetricCard.shared.stories.tsx` |
-| ViewModel hook | `use<Name>ViewModel.ts` | `useAppDataGridViewModel.ts` |
-| Switcher component | `<Name>View.tsx` | `AppDataGridView.tsx` |
+| Viewport-agnostic component | `.tsx` (no suffix) | `MetricCard.tsx` |
+| Mobile component | `.mobile.tsx` | `AppDataGrid.mobile.tsx` (in `frontend/mobile/views/`) |
+| Desktop component | `.desktop.tsx` | `AppDataGrid.desktop.tsx` (in `frontend/desktop/views/`) |
+| ViewModel hook | `use<Name>ViewModel.ts` | `useAppDataGridViewModel.ts` (in `frontend/common/views/`) |
+| Switcher component | `<Name>View.tsx` | `AppDataGridView.tsx` (in `frontend/common/views/`) |
 
 **Rules:**
 - **ALWAYS** use the exact suffixes above — no variations
-- **NEVER** omit suffix for mobile/desktop files
-- **ONLY** shared components omit the version suffix (use `.shared.tsx`)
+- **NEVER** omit `mobile`/`desktop` suffix for tier-specific files
+- Viewport-agnostic primitives in `common` have NO tier suffix
 - **ALWAYS** name the ViewModel hook `use<ComponentName>ViewModel`
 - **ALWAYS** name the switcher `<ComponentName>View`
 
-### Shared Components
+### Viewport-agnostic primitives (this layer)
 
-Shared components (`.shared.tsx`) are for truly viewport-agnostic UI primitives that render identically on mobile and desktop.
+Shared components (no suffix) are for truly viewport-agnostic UI primitives that render identically on mobile and desktop. Both tiers import them from `@/frontend/common/components/ui`.
+
+**Examples:** `AppDataGrid`, `PageHeader`, `SectionPanel`, `StatusBadge`, `BaseCard`, `PageContainer`, `MetricCard`, `MetricCardGrid`, `ActionIconLink`, `PersonProfileLink`, `PaginationControls`.
 
 **Rules:**
-- **ONLY** create `.shared.tsx` when the component has **zero** viewport-dependent rendering
-- **NEVER** use `.shared.tsx` as a dumping ground for "common code" — extract to hooks or utils instead
-- Shared components **MUST NOT** import or use `useViewport` or `useMediaQuery`
-- Shared components **MAY** use `useState` for purely local UI state (tooltip, popover)
-- Export shared components from `index.ts` alongside mobile/desktop variants
+- **ONLY** create a non-suffixed component in `common` when it has **zero** viewport-dependent rendering
+- **NEVER** import or use `useViewport` or `useMediaQuery` in this layer
+- **MAY** use `useState` for purely local UI state (tooltip, popover)
+- Export from `index.ts` using named exports
+- The ONLY component in this layer that imports `useViewport()` is `ResponsiveViewSwitch` (the infrastructure switcher)
 
-**Example Shared Component:**
+### Tier-paired parent switchers (in this layer)
 
-```tsx
-// frontend/components/ui/metricCard/MetricCard.shared.tsx
-import { MetricCardProps } from './MetricCard.types';
-import { Box, Typography } from '@mui/material';
+Three un-suffixed parent switchers in `frontend/common/components/ui/` lazy-import BOTH tier halves via dynamic `import()`:
+- `filter/DateNavigator.tsx` — imports `dateNavigator.mobile.tsx` + `dateNavigator.desktop.tsx`
+- `input/localizedString/LocaleAdornmentSwitch.tsx` — imports `localeAdornmentSwitch.mobile.tsx` + `localeAdornmentSwitch.desktop.tsx`
+- `input/localizedString/LocalizedStringDrawer.tsx` — imports `localizedStringDrawer.mobile.tsx` + `localizedStringDrawer.desktop.tsx`
 
-export function MetricCard({ title, value, trend, icon, sx }: MetricCardProps) {
-  return (
-    <Box sx={sx}>
-      <Typography variant="labelUppercase">{title}</Typography>
-      <Typography variant="headlineLg">{value}</Typography>
-      {trend && <TrendIndicator trend={trend} />}
-      {icon && <Box sx={{ mt: 1 }}>{icon}</Box>}
-    </Box>
-  );
-}
-```
-
-**Example Shared Export (index.ts):**
-
-```typescript
-// frontend/components/ui/metricCard/index.ts
-export { MetricCard } from './shared/MetricCard.shared';
-export { MetricCardMobile } from './mobile/MetricCard.mobile';
-export { MetricCardDesktop } from './desktop/MetricCard.desktop';
-export { MetricCardView } from './MetricCardView';
-export { useMetricCardViewModel } from './useMetricCardViewModel';
-export type { MetricCardProps, MetricCardViewModel } from './MetricCard.types';
-```
+These files are NOT `.mobile.tsx`/`.desktop.tsx`; their cross-tier dynamic `import()` is allowed (ESLint cross-tier rule only fires on tier-versioned files).
 
 ### MUI v9 Compliance
 
@@ -251,7 +221,10 @@ test/ui/components/
 
 - **Frontend Root Rules:** `frontend/AGENTS.md` — MUI v9, React 19, logging, quality gate, theming
 - **Views Layer Rules:** `frontend/views/AGENTS.md` — ViewModel pattern, domain structure, Storybook
-- **Stores Layer Rules:** `frontend/stores/AGENTS.md` — Zustand patterns, persistence, serialization
+- **Common Views (switcher home):** `frontend/common/views/AGENTS.md` — switcher/Container/ViewModel relocation home
+- **Stores Layer Rules:** `frontend/common/stores/AGENTS.md` — Zustand patterns, persistence, serialization
+- **Mobile Module:** `frontend/mobile/AGENTS.md` — Mobile* primitives (3 behavioral categories)
+- **Desktop Module:** `frontend/desktop/AGENTS.md` — tier-paired `.desktop.*` variants
 - **Test Rules:** `tests.instructions.md` — runInRollback, tx propagation, entity setup, coverage
 - **Mobile/Desktop Instructions:** `.agents/instructions/mobile-desktop.instructions.md` — detailed mobile/desktop pattern
 - **Theme Palette:** `frontend/THEME_PALETTE.md` — color tokens and access patterns
@@ -264,13 +237,15 @@ test/ui/components/
 
 | DO | DON'T |
 |---|---|
-| Create `mobile/`, `desktop/`, `shared/` dirs | Create flat `.tsx` files |
+| Create viewport-agnostic primitives in `common` | Create `mobile/`/`desktop/` subdirs in `common` |
 | Put all logic in `use<Name>ViewModel.ts` | Put logic in `.mobile.tsx`/`.desktop.tsx` |
 | Use Zustand for mutable state | Use `useState` for filters/pagination/dialogs |
+| Import Mobile* from `@/frontend/mobile/components/ui` | Re-export Mobile* from `@/frontend/common/components/ui` |
+| Import Desktop* from `@/frontend/desktop/components/ui` | Re-export Desktop* from `@/frontend/common/components/ui` |
 | Use `sx` prop for all styling | Use direct style props (`mb`, `p`, `fontWeight`) |
 | Use theme callback for palette | Use `color="primary.main"` strings |
 | Export from `index.ts` with named exports | Use default exports |
 | Test ViewModel hooks in isolation | Test only via integration |
-| Use `.shared.tsx` for truly shared UI | Use `.shared.tsx` for "common code" |
-| Call `useViewport` ONLY in `<Name>View.tsx` | Call `useViewport` in ViewModel or versioned files |
+| Use non-suffixed `.tsx` for shared UI | Use `.shared.tsx` suffix (deprecated convention) |
+| Call `useViewport` ONLY in switcher via `ResponsiveViewSwitch` | Call `useViewport` in primitives or versioned files |
 | Use `*Outlined` icon names | Use `*Outline` icon names |
