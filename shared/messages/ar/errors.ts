@@ -49,6 +49,8 @@ export const errors: ErrorsLabels = {
   unsupportedTable: "جدول غير مدعوم: {table}",
   studentCreateFailed: "فشل إنشاء الطالب",
   studentCreateError: "فشل إنشاء الطلاب: {message}",
+  studentEmailRequired: "بريد إلكتروني للطالب مطلوب لإنشاء حساب دخول.",
+  studentPasswordRequired: "كلمة مرور للطالب مطلوبة لإنشاء حساب دخول.",
   studentNotFound: "الطالب {id} غير موجود",
   studentUpdateFailed: "فشل تحديث الطالب ذو المعرف {id}.",
   bankingDetailsAlreadyVerified: "التفاصيل البنكية مؤكدة بالفعل",
@@ -178,6 +180,26 @@ export const errors: ErrorsLabels = {
   },
   complaintResponse: {
     createFailed: "فشل إنشاء الرد على الشكوى.",
+  },
+  credit: {
+    createFailed: "فشل تسجيل عملية شراء الرصيد.",
+    insufficientBalance: "رصيد غير كافٍ للطالب {studentId}. المتبقي: {remaining} ساعة.",
+    recordPurchaseFailed: "فشل تسجيل عملية شراء {hours} ساعة للطالب {studentId}.",
+    duplicatePurchase: "تمت معالجة عملية الشراء هذه مسبقاً باستخدام مفتاح الإيداع {idempotencyKey}.",
+  },
+  lessonReport: {
+    createFailed: "فشل إنشاء تقرير الدرس.",
+    notFound: "تقرير الدرس ذو المعرف {id} غير موجود.",
+    alreadyExists: "يوجد تقرير للموثبة {classInstanceId} بالفعل.",
+    notEligibleForReview: "لا يمكن مراجعة تقرير الدرس ذو المعرف {id} في حالته الحالية.",
+    alreadyReviewed: "تمت مراجعة تقرير الدرس ذو المعرف {id} بالفعل.",
+    invalidStatusTransition: "انتقال حالة غير صالح: {currentStatus} → {newStatus}",
+  },
+  teacherDue: {
+    createFailed: "فشل إنشاء مستحق المعلم للدرس {classInstanceId}.",
+    notFound: "مستحق المعلم ذو المعرف {id} غير موجود.",
+    alreadyExists: "يوجد مستحق للدرس {classInstanceId} بالفعل.",
+    markAsPaidFailed: "فشل تحديد المستحق ذو المعرف {id} كمدفوع.",
   },
   complaintNotFound: "الشكوى ذو المعرف {id} غير موجودة.",
   suggestion: {

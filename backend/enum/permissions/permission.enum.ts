@@ -232,4 +232,18 @@ export enum AppPermission {
   STUDENT_QUOTA_EDIT_VIEW_OTHER = "student.student_quota_edit.view_other",
   STUDENT_QUOTA_EDIT_EDIT_OWN = "student.student_quota_edit.edit_own",
   STUDENT_QUOTA_EDIT_EDIT_OTHER = "student.student_quota_edit.edit_other",
+  // LMS — Lesson reports workflow
+  LESSON_REPORTS_SUBMIT = "lesson_reports.submit",
+  LESSON_REPORTS_REVIEW = "lesson_reports.review",
+  LESSON_REPORTS_APPROVE = "lesson_reports.approve",
+  LESSON_REPORTS_REJECT = "lesson_reports.reject",
+  // LMS — Role-scoped dashboard access
+  SUPERVISOR_VIEW_DASHBOARD = "supervisor.view_dashboard",
+  STUDENT_VIEW_OWN_DASHBOARD = "student.view_own_dashboard",
+  // LMS — Credits ledger management
+  CREDITS_MANAGE = "credits.manage",
+  // LMS — Teacher dues ledger
+  TEACHER_DUES_VIEW = "teacher_dues.view",
+  // LMS — Monthly reports
+  MONTHLY_REPORTS_VIEW = "monthly_reports.view",
 }

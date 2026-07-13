@@ -1,8 +1,14 @@
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
-import { AppPermission, StudentStatus } from "@/backend/enum";
+import {
+  ParentRepository,
+  PermissionManagementRepository,
+  StudentRepository,
+  TeacherRepository,
+  UserRepository,
+} from "@/backend/db/repo";
+import { AppPermission, StudentStatus, SystemPermissionGroupSlug } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
@@ -35,10 +41,43 @@ export namespace StudentOnboardingService {
       }
     }
 
+    // LMS — every student must have a login account (students.userId is NOT NULL).
+    // Validate email + password are provided before entering the transaction.
+    const email = input.email?.trim() || null;
+    const password = input.password ?? null;
+    if (!email) {
+      throw new Error(t("studentEmailRequired"));
+    }
+    if (!password) {
+      throw new Error(t("studentPasswordRequired"));
+    }
+
+    const emailExists = await UserRepository.existsByEmail(email);
+    if (emailExists) {
+      throw new Error(t("user.emailAlreadyExists"));
+    }
+
     const run = async (txObj: DBTransaction): Promise<StudentOnboardingResult> => {
+      // Step 1: Create the student login account (users row).
+      const user = await UserRepository.create({ name: input.name, email: { value: email }, password }, locale, txObj);
+
+      if (input.timezone) {
+        await UserRepository.updateTimezone(user.id, input.timezone, txObj, locale);
+      }
+
+      // Step 2: Assign the student to the STUDENT_DEFAULT permission group.
+      const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
+      const studentGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.STUDENT_DEFAULT);
+      if (!studentGroup) {
+        throw new Error(t("permission.groupNotFound"));
+      }
+      await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], studentGroup.id, actorUserId, txObj);
+
+      // Step 3: Create the students record linked to the new user.
       const student = await StudentRepository.create(
         {
           parentId: input.parentId,
+          userId: user.id,
           name: input.name,
           dateOfBirth: input.dateOfBirth ?? null,
           gender: input.gender ?? null,
@@ -67,11 +106,13 @@ export namespace StudentOnboardingService {
       logger.info("Student onboarded successfully", {
         studentId: student.id,
         parentId: input.parentId,
+        userId: user.id,
       });
 
       return {
         studentId: student.id,
         parentId: student.parentId,
+        userId: user.id,
         name: student.name,
         status: parseStudentStatus(student.status) ?? StudentStatus.REGULAR,
         primaryTeacherId: student.primaryTeacherId,

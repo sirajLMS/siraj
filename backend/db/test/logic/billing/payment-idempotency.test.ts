@@ -40,10 +40,22 @@ async function createTestParent(args: { tx: DBTransaction; suffix: string; now: 
 
 async function createTestStudent(args: { tx: DBTransaction; parentId: string; suffix: string; now: Date }) {
   const { tx, parentId, suffix, now } = args;
+  const [studentUser] = await tx
+    .insert(users)
+    .values({
+      name: "Idempotency Test Student User",
+      email: `student-${suffix}@example.com`,
+      password: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
   const [studentRecord] = await tx
     .insert(students)
     .values({
       parentId,
+      userId: studentUser.id,
       name: "Idempotency Test Student",
       status: "REGULAR",
       idempotencyKey: `stud-${suffix}`,

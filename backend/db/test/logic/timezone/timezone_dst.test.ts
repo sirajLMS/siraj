@@ -83,11 +83,23 @@ describe("Timezone Handling & DST Adjustment", () => {
       })
       .returning();
 
-    // 4. Create Student
+    // 4. Create Student User & Student
+    const [studentUserRow] = await db
+      .insert(users)
+      .values({
+        name: "TZ Student User",
+        email: `student-${randomUUID()}@example.com`,
+        password: "password",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
     [testStudent] = await db
       .insert(students)
       .values({
         parentId: testParent.id,
+        userId: studentUserRow.id,
         name: "TZ Student",
         status: "REGULAR",
         idempotencyKey: randomUUID(),

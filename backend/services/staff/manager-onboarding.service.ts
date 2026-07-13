@@ -11,7 +11,7 @@ export interface ManagerOnboardingInput {
   readonly email: string;
   readonly password: string;
   readonly phone?: string | null;
-  readonly accountType: "admin" | "manager";
+  readonly accountType: "admin" | "manager" | "supervisor";
 }
 
 export interface ManagerOnboardingResult {
@@ -53,7 +53,11 @@ export namespace ManagerOnboardingService {
 
     // Determine permission group based on account type
     const targetGroupSlug =
-      input.accountType === "admin" ? SystemPermissionGroupSlug.ACADEMY_ADMIN : SystemPermissionGroupSlug.STAFF_DEFAULT;
+      input.accountType === "admin"
+        ? SystemPermissionGroupSlug.ACADEMY_ADMIN
+        : input.accountType === "supervisor"
+          ? SystemPermissionGroupSlug.SUPERVISOR_DEFAULT
+          : SystemPermissionGroupSlug.STAFF_DEFAULT;
 
     const run = async (txObj: DBTransaction) => {
       // Step 1: Create user record

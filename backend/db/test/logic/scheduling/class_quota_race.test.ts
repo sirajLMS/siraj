@@ -61,10 +61,22 @@ async function createBaseTestData(
     })
     .returning();
 
+  const [studentUser] = await executor
+    .insert(users)
+    .values({
+      name: `${data.studentName} User`,
+      email: `student-${randomUUID()}@example.com`,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
   const [student] = await executor
     .insert(students)
     .values({
       parentId: parent.id,
+      userId: studentUser.id,
       name: data.studentName,
       gender: data.gender ?? Gender.MALE,
       status: "REGULAR",
@@ -82,7 +94,7 @@ async function createBaseTestData(
     assignedAt: now,
   });
 
-  return { parentUser, parent, teacherUser, teacher, student };
+  return { parentUser, parent, teacherUser, teacher, student, studentUser };
 }
 
 async function expectStudentQuota(executor: DBTransaction | typeof db, studentId: string, expectedRemaining: number) {
@@ -94,6 +106,7 @@ async function cleanupRaceTestData(data: {
   studentId: string;
   parentUserId: string;
   teacherUserId: string;
+  studentUserId: string;
   parentId: string;
   teacherId: string;
 }) {
@@ -115,6 +128,7 @@ async function cleanupRaceTestData(data: {
   // 5. Delete users
   await db.delete(users).where(eq(users.id, data.parentUserId));
   await db.delete(users).where(eq(users.id, data.teacherUserId));
+  await db.delete(users).where(eq(users.id, data.studentUserId));
 }
 
 describe("Class Quota System Constraints & Triggers", () => {
@@ -223,7 +237,7 @@ describe("Class Quota System Constraints & Triggers", () => {
     const parentEmail = `parent-race-${uniqueSuffix}@example.com`;
     const teacherEmail = `teacher-race-${uniqueSuffix}@example.com`;
 
-    const { student, teacher, parentUser, teacherUser, parent } = await createBaseTestData(db, {
+    const { student, teacher, parentUser, teacherUser, parent, studentUser } = await createBaseTestData(db, {
       parentEmail,
       teacherEmail,
       studentName: `Race Student ${uniqueSuffix}`,
@@ -280,6 +294,7 @@ describe("Class Quota System Constraints & Triggers", () => {
           studentId: student.id,
           parentUserId: parentUser.id,
           teacherUserId: teacherUser.id,
+          studentUserId: studentUser.id,
           parentId: parent.id,
           teacherId: teacher.id,
         });

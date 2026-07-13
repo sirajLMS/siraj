@@ -10,6 +10,7 @@ import "./meeting";
 import "./notifications";
 import "./parents";
 import "./profile";
+import "./reports";
 import "./scheduling";
 import "./shared";
 import "./storage";

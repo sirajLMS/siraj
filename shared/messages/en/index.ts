@@ -19,6 +19,12 @@ import {
   searchSchedule,
   statusTracking,
 } from "@/shared/messages/en/dashboard/core";
+import {
+  credit as lmsCredit,
+  lessonReports as lmsLessonReports,
+  monthlyReports as lmsMonthlyReports,
+  teacherDues as lmsTeacherDues,
+} from "@/shared/messages/en/dashboard/lms";
 import { managerOnboarding, managersDirectory } from "@/shared/messages/en/dashboard/managers";
 import { meetingProviders } from "@/shared/messages/en/dashboard/meeting-providers";
 import {
@@ -168,6 +174,12 @@ export const enTranslations = {
     booksAndBags,
     permissions,
     searchSchedule,
+    lms: {
+      credit: lmsCredit,
+      lessonReports: lmsLessonReports,
+      teacherDues: lmsTeacherDues,
+      monthlyReports: lmsMonthlyReports,
+    },
   },
 };
 

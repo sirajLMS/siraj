@@ -12,6 +12,11 @@ export namespace StudentHistoryService {
       return false;
     }
 
+    // LMS — Student login accounts can view their own history.
+    if (profile.userId === actorUserId) {
+      return true;
+    }
+
     const parent = await ParentRepository.findByUserId(actorUserId);
     if (parent && parent.id === profile.parentId) {
       return true;

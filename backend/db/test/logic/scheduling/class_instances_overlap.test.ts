@@ -57,10 +57,15 @@ async function createTestStudents(tx: DBTransaction, parentId: string, now: Date
 
   const createdStudents: StudentEntity[] = [];
   for (const data of studentsData) {
+    const studentUser = await createTestUser(tx, {
+      name: `${data.name} User`,
+      email: `student-${randomUUID()}@example.com`,
+    });
     const [student] = (await tx
       .insert(students)
       .values({
         parentId,
+        userId: studentUser.id,
         name: data.name,
         gender: data.gender,
         status: "REGULAR",

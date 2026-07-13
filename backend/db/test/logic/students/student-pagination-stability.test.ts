@@ -14,6 +14,22 @@ import { testLogger } from "@/shared/lib/logger/testlogger";
 describe("Issue #25: Student Pagination Cursor Stability", () => {
   let testParent: ParentEntity;
   let testUser: UserReturnType;
+  const createdStudentUserIds: string[] = [];
+
+  async function createStudentUser(): Promise<string> {
+    const [u] = await db
+      .insert(users)
+      .values({
+        name: `Student User ${randomUUID().slice(0, 8)}`,
+        email: `student-${randomUUID()}@example.com`,
+        password: randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    createdStudentUserIds.push(u.id);
+    return u.id;
+  }
 
   beforeAll(async () => {
     testLogger.info("Setting up test parent for pagination stability tests...");
@@ -52,10 +68,19 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
   afterEach(async () => {
     // Clean up students after each test
     await db.delete(students).where(eq(students.parentId, testParent.id));
+    // Clean up student users created during the test
+    for (const userId of createdStudentUserIds) {
+      await db.delete(users).where(eq(users.id, userId));
+    }
+    createdStudentUserIds.length = 0;
   });
 
   afterAll(async () => {
     testLogger.info("Cleaning up pagination stability test data...");
+    // Clean up any remaining student users
+    for (const userId of createdStudentUserIds) {
+      await db.delete(users).where(eq(users.id, userId));
+    }
     await db.delete(parents).where(eq(parents.id, testParent.id));
     await db.delete(users).where(eq(users.id, testUser.id));
   });
@@ -69,6 +94,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
     for (let i = 0; i < 3; i++) {
       await db.insert(students).values({
         parentId: testParent.id,
+        userId: await createStudentUser(),
         name: `Format Student ${i + 1}`,
         gender: Gender.MALE,
         status: "REGULAR",
@@ -112,6 +138,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
         .insert(students)
         .values({
           parentId: testParent.id,
+          userId: await createStudentUser(),
           name: `Forward Student ${i + 1}`,
           gender: Gender.FEMALE,
           status: "REGULAR",
@@ -171,6 +198,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
         .insert(students)
         .values({
           parentId: testParent.id,
+          userId: await createStudentUser(),
           name: `Update Stability Student ${i + 1}`,
           gender: Gender.FEMALE,
           status: "REGULAR",
@@ -221,6 +249,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
     for (let i = 0; i < 4; i++) {
       await db.insert(students).values({
         parentId: testParent.id,
+        userId: await createStudentUser(),
         name: `Desc Student ${i + 1}`,
         gender: Gender.MALE,
         status: "REGULAR",
@@ -258,6 +287,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
     for (let i = 0; i < 2; i++) {
       await db.insert(students).values({
         parentId: testParent.id,
+        userId: await createStudentUser(),
         name: `Invalid Cursor Student ${i + 1}`,
         gender: Gender.FEMALE,
         status: "REGULAR",
@@ -303,6 +333,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
         .insert(students)
         .values({
           parentId: testParent.id,
+          userId: await createStudentUser(),
           name: `Large Student ${String(i + 1).padStart(2, "0")}`,
           gender: i % 2 === 0 ? Gender.MALE : Gender.FEMALE,
           status: "REGULAR",

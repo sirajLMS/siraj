@@ -19,6 +19,12 @@ import {
   searchSchedule,
   statusTracking,
 } from "@/shared/messages/ar/dashboard/core";
+import {
+  credit as lmsCredit,
+  lessonReports as lmsLessonReports,
+  monthlyReports as lmsMonthlyReports,
+  teacherDues as lmsTeacherDues,
+} from "@/shared/messages/ar/dashboard/lms";
 import { managerOnboarding, managersDirectory } from "@/shared/messages/ar/dashboard/managers";
 import { meetingProviders as meetingProvidersLabels } from "@/shared/messages/ar/dashboard/meeting-providers/main";
 import {
@@ -171,6 +177,12 @@ export const arTranslations = {
     booksAndBags: booksAndBagsLabels,
     permissions: permissionsLabels,
     searchSchedule,
+    lms: {
+      credit: lmsCredit,
+      lessonReports: lmsLessonReports,
+      teacherDues: lmsTeacherDues,
+      monthlyReports: lmsMonthlyReports,
+    },
   },
 };
 

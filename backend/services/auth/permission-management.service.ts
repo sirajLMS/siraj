@@ -488,4 +488,25 @@ export namespace PermissionManagementService {
       assignedByUserId: input.assignedByUserId,
     });
   }
+
+  /**
+   * Idempotent upsert of a fixed-slug system permission group. Used by seeders
+   * and bootstrap flows to guarantee the existence of system-ready groups whose
+   * slugs are referenced externally (e.g. by `SystemPermissionGroupSlug`) but
+   * which may predate the migrations inserting them. Safe to call repeatedly.
+   *
+   * NOTE: this bypasses `requireManageAccess` because it is part of the
+   * system bootstrap surface, not user-initiated CRUD.
+   */
+  export async function ensureSystemPermissionGroup(input: {
+    slug: string;
+    name: LocalizedString;
+    description?: LocalizedString | null;
+  }): Promise<{ id: string; slug: string; isSystem: boolean }> {
+    return PermissionManagementRepository.upsertSystemGroup({
+      slug: input.slug,
+      name: input.name,
+      description: input.description ?? null,
+    });
+  }
 }

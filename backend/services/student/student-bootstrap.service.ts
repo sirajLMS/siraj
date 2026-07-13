@@ -15,6 +15,7 @@ import type { StudentEntity, StudentProgressSelectType } from "@/backend/types";
 
 export type StudentUpsertByKeyInput = {
   parentId: string;
+  userId: string;
   primaryTeacherId: string;
   name: string;
   avatarUrl: string | null;

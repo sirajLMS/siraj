@@ -284,13 +284,6 @@ async function executeProcessClassLeave(
 
   const originalId = updated?.id ?? id;
 
-  if (existing.quotaDeducted) {
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, existing.studentId));
-  }
-
   await insertLeaveRequestRecord(t, id, actorUserId, reason);
 
   const [teacherRow] = await t
@@ -324,70 +317,15 @@ async function validateRescheduleState(
   }
 }
 
-async function handleOriginalQuotaRestoration(t: DBTransaction, original: Types.ClassInstanceEntity) {
-  if (original.quotaDeducted && original.deletedAt === null) {
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, original.studentId));
-  }
-}
+async function handleOriginalQuotaRestoration(_t: DBTransaction, _original: Types.ClassInstanceEntity): Promise<void> {}
 
 export async function adjustQuotaOnUpdate(
-  t: DBTransaction,
-  existing: Types.ClassInstanceEntity,
-  input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
-  isBeingSoftDeleted: boolean,
-  locale?: string
-) {
-  const studentId = input.studentId ?? existing.studentId;
-  const wasDeducted = existing.quotaDeducted && existing.deletedAt === null;
-  const effectiveNewDeducted = (input.quotaDeducted ?? existing.quotaDeducted) && !isBeingSoftDeleted;
-
-  if (!wasDeducted && effectiveNewDeducted) {
-    const [student] = await t
-      .select({ classesRemaining: students.classesRemaining })
-      .from(students)
-      .where(eq(students.id, studentId))
-      .limit(1);
-
-    if (!student || student.classesRemaining <= 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("outOfQuota"));
-    }
-
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-      .where(eq(students.id, studentId));
-  } else if (wasDeducted && !effectiveNewDeducted) {
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, studentId));
-  } else if (wasDeducted && effectiveNewDeducted && input.studentId && input.studentId !== existing.studentId) {
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-      .where(eq(students.id, existing.studentId));
-
-    const [newStudent] = await t
-      .select({ classesRemaining: students.classesRemaining })
-      .from(students)
-      .where(eq(students.id, input.studentId))
-      .limit(1);
-
-    if (!newStudent || newStudent.classesRemaining <= 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("outOfQuota"));
-    }
-
-    await t
-      .update(students)
-      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-      .where(eq(students.id, input.studentId));
-  }
-}
+  _t: DBTransaction,
+  _existing: Types.ClassInstanceEntity,
+  _input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
+  _isBeingSoftDeleted: boolean,
+  _locale?: string
+): Promise<void> {}
 
 export const activateClassInstance = async (
   id: string,
@@ -524,14 +462,8 @@ export const resetClassInstance = async (id: string, actorUserId: string, tx?: D
   return runStateChange(
     id,
     actorUserId,
-    async (t, existing) => {
+    async () => {
       const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
-      if (existing.quotaDeducted) {
-        await t
-          .update(students)
-          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-          .where(eq(students.id, existing.studentId));
-      }
       return {
         state: {
           executionState: "NOT_ACTIVATED",
@@ -550,7 +482,7 @@ export const resetClassInstance = async (id: string, actorUserId: string, tx?: D
           adminNotes: null,
         },
         event: {
-          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          fromState: { executionState: undefined, outcome: undefined },
           toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
           description: tFuncSession("resetDescription"),
         },
@@ -683,13 +615,6 @@ export async function processAutomatedClassLeave(
     );
 
     const originalId = updated?.id ?? id;
-
-    if (existing.quotaDeducted) {
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-        .where(eq(students.id, existing.studentId));
-    }
 
     const now = new Date();
     await t

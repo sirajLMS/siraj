@@ -14,6 +14,7 @@ export * from "@/backend/graphql/pothos/notifications";
 export * from "@/backend/graphql/pothos/parents";
 export * from "@/backend/graphql/pothos/permissions";
 export * from "@/backend/graphql/pothos/profile";
+export * from "@/backend/graphql/pothos/reports";
 export * from "@/backend/graphql/pothos/scheduling";
 export * from "@/backend/graphql/pothos/shared";
 export * from "@/backend/graphql/pothos/storage";

@@ -111,6 +111,7 @@ export {
 export { type OrchestrateSeedManyOptions, orchestrateSeedMany } from "./orchestrate-seed-many";
 export {
   buildExtraParentUserSpecs,
+  buildExtraStudentUserSpecs,
   buildExtraTeacherUserSpecs,
   buildStudentName,
   getStudentAvatarFileName,

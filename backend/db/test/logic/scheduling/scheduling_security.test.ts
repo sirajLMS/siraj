@@ -42,7 +42,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .returning();
 
       const result = await SchedulingRepository.deleteRecurringClass(instance.id, tx);
-      expect(result).toBe(true);
+      expect(result).not.toBeNull();
 
       const [deleted] = await tx.select().from(classInstances).where(eq(classInstances.id, instance.id));
       expect(deleted.deletedAt).not.toBeNull();
@@ -70,7 +70,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .returning();
 
       const result = await SchedulingRepository.deleteRecurringClass(instance.id, tx);
-      expect(result).toBe(true);
+      expect(result).not.toBeNull();
 
       const [deleted] = await tx.select().from(classInstances).where(eq(classInstances.id, instance.id));
       expect(deleted.deletedAt).not.toBeNull();
@@ -100,7 +100,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
         .returning();
 
       const result = await SchedulingRepository.deleteRecurringClass(instance.id, tx);
-      expect(result).toBe(true);
+      expect(result).not.toBeNull();
 
       const [deleted] = await tx.select().from(classInstances).where(eq(classInstances.id, instance.id));
       expect(deleted.deletedAt).not.toBeNull();
@@ -152,7 +152,7 @@ describe("Scheduling Security & Trigger Compatibility", () => {
       ]);
 
       const result = await SchedulingRepository.clearWeeklySchedule(teacher.id, tx);
-      expect(result).toBe(true);
+      expect(result).not.toBeNull();
 
       const activeSchedules = await tx
         .select()

@@ -61,6 +61,32 @@ export function buildExtraParentUserSpecs(config: SeedConfig): SeedUserSpec[] {
   return specs;
 }
 
+/**
+ * Build the extra student login user specs beyond the single default demo student
+ * (`student@siraj.local` defined in `shared/demo-users.ts`).
+ *
+ * The student seeder (`getTotalStudents`) produces `2 + config.extraStudents` student
+ * rows (two demo + extras). One of those two demo rows is paired with the default demo
+ * student user; this helper produces the remaining `1 + extraStudents` users so that
+ * every seeded student has a corresponding login account.
+ */
+export function buildExtraStudentUserSpecs(config: SeedConfig): SeedUserSpec[] {
+  const specs: SeedUserSpec[] = [];
+  const count = 1 + config.extraStudents;
+  for (let i = 1; i <= count; i++) {
+    const faker = getFakerForIndex(config.fakerSeed, 3000 + i);
+    specs.push({
+      name: faker.person.fullName(),
+      email: `student-${i}@seed.siraj.local`,
+      plainPassword: SEED_PASSWORD,
+      isSuperAdmin: false,
+      groupSlug: SystemPermissionGroupSlug.STUDENT_DEFAULT,
+      idempotencyKey: `seed_student_user_${i}`,
+    });
+  }
+  return specs;
+}
+
 export function buildStudentName(config: SeedConfig, index: number): string {
   const faker = getFakerForIndex(config.fakerSeed, 2000 + index);
   return faker.person.fullName();

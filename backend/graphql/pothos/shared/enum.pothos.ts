@@ -2,6 +2,7 @@ import {
   AccountStatus,
   AppLanguage,
   AppPermission,
+  AttendanceEvaluation,
   AttendanceStatus,
   AvailabilitySearchSortBy,
   AvailabilityStatus,
@@ -10,6 +11,7 @@ import {
   ClassOutcome,
   ClassType,
   CountryCode,
+  CreditReason,
   CurrencyCode,
   DayOfWeek,
   FxProvider,
@@ -19,6 +21,7 @@ import {
   InvoiceStatus,
   InvoiceType,
   LeaveRequestStatus,
+  LessonReportStatus,
   NotificationChannel,
   NotificationEventType,
   OrderSortDirection,
@@ -29,6 +32,8 @@ import {
   ProfileScope,
   RescheduleDateLabel,
   StudentStatus,
+  TeacherDueStatus,
+  UserRole,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
@@ -168,4 +173,24 @@ export const ProfileScopePothosEnum = gqlSchemaBuilder.enumType(ProfileScope, {
 
 export const ProfileModePothosEnum = gqlSchemaBuilder.enumType(ProfileMode, {
   name: "ProfileMode",
+});
+
+export const UserRolePothosEnum = gqlSchemaBuilder.enumType(UserRole, {
+  name: "UserRole",
+});
+
+export const CreditReasonPothosEnum = gqlSchemaBuilder.enumType(CreditReason, {
+  name: "CreditReason",
+});
+
+export const LessonReportStatusPothosEnum = gqlSchemaBuilder.enumType(LessonReportStatus, {
+  name: "LessonReportStatus",
+});
+
+export const AttendanceEvaluationPothosEnum = gqlSchemaBuilder.enumType(AttendanceEvaluation, {
+  name: "AttendanceEvaluation",
+});
+
+export const TeacherDueStatusPothosEnum = gqlSchemaBuilder.enumType(TeacherDueStatus, {
+  name: "TeacherDueStatus",
 });

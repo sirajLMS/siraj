@@ -3,5 +3,6 @@
 export * from "./class-category";
 export * from "./class-subject";
 export * from "./group-class";
+export * from "./lesson-reports";
 export * from "./scheduling";
 export * from "./subject-resource";

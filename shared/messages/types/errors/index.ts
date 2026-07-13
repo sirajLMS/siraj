@@ -1,6 +1,8 @@
 export type { AuthErrorLabels } from "./auth";
 export type { ComplaintErrorLabels } from "./complaint";
 export type { ComplaintResponseErrorLabels } from "./complaintResponse";
+export type { CreditErrorLabels } from "./credit";
+export type { LessonReportErrorLabels } from "./lesson-report";
 export type { ErrorsLabels } from "./main";
 export type { ManagerErrorLabels } from "./manager";
 export type { ParentErrorLabels } from "./parent";
@@ -8,4 +10,5 @@ export type { PermissionErrorLabels } from "./permission";
 export type { StaffErrorLabels } from "./staff";
 export type { SuggestionErrorLabels } from "./suggestion";
 export type { TeacherErrorLabels } from "./teacher";
+export type { TeacherDueErrorLabels } from "./teacher-due";
 export type { UserErrorLabels } from "./user";

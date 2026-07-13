@@ -41,6 +41,9 @@ const createMinimalStudentInput = (
   primaryTeacherId: overrides?.primaryTeacherId ?? null,
   classesTotal: null,
   classesRemaining: null,
+  email: null,
+  password: null,
+  timezone: null,
 });
 
 describe("Student Onboarding GraphQL API", () => {

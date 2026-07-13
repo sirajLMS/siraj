@@ -12,6 +12,7 @@ import { testLogger } from "@/shared/lib/logger/testlogger";
 describe("hoursPerWeek Recalculation Triggers", () => {
   let parentUser: Pick<UserReturnType, "id"> | null = null;
   let teacherUser: Pick<UserReturnType, "id"> | null = null;
+  let studentUser: Pick<UserReturnType, "id"> | null = null;
   let testParent: ParentEntity | null = null;
   let testTeacher: TeacherEntity | null = null;
   let testStudent: StudentEntity | null = null;
@@ -75,11 +76,23 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       })
       .returning();
 
-    // 3. Create Student
+    // 3. Create Student User & Student
+    [studentUser] = await db
+      .insert(users)
+      .values({
+        name: "Recalculation Student User",
+        email: `student-${randomUUID()}@example.com`,
+        password: randomUUID(),
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+
     [testStudent] = await db
       .insert(students)
       .values({
         parentId: testParent.id,
+        userId: studentUser.id,
         primaryTeacherId: testTeacher.id,
         name: "Recalculation Student",
         status: "REGULAR",
@@ -111,6 +124,9 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       }
       if (teacherUser) {
         await db.delete(users).where(sql`id = ${teacherUser.id}`);
+      }
+      if (studentUser) {
+        await db.delete(users).where(sql`id = ${studentUser.id}`);
       }
       testLogger.info("Hours recalculation test records cleaned up successfully.");
     } catch (error) {

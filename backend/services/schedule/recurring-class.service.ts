@@ -1,4 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
+import { CreditRepository } from "@/backend/db/repo";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   type RecurringScheduleDayUpsertInput,
@@ -10,6 +12,7 @@ import { AppPermission, type IanaTimezone } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { CreditService } from "@/backend/services/billing/credit.service";
 import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
 
 export interface CreateRecurringClassInput {
@@ -55,23 +58,44 @@ export namespace RecurringClassService {
         throw new Error(t("invalidInput"));
       }
 
-      const result = await SchedulingRepository.createRecurringScheduleWithInstances(
-        {
-          studentId: input.studentId,
-          teacherId: input.teacherId,
-          durationMinutes: input.durationMinutes,
-          defaultStartTime: input.defaultStartTime,
-          timezone: input.timezone,
-          timezoneId: input.timezoneId,
-          effectiveFrom: input.effectiveFrom ? new Date(input.effectiveFrom) : null,
-          effectiveUntil: input.effectiveUntil ? new Date(input.effectiveUntil) : null,
-          days: input.days,
-          classType: input.classType,
-          generateInstancesForWeeks: input.generateInstancesForWeeks,
-        },
-        undefined,
-        locale
-      );
+      const balance = await CreditRepository.getBalance(db, input.studentId);
+      if (balance.classesRemaining <= 0) {
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(
+          t("credit.insufficientBalance", {
+            studentId: input.studentId,
+            remaining: balance.classesRemaining,
+          })
+        );
+      }
+
+      const result = await db.transaction(async tx => {
+        const created = await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: input.studentId,
+            teacherId: input.teacherId,
+            durationMinutes: input.durationMinutes,
+            defaultStartTime: input.defaultStartTime,
+            timezone: input.timezone,
+            timezoneId: input.timezoneId,
+            effectiveFrom: input.effectiveFrom ? new Date(input.effectiveFrom) : null,
+            effectiveUntil: input.effectiveUntil ? new Date(input.effectiveUntil) : null,
+            days: input.days,
+            classType: input.classType,
+            generateInstancesForWeeks: input.generateInstancesForWeeks,
+            quotaDeducted: true,
+          },
+          tx,
+          locale
+        );
+
+        for (const classInstanceId of created.classInstanceIds) {
+          const idempotencyKey = `credit-deduction:${classInstanceId}`;
+          await CreditService.deductForBooking(input.studentId, classInstanceId, userId, idempotencyKey, tx, locale);
+        }
+
+        return created;
+      });
 
       return {
         id: result.recurringScheduleId,

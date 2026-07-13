@@ -3,6 +3,7 @@ import {
   AccountStatus,
   AppLanguage,
   AppPermission,
+  AttendanceEvaluation,
   AvailabilityStatus,
   ClassExecutionState,
   ClassOutcome,
@@ -10,6 +11,7 @@ import {
   ComplaintCategory,
   ComplaintStatus,
   CountryCode,
+  CreditReason,
   CurrencyCode,
   DayOfWeek,
   DevicePlatform,
@@ -21,12 +23,14 @@ import {
   InvoiceType,
   LeaveRequesterType,
   LeaveRequestStatus,
+  LessonReportStatus,
   NotificationChannel,
   NotificationDeliveryStatus,
   NotificationEventType,
   ParentStatus,
   StudentStatus,
   SuggestionStatus,
+  TeacherDueStatus,
   VacationRequestStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
@@ -98,3 +102,11 @@ export const appPermissionEnum = pgEnum(
 export const fxProviderEnum = createPgEnumFromEnum("fx_provider", FxProvider);
 
 export const fxSyncStatusEnum = createPgEnumFromEnum("fx_sync_status", FxSyncStatus);
+
+export const teacherDueStatusEnum = createPgEnumFromEnum("teacher_due_status", TeacherDueStatus);
+
+export const lessonReportStatusEnum = createPgEnumFromEnum("lesson_report_status", LessonReportStatus);
+
+export const attendanceEvaluationEnum = createPgEnumFromEnum("attendance_evaluation", AttendanceEvaluation);
+
+export const creditReasonEnum = createPgEnumFromEnum("credit_reason", CreditReason);

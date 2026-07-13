@@ -6,7 +6,7 @@ import type {
 import type { ManagerOnboardingReturnType } from "@/backend/types";
 
 export const ManagerAccountTypePothosEnum = gqlSchemaBuilder.enumType(
-  { admin: "admin" as const, manager: "manager" as const },
+  { admin: "admin" as const, manager: "manager" as const, supervisor: "supervisor" as const },
   { name: "ManagerAccountType", description: "Account type for new manager" }
 );
 
@@ -32,7 +32,7 @@ export const ManagerOnboardingInputPothosObject = gqlSchemaBuilder
   .inputRef<
     Omit<ManagerOnboardingInput, "email" | "accountType"> & {
       email: string;
-      accountType: "admin" | "manager";
+      accountType: "admin" | "manager" | "supervisor";
     }
   >("ManagerOnboardingInput")
   .implement({

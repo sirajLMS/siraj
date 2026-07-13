@@ -1,4 +1,5 @@
 import type { DBTransaction } from "@/backend/db/db.types";
+import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
@@ -7,6 +8,7 @@ import { AppPermission } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { CreditService } from "@/backend/services/billing/credit.service";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
 import type {
@@ -79,6 +81,17 @@ export namespace ClassSessionService {
     return result;
   }
 
+  async function refundCreditIfDeducted(
+    instance: { id: string; studentId: string; quotaDeducted: boolean | null },
+    actorUserId: string,
+    tx: DBTransaction,
+    locale?: string
+  ): Promise<void> {
+    if (!instance.quotaDeducted) return;
+    const idempotencyKey = `credit-refund:${instance.id}`;
+    await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, locale);
+  }
+
   async function assertSessionActivated(
     instance: Awaited<ReturnType<typeof getOrThrow>>,
     locale?: string
@@ -147,8 +160,18 @@ export namespace ClassSessionService {
 
   export async function deleteInstance(userId: string, classInstanceId: string, locale?: string) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, locale);
-    const deleted = await SchedulingRepository.softDeleteClassInstance(classInstanceId, userId);
-    return deleted !== null;
+    const instance = await getOrThrow(classInstanceId, locale);
+
+    return db.transaction(async tx => {
+      const deleted = await SchedulingRepository.softDeleteClassInstance(classInstanceId, userId, tx, locale);
+      if (!deleted) return false;
+
+      const wasDeducted = instance.quotaDeducted && instance.deletedAt === null;
+      if (wasDeducted) {
+        await refundCreditIfDeducted(instance, userId, tx, locale);
+      }
+      return true;
+    });
   }
 
   export const updateStatusStart: ClassActionFn<ClassInstanceEntity> = (userId, classInstanceId, locale) =>
@@ -174,16 +197,18 @@ export namespace ClassSessionService {
     reason?: string | null,
     locale?: string
   ) {
-    return runActivatedClassAction(
-      userId,
-      classInstanceId,
-      AppPermission.SESSION_UPDATE_STATUS_LEAVE,
-      locale,
-      async instance => {
-        await SystemRulesService.assertLeaveQuotaAvailable(instance.teacherId, locale);
-        return SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, undefined, locale);
+    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_LEAVE, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await assertSessionActivated(instance, locale);
+    await SystemRulesService.assertLeaveQuotaAvailable(instance.teacherId, locale);
+
+    return db.transaction(async tx => {
+      const result = await SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, tx, locale);
+      if (instance.quotaDeducted) {
+        await refundCreditIfDeducted(instance, userId, tx, locale);
       }
-    );
+      return result;
+    });
   }
 
   export async function reschedule(
@@ -227,29 +252,54 @@ export namespace ClassSessionService {
     const finalRemarks = remarksParts.length > 0 ? remarksParts.join("\n") : null;
 
     const idempotencyKey = `manual-reschedule-${classInstanceId}-${input.scheduledStartAt.toISOString()}`;
-    return SchedulingRepository.rescheduleClassInstance(classInstanceId, {
-      studentId: existing.studentId,
-      teacherId: existing.teacherId,
-      scheduledStartAt: input.scheduledStartAt,
-      scheduledEndAt: input.scheduledEndAt,
-      durationMinutes: input.durationMinutes,
-      classType: existing.classType,
-      executionState: "NOT_ACTIVATED" as const,
-      outcome: "PENDING" as const,
-      isRescheduled: false,
-      quotaDeducted: false,
-      payrollCredited: false,
-      rateAmount: existing.rateAmount,
-      rateCurrency: existing.rateCurrency,
-      isRateOverridden: existing.isRateOverridden,
-      remarks: finalRemarks,
-      idempotencyKey,
+    return db.transaction(async tx => {
+      const created = await SchedulingRepository.rescheduleClassInstance(
+        classInstanceId,
+        {
+          studentId: existing.studentId,
+          teacherId: existing.teacherId,
+          scheduledStartAt: input.scheduledStartAt,
+          scheduledEndAt: input.scheduledEndAt,
+          durationMinutes: input.durationMinutes,
+          classType: existing.classType,
+          executionState: "NOT_ACTIVATED" as const,
+          outcome: "PENDING" as const,
+          isRescheduled: false,
+          quotaDeducted: false,
+          payrollCredited: false,
+          rateAmount: existing.rateAmount,
+          rateCurrency: existing.rateCurrency,
+          isRateOverridden: existing.isRateOverridden,
+          remarks: finalRemarks,
+          idempotencyKey,
+        },
+        tx,
+        locale
+      );
+
+      if (existing.quotaDeducted && existing.deletedAt === null) {
+        await refundCreditIfDeducted(existing, userId, tx, locale);
+      }
+
+      return created;
     });
   }
 
   export async function reset(userId: string, classInstanceId: string, locale?: string) {
     await assertPermission(userId, AppPermission.SESSION_RESET, locale);
-    return handleUpdate(SchedulingRepository.resetClassInstance(classInstanceId, userId), locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+
+    return db.transaction(async tx => {
+      const resetInstance = await SchedulingRepository.resetClassInstance(classInstanceId, userId, tx, locale);
+      if (!resetInstance) {
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("notFound"));
+      }
+      if (instance.quotaDeducted) {
+        await refundCreditIfDeducted(instance, userId, tx, locale);
+      }
+      return resetInstance;
+    });
   }
   export async function listClassInstancesByIdempotencyKeys(
     keys: readonly string[],

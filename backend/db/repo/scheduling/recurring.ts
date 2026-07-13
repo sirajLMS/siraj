@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   acquireLocks,
@@ -6,9 +6,8 @@ import {
   type DBTransaction,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
-import { handleQuotaDeduction } from "@/backend/db/repo/scheduling/state-changes";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
-import { classInstances, recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
+import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 
@@ -151,8 +150,6 @@ async function createSingleRecurringInstance(params: {
     locale
   );
 
-  await handleQuotaDeduction(t, input.studentId, !!input.quotaDeducted, locale);
-
   const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
 
   const [classInstance] = await t
@@ -170,6 +167,7 @@ async function createSingleRecurringInstance(params: {
       classType: input.classType ?? "REGULAR",
       executionState: "NOT_ACTIVATED",
       outcome: "PENDING",
+      quotaDeducted: !!input.quotaDeducted,
       idempotencyKey,
       createdAt: now,
       updatedAt: now,
@@ -179,7 +177,10 @@ async function createSingleRecurringInstance(params: {
   return classInstance.id;
 }
 
-export async function deleteRecurringClass(classInstanceId: string, tx?: DBTransaction): Promise<boolean> {
+export async function deleteRecurringClass(
+  classInstanceId: string,
+  tx?: DBTransaction
+): Promise<{ id: string; studentId: string; quotaDeducted: boolean; deleted: boolean } | null> {
   const runner = async (t: DBTransaction) => {
     const now = new Date();
 
@@ -194,12 +195,7 @@ export async function deleteRecurringClass(classInstanceId: string, tx?: DBTrans
       .where(eq(classInstances.id, classInstanceId))
       .limit(1);
 
-    if (existing?.quotaDeducted && existing.deletedAt === null) {
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-        .where(eq(students.id, existing.studentId));
-    }
+    if (!existing) return null;
 
     const [deleted] = await t
       .update(classInstances)
@@ -210,12 +206,21 @@ export async function deleteRecurringClass(classInstanceId: string, tx?: DBTrans
       .where(eq(classInstances.id, classInstanceId))
       .returning({ id: classInstances.id });
 
-    return !!deleted;
+    if (!deleted) return null;
+    return {
+      id: deleted.id,
+      studentId: existing.studentId,
+      quotaDeducted: existing.quotaDeducted,
+      deleted: existing.deletedAt === null,
+    };
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 }
 
-export async function clearWeeklySchedule(teacherId: string, tx?: DBTransaction): Promise<boolean> {
+export async function clearWeeklySchedule(
+  teacherId: string,
+  tx?: DBTransaction
+): Promise<{ refundedInstances: { id: string; studentId: string }[] } | null> {
   const runner = async (t: DBTransaction) => {
     const now = new Date();
 
@@ -225,7 +230,7 @@ export async function clearWeeklySchedule(teacherId: string, tx?: DBTransaction)
       .where(and(eq(recurringSchedules.teacherId, teacherId), isNull(recurringSchedules.deletedAt)));
 
     if (schedules.length === 0) {
-      return false;
+      return null;
     }
 
     const scheduleIds = schedules.map(s => s.id);
@@ -258,14 +263,9 @@ export async function clearWeeklySchedule(teacherId: string, tx?: DBTransaction)
         )
       );
 
-    for (const instance of orphanedInstances) {
-      if (instance.quotaDeducted) {
-        await t
-          .update(students)
-          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-          .where(eq(students.id, instance.studentId));
-      }
-    }
+    const refundedInstances = orphanedInstances
+      .filter(instance => instance.quotaDeducted)
+      .map(instance => ({ id: instance.id, studentId: instance.studentId }));
 
     if (orphanedInstances.length > 0) {
       await t
@@ -279,7 +279,7 @@ export async function clearWeeklySchedule(teacherId: string, tx?: DBTransaction)
         );
     }
 
-    return true;
+    return { refundedInstances };
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 }

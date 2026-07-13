@@ -71,6 +71,7 @@ export type {
 } from "@/backend/types/billing/billing.types";
 // Billing types
 export * from "@/backend/types/billing/billing.types";
+export * from "@/backend/types/billing/credit.types";
 export * from "@/backend/types/billing/payment-method.types";
 // Book types
 export * from "@/backend/types/books/book.types";
@@ -100,6 +101,8 @@ export type {
 } from "@/backend/types/classes/group-class.types";
 // Group Class types
 export * from "@/backend/types/classes/group-class.types";
+// Lesson Report types
+export * from "@/backend/types/classes/lesson-report.types";
 // Complaint types
 export * from "@/backend/types/complaints/complaint.types";
 export type {
@@ -135,6 +138,8 @@ export type {
 } from "@/backend/types/permissions/permission-management.types";
 export * from "@/backend/types/permissions/permission-management.types";
 export * from "@/backend/types/profile/profile.types";
+// Monthly report types (parental report types — distinct from books/report.types)
+export * from "@/backend/types/report/report.types";
 export type {
   DstCheckedEmptyItemReturnType,
   DstConflictGroupReturnType,
@@ -159,6 +164,7 @@ export * from "@/backend/types/students/studentProgress.types";
 export * from "@/backend/types/students/studentStatusHistory.types";
 export * from "@/backend/types/teachers/teacher.types";
 export * from "@/backend/types/teachers/teacher-availability.types";
+export * from "@/backend/types/teachers/teacher-due.types";
 export * from "@/backend/types/teachers/teacher-notes.types";
 export * from "@/backend/types/teachers/teacher-onboarding.types";
 // User types

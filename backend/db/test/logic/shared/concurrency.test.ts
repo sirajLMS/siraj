@@ -34,10 +34,20 @@ async function setupBaseTest(tx: DBTransaction, suffix: string) {
 
 async function setupStudentTest(tx: DBTransaction, suffix: string, classesTotal = 10) {
   const { testParent } = await setupBaseTest(tx, suffix);
+  const [testStudentUser] = await tx
+    .insert(users)
+    .values({
+      name: `${suffix} Student User`,
+      email: `${suffix.toLowerCase().replace(/\s+/g, "-")}-student@example.com`,
+      password: "hash",
+      ...getCommonDates(),
+    })
+    .returning();
   const [testStudent] = await tx
     .insert(students)
     .values({
       parentId: testParent.id,
+      userId: testStudentUser.id,
       name: `${suffix} Student`,
       status: "REGULAR",
       classesTotal,

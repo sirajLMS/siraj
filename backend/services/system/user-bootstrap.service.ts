@@ -5,7 +5,7 @@ import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 import type { UserSelectType } from "@/backend/types";
 
-const STAFF_GROUP_SLUGS = new Set(["super_admin", "academy_admin", "staff_default"]);
+const STAFF_GROUP_SLUGS = new Set(["super_admin", "academy_admin", "staff_default", "supervisor_default"]);
 
 export type DemoUserUpsertInput = {
   name: string;

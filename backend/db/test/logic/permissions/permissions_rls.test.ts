@@ -34,10 +34,12 @@ async function createParentForUser(tx: DBTransaction, userId: string, now: Date)
  * Helper to create a student for a given parent
  */
 async function createStudentForParent(tx: DBTransaction, parentId: string, name: string, now: Date) {
+  const studentUser = await createNamedUser(tx, `${name} User`, now);
   const [student] = (await tx
     .insert(students)
     .values({
       parentId,
+      userId: studentUser.id,
       name,
       status: "REGULAR",
       idempotencyKey: randomUUID(),

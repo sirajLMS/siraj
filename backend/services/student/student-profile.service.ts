@@ -40,6 +40,11 @@ async function resolveIsAssociatedViewer(actorUserId: string, studentId: string)
     return false;
   }
 
+  // LMS — Student login accounts can view their own profile.
+  if (profile.userId === actorUserId) {
+    return true;
+  }
+
   const parent = await ParentRepository.findByUserId(actorUserId);
   if (parent && parent.id === profile.parentId) {
     return true;
@@ -103,7 +108,7 @@ export namespace StudentProfileService {
       permissions: new Set(permissionContext.permissions),
     };
 
-    let upcomingClasses = null;
+    let upcomingClasses: Awaited<ReturnType<typeof StudentStatusService.getUpcomingClasses>> | null;
     try {
       upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, locale);
     } catch {

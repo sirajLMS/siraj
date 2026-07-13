@@ -20,6 +20,9 @@ export function useCreateStudentOnboarding() {
       primaryTeacherId: formData.primaryTeacherId || null,
       classesTotal: null,
       classesRemaining: null,
+      email: null,
+      password: null,
+      timezone: null,
     };
 
     const result = await mutate({ variables: { input } });

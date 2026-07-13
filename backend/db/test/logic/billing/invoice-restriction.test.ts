@@ -37,11 +37,23 @@ describe("Invoice Referential Integrity", () => {
         })
         .returning();
 
-      // 2. Create student record
+      // 2. Create student user and student record
+      const [studentUser] = await tx
+        .insert(users)
+        .values({
+          name: "Invoice Test Student User",
+          email: `student-${uniqueSuffix}@example.com`,
+          password: randomUUID(),
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
       const [studentRecord] = await tx
         .insert(students)
         .values({
           parentId: parentRecord.id,
+          userId: studentUser.id,
           name: "Invoice Test Student",
           status: "REGULAR",
           idempotencyKey: `stud-${uniqueSuffix}`,

@@ -24,6 +24,12 @@ import type {
   SearchScheduleLabels,
   StatusTrackingLabels,
 } from "@/shared/messages/types/dashboard/core";
+import type {
+  CreditLabels,
+  LessonReportLabels,
+  MonthlyReportLabels,
+  TeacherDueLabels,
+} from "@/shared/messages/types/dashboard/lms";
 import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "@/shared/messages/types/dashboard/managers";
 import type { MeetingProvidersLabels } from "@/shared/messages/types/dashboard/meeting-providers";
 import type {
@@ -71,12 +77,15 @@ export type {
   ClassDetailsPerformanceLabels,
   ComplaintsLabels,
   CreateRecurringClassLabels,
+  CreditLabels,
   DashboardLayoutLabels,
   DashboardNavigationLabels,
   DstMigrationLabels,
+  LessonReportLabels,
   ManagerOnboardingLabels,
   ManagersDirectoryLabels,
   MeetingProvidersLabels,
+  MonthlyReportLabels,
   ParentDashboardLabels,
   ParentLifecycleLabels,
   ParentOnboardingLabels,
@@ -89,6 +98,7 @@ export type {
   ScheduleAlertsLabels,
   StudentDirectoryLabels,
   StudentHistoryLabels,
+  StudentOnboardingLabels,
   StudentQuotaLabels,
   StudentStatusLabels,
   SubjectsLabels,
@@ -96,6 +106,7 @@ export type {
   TeacherAvailabilityLabels,
   TeacherCreateRecurringClassLabels,
   TeacherDashboardLabels,
+  TeacherDueLabels,
   TeacherFutureScheduleLabels,
   TeacherOnboardingLabels,
   TeacherProfileLabels,
@@ -163,5 +174,11 @@ export type MessageSchema = {
     readonly booksAndBags: BooksAndBagsLabels;
     readonly permissions: PermissionsLabels;
     readonly searchSchedule: SearchScheduleLabels;
+    readonly lms: {
+      readonly credit: CreditLabels;
+      readonly lessonReports: LessonReportLabels;
+      readonly teacherDues: TeacherDueLabels;
+      readonly monthlyReports: MonthlyReportLabels;
+    };
   };
 };

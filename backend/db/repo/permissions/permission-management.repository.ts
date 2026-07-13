@@ -211,6 +211,70 @@ export namespace PermissionManagementRepository {
   }
 
   /**
+   * Returns a permission group row by its slug (read by system-automated callers
+   * and seeds; no permissions list).
+   */
+  export async function findGroupBySlug(
+    slug: string,
+    tx?: DBTransaction
+  ): Promise<{ id: string; slug: string; isSystem: boolean } | null> {
+    const client = tx ?? db;
+    const [row] = await client
+      .select({ id: permissionGroups.id, slug: permissionGroups.slug, isSystem: permissionGroups.isSystem })
+      .from(permissionGroups)
+      .where(eq(permissionGroups.slug, slug))
+      .limit(1);
+    return row ?? null;
+  }
+
+  /**
+   * Idempotent upsert of a system permission group by slug. Used by seeders and
+   * system bootstrap to create the fixed system-ready groups (e.g.
+   * `supervisor_default`, `student_default`) that the migrations may not have
+   * inserted on older databases. Safe to call repeatedly.
+   */
+  export async function upsertSystemGroup(
+    input: { slug: string; name: LocalizedString; description: LocalizedString | null },
+    tx?: DBTransaction
+  ): Promise<{ id: string; slug: string; isSystem: boolean }> {
+    const client = tx ?? db;
+    const now = new Date();
+    const nameMap = omitEmptyLocalized(input.name);
+    const descriptionMap = input.description === null ? null : omitEmptyLocalized(input.description ?? {});
+
+    const [row] = await client
+      .insert(permissionGroups)
+      .values({
+        name: nameMap,
+        slug: input.slug,
+        description: descriptionMap,
+        isSystem: true,
+        createdByUserId: null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: permissionGroups.slug,
+        set: {
+          name: nameMap,
+          description: descriptionMap,
+          isSystem: true,
+          updatedAt: now,
+        },
+      })
+      .returning({
+        id: permissionGroups.id,
+        slug: permissionGroups.slug,
+        isSystem: permissionGroups.isSystem,
+      });
+
+    if (!row) {
+      throw new Error(`Failed to upsert system permission group: ${input.slug}`);
+    }
+    return row;
+  }
+
+  /**
    * Atomic transaction inserting group + permissions.
    * Persists the full `LocalizedString` map received from the caller; empty
    * entries are stripped before writing so the column never holds whitespace.

@@ -356,7 +356,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
 
         const result = await SchedulingRepository.deleteRecurringClass(instance.id, tx);
 
-        expect(result).toBe(true);
+        expect(result).not.toBeNull();
+        expect(result?.id).toBe(instance.id);
         const [deleted] = await tx.select().from(classInstances).where(eq(classInstances.id, instance.id));
         expect(deleted.deletedAt).not.toBeNull();
       });
@@ -365,7 +366,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
     test("should return false for non-existent class instance", async () => {
       await runInRollback(async tx => {
         const result = await SchedulingRepository.deleteRecurringClass(randomUUID(), tx);
-        expect(result).toBe(false);
+        expect(result).toBeNull();
       });
     });
   });
@@ -421,7 +422,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
 
         const clearResult = await SchedulingRepository.clearWeeklySchedule(teacher.id, tx);
 
-        expect(clearResult).toBe(true);
+        expect(clearResult).not.toBeNull();
 
         const remaining = await tx
           .select()
@@ -436,7 +437,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         const { teacher } = await setupTestEntities(tx, "ClearWeeklyEmpty", { skipInstance: true });
 
         const result = await SchedulingRepository.clearWeeklySchedule(teacher.id, tx);
-        expect(result).toBe(false);
+        expect(result).toBeNull();
       });
     });
   });

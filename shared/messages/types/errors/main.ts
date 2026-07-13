@@ -1,12 +1,15 @@
 import type { AuthErrorLabels } from "@/shared/messages/types/errors/auth";
 import type { ComplaintErrorLabels } from "@/shared/messages/types/errors/complaint";
 import type { ComplaintResponseErrorLabels } from "@/shared/messages/types/errors/complaintResponse";
+import type { CreditErrorLabels } from "@/shared/messages/types/errors/credit";
+import type { LessonReportErrorLabels } from "@/shared/messages/types/errors/lesson-report";
 import type { ManagerErrorLabels } from "@/shared/messages/types/errors/manager";
 import type { ParentErrorLabels } from "@/shared/messages/types/errors/parent";
 import type { PermissionErrorLabels } from "@/shared/messages/types/errors/permission";
 import type { StaffErrorLabels } from "@/shared/messages/types/errors/staff";
 import type { SuggestionErrorLabels } from "@/shared/messages/types/errors/suggestion";
 import type { TeacherErrorLabels } from "@/shared/messages/types/errors/teacher";
+import type { TeacherDueErrorLabels } from "@/shared/messages/types/errors/teacher-due";
 import type { UserErrorLabels } from "@/shared/messages/types/errors/user";
 
 export interface ErrorsLabels {
@@ -57,6 +60,8 @@ export interface ErrorsLabels {
   readonly unsupportedTable: string;
   readonly studentCreateFailed: string;
   readonly studentCreateError: string;
+  readonly studentEmailRequired: string;
+  readonly studentPasswordRequired: string;
   readonly studentNotFound: string;
   readonly studentUpdateFailed: string;
   readonly bankingDetailsAlreadyVerified: string;
@@ -131,6 +136,9 @@ export interface ErrorsLabels {
   readonly permission: PermissionErrorLabels;
   readonly complaint: ComplaintErrorLabels;
   readonly complaintResponse: ComplaintResponseErrorLabels;
+  readonly credit: CreditErrorLabels;
+  readonly lessonReport: LessonReportErrorLabels;
+  readonly teacherDue: TeacherDueErrorLabels;
   readonly complaintNotFound: string;
   readonly suggestion: SuggestionErrorLabels;
   readonly outOfQuota: string;

@@ -60,6 +60,26 @@ const _teachers: InternalDemoUser[] = [
   },
 ];
 
+const _supervisors: InternalDemoUser[] = [
+  {
+    name: "Default Supervisor",
+    email: "supervisor@siraj.local",
+    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    isSuperAdmin: false,
+    groupSlug: SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
+  },
+];
+
+const _students: InternalDemoUser[] = [
+  {
+    name: "Default Student",
+    email: "student@siraj.local",
+    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    isSuperAdmin: false,
+    groupSlug: SystemPermissionGroupSlug.STUDENT_DEFAULT,
+  },
+];
+
 const _parents: InternalDemoUser[] = [
   {
     name: "Default Parent",
@@ -73,6 +93,15 @@ const _parents: InternalDemoUser[] = [
 export const superAdmins: DemoUser[] = _superAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const academyAdmins: DemoUser[] = _academyAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const teachers: DemoUser[] = _teachers.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+export const supervisors: DemoUser[] = _supervisors.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+export const students: DemoUser[] = _students.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const parents: DemoUser[] = _parents.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 
-export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [..._superAdmins, ..._academyAdmins, ..._teachers, ..._parents];
+export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [
+  ..._superAdmins,
+  ..._academyAdmins,
+  ..._teachers,
+  ..._supervisors,
+  ..._students,
+  ..._parents,
+];

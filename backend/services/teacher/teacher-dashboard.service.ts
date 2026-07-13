@@ -1,3 +1,5 @@
+import { db } from "@/backend/db/drizzleDb";
+import { CreditRepository } from "@/backend/db/repo";
 import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
@@ -6,6 +8,7 @@ import { AppPermission } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { CreditService } from "@/backend/services/billing/credit.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 
@@ -85,6 +88,18 @@ export namespace TeacherDashboardService {
   export async function createManualEntry(userId: string, input: ManualEntryInput, locale?: string) {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, locale);
 
+    const balance = await CreditRepository.getBalance(db, input.studentId);
+    if (balance.classesRemaining <= 0) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(
+        t("credit.insufficientBalance", {
+          studentId: input.studentId,
+          remaining: balance.classesRemaining,
+        })
+      );
+    }
+
+    const idempotencyKey = `manual-${userId}-${Date.now()}`;
     const entry: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
       studentId: input.studentId,
       teacherId: input.teacherId,
@@ -94,11 +109,18 @@ export namespace TeacherDashboardService {
       classType: input.classType ?? "REGULAR",
       executionState: "NOT_ACTIVATED",
       outcome: "PENDING",
-      idempotencyKey: `manual-${userId}-${Date.now()}`,
+      quotaDeducted: true,
+      idempotencyKey,
     };
 
-    // Logic to create ad-hoc class_instances row for teacher's assigned student.
-    return SchedulingRepository.createClassInstance(entry, undefined, locale);
+    return db.transaction(async tx => {
+      const created = await SchedulingRepository.createClassInstance(entry, tx, locale);
+
+      const creditIdempotencyKey = `credit-deduction:${created.id}`;
+      await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, locale);
+
+      return created;
+    });
   }
 
   export interface SupportRequestInput {

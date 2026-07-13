@@ -49,6 +49,8 @@ export const errors: ErrorsLabels = {
   unsupportedTable: "Unsupported table: {table}",
   studentCreateFailed: "Failed to create student",
   studentCreateError: "Failed to create students: {message}",
+  studentEmailRequired: "Student email is required to provision a login account.",
+  studentPasswordRequired: "Student password is required to provision a login account.",
   studentNotFound: "Student {id} not found",
   studentUpdateFailed: "Failed to update student with ID {id}.",
   bankingDetailsAlreadyVerified: "Banking details already verified",
@@ -178,6 +180,26 @@ export const errors: ErrorsLabels = {
   },
   complaintResponse: {
     createFailed: "Failed to create complaint response.",
+  },
+  credit: {
+    createFailed: "Failed to record credit purchase.",
+    insufficientBalance: "Insufficient credit balance for student {studentId}. Remaining: {remaining} hours.",
+    recordPurchaseFailed: "Failed to record purchase of {hours} hours for student {studentId}.",
+    duplicatePurchase: "This purchase has already been processed using idempotency key {idempotencyKey}.",
+  },
+  lessonReport: {
+    createFailed: "Failed to create lesson report.",
+    notFound: "Lesson report with ID {id} not found.",
+    alreadyExists: "A lesson report already exists for class instance {classInstanceId}.",
+    notEligibleForReview: "Lesson report {id} is not eligible for review in its current status.",
+    alreadyReviewed: "Lesson report {id} has already been reviewed.",
+    invalidStatusTransition: "Invalid status transition: {currentStatus} → {newStatus}",
+  },
+  teacherDue: {
+    createFailed: "Failed to create teacher due for class instance {classInstanceId}.",
+    notFound: "Teacher due with ID {id} not found.",
+    alreadyExists: "A teacher due already exists for class instance {classInstanceId}.",
+    markAsPaidFailed: "Failed to mark teacher due {id} as paid.",
   },
   complaintNotFound: "Complaint with ID {id} not found.",
   suggestion: {

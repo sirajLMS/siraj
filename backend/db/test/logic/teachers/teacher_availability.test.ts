@@ -63,10 +63,13 @@ async function createBookingFixture(tx: DBTransaction): Promise<{
     throw new Error("Failed to create test teacher");
   }
 
+  const studentUser = await createTestUser(tx, "Availability Student User", "student-avail");
+
   const [student] = await tx
     .insert(students)
     .values({
       parentId: parent.id,
+      userId: studentUser.id,
       name: "Availability Student",
       gender: Gender.MALE,
       status: "REGULAR",

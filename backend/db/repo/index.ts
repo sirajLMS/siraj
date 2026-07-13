@@ -2,6 +2,7 @@ export { AuditRepository } from "@/backend/db/repo/audit";
 export { ImpersonationRepository } from "@/backend/db/repo/auth";
 export {
   BillingRepository,
+  CreditRepository,
   InvoicePaymentSubmissionRepository,
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,
@@ -15,6 +16,8 @@ export { ClassPerformanceRepository } from "@/backend/db/repo/classes/class-perf
 export { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 export { DstMigrationRepository } from "@/backend/db/repo/classes/dst-migration.repository";
 export { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
+export type { PendingReviewFilters } from "@/backend/db/repo/classes/lesson-report.repository";
+export { LessonReportRepository } from "@/backend/db/repo/classes/lesson-report.repository";
 export { SubjectResourceRepository } from "@/backend/db/repo/classes/subject-resource.repository";
 export {
   ComplaintRepository,
@@ -52,6 +55,7 @@ export {
 export {
   StaffProfileRepository,
   TeacherAvailabilityRepository,
+  TeacherDueRepository,
   TeacherNotesRepository,
   TeacherRepository,
 } from "@/backend/db/repo/teachers";

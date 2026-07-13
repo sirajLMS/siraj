@@ -47,10 +47,12 @@ async function createTestTeacher(tx: DBTransaction, name: string, email: string)
 
 async function createTestStudent(tx: DBTransaction, parentId: string, name: string, gender: Gender = Gender.MALE) {
   const now = new Date();
+  const { user: studentUser } = await createTestUser(tx, name, `student-${randomUUID()}@example.com`);
   const [student] = (await tx
     .insert(students)
     .values({
       parentId,
+      userId: studentUser.id,
       name,
       gender,
       status: "REGULAR",

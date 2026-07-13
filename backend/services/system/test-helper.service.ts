@@ -142,6 +142,7 @@ export namespace TestHelperService {
     tx: TxType,
     parentUserRowId: string,
     teacherUserRowId: string,
+    studentUserRowId: string,
     prefix: string,
     classesRemaining: number,
     now: Date
@@ -162,6 +163,7 @@ export namespace TestHelperService {
       .insert(students)
       .values({
         parentId: parentProfile.id,
+        userId: studentUserRowId,
         name: `${prefix} Student`,
         status: "REGULAR",
         classesRemaining,
@@ -214,6 +216,7 @@ export namespace TestHelperService {
         tx,
         parentUserRow.id,
         teacherUserRow.id,
+        studentUserRow.id,
         prefix,
         classesRemaining,
         now

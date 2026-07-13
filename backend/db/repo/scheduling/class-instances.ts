@@ -1,4 +1,4 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   acquireLocks,
@@ -103,11 +103,6 @@ export const createClassInstance = async (
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(tFunc("outOfQuota"));
       }
-
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-        .where(eq(students.id, input.studentId));
     }
 
     const [created] = await t
@@ -183,14 +178,7 @@ export const deleteClassInstance = async (
   locale?: string
 ): Promise<Types.ClassInstanceEntity> => {
   const runner = async (t: DBTransaction) => {
-    const existing = await getClassInstanceByIdOrThrow(t, id, locale);
-
-    if (existing.quotaDeducted && existing.deletedAt === null) {
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-        .where(eq(students.id, existing.studentId));
-    }
+    await getClassInstanceByIdOrThrow(t, id, locale);
 
     const { entity: deleted } = await SoftDeleteRepository.softDeleteClassInstance(id, null, t);
     return deleted;

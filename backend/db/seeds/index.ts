@@ -1,5 +1,6 @@
 import { seedOrGet as seedOrGetAdminAuditLogs } from "@/backend/db/seeds/audit/seed-admin-audit-logs";
 import { seedOrGet as seedOrGetAuditLogs } from "@/backend/db/seeds/audit/seed-audit-logs";
+import { seedOrGet as seedOrGetLmsPermissions } from "@/backend/db/seeds/auth/seed-lms-permissions";
 import { seedOrGet as seedOrGetMeetingPermissions } from "@/backend/db/seeds/auth/seed-meeting-permissions";
 import { seedOrGet as seedOrGetPaymentMethodPermissions } from "@/backend/db/seeds/auth/seed-payment-method-permissions";
 import { seedOrGet as seedOrGetProfileFieldPermissions } from "@/backend/db/seeds/auth/seed-profile-field-permissions";
@@ -34,6 +35,9 @@ import { seedOrGet as seedOrGetComplaintResponses } from "@/backend/db/seeds/com
 import { seedOrGet as seedOrGetComplaints } from "@/backend/db/seeds/complaints/seed-complaints";
 import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logFailedSeedSteps, runSeedStep, type SeedStepResult } from "@/backend/db/seeds/lib/run-seed-step";
+import { seedOrGet as seedOrGetCreditTransactions } from "@/backend/db/seeds/lms/seed-credit-transactions";
+import { seedOrGet as seedOrGetLessonReports } from "@/backend/db/seeds/lms/seed-lesson-reports";
+import { seedOrGet as seedOrGetTeacherDues } from "@/backend/db/seeds/lms/seed-teacher-dues";
 import { seedOrGet as seedOrGetClassMeetingConfigs } from "@/backend/db/seeds/meeting/seed-class-meeting-configs";
 import { seedOrGet as seedOrGetMeetingProviders } from "@/backend/db/seeds/meeting/seed-meeting-providers";
 import { seedOrGet as seedOrGetUserMeetingConfigs } from "@/backend/db/seeds/meeting/seed-user-meeting-configs";
@@ -63,13 +67,16 @@ import logger from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 import type {
   ClassInstanceEntity,
+  CreditTransactionReturnType,
   GroupWithPermissionIds,
   InvoiceSelectType,
+  LessonReportReturnType,
   ParentEntity,
   RecurringScheduleDayEntity,
   RecurringScheduleEntity,
   StudentEntity,
   SystemSettingSelectType,
+  TeacherDueReturnType,
   TeacherEntity,
   TimezoneEntity,
   UserSelectType,
@@ -93,6 +100,9 @@ export type SeedContext = {
   groupClasses?: { id: string; classInstanceId: string; courseName: string }[];
   groupClassEnrollments?: { id: string }[];
   classCommunications?: { id: string }[];
+  creditTransactions?: CreditTransactionReturnType[];
+  lessonReports?: LessonReportReturnType[];
+  teacherDues?: TeacherDueReturnType[];
   failedSteps?: string[];
 };
 
@@ -126,6 +136,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await step("payment-method-permissions", () => seedOrGetPaymentMethodPermissions());
   await step("profile-field-permissions", () => seedOrGetProfileFieldPermissions());
   await step("meeting-permissions", () => seedOrGetMeetingPermissions());
+  await step("lms-permissions", () => seedOrGetLmsPermissions());
 
   await step("supported-currencies", () => seedOrGetSupportedCurrencies());
   await step("supported-mobile-wallets", () => seedOrGetSupportedMobileWallets());
@@ -174,31 +185,19 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   if (!context.students) {
     const students = await step("students", () =>
-      seedOrGetStudents(context.parents ?? [], context.teachers ?? [], config)
+      seedOrGetStudents(context.parents ?? [], context.teachers ?? [], config, context.users ?? [])
     );
     if (students) context.students = students;
   }
 
-  if (!context.classes) {
-    const classes = await step("classes", () =>
-      seedOrGetClasses(context.teachers ?? [], context.students ?? [], config)
+  if (!context.creditTransactions) {
+    const credits = await step("credit-transactions", () =>
+      seedOrGetCreditTransactions(context.students ?? [], context.users ?? [], config)
     );
-    if (classes) context.classes = classes;
+    if (credits) context.creditTransactions = credits;
   }
 
-  if (!context.recurringScheduleDays) {
-    const days = await step("recurring-schedule-days", () =>
-      seedOrGetRecurringScheduleDays(context.classes ?? [], config)
-    );
-    if (days) context.recurringScheduleDays = days;
-  }
-
-  if (!context.classInstances) {
-    const instances = await step("class-instances", () =>
-      seedOrGetClassInstances(context.classes ?? [], context.teachers ?? [], context.students ?? [], config)
-    );
-    if (instances) context.classInstances = instances;
-  }
+  await runScheduleSeeds(context, step, config);
 
   await step("class-meeting-configs", () => seedOrGetClassMeetingConfigs(context.classInstances ?? [], config));
   await step("class-performance", () => seedOrGetClassPerformance(context.classInstances ?? [], config));
@@ -206,20 +205,9 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
     seedOrGetClassStatusEvents(context.classInstances ?? [], context.teachers ?? [], config)
   );
 
-  const groupClasses = await step("group-classes", () =>
-    seedOrGetGroupClasses(context.classInstances ?? [], context.students ?? [], config)
-  );
-  if (groupClasses) context.groupClasses = groupClasses;
+  await runLmsWorkflowSeeds(context, step, config);
 
-  const enrollments = await step("group-class-enrollments", () =>
-    seedOrGetGroupClassEnrollments(context.groupClasses ?? [], context.students ?? [], config)
-  );
-  if (enrollments) context.groupClassEnrollments = enrollments;
-
-  const communications = await step("class-communications", () =>
-    seedOrGetClassCommunications(context.groupClasses ?? [], config)
-  );
-  if (communications) context.classCommunications = communications;
+  await runGroupClassSeeds(context, step, config);
 
   await step("teacher-availability-windows", () =>
     seedOrGetTeacherAvailabilityWindows(context.teachers ?? [], context.users ?? [], context.timezones ?? [], config)
@@ -262,54 +250,9 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   await step("teacher-payments", () => seedOrGetTeacherPayments(context.teachers ?? [], context.users ?? [], config));
 
-  if (config.enableBilling) {
-    const exchangeRates = await step("currency-exchange-rates", () => seedOrGetCurrencyExchangeRates(config));
-    if (exchangeRates) context.exchangeRates = exchangeRates;
-
-    await step("currency-exchange-audit-logs", () =>
-      seedOrGetCurrencyExchangeAuditLogs(context.exchangeRates ?? [], context.users ?? [], config)
-    );
-    await step("currency-hedges", () => seedOrGetCurrencyHedges(config));
-
-    const invoices = await step("invoices", () =>
-      seedOrGetInvoices(context.parents ?? [], context.students ?? [], context.users ?? [], config)
-    );
-    if (invoices) context.invoices = invoices;
-
-    await step("invoice-coverage-months", () => seedOrGetInvoiceCoverageMonths(context.invoices ?? [], config));
-    await step("invoice-payment-submissions", () =>
-      seedOrGetInvoicePaymentSubmissions(context.invoices ?? [], context.parents ?? [], context.users ?? [], config)
-    );
-    await step("payments", () => seedOrGetPayments(context.invoices ?? [], config));
-  }
-
-  if (config.enableCommunications) {
-    await step("user-notification-preferences", () =>
-      seedOrGetUserNotificationPreferences(context.users ?? [], config)
-    );
-    const deviceTokens = await step("user-device-tokens", () => seedOrGetUserDeviceTokens(context.users ?? [], config));
-    if (deviceTokens) {
-      await step("notification-deliveries", () =>
-        seedOrGetNotificationDeliveries(context.users ?? [], deviceTokens, config)
-      );
-    }
-    const complaints = await step("complaints", () =>
-      seedOrGetComplaints(context.parents ?? [], context.students ?? [], context.users ?? [], config)
-    );
-    if (complaints) {
-      await step("complaint-responses", () => seedOrGetComplaintResponses(complaints, context.users ?? [], config));
-    }
-    await step("suggestions", () => seedOrGetSuggestions(context.parents ?? [], context.users ?? [], config));
-    await step("learning-resources", () => seedOrGetLearningResources(context.users ?? [], config));
-    await step("subject-resources", () => seedOrGetSubjectResources());
-    await step("site-content", () => seedOrGetSiteContent(context.users ?? [], config));
-  }
-
-  if (config.enableAuditLogs) {
-    await step("admin-audit-logs", () => seedOrGetAdminAuditLogs(context.users ?? [], config));
-    await step("audit-logs", () => seedOrGetAuditLogs(context.users ?? [], context.invoices ?? [], config));
-    await step("user-permission-overrides", () => seedOrGetUserPermissionOverrides(context.users ?? [], config));
-  }
+  await runBillingSeeds(context, step, config);
+  await runCommunicationsSeeds(context, step, config);
+  await runAuditLogSeeds(context, step, config);
 
   const failedSteps = stepResults.filter(result => !result.ok).map(result => result.name);
   context.failedSteps = failedSteps;
@@ -320,4 +263,127 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   logger.log("Master seed process completed.");
   return context;
+}
+
+type RunStep = <T>(name: string, fn: () => Promise<T>) => Promise<T | undefined>;
+
+async function runScheduleSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  if (!context.classes) {
+    const classes = await step("classes", () =>
+      seedOrGetClasses(context.teachers ?? [], context.students ?? [], config)
+    );
+    if (classes) context.classes = classes;
+  }
+
+  if (!context.recurringScheduleDays) {
+    const days = await step("recurring-schedule-days", () =>
+      seedOrGetRecurringScheduleDays(context.classes ?? [], config)
+    );
+    if (days) context.recurringScheduleDays = days;
+  }
+
+  if (!context.classInstances) {
+    const instances = await step("class-instances", () =>
+      seedOrGetClassInstances(context.classes ?? [], context.teachers ?? [], context.students ?? [], config)
+    );
+    if (instances) context.classInstances = instances;
+  }
+}
+
+async function runGroupClassSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  const groupClasses = await step("group-classes", () =>
+    seedOrGetGroupClasses(context.classInstances ?? [], context.students ?? [], config)
+  );
+  if (groupClasses) context.groupClasses = groupClasses;
+
+  const enrollments = await step("group-class-enrollments", () =>
+    seedOrGetGroupClassEnrollments(context.groupClasses ?? [], context.students ?? [], config)
+  );
+  if (enrollments) context.groupClassEnrollments = enrollments;
+
+  const communications = await step("class-communications", () =>
+    seedOrGetClassCommunications(context.groupClasses ?? [], config)
+  );
+  if (communications) context.classCommunications = communications;
+}
+
+async function runLmsWorkflowSeeds(context: SeedContext, step: RunStep, config?: SeedConfig): Promise<void> {
+  if (!context.lessonReports) {
+    const reports = await step("lesson-reports", () =>
+      seedOrGetLessonReports(
+        context.classInstances ?? [],
+        context.teachers ?? [],
+        context.students ?? [],
+        context.users ?? [],
+        config
+      )
+    );
+    if (reports) context.lessonReports = reports;
+  }
+
+  if (!context.teacherDues) {
+    const dues = await step("teacher-dues", () =>
+      seedOrGetTeacherDues(
+        context.lessonReports ?? [],
+        context.classInstances ?? [],
+        context.teachers ?? [],
+        context.users ?? [],
+        config
+      )
+    );
+    if (dues) context.teacherDues = dues;
+  }
+}
+
+async function runBillingSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  if (!config.enableBilling) return;
+
+  const exchangeRates = await step("currency-exchange-rates", () => seedOrGetCurrencyExchangeRates(config));
+  if (exchangeRates) context.exchangeRates = exchangeRates;
+
+  await step("currency-exchange-audit-logs", () =>
+    seedOrGetCurrencyExchangeAuditLogs(context.exchangeRates ?? [], context.users ?? [], config)
+  );
+  await step("currency-hedges", () => seedOrGetCurrencyHedges(config));
+
+  const invoices = await step("invoices", () =>
+    seedOrGetInvoices(context.parents ?? [], context.students ?? [], context.users ?? [], config)
+  );
+  if (invoices) context.invoices = invoices;
+
+  await step("invoice-coverage-months", () => seedOrGetInvoiceCoverageMonths(context.invoices ?? [], config));
+  await step("invoice-payment-submissions", () =>
+    seedOrGetInvoicePaymentSubmissions(context.invoices ?? [], context.parents ?? [], context.users ?? [], config)
+  );
+  await step("payments", () => seedOrGetPayments(context.invoices ?? [], config));
+}
+
+async function runCommunicationsSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  if (!config.enableCommunications) return;
+
+  await step("user-notification-preferences", () => seedOrGetUserNotificationPreferences(context.users ?? [], config));
+  const deviceTokens = await step("user-device-tokens", () => seedOrGetUserDeviceTokens(context.users ?? [], config));
+  if (deviceTokens) {
+    await step("notification-deliveries", () =>
+      seedOrGetNotificationDeliveries(context.users ?? [], deviceTokens, config)
+    );
+  }
+  const complaints = await step("complaints", () =>
+    seedOrGetComplaints(context.parents ?? [], context.students ?? [], context.users ?? [], config)
+  );
+  if (complaints) {
+    await step("complaint-responses", () => seedOrGetComplaintResponses(complaints, context.users ?? [], config));
+  }
+  await step("suggestions", () => seedOrGetSuggestions(context.parents ?? [], context.users ?? [], config));
+  await step("learning-resources", () => seedOrGetLearningResources(context.users ?? [], config));
+  await step("subject-resources", () => seedOrGetSubjectResources());
+  await step("site-content", () => seedOrGetSiteContent(context.users ?? [], config));
+}
+
+async function runAuditLogSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
+  if (!config.enableAuditLogs) return;
+
+  await step("admin-audit-logs", () => seedOrGetAdminAuditLogs(context.users ?? [], config));
+  await step("audit-logs", () => seedOrGetAuditLogs(context.users ?? [], context.invoices ?? [], config));
+  await step("user-permission-overrides", () => seedOrGetUserPermissionOverrides(context.users ?? [], config));
 }

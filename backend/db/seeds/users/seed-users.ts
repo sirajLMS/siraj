@@ -1,5 +1,6 @@
 import {
   buildExtraParentUserSpecs,
+  buildExtraStudentUserSpecs,
   buildExtraTeacherUserSpecs,
   getAvatarFileNameForPersona,
   loadSeedConfig,
@@ -41,7 +42,11 @@ export async function seedOrGet(
 
   const demoInputs: DemoUserUpsertInput[] = [
     ...INTERNAL_DEMO_USERS.map(toDemoUserInput),
-    ...[...buildExtraTeacherUserSpecs(seedConfig), ...buildExtraParentUserSpecs(seedConfig)].map(toDemoUserInput),
+    ...[
+      ...buildExtraTeacherUserSpecs(seedConfig),
+      ...buildExtraParentUserSpecs(seedConfig),
+      ...buildExtraStudentUserSpecs(seedConfig),
+    ].map(toDemoUserInput),
   ];
 
   const results = await UserBootstrapService.upsertManyDemoUsers(demoInputs, groupMap);

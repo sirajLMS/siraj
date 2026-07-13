@@ -88,6 +88,8 @@ export namespace PermissionsService {
     if (groupSlugs.some(slug => slug === SystemPermissionGroupSlug.PARENT_DEFAULT || slug === "parent")) {
       return UserRole.PARENT;
     }
+    if (groupSlugs.includes(SystemPermissionGroupSlug.SUPERVISOR_DEFAULT)) return UserRole.SUPERVISOR;
+    if (groupSlugs.includes(SystemPermissionGroupSlug.STUDENT_DEFAULT)) return UserRole.STUDENT;
     if (groupSlugs.includes(SystemPermissionGroupSlug.STAFF_DEFAULT)) return UserRole.STAFF;
     return UserRole.USER;
   }

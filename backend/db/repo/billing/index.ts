@@ -1,4 +1,5 @@
 export { BillingRepository } from "./billing.repository";
+export { CreditRepository } from "./credit.repository";
 export { CurrencyHedgeRepository } from "./currency-hedge.repository";
 export { InvoicePaymentSubmissionRepository } from "./invoice-payment-submission.repository";
 export { SupportedMobileWalletRepository } from "./supported-mobile-wallet.repository";

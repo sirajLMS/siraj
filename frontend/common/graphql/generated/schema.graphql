@@ -1,21 +1,4 @@
-directive @constraint(
-  minLength: Int
-  maxLength: Int
-  startsWith: String
-  endsWith: String
-  contains: String
-  notContains: String
-  pattern: String
-  format: String
-  min: Float
-  max: Float
-  exclusiveMin: Float
-  exclusiveMax: Float
-  multipleOf: Float
-  minItems: Int
-  maxItems: Int
-  uniqueTypeName: String
-) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | ARGUMENT_DEFINITION
+directive @constraint(minLength: Int, maxLength: Int, startsWith: String, endsWith: String, contains: String, notContains: String, pattern: String, format: String, min: Float, max: Float, exclusiveMin: Float, exclusiveMax: Float, multipleOf: Float, minItems: Int, maxItems: Int, uniqueTypeName: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | ARGUMENT_DEFINITION
 
 enum AccountStatus {
   ACTIVATED
@@ -60,9 +43,7 @@ type AdminNoteInfo {
   lastUpdated: String
 }
 
-"""
-Paginated admin suggestion list with metrics.
-"""
+"""Paginated admin suggestion list with metrics."""
 type AdminSuggestionResult {
   id: String
   metrics: SuggestionMetrics
@@ -98,6 +79,7 @@ enum AppPermission {
   COMPLAINTS_DELETE
   COMPLAINTS_LIST
   COMPLAINTS_RESPOND
+  CREDITS_MANAGE
   DASHBOARD_FILTER_METRICS
   DASHBOARD_METRICS_VIEW_ALL
   DASHBOARD_SEARCH
@@ -111,10 +93,15 @@ enum AppPermission {
   INVOICES_EDIT
   INVOICES_LIST
   INVOICES_MARK_PAID
+  LESSON_REPORTS_APPROVE
+  LESSON_REPORTS_REJECT
+  LESSON_REPORTS_REVIEW
+  LESSON_REPORTS_SUBMIT
   MEETING_CONFIGS_MANAGE_CLASS
   MEETING_CONFIGS_MANAGE_OTHER
   MEETING_CONFIGS_MANAGE_OWN
   MEETING_PROVIDERS_MANAGE_CATALOG
+  MONTHLY_REPORTS_VIEW
   NOTES_CREATE
   NOTES_DELETE
   NOTES_LIST
@@ -262,6 +249,7 @@ enum AppPermission {
   STUDENT_TEACHER_VIEW_OTHER
   STUDENT_TEACHER_VIEW_OWN
   STUDENT_VIEW_ASSOCIATED
+  STUDENT_VIEW_OWN_DASHBOARD
   SUBJECTS_CREATE
   SUBJECTS_DELETE
   SUBJECTS_LIST
@@ -271,6 +259,7 @@ enum AppPermission {
   SUGGESTIONS_DELETE
   SUGGESTIONS_LIST
   SUGGESTIONS_REVIEW
+  SUPERVISOR_VIEW_DASHBOARD
   SUPPORT_SUBMIT_COMPLAINT
   SUPPORT_VIEW_HISTORY
   SYSTEM_BULK_UPDATE_DST
@@ -285,6 +274,7 @@ enum AppPermission {
   TEACHERS_EDIT
   TEACHERS_LIST
   TEACHERS_MANAGE_SCHEDULE
+  TEACHER_DUES_VIEW
   TEACHER_EDIT_OWN_PROFILE
   TEACHER_VIEW_DASHBOARD
   TEACHER_VIEW_OWN_PROFILE
@@ -325,30 +315,26 @@ input AttachSubjectResourceInput {
   subjectId: String!
 }
 
-"""
-Filters applied to the dynamic attendance query engine.
-"""
+enum AttendanceEvaluation {
+  ABSENT
+  LATE
+  PRESENT
+}
+
+"""Filters applied to the dynamic attendance query engine."""
 input AttendanceReportFiltersInput {
-  """
-  ISO Date String representing start bound
-  """
+  """ISO Date String representing start bound"""
   fromDate: String!
   groupBy: ReportGroupingMode!
 
-  """
-  Optional UUID to filter by a specific teacher
-  """
+  """Optional UUID to filter by a specific teacher"""
   teacherId: String
 
-  """
-  ISO Date String representing end bound
-  """
+  """ISO Date String representing end bound"""
   toDate: String!
 }
 
-"""
-Locked paid amount for a report row in a specific currency.
-"""
+"""Locked paid amount for a report row in a specific currency."""
 type AttendanceReportPaidAmount {
   amount: String
   currency: CurrencyCode
@@ -356,24 +342,18 @@ type AttendanceReportPaidAmount {
   id: ID
 }
 
-"""
-The full attendance report result including rows and growth metric.
-"""
+"""The full attendance report result including rows and growth metric."""
 type AttendanceReportPayload {
   """
   Period-over-period engagement growth percentage, or null if unavailable.
   """
   engagementGrowth: Float
 
-  """
-  The aggregated attendance report rows.
-  """
+  """The aggregated attendance report rows."""
   rows: [AttendanceReportRow!]
 }
 
-"""
-A single row of the aggregated attendance report.
-"""
+"""A single row of the aggregated attendance report."""
 type AttendanceReportRow {
   absentClasses: Int
   engagementGrowth: Float
@@ -671,9 +651,7 @@ type CommunicationLogEntry {
   type: String
 }
 
-"""
-A parent complaint with full details and responses.
-"""
+"""A parent complaint with full details and responses."""
 type Complaint {
   body: String
   category: ComplaintCategory
@@ -688,18 +666,14 @@ type Complaint {
   updatedAt: DateTime
 }
 
-"""
-Categories for parent complaints.
-"""
+"""Categories for parent complaints."""
 enum ComplaintCategory {
   OTHER
   REGARDING_SYSTEM
   REGARDING_TEACHER
 }
 
-"""
-A file attached to a complaint.
-"""
+"""A file attached to a complaint."""
 type ComplaintFile {
   createdAt: DateTime
   fileId: String
@@ -708,18 +682,14 @@ type ComplaintFile {
   usageType: String
 }
 
-"""
-Input metadata for a pre-uploaded complaint attachment.
-"""
+"""Input metadata for a pre-uploaded complaint attachment."""
 input ComplaintFileMetadataInput {
   mimeType: String!
   path: String!
   sizeBytes: Int!
 }
 
-"""
-Aggregate metrics for the complaint queue.
-"""
+"""Aggregate metrics for the complaint queue."""
 type ComplaintMetrics {
   answered: Int
   avgResolutionHours: Int
@@ -729,26 +699,20 @@ type ComplaintMetrics {
   unanswered: Int
 }
 
-"""
-Filter options for the admin complaint queue.
-"""
+"""Filter options for the admin complaint queue."""
 input ComplaintQueueFilter {
   search: String
   status: ComplaintStatus
 }
 
-"""
-Paginated result for the admin complaint queue.
-"""
+"""Paginated result for the admin complaint queue."""
 type ComplaintQueuePaginatedResult {
   pageInfo: PageInfo
   rows: [Complaint!]
   totalCount: Int
 }
 
-"""
-Paginated admin complaint queue with metrics.
-"""
+"""Paginated admin complaint queue with metrics."""
 type ComplaintQueueResult {
   complaints: [Complaint!]
   id: String
@@ -758,9 +722,7 @@ type ComplaintQueueResult {
   totalCount: Int
 }
 
-"""
-A single response to a complaint.
-"""
+"""A single response to a complaint."""
 type ComplaintResponse {
   body: String
   complaintId: String
@@ -770,17 +732,13 @@ type ComplaintResponse {
   responderName: String
 }
 
-"""
-Status of a complaint in the support queue.
-"""
+"""Status of a complaint in the support queue."""
 enum ComplaintStatus {
   ANSWERED
   UNANSWERED
 }
 
-"""
-Input for submitting a new complaint.
-"""
+"""Input for submitting a new complaint."""
 input ComplaintSubmitInput {
   body: String!
   category: ComplaintCategory!
@@ -1089,6 +1047,54 @@ input CreateTeacherNoteInput {
   title: String!
 }
 
+"""
+Credit balance summary for a student (total classes purchased and remaining)
+"""
+type CreditBalance {
+  classesRemaining: Int
+  classesTotal: Int
+  studentId: String
+}
+
+"""Result of recording a credit purchase for a student"""
+type CreditPurchaseResult {
+  changeAmount: Int
+  classInstanceId: String
+  createdAt: DateTime
+  creditedByUserId: String
+  id: String
+  idempotencyKey: String
+  notes: String
+  reason: CreditReason
+  sourcePaymentId: String
+  studentId: String
+  updatedAt: DateTime
+}
+
+enum CreditReason {
+  ADJUSTMENT
+  DEDUCTION
+  PURCHASE
+  REFUND
+}
+
+"""
+A credit ledger transaction for a student (purchase, deduction, refund, or adjustment)
+"""
+type CreditTransaction {
+  changeAmount: Int
+  classInstanceId: String
+  createdAt: DateTime
+  creditedByUserId: String
+  id: String
+  idempotencyKey: String
+  notes: String
+  reason: CreditReason
+  sourcePaymentId: String
+  studentId: String
+  updatedAt: DateTime
+}
+
 enum CurrencyCode {
   AED
   AUD
@@ -1211,13 +1217,9 @@ type DeleteInvoiceResult {
   version: Int
 }
 
-"""
-Input for the demo fast login mutation.
-"""
+"""Input for the demo fast login mutation."""
 input DemoLoginInput {
-  """
-  The unique slug of the permission group to authenticate as.
-  """
+  """The unique slug of the permission group to authenticate as."""
   groupSlug: String!
 }
 
@@ -1331,9 +1333,7 @@ enum EffectiveMeetingSource {
   teacher
 }
 
-"""
-A type representing a validated email address
-"""
+"""A type representing a validated email address"""
 scalar Email
 
 type EndImpersonationResponse {
@@ -2080,9 +2080,7 @@ enum InvoiceType {
   PER_CLASSES
 }
 
-"""
-A type representing arbitrary JSON values
-"""
+"""A type representing arbitrary JSON values"""
 scalar JSON
 
 type LearningResourceRow {
@@ -2112,6 +2110,52 @@ enum LeaveRequestStatus {
 }
 
 """
+A teacher-submitted lesson report for a completed class instance, with review workflow
+"""
+type LessonReport {
+  attendanceEvaluation: AttendanceEvaluation
+  classInstanceId: String
+  completionPercentage: Int
+  createdAt: DateTime
+  durationMinutes: Int
+  id: String
+  idempotencyKey: String
+  lessonDate: DateTime
+  rejectionReason: String
+  reviewedAt: DateTime
+  reviewedByUserId: String
+  status: LessonReportStatus
+  studentId: String
+  submittedAt: DateTime
+  submittedByUserId: String
+  teacherId: String
+  teacherNotes: String
+  updatedAt: DateTime
+}
+
+enum LessonReportStatus {
+  APPROVED
+  DRAFT
+  PENDING_REVIEW
+  REJECTED
+}
+
+"""Input for submitting a lesson report for a completed class instance"""
+input LessonReportSubmitInput {
+  attendanceEvaluation: AttendanceEvaluation!
+  classInstanceId: ID!
+  completionPercentage: Int!
+  durationMinutes: Int!
+  teacherNotes: String
+}
+
+"""Input for reviewing (approving/rejecting) a lesson report"""
+input LessonReviewInput {
+  rejectionReason: String
+  reportId: ID!
+}
+
+"""
 A JSONB map of AppLocale → string (e.g. { ar: "فودافون كاش", en: "Vodafone Cash" }). Keys are restricted to the app locales from @/shared/i18n/routing.
 """
 scalar LocalizedString
@@ -2130,12 +2174,11 @@ type LoginResponse {
   user: User
 }
 
-"""
-Account type for new manager
-"""
+"""Account type for new manager"""
 enum ManagerAccountType {
   admin
   manager
+  supervisor
 }
 
 type ManagerDirectoryMetrics {
@@ -2169,9 +2212,7 @@ type ManagerDirectoryRow {
   status: AccountStatus
 }
 
-"""
-Manager/Staff account details
-"""
+"""Manager/Staff account details"""
 type ManagerOnboarding {
   assignedGroupSlug: String
   email: String!
@@ -2182,9 +2223,7 @@ type ManagerOnboarding {
   userId: String
 }
 
-"""
-Input for creating a new manager/staff account with RBAC assignment
-"""
+"""Input for creating a new manager/staff account with RBAC assignment"""
 input ManagerOnboardingInput {
   accountType: ManagerAccountType!
   email: String!
@@ -2193,9 +2232,7 @@ input ManagerOnboardingInput {
   phone: String
 }
 
-"""
-Result of manager onboarding operation
-"""
+"""Result of manager onboarding operation"""
 type ManagerOnboardingResult {
   assignedGroupSlug: String
   email: String
@@ -2231,9 +2268,7 @@ type MarkInvoicePaidResult {
   version: Int
 }
 
-"""
-Input for marking a suggestion as a duplicate of another suggestion.
-"""
+"""Input for marking a suggestion as a duplicate of another suggestion."""
 input MarkSuggestionDuplicateInput {
   duplicateOfId: String!
   suggestionId: String!
@@ -2307,6 +2342,9 @@ input MeetingProviderUpdateInput {
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
+
+  """Approve a pending lesson report (supervisor/manager action)"""
+  approveLessonReport(reportId: ID!): LessonReport
   approvePaymentProof(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
   assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
   attachSubjectResource(input: AttachSubjectResourceInput!): SubjectResource
@@ -2314,14 +2352,7 @@ type Mutation {
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   changeParentLifecycleStatus(newStatus: ParentStatus!, parentId: String!): ChangeParentLifecycleResult
   changeStudentStatus(expectedVersion: Int, newStatus: StudentStatus!, studentId: String!): ChangeStudentStatusResult
-  cleanupTestEntities(
-    parentId: String!
-    parentUserId: String!
-    studentId: String!
-    studentUserId: String!
-    teacherId: String!
-    teacherUserId: String!
-  ): Boolean
+  cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   cleanupTestGroupClass(groupClassId: String!): Boolean
   cleanupTestManager(userId: String!): Boolean
   cleanupTestSuperAdmin(userId: String!): Boolean
@@ -2333,54 +2364,32 @@ type Mutation {
   createCurrencyHedge(amount: String!, currency: CurrencyCode!, hedgeType: String!, notes: String): CurrencyHedge
   createFolder(input: FolderCreateInput!): FileOperationResult
 
-  """
-  Create a new manager/staff account (System Admin only)
-  """
+  """Create a new manager/staff account (System Admin only)"""
   createManager(input: ManagerOnboardingInput!): ManagerOnboardingResult
-  createManualInvoice(
-    amount: String!
-    billingMonths: [BillingMonthInput!]
-    currency: CurrencyCode!
-    dueDate: String!
-    exchangeRateSnapshot: String
-    exchangeRateSource: String
-    invoiceType: InvoiceType!
-    issueDate: String!
-    parentId: String!
-    sendEmail: Boolean
-    studentId: String
-  ): ManualInvoiceResult
+  createManualInvoice(amount: String!, billingMonths: [BillingMonthInput!], currency: CurrencyCode!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: InvoiceType!, issueDate: String!, parentId: String!, sendEmail: Boolean, studentId: String): ManualInvoiceResult
   createMeetingProvider(input: MeetingProviderCreateInput!): MeetingProvider
 
-  """
-  Create a new parent account with billing configuration
-  """
+  """Create a new parent account with billing configuration"""
   createParent(input: ParentOnboardingInput!): ParentOnboardingResult
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
 
-  """
-  Create a new student profile under an existing parent
-  """
+  """Create a new student profile under an existing parent"""
   createStudent(input: StudentOnboardingInput!): StudentOnboardingResult
+
+  """
+  Create a new supervisor account with SUPERVISOR_DEFAULT permission group (System Admin only)
+  """
+  createSupervisor(input: ManagerOnboardingInput!): ManagerOnboardingResult
   createSupportedMobileWallet(input: SupportedMobileWalletCreateInput!): SupportedMobileWallet
   createSupportedOnlineAccount(input: SupportedOnlineAccountCreateInput!): SupportedOnlineAccount
   createSupportedPaymentLink(input: SupportedPaymentLinkCreateInput!): SupportedPaymentLink
 
-  """
-  Create a new teacher account with comprehensive profile
-  """
+  """Create a new teacher account with comprehensive profile"""
   createTeacher(input: TeacherOnboardingInput!): TeacherOnboarding
   createTeacherImportantNote(input: CreateTeacherNoteInput!): TeacherImportantNote
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
-  createTeacherPayment(
-    amount: String!
-    currency: CurrencyCode!
-    isTestPayment: Boolean
-    paymentDate: String
-    teacherId: ID!
-    userPaymentMethodId: ID!
-  ): TeacherPayment
+  createTeacherPayment(amount: String!, currency: CurrencyCode!, isTestPayment: Boolean, paymentDate: String, teacherId: ID!, userPaymentMethodId: ID!): TeacherPayment
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
   createTestSuperAdmin(prefix: String!): TestSuperAdmin
@@ -2391,13 +2400,9 @@ type Mutation {
   deactivateSupportedOnlineAccount(id: ID!): SupportedOnlineAccount
   deactivateSupportedPaymentLink(id: ID!): SupportedPaymentLink
 
-  """
-  Soft-deletes a book by marking it as deleted.
-  """
+  """Soft-deletes a book by marking it as deleted."""
   deleteBook(
-    """
-    The UUID of the book to delete
-    """
+    """The UUID of the book to delete"""
     id: ID!
   ): Boolean
   deleteClassCategory(id: ID!): Boolean
@@ -2405,9 +2410,7 @@ type Mutation {
   deleteClassMeetingConfig(id: ID!): Boolean
   deleteClassSubject(id: ID!): Boolean
 
-  """
-  Soft-deletes a complaint (admin only). Returns true on success.
-  """
+  """Soft-deletes a complaint (admin only). Returns true on success."""
   deleteComplaint(complaintId: String!): Boolean
   deleteCurrencyHedge(id: String!): Boolean
   deleteFile(path: String!): FileOperationResult
@@ -2417,9 +2420,7 @@ type Mutation {
   Permanently deletes a learning resource from physical storage and the database.
   """
   deleteLearningResource(
-    """
-    The UUID of the resource to delete
-    """
+    """The UUID of the resource to delete"""
     id: ID!
   ): Boolean
   deleteMeetingProvider(id: ID!): Boolean
@@ -2428,9 +2429,7 @@ type Mutation {
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
   deleteStudent(id: String!): Student
 
-  """
-  Soft-deletes a suggestion (super admin only). Returns true on success.
-  """
+  """Soft-deletes a suggestion (super admin only). Returns true on success."""
   deleteSuggestion(suggestionId: String!): Boolean
   deleteTeacherImportantNote(id: ID!): Boolean
   deleteUserMeetingConfig(id: ID!): Boolean
@@ -2450,43 +2449,37 @@ type Mutation {
   logout: Boolean
   markInvoicePaid(expectedVersion: Int, invoiceId: String!, proofFileId: ID!): MarkInvoicePaidResult
 
-  """
-  Marks a suggestion as a duplicate of another suggestion (admin only).
-  """
+  """Marks a suggestion as a duplicate of another suggestion (admin only)."""
   markSuggestionDuplicate(input: MarkSuggestionDuplicateInput!): Suggestion
 
-  """
-  Marks a suggestion as reviewed (admin only).
-  """
+  """Marks a suggestion as reviewed (admin only)."""
   markSuggestionReviewed(suggestionId: String!): Suggestion
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
   reactivateParent(parentId: String!): ReactivateParentResult
   reassignStudentTeacher(expectedVersion: Int, newTeacherId: String!, studentId: String!): ReassignStudentTeacherResult
-  recordPayment(
-    amount: String!
-    currency: CurrencyCode!
-    invoiceId: ID!
-    transactionId: String
-    userPaymentMethodId: ID!
-  ): Payment
+
+  """Record a credit purchase for a student (adds classes to their balance)"""
+  recordCreditPurchase(hours: Int!, notes: String, studentId: ID!): CreditPurchaseResult
+  recordPayment(amount: String!, currency: CurrencyCode!, invoiceId: ID!, transactionId: String, userPaymentMethodId: ID!): Payment
   refreshExchangeRates(force: Boolean = false): RefreshExchangeRatesResult
   refreshToken: RefreshTokenResponse
+
+  """
+  Reject a pending lesson report with a rejection reason (supervisor/manager action)
+  """
+  rejectLessonReport(rejectionReason: String!, reportId: ID!): LessonReport
   rejectPaymentProof(expectedVersion: Int, invoiceId: String!, rejectionReason: String): MarkInvoicePaidResult
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
   resendClassNotifications(classInstanceId: String!): SupportRequestResult
   resetClass(classInstanceId: ID!): Boolean
 
-  """
-  Creates a response to an existing complaint (admin only).
-  """
+  """Creates a response to an existing complaint (admin only)."""
   respondToComplaint(input: RespondToComplaintInput!): ComplaintResponse
 
-  """
-  Responds to a suggestion with an admin text response (admin only).
-  """
+  """Responds to a suggestion with an admin text response (admin only)."""
   respondToSuggestion(input: RespondToSuggestionInput!): Suggestion
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   sendPaymentReminder(studentId: String!): SendPaymentReminderResult
@@ -2498,33 +2491,24 @@ type Mutation {
   startPermissionGroupSimulation(groupSlug: String!): StartPermissionGroupSimulationResponse
   stopClass(classInstanceId: ID!): ClassInstanceDetail
 
-  """
-  Submits a new complaint from the authenticated parent.
-  """
+  """Submits a new complaint from the authenticated parent."""
   submitComplaint(input: ComplaintSubmitInput!): Complaint
+
+  """Submit a lesson report for a completed class instance (teacher action)"""
+  submitLessonReport(classInstanceId: ID!, input: LessonReportSubmitInput!): LessonReport
   submitPaymentProof(expectedVersion: Int, invoiceId: String!, proofFileId: ID!): MarkInvoicePaidResult
 
-  """
-  Submits a new suggestion from the authenticated parent.
-  """
+  """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
   updateClassMeetingConfig(id: ID!, input: ClassMeetingConfigUpdateInput!): ClassMeetingConfig
   updateClassSubject(id: ID!, input: ClassSubjectUpdateInput!): ClassSubject
-  updateCurrencyHedge(
-    amount: String
-    currency: CurrencyCode
-    hedgeType: String
-    id: String!
-    notes: String
-  ): CurrencyHedge
+  updateCurrencyHedge(amount: String, currency: CurrencyCode, hedgeType: String, id: String!, notes: String): CurrencyHedge
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
   updateFxProvider(provider: FxProvider!): FxProviderConfig
 
-  """
-  Updates a manager's profile fields.
-  """
+  """Updates a manager's profile fields."""
   updateManagerProfile(input: UpdateManagerProfileInput!, staffProfileId: ID!): ManagerDirectoryRow
   updateMeetingProvider(id: ID!, input: MeetingProviderUpdateInput!): MeetingProvider
   updateNotificationPreferences(input: [NotificationPreferenceInput!]!): [NotificationPreference!]
@@ -2544,16 +2528,9 @@ type Mutation {
   updateUserPaymentMethod(id: ID!, input: UserPaymentMethodUpdateInput!): UserPaymentMethod
   updateUserProfile(input: UpdateUserProfileInput!, userId: String!): UnifiedProfile
 
-  """
-  Uploads a new learning resource to the academy library.
-  """
+  """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
-  upsertManualExchangeRate(
-    effectiveDate: DateTime
-    fromCurrency: CurrencyCode!
-    rate: String!
-    toCurrency: CurrencyCode!
-  ): UpsertManualExchangeRateResult
+  upsertManualExchangeRate(effectiveDate: DateTime, fromCurrency: CurrencyCode!, rate: String!, toCurrency: CurrencyCode!): UpsertManualExchangeRateResult
   verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
 }
 
@@ -2603,9 +2580,7 @@ input NotificationPreferenceInput {
   eventType: NotificationEventType!
 }
 
-"""
-Summary metrics for the staff onboarding process
-"""
+"""Summary metrics for the staff onboarding process"""
 type OnboardingMetrics {
   activeStaff: Int
   avgOnboardingDays: Float
@@ -2700,9 +2675,7 @@ type ParentBillingSummary {
   pendingPaymentCount: Int
 }
 
-"""
-Paginated parent complaints with page info.
-"""
+"""Paginated parent complaints with page info."""
 type ParentComplaintsResult {
   complaints: [Complaint!]
   id: String
@@ -2825,9 +2798,7 @@ type ParentInvoiceRow {
   studentName: String
 }
 
-"""
-Input for creating a new parent account with billing configuration
-"""
+"""Input for creating a new parent account with billing configuration"""
 input ParentOnboardingInput {
   address: String
   currency: CurrencyCode
@@ -2845,9 +2816,7 @@ input ParentOnboardingInput {
   whatsapp: String
 }
 
-"""
-Result of parent onboarding operation
-"""
+"""Result of parent onboarding operation"""
 type ParentOnboardingResult {
   currency: CurrencyCode
   email: String
@@ -2905,9 +2874,7 @@ enum ParentStatus {
   SUSPENDED
 }
 
-"""
-Pagination options for the parent suggestions history query.
-"""
+"""Pagination options for the parent suggestions history query."""
 input ParentSuggestionOptions {
   limit: Int!
   offset: Int!
@@ -2924,6 +2891,7 @@ input PartialStudentUpdateInput {
   parentId: String
   primaryTeacherId: String
   status: StudentStatus
+  userId: String
 }
 
 type Payment {
@@ -3008,6 +2976,11 @@ enum PaymentMethodType {
   PROOF_UPLOAD
 }
 
+"""Count of pending lesson reports awaiting review"""
+type PendingReviewCount {
+  pendingCount: Int
+}
+
 type Permission {
   action: String
   category: String
@@ -3038,9 +3011,7 @@ type PermissionGroupSimulationStatus {
   startedAt: DateTime
 }
 
-"""
-A type representing a validated phone number
-"""
+"""A type representing a validated phone number"""
 scalar PhoneNumber
 
 enum ProfileAudience {
@@ -3062,21 +3033,15 @@ enum ProfileScope {
 type Query {
   adminBillingSummary: AdminBillingSummary
 
-  """
-  Returns the paginated admin complaint queue with metrics.
-  """
+  """Returns the paginated admin complaint queue with metrics."""
   adminComplaintQueue(filter: ComplaintQueueFilter!, paginationArgs: PaginationArgs): ComplaintQueueResult
   adminDashboardSchedule(input: AdminDashboardScheduleInput!): AdminDashboardScheduleResult
   adminInvoices(paginationArgs: PaginationArgs, search: String): AdminInvoiceHistoryResult
 
-  """
-  Returns the paginated admin suggestion list with metrics.
-  """
+  """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
 
-  """
-  Lists all books and bags available to the academy.
-  """
+  """Lists all books and bags available to the academy."""
   booksAndBags: [Book!]
   classCategories: [ClassCategory!]
   classInstance(id: ID!): ClassInstanceDetail
@@ -3093,9 +3058,7 @@ type Query {
   dailyScheduleList(date: String!, metricFilter: String, search: String, teacherId: String): [DailyScheduleList!]
   dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
   directoryChildren(
-    """
-    Parent directory path (empty or null for root level)
-    """
+    """Parent directory path (empty or null for root level)"""
     path: String
   ): [DirectoryInfo!]
 
@@ -3103,21 +3066,14 @@ type Query {
   Return effective permissions for a user, combining groups and overrides.
   """
   effectiveUserPermissions(userId: String!): [String!]
-  exchangeRateHistory(
-    from: CurrencyCode!
-    maxDays: Int = 90
-    paginationArgs: PaginationArgs
-    to: CurrencyCode!
-  ): ExchangeRateHistoryResult
+  exchangeRateHistory(from: CurrencyCode!, maxDays: Int = 90, paginationArgs: PaginationArgs, to: CurrencyCode!): ExchangeRateHistoryResult
   fileInfo(path: String!): FileInfo
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
   folderInfo(path: String!): DirectoryInfo
   fxProviderConfig: FxProviderConfig
   fxSyncHealth: FxSyncHealth
 
-  """
-  Generates dynamic attendance and financial reports.
-  """
+  """Generates dynamic attendance and financial reports."""
   generateAttendanceReport(filters: AttendanceReportFiltersInput!): AttendanceReportPayload
   groupClassAudit(classInstanceId: String!): GroupClassAudit
   impersonationStatus: ImpersonationStatus
@@ -3126,15 +3082,21 @@ type Query {
   latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
   latestFxSyncRun: FxSyncRun
 
-  """
-  Lists all learning resources available to the academy.
-  """
+  """Lists all learning resources available to the academy."""
   learningResources(searchQuery: String): [LearningResourceRow!]
-  listFiles(input: FilesListInput!): StorageObjectList
 
   """
-  Lists all staff members with administrative access.
+  Get the lesson report for a specific class instance (if one has been submitted)
   """
+  lessonReport(classInstanceId: ID!): LessonReport
+
+  """
+  Get the count of pending lesson reports awaiting review with optional filters
+  """
+  lessonReportCount(studentId: ID, teacherId: ID): PendingReviewCount
+  listFiles(input: FilesListInput!): StorageObjectList
+
+  """Lists all staff members with administrative access."""
   managerDirectory(paginationArgs: PaginationArgs, roleFilter: String, statusFilter: String): ManagerDirectoryResult
   me: User
   meetingProvider(id: ID!): MeetingProvider
@@ -3142,29 +3104,20 @@ type Query {
   notificationAlerts: NotificationAlertsResult
   notificationPreferences: [NotificationPreference!]
 
-  """
-  Returns onboarding metrics for staff accounts.
-  """
+  """Returns onboarding metrics for staff accounts."""
   onboardingMetrics: OnboardingMetrics
   parentAssignedStudents: ParentAssignedStudentsResult
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
   parentBillingSummary(parentId: String, userId: String): ParentBillingSummary
 
-  """
-  Returns the authenticated parent's complaint history with pagination.
-  """
+  """Returns the authenticated parent's complaint history with pagination."""
   parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
   parentDashboardMetrics: ParentDashboardMetricsResult
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
   parentDirectory(lifecycleStatusFilter: ParentStatus, paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
   parentHandbookUrl: ParentHandbookUrl
-  parentInvoiceHistory(
-    paginationArgs: PaginationArgs
-    parentId: String
-    search: String
-    userId: String
-  ): ParentInvoiceHistoryResult
+  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String, search: String, userId: String): ParentInvoiceHistoryResult
   parentOwnProfile: ParentOwnProfile
   parentProfile(parentId: String!): ParentProfile
 
@@ -3174,33 +3127,26 @@ type Query {
   parentSuggestions(options: ParentSuggestionOptions!): [Suggestion!]
 
   """
-  Fetch a single permission group by ID.
+  Get pending lesson reports awaiting review with optional teacher/student filters and pagination
   """
+  pendingLessonReports(paginationArgs: PaginationArgs, studentId: ID, teacherId: ID): [LessonReport!]
+
+  """Fetch a single permission group by ID."""
   permissionGroup(id: String!): PermissionGroup
   permissionGroupSimulationStatus: PermissionGroupSimulationStatus
 
-  """
-  List all permission groups with their permission IDs.
-  """
+  """List all permission groups with their permission IDs."""
   permissionGroups: [PermissionGroup!]
 
-  """
-  List all permission catalog entries.
-  """
+  """List all permission catalog entries."""
   permissions: [Permission!]
   profileByUserId(userId: String!): UnifiedProfile
   recurringMeetingConfigs(recurringScheduleId: ID!): [ClassMeetingConfig!]
   recurringSchedule(id: ID!): RecurringScheduleDetail
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
-  rescheduleTrackingRows(
-    paginationArgs: PaginationArgs
-    search: String
-    status: LeaveRequestStatus
-  ): RescheduleTrackingResult
+  rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: LeaveRequestStatus): RescheduleTrackingResult
   searchFiles(
-    """
-    File type filter (optional)
-    """
+    """File type filter (optional)"""
     fileType: String
 
     """
@@ -3208,9 +3154,7 @@ type Query {
     """
     folder: String
 
-    """
-    Maximum number of results
-    """
+    """Maximum number of results"""
     limit: Int = 50
     searchTerm: String!
   ): StorageObjectList
@@ -3232,34 +3176,33 @@ type Query {
   studentById(studentId: String!): AssociatedStudent
   studentClassHistory(month: Int!, studentId: ID!, year: Int!): StudentClassHistory
   studentClassSessionDetail(classInstanceId: ID!): StudentSessionDetail
+
+  """Get the credit balance (classes total and remaining) for a student"""
+  studentCreditBalance(studentId: ID!): CreditBalance
   studentCreditStatus: [StudentCreditRow!]
 
   """
-  Fetches the global student directory with cross-relational data.
+  Get the credit transaction history for a student with optional pagination
   """
-  studentDirectory(
-    filterArgs: StudentFilterArgs
-    orderBy: [StudentsOrderByClause!]
-    paginationArgs: PaginationArgs
-  ): StudentDirectoryPayload
+  studentCreditTransactions(paginationArgs: PaginationArgs, studentId: ID!): [CreditTransaction!]
+
+  """Fetches the global student directory with cross-relational data."""
+  studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentDirectoryPayload
+
+  """
+  Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
+  """
+  studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
   studentProfile(month: Int, studentId: String!, year: Int): StudentProfile
   studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
-  students(
-    filterArgs: StudentFilterArgs
-    orderBy: [StudentsOrderByClause!]
-    paginationArgs: PaginationArgs
-  ): StudentsWithFiltersResponse!
+  students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
 
   """
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
   supportedCurrencies(activeOnly: Boolean): [SupportedCurrency!]
-  supportedMobileWallets(
-    activeOnly: Boolean = true
-    countryCode: CountryCode
-    direction: PaymentDirection
-  ): [SupportedMobileWallet!]
+  supportedMobileWallets(activeOnly: Boolean = true, countryCode: CountryCode, direction: PaymentDirection): [SupportedMobileWallet!]
   supportedOnlineAccounts(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedOnlineAccount!]
   supportedPaymentLinks(activeOnly: Boolean = true, direction: PaymentDirection): [SupportedPaymentLink!]
   teacherAssignedClasses: TeacherAssignedClassesResult
@@ -3268,7 +3211,17 @@ type Query {
   teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
   teacherFutureSchedule(teacherId: String): TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
+
+  """
+  Aggregated monthly report for a single teacher: lessons taught, dues, and cancellation count.
+  """
+  teacherMonthlyReport(month: Int!, teacherId: ID!, year: Int!): TeacherMonthlyReport
   teacherOwnProfile: TeacherOwnProfile
+
+  """
+  Get pending (unpaid) teacher due entries, optionally filtered by teacher
+  """
+  teacherPendingDues(teacherId: ID): [TeacherDue!]
   teacherProfileForEdit(teacherId: ID!): TeacherProfileResult
   teacherWeeklyScheduleGrid(teacherId: String, weekDate: String!): WeeklyScheduleGrid
   teacherWorkloadMetrics(teacherId: String, weekDate: String!): WeeklyWorkloadMetrics
@@ -3279,21 +3232,15 @@ type Query {
   userMeetingConfig(id: ID!): UserMeetingConfig
   userMeetingConfigs(userId: ID!): [UserMeetingConfig!]
 
-  """
-  List overrides for a user.
-  """
+  """List overrides for a user."""
   userOverrides(userId: String!): [UserOverride!]
   userPaymentMethod(id: ID!): UserPaymentMethod
   userPaymentMethods(direction: PaymentDirection, userId: ID!): [UserPaymentMethod!]
 
-  """
-  Return group IDs assigned to a user.
-  """
+  """Return group IDs assigned to a user."""
   userPermissionGroups(userId: String!): [String!]
   users(
-    """
-    Max results (max 200)
-    """
+    """Max results (max 200)"""
     limit: Int = 50
     offset: Int = 0
   ): [User!]
@@ -3310,6 +3257,14 @@ type ReassignStudentTeacherResult {
   id: String
   primaryTeacherId: String
   version: Int
+}
+
+"""Input for recording a credit purchase for a student"""
+input RecordPurchaseInput {
+  hours: Int!
+  notes: String
+  sourcePaymentId: ID
+  studentId: String!
 }
 
 input RecurringClassDayInput {
@@ -3351,9 +3306,7 @@ type RefreshTokenResponse {
   user: User
 }
 
-"""
-Determines how the attendance data is aggregated.
-"""
+"""Determines how the attendance data is aggregated."""
 enum ReportGroupingMode {
   DATE
   STUDENT
@@ -3413,17 +3366,13 @@ input ResourceUploadInput {
   filePath: String!
 }
 
-"""
-Input for responding to a complaint.
-"""
+"""Input for responding to a complaint."""
 input RespondToComplaintInput {
   body: String!
   complaintId: String!
 }
 
-"""
-Input for responding to a suggestion with an admin response.
-"""
+"""Input for responding to a suggestion with an admin response."""
 input RespondToSuggestionInput {
   adminResponse: String!
   suggestionId: String!
@@ -3591,6 +3540,7 @@ input StudentCreateInput {
   parentId: String!
   primaryTeacherId: String
   status: StudentStatus!
+  userId: String!
 }
 
 type StudentCreditRow {
@@ -3686,23 +3636,50 @@ type StudentHistorySession {
 }
 
 """
-Input for creating a new student profile under a parent
+Monthly report aggregating student attendance, lessons, and credit ledger activity.
 """
+type StudentMonthlyReport {
+  absentCount: Int
+  cancelledLessons: Int
+  completedLessons: Int
+  creditsBalance: Int
+  creditsDeducted: Int
+  creditsPurchased: Int
+  creditsRefunded: Int
+  id: String
+  lateCount: Int
+  month: Int
+  presentCount: Int
+  studentId: String
+  studentName: String
+  totalHours: Float
+  totalLessons: Int
+  year: Int
+}
+
+"""Input for creating a new student profile under a parent"""
 input StudentOnboardingInput {
   classesRemaining: Int
   classesTotal: Int
   dateOfBirth: DateTime
+
+  """Student login email (creates a users row when provided)"""
+  email: String
   gender: Gender
   language: AppLanguage
   name: String!
   parentId: String!
+
+  """Student login password (required when email is provided)"""
+  password: String
   primaryTeacherId: String
   status: StudentStatus
+
+  """Student timezone (applied to the created user record)"""
+  timezone: IanaTimezone
 }
 
-"""
-Result of student onboarding operation
-"""
+"""Result of student onboarding operation"""
 type StudentOnboardingResult {
   name: String
   parentId: String
@@ -3818,9 +3795,7 @@ type SubjectResource {
   subjectId: String
 }
 
-"""
-Input for submitting a new suggestion.
-"""
+"""Input for submitting a new suggestion."""
 input SubmitSuggestionInput {
   body: String!
   submitterName: String!
@@ -3849,27 +3824,21 @@ type Suggestion {
   submitterName: String
 }
 
-"""
-A parent who recently submitted suggestions.
-"""
+"""A parent who recently submitted suggestions."""
 type SuggestionContributor {
   id: String
   name: String
   suggestionCount: Int
 }
 
-"""
-Statistics about recent suggestion contributors.
-"""
+"""Statistics about recent suggestion contributors."""
 type SuggestionContributorStats {
   contributors: [SuggestionContributor!]
   id: String
   uniqueContributorCount: Int
 }
 
-"""
-Filter and pagination options for the admin suggestion list.
-"""
+"""Filter and pagination options for the admin suggestion list."""
 input SuggestionFilter {
   limit: Int!
   offset: Int!
@@ -3877,9 +3846,7 @@ input SuggestionFilter {
   status: SuggestionStatus
 }
 
-"""
-Aggregate metrics for the suggestion queue.
-"""
+"""Aggregate metrics for the suggestion queue."""
 type SuggestionMetrics {
   avgResponseTime: String
   duplicate: Int
@@ -3889,9 +3856,7 @@ type SuggestionMetrics {
   totalCount: Int
 }
 
-"""
-A lightweight suggestion result for duplicate search autocomplete.
-"""
+"""A lightweight suggestion result for duplicate search autocomplete."""
 type SuggestionSearchResult {
   body: String
   createdAt: DateTime
@@ -3902,9 +3867,7 @@ type SuggestionSearchResult {
   submitterName: String
 }
 
-"""
-Status of a suggestion in the review pipeline.
-"""
+"""Status of a suggestion in the review pipeline."""
 enum SuggestionStatus {
   DUPLICATE
   PENDING
@@ -4177,6 +4140,30 @@ type TeacherDirectoryRow {
   userId: String
 }
 
+"""
+A per-lesson earning accrued to a teacher when a lesson report is approved
+"""
+type TeacherDue {
+  amount: String
+  approvedAt: DateTime
+  approvedByUserId: String
+  classInstanceId: String
+  createdAt: DateTime
+  currency: CurrencyCode
+  hours: String
+  id: String
+  status: TeacherDueStatus
+  studentId: String
+  teacherId: String
+  teacherPaymentId: String
+  updatedAt: DateTime
+}
+
+enum TeacherDueStatus {
+  PAID
+  PENDING
+}
+
 type TeacherFutureSchedule {
   classes: [FutureClass!]
   id: String
@@ -4203,118 +4190,87 @@ type TeacherImportantNote {
   title: String
 }
 
-"""
-Teacher onboarding profile with resolved metadata
-"""
+"""Monthly earnings summary for a teacher (lessons, counts, totals)"""
+type TeacherMonthlyReport {
+  approvedCount: Int
+  cancelledCount: Int
+  currency: CurrencyCode
+  lessonsTaught: Int
+  month: Int
+  teacherId: String
+  teacherName: String
+  totalAccruedHours: Float
+  totalDueAmount: Float
+  totalPaidAmount: Float
+  year: Int
+}
+
+"""Teacher onboarding profile with resolved metadata"""
 type TeacherOnboarding {
-  """
-  Teacher email address
-  """
+  """Teacher email address"""
   email: String
 
-  """
-  Teacher gender
-  """
+  """Teacher gender"""
   gender: Gender
 
-  """
-  Unique identifier for the teacher profile
-  """
+  """Unique identifier for the teacher profile"""
   id: String
 
-  """
-  Resolved teacher display name
-  """
+  """Resolved teacher display name"""
   name: String
 
-  """
-  Current teacher account status
-  """
+  """Current teacher account status"""
   status: String
 
-  """
-  Formatted timezone display string
-  """
+  """Formatted timezone display string"""
   timezoneDisplay: String
 
-  """
-  Created user ID for the onboarded teacher
-  """
+  """Created user ID for the onboarded teacher"""
   userId: String
 }
 
-"""
-Input for creating a new teacher account with comprehensive profile
-"""
+"""Input for creating a new teacher account with comprehensive profile"""
 input TeacherOnboardingInput {
-  """
-  Teacher address
-  """
+  """Teacher address"""
   address: String
 
-  """
-  Teacher country code
-  """
+  """Teacher country code"""
   countryCode: CountryCode
 
-  """
-  Teacher date of birth (ISO date string)
-  """
+  """Teacher date of birth (ISO date string)"""
   dateOfBirth: String
 
-  """
-  Teacher email address
-  """
+  """Teacher email address"""
   email: Email!
 
-  """
-  Teacher gender
-  """
+  """Teacher gender"""
   gender: Gender
 
-  """
-  Teacher hourly rate
-  """
+  """Teacher hourly rate"""
   hourlyRate: String
 
-  """
-  Optional initial payout payment method for the teacher
-  """
+  """Optional initial payout payment method for the teacher"""
   initialPayoutMethod: UserPaymentMethodInitialInput
 
-  """
-  Teacher full name
-  """
+  """Teacher full name"""
   name: String!
 
-  """
-  Teacher national ID (encrypted)
-  """
+  """Teacher national ID (encrypted)"""
   nationalId: String
 
-  """
-  Teacher nationality (country code)
-  """
+  """Teacher nationality (country code)"""
   nationality: String
 
-  """
-  Teacher password
-  """
+  """Teacher password"""
   password: String!
 
-  """
-  Teacher phone number
-  """
+  """Teacher phone number"""
   phone: String
 
-  """
-  Teacher qualifications
-  """
+  """Teacher qualifications"""
   qualifications: String
 
-  """
-  Currency for hourly rate
-  """
+  """Currency for hourly rate"""
   rateCurrency: CurrencyCode
   timezone: IanaTimezone!
 }
@@ -4634,6 +4590,18 @@ input UserPaymentMethodUpdateInput {
   direction: PaymentDirection
   isDefault: Boolean
   label: String
+}
+
+enum UserRole {
+  ACADEMY_ADMIN
+  GUEST
+  PARENT
+  STAFF
+  STUDENT
+  SUPERVISOR
+  SUPER_ADMIN
+  TEACHER
+  USER
 }
 
 type WeeklyScheduleClass {

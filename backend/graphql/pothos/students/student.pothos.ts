@@ -73,6 +73,7 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       parentId: t.string({ required: true }),
+      userId: t.string({ required: true }),
       primaryTeacherId: t.string({ required: false }),
       name: t.string({ required: true }),
       dateOfBirth: t.field({
@@ -103,6 +104,7 @@ export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       id: t.string({ required: true }),
       parentId: t.string({ required: false }),
+      userId: t.string({ required: false }),
       primaryTeacherId: t.string({ required: false }),
       name: t.string({ required: false }),
       dateOfBirth: t.field({

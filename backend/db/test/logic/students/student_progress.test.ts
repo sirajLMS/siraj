@@ -46,10 +46,21 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
     .insert(teachers)
     .values({ userId: userT.id, createdAt: now, updatedAt: now })
     .returning()) as [TeacherEntity];
+  const [userS] = await tx
+    .insert(users)
+    .values({
+      name: "Student",
+      email: `s-${randomUUID()}@x.com`,
+      password: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
   const [student] = (await tx
     .insert(students)
     .values({
       parentId: parent.id,
+      userId: userS.id,
       name: "Student",
       gender: Gender.MALE,
       status: "REGULAR",

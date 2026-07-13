@@ -3,23 +3,39 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import {
   classInstances,
   classMeetingConfigs,
+  creditTransactions,
+  lessonReports,
   meetingProviders,
   parents,
   permissions,
   students,
   teacherAssignments,
+  teacherDues,
   teachers,
   userMeetingConfigs,
   users,
 } from "@/backend/db/schema";
-import { AccountStatus, type AppPermission } from "@/backend/enum";
+import {
+  AccountStatus,
+  type AppPermission,
+  AttendanceEvaluation,
+  ClassExecutionState,
+  ClassOutcome,
+  CreditReason,
+  CurrencyCode,
+  LessonReportStatus,
+  TeacherDueStatus,
+} from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   ClassInstanceEntity,
   ClassMeetingConfigSelectType,
+  CreditTransactionSelectType,
+  LessonReportSelectType,
   MeetingProviderSelectType,
   ParentEntity,
   StudentEntity,
+  TeacherDueSelectType,
   TeacherEntity,
   UserMeetingConfigSelectType,
   UserSelectType,
@@ -113,16 +129,29 @@ export async function createTestStudent(
   overrides: Partial<typeof students.$inferInsert> = {}
 ): Promise<StudentEntity> {
   const now = new Date();
+  // LMS — students.userId IS NOT NULL: every student must have a login account.
+  // If the caller did not provide a userId (most tests don't need a specific user),
+  // create a throwaway user row and link it to the new student.
+  const { userId: overrideUserId, ...remainingOverrides } = overrides;
+  let userId = overrideUserId;
+  if (!userId) {
+    const studentUser = await createTestUser(tx, {
+      name: "Test Student User",
+      email: `student-${randomUUID()}@example.com`,
+    });
+    userId = studentUser.id;
+  }
   const [student] = (await tx
     .insert(students)
     .values({
       parentId,
+      userId,
       name: "Test Student",
       status: "REGULAR",
       idempotencyKey: randomUUID(),
       createdAt: now,
       updatedAt: now,
-      ...overrides,
+      ...remainingOverrides,
     })
     .returning()) as [StudentEntity];
   return student;
@@ -322,4 +351,162 @@ export async function createTestClassMeetingConfig(
   }
 
   return config;
+}
+
+/**
+ * Creates a credit_transaction row for testing.
+ * @param tx Database transaction
+ * @param studentId Student to credit/debit
+ * @param creditedByUserId User who performed the credit/debit action (required — the column is NOT NULL)
+ * @param overrides Optional field overrides (defaults: changeAmount=1, reason=PURCHASE)
+ */
+export async function createTestCreditTransaction(
+  tx: DBTransaction,
+  studentId: string,
+  creditedByUserId: string,
+  overrides: Partial<typeof creditTransactions.$inferInsert> = {}
+): Promise<CreditTransactionSelectType> {
+  const now = new Date();
+  const [row] = await tx
+    .insert(creditTransactions)
+    .values({
+      studentId,
+      changeAmount: 1,
+      reason: CreditReason.PURCHASE,
+      sourcePaymentId: null,
+      classInstanceId: null,
+      notes: null,
+      creditedByUserId,
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!row) {
+    throw new Error("Failed to create test credit transaction");
+  }
+
+  return row;
+}
+
+/**
+ * Creates a lesson_report row for testing.
+ * @param tx Database transaction
+ * @param classInstanceId Class instance the report is for
+ * @param studentId Student who attended the lesson
+ * @param teacherId Teacher who taught the lesson
+ * @param submittedByUserId User who submitted the report
+ * @param overrides Optional field overrides (defaults: status=PENDING_REVIEW, durationMinutes=60,
+ *  attendanceEvaluation=PRESENT, completionPercentage=100, lessonDate=now)
+ */
+export async function createTestLessonReport(
+  tx: DBTransaction,
+  classInstanceId: string,
+  studentId: string,
+  teacherId: string,
+  submittedByUserId: string,
+  overrides: Partial<typeof lessonReports.$inferInsert> = {}
+): Promise<LessonReportSelectType> {
+  const now = new Date();
+  const [row] = await tx
+    .insert(lessonReports)
+    .values({
+      classInstanceId,
+      studentId,
+      teacherId,
+      lessonDate: now,
+      durationMinutes: 60,
+      attendanceEvaluation: AttendanceEvaluation.PRESENT,
+      teacherNotes: null,
+      completionPercentage: 100,
+      status: LessonReportStatus.PENDING_REVIEW,
+      submittedByUserId,
+      submittedAt: now,
+      reviewedByUserId: null,
+      reviewedAt: null,
+      rejectionReason: null,
+      idempotencyKey: overrides.idempotencyKey ?? `lesson-report:${classInstanceId}`,
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!row) {
+    throw new Error("Failed to create test lesson report");
+  }
+
+  return row;
+}
+
+/**
+ * Creates a teacher_due row for testing.
+ * @param tx Database transaction
+ * @param teacherId Teacher who accrued the due
+ * @param classInstanceId Class instance the due is for
+ * @param studentId Student who attended
+ * @param approvedByUserId User who approved the lesson report
+ * @param overrides Optional field overrides (defaults: status=PENDING, hours="1.00", amount="25.00",
+ *  currency=SAR, approvedAt=now)
+ */
+export async function createTestTeacherDue(
+  tx: DBTransaction,
+  teacherId: string,
+  classInstanceId: string,
+  studentId: string,
+  approvedByUserId: string,
+  overrides: Partial<typeof teacherDues.$inferInsert> = {}
+): Promise<TeacherDueSelectType> {
+  const now = new Date();
+  const [row] = await tx
+    .insert(teacherDues)
+    .values({
+      teacherId,
+      classInstanceId,
+      studentId,
+      hours: "1.00",
+      amount: "25.00",
+      currency: CurrencyCode.SAR,
+      status: TeacherDueStatus.PENDING,
+      approvedByUserId,
+      approvedAt: now,
+      teacherPaymentId: null,
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!row) {
+    throw new Error("Failed to create test teacher due");
+  }
+
+  return row;
+}
+
+/**
+ * Creates a class instance in the COMPLETED execution state for testing
+ * lesson-report workflows. Wraps `createMockClassInstance` and forces
+ * `executionState = "COMPLETED"` plus a `TAKEN`/`PENDING` outcome pair that
+ * satisfies the scheduling CHECK constraints.
+ * @param tx Database transaction
+ * @param studentId Student who attended
+ * @param teacherId Teacher who taught
+ * @param overrides Optional field overrides
+ */
+export async function createCompletedClassInstance(
+  tx: DBTransaction,
+  studentId: string,
+  teacherId: string,
+  overrides: Partial<typeof classInstances.$inferInsert> = {}
+): Promise<ClassInstanceEntity> {
+  return createMockClassInstance(tx, studentId, teacherId, {
+    executionState: ClassExecutionState.COMPLETED,
+    outcome: ClassOutcome.TAKEN,
+    actualStartAt: new Date(),
+    actualEndAt: new Date(Date.now() + 60 * 1000),
+    ...overrides,
+  });
 }

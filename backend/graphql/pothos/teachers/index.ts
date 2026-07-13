@@ -3,6 +3,7 @@ export * from "./staff-directory.pothos";
 export * from "./staff-profile.pothos";
 export * from "./teacher.pothos";
 export * from "./teacher-dashboard.pothos";
+export * from "./teacher-due.pothos";
 export * from "./teacher-notes.pothos";
 export * from "./teacher-onboarding.pothos";
 export * from "./teacher-portal.pothos";

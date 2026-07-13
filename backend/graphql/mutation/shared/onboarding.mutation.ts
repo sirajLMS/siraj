@@ -140,4 +140,27 @@ gqlSchemaBuilder.mutationFields(t => ({
       );
     },
   }),
+
+  createSupervisor: t.field({
+    type: ManagerOnboardingResultPothosObject,
+    description: "Create a new supervisor account with SUPERVISOR_DEFAULT permission group (System Admin only)",
+    authScopes: { superAdmin: true, notImpersonating: true },
+    args: {
+      input: t.arg({ type: ManagerOnboardingInputPothosObject, required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return await ManagerOnboardingService.createManager(
+        userId,
+        {
+          name: args.input.name,
+          email: args.input.email,
+          password: args.input.password,
+          phone: args.input.phone ?? null,
+          accountType: "supervisor",
+        },
+        ctx.locale
+      );
+    },
+  }),
 }));

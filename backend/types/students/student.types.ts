@@ -67,11 +67,17 @@ export interface StudentOnboardingInput {
   readonly status?: StudentStatus | null;
   readonly classesTotal?: number | null;
   readonly classesRemaining?: number | null;
+  // LMS — optional login account provisioning (email + password creates a users row,
+  // links the resulting users.id to students.userId, and assigns STUDENT_DEFAULT group)
+  readonly email?: string | null;
+  readonly password?: string | null;
+  readonly timezone?: string | null;
 }
 
 export interface StudentOnboardingResult {
   readonly studentId: string;
   readonly parentId: string;
+  readonly userId?: string;
   readonly name: string;
   readonly status: StudentStatus;
   readonly primaryTeacherId: string | null;

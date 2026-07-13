@@ -135,6 +135,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.teachers.id,
       to: r.teacherPayments.teacherId,
     }),
+    dues: r.many.teacherDues({
+      from: r.teachers.id,
+      to: r.teacherDues.teacherId,
+    }),
     availabilityWindows: r.many.teacherAvailabilityWindows({
       from: r.teachers.id,
       to: r.teacherAvailabilityWindows.teacherId,
@@ -208,6 +212,28 @@ export const relations = defineRelations(schema, r => ({
     progressLogs: r.many.studentProgress({
       from: r.students.id,
       to: r.studentProgress.studentId,
+    }),
+    creditTransactions: r.many.creditTransactions({
+      from: r.students.id,
+      to: r.creditTransactions.studentId,
+    }),
+  },
+  creditTransactions: {
+    student: r.one.students({
+      from: r.creditTransactions.studentId,
+      to: r.students.id,
+    }),
+    classInstance: r.one.classInstances({
+      from: r.creditTransactions.classInstanceId,
+      to: r.classInstances.id,
+    }),
+    creditedBy: r.one.users({
+      from: r.creditTransactions.creditedByUserId,
+      to: r.users.id,
+    }),
+    sourcePayment: r.one.payments({
+      from: r.creditTransactions.sourcePaymentId,
+      to: r.payments.id,
     }),
   },
   studentProgress: {
@@ -298,6 +324,40 @@ export const relations = defineRelations(schema, r => ({
     performance: r.one.classInstancePerformance({
       from: r.classInstances.id,
       to: r.classInstancePerformance.classInstanceId,
+    }),
+    teacherDue: r.one.teacherDues({
+      from: r.classInstances.id,
+      to: r.teacherDues.classInstanceId,
+    }),
+    lessonReport: r.one.lessonReports({
+      from: r.classInstances.id,
+      to: r.lessonReports.classInstanceId,
+    }),
+    creditTransactions: r.many.creditTransactions({
+      from: r.classInstances.id,
+      to: r.creditTransactions.classInstanceId,
+    }),
+  },
+  lessonReports: {
+    classInstance: r.one.classInstances({
+      from: r.lessonReports.classInstanceId,
+      to: r.classInstances.id,
+    }),
+    student: r.one.students({
+      from: r.lessonReports.studentId,
+      to: r.students.id,
+    }),
+    teacher: r.one.teachers({
+      from: r.lessonReports.teacherId,
+      to: r.teachers.id,
+    }),
+    submittedBy: r.one.users({
+      from: r.lessonReports.submittedByUserId,
+      to: r.users.id,
+    }),
+    reviewedBy: r.one.users({
+      from: r.lessonReports.reviewedByUserId,
+      to: r.users.id,
     }),
   },
   classInstancePerformance: {
@@ -466,6 +526,28 @@ export const relations = defineRelations(schema, r => ({
     userPaymentMethod: r.one.userPaymentMethods({
       from: r.teacherPayments.userPaymentMethodId,
       to: r.userPaymentMethods.id,
+    }),
+  },
+  teacherDues: {
+    teacher: r.one.teachers({
+      from: r.teacherDues.teacherId,
+      to: r.teachers.id,
+    }),
+    classInstance: r.one.classInstances({
+      from: r.teacherDues.classInstanceId,
+      to: r.classInstances.id,
+    }),
+    student: r.one.students({
+      from: r.teacherDues.studentId,
+      to: r.students.id,
+    }),
+    approvedBy: r.one.users({
+      from: r.teacherDues.approvedByUserId,
+      to: r.users.id,
+    }),
+    teacherPayment: r.one.teacherPayments({
+      from: r.teacherDues.teacherPaymentId,
+      to: r.teacherPayments.id,
     }),
   },
   teacherAvailabilityWindows: {

@@ -51,6 +51,9 @@ export const students = pgTable(
     parentId: uuid("parent_id")
       .notNull()
       .references(() => parents.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     primaryTeacherId: uuid("primary_teacher_id").references(() => teachers.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
     avatarUrl: varchar("avatar_url", { length: 1024 }),
@@ -71,11 +74,13 @@ export const students = pgTable(
   },
   table => [
     index("students_parent_id_idx").on(table.parentId),
+    index("students_user_id_idx").on(table.userId),
     index("students_primary_teacher_id_idx").on(table.primaryTeacherId),
     index("students_status_idx").on(table.status),
     index("idx_students_name_fts").using("gin", sql`to_tsvector('simple', ${table.name})`),
     index("idx_students_name_trgm").using("gist", table.name.op("gist_trgm_ops")),
     uniqueIndex("students_idempotency_key_unique_idx").on(table.idempotencyKey),
+    uniqueIndex("students_user_id_unique_idx").on(table.userId),
     check("students_classes_remaining_chk", sql`${table.classesRemaining} >= 0`),
     check("students_classes_total_chk", sql`${table.classesTotal} >= 0`),
     check(

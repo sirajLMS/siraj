@@ -4,4 +4,6 @@ export enum SystemPermissionGroupSlug {
   TEACHER_DEFAULT = "teacher_default",
   PARENT_DEFAULT = "parent_default",
   STAFF_DEFAULT = "staff_default",
+  SUPERVISOR_DEFAULT = "supervisor_default",
+  STUDENT_DEFAULT = "student_default",
 }

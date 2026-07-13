@@ -2,6 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AppLanguagePothosObject,
   GenderPothosObject,
+  IanaTimezonePothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
@@ -20,6 +21,20 @@ export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
       status: t.field({ type: StudentStatusPothosObject }),
       classesTotal: t.int(),
       classesRemaining: t.int(),
+      email: t.string({
+        required: false,
+        description: "Student login email (creates a users row when provided)",
+        directives: { constraint: { maxLength: 255 } },
+      }),
+      password: t.string({
+        required: false,
+        directives: { constraint: { maxLength: 128 } },
+        description: "Student login password (required when email is provided)",
+      }),
+      timezone: t.field({
+        type: IanaTimezonePothosObject,
+        description: "Student timezone (applied to the created user record)",
+      }),
     }),
   });
 

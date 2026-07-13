@@ -1,7 +1,9 @@
+import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { CreditService } from "@/backend/services/billing/credit.service";
 
 export namespace ScheduleDeletionService {
   /**
@@ -15,7 +17,16 @@ export namespace ScheduleDeletionService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    return SchedulingRepository.deleteRecurringClass(classInstanceId);
+    return db.transaction(async tx => {
+      const result = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
+      if (!result?.deleted || !result.quotaDeducted) {
+        return result !== null;
+      }
+
+      const idempotencyKey = `credit-refund:${result.id}`;
+      await CreditService.refundOnCancel(result.studentId, result.id, actorUserId, idempotencyKey, tx, locale);
+      return true;
+    });
   }
 
   /**
@@ -29,6 +40,16 @@ export namespace ScheduleDeletionService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    return SchedulingRepository.clearWeeklySchedule(teacherId);
+    return db.transaction(async tx => {
+      const result = await SchedulingRepository.clearWeeklySchedule(teacherId, tx);
+      if (!result) return false;
+
+      for (const instance of result.refundedInstances) {
+        const idempotencyKey = `credit-refund:${instance.id}`;
+        await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, locale);
+      }
+
+      return true;
+    });
   }
 }

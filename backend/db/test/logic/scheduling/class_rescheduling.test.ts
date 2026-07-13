@@ -31,10 +31,12 @@ async function setupTestData(
   const tUser = await createTestUser(tx, `${prefix} Teacher`, `${prefix}-t-${randomUUID()}@example.com`, now);
   const [teacher] = await tx.insert(teachers).values({ userId: tUser.id, createdAt: now, updatedAt: now }).returning();
 
+  const sUser = await createTestUser(tx, `${prefix} Student User`, `${prefix}-su-${randomUUID()}@example.com`, now);
   const [student] = await tx
     .insert(students)
     .values({
       parentId: parent.id,
+      userId: sUser.id,
       name: `${prefix} Student`,
       gender,
       status: "REGULAR",

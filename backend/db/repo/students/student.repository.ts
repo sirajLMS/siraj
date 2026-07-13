@@ -101,6 +101,7 @@ export namespace StudentRepository {
 
     const insertInput: Types.StudentEntityInput = {
       parentId: input.parentId,
+      userId: input.userId,
       primaryTeacherId: input.primaryTeacherId ?? null,
       name: input.name,
       dateOfBirth: input.dateOfBirth,
@@ -152,6 +153,7 @@ export namespace StudentRepository {
       }
       const values: Types.StudentEntityInput[] = input.map(item => ({
         parentId: item.parentId,
+        userId: item.userId,
         primaryTeacherId: item.primaryTeacherId ?? null,
         name: item.name,
         dateOfBirth: item.dateOfBirth,
@@ -226,6 +228,7 @@ export namespace StudentRepository {
     const updateInput: Types.StudentEntityInput = {
       id: input.id,
       parentId: input.parentId ?? existingStudent.parentId,
+      userId: existingStudent.userId,
       primaryTeacherId:
         input.primaryTeacherId === null ? null : (input.primaryTeacherId ?? existingStudent.primaryTeacherId),
       name: input.name ?? existingStudent.name,
@@ -547,6 +550,7 @@ export namespace StudentRepository {
   export const upsertByIdempotencyKey = async (
     input: {
       parentId: string;
+      userId: string;
       primaryTeacherId: string;
       name: string;
       avatarUrl: string | null;
@@ -564,6 +568,7 @@ export namespace StudentRepository {
       .insert(students)
       .values({
         parentId: input.parentId,
+        userId: input.userId,
         primaryTeacherId: input.primaryTeacherId,
         name: input.name,
         avatarUrl: input.avatarUrl,
@@ -620,6 +625,7 @@ export namespace StudentRepository {
 
   export type StudentProfileRow = {
     readonly id: string;
+    readonly userId: string;
     readonly name: string;
     readonly status: StudentStatus;
     readonly avatarUrl: string | null;
@@ -647,6 +653,7 @@ export namespace StudentRepository {
     const results = await queryDb
       .select({
         id: students.id,
+        userId: students.userId,
         name: students.name,
         status: students.status,
         avatarUrl: students.avatarUrl,
@@ -681,6 +688,7 @@ export namespace StudentRepository {
     const row = results[0];
     return {
       id: row.id,
+      userId: row.userId,
       name: row.name,
       status: parseStudentStatus(row.status) ?? StudentStatus.REGULAR,
       avatarUrl: row.avatarUrl,
