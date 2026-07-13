@@ -143,6 +143,14 @@ export const profile: ProfileLabels = {
       reactivateSuccess: "Parent login access has been restored.",
       manageLifecycle: "Manage Lifecycle",
     },
+    common: {
+      student: {
+        fallbackInitial: "S",
+      },
+      teacher: {
+        fallbackInitial: "T",
+      },
+    },
     students: {
       empty: "No students currently associated.",
       mobileListLabel: "Associated Students List",
@@ -151,6 +159,13 @@ export const profile: ProfileLabels = {
         status: "Status",
         teacher: "Teacher",
         hoursPerWeek: "Hours/Week",
+      },
+      statusLabel: {
+        regular: "Regular",
+        on_trial: "On Trial",
+        on_leave: "On Leave",
+        suspended: "Suspended",
+        deactivated: "Deactivated",
       },
     },
   },

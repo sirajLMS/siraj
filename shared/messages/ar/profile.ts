@@ -143,6 +143,14 @@ export const profile: ProfileLabels = {
       reactivateSuccess: "تم استعادة صلاحية دخول ولي الأمر.",
       manageLifecycle: "إدارة دورة الحياة",
     },
+    common: {
+      student: {
+        fallbackInitial: "ط",
+      },
+      teacher: {
+        fallbackInitial: "م",
+      },
+    },
     students: {
       empty: "لا يوجد طلاب مرتبطون حالياً.",
       mobileListLabel: "قائمة الطلاب المرتبطين",
@@ -151,6 +159,13 @@ export const profile: ProfileLabels = {
         status: "الحالة",
         teacher: "المعلم",
         hoursPerWeek: "الساعات أسبوعياً",
+      },
+      statusLabel: {
+        regular: "عادي",
+        on_trial: "فترة تجريبية",
+        on_leave: "في إجازة",
+        suspended: "موقوف",
+        deactivated: "غير مفعّل",
       },
     },
   },

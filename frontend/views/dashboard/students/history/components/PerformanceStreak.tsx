@@ -27,7 +27,7 @@ export function PerformanceStreak({ streakDays }: Readonly<PerformanceStreakProp
           {t("title")}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onPrimary, opacity: 0.8, mb: 3 })}>
-          {t("description")}
+          {t("description", { count: streakDays.length })}
         </Typography>
 
         <Box sx={{ display: "flex", gap: 0.5, height: MAX_STREAK_HEIGHT, alignItems: "flex-end" }}>

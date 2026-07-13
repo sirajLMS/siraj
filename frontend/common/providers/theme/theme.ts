@@ -72,7 +72,13 @@ export function createAppCssVarsTheme(direction: "rtl" | "ltr" = "ltr", locale: 
 
   const themeWithLocale = createTheme(
     {
-      cssVariables: true,
+      cssVariables: {
+        // Use a `data-*` attribute selector (rather than the default `media`)
+        // so `useColorScheme().setMode()` can toggle the mode manually. The
+        // matching `attribute="data"` on `<InitColorSchemeScript />` in the
+        // root layout keeps SSR and client in sync without flicker.
+        colorSchemeSelector: "data",
+      },
       colorSchemes: {
         light: { palette: { mode: "light", ...lightPalette } },
         dark: { palette: { mode: "dark", ...darkPalette } },

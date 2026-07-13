@@ -102,6 +102,7 @@ export interface PaymentMethodLabels {
     readonly onlineAccount: string;
     readonly bankTransfer: string;
     readonly cash: string;
+    readonly proofUpload: string;
   };
   readonly direction: {
     readonly in: string;

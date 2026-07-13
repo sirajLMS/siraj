@@ -41,24 +41,24 @@ export const IDENTIFIER_KINDS: readonly IdentifierKind[] = [
 ];
 
 const PAYMENT_METHOD_TYPE_LABEL_KEYS: Record<PaymentMethodType, string> = {
-  [PaymentMethodType.MobileWallet]: "ui.paymentMethod.type.mobileWallet",
-  [PaymentMethodType.PaymentLink]: "ui.paymentMethod.type.paymentLink",
-  [PaymentMethodType.OnlineAccount]: "ui.paymentMethod.type.onlineAccount",
-  [PaymentMethodType.BankTransfer]: "ui.paymentMethod.type.bankTransfer",
-  [PaymentMethodType.Cash]: "ui.paymentMethod.type.cash",
-  [PaymentMethodType.ProofUpload]: "ui.paymentMethod.type.proofUpload",
+  [PaymentMethodType.MobileWallet]: "type.mobileWallet",
+  [PaymentMethodType.PaymentLink]: "type.paymentLink",
+  [PaymentMethodType.OnlineAccount]: "type.onlineAccount",
+  [PaymentMethodType.BankTransfer]: "type.bankTransfer",
+  [PaymentMethodType.Cash]: "type.cash",
+  [PaymentMethodType.ProofUpload]: "type.proofUpload",
 };
 
 const PAYMENT_DIRECTION_LABEL_KEYS: Record<PaymentDirection, string> = {
-  [PaymentDirection.Payin]: "ui.paymentMethod.direction.in",
-  [PaymentDirection.Payout]: "ui.paymentMethod.direction.out",
-  [PaymentDirection.Both]: "ui.paymentMethod.direction.both",
+  [PaymentDirection.Payin]: "direction.in",
+  [PaymentDirection.Payout]: "direction.out",
+  [PaymentDirection.Both]: "direction.both",
 };
 
 export const IDENTIFIER_KIND_LABEL_KEYS: Record<IdentifierKind, string> = {
-  [IdentifierKind.Email]: "ui.paymentMethod.identifier.email",
-  [IdentifierKind.Handle]: "ui.paymentMethod.identifier.handle",
-  [IdentifierKind.EmailOrHandle]: "ui.paymentMethod.identifier.emailOrHandle",
+  [IdentifierKind.Email]: "identifier.email",
+  [IdentifierKind.Handle]: "identifier.handle",
+  [IdentifierKind.EmailOrHandle]: "identifier.emailOrHandle",
 };
 
 export type PaymentMethodLabelResolver = (messageKey: string) => string;

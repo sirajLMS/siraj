@@ -64,6 +64,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             very first render — no dark-mode hydration flash. `defaultMode`
             matches the cookie value read above and passed to MuiProvider. */}
         <InitColorSchemeScript
+          attribute="data" // match `colorSchemeSelector: "data"` in `createAppCssVarsTheme`
           defaultMode={initialTheme}
           modeStorageKey="theme" // match the existing localStorage key from `theme-detection.ts`
         />

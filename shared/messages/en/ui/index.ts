@@ -75,6 +75,7 @@ export const paymentMethod = {
     onlineAccount: "Online account",
     bankTransfer: "Bank transfer",
     cash: "Cash",
+    proofUpload: "Proof upload",
   },
   direction: {
     in: "In",

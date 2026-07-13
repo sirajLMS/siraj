@@ -58,7 +58,7 @@ export function ProfilePageClient({ scope, mode, audience, targetUserId }: Profi
   const roleLabel =
     audience === ProfileAudience.Staff
       ? (profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined)
-      : t(`role.${audience}`);
+      : t(`role.${audience.toLowerCase()}`);
 
   const showParentAccountActions =
     audience === ProfileAudience.Parent && scope === ProfileScope.Other && mode === ProfileMode.View;

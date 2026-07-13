@@ -84,22 +84,27 @@ export function StudentHistoryDesktop({
       </Box>
 
       <Box sx={theme => ({ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: theme.layout.gutter, mb: 4 })}>
-        <MetricCard icon={School} label={t("metrics.totalClasses")} value={metrics.totalClasses} variant="default" />
+        <MetricCard
+          icon={School}
+          label={t("metrics.totalClasses", { count: metrics.totalClasses })}
+          value={metrics.totalClasses}
+          variant="default"
+        />
         <MetricCard
           icon={VerifiedUser}
-          label={t("metrics.attendanceRate")}
+          label={t("metrics.attendanceRate", { rate: metrics.attendanceRate })}
           value={`${metrics.attendanceRate}%`}
           variant="default"
         />
         <MetricCard
           icon={Timer}
-          label={t("metrics.hoursStudied")}
+          label={t("metrics.hoursStudied", { hours: metrics.hoursStudied })}
           value={`${metrics.hoursStudied}h`}
           variant="default"
         />
         <MetricCard
           icon={TrendingUp}
-          label={t("metrics.performance")}
+          label={t("metrics.performance", { score: metrics.performance })}
           value={`${metrics.performance}%`}
           variant="default"
         />

@@ -139,6 +139,14 @@ export interface ProfileLabels {
       readonly reactivateSuccess: string;
       readonly manageLifecycle: string;
     };
+    readonly common: {
+      readonly student: {
+        readonly fallbackInitial: string;
+      };
+      readonly teacher: {
+        readonly fallbackInitial: string;
+      };
+    };
     readonly students: {
       readonly empty: string;
       readonly mobileListLabel: string;
@@ -147,6 +155,13 @@ export interface ProfileLabels {
         readonly status: string;
         readonly teacher: string;
         readonly hoursPerWeek: string;
+      };
+      readonly statusLabel: {
+        readonly regular: string;
+        readonly on_trial: string;
+        readonly on_leave: string;
+        readonly suspended: string;
+        readonly deactivated: string;
       };
     };
   };

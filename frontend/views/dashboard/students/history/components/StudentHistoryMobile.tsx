@@ -173,54 +173,26 @@ function HistoryMobileMetricsGrid({
       }}
     >
       <MobileMetric
-        title={t("metrics.totalClasses")}
-        icon={
-          <School
-            sx={theme => ({
-              color: theme.palette.onPrimaryContainer,
-              fontSize: 18,
-            })}
-          />
-        }
+        title={t("metrics.totalClasses", { count: metrics.totalClasses })}
+        icon={<School sx={theme => ({ color: theme.palette.onPrimaryContainer, fontSize: 18 })} />}
         value={metrics.totalClasses}
         bg={theme => theme.palette.primaryContainer}
       />
       <MobileMetric
-        title={t("metrics.attendanceRate")}
-        icon={
-          <VerifiedUser
-            sx={theme => ({
-              color: theme.palette.onSecondaryContainer,
-              fontSize: 18,
-            })}
-          />
-        }
+        title={t("metrics.attendanceRate", { rate: metrics.attendanceRate })}
+        icon={<VerifiedUser sx={theme => ({ color: theme.palette.onSecondaryContainer, fontSize: 18 })} />}
         value={`${metrics.attendanceRate}%`}
         bg={theme => theme.palette.secondaryContainer}
       />
       <MobileMetric
-        title={t("metrics.hoursStudied")}
-        icon={
-          <Timer
-            sx={theme => ({
-              color: theme.palette.onTertiaryContainer,
-              fontSize: 18,
-            })}
-          />
-        }
+        title={t("metrics.hoursStudied", { hours: metrics.hoursStudied })}
+        icon={<Timer sx={theme => ({ color: theme.palette.onTertiaryContainer, fontSize: 18 })} />}
         value={`${metrics.hoursStudied}h`}
         bg={theme => theme.palette.tertiaryContainer}
       />
       <MobileMetric
-        title={t("metrics.performance")}
-        icon={
-          <TrendingUp
-            sx={theme => ({
-              color: theme.palette.onErrorContainer,
-              fontSize: 18,
-            })}
-          />
-        }
+        title={t("metrics.performance", { score: metrics.performance })}
+        icon={<TrendingUp sx={theme => ({ color: theme.palette.onErrorContainer, fontSize: 18 })} />}
         value={`${metrics.performance}%`}
         bg={theme => theme.palette.errorContainer}
       />

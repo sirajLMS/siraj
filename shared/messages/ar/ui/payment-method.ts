@@ -7,6 +7,7 @@ export const paymentMethod: PaymentMethodLabels = {
     onlineAccount: "حساب إلكتروني",
     bankTransfer: "تحويل بنكي",
     cash: "نقدي",
+    proofUpload: "إثبات دفع",
   },
   direction: {
     in: "وارد",
