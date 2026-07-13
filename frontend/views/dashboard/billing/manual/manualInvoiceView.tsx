@@ -1,8 +1,8 @@
 "use client";
 
-import { FormSuccessSnackbar } from "@/frontend/components/ui";
-import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
-import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   type ManualInvoiceViewModel,
   type UseManualInvoiceViewModelProps,

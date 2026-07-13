@@ -207,7 +207,7 @@ Wire the `DateNavigator` to a Zustand store `filterDate` field so a single value
 Use shared form field styles from `@/frontend/components/ui/form`:
 
 ```tsx
-import { labelSx, standardInputSx, outlinedInputSx } from "@/frontend/components/ui/form";
+import { labelSx, standardInputSx, outlinedInputSx } from "@/frontend/common/components/ui/form";
 
 <Box component="label" sx={labelSx}>
   {label}
@@ -380,7 +380,7 @@ The switcher (`xxView.tsx`) is the ONLY page-level file that reads viewport. It 
 ```tsx
 // xxView.tsx — the switcher (uses ResponsiveViewSwitch for lazy loading)
 "use client";
-import { createLazyView, ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { createLazyView, ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { type XxViewModel, useXxViewModel } from "./useXxViewModel";
 
 // createLazyView MUST be at module top level (required by next/dynamic).
@@ -471,7 +471,7 @@ Example usage:
 
 ```tsx
 // resources.mobile.tsx
-import { MobilePageHeader, MobileContentStack, MobileCardList, MobileCardListItem } from "@/frontend/components/ui";
+import { MobilePageHeader, MobileContentStack, MobileCardList, MobileCardListItem } from "@/frontend/common/components/ui";
 import { logger } from "@/frontend/common/utils/logger";
 
 export function ResourcesMobileView({ rows, loading, labels, onOpen }: Readonly<ResourcesViewModel>) {

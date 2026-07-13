@@ -3,8 +3,8 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Grid, Link, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader, PhoneDisplay, SectionPanel } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { PageContainer, PageHeader, PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { parentOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";

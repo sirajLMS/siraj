@@ -5,7 +5,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function NewStudentContainer() {

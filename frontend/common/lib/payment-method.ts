@@ -9,7 +9,7 @@
  * imports so it can be unit-tested and tree-shaken.
  */
 
-import type { PaymentMethodDisplayData } from "@/frontend/components/ui/display/paymentMethod/PaymentMethodDisplay";
+import type { PaymentMethodDisplayData } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodTransactionSnapshotFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { LocalizedString } from "@/shared/types/localized-string";

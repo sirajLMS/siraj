@@ -2,8 +2,8 @@
 
 import { AcUnitOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { Box, Card, CardContent, Stack, Tooltip, Typography } from "@mui/material";
-import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/common/components/ui";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";

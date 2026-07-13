@@ -4,8 +4,8 @@ import { AlternateEmailOutlined, ChatOutlined, GroupsOutlined } from "@mui/icons
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
-import { PhoneDisplay, SectionPanel } from "@/frontend/components/ui";
-import { PhoneFormField } from "@/frontend/components/ui/input";
+import { PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
+import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import {
   type ParentViewData,

@@ -1,6 +1,6 @@
 "use client";
 
-import { PersonProfileLinkCell } from "@/frontend/components/ui";
+import { PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 

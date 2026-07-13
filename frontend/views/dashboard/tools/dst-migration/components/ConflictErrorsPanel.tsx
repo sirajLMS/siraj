@@ -3,7 +3,7 @@
 import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { StatusBadge } from "@/frontend/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import type { ConflictGroup } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {

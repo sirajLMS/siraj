@@ -4,8 +4,8 @@ import { useMutation } from "@apollo/client/react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
 import { AccountStatus, AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   deactivateParentMutationDocument,

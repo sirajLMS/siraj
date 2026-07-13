@@ -2,7 +2,7 @@
 
 import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";

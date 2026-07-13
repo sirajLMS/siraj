@@ -4,7 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Alert, Box, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { TimezoneDisplay } from "@/frontend/components/ui/display";
+import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
 import { edgeToEdgeSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { classDetailsContentPaddingSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";

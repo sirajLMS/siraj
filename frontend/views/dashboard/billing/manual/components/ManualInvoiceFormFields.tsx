@@ -4,7 +4,7 @@ import { Autocomplete, Box, Skeleton, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { ManualInvoiceDateField } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceDateField";

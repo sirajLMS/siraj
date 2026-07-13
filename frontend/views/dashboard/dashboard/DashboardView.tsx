@@ -1,7 +1,7 @@
 "use client";
 
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { PageContainer } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TodayClassesSection } from "@/frontend/views/dashboard/admin/home/components/TodayClassesSection";
 import { ScheduleOverviewView } from "@/frontend/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView";

@@ -3,7 +3,7 @@
 import { ReportProblemOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { ConflictErrorsPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
 import { DstMigrationMetricsRow } from "@/frontend/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
 import { UpdatedSessionsCardList } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";

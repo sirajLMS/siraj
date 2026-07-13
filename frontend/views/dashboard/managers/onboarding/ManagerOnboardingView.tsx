@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import { FormSuccessSnackbar, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { FormSuccessSnackbar, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { OnboardingMetricsOverview } from "@/frontend/views/dashboard/managers/onboarding/OnboardingMetricsOverview";
 import { StaffInfoSection } from "@/frontend/views/dashboard/managers/onboarding/StaffInfoSection";
 import { SystemAccessSection } from "@/frontend/views/dashboard/managers/onboarding/SystemAccessSection";

@@ -4,7 +4,7 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { FeesContractSection } from "@/frontend/views/dashboard/admin/parents/onboarding/FeesContractSection";
 import { ParentInfoSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentInfoSection";
 import { ParentMeetingConfigOnboardingSection } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";

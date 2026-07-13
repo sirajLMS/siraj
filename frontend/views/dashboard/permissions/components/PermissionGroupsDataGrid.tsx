@@ -5,8 +5,8 @@ import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface PermissionGroupsDataGridProps {

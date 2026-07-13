@@ -2,7 +2,7 @@
 
 import { Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { AdminBillingView } from "@/frontend/views/dashboard/admin/billing/adminBillingView";

@@ -2,8 +2,8 @@
 
 import { Box, Grid, Input, InputAdornment, Typography } from "@mui/material";
 import { type Control, Controller, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import { labelSx, standardInputSx } from "@/frontend/common/components/ui/form";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";

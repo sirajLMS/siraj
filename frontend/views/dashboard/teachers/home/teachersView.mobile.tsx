@@ -2,8 +2,8 @@
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { MobileContentStack, MobilePageHeader, PageContainer, PrimaryPageAction } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { MobileContentStack, MobilePageHeader, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TeacherCardList } from "@/frontend/views/dashboard/teachers/home/components/TeacherCardList";

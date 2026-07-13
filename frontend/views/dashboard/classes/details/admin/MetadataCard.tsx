@@ -6,7 +6,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 
 interface MetadataCardProps {
   readonly scheduledDate: string;

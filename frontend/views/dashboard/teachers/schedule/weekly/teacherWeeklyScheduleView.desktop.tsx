@@ -13,9 +13,9 @@ import {
   Stack,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui/container";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import { ScheduleFooterLegend } from "@/frontend/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";

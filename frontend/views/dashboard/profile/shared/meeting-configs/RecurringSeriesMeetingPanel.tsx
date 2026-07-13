@@ -2,7 +2,7 @@
 
 import { Button, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { SectionPanel } from "@/frontend/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 import { Link } from "@/shared/i18n/routing";
 

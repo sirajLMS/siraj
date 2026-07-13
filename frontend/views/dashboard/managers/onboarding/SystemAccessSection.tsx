@@ -5,8 +5,8 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
+import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
 import { ManagerAccountType } from "@/frontend/views/dashboard/managers/onboarding/types";
 

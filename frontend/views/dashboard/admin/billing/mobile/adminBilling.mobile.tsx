@@ -13,7 +13,7 @@ import {
   MobilePageHeader,
   PageContainer,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { AdminInvoiceMobileCard } from "@/frontend/views/dashboard/admin/billing/mobile/components/adminInvoiceCard.mobile";
 import type { AdminBillingViewModel } from "@/frontend/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";

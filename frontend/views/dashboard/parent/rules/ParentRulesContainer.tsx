@@ -4,8 +4,8 @@ import { useQuery } from "@apollo/client/react";
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 

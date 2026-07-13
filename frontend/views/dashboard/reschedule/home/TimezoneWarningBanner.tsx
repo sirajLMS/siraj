@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { TimezoneDisplay } from "@/frontend/components/ui/display";
+import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
 
 interface Props {
   readonly timezone: string;

@@ -3,7 +3,7 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Tab, Tabs } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type {
   SupportedMobileWalletFieldsFragment,
   SupportedOnlineAccountFieldsFragment,

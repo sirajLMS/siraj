@@ -4,7 +4,7 @@ import { ArrowBackOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { StatusBadge } from "@/frontend/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 

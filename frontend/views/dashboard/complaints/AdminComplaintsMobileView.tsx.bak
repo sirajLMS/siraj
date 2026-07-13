@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { ComplaintQueueCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintQueueCardList";
 import { ComplaintsMetricsRow } from "@/frontend/views/dashboard/complaints/components/ComplaintsMetricsRow";
 import { ComplaintsSearchBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsSearchBar";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Grid } from "@mui/material";
-import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { ComplaintFormFields } from "@/frontend/views/dashboard/complaints/components/ComplaintFormFields";
 import { ComplaintPolicyPanel } from "@/frontend/views/dashboard/complaints/components/ComplaintPolicyPanel";
 import { ComplaintRecordCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintRecordCardList";

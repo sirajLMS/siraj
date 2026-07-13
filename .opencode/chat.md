@@ -7609,7 +7609,7 @@ Let me do a much deeper analysis of every file involved.
 2: 
 3: import { Grid } from "@mui/material";
 4: import type { Control, FieldErrors } from "react-hook-form";
-5: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+5: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 6: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/common/stores/mockParentComplaintsStore";
 7: import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 8: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
@@ -7713,7 +7713,7 @@ Let me do a much deeper analysis of every file involved.
 <content>
 1: "use client";
 2: 
-3: import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+3: import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 4: import { ComplaintQueueCardList } from "./components/ComplaintQueueCardList";
 5: import { ComplaintsMetricsRow } from "./components/ComplaintsMetricsRow";
 6: import { ComplaintsSearchBar } from "./components/ComplaintsSearchBar";
@@ -8088,7 +8088,7 @@ Let me do a much deeper analysis of all the remaining frontend files.
 3: import { AlternateEmailOutlined, CheckCircleOutlined, SendOutlined } from "@mui/icons-material";
 4: import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 5: import { styled } from "@mui/material/styles";
-6: import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+6: import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
 7: import type { AdminComplaintRow, ComplaintPriority } from "@/frontend/common/stores/mockAdminComplaintsStore";
 8: import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 9: 
@@ -8406,7 +8406,7 @@ Let me do a much deeper analysis of all the remaining frontend files.
 3: import { HourglassEmptyOutlined, VerifiedUserOutlined } from "@mui/icons-material";
 4: import { Box, Paper, Typography } from "@mui/material";
 5: import { styled } from "@mui/material/styles";
-6: import { StatusBadge } from "@/frontend/components/ui";
+6: import { StatusBadge } from "@/frontend/common/components/ui";
 7: import type { ParentComplaintRecord } from "@/frontend/common/stores/mockParentComplaintsStore";
 8: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 9: 
@@ -9247,7 +9247,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 3: import { Button, Typography } from "@mui/material";
 4: import type { GridColDef } from "@mui/x-data-grid";
 5: import { useMemo } from "react";
-6: import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+6: import { AppDataGrid, StatusBadge } from "@/frontend/common/components/ui";
 7: import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 8: import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 9: 
@@ -9369,7 +9369,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 1: "use client";
 2: 
 3: import { Box, Button, Paper, Typography } from "@mui/material";
-4: import { StatusBadge } from "@/frontend/components/ui";
+4: import { StatusBadge } from "@/frontend/common/components/ui";
 5: import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 6: import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 7: 
@@ -9475,7 +9475,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 2: 
 3: import { AutoAwesomeOutlined, SecurityOutlined, UpdateOutlined } from "@mui/icons-material";
 4: import { Box, Typography } from "@mui/material";
-5: import { BaseCard } from "@/frontend/components/ui";
+5: import { BaseCard } from "@/frontend/common/components/ui";
 6: import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 7: 
 8: interface SuggestionSupportCardsProps {
@@ -9680,7 +9680,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 3: import { SendOutlined } from "@mui/icons-material";
 4: import { Box } from "@mui/material";
 5: import type { Control, FieldErrors } from "react-hook-form";
-6: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+6: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 7: import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 8: import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 9: import { SuggestionFormFields } from "./components/SuggestionFormFields";
@@ -9770,7 +9770,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 <content>
 1: "use client";
 2: 
-3: import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+3: import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 4: import { SuggestionsDataGrid } from "./components/SuggestionsDataGrid";
 5: import { SuggestionsMetricsRow } from "./components/SuggestionsMetricsRow";
 6: import { SuggestionsSearchBar } from "./components/SuggestionsSearchBar";
@@ -10429,7 +10429,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 3: import { Box } from "@mui/material";
 4: import { styled } from "@mui/material/styles";
 5: import type { Control, FieldErrors } from "react-hook-form";
-6: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+6: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 7: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/common/stores/mockParentComplaintsStore";
 8: import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 9: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
@@ -10553,7 +10553,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 2: 
 3: import { Box } from "@mui/material";
 4: import { styled } from "@mui/material/styles";
-5: import { PageContainer, PageHeader } from "@/frontend/components/ui";
+5: import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 6: import { ComplaintQueueCardList } from "./components/ComplaintQueueCardList";
 7: import { ComplaintsMetricsRow } from "./components/ComplaintsMetricsRow";
 8: import { ComplaintsSearchBar } from "./components/ComplaintsSearchBar";
@@ -10641,7 +10641,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 2: 
 3: import { Box } from "@mui/material";
 4: import type { Control, FieldErrors } from "react-hook-form";
-5: import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/components/ui";
+5: import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
 6: import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 7: import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 8: import { SuggestionFormFields } from "./components/SuggestionFormFields";
@@ -10740,7 +10740,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 1: "use client";
 2: 
 3: import { Box } from "@mui/material";
-4: import { PageContainer, PageHeader } from "@/frontend/components/ui";
+4: import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 5: import { SuggestionsCardList } from "./components/SuggestionsCardList";
 6: import { SuggestionsMetricsRow } from "./components/SuggestionsMetricsRow";
 7: import { SuggestionsSearchBar } from "./components/SuggestionsSearchBar";

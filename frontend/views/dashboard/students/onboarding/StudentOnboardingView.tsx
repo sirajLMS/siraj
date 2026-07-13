@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import {
   ParentAssignmentSection,
   type ParentOption,

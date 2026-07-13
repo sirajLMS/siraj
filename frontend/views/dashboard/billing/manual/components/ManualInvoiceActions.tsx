@@ -2,7 +2,7 @@
 
 import { MailOutlined, SendOutlined } from "@mui/icons-material";
 import { Box, useTheme } from "@mui/material";
-import { ExportButton, PrimaryPageAction } from "@/frontend/components/ui";
+import { ExportButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
 interface ManualInvoiceActionsProps {

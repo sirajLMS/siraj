@@ -5,7 +5,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   adminComplaintQueueQueryDocument,

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { FormSuccessSnackbar } from "@/frontend/components/ui";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ManualInvoiceDesktopView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceDesktopView";
 import { ManualInvoiceMobileView } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceMobileView";

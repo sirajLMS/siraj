@@ -2,10 +2,10 @@
 
 import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
-import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
-import { PaginationControls, PersonProfileLink } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { PaginationControls, PersonProfileLink } from "@/frontend/common/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentAccountStatusKey,

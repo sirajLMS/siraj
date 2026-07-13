@@ -6,7 +6,7 @@ import { alpha, Box, IconButton, Snackbar, Typography, useTheme } from "@mui/mat
 import { styled } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { RecurringClassForm } from "@/frontend/views/dashboard/classes/recurring/RecurringClassForm";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";

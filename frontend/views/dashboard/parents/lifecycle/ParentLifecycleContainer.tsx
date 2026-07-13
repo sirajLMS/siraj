@@ -6,7 +6,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AccountStatus, AppPermission, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { changeParentLifecycleStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-lifecycle.documents";
 import { parentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-profile.documents";

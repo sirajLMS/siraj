@@ -3,9 +3,9 @@
 import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, ClassProfileLinkCell, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { AppDataGrid, ClassProfileLinkCell, GridPagination, PersonProfileLinkCell } from "@/frontend/common/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";

@@ -17,8 +17,8 @@ import {
 } from "@mui/material";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { SectionPanel } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission, FxProvider, FxProviderConfigSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fxProviderConfigQueryDocument, updateFxProviderMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";

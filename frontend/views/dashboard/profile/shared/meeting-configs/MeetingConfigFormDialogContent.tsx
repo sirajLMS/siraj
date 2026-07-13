@@ -12,9 +12,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
-import { MeetingConfigTypeFields } from "@/frontend/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
-import { MeetingProviderSelect } from "@/frontend/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
+import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
+import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
 import type { UseMeetingConfigFormStateReturn } from "@/frontend/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
 
 export type MeetingConfigFormDialogContentProps = {

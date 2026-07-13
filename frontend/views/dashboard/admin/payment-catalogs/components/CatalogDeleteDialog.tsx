@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { BaseDeleteDialog } from "@/frontend/components/ui/dialog/BaseDeleteDialog";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { CatalogDeleteDialogProps } from "@/frontend/views/dashboard/admin/payment-catalogs/types";
 
 export function CatalogDeleteDialog({

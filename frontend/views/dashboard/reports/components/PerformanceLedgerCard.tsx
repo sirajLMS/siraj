@@ -3,8 +3,8 @@
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useLocale, useTranslations } from "next-intl";
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { useUserStore } from "@/frontend/common/stores/userStore";

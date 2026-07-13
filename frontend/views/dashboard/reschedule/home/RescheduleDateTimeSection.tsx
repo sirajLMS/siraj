@@ -6,7 +6,7 @@ import { format, isValid } from "date-fns";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { AppDatePicker, AppTimePicker, FieldWrapper, timeInputStandardSx } from "@/frontend/components/ui/form";
+import { AppDatePicker, AppTimePicker, FieldWrapper, timeInputStandardSx } from "@/frontend/common/components/ui/form";
 import type { RescheduleFormData } from "@/frontend/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import {
   parseDateValue,

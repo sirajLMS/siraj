@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   userBillingProfileInvoiceHistoryQueryDocument,

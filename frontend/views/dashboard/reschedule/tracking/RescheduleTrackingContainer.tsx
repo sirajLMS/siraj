@@ -5,7 +5,7 @@ import { Box, CircularProgress, type SxProps, type Theme } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   rescheduleTrackingMetricsQueryDocument,

@@ -3,7 +3,7 @@
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({

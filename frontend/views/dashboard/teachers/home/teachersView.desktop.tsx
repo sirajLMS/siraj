@@ -3,9 +3,9 @@
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { PrimaryPageAction } from "@/frontend/components/ui/button/ActionButtons";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui/button/ActionButtons";
 import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TeacherDataGrid } from "@/frontend/views/dashboard/teachers/home/components/TeacherDataGrid";

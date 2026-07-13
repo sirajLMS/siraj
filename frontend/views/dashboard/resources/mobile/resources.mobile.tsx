@@ -2,7 +2,7 @@
 
 import { CloudUploadOutlined, ExpandMoreOutlined } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, Box } from "@mui/material";
-import { BaseCard, MobileContentStack, MobilePageHeader, PageContainer } from "@/frontend/components/ui";
+import { BaseCard, MobileContentStack, MobilePageHeader, PageContainer } from "@/frontend/common/components/ui";
 import { ResourceDeleteDialog } from "@/frontend/views/dashboard/resources/components/ResourceDeleteDialog";
 import { ResourceGovernancePanel } from "@/frontend/views/dashboard/resources/components/ResourceGovernancePanel";
 import { ResourceLibraryList } from "@/frontend/views/dashboard/resources/components/ResourceLibraryList";

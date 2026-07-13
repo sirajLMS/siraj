@@ -6,11 +6,11 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Button, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { ErrorState } from "@/frontend/components/ui";
+import { ErrorState } from "@/frontend/common/components/ui";
 import {
   PaymentMethodList,
   type PaymentMethodRow,
-} from "@/frontend/components/ui/display/paymentMethod/PaymentMethodList";
+} from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
 import { AppPermission, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {

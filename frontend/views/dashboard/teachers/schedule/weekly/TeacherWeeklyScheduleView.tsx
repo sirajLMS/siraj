@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
-import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
 
 interface ScheduleFooterLegendProps {

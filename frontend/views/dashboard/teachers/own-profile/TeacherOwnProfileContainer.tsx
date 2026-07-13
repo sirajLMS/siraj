@@ -3,10 +3,10 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { PhoneDisplay } from "@/frontend/components/ui/display";
-import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
+import { PhoneDisplay } from "@/frontend/common/components/ui/display";
+import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { teacherOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";

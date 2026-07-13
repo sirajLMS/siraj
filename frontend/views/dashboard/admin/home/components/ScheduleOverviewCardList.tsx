@@ -5,8 +5,8 @@ import { Avatar, Box, CircularProgress, Paper, Stack, type Theme, Tooltip, Typog
 import { alpha, styled } from "@mui/material/styles";
 import { useLocale } from "next-intl";
 import type * as React from "react";
-import { ActionIconLink, TimezoneDisplay } from "@/frontend/components/ui";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { ActionIconLink, TimezoneDisplay } from "@/frontend/common/components/ui";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";

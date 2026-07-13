@@ -4,7 +4,7 @@ import { TranslateOutlined } from "@mui/icons-material";
 import { Paper, type PaperProps, Popover, Stack, styled } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { LanguageDisplay } from "@/frontend/components/ui/display";
+import { LanguageDisplay } from "@/frontend/common/components/ui/display";
 import { useLanguageSwitch } from "@/frontend/common/hooks/useLanguageSwitch";
 import { languages } from "@/frontend/common/lib/locale";
 import { NavbarIcon } from "@/frontend/views/dashboard/components/navbar/NavbarIcon";

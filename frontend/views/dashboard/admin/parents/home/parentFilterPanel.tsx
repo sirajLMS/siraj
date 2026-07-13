@@ -1,7 +1,7 @@
 "use client";
 
 import { Chip, Collapse, Stack, Typography } from "@mui/material";
-import { FilterButton } from "@/frontend/components/ui";
+import { FilterButton } from "@/frontend/common/components/ui";
 import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { toParentLifecycleStatus } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { LIFECYCLE_STATUS_FILTER_OPTIONS } from "@/frontend/views/dashboard/admin/parents/home/parentFilterConstants";

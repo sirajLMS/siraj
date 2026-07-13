@@ -9,7 +9,7 @@ import {
   MobilePageHeader,
   PageContainer,
   StatusBadge,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
 import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";

@@ -7,7 +7,7 @@ import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";

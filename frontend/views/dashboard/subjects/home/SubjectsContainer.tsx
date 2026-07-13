@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classCategoriesQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-category.documents";
 import { classSubjectsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";

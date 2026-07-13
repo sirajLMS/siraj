@@ -18,8 +18,8 @@ import {
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
-import { PhoneInput } from "@/frontend/components/ui/input";
+import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { PhoneInput } from "@/frontend/common/components/ui/input";
 import type { UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { updateManagerProfileMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { logger } from "@/frontend/common/utils/logger";

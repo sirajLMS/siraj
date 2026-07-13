@@ -2,7 +2,7 @@
 
 import { AutoAwesomeOutlined, SecurityOutlined, UpdateOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { BaseCard } from "@/frontend/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { SuggestionSupportCardsProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 const SUPPORT_CARDS = [

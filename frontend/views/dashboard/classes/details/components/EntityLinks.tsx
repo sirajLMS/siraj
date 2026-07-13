@@ -1,6 +1,6 @@
 "use client";
 
-import { PersonProfileLink } from "@/frontend/components/ui";
+import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 
 interface StudentEntityLinkProps {

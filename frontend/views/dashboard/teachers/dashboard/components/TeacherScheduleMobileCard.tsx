@@ -3,8 +3,8 @@
 import { AccessTimeOutlined, AcUnitOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/ui";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/common/components/ui";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";

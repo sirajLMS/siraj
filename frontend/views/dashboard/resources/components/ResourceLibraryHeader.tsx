@@ -2,7 +2,7 @@
 
 import { FilterListOutlined, SortOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { FilterButton } from "@/frontend/components/ui";
+import { FilterButton } from "@/frontend/common/components/ui";
 import type { ResourceLibraryHeaderProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 export function ResourceLibraryHeader({

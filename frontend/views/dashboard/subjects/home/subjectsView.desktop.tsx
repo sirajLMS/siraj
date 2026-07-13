@@ -3,7 +3,7 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { CategoriesSection } from "@/frontend/views/dashboard/subjects/home/components/CategoriesSection";
 import { SubjectCard } from "@/frontend/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/views/dashboard/subjects/home/types";

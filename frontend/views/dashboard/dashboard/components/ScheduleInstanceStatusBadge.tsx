@@ -1,6 +1,6 @@
 "use client";
 
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveScheduleInstanceDisplayStatus } from "@/frontend/views/dashboard/dashboard/utils/scheduleInstanceStatus";
 

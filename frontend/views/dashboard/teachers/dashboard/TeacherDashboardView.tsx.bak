@@ -9,7 +9,7 @@ import {
   PaginationControls,
   PrimaryPageAction,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import type {
   MissedClassAlert,
   StudentProgressFeedItem,

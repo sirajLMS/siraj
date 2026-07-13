@@ -119,7 +119,7 @@ const labelSx = { fontSize: 12, textTransform: "uppercase" };
 <PageHeader title="..." titleVariant="headlineLg" />
 
 // Import form styles
-import { labelSx } from "@/frontend/components/ui/form";
+import { labelSx } from "@/frontend/common/components/ui/form";
 ```
 
 ---

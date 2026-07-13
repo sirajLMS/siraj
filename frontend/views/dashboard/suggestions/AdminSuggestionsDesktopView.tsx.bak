@@ -1,6 +1,6 @@
 "use client";
 
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { SuggestionsDataGrid } from "@/frontend/views/dashboard/suggestions/components/SuggestionsDataGrid";
 import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
 import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";

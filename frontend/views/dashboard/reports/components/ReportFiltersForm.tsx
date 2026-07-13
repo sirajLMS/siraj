@@ -4,8 +4,8 @@ import { QueryStatsOutlined } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
-import { PrimaryPageAction } from "@/frontend/components/ui";
-import { AppDatePicker } from "@/frontend/components/ui/form/date/AppDatePicker";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import type { ReportTeacherOption, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";

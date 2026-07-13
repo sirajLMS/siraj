@@ -3,7 +3,7 @@
 import { Box, FormHelperText, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { durationBoxSx, labelSx } from "@/frontend/components/ui/form";
+import { durationBoxSx, labelSx } from "@/frontend/common/components/ui/form";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 
 // Uppercase onSurfaceVariant label-sized caption used beside the duration input as a unit label

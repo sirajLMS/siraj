@@ -8,11 +8,11 @@ import {
   PageHeader,
   PrimaryPageAction,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import {
   effectiveMeetingToDisplayData,
   MeetingConfigDisplay,
-} from "@/frontend/components/ui/display/meetingConfig/MeetingConfigDisplay";
+} from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import { ClassParticipantsSection } from "@/frontend/views/dashboard/reschedule/home/ClassParticipantsSection";
 import { NotificationPolicyCard } from "@/frontend/views/dashboard/reschedule/home/NotificationPolicyCard";
 import { QuickAdjustSection } from "@/frontend/views/dashboard/reschedule/home/QuickAdjustSection";

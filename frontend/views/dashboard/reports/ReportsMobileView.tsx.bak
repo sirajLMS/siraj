@@ -1,6 +1,6 @@
 "use client";
 
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
 import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
 import { PerformanceLedgerCardList } from "@/frontend/views/dashboard/reports/components/PerformanceLedgerCardList";

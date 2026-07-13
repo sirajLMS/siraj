@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Stack, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ErrorState, LoadingState, PageContainer, PageHeader } from "@/frontend/components/ui";
+import { ErrorState, LoadingState, PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { recurringScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";

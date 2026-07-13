@@ -2,7 +2,7 @@
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { FutureClassCard } from "@/frontend/views/dashboard/teachers/futureSchedule/components/FutureClassCard";
 import { ImportantNotes } from "@/frontend/views/dashboard/teachers/futureSchedule/components/ImportantNotes";
 import { JumpToDateHeader } from "@/frontend/views/dashboard/teachers/futureSchedule/components/JumpToDateHeader";

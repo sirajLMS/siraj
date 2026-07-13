@@ -20,9 +20,9 @@ import {
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppDataGrid, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { AppDataGrid, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   createCurrencyHedgeMutationDocument,

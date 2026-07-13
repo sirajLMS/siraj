@@ -12,7 +12,7 @@ import {
   type PageHeaderBreadcrumb,
   PrimaryPageAction,
   UserAvatar,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import { ContextualHelperCards } from "@/frontend/views/dashboard/students/quota/components/ContextualHelperCards";

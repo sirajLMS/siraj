@@ -4,7 +4,7 @@ import { SchoolOutlined } from "@mui/icons-material";
 import { Autocomplete, InputAdornment, TextField } from "@mui/material";
 import type { Control } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
+import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
 export interface TeacherOption {

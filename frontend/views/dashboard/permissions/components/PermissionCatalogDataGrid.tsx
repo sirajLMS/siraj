@@ -4,8 +4,8 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+import { AppDataGrid } from "@/frontend/common/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface PermissionCatalogDataGridProps {

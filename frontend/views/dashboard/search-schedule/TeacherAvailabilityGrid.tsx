@@ -5,8 +5,8 @@ import { Box, Chip, IconButton, Paper, Tooltip, Typography } from "@mui/material
 import { addDays, differenceInCalendarDays, format, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { HorizontalScrollRow } from "@/frontend/components/ui/container/HorizontalScrollRow";
-import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
+import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
+import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type { SearchScheduleResultItem } from "@/frontend/views/dashboard/search-schedule/SearchScheduleView";

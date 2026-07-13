@@ -3,7 +3,7 @@
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { SectionPanel } from "@/frontend/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCatalogDataGrid } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogDataGrid";
 import { PermissionCatalogToolbar } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogToolbar";

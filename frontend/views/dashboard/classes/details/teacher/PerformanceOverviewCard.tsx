@@ -2,7 +2,7 @@
 
 import { Box, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 
 interface PerformanceOverviewCardProps {
   readonly attendanceRate: number;

@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   createManualInvoiceMutationDocument,

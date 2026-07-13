@@ -2,8 +2,8 @@
 
 import { Grid, Input } from "@mui/material";
 import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
-import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
-import { PhoneFormField } from "@/frontend/components/ui/input";
+import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { PhoneFormField } from "@/frontend/common/components/ui/input";
 
 interface IdentityFieldShape {
   readonly fullName?: string;

@@ -3,9 +3,9 @@
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Stack, Tooltip, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { FutureClassCardProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";

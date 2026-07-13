@@ -1,7 +1,7 @@
 import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
-import { AdminControlPanel, FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
+import { AdminControlPanel, FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StatusUpdateFormData } from "@/frontend/views/dashboard/students/status/schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "@/frontend/views/dashboard/students/status/types";

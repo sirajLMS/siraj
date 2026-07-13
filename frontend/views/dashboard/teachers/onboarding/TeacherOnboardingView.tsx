@@ -11,7 +11,7 @@ import {
   PageHeader,
   PrimaryPageAction,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { MeetingConfigOnboardingSection } from "@/frontend/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";

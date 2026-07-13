@@ -7,7 +7,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { addDays, format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";

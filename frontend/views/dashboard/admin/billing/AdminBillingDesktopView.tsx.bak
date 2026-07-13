@@ -3,7 +3,7 @@
 import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AdminInvoicesDataGrid } from "@/frontend/views/dashboard/admin/billing/components/AdminInvoicesDataGrid";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingSearchBar } from "@/frontend/views/dashboard/billing/components/BillingSearchBar";

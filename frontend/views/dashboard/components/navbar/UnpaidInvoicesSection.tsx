@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-alerts.documents";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";

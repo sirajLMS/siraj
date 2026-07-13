@@ -3,7 +3,7 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Fab, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
 import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";

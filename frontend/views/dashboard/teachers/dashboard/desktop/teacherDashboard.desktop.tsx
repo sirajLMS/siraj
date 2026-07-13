@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Box } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";

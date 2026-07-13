@@ -12,8 +12,8 @@ import {
 import { format, isValid, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
-import { LanguageDisplay } from "@/frontend/components/ui/display";
-import { AppDatePicker } from "@/frontend/components/ui/form";
+import { LanguageDisplay } from "@/frontend/common/components/ui/display";
+import { AppDatePicker } from "@/frontend/common/components/ui/form";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import { QuotaFormField } from "@/frontend/views/dashboard/students/quota/components/QuotaFormField";

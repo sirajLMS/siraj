@@ -4,7 +4,7 @@ import { Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssociatedStudentRow } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 

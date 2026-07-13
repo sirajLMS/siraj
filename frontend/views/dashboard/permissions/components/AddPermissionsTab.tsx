@@ -5,7 +5,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
+import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AddPermissionBulkBar } from "@/frontend/views/dashboard/permissions/components/AddPermissionBulkBar";
 import { AddPermissionFilterBar } from "@/frontend/views/dashboard/permissions/components/AddPermissionFilterBar";

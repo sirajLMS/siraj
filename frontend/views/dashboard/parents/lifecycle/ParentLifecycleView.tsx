@@ -6,7 +6,7 @@ import { Box, Button, Grid, MenuItem, Select, Stack, TextField, Typography } fro
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form";
-import { AdminControlPanel, PageContainer, PageHeader, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import { AdminControlPanel, PageContainer, PageHeader, PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
 import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import {

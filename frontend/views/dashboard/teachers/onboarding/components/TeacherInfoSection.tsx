@@ -3,10 +3,10 @@
 import { Box, Grid, Input, Typography } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import { PhoneFormField } from "@/frontend/components/ui/input";
-import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
-import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
+import { labelSx, standardInputSx } from "@/frontend/common/components/ui/form";
+import { PhoneFormField } from "@/frontend/common/components/ui/input";
+import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
+import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 

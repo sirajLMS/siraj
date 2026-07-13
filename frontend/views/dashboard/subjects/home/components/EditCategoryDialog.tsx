@@ -16,7 +16,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { EditCategoryDialogProps } from "@/frontend/views/dashboard/subjects/home/types";
 
 function slugify(text: string): string {

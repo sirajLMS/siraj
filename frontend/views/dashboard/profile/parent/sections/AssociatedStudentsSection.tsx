@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { AppDataGridLoadingOverlay, SectionPanel } from "@/frontend/components/ui";
+import { AppDataGridLoadingOverlay, SectionPanel } from "@/frontend/common/components/ui";
 import { AssociatedStudentsCardList } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsCardList";
 import { AssociatedStudentsDataGrid } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsDataGrid";
 import type { AssociatedStudents } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";

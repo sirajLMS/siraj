@@ -5,9 +5,9 @@ import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material"
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";

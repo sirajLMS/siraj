@@ -4,7 +4,7 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LanguageIcon from "@mui/icons-material/Language";
 import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard, UserAvatar } from "@/frontend/components/ui";
+import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
 import type {
   ClassInstanceStudentInfo,
   ClassInstanceTeacherInfo,

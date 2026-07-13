@@ -5,8 +5,8 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/components/ui";
-import { MeetingConfigList } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
+import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/common/components/ui";
+import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classMeetingConfigsQueryDocument,

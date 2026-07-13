@@ -10,9 +10,9 @@ import {
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ExportButton } from "@/frontend/components/ui/button";
-import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
-import { PageHeader } from "@/frontend/components/ui/container";
+import { ExportButton } from "@/frontend/common/components/ui/button";
+import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { PageHeader } from "@/frontend/common/components/ui/container";
 import { CalendarGrid } from "@/frontend/views/dashboard/students/history/components/CalendarGrid";
 import type { StudentHistoryDesktopProps } from "@/frontend/views/dashboard/students/history/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";

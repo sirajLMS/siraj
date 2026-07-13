@@ -3,7 +3,7 @@
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { submitSuggestionMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useParentSuggestionsStore } from "@/frontend/common/stores/parentSuggestionsStore";

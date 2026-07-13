@@ -1,7 +1,7 @@
 "use client";
 
-import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
-import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import {
   type ParentSuggestionsViewModel,
   type UseParentSuggestionsViewModelProps,

@@ -2,7 +2,7 @@
 
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
-import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { SuggestionRespondDialogProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 
 export function SuggestionRespondDialog({

@@ -1,9 +1,9 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { PageContainer } from "@/frontend/components/ui";
-import { ErrorState } from "@/frontend/components/ui/state/ErrorState";
-import { LoadingState } from "@/frontend/components/ui/state/LoadingState";
+import { PageContainer } from "@/frontend/common/components/ui";
+import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
+import { LoadingState } from "@/frontend/common/components/ui/state/LoadingState";
 import { ClassDetailsContent } from "@/frontend/views/dashboard/classes/details/components/ClassDetailsContent";
 import type { ClassDetailsViewModel } from "@/frontend/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 

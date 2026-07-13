@@ -67,7 +67,7 @@ Mobile devices never download the desktop component code, and vice versa.
 ```tsx
 // xxView.tsx — the ONLY file that reads viewport (via ResponsiveViewSwitch)
 "use client";
-import { createLazyView, ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { createLazyView, ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { type XxViewModel, type UseXxViewModelProps, useXxViewModel } from "./useXxViewModel";
 
 // createLazyView MUST be called at module top level (required by next/dynamic).

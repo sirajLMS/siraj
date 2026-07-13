@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { MobilePageHeader, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { MobilePageHeader, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ManagersCardList } from "@/frontend/views/dashboard/managers/home/ManagersCardList";
 import { ManagersFilterBar } from "@/frontend/views/dashboard/managers/home/ManagersFilterBar";

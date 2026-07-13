@@ -3,7 +3,7 @@
 import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PaginationControls } from "@/frontend/components/ui";
+import { PaginationControls } from "@/frontend/common/components/ui";
 import { ComplaintRecordCard } from "@/frontend/views/dashboard/complaints/components/ComplaintRecordCard";
 import type { ParentComplaintRecord } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";

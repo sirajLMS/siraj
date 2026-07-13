@@ -2,8 +2,8 @@
 
 import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
-import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { DeleteInvoiceDialog } from "@/frontend/views/dashboard/admin/billing/components/DeleteInvoiceDialog";
 import {
   type AdminBillingViewModel,

@@ -2,9 +2,9 @@
 
 import { Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { MeetingJoinEmptyRole } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import type { MeetingJoinEmptyRole } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classDetailsContentPaddingSx,

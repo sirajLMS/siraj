@@ -5,11 +5,11 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/components/ui";
+import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
 import {
   MeetingConfigList,
   type MeetingConfigListItem,
-} from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
+} from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteUserMeetingConfigMutationDocument,

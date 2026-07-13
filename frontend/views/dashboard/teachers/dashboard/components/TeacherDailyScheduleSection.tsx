@@ -2,7 +2,7 @@
 
 import { Box, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DateNavigator, SectionPanel } from "@/frontend/components/ui";
+import { DateNavigator, SectionPanel } from "@/frontend/common/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { TeacherScheduleDataGrid } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleDataGrid";

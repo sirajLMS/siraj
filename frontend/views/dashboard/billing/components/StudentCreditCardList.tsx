@@ -3,7 +3,7 @@
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import type { StudentCreditRow, StudentCreditStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 interface StudentCreditCardListLabels {

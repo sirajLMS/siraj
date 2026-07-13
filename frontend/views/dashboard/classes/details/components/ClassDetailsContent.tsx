@@ -1,7 +1,7 @@
 "use client";
 
 import type { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ClassDetailsAdminView } from "@/frontend/views/dashboard/classes/details/admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "@/frontend/views/dashboard/classes/details/ClassDetailsHeader";

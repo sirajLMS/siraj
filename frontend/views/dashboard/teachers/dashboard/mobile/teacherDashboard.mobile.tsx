@@ -11,7 +11,7 @@ import {
   PaginationControls,
   PrimaryPageAction,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";

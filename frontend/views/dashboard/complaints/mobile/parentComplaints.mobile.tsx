@@ -7,7 +7,7 @@ import {
   MobilePageHeader,
   PageContainer,
   PrimaryPageAction,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { ComplaintFormFields } from "@/frontend/views/dashboard/complaints/components/ComplaintFormFields";
 import { ComplaintPolicyPanel } from "@/frontend/views/dashboard/complaints/components/ComplaintPolicyPanel";
 import { ComplaintRecordCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintRecordCardList";

@@ -3,7 +3,7 @@
 import { CalendarTodayOutlined, ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, IconButton, Stack, type SxProps, type Theme, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { JumpToDateHeaderProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 function shiftDate(selectedDate: string, delta: number): string {

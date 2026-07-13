@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
+import { LocalizedStringInput } from "@/frontend/common/components/ui/input/localizedString";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { updateMeetingProviderMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";

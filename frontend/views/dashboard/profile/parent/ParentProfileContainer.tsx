@@ -2,7 +2,7 @@
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { ErrorState } from "@/frontend/components/ui";
+import { ErrorState } from "@/frontend/common/components/ui";
 import { ParentStatus, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {

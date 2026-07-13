@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, UploadType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   deleteLearningResourceMutationDocument,

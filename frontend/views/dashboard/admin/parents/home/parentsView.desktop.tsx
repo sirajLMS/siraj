@@ -2,7 +2,7 @@
 
 import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
   ExportButton,
   FilterButton,
@@ -10,7 +10,7 @@ import {
   PageHeader,
   PrimaryPageAction,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentsDataGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsDataGrid";

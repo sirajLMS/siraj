@@ -2,7 +2,7 @@
 
 import { SendOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { SuggestionFormFields } from "@/frontend/views/dashboard/suggestions/components/SuggestionFormFields";
 import { SuggestionHeroBanner } from "@/frontend/views/dashboard/suggestions/components/SuggestionHeroBanner";
 import { SuggestionSocialProof } from "@/frontend/views/dashboard/suggestions/components/SuggestionSocialProof";

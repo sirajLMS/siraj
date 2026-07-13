@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {

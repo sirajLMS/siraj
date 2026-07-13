@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { PageContainer } from "@/frontend/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StudentHistoryDesktop } from "@/frontend/views/dashboard/students/history/components/StudentHistoryDesktop";
 import { StudentHistoryMobile } from "@/frontend/views/dashboard/students/history/components/StudentHistoryMobile";

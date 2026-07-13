@@ -1,4 +1,4 @@
-import type { StatusBadgeCategory } from "@/frontend/components/ui/badge/StatusBadge";
+import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { TeacherSessionStatus } from "@/frontend/common/stores/teacherDashboardTypes";
 
 export function resolveTeacherStatusBadge(status: TeacherSessionStatus): {

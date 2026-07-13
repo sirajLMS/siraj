@@ -7,7 +7,7 @@ import {
   MobilePageHeader,
   PageContainer,
   PrimaryPageAction,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { SuggestionFormFields } from "@/frontend/views/dashboard/suggestions/components/SuggestionFormFields";
 import { SuggestionHeroBanner } from "@/frontend/views/dashboard/suggestions/components/SuggestionHeroBanner";
 import { SuggestionSocialProof } from "@/frontend/views/dashboard/suggestions/components/SuggestionSocialProof";

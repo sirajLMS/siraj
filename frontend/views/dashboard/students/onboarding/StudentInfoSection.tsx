@@ -3,10 +3,10 @@
 import { Grid, Input, MenuItem, Select } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
-import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
-import { LanguageSelector } from "@/frontend/components/ui/input/languageSelector/LanguageSelector";
+import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
+import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
+import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";

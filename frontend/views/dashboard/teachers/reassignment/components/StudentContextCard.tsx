@@ -2,7 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard, StatusBadge, UserAvatar } from "@/frontend/components/ui";
+import { BaseCard, StatusBadge, UserAvatar } from "@/frontend/common/components/ui";
 import type { StudentContextCardProps } from "@/frontend/views/dashboard/teachers/reassignment/types";
 
 export function StudentContextCard({ student }: Readonly<StudentContextCardProps>) {

@@ -3,7 +3,7 @@
 import { Alert, Box, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";

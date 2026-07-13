@@ -3,7 +3,7 @@
 import { VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   AdminInvoiceRow,

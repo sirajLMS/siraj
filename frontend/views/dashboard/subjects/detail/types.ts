@@ -1,4 +1,4 @@
-import type { PageHeaderBreadcrumb } from "@/frontend/components/ui";
+import type { PageHeaderBreadcrumb } from "@/frontend/common/components/ui";
 import type { ClassSubjectByIdQuery } from "@/frontend/common/graphql/generated/gql/operations";
 
 export type SubjectDetailData = NonNullable<ClassSubjectByIdQuery["classSubject"]>;

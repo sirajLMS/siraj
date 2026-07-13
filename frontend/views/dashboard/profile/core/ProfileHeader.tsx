@@ -2,7 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { UserAvatar } from "@/frontend/components/ui";
+import { UserAvatar } from "@/frontend/common/components/ui";
 
 export type ProfileHeaderProps = {
   readonly name: string;

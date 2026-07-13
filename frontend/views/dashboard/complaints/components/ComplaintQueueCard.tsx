@@ -3,7 +3,7 @@
 import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
 import {
   type AdminComplaintRow,
   type ComplaintPriority,

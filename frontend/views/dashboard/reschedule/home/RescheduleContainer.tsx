@@ -5,7 +5,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";

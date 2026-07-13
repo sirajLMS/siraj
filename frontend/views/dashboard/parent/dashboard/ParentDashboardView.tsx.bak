@@ -2,7 +2,7 @@
 
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
-import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AcademicProgressSummary } from "@/frontend/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
 import { ParentDashboardMetricsRow } from "@/frontend/views/dashboard/parent/dashboard/components/ParentDashboardMetrics";
 import { ParentScheduleCardList } from "@/frontend/views/dashboard/parent/dashboard/components/ParentScheduleCardList";

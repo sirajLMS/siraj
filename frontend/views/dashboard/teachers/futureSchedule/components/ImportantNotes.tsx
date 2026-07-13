@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { ImportantNotesProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 export function ImportantNotes({ notes }: Readonly<ImportantNotesProps>) {

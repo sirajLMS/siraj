@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
   AppPermission,
   ClassExecutionState,

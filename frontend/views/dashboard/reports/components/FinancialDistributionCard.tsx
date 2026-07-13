@@ -3,7 +3,7 @@
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import type { CurrencyDistributionSlice } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 interface FinancialDistributionCardProps {

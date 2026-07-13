@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { searchSuggestionsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SearchResult } from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionMarkDuplicateDialogProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";

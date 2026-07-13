@@ -1,7 +1,7 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
-import { PageContainer } from "@/frontend/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
 import {
   AppPermission,
   ClassExecutionState,

@@ -3,14 +3,14 @@
 import { AddOutlined, FilterListOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
 import type { ReactNode } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
   MobileCardList,
   MobileContentStack,
   MobileFab,
   MobilePageHeader,
   PageContainer,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentMobileMetricsScroll } from "@/frontend/views/dashboard/admin/parents/students/components/StudentMobileMetricsScroll";
 import { StudentDirectoryMobileCard } from "@/frontend/views/dashboard/admin/parents/students/mobile/components/studentDirectoryCard.mobile";

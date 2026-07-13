@@ -6,10 +6,10 @@ import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
-import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/common/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { StatusAction } from "@/frontend/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {

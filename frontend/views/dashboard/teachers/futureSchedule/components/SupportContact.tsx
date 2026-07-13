@@ -4,9 +4,9 @@ import { useMutation } from "@apollo/client/react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import { UserAvatar } from "@/frontend/components/ui";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import { PhoneDisplay } from "@/frontend/components/ui/display";
+import { UserAvatar } from "@/frontend/common/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
+import { PhoneDisplay } from "@/frontend/common/components/ui/display";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SupportContactProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 

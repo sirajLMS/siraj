@@ -10,8 +10,8 @@ import {
 import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
 import { useLocale } from "next-intl";
-import { StatusBadge } from "@/frontend/components/ui";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { StatusBadge } from "@/frontend/common/components/ui";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import {
   type CardListLabels,
   computeSessionStatus,

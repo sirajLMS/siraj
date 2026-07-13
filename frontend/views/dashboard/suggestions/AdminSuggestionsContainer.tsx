@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AdminSuggestionsView } from "@/frontend/views/dashboard/suggestions/adminSuggestionsView";
 import { SuggestionMarkDuplicateDialog } from "@/frontend/views/dashboard/suggestions/components/SuggestionMarkDuplicateDialog";

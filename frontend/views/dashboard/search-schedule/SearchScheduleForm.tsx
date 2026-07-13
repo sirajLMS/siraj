@@ -4,7 +4,7 @@ import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
 import { Badge, Box, Button, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { type SyntheticEvent, useState } from "react";
-import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/components/ui/form";
+import { AppDateRangePicker, AppTimeRangePicker } from "@/frontend/common/components/ui/form";
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import { SearchScheduleFilterDrawer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleFilterDrawer";
 import { SearchScheduleSortMenu } from "@/frontend/views/dashboard/search-schedule/SearchScheduleSortMenu";

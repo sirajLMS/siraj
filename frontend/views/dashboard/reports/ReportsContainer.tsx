@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { AttendanceReportRow, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission, ReportGroupingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { generateAttendanceReportQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";

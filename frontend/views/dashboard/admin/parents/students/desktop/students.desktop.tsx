@@ -1,9 +1,9 @@
 "use client";
 
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
-import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
+import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentDirectoryDataGrid } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryDataGrid";
 import type { StudentsViewModel } from "@/frontend/views/dashboard/admin/parents/students/useStudentsViewModel";

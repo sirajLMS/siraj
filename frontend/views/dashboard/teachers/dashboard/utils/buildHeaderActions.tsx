@@ -3,7 +3,7 @@
 import { AddOutlined, PrintOutlined } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
 import type { ReactNode } from "react";
-import { PrimaryPageAction } from "@/frontend/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 

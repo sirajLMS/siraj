@@ -1,7 +1,7 @@
 "use client";
 
 import type { GridColDef, GridValidRowModel } from "@mui/x-data-grid";
-import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
 
 export interface ServerPaginatedDataGridProps<R extends GridValidRowModel> {
   readonly rows: readonly R[];

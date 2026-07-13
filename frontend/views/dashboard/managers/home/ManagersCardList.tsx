@@ -4,7 +4,7 @@ import { MailOutlined, PhoneOutlined } from "@mui/icons-material";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { BaseCard, PaginationControls, PhoneDisplay, StatusBadge } from "@/frontend/components/ui";
+import { BaseCard, PaginationControls, PhoneDisplay, StatusBadge } from "@/frontend/common/components/ui";
 import { ManagerRowActions } from "@/frontend/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/views/dashboard/managers/home/types";
 

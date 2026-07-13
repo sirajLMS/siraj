@@ -9,7 +9,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Card, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   getTrackingStatusIcon,

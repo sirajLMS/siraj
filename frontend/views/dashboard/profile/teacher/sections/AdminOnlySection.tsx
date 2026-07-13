@@ -3,9 +3,9 @@
 import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { type Control, Controller, type UseFormRegister } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
+import { SectionPanel } from "@/frontend/common/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { AccountStatus, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 import {

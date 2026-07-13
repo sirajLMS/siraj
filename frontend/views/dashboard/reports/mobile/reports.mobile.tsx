@@ -7,7 +7,7 @@ import {
   MobilePageHeader,
   PageContainer,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
 import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
 import { PerformanceLedgerCard } from "@/frontend/views/dashboard/reports/components/PerformanceLedgerCard";

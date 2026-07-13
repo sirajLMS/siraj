@@ -8,7 +8,7 @@ import {
   MobileFab,
   MobilePageHeader,
   PageContainer,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
 import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";

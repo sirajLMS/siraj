@@ -5,7 +5,7 @@ import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/common/components/ui";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 

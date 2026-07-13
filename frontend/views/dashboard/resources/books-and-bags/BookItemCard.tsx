@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import { DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { deleteBookMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type {

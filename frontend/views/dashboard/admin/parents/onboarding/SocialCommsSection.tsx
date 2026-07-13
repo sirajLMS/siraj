@@ -4,9 +4,9 @@ import { AlternateEmailOutlined, GroupsOutlined } from "@mui/icons-material";
 import { Grid, Input, InputAdornment } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
-import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
-import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
-import { PhoneFormField } from "@/frontend/components/ui/input";
+import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
+import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
+import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 
 interface Props {

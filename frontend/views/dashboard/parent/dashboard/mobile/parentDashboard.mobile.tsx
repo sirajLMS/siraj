@@ -10,8 +10,8 @@ import {
   PaginationControls,
   PrimaryPageAction,
   SectionPanel,
-} from "@/frontend/components/ui";
-import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
+} from "@/frontend/common/components/ui";
+import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { AcademicProgressSummary } from "@/frontend/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
 import { ParentWelcomeHero } from "@/frontend/views/dashboard/parent/dashboard/components/ParentWelcomeHero";
 import { ParentScheduleCardMobile } from "@/frontend/views/dashboard/parent/dashboard/mobile/components/parentScheduleCard.mobile";

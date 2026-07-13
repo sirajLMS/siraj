@@ -3,7 +3,7 @@
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Grid } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { CurrentTeacherCard } from "@/frontend/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
 import { ManagementControlsCard } from "@/frontend/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
 import { ReassignmentBentoGrid } from "@/frontend/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";

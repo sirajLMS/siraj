@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
-import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { RescheduleTrackingCardList } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingCardList";
 import { getTrackingStatusLabel } from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";

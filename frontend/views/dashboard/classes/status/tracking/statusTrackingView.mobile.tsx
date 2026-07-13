@@ -1,8 +1,8 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
-import { MobileContentStack, MobileFab, MobilePageHeader, PageContainer } from "@/frontend/components/ui";
+import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
+import { MobileContentStack, MobileFab, MobilePageHeader, PageContainer } from "@/frontend/common/components/ui";
 import { StatusTrackingCardList } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingCardList";
 import type { MobileLayoutProps } from "@/frontend/views/dashboard/classes/status/tracking/types";
 

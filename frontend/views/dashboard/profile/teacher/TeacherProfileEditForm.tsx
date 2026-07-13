@@ -5,7 +5,7 @@ import { Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { PrimaryPageAction } from "@/frontend/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";

@@ -8,7 +8,7 @@ import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactElement } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";

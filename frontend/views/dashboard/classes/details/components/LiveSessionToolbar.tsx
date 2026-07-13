@@ -16,7 +16,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface LiveSessionToolbarProps {

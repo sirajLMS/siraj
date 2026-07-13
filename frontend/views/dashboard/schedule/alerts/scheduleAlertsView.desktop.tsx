@@ -2,8 +2,8 @@
 
 import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
-import { ExportButton, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
+import { ExportButton, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
+import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import {
   AcademicScheduleDataGrid,
   type AcademicScheduleDataGridLabels,

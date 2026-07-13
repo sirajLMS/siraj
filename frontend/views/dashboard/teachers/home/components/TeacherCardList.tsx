@@ -1,9 +1,9 @@
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
-import { PaginationControls, PersonProfileLink } from "@/frontend/components/ui";
-import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
+import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { PaginationControls, PersonProfileLink } from "@/frontend/common/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";

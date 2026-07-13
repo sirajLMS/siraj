@@ -3,8 +3,8 @@
 import { Grid } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
-import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
+import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
+import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";

@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
+import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { useUserStore } from "@/frontend/common/stores/userStore";

@@ -5,7 +5,7 @@ import { Box, InputAdornment } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { type Control, Controller } from "react-hook-form";
-import { AppTimePicker, labelSx, timeInputOutlinedSx, timeInputStandardSx } from "@/frontend/components/ui/form";
+import { AppTimePicker, labelSx, timeInputOutlinedSx, timeInputStandardSx } from "@/frontend/common/components/ui/form";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 
 const TIME_FORMAT = "HH:mm";

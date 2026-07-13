@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { SuggestionsCardList } from "@/frontend/views/dashboard/suggestions/components/SuggestionsCardList";
 import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
 import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";

@@ -2,7 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, Stack, TextField } from "@mui/material";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
   ExportButton,
   FilterButton,
@@ -11,7 +11,7 @@ import {
   PageContainer,
   PrimaryPageAction,
   SectionPanel,
-} from "@/frontend/components/ui";
+} from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentCardList } from "@/frontend/views/dashboard/admin/parents/home/ParentCardList";

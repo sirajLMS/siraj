@@ -158,7 +158,7 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 ### Existing-component extensions + barrel wiring
 
 - [x] Update `frontend/components/ui/badge/StatusBadge.tsx` — extend `StatusBadgeCategory` union with `"paymentMethod"`; add `case "paymentMethod":` in `resolveStatusPaletteKey` (≈10 lines — self-contained, no theme token additions)
-- [x] Update `frontend/components/ui/input/index.ts` — export the three new folders (`paymentMethodSelect`, `paymentMethodTypeFields`, `paymentMethodDefaultsEditor`); **add `export * from "@/frontend/components/ui/input/catalogImageUpload/CatalogImageUpload"`** (currently un-barreled, needed for catalog icons)
+- [x] Update `frontend/components/ui/input/index.ts` — export the three new folders (`paymentMethodSelect`, `paymentMethodTypeFields`, `paymentMethodDefaultsEditor`); **add `export * from "@/frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload"`** (currently un-barreled, needed for catalog icons)
 - [x] Update `frontend/components/ui/display/index.ts` — re-export `paymentMethod/`
 
 ### i18n

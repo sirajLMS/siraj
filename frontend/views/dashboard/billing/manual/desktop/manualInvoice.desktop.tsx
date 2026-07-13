@@ -4,7 +4,7 @@
 import { ArrowBackOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
+import { BaseCard, PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { BillingMonthSelector } from "@/frontend/views/dashboard/billing/manual/components/BillingMonthSelector";
 import { InvoiceDraftSummaryCard } from "@/frontend/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
 import { ManualInvoiceActions } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceActions";

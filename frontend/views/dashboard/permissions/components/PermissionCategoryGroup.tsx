@@ -2,7 +2,7 @@
 
 import { Box, Checkbox, FormControlLabel, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { labelSx } from "@/frontend/components/ui/form";
+import { labelSx } from "@/frontend/common/components/ui/form";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionRow } from "@/frontend/views/dashboard/permissions/components/PermissionRow";
 

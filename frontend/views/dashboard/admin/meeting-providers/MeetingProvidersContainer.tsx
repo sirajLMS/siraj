@@ -6,7 +6,7 @@ import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import {
   AppDataGrid,
   BaseDeleteDialog,
@@ -15,8 +15,8 @@ import {
   PageContainer,
   PageHeader,
   PrimaryPageAction,
-} from "@/frontend/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+} from "@/frontend/common/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {

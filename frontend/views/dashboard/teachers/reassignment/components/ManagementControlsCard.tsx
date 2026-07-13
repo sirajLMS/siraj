@@ -5,8 +5,8 @@ import { Box, Button, CircularProgress, FormControl, MenuItem, Select, Stack, Ty
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { BaseCard, StatusBadge } from "@/frontend/components/ui";
-import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
+import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
+import { labelSx, outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/admin/parents/students/types";

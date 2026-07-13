@@ -4,8 +4,8 @@ import { DeleteOutlined, EditOutlined, MoreVertOutlined, PersonAddOutlined } fro
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { BaseCard, StatusBadge } from "@/frontend/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface PermissionGroupCardListProps {

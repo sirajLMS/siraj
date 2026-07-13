@@ -5,7 +5,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination } from "@/frontend/common/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { OverrideEditControls } from "@/frontend/views/dashboard/permissions/components/OverrideEditControls";
 import { OverrideEffectiveDisplay } from "@/frontend/views/dashboard/permissions/components/OverrideEffectiveDisplay";

@@ -2,8 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { BaseCard } from "@/frontend/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
+import { BaseCard } from "@/frontend/common/components/ui";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface PermissionCatalogCardListProps {

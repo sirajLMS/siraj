@@ -4,9 +4,9 @@
 import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { UserAvatar } from "@/frontend/components/ui";
-import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import { TimezoneDisplay } from "@/frontend/components/ui/display";
+import { UserAvatar } from "@/frontend/common/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
+import { TimezoneDisplay } from "@/frontend/common/components/ui/display";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,

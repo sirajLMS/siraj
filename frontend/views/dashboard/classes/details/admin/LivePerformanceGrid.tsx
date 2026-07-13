@@ -7,7 +7,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
+import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import type { PerformanceMetric } from "@/frontend/views/dashboard/types/dashboard";
 
 const METRIC_ICONS: Record<string, SvgIconComponent> = {

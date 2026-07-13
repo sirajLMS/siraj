@@ -5,8 +5,8 @@ import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "
 import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
+import { labelSx, standardInputSx } from "@/frontend/common/components/ui/form";
+import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
 import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher.documents";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";

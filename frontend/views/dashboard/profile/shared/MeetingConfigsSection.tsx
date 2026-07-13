@@ -1,6 +1,6 @@
 "use client";
 
-import { SectionPanel } from "@/frontend/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigsManager } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigsManager";
 
 export type MeetingConfigsSectionProps = {

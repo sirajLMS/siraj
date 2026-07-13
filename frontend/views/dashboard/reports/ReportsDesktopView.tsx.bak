@@ -2,7 +2,7 @@
 
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
-import { BaseCard, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { BaseCard, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
 import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
 import type { ReportFiltersFormLabels } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";

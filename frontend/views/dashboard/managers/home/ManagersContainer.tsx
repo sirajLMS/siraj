@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { managerDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { useManagersDirectoryStore } from "@/frontend/common/stores/managersDirectoryStore";

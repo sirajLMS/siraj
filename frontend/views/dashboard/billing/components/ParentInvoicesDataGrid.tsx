@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ParentInvoiceRowActions } from "@/frontend/views/dashboard/billing/components/ParentInvoiceRowActions";
 import type {

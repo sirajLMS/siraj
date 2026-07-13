@@ -5,9 +5,9 @@ import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from "@mui
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/components/ui";
-import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
+import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   latestExchangeRatesQueryDocument,

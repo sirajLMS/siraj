@@ -22,8 +22,8 @@ import {
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import {
   AppPermission,
   ClassType as ClassTypeEnum,

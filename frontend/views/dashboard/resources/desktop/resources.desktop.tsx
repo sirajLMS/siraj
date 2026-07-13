@@ -1,7 +1,7 @@
 "use client";
 
 import { Grid } from "@mui/material";
-import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
+import { BaseCard, PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { ResourceDeleteDialog } from "@/frontend/views/dashboard/resources/components/ResourceDeleteDialog";
 import { ResourceGovernancePanel } from "@/frontend/views/dashboard/resources/components/ResourceGovernancePanel";
 import { ResourceLibraryGrid } from "@/frontend/views/dashboard/resources/components/ResourceLibraryGrid";

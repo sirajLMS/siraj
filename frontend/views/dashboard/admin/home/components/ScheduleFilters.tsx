@@ -2,7 +2,7 @@
 
 import { Autocomplete, Box, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { DateNavigator } from "@/frontend/components/ui";
+import { DateNavigator } from "@/frontend/common/components/ui";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 
 const StyledFiltersContainer = styled(Box)(({ theme }) => ({

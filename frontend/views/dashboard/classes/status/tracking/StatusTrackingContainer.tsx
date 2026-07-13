@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/schedule.documents";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";

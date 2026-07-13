@@ -3,7 +3,7 @@
 import { StickyNote2Outlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface AdminNoteCardMobileProps {

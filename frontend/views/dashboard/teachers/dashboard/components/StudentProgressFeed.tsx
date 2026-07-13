@@ -12,7 +12,7 @@ import {
   SensorsOutlined,
 } from "@mui/icons-material";
 import { Box, Paper, Stack, Tooltip, Typography } from "@mui/material";
-import { UserAvatar } from "@/frontend/components/ui";
+import { UserAvatar } from "@/frontend/common/components/ui";
 import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 

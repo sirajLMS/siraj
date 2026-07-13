@@ -3,7 +3,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useLocale, useTranslations } from "next-intl";
-import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
+import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";

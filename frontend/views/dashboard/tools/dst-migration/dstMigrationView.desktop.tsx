@@ -2,7 +2,7 @@
 
 import { Grid, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { CheckedEmptyPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/CheckedEmptyPanel";
 import { ConflictErrorsPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
 import { DstMigrationMetricsRow } from "@/frontend/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";

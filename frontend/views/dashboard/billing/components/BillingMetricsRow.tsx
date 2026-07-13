@@ -2,7 +2,7 @@
 
 import type { SvgIconComponent } from "@mui/icons-material";
 import { Grid, Skeleton } from "@mui/material";
-import { MetricCard, type MetricCardVariant } from "@/frontend/components/ui/card/MetricCard";
+import { MetricCard, type MetricCardVariant } from "@/frontend/common/components/ui/card/MetricCard";
 
 export interface BillingMetricItem {
   readonly key: string;

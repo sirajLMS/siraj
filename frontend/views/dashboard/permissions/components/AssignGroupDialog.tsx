@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
+import { FieldWrapper, standardInputSx } from "@/frontend/common/components/ui/form";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 

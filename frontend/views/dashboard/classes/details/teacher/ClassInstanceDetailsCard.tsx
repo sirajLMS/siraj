@@ -2,7 +2,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/components/ui";
+import { BaseCard } from "@/frontend/common/components/ui";
 import { StudentEntityLink } from "@/frontend/views/dashboard/classes/details/components/EntityLinks";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 

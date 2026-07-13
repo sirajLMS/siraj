@@ -4,8 +4,8 @@ import { AccessTimeOutlined } from "@mui/icons-material";
 import type { Breakpoint } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import type { GridSize } from "@mui/material/Grid";
-import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
-import { SectionPanel } from "@/frontend/components/ui";
+import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };

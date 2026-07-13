@@ -3,8 +3,8 @@
 import { useMutation } from "@apollo/client/react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
 import { useState } from "react";
-import { AppDatePicker } from "@/frontend/components/ui/form/date/AppDatePicker";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
+import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { upsertManualExchangeRateMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";

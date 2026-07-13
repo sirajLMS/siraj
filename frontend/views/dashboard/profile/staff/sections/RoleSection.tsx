@@ -2,7 +2,7 @@
 
 import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { SectionPanel } from "@/frontend/components/ui";
+import { SectionPanel } from "@/frontend/common/components/ui";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
 import {
   type StaffProfileData,

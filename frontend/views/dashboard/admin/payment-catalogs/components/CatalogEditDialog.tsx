@@ -18,11 +18,11 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { CatalogImageUpload } from "@/frontend/components/ui/input/catalogImageUpload/CatalogImageUpload";
-import { CountryAutocomplete } from "@/frontend/components/ui/input/countrySelect/CountryAutocomplete";
-import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import { LocalizedStringFormField } from "@/frontend/components/ui/input/localizedString/LocalizedStringFormField";
-import { TagInput } from "@/frontend/components/ui/input/tagInput/TagInput";
+import { CatalogImageUpload } from "@/frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload";
+import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
+import { LocalizedStringFormField } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringFormField";
+import { TagInput } from "@/frontend/common/components/ui/input/tagInput/TagInput";
 import {
   type CountryCode,
   type CurrencyCode,

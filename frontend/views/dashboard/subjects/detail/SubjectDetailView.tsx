@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import type { SubjectDetailViewProps, SubjectResourceItem } from "@/frontend/views/dashboard/subjects/detail/types";
 
 function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) {

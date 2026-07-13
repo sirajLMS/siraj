@@ -2,7 +2,7 @@
 
 import { Box, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { AdminNoteCard } from "@/frontend/views/dashboard/classes/audit/AdminNoteCard";
 import { ClassAuditDetailsCard } from "@/frontend/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import { CommunicationLogCard } from "@/frontend/views/dashboard/classes/audit/CommunicationLogCard";

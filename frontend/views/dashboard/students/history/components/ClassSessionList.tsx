@@ -2,7 +2,7 @@ import type { Theme } from "@mui/material";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, ClassSessionListProps } from "@/frontend/views/dashboard/students/history/types";
 import { isJoinableClassSession } from "@/frontend/views/dashboard/students/history/types";

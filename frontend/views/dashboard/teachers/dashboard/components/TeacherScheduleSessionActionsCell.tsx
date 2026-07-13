@@ -1,8 +1,8 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";

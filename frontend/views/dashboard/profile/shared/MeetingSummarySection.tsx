@@ -3,8 +3,8 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { SectionPanel } from "@/frontend/components/ui";
-import { MeetingConfigDisplay } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigDisplay";
+import { SectionPanel } from "@/frontend/common/components/ui";
+import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 

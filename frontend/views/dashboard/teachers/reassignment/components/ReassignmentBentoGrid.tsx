@@ -4,7 +4,7 @@ import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Box, Grid, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import { BaseCard, UserAvatar } from "@/frontend/components/ui";
+import { BaseCard, UserAvatar } from "@/frontend/common/components/ui";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   BentoCardProps,
