@@ -9,8 +9,8 @@ import { LocaleAdornmentSwitch } from "@/frontend/components/ui/input/localizedS
 import { LocalizedStringDrawer } from "@/frontend/components/ui/input/localizedString/LocalizedStringDrawer";
 import { useLocaleSwitchSuccess } from "@/frontend/components/ui/input/localizedString/useLocaleSwitchSuccess";
 import { useNarrowContainer } from "@/frontend/components/ui/input/localizedString/useNarrowContainer";
-import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/lib/localized-string";
-import type { AppLocale, LocalizedString } from "@/frontend/types/localized-string.types";
+import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 export type LocalizedStringInputProps = {

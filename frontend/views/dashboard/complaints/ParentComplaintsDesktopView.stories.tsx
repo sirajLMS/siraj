@@ -8,9 +8,9 @@ import {
   ComplaintCategory,
   ComplaintStatus,
   CurrencyCode,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { ParentComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/desktop/parentComplaints.desktop";
 import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
 import { complaintFormSchema } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useForm } from "react-hook-form";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentOnboardingView } from "@/frontend/views/dashboard/students/onboarding/StudentOnboardingView";
 import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 

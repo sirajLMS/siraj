@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { ParentStatus, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ParentStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import {
   type ParentAdminEditFormData,

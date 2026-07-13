@@ -7,9 +7,9 @@ import {
   CurrencyCode,
   IanaTimezone,
   ParentStatus,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;

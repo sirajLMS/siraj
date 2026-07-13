@@ -5,15 +5,15 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   teacherFutureScheduleQueryDocument,
   updateSessionStatusLeaveMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
-import { useFutureScheduleDateStore } from "@/frontend/stores/futureScheduleDateStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useFutureScheduleDateStore } from "@/frontend/common/stores/futureScheduleDateStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { FutureScheduleView } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleView";
 import type {
   FutureScheduleContainerProps,

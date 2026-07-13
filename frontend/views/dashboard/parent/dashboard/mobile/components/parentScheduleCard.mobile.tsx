@@ -5,7 +5,7 @@ import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { MeetingJoinAction, MobileCardListItem, StatusBadge } from "@/frontend/components/ui";
 import { PersonProfileLink } from "@/frontend/components/ui/display/personProfileLink/PersonProfileLink";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";

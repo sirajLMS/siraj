@@ -121,7 +121,7 @@ Add three new rule blocks after the existing frontend/backend boundary rules:
         ],
         patterns: [
           {
-            group: ["@/frontend/hooks/useViewport", "@/frontend/context/ViewportContext"],
+            group: ["@/frontend/common/hooks/useViewport", "@/frontend/common/context/ViewportContext"],
             message: "Mobile/desktop components must not read viewport context — they are already tier-specific",
           },
         ],
@@ -266,7 +266,7 @@ export function useResourcesViewModel() {
 ```typescript
 // Example: ResourcesView.tsx (the switcher — the ONLY file that reads viewport)
 "use client";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import type { ResourcesViewModel } from "@/frontend/views/dashboard/resources/useResourcesViewModel";
 import { ResourcesMobileView } from "./resources.mobile";
 import { ResourcesDesktopView } from "./resources.desktop";

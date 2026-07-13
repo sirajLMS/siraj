@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
-import { type CountryType, getCountryDisplayName } from "@/frontend/lib/locale";
+import { type CountryType, getCountryDisplayName } from "@/frontend/common/lib/locale";
 
 export type CountryOptionRowProps = {
   readonly country: CountryType;

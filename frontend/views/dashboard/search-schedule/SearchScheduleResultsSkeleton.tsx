@@ -2,8 +2,8 @@
 
 import { Box, Skeleton } from "@mui/material";
 import { HorizontalScrollRow } from "@/frontend/components/ui/container/HorizontalScrollRow";
-import { edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
-import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 interface SearchScheduleResultsSkeletonProps {
   readonly columnCount: number;

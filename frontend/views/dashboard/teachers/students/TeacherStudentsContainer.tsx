@@ -5,8 +5,8 @@ import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherAssignedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
 export function TeacherStudentsContainer() {
   const t = useTranslations("dashboard.teacherStudents");

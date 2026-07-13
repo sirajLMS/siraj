@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
+import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { IANA_TIMEZONE_IDS } from "@/shared/constants/iana-timezones";
 
 const dayScheduleSchema = z.object({

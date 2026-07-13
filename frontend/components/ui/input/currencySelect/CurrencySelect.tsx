@@ -5,7 +5,7 @@ import {
   CurrencyAutocomplete,
   type CurrencyAutocompleteProps,
 } from "@/frontend/components/ui/input/currencySelect/CurrencyAutocomplete";
-import type { CurrencyOption } from "@/frontend/lib/currency";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
 
 export type CurrencySelectProps = {
   readonly currency?: CurrencyOption | null;

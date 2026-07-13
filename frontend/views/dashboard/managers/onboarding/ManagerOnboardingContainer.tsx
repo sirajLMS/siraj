@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useCreateManagerOnboarding } from "@/frontend/hooks/useCreateManagerOnboarding";
-import { logger } from "@/frontend/utils/logger";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
+import { logger } from "@/frontend/common/utils/logger";
 import { ManagerOnboardingView } from "@/frontend/views/dashboard/managers/onboarding/ManagerOnboardingView";
 import {
   type ManagerOnboardingFormData,

@@ -2,10 +2,10 @@
 
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
-import type { TeacherFilterItem } from "@/frontend/types/shared.types";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 
 export interface ScheduleOverviewViewModel {

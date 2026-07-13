@@ -11,7 +11,7 @@ import {
 import { Box, IconButton, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ClassSessionList } from "@/frontend/views/dashboard/students/history/components/ClassSessionList";
 import { MobileWeeklyScroller } from "@/frontend/views/dashboard/students/history/components/MobileWeeklyScroller";
 import { PerformanceStreak } from "@/frontend/views/dashboard/students/history/components/PerformanceStreak";

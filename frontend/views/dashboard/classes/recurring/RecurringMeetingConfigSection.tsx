@@ -8,11 +8,11 @@ import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
 import { MeetingConfigSelect } from "@/frontend/components/ui/input/meetingConfigSelect/MeetingConfigSelect";
 import { MeetingConfigTypeFields } from "@/frontend/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
 import { MeetingProviderSelect } from "@/frontend/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { userMeetingConfigsQueryDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
-import type { MeetingConfigSelectOption } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import { isUrlAllowedByProvider } from "@/frontend/lib/meeting-config";
+import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { RecurringMeetingConfigFormState } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import {
   getRecurringMeetingConfigErrorKey,

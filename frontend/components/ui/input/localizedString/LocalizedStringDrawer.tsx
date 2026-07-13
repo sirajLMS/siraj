@@ -2,7 +2,7 @@
 
 import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
-import type { AppLocale, LocalizedString } from "@/frontend/types/localized-string.types";
+import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export type LocalizedStringDrawerProps = {
   readonly open: boolean;

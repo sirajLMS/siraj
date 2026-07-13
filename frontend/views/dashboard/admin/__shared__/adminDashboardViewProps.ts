@@ -1,7 +1,7 @@
 "use client";
 
 import type { useTranslations } from "next-intl";
-import type { AdminMetricKey, DashboardFilters, TeacherFilterItem } from "@/frontend/types/shared.types";
+import type { AdminMetricKey, DashboardFilters, TeacherFilterItem } from "@/frontend/common/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import {
   buildAdminDashboardMetrics,

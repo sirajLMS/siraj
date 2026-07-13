@@ -4,7 +4,7 @@ import type {
   MissedClassAlert,
   StudentProgressFeedItem,
   TeacherScheduleRow,
-} from "@/frontend/stores/teacherDashboardTypes";
+} from "@/frontend/common/stores/teacherDashboardTypes";
 import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 

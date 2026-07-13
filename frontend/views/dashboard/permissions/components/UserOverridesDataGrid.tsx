@@ -8,10 +8,10 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
-import type { PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
-import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import { profileHrefForUser } from "@/frontend/utils/profileHref";
+import type { PermissionGroup, User, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 
 export interface UserOverridesDataGridProps {
   readonly users: readonly User[];

@@ -3613,7 +3613,7 @@ Now let me check the existing complaint-related mock stores and parent repositor
 <type>file</type>
 <content>
 1: import { create } from "zustand";
-2: import { logger } from "@/frontend/utils/logger";
+2: import { logger } from "@/frontend/common/utils/logger";
 3: import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
 4: 
 5: export interface ParentComplaintRecord {
@@ -3956,7 +3956,7 @@ bun quality-gate
 <content>
 1: // cspell:disable
 2: import { create } from "zustand";
-3: import { logger } from "@/frontend/utils/logger";
+3: import { logger } from "@/frontend/common/utils/logger";
 4: 
 5: export type ComplaintTab = "unanswered" | "answered";
 6: 
@@ -4120,7 +4120,7 @@ bun quality-gate
 <type>file</type>
 <content>
 1: import { create } from "zustand";
-2: import { logger } from "@/frontend/utils/logger";
+2: import { logger } from "@/frontend/common/utils/logger";
 3: import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
 4: 
 5: interface ParentSuggestionsState {
@@ -4170,7 +4170,7 @@ bun quality-gate
 <content>
 1: // cspell:disable
 2: import { create } from "zustand";
-3: import { logger } from "@/frontend/utils/logger";
+3: import { logger } from "@/frontend/common/utils/logger";
 4: 
 5: export type SuggestionStatus = "pending" | "reviewed";
 6: 
@@ -6192,9 +6192,9 @@ Let me check a couple of key container files to see if they use mock stores:
 1: "use client";
 2: 
 3: import { useTranslations } from "next-intl";
-4: import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-5: import { useParentComplaintsStore } from "@/frontend/stores/mockParentComplaintsStore";
-6: import { useUserStore } from "@/frontend/stores/mockUserStore";
+4: import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+5: import { useParentComplaintsStore } from "@/frontend/common/stores/mockParentComplaintsStore";
+6: import { useUserStore } from "@/frontend/common/stores/mockUserStore";
 7: import { ParentComplaintsView } from "./ParentComplaintsView";
 8: import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
 9: 
@@ -6283,9 +6283,9 @@ Instructions from: C:\Users\PC\Projects\siraj\frontend\views\AGENTS.md
 2: 
 3: import { useTranslations } from "next-intl";
 4: import { useMemo } from "react";
-5: import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-6: import { useAdminComplaintsStore } from "@/frontend/stores/mockAdminComplaintsStore";
-7: import { useUserStore } from "@/frontend/stores/mockUserStore";
+5: import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+6: import { useAdminComplaintsStore } from "@/frontend/common/stores/mockAdminComplaintsStore";
+7: import { useUserStore } from "@/frontend/common/stores/mockUserStore";
 8: import { AdminComplaintsView } from "./AdminComplaintsView";
 9: import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
 10: import { filterComplaintsByTab } from "./utils/complaintFilters";
@@ -6357,9 +6357,9 @@ Instructions from: C:\Users\PC\Projects\siraj\frontend\views\AGENTS.md
 1: "use client";
 2: 
 3: import { useTranslations } from "next-intl";
-4: import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-5: import { useParentSuggestionsStore } from "@/frontend/stores/mockParentSuggestionsStore";
-6: import { useUserStore } from "@/frontend/stores/mockUserStore";
+4: import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+5: import { useParentSuggestionsStore } from "@/frontend/common/stores/mockParentSuggestionsStore";
+6: import { useUserStore } from "@/frontend/common/stores/mockUserStore";
 7: import { ParentSuggestionsView } from "./ParentSuggestionsView";
 8: import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
 9: 
@@ -6422,9 +6422,9 @@ Instructions from: C:\Users\PC\Projects\siraj\frontend\views\AGENTS.md
 2: 
 3: import { useTranslations } from "next-intl";
 4: import { useMemo } from "react";
-5: import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-6: import { useAdminSuggestionsStore } from "@/frontend/stores/mockAdminSuggestionsStore";
-7: import { useUserStore } from "@/frontend/stores/mockUserStore";
+5: import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+6: import { useAdminSuggestionsStore } from "@/frontend/common/stores/mockAdminSuggestionsStore";
+7: import { useUserStore } from "@/frontend/common/stores/mockUserStore";
 8: import { AdminSuggestionsView } from "./AdminSuggestionsView";
 9: import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
 10: import { filterSuggestionsByTab } from "./utils/suggestionFilters";
@@ -6759,8 +6759,8 @@ Let me do a much deeper analysis of all the frontend files.
 2:   AdminComplaintRow,
 3:   AdminComplaintsSummary,
 4:   ComplaintTab,
-5: } from "@/frontend/stores/mockAdminComplaintsStore";
-6: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
+5: } from "@/frontend/common/stores/mockAdminComplaintsStore";
+6: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/common/stores/mockParentComplaintsStore";
 7: import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints/main";
 8: import type { ComplaintFormData } from "../schemas/complaintFormSchema";
 9: 
@@ -6844,7 +6844,7 @@ Let me do a much deeper analysis of all the frontend files.
 <path>C:\Users\PC\Projects\siraj\frontend\views\dashboard\complaints\utils\complaintFilters.ts</path>
 <type>file</type>
 <content>
-1: import type { AdminComplaintRow, ComplaintTab } from "@/frontend/stores/mockAdminComplaintsStore";
+1: import type { AdminComplaintRow, ComplaintTab } from "@/frontend/common/stores/mockAdminComplaintsStore";
 2: 
 3: export function filterComplaintsByTab(
 4:   rows: readonly AdminComplaintRow[],
@@ -7610,7 +7610,7 @@ Let me do a much deeper analysis of every file involved.
 3: import { Grid } from "@mui/material";
 4: import type { Control, FieldErrors } from "react-hook-form";
 5: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-6: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
+6: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/common/stores/mockParentComplaintsStore";
 7: import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 8: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 9: import { ComplaintFormFields } from "./components/ComplaintFormFields";
@@ -7794,7 +7794,7 @@ Let me do a much deeper analysis of every file involved.
 5: import { styled } from "@mui/material/styles";
 6: import type { Control, FieldErrors } from "react-hook-form";
 7: import { Controller } from "react-hook-form";
-8: import type { ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
+8: import type { ParentStudentOption } from "@/frontend/common/stores/mockParentComplaintsStore";
 9: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 10: import type { ComplaintFormData } from "../schemas/complaintFormSchema";
 11: 
@@ -8089,7 +8089,7 @@ Let me do a much deeper analysis of all the remaining frontend files.
 4: import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 5: import { styled } from "@mui/material/styles";
 6: import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-7: import type { AdminComplaintRow, ComplaintPriority } from "@/frontend/stores/mockAdminComplaintsStore";
+7: import type { AdminComplaintRow, ComplaintPriority } from "@/frontend/common/stores/mockAdminComplaintsStore";
 8: import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 9: 
 10: /** Container for an already-answered complaint response with surface background */
@@ -8407,7 +8407,7 @@ Let me do a much deeper analysis of all the remaining frontend files.
 4: import { Box, Paper, Typography } from "@mui/material";
 5: import { styled } from "@mui/material/styles";
 6: import { StatusBadge } from "@/frontend/components/ui";
-7: import type { ParentComplaintRecord } from "@/frontend/stores/mockParentComplaintsStore";
+7: import type { ParentComplaintRecord } from "@/frontend/common/stores/mockParentComplaintsStore";
 8: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 9: 
 10: /** Root card paper with border, hover transition, and rounded corners */
@@ -8577,7 +8577,7 @@ Let me do a much deeper analysis of all the remaining frontend files.
 3: import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
 4: import { Box } from "@mui/material";
 5: import { styled } from "@mui/material/styles";
-6: import type { AdminComplaintsSummary } from "@/frontend/stores/mockAdminComplaintsStore";
+6: import type { AdminComplaintsSummary } from "@/frontend/common/stores/mockAdminComplaintsStore";
 7: import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 8: import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
 9: import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
@@ -8644,7 +8644,7 @@ Let me do a much deeper analysis of all the remaining frontend files.
 <content>
 1: "use client";
 2: 
-3: import type { ComplaintTab } from "@/frontend/stores/mockAdminComplaintsStore";
+3: import type { ComplaintTab } from "@/frontend/common/stores/mockAdminComplaintsStore";
 4: import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
 5: import { formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/utils";
 6: import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
@@ -8706,7 +8706,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 2:   AdminSuggestionRow,
 3:   AdminSuggestionsSummary,
 4:   SuggestionTab,
-5: } from "@/frontend/stores/mockAdminSuggestionsStore";
+5: } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 6: import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 7: import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
 8: 
@@ -9123,7 +9123,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 2: 
 3: import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
 4: import { Box } from "@mui/material";
-5: import type { AdminSuggestionsSummary } from "@/frontend/stores/mockAdminSuggestionsStore";
+5: import type { AdminSuggestionsSummary } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 6: import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 7: import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
 8: import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
@@ -9184,7 +9184,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 <content>
 1: "use client";
 2: 
-3: import type { SuggestionTab } from "@/frontend/stores/mockAdminSuggestionsStore";
+3: import type { SuggestionTab } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 4: import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
 5: import { formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/utils";
 6: import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
@@ -9248,7 +9248,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 4: import type { GridColDef } from "@mui/x-data-grid";
 5: import { useMemo } from "react";
 6: import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-7: import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/mockAdminSuggestionsStore";
+7: import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 8: import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 9: 
 10: interface SuggestionsDataGridProps {
@@ -9370,7 +9370,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 2: 
 3: import { Box, Button, Paper, Typography } from "@mui/material";
 4: import { StatusBadge } from "@/frontend/components/ui";
-5: import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/mockAdminSuggestionsStore";
+5: import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 6: import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 7: 
 8: interface SuggestionsCardListProps {
@@ -9981,7 +9981,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 2: 
 3: import { Box, Typography } from "@mui/material";
 4: import { styled } from "@mui/material/styles";
-5: import type { AdminComplaintRow } from "@/frontend/stores/mockAdminComplaintsStore";
+5: import type { AdminComplaintRow } from "@/frontend/common/stores/mockAdminComplaintsStore";
 6: import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 7: import { ComplaintQueueCard } from "./ComplaintQueueCard";
 8: 
@@ -10065,7 +10065,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 3: import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 4: import { Box, Button, Chip, Typography } from "@mui/material";
 5: import { styled } from "@mui/material/styles";
-6: import type { ParentComplaintRecord } from "@/frontend/stores/mockParentComplaintsStore";
+6: import type { ParentComplaintRecord } from "@/frontend/common/stores/mockParentComplaintsStore";
 7: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 8: import { ComplaintRecordCard } from "./ComplaintRecordCard";
 9: 
@@ -10369,7 +10369,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 <path>C:\Users\PC\Projects\siraj\frontend\views\dashboard\suggestions\utils\suggestionFilters.ts</path>
 <type>file</type>
 <content>
-1: import type { AdminSuggestionRow, SuggestionTab } from "@/frontend/stores/mockAdminSuggestionsStore";
+1: import type { AdminSuggestionRow, SuggestionTab } from "@/frontend/common/stores/mockAdminSuggestionsStore";
 2: 
 3: export function filterSuggestionsByTab(
 4:   rows: readonly AdminSuggestionRow[],
@@ -10430,7 +10430,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 4: import { styled } from "@mui/material/styles";
 5: import type { Control, FieldErrors } from "react-hook-form";
 6: import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-7: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
+7: import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/common/stores/mockParentComplaintsStore";
 8: import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 9: import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 10: import { ComplaintFormFields } from "./components/ComplaintFormFields";

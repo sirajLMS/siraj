@@ -8,8 +8,8 @@ import { BaseCard, UserAvatar } from "@/frontend/components/ui";
 import type {
   ClassInstanceStudentInfo,
   ClassInstanceTeacherInfo,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   StudentEntityLink,
   TeacherEntityLink,

@@ -23,15 +23,15 @@ import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   createCurrencyHedgeMutationDocument,
   currencyHedgesQueryDocument,
   deleteCurrencyHedgeMutationDocument,
   updateCurrencyHedgeMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { getCurrencyByCode, getCurrencyDisplayName } from "@/frontend/lib/currency";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { getCurrencyByCode, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
+import { logger } from "@/frontend/common/utils/logger";
 
 const HEDGE_TYPE_LONG = "LONG";
 const HEDGE_TYPE_SHORT = "SHORT";

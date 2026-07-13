@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
-import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { QuotaFormField } from "@/frontend/views/dashboard/students/quota/components/QuotaFormField";
 import { quotaInputSx } from "@/frontend/views/dashboard/students/quota/components/quotaFieldStyles";

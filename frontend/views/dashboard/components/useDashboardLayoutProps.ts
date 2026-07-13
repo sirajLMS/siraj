@@ -1,7 +1,7 @@
 "use client";
 
-import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useLayoutStore } from "@/frontend/stores/layoutStore";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
 import { getNavItemsForPermissions } from "@/frontend/views/dashboard/config/navigationConfig";
 import { getActiveNavKey } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";

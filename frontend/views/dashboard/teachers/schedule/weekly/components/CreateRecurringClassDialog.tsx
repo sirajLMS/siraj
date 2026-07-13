@@ -29,12 +29,12 @@ import {
   ClassType as ClassTypeEnum,
   type CreateRecurringClassInput,
   type DayOfWeek,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-class.documents";
-import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
+import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { RecurringMeetingConfigSection } from "@/frontend/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
 import { CLASS_TYPE_OPTIONS, type DayScheduleConfig } from "@/frontend/views/dashboard/classes/recurring/types";
 import {

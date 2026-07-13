@@ -1,4 +1,4 @@
-import { ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type {
   Complaint,
@@ -7,8 +7,8 @@ export type {
   ComplaintQueueResult,
   ComplaintResponse,
   ComplaintSubmitInput,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-export { ComplaintCategory } from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+export { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export { ComplaintStatus };
 
@@ -32,7 +32,7 @@ export interface ParentComplaintRecord {
   readonly adminResponse?: ParentComplaintRecordResponse;
 }
 
-export type { ParentStudentOption } from "@/frontend/types/shared.types";
+export type { ParentStudentOption } from "@/frontend/common/types/shared.types";
 
 export interface AdminComplaintsSummary {
   readonly unanswered: number;

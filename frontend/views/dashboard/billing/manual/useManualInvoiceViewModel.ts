@@ -10,7 +10,7 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type ManualInvoiceFormData,
   manualInvoiceSchema,

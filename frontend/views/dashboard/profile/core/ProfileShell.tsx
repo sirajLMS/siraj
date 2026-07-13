@@ -4,7 +4,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { PageContainer } from "@/frontend/components/ui";
-import { type ProfileAudience, ProfileMode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type ProfileAudience, ProfileMode, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileHeader } from "@/frontend/views/dashboard/profile/core/ProfileHeader";
 import { ProfileSkeleton } from "@/frontend/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/views/dashboard/profile/core/ProfileTabNav";

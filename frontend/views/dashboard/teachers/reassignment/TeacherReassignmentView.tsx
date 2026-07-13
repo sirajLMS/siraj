@@ -1,6 +1,6 @@
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { TeacherReassignmentViewDesktop } from "@/frontend/views/dashboard/teachers/reassignment/teacherReassignmentView.desktop";
 import { TeacherReassignmentViewMobile } from "@/frontend/views/dashboard/teachers/reassignment/teacherReassignmentView.mobile";
 import type {

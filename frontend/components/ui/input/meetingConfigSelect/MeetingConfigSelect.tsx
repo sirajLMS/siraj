@@ -2,8 +2,8 @@
 
 import { Autocomplete, TextField } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
-import type { MeetingConfigSelectOption } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
+import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 
 export type MeetingConfigSelectProps = {
   readonly options: readonly MeetingConfigSelectOption[];

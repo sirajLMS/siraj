@@ -1,4 +1,4 @@
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 export type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;

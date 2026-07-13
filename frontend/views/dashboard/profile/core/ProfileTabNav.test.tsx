@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ProfileTabNav } from "@/frontend/views/dashboard/profile/core/ProfileTabNav";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 

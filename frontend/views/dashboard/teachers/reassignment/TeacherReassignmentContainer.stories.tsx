@@ -1,7 +1,7 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentByIdQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { studentByIdQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { TeacherReassignmentContainer } from "@/frontend/views/dashboard/teachers/reassignment/TeacherReassignmentContainer";
 
 const MOCK_STUDENT_RESULT = {

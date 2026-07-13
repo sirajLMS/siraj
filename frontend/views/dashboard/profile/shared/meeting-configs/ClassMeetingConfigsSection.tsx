@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/components/ui";
 import { MeetingConfigList } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classMeetingConfigsQueryDocument,
   createClassMeetingConfigMutationDocument,
@@ -15,13 +15,13 @@ import {
   recurringMeetingConfigsQueryDocument,
   setDefaultClassMeetingConfigMutationDocument,
   updateClassMeetingConfigMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+} from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import type {
   ClassMeetingConfigFieldsFragment,
   EffectiveMeetingFieldsFragment,
-} from "@/frontend/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
 import { ClassMeetingContextBanner } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
 import { MeetingConfigDeleteDialog } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";

@@ -7,8 +7,8 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   getTrackingStatusIcon,
   getTrackingStatusLabel,

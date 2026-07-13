@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
 export const createStatusUpdateSchema = (messages: MessageSchema["dashboard"]["studentStatus"]["validation"]) =>

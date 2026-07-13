@@ -6,15 +6,15 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   adminComplaintQueueQueryDocument,
   deleteComplaintMutationDocument,
   respondToComplaintMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useAdminComplaintsStore } from "@/frontend/common/stores/adminComplaintsStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { AdminComplaintsView } from "@/frontend/views/dashboard/complaints/adminComplaintsView";
 import type {
   AdminComplaintRow,

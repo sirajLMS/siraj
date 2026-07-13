@@ -10,8 +10,8 @@ import { alpha, Box, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { classDetailsContentPaddingSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 
 interface ActionConfig {

@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { AppDataGrid, ClassProfileLinkCell, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { classHref, profileHrefForTeacher } from "@/frontend/utils/profileHref";
+import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";

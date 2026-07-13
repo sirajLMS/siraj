@@ -1,0 +1,107 @@
+"use client";
+
+import { CssBaseline } from "@mui/material";
+import type { PaletteMode } from "@mui/material/styles";
+import { ThemeProvider, useColorScheme } from "@mui/material/styles";
+import { useLocale } from "next-intl";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ThemeContext } from "@/frontend/common/context/ThemeContext";
+import { setThemePreference } from "@/frontend/common/lib/theme-detection";
+import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
+import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
+
+interface AppThemeProviderProps {
+  readonly children: ReactNode;
+  // Allow server to pass initial theme; used as `defaultMode` for the
+  // CSS-variables-aware ThemeProvider so the first paint matches the cookie.
+  readonly initialTheme?: PaletteMode;
+}
+
+/**
+ * Inner consumer that wires `useColorScheme()` (the modern MUI v9 hook) into the
+ * legacy `ThemeContext` so existing `useThemeMode` consumers keep working.
+ *
+ * Lives in a separate component so that `useColorScheme` (a client hook) is
+ * only called beneath the `ThemeProvider` that owns the color-scheme context.
+ */
+function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) {
+  const { mode: schemeMode, setMode } = useColorScheme();
+  const [isThemeChanging, setIsThemeChanging] = useState<boolean>(false);
+  const locale = useLocale();
+  const direction = locale === "ar" ? "rtl" : "ltr";
+
+  // `useColorScheme` returns `undefined` on first render (SSR-safe); default
+  // to "dark" to match `getThemeFromCookies()` so server and first client
+  // render agree, avoiding hydration mismatches. "system" follows the user's OS
+  // preference but is collapsed here to keep the consumer-facing `mode` typed as
+  // a concrete PaletteMode — the prior behavior always returned "light"|"dark".
+  const mode: PaletteMode = schemeMode === "light" ? "light" : "dark";
+
+  // Sync `data-theme`, `colorScheme`, `lang` and `dir` attributes for CSS
+  // variable application and layout flow (preserved from legacy provider).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.dataset.theme = mode;
+    document.documentElement.style.colorScheme = mode;
+    document.documentElement.dir = direction;
+    document.documentElement.lang = locale;
+  }, [mode, direction, locale]);
+
+  const toggleTheme = useCallback(() => {
+    setIsThemeChanging(true);
+    const nextMode: PaletteMode = mode === "light" ? "dark" : "light";
+    setMode(nextMode); // updates `useColorScheme` state + localStorage ("theme")
+    setThemePreference(nextMode); // also writes the `theme-mode` cookie so the
+    // server-side `getThemeFromCookies` (app/layout.tsx) reads the correct
+    // `defaultMode` on next navigation / hard refresh (preserved behavior).
+
+    // Reset loading state after a brief delay to allow for transition
+    // (preserved from legacy provider).
+    setTimeout(() => {
+      setIsThemeChanging(false);
+    }, 300);
+  }, [mode, setMode]);
+
+  const themeContextValue = useMemo(
+    () => ({ mode, toggleTheme, isThemeChanging, setIsThemeChanging }),
+    [mode, toggleTheme, isThemeChanging]
+  );
+
+  return <ThemeContext.Provider value={themeContextValue}>{children}</ThemeContext.Provider>;
+}
+
+/**
+ * Modern MUI v9 color-scheme provider.
+ *
+ * Replaces the legacy `ThemeProvider` + custom `useState` mode management. Uses
+ * the stable `ThemeProvider` (with `cssVariables: true` + `colorSchemes` baked
+ * into the theme via `createAppCssVarsTheme`) — the supported v9 successor to
+ * the deprecated `CssVarsProvider`. `defaultMode` is sourced from the server-
+ * read theme cookie so the first paint matches the user's preference; the
+ * `<InitColorSchemeScript />` in `app/layout.tsx` prevents the dark-mode SSR
+ * hydration flash.
+ */
+export function AppThemeProvider({ children, initialTheme }: AppThemeProviderProps) {
+  const locale = useLocale();
+  const direction = locale === "ar" ? "rtl" : "ltr";
+  const defaultMode: PaletteMode = initialTheme ?? "dark";
+
+  const theme = useMemo(() => createAppCssVarsTheme(direction, locale), [direction, locale]);
+
+  return (
+    <ThemeProvider
+      theme={theme}
+      defaultMode={defaultMode}
+      forceThemeRerender
+      // Match the existing localStorage key (`"theme"`) written by
+      // `theme-detection.ts` so the preference persists across refreshes and
+      // stays in sync with `<InitColorSchemeScript modeStorageKey="theme" />`.
+      modeStorageKey="theme"
+    >
+      <CssBaseline />
+      <ViewportProvider>
+        <ColorSchemeStateBridge>{children}</ColorSchemeStateBridge>
+      </ViewportProvider>
+    </ThemeProvider>
+  );
+}

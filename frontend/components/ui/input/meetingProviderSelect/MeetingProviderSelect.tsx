@@ -5,11 +5,11 @@ import { Alert, Button, Stack } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useLocale, useTranslations } from "next-intl";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { meetingProvidersQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n/routing";
 
 export type MeetingProviderSelectProps = {

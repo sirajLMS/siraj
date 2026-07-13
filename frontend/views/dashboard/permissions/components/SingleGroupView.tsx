@@ -2,8 +2,8 @@
 
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { AddPermissionsTab } from "@/frontend/views/dashboard/permissions/components/AddPermissionsTab";
 import { AssignedUsersTab } from "@/frontend/views/dashboard/permissions/components/AssignedUsersTab";
 import { CurrentPermissionsTab } from "@/frontend/views/dashboard/permissions/components/CurrentPermissionsTab";

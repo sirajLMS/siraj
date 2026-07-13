@@ -10,7 +10,7 @@ import {
   type UseFormSetValue,
   useForm,
 } from "react-hook-form";
-import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
+import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import {
   type RescheduleFormData,
   rescheduleSchema,

@@ -3,7 +3,7 @@
 import { Avatar } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { avatarInitials } from "@/frontend/utils/avatar";
+import { avatarInitials } from "@/frontend/common/utils/avatar";
 
 export type BaseAvatarVariant = "circular" | "rounded";
 

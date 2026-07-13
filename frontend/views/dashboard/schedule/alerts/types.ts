@@ -1,5 +1,5 @@
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 
 export type ScheduleAlertType = "leave_quota_exceeded" | "missed_class_time";
 

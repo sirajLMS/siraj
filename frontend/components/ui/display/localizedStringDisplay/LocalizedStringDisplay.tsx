@@ -5,8 +5,8 @@ import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import { useLocale } from "next-intl";
 import type * as React from "react";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export type LocalizedStringDisplayProps = {
   readonly value?: LocalizedString | null;

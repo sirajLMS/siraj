@@ -5,7 +5,7 @@ import { alpha, Box, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { BaseCard } from "@/frontend/components/ui";
-import type { GroupClassAudit } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { GroupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 interface ClassAuditDetailsCardProps {
   readonly audit: NonNullable<GroupClassAudit>;

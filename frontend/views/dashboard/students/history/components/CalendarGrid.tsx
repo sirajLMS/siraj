@@ -2,7 +2,7 @@ import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui";
-import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   CalendarGridContainer,
   CalendarWeekdayHeader,

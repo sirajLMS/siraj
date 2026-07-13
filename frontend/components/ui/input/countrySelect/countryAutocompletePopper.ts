@@ -1,7 +1,7 @@
 import type { AutocompleteProps } from "@mui/material/Autocomplete";
 import type { Theme } from "@mui/material/styles";
 import type { Modifier } from "@popperjs/core";
-import type { CountryType } from "@/frontend/lib/locale";
+import type { CountryType } from "@/frontend/common/lib/locale";
 
 type CountryAutocompleteSlotProps = NonNullable<AutocompleteProps<CountryType, false, false, false>["slotProps"]>;
 

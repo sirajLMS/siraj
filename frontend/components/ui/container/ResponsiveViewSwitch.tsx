@@ -2,8 +2,8 @@
 
 import { Alert, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Component, type ComponentType, type ErrorInfo, type ReactNode, Suspense } from "react";
-import { useViewport } from "@/frontend/hooks/useViewport";
-import { logger } from "@/frontend/utils/logger";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { logger } from "@/frontend/common/utils/logger";
 
 type ViewProps<T> = Readonly<T>;
 

@@ -5,7 +5,7 @@ import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import { useLocale } from "next-intl";
 import type * as React from "react";
-import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/lib/timezone";
+import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 
 export type TimezoneDisplayProps = {
   readonly timezone?: string | null;

@@ -4,7 +4,7 @@ import { CloseOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { OverridesDataGrid } from "@/frontend/views/dashboard/permissions/components/OverridesDataGrid";
 import { OverridesDialogFooter } from "@/frontend/views/dashboard/permissions/components/OverridesDialogFooter";
 import { OverridesToolbar } from "@/frontend/views/dashboard/permissions/components/OverridesToolbar";

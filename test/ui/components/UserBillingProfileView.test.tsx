@@ -4,8 +4,8 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AppPermission, InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { UserBillingProfileViewProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/userBillingProfileView";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";

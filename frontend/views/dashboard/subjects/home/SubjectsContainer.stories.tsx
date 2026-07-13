@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { SubjectsView } from "@/frontend/views/dashboard/subjects/home/SubjectsView";
 
 const mockCategories = [

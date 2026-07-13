@@ -2,9 +2,9 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { addDays, format } from "date-fns";
 import { StoryBookPageContainer } from "@/frontend/components/ui/story/StoryBookPageContainer";
-import { DayOfWeek, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
+import { DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { searchTeacherAvailabilityQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
 import { SearchScheduleContainer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleContainer";
 
 const fromDate = format(new Date(), "yyyy-MM-dd");

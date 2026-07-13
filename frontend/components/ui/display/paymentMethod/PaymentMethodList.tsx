@@ -14,8 +14,8 @@ import {
   PaymentMethodDisplay,
   type PaymentMethodRow,
 } from "@/frontend/components/ui/display/paymentMethod/PaymentMethodDisplay";
-import { PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/lib/payment-method";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 
 export type { PaymentMethodRow };
 

@@ -3,7 +3,7 @@
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { RescheduleTrackingCardList } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingCardList";
 import { getTrackingStatusLabel } from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewProps } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";

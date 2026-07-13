@@ -5,7 +5,7 @@ import {
   CountryAutocomplete,
   type CountryAutocompleteProps,
 } from "@/frontend/components/ui/input/countrySelect/CountryAutocomplete";
-import type { CountryType } from "@/frontend/lib/locale";
+import type { CountryType } from "@/frontend/common/lib/locale";
 
 export type CountrySelectProps = {
   readonly country?: CountryType;

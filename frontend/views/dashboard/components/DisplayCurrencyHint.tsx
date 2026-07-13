@@ -4,10 +4,10 @@ import { useQuery } from "@apollo/client/react";
 import CloseIcon from "@mui/icons-material/CloseOutlined";
 import { Alert, Button, IconButton } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { userQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useDisplayCurrencyHintDismissed } from "@/frontend/hooks/useDisplayCurrencyHintDismissed";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { profileHrefForUser } from "@/frontend/utils/profileHref";
+import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisplayCurrencyHintDismissed";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 
 type DisplayCurrencyHintMode = "viewer" | "subject";

@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { CountryAutocomplete } from "@/frontend/components/ui/input/countrySelect/CountryAutocomplete";
-import type { CountryType } from "@/frontend/lib/locale";
+import type { CountryType } from "@/frontend/common/lib/locale";
 
 export type PhoneCountryPickerProps = {
   readonly country?: CountryType;

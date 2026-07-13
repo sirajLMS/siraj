@@ -7,11 +7,11 @@ import type {
   ClassInstanceTeacherInfo,
   ClassOutcome,
   DailyScheduleList,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherFilterItem } from "@/frontend/types/shared.types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
 import type { DashboardNavigationLabels } from "@/shared/messages/types/message";
 
-export type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/types/shared.types";
+export type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/common/types/shared.types";
 
 export type DailyScheduleRow = DailyScheduleList;
 
@@ -95,4 +95,4 @@ export type {
   TeacherDashboardMetrics,
   TeacherScheduleRow,
   TeacherSessionStatus,
-} from "@/frontend/types/shared.types";
+} from "@/frontend/common/types/shared.types";

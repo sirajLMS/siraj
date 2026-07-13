@@ -2,7 +2,7 @@
 
 import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
-import type { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { ParentCardListLabels } from "@/frontend/views/dashboard/admin/parents/home/ParentCardList";
 import type { ParentsDataGridLabels } from "@/frontend/views/dashboard/admin/parents/home/ParentsDataGrid";

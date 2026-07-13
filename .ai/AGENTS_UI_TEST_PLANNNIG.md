@@ -564,7 +564,7 @@ Address specific threats to test reliability. Each threat must include: the curr
 **Fix in every component test file:**
 ```typescript
 import { afterEach } from "bun:test";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 
 afterEach(() => {
   useUserStore.setState({ permissions: [] }, false);

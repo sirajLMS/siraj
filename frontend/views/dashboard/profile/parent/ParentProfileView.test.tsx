@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ParentProfileView } from "@/frontend/views/dashboard/profile/parent/ParentProfileView";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 

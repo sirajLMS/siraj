@@ -4,9 +4,9 @@ import { Box, Chip, Stack, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import { EffectiveMeetingSource } from "@/frontend/types/meeting-class-config.graphql.types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 
 export type MeetingConfigDisplayData = {
   readonly id?: string;

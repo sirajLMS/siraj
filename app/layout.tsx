@@ -6,11 +6,11 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
-import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/lib/theme-detection";
-import MuiProvider from "@/frontend/providers/theme/MuiProvider";
+import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
+import MuiProvider from "@/frontend/common/providers/theme/MuiProvider";
 import "@/app/index.css";
-import { AppApolloProvider } from "@/frontend/context";
-import { AuthProvider } from "@/frontend/providers/apollo/AuthProvider";
+import { AppApolloProvider } from "@/frontend/common/context";
+import { AuthProvider } from "@/frontend/common/providers/apollo/AuthProvider";
 
 async function getLocale() {
   const cookieStore = await cookies();

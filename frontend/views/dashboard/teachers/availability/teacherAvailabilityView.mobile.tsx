@@ -6,7 +6,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { FormProvider, useForm } from "react-hook-form";
 import { ExportButton, MobilePageHeader, PageContainer, SectionPanel } from "@/frontend/components/ui";
-import { useTeacherAvailabilityStore } from "@/frontend/stores/teacherAvailabilityStore";
+import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
 import { AvailabilitySearchForm } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
 import { WeeklyAvailabilityGrid } from "@/frontend/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
 import { availabilitySearchSchema } from "@/frontend/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";

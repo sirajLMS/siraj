@@ -2,8 +2,8 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { AssignedStudentsTab } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsTab";
 
 const assignedStudents: NonNullable<

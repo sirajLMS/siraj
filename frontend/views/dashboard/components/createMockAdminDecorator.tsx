@@ -1,6 +1,6 @@
 import type { Decorator } from "@storybook/react";
-import { AccountStatus, type AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AccountStatus, type AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 
 export function createMockAdminDecorator(permissions: readonly AppPermission[]): Decorator[] {
   return [

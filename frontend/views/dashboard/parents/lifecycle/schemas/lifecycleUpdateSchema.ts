@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export const lifecycleUpdateSchema = z.object({
   lifecycleStatus: z.enum(ParentStatus),

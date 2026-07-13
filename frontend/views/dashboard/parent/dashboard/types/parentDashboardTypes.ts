@@ -2,7 +2,7 @@ import type {
   ClassExecutionState,
   ClassOutcome,
   EffectiveMeeting,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type ParentBookingStatus = "confirmed" | "rescheduled";
 

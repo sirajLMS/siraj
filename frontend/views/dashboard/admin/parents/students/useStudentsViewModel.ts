@@ -4,11 +4,11 @@ import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import type { StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StudentDirectoryQuery } from "@/frontend/graphql/generated/gql/operations";
-import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-directory.documents";
-import { useStudentDirectoryStore } from "@/frontend/stores/studentDirectoryStore";
-import { studentHref, studentProfileTabHref } from "@/frontend/utils/profileHref";
+import type { StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import { studentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-directory.documents";
+import { useStudentDirectoryStore } from "@/frontend/common/stores/studentDirectoryStore";
+import { studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   StudentDirectoryRowExtended,
   StudentsViewLabels,

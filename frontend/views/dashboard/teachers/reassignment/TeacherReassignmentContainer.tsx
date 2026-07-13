@@ -7,15 +7,15 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
   studentByIdQueryDocument,
   teachersQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/admin/parents/students/types";
 import { TeacherReassignmentView } from "@/frontend/views/dashboard/teachers/reassignment/TeacherReassignmentView";
 import type {

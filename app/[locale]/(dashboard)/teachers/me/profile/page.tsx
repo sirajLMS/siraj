@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib";
-import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { redirect } from "@/shared/i18n";
 
 interface PageProps {

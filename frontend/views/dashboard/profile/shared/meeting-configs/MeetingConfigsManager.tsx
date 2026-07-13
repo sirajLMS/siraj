@@ -10,13 +10,13 @@ import {
   MeetingConfigList,
   type MeetingConfigListItem,
 } from "@/frontend/components/ui/display/meetingConfig/MeetingConfigList";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteUserMeetingConfigMutationDocument,
   setDefaultMeetingConfigMutationDocument,
   userMeetingConfigsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
+} from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { MeetingConfigDeleteDialog } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
 import { MeetingConfigFormDialog } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
 

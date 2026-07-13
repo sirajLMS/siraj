@@ -3,13 +3,13 @@
 import { useQuery } from "@apollo/client/react";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
-import type { PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   supportedMobileWalletsQueryDocument,
   supportedOnlineAccountsQueryDocument,
   supportedPaymentLinksQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
-import { toPaymentMethodCatalogOptions } from "@/frontend/lib/payment-method";
+} from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
+import { toPaymentMethodCatalogOptions } from "@/frontend/common/lib/payment-method";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 function isPaymentMethodCatalogRow<T extends { id: string | null; slug: string | null; name: LocalizedString | null }>(

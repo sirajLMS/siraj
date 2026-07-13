@@ -3,9 +3,9 @@
 import { useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { fxSyncHealthQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link, usePathname } from "@/shared/i18n/routing";
 
 export function FxStaleBanner(): React.ReactNode {

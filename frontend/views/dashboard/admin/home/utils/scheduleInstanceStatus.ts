@@ -1,4 +1,4 @@
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type ClassInstanceStatusResolveOptions,
   DEFAULT_MISSED_GRACE_MINUTES,

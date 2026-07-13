@@ -1,4 +1,4 @@
-import type { DayOfWeek, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface AvailabilityEntry {
   readonly id: string;

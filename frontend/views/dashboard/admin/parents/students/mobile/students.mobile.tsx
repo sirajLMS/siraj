@@ -11,7 +11,7 @@ import {
   MobilePageHeader,
   PageContainer,
 } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentMobileMetricsScroll } from "@/frontend/views/dashboard/admin/parents/students/components/StudentMobileMetricsScroll";
 import { StudentDirectoryMobileCard } from "@/frontend/views/dashboard/admin/parents/students/mobile/components/studentDirectoryCard.mobile";
 import type { StudentsViewModel } from "@/frontend/views/dashboard/admin/parents/students/useStudentsViewModel";

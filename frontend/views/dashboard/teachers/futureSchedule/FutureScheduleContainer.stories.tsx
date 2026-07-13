@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ClassExecutionState } from "@/frontend/graphql/generated/gql/graphql-types";
-import { logger } from "@/frontend/utils/logger";
+import { ClassExecutionState } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { logger } from "@/frontend/common/utils/logger";
 import { FutureScheduleView } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleView";
 import type { ImportantNoteItem, SupportContactData } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 

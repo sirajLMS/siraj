@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { useGroupMutationActions } from "@/frontend/views/dashboard/permissions/components/useGroupMutationActions";
 import { useGroupPermissionFilters } from "@/frontend/views/dashboard/permissions/components/useGroupPermissionFilters";
 

@@ -1,5 +1,5 @@
 import type { ElementType, ReactNode } from "react";
-import { AppLanguage, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentQuotaFormData } from "@/frontend/views/dashboard/students/quota/schemas/studentQuotaSchema";
 
 export interface StudentProfileData extends StudentQuotaFormData {

@@ -4,8 +4,8 @@ import { Box, Chip, Stack, Tab, Tabs } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef } from "react";
-import type { ProfileAudience, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import type { ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { getVisibleProfileTabs } from "@/frontend/views/dashboard/profile/core/profileTabs";
 
 export type ProfileTabNavProps = {

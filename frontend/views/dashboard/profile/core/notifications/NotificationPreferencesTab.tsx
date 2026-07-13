@@ -4,13 +4,13 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
+import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useViewport } from "@/frontend/hooks/useViewport";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { logger } from "@/frontend/common/utils/logger";
 import { NotificationPreferencesTabDesktop } from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferencesTab.desktop";
 import { NotificationPreferencesTabMobile } from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile";
 import {

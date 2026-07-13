@@ -3,8 +3,8 @@
 import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodsManager } from "@/frontend/views/dashboard/profile/shared/payment-methods";
 
 type PaymentMethodsTabProps = {

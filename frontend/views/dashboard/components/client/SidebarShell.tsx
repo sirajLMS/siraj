@@ -16,7 +16,7 @@ import {
 import type { SxProps, Theme } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
 import { type RefObject, useEffect, useRef } from "react";
-import { useLayoutStore } from "@/frontend/stores/layoutStore";
+import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n/routing";
 

@@ -1,13 +1,13 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import type { ReactNode } from "react";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   impersonationStatusQueryDocument,
   permissionGroupSimulationStatusQueryDocument,
   simulatablePermissionGroupsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { UserMenuButton } from "@/frontend/views/dashboard/components/navbar/UserMenuButton";
 
 const baseMocks = [

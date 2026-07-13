@@ -5,14 +5,14 @@ import { Alert, Snackbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   createManualInvoiceMutationDocument,
   parentDirectoryQueryDocument,
   studentDirectoryQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { logger } from "@/frontend/common/utils/logger";
 import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import { ManualInvoiceView } from "@/frontend/views/dashboard/billing/manual/manualInvoiceView";
 import type { ManualInvoiceFormData } from "@/frontend/views/dashboard/billing/manual/schemas/manualInvoiceSchema";

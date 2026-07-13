@@ -27,8 +27,8 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ScheduleOverviewDataGrid } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";

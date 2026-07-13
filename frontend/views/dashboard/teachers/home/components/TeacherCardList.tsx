@@ -4,9 +4,9 @@ import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PaginationControls, PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
+import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherCardListProps {

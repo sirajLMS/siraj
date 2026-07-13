@@ -7,14 +7,14 @@ import {
   ClassExecutionState,
   ClassOutcome,
   type EffectiveMeeting,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   parentDashboardMetricsQueryDocument,
   parentDashboardScheduleQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { studentProfileTabHref } from "@/frontend/utils/profileHref";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useParentDashboardStore } from "@/frontend/common/stores/parentDashboardStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ParentDashboardView } from "@/frontend/views/dashboard/parent/dashboard/parentDashboardView";
 import type {
   ParentDashboardMetrics,

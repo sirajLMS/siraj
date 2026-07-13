@@ -8,8 +8,8 @@ import {
   WarningAmberOutlined,
 } from "@mui/icons-material";
 import type { ReactNode } from "react";
-import type { RescheduleTrackingRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { RescheduleTrackingRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   MetricDefinition,
   RawMetrics,

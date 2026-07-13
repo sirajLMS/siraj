@@ -1,7 +1,7 @@
 "use client";
 
-import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { TeachersDesktopView } from "@/frontend/views/dashboard/teachers/home/teachersView.desktop";
 import { TeachersMobileView } from "@/frontend/views/dashboard/teachers/home/teachersView.mobile";
 

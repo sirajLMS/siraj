@@ -11,16 +11,16 @@ import {
   PaymentMethodList,
   type PaymentMethodRow,
 } from "@/frontend/components/ui/display/paymentMethod/PaymentMethodList";
-import { AppPermission, PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import { AppPermission, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteUserPaymentMethodMutationDocument,
   setDefaultUserPaymentMethodMutationDocument,
   userPaymentMethodsQueryDocument,
   verifyBankTransferPaymentMethodMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
-import { getPaymentMethodTypeLabel } from "@/frontend/lib/payment-method";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
+import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentMethodDeleteDialog } from "@/frontend/views/dashboard/profile/shared/payment-methods/PaymentMethodDeleteDialog";
 import { PaymentMethodFormDialog } from "@/frontend/views/dashboard/profile/shared/payment-methods/PaymentMethodFormDialog";
 

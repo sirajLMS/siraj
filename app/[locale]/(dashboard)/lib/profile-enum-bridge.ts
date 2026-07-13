@@ -3,7 +3,7 @@ import {
   ProfileAudience as GqlProfileAudience,
   ProfileMode as GqlProfileMode,
   ProfileScope as GqlProfileScope,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export function toGqlProfileMode(mode: ProfileMode): GqlProfileMode {
   switch (mode) {

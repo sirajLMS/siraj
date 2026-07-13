@@ -2,9 +2,9 @@ import type { useApolloClient } from "@apollo/client/react";
 import type {
   MeetingProviderFieldsFragment,
   UserMeetingConfigFieldsFragment,
-} from "@/frontend/graphql/generated/gql/operations";
-import { createClassMeetingConfigMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/generated/gql/operations";
+import { createClassMeetingConfigMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import { logger } from "@/frontend/common/utils/logger";
 
 export type RecurringMeetingConfigFormState = {
   readonly useTeacherDefault: boolean;

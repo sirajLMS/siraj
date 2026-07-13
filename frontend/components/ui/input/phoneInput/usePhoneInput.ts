@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type CountryType, getCountryByCode } from "@/frontend/lib/locale";
+import { type CountryType, getCountryByCode } from "@/frontend/common/lib/locale";
 import {
   buildE164FromParts,
   canAppendCallingCodeDigit,

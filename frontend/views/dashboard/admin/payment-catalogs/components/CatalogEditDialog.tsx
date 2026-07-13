@@ -28,7 +28,7 @@ import {
   type CurrencyCode,
   IdentifierKind,
   PaymentDirection,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   createSupportedMobileWalletMutationDocument,
   createSupportedOnlineAccountMutationDocument,
@@ -36,11 +36,11 @@ import {
   updateSupportedMobileWalletMutationDocument,
   updateSupportedOnlineAccountMutationDocument,
   updateSupportedPaymentLinkMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
-import { type CurrencyOption, getCurrencyOptions } from "@/frontend/lib/currency";
-import { type CountryType, countries } from "@/frontend/lib/locale";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
+import { type CurrencyOption, getCurrencyOptions } from "@/frontend/common/lib/currency";
+import { type CountryType, countries } from "@/frontend/common/lib/locale";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { logger } from "@/frontend/common/utils/logger";
 import type { CatalogEditDialogProps } from "@/frontend/views/dashboard/admin/payment-catalogs/types";
 import { EntityFormDialogActions } from "@/frontend/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
 

@@ -5,7 +5,7 @@ import {
   PaymentMethodAutocomplete,
   type PaymentMethodAutocompleteProps,
 } from "@/frontend/components/ui/input/paymentMethodSelect/PaymentMethodAutocomplete";
-import type { PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
+import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 export type PaymentMethodSelectProps = {
   readonly option?: PaymentMethodCatalogOption | null;

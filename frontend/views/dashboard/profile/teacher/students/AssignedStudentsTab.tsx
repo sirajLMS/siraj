@@ -5,7 +5,7 @@ import type { GridPaginationModel } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { PaginationControls } from "@/frontend/components/ui";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { AssignedStudentsCardList } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsCardList";
 import {
   AssignedStudentsDataGrid,

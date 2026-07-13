@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
-import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { FutureScheduleContainer } from "@/frontend/views/dashboard/teachers/futureSchedule/FutureScheduleContainer";
 
 interface PageProps {

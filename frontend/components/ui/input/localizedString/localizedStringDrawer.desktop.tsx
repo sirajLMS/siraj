@@ -19,9 +19,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
 import type { LocalizedStringDrawerProps } from "@/frontend/components/ui/input/localizedString/LocalizedStringDrawer";
-import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/lib/locale";
-import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/lib/localized-string";
-import type { AppLocale, LocalizedString } from "@/frontend/types/localized-string.types";
+import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
+import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 type TranslationFn = (key: string, params?: Record<string, string>) => string;

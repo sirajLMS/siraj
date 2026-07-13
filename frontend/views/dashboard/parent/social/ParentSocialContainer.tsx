@@ -5,9 +5,9 @@ import { Box, CircularProgress, Grid, Link, Stack, Typography } from "@mui/mater
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PhoneDisplay, SectionPanel } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { parentOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { isSafeUrl } from "@/frontend/lib/safeRedirect";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { parentOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
 
 function SocialLink({ label, value }: { readonly label: string; readonly value: string | null | undefined }) {
   if (!value) return null;

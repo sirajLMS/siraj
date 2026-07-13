@@ -7,8 +7,8 @@ import Typography from "@mui/material/Typography";
 import { useLocale } from "next-intl";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display/localeEmoji/LocaleEmoji";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/lib/currency";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 
 export const CurrencyDisplayPart = {
   Flag: "flag",

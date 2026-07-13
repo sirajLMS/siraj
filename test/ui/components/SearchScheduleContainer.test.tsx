@@ -1,4 +1,4 @@
-import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
@@ -23,10 +23,10 @@ import { addDays, format } from "date-fns";
 
 expect.extend(matchers);
 
-import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useSearchScheduleStore } from "@/frontend/stores/searchScheduleStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { SearchScheduleContainer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleContainer";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
-import type { CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreIdentitySection } from "@/frontend/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import type { TeacherViewData } from "@/frontend/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { UserPaymentMethodSelect } from "@/frontend/components/ui/input/userPaymentMethodSelect";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 
 const mockMethods: UserPaymentMethodFieldsFragment[] = [
   {

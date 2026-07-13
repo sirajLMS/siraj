@@ -7,10 +7,10 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-profile.documents";
-import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
-import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
+import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useStudentHistoryStore } from "@/frontend/common/stores/studentHistoryStore";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StudentHistoryContainer } from "@/frontend/views/dashboard/students/history/StudentHistoryContainer";
 import {

@@ -4,7 +4,7 @@ import { Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
-import { profileHrefForParent, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 
 export type AssignedStudentsRow = {
   readonly id: string;

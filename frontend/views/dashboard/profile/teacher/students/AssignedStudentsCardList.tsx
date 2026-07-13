@@ -3,7 +3,7 @@
 import { Chip, Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PersonProfileLink } from "@/frontend/components/ui";
-import { profileHrefForParent, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/views/dashboard/profile/teacher/students/AssignedStudentsDataGrid";
 
 type AssignedStudentsCardListProps = {

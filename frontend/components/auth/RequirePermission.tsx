@@ -1,9 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import logger from "@/frontend/lib/logger";
-import { useUserStore } from "@/frontend/stores/userStore";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import logger from "@/frontend/common/lib/logger";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 
 export interface RequirePermissionProps {
   /**

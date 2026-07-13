@@ -5,16 +5,16 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, UploadType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, UploadType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   deleteLearningResourceMutationDocument,
   learningResourcesQueryDocument,
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useLearningResourcesStore } from "@/frontend/stores/learningResourcesStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useLearningResourcesStore } from "@/frontend/common/stores/learningResourcesStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { ResourcesView } from "@/frontend/views/dashboard/resources/resourcesView";
 import { buildResourcesLabels } from "@/frontend/views/dashboard/resources/utils/buildResourcesLabels";
 import { inferResourceFileType } from "@/frontend/views/dashboard/resources/utils/resourceFileTypeUtils";

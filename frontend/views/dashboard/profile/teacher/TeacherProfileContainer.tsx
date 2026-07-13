@@ -3,15 +3,15 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { ErrorState } from "@/frontend/components/ui";
-import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
-import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { syncViewerFromProfile } from "@/frontend/common/lib/sync-viewer-profile";
+import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { PaymentMethodsTab } from "@/frontend/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { MeetingConfigsTab } from "@/frontend/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";

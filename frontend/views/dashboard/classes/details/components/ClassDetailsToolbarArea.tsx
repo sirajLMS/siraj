@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { MeetingJoinEmptyRole } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classDetailsContentPaddingSx,
   classDetailsSectionStackSx,

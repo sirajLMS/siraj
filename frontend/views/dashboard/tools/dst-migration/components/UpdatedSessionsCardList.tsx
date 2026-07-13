@@ -3,7 +3,7 @@
 import { ArrowForwardOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { PersonProfileLink } from "@/frontend/components/ui";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {

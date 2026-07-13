@@ -11,11 +11,11 @@ import { LocalizedStringFormField } from "@/frontend/components/ui/input/localiz
 import { PaymentMethodSelect } from "@/frontend/components/ui/input/paymentMethodSelect/PaymentMethodSelect";
 import { PhoneFormField } from "@/frontend/components/ui/input/phoneInput/PhoneFormField";
 import { TagInput } from "@/frontend/components/ui/input/tagInput/TagInput";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { CurrencyOption } from "@/frontend/lib/currency";
-import type { CountryType } from "@/frontend/lib/locale";
-import type { PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
+import type { CountryType } from "@/frontend/common/lib/locale";
+import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 export type PaymentMethodDetailsFormValue = {
   readonly walletId?: string;

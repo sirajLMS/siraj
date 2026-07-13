@@ -5,7 +5,7 @@ import {
   UserPaymentMethodAutocomplete,
   type UserPaymentMethodAutocompleteProps,
 } from "@/frontend/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocomplete";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 
 export type UserPaymentMethodSelectProps = {
   readonly value?: UserPaymentMethodFieldsFragment | null;

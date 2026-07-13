@@ -8,8 +8,8 @@ import {
   type AppPermission,
   type CurrencyCode,
   type User,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { DashboardLayoutContainer } from "@/frontend/views/dashboard/components/DashboardLayoutContainer";
 import { type AppLocale, locales } from "@/shared/i18n/routing";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import type { AdminMetricKey } from "@/frontend/types/shared.types";
+import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { ADMIN_METRIC_DEFINITIONS } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import { DashboardView } from "@/frontend/views/dashboard/dashboard/DashboardView";

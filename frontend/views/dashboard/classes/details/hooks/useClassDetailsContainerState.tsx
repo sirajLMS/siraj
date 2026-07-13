@@ -1,4 +1,4 @@
-import { useClassDetailsStore } from "@/frontend/stores/classDetailsStore";
+import { useClassDetailsStore } from "@/frontend/common/stores/classDetailsStore";
 import type { ActionFeedbackState } from "@/frontend/views/dashboard/classes/details/types";
 
 export function useClassDetailsContainerState() {

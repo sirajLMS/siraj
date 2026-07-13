@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export const availabilitySearchSchema = z.object({
   fromTime: z.date().nullable(),

@@ -6,13 +6,13 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/components/ui";
-import { AccountStatus, AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   deactivateParentMutationDocument,
   profileByUserIdQueryDocument,
   reactivateParentMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { getGraphQLErrorMessage } from "@/frontend/utils/errorUtils";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 
 type ParentAccountActionsProps = {
   readonly parentId: string;

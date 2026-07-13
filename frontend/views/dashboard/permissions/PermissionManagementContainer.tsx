@@ -1,6 +1,6 @@
 "use client";
 
-import { usePermissionManagementStore } from "@/frontend/stores/permissionManagementStore";
+import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
 import { PermissionManagementView } from "@/frontend/views/dashboard/permissions/PermissionManagementView";
 import { usePermissionManagementData } from "@/frontend/views/dashboard/permissions/usePermissionManagementData";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import type {
   CheckedEmptyItem,
   ConflictGroup,

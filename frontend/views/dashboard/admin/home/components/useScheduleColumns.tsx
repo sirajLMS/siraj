@@ -8,8 +8,8 @@ import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/utils/profileHref";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,

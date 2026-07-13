@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import { type ReactNode, useEffect, useRef } from "react";
-import { useFxLiveRefresh } from "@/frontend/hooks/useFxLiveRefresh";
+import { useFxLiveRefresh } from "@/frontend/common/hooks/useFxLiveRefresh";
 import { BottomNavbar } from "@/frontend/views/dashboard/components/BottomNavbar";
 import { FxStaleBanner } from "@/frontend/views/dashboard/components/FxStaleBanner";
 import { Sidebar } from "@/frontend/views/dashboard/components/Sidebar";

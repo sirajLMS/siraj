@@ -20,9 +20,9 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PhoneInput } from "@/frontend/components/ui/input";
-import type { UpdateManagerProfileInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { updateManagerProfileMutationDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
-import { logger } from "@/frontend/utils/logger";
+import type { UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { updateManagerProfileMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
+import { logger } from "@/frontend/common/utils/logger";
 import type { Manager } from "@/frontend/views/dashboard/managers/home/types";
 
 interface ManagerRowActionsProps {

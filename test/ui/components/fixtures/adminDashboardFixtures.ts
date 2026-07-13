@@ -1,4 +1,4 @@
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
 

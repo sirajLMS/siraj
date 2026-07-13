@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, PhoneDisplay } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { profileHrefForStaff } from "@/frontend/utils/profileHref";
+import { profileHrefForStaff } from "@/frontend/common/utils/profileHref";
 import { ManagerRowActions } from "@/frontend/views/dashboard/managers/home/ManagerRowActions";
 import type { Manager } from "@/frontend/views/dashboard/managers/home/types";
 

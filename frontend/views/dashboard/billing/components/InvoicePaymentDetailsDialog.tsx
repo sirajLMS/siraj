@@ -17,17 +17,17 @@ import {
 } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { InvoicePaymentSubmissionQuery, InvoicePaymentsQuery } from "@/frontend/graphql/generated/gql/operations";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { InvoicePaymentSubmissionQuery, InvoicePaymentsQuery } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   approvePaymentProofMutationDocument,
   invoicePaymentSubmissionQueryDocument,
   rejectPaymentProofMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/billing-management.documents";
-import { invoicePaymentsQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-payments.documents";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/sharedDocuments/billing/billing-management.documents";
+import { invoicePaymentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-payments.documents";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { FxConversionNote } from "@/frontend/views/dashboard/components/FxConversionNote";
 import { getErrorMessage } from "@/shared/utils/error";

@@ -5,7 +5,7 @@ import { Badge, type IconButtonProps, Popover } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { type MouseEvent, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NavbarIcon } from "@/frontend/views/dashboard/components/navbar/NavbarIcon";
 import { NotificationPanel } from "@/frontend/views/dashboard/components/navbar/NotificationPanel";
 

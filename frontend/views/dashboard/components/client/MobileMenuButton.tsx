@@ -2,7 +2,7 @@
 
 import { MenuOutlined } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { useLayoutStore } from "@/frontend/stores/layoutStore";
+import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
 
 export function MobileMenuButton() {
   const toggleMobileDrawer = useLayoutStore(state => state.toggleMobileDrawer);

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { MockAdminDashboardContainer } from "@/frontend/views/dashboard/admin/home/AdminDashboardContainer.stories";
 import { ParentDashboardContainer } from "@/frontend/views/dashboard/parent/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";

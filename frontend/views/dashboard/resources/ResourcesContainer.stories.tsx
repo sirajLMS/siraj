@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { ResourcesView } from "@/frontend/views/dashboard/resources/resourcesView";
 import type { ResourceFilterType, ResourceSortBy } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 

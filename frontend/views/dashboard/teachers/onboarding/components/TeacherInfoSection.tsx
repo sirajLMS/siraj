@@ -7,7 +7,7 @@ import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import { PhoneFormField } from "@/frontend/components/ui/input";
 import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
-import { getCountryByCode } from "@/frontend/lib/locale";
+import { getCountryByCode } from "@/frontend/common/lib/locale";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 interface BaseSectionProps {

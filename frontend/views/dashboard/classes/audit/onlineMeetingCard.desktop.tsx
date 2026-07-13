@@ -6,9 +6,9 @@ import { styled } from "@mui/material/styles";
 import { useLocale } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import type { OnlineMeetingInfo } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
+import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 
 export interface OnlineMeetingCardDesktopProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;

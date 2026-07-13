@@ -1,4 +1,4 @@
-import type { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentAccountStatus } from "@/frontend/views/dashboard/admin/parents/students/types";
 
 export interface TeacherReassignmentViewProps {

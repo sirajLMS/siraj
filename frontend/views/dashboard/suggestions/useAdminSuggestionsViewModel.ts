@@ -4,17 +4,17 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppPermission, SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   adminSuggestionsQueryDocument,
   deleteSuggestionMutationDocument,
   markSuggestionDuplicateMutationDocument,
   markSuggestionReviewedMutationDocument,
   respondToSuggestionMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/suggestions/suggestion.documents";
-import { useAdminSuggestionsStore } from "@/frontend/stores/adminSuggestionsStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments/suggestions/suggestion.documents";
+import { useAdminSuggestionsStore } from "@/frontend/common/stores/adminSuggestionsStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import type {
   AdminSuggestionRow,
   AdminSuggestionsSummary,

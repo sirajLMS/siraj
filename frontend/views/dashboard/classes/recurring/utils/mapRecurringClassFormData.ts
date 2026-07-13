@@ -1,5 +1,5 @@
-import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
+import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 
 function buildActiveDays(data: RecurringClassFormData) {

@@ -7,18 +7,18 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
-import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
-import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useUserBillingProfileStore } from "@/frontend/common/stores/userBillingProfileStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { BillingImpersonationNotice } from "@/frontend/views/dashboard/billing/components/BillingImpersonationNotice";
 import { InvoicePaymentDetailsDialog } from "@/frontend/views/dashboard/billing/components/InvoicePaymentDetailsDialog";
 import {

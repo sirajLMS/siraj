@@ -2,7 +2,7 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { type CurrencyCode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { AccountSection } from "@/frontend/views/dashboard/profile/parent/sections/AccountSection";
 import { AssociatedStudentsSection } from "@/frontend/views/dashboard/profile/parent/sections/AssociatedStudentsSection";

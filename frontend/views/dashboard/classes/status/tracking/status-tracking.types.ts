@@ -1,6 +1,6 @@
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { StatusTrackingScheduleRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { ClassExecutionState, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { StatusTrackingScheduleRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export enum SessionStatus {

@@ -3,8 +3,8 @@
 import { Box } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
 import { TeacherActiveSessionControls } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherActiveSessionControls";
 import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";

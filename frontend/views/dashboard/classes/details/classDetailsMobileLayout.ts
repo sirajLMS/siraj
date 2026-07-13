@@ -1,5 +1,5 @@
 import type { SxProps, Theme } from "@mui/material/styles";
-import { MOBILE_TABLET_MAX_BREAKPOINT } from "@/frontend/utils/sx/edgeToEdgeSx";
+import { MOBILE_TABLET_MAX_BREAKPOINT } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 
 const mobileTabletMedia = (theme: Theme) => theme.breakpoints.down(MOBILE_TABLET_MAX_BREAKPOINT);
 

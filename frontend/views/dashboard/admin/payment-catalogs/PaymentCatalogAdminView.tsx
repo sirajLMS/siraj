@@ -8,7 +8,7 @@ import type {
   SupportedMobileWalletFieldsFragment,
   SupportedOnlineAccountFieldsFragment,
   SupportedPaymentLinkFieldsFragment,
-} from "@/frontend/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/operations";
 import { MobileWalletCatalogGrid } from "@/frontend/views/dashboard/admin/payment-catalogs/components/MobileWalletCatalogGrid";
 import { OnlineAccountCatalogGrid } from "@/frontend/views/dashboard/admin/payment-catalogs/components/OnlineAccountCatalogGrid";
 import { PaymentLinkCatalogGrid } from "@/frontend/views/dashboard/admin/payment-catalogs/components/PaymentLinkCatalogGrid";

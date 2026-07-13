@@ -4,7 +4,7 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CalendarGrid } from "@/frontend/views/dashboard/students/history/components/CalendarGrid";
 import type { ClassSession } from "@/frontend/views/dashboard/students/history/types";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";

@@ -10,7 +10,7 @@ export interface EntityLinkTargets {
   readonly teacherId: string;
 }
 
-import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export function formatClassDetailDate(value: string | null | undefined, locale: string): string {

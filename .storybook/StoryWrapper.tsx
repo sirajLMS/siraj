@@ -7,16 +7,16 @@ import { NextIntlClientProvider } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
-import { ThemeContext } from "@/frontend/context/ThemeContext";
-import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ThemeContext } from "@/frontend/common/context/ThemeContext";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   AccountStatus,
   AppPermission as AppPermissionEnum,
   CurrencyCode as CurrencyCodeEnum,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { createAppTheme } from "@/frontend/providers/theme/theme";
-import { ViewportProvider } from "@/frontend/providers/theme/ViewportProvider";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { createAppTheme } from "@/frontend/common/providers/theme/theme";
+import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
 import type { MessageSchema } from "@/shared/messages/types/message";

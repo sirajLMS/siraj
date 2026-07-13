@@ -17,15 +17,15 @@ import {
   PrimaryPageAction,
 } from "@/frontend/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteMeetingProviderMutationDocument,
   meetingProvidersQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { logger } from "@/frontend/common/utils/logger";
 import { CreateMeetingProviderDialog } from "@/frontend/views/dashboard/admin/meeting-providers/CreateMeetingProviderDialog";
 import { EditMeetingProviderDialog } from "@/frontend/views/dashboard/admin/meeting-providers/EditMeetingProviderDialog";
 

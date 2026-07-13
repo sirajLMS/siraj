@@ -1,6 +1,6 @@
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { StatusTrackingDesktopView } from "@/frontend/views/dashboard/classes/status/tracking/statusTrackingView.desktop";
 import { StatusTrackingMobileView } from "@/frontend/views/dashboard/classes/status/tracking/statusTrackingView.mobile";
 import type {

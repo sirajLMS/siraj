@@ -12,7 +12,7 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import { AppPermission, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentCardList } from "@/frontend/views/dashboard/admin/parents/home/ParentCardList";
 import { ParentsMetricGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsMetricGrid";

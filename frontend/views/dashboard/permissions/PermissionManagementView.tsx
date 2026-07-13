@@ -1,7 +1,7 @@
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
-import { usePermissionManagementStore } from "@/frontend/stores/permissionManagementStore";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
 import { PermissionManagementDesktopView } from "@/frontend/views/dashboard/permissions/permissionManagementView.desktop";
 import { PermissionManagementMobileView } from "@/frontend/views/dashboard/permissions/permissionManagementView.mobile";
 import {

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { CurrencyCode, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { isValidIanaTimezoneId } from "@/frontend/lib/timezone";
+import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 
 const coreSchema = z.object({
   name: z.string().min(1),

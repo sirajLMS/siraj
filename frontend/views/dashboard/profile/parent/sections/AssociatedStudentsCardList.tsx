@@ -3,7 +3,7 @@
 import { Paper, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
-import { profileHrefForUser, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForUser, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssociatedStudentRow } from "@/frontend/views/dashboard/profile/parent/sections/parentProfileTypes";
 
 type AssociatedStudentsCardListProps = {

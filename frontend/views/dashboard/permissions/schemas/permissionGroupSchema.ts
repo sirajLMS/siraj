@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   localizedStringOptionalSchema,
   localizedStringRequiredSchema,
-} from "@/frontend/lib/localized-string.validation";
+} from "@/frontend/common/lib/localized-string.validation";
 
 export const permissionGroupSchema = z.object({
   name: localizedStringRequiredSchema(["ar"]),

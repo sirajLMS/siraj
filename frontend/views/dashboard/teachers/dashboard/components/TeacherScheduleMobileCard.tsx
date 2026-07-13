@@ -5,9 +5,9 @@ import { alpha, Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/mate
 import { styled } from "@mui/material/styles";
 import { ActionIconLink, StatusBadge, UserAvatar } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
 import { TeacherActiveSessionControls } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherActiveSessionControls";

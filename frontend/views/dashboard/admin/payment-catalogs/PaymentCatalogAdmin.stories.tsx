@@ -5,8 +5,8 @@ import {
   CurrencyCode,
   IdentifierKind,
   PaymentDirection,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { PaymentCatalogAdminView } from "@/frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView";
 
 const mockMobileWallets = [

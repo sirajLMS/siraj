@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { AppPermission, type User } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 
 interface UserStoreInitializerProps {
   readonly userProfile: User;

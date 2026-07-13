@@ -5,7 +5,7 @@ import {
   LocalizedStringInput,
   type LocalizedStringInputProps,
 } from "@/frontend/components/ui/input/localizedString/LocalizedStringInput";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 type LocalizedStringFormFieldProps<T extends FieldValues> = Omit<
   LocalizedStringInputProps,

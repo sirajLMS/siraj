@@ -15,9 +15,9 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
-import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 
 type ViewAsUserVariant = "icon" | "link" | "menuItem" | "button";
 

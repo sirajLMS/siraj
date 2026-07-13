@@ -4,8 +4,8 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { parseIanaTimezone } from "@/backend/lib/enum";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
-import { toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
-import { logger } from "@/frontend/utils/logger";
+import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { logger } from "@/frontend/common/utils/logger";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import { mapFormDataToServiceInput } from "@/frontend/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
 

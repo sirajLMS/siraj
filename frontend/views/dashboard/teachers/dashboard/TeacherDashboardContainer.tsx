@@ -5,8 +5,8 @@ import { Alert, Snackbar } from "@mui/material";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { EffectiveMeeting } from "@/frontend/graphql/generated/gql/graphql-types";
-import * as Types from "@/frontend/graphql/generated/gql/graphql-types";
+import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
   createTeacherManualClassEntryMutationDocument,
@@ -16,10 +16,10 @@ import {
   updateSessionStatusAbsentMutationDocument,
   updateSessionStatusLeaveMutationDocument,
   updateSessionStatusStartMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { ManualClassEntryDialog } from "@/frontend/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import { TeacherDashboardView } from "@/frontend/views/dashboard/teachers/dashboard/teacherDashboardView";
 import { buildStudentProgressFeedItems } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildStudentProgressFeedItems";

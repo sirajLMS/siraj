@@ -3,7 +3,7 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { SectionPanel } from "@/frontend/components/ui";
-import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCatalogSection } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogSection";
 import { PermissionGroupCardList } from "@/frontend/views/dashboard/permissions/components/PermissionGroupCardList";
 import { PermissionGroupsDataGrid } from "@/frontend/views/dashboard/permissions/components/PermissionGroupsDataGrid";

@@ -6,10 +6,10 @@ import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hoo
 import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
-import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 

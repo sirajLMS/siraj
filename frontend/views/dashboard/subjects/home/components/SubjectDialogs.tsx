@@ -1,6 +1,6 @@
 "use client";
 
-import { useSubjectManagementStore } from "@/frontend/stores/subjectManagementStore";
+import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
 import { CreateCategoryDialog } from "@/frontend/views/dashboard/subjects/home/components/CreateCategoryDialog";
 import { CreateSubjectDialog } from "@/frontend/views/dashboard/subjects/home/components/CreateSubjectDialog";
 import { DeleteCategoryDialog } from "@/frontend/views/dashboard/subjects/home/components/DeleteCategoryDialog";

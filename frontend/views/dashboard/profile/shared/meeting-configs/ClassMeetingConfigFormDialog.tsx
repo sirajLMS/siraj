@@ -9,7 +9,7 @@ import type {
   CreateClassMeetingConfigMutationVariables,
   UpdateClassMeetingConfigMutation,
   UpdateClassMeetingConfigMutationVariables,
-} from "@/frontend/graphql/types/meeting-class-config.operations";
+} from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { MeetingConfigFormDialogContent } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
 import {
   type MeetingConfigFormEditInfo,

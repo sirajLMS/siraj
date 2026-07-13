@@ -12,8 +12,8 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
-import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
 import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
 import { StudentProgressFeed } from "@/frontend/views/dashboard/teachers/dashboard/components/StudentProgressFeed";

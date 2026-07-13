@@ -1,6 +1,6 @@
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { CreateRecurringClassViewDesktop } from "@/frontend/views/dashboard/classes/recurring/createRecurringClassView.desktop";
 import { CreateRecurringClassViewMobile } from "@/frontend/views/dashboard/classes/recurring/createRecurringClassView.mobile";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";

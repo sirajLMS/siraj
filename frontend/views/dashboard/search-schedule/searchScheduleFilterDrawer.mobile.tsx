@@ -14,8 +14,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { DayOfWeek, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { SearchScheduleDraftFilters } from "@/frontend/stores/searchScheduleStore";
+import { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import type { SearchScheduleFilterDrawerProps } from "@/frontend/views/dashboard/search-schedule/SearchScheduleFilterDrawer";
 import { getClearDrawerFiltersPatch } from "@/frontend/views/dashboard/search-schedule/searchScheduleFilterUtils";
 

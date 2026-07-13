@@ -5,7 +5,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
-import type { NotificationChannel, NotificationEventType } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   buildPreferenceMap,
   NOTIFICATION_CHANNELS,

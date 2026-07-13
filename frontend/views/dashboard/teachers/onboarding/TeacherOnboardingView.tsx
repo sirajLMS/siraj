@@ -12,7 +12,7 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { MeetingConfigOnboardingSection } from "@/frontend/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { PaymentMethodSection } from "@/frontend/views/dashboard/teachers/onboarding/components/PaymentMethodSection";

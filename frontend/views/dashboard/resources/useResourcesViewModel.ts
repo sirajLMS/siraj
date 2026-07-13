@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useLearningResourcesStore } from "@/frontend/stores/learningResourcesStore";
-import type { ResourceFilterType, ResourceSortBy } from "@/frontend/types/shared.types";
+import { useLearningResourcesStore } from "@/frontend/common/stores/learningResourcesStore";
+import type { ResourceFilterType, ResourceSortBy } from "@/frontend/common/types/shared.types";
 import type {
   LearningResourceRow,
   ResourceUploadFormData,

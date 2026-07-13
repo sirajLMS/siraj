@@ -1,7 +1,7 @@
 "use client";
 
-import type { OnlineMeetingInfo } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { OnlineMeetingCardDesktop } from "@/frontend/views/dashboard/classes/audit/onlineMeetingCard.desktop";
 import { OnlineMeetingCardMobile } from "@/frontend/views/dashboard/classes/audit/onlineMeetingCard.mobile";
 

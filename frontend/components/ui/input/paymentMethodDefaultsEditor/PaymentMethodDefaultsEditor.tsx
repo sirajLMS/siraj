@@ -10,11 +10,11 @@ import { FieldWrapper } from "@/frontend/components/ui/form/field/FieldWrapper";
 import { FormSuccessSnackbar } from "@/frontend/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
 import { LocalizedStringDrawer } from "@/frontend/components/ui/input/localizedString/LocalizedStringDrawer";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { CurrencyOption } from "@/frontend/lib/currency";
-import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/lib/payment-method";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
+import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export type PaymentMethodDefaultsEditorProps = {
   readonly methods: readonly PaymentMethodRow[];

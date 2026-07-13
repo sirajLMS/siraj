@@ -9,8 +9,8 @@ import {
   WarningAmberOutlined,
 } from "@mui/icons-material";
 import type { useTranslations } from "next-intl";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StudentDirectoryQuery } from "@/frontend/graphql/generated/gql/operations";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
 import type {
   StudentAccountStatus,
   StudentDirectoryRowExtended,

@@ -5,9 +5,9 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import type { ClassMeetingConfigFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
+import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 
 export type MeetingConfigListItem = UserMeetingConfigFieldsFragment | ClassMeetingConfigFieldsFragment;
 

@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import type { ComponentProps } from "react";
-import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/views/dashboard/profile/staff/StaffProfileView";
 
 const staffProfile = {

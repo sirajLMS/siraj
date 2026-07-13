@@ -6,8 +6,8 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { type ReactNode, useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
-import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   AdminInvoiceRow,
   AdminInvoiceStatus,

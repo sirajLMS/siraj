@@ -6,13 +6,13 @@ import { useCallback, useMemo, useState } from "react";
 import type {
   CreateRecurringClassInput,
   MutationCreateRecurringClassArgs,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
-import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-class.documents";
-import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
+import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { CreateRecurringClassView } from "@/frontend/views/dashboard/classes/recurring/CreateRecurringClassView";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import { mapFormDataToInput } from "@/frontend/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";

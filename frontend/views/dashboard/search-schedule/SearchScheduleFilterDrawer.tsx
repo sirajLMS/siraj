@@ -2,7 +2,7 @@
 
 import { createLazyView } from "@/frontend/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/components/ui/container/ResponsiveViewSwitch";
-import type { SearchScheduleDraftFilters } from "@/frontend/stores/searchScheduleStore";
+import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 
 export interface SearchScheduleFilterDrawerProps {
   readonly open: boolean;

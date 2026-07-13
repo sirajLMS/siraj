@@ -5,9 +5,9 @@ import { alpha } from "@mui/material/styles";
 import { useLocale, useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountStatus, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const coreSchema = z.object({
   name: z.string().min(1),

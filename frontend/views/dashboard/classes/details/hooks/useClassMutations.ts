@@ -12,9 +12,9 @@ import {
   updateSessionStatusAbsentMutationDocument,
   updateSessionStatusLeaveMutationDocument,
   updateSessionStatusStartMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { getGraphQLErrorMessage } from "@/frontend/utils/errorUtils";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
+import { logger } from "@/frontend/common/utils/logger";
 
 interface UseClassMutationsOptions {
   id: string;

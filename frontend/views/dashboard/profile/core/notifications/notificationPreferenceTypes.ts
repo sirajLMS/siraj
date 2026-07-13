@@ -1,5 +1,5 @@
-import { NotificationChannel, NotificationEventType } from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export type NotificationPrefRow = NonNullable<
   Operations.NotificationPreferencesQuery["notificationPreferences"]

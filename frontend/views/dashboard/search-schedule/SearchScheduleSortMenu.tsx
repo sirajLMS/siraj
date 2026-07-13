@@ -4,8 +4,8 @@ import { SortOutlined } from "@mui/icons-material";
 import { alpha, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { type MouseEvent, useState } from "react";
-import { AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { SearchScheduleDraftFilters } from "@/frontend/stores/searchScheduleStore";
+import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import { isSortApplied } from "@/frontend/views/dashboard/search-schedule/searchScheduleFilterUtils";
 
 interface SearchScheduleSortMenuProps {

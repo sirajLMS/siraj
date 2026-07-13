@@ -9,13 +9,13 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ClassExecutionState as GqlClassExecutionState,
   StudentStatus,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as GqlOperations from "@/frontend/graphql/generated/gql/operations";
-import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student.documents";
-import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/students/student-lifecycle.documents";
-import { studentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-profile.documents";
-import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/students/student-status.documents";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as GqlOperations from "@/frontend/common/graphql/generated/gql/operations";
+import { studentByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
+import { changeStudentStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-lifecycle.documents";
+import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
+import { studentUpcomingClassesQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-status.documents";
+import { logger } from "@/frontend/common/utils/logger";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { StudentProfileQueryData } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";

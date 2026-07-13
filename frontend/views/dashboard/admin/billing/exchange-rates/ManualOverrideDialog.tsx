@@ -5,10 +5,10 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextF
 import { useState } from "react";
 import { AppDatePicker } from "@/frontend/components/ui/form/date/AppDatePicker";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { upsertManualExchangeRateMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { getCurrencyByCode } from "@/frontend/lib/currency";
-import { logger } from "@/frontend/utils/logger";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { upsertManualExchangeRateMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { getCurrencyByCode } from "@/frontend/common/lib/currency";
+import { logger } from "@/frontend/common/utils/logger";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 
 type ManualOverrideDialogProps = {

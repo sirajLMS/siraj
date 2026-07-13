@@ -19,9 +19,9 @@ import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/components/ui";
-import { AppPermission, FxProvider, FxProviderConfigSource } from "@/frontend/graphql/generated/gql/graphql-types";
-import { fxProviderConfigQueryDocument, updateFxProviderMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { logger } from "@/frontend/utils/logger";
+import { AppPermission, FxProvider, FxProviderConfigSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { fxProviderConfigQueryDocument, updateFxProviderMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 
 type ProviderSettingsSectionProps = {

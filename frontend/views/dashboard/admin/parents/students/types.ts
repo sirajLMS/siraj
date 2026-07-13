@@ -1,4 +1,4 @@
-import { type StudentDirectoryRow, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type StudentDirectoryRow, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export enum StudentEnrollmentStatus {
   REGULAR = "regular",

@@ -6,15 +6,15 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   rescheduleTrackingMetricsQueryDocument,
   rescheduleTrackingRowsQueryDocument,
   updateSessionStatusLeaveMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useRescheduleTrackingStore } from "@/frontend/stores/rescheduleTrackingStore";
-import { exportRescheduleTracking } from "@/frontend/utils/excel-export/tracking-export";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useRescheduleTrackingStore } from "@/frontend/common/stores/rescheduleTrackingStore";
+import { exportRescheduleTracking } from "@/frontend/common/utils/excel-export/tracking-export";
+import { logger } from "@/frontend/common/utils/logger";
 import { RescheduleTrackingView } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingView";
 import {
   buildTrackingMetrics,

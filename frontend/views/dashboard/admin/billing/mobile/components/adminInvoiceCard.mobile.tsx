@@ -4,7 +4,7 @@ import { VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
-import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AdminBillingViewModel } from "@/frontend/views/dashboard/admin/billing/useAdminBillingViewModel";
 import type {
   AdminInvoiceRow,

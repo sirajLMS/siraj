@@ -13,7 +13,7 @@ import {
   PrimaryPageAction,
   UserAvatar,
 } from "@/frontend/components/ui";
-import { formatStudentDisplayId } from "@/frontend/utils/formatStudentDisplayId";
+import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
 import { ContextualHelperCards } from "@/frontend/views/dashboard/students/quota/components/ContextualHelperCards";
 import { CourseDetailsSection } from "@/frontend/views/dashboard/students/quota/components/CourseDetailsSection";

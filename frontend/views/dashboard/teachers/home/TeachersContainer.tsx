@@ -2,9 +2,9 @@
 
 import { useQuery } from "@apollo/client/react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useTeacherDirectoryStore } from "@/frontend/stores/teacherDirectoryStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { teacherDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useTeacherDirectoryStore } from "@/frontend/common/stores/teacherDirectoryStore";
 import { TeachersView } from "@/frontend/views/dashboard/teachers/home/TeachersView";
 
 export function TeachersContainer() {

@@ -7,7 +7,7 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import { ClassesLeftProgress } from "@/frontend/views/dashboard/admin/parents/students/components/ClassesLeftProgress";
 import type {
   StudentDirectoryDataGridLabels,

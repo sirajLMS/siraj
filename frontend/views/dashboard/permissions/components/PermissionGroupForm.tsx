@@ -18,8 +18,8 @@ import { useEffect, useMemo, useState } from "react";
 import { type Control, useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { LocalizedStringFormField } from "@/frontend/components/ui/input/localizedString";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { PermissionCategoryList } from "@/frontend/views/dashboard/permissions/components/PermissionCategoryList";
 import { PermissionFilterBar } from "@/frontend/views/dashboard/permissions/components/PermissionFilterBar";
 import {

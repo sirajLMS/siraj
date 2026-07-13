@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
 import { CountryDisplay, CurrencyDisplay, LocalizedStringDisplay } from "@/frontend/components/ui/display";
-import { PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { SupportedMobileWalletFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { SupportedMobileWalletFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { CatalogGridActionHandlers } from "@/frontend/views/dashboard/admin/payment-catalogs/types";
 
 export interface MobileWalletCatalogGridProps extends CatalogGridActionHandlers {

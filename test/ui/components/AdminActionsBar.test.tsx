@@ -5,8 +5,8 @@ import userEvent from "@testing-library/user-event";
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { AdminActionsBar } from "@/frontend/views/dashboard/classes/details/admin/AdminActionsBar";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 

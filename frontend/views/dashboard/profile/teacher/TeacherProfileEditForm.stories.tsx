@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TeacherAdminEditForm } from "@/frontend/views/dashboard/profile/teacher/TeacherAdminEditForm";
 import { TeacherProfileEditForm } from "@/frontend/views/dashboard/profile/teacher/TeacherProfileEditForm";
 

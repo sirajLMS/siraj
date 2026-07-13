@@ -126,7 +126,7 @@ src/views/auth/[page]/
 ```tsx
 "use client";
 
-import { useScheduleStore } from "@/frontend/stores/scheduleStore";
+import { useScheduleStore } from "@/frontend/common/stores/scheduleStore";
 import { ScheduleView } from "./ScheduleView";
 
 export function ScheduleContainer() {

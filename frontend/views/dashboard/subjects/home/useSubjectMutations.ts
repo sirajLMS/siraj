@@ -6,19 +6,19 @@ import type {
   ClassCategoryUpdateInput,
   ClassSubjectCreateInput,
   ClassSubjectUpdateInput,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   createClassCategoryMutationDocument,
   deleteClassCategoryMutationDocument,
   updateClassCategoryMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/classes/class-category.documents";
+} from "@/frontend/common/graphql/sharedDocuments/classes/class-category.documents";
 import {
   createClassSubjectMutationDocument,
   deleteClassSubjectMutationDocument,
   updateClassSubjectMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/classes/class-subject.documents";
-import { useSubjectManagementStore } from "@/frontend/stores/subjectManagementStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
+import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { getErrorMessage } from "@/shared/utils/error";
 
 interface UseSubjectMutationsOptions {

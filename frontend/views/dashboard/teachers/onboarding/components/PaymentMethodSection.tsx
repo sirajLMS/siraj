@@ -6,8 +6,8 @@ import type { Control, FieldErrors } from "react-hook-form";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
+import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { usePaymentMethodCatalogs } from "@/frontend/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 

@@ -1,4 +1,4 @@
-import { isUrlAllowedByProvider } from "@/frontend/lib/meeting-config";
+import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { RecurringMeetingConfigFormState } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 
 export type RecurringMeetingConfigErrorKey = "incomplete" | "urlNotAllowed";

@@ -1,8 +1,8 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { managerDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/staff-directory.documents";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { managerDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ManagersContainer } from "@/frontend/views/dashboard/managers/home/ManagersContainer";
 
 const MOCK_MANAGER_ROWS = [

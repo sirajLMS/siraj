@@ -2,12 +2,12 @@
 
 import { useMutation } from "@apollo/client/react";
 import { Dialog } from "@mui/material";
-import type { UserMeetingConfigUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import type { UserMeetingConfigUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   createUserMeetingConfigMutationDocument,
   updateUserMeetingConfigMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
+} from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { MeetingConfigFormDialogContent } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
 import {
   type MeetingConfigFormEditInfo,

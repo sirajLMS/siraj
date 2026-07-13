@@ -17,9 +17,9 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import type { PaginationArgs, StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { logger } from "@/frontend/utils/logger";
+import type { PaginationArgs, StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { studentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
 
 interface ManualClassEntryDialogProps {
   readonly open: boolean;

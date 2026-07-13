@@ -18,9 +18,9 @@ import {
   getCurrencyAutocompletePaperSlotProps,
   getCurrencyAutocompletePopperSlotProps,
 } from "@/frontend/components/ui/input/currencySelect/currencyAutocompletePopper";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useCurrencyCatalog } from "@/frontend/hooks/useCurrencyCatalog";
-import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
+import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
 
 export type CurrencyAutocompleteProps = {
   readonly currency?: CurrencyOption | null;

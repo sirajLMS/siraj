@@ -2,7 +2,7 @@
 
 import { Alert } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 
 export function BillingImpersonationNotice(): React.ReactNode {
   const { isImpersonating } = useImpersonation();

@@ -4,7 +4,7 @@ import type { SxProps, Theme } from "@mui/material";
 import { Grid } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { MetricCard } from "@/frontend/components/ui/card/MetricCard";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 export interface MobileMetricCardGridProps {

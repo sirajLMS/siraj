@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { useDashboardStore } from "@/frontend/stores/dashboardStore";
-import type { AdminMetricKey } from "@/frontend/types/shared.types";
+import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
+import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
 import { renderAdminDashboardView } from "@/frontend/views/dashboard/admin/__shared__/adminDashboardView";
 import { useAdminDashboardLabels } from "@/frontend/views/dashboard/admin/home/utils";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/admin/home/utils/adminDashboardMetrics";

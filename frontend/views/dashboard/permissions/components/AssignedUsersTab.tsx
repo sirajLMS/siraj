@@ -8,8 +8,8 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
-import type { GroupUser, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForUser } from "@/frontend/utils/profileHref";
+import type { GroupUser, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { Link } from "@/shared/i18n/routing";
 
 const StyledTabContainer = styled(Box)(({ theme }) => ({

@@ -4,8 +4,8 @@ import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { AppDataGrid, GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
-import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
+import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherDataGridProps {

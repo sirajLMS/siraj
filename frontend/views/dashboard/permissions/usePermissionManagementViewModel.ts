@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Permission, PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { PermissionManagementTab } from "@/frontend/stores/permissionManagementStore";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { Permission, PermissionGroup, User, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionManagementTab } from "@/frontend/common/stores/permissionManagementStore";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export interface PermissionManagementViewProps {
   readonly permissions: readonly Permission[];

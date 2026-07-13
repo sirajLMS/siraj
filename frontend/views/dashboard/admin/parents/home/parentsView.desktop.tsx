@@ -11,7 +11,7 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import { AppPermission, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentsDataGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsDataGrid";
 import { ParentsMetricGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsMetricGrid";

@@ -15,11 +15,11 @@ import {
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LocalizedStringInput } from "@/frontend/components/ui/input/localizedString";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { updateMeetingProviderMutationDocument } from "@/frontend/graphql/sharedDocuments/meeting/meeting.documents";
-import { isUrlAllowedByProvider } from "@/frontend/lib/meeting-config";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
-import { logger } from "@/frontend/utils/logger";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { updateMeetingProviderMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { logger } from "@/frontend/common/utils/logger";
 
 type EditMeetingProviderDialogProps = {
   readonly open: boolean;

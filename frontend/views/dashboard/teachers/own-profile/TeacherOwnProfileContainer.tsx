@@ -7,10 +7,10 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherOwnProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
+import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { teacherOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 
 export function TeacherOwnProfileContainer() {

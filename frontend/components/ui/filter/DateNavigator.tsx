@@ -2,7 +2,7 @@
 
 import { DateNavigatorDesktop } from "@/frontend/components/ui/filter/dateNavigator.desktop";
 import { DateNavigatorMobile } from "@/frontend/components/ui/filter/dateNavigator.mobile";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 
 export interface DateNavigatorProps {
   readonly dateValue: string;

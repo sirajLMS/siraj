@@ -1,5 +1,5 @@
-import { DayOfWeek, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/stores/recurring-schedule-types";
+import { DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/common/stores/recurring-schedule-types";
 
 export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
 

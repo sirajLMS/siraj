@@ -1,1 +1,1 @@
-export type { DailyScheduleList as DailyScheduleRow } from "@/frontend/graphql/generated/gql/graphql-types";
+export type { DailyScheduleList as DailyScheduleRow } from "@/frontend/common/graphql/generated/gql/graphql-types";

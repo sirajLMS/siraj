@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, MobileWeeklyScrollerProps } from "@/frontend/views/dashboard/students/history/types";
 
 interface WeekDayData {

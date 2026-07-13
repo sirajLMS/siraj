@@ -10,10 +10,10 @@ import {
   LocalizedStringDisplay,
   PhoneDisplay,
 } from "@/frontend/components/ui/display";
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/lib/payment-method";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 export type PaymentMethodDisplayData = {
   readonly id?: string;

@@ -23,9 +23,9 @@ import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-inst
 ### Negative Pattern (PROHIBITED)
 
 ```typescript
-import { isSafeUrl } from "@/frontend/lib/safeRedirect";
+import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
 import { ClassOutcome } from "@/backend/enum";
-import type { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 ```
 
 ## Import Convention

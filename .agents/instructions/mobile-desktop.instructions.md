@@ -35,8 +35,8 @@ Each domain feature follows this structure:
 **NEVER in `.mobile.tsx` or `.desktop.tsx` files:**
 
 - `import { useMediaQuery } from "@mui/material"` — viewport tier decided by parent switcher
-- `import { useViewport } from "@/frontend/hooks/useViewport"` — already tier-specific
-- `import { ViewportContext } from "@/frontend/context/ViewportContext"` — never read context directly
+- `import { useViewport } from "@/frontend/common/hooks/useViewport"` — already tier-specific
+- `import { ViewportContext } from "@/frontend/common/context/ViewportContext"` — never read context directly
 - Import from sibling tier (`import { X } from "./something.desktop"` from a `.mobile.tsx` file)
 - Import from sibling tier (`import { X } from "./something.mobile"` from a `.desktop.tsx` file)
 
@@ -167,7 +167,7 @@ These non-versioned components are used BY mobile views, not by both tiers:
   rules: {
     "no-restricted-imports": ["error", {
       paths: [{ name: "@mui/material", importNames: ["useMediaQuery"], allowTypeImports: true, message: "Versioned files must not use useMediaQuery" }],
-      patterns: [{ group: ["@/frontend/hooks/useViewport", "@/frontend/context/ViewportContext"], message: "Versioned files must not read viewport context" }],
+      patterns: [{ group: ["@/frontend/common/hooks/useViewport", "@/frontend/common/context/ViewportContext"], message: "Versioned files must not read viewport context" }],
     }],
   },
 },

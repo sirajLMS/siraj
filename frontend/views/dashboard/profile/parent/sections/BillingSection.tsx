@@ -8,10 +8,10 @@ import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { CurrencyDisplay } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { TimezoneDisplay } from "@/frontend/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
-import { CurrencyCode, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
+import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
 import {

@@ -1,7 +1,7 @@
 import type { AutocompleteProps } from "@mui/material/Autocomplete";
 import type { Theme } from "@mui/material/styles";
 import type { Modifier } from "@popperjs/core";
-import type { CurrencyOption } from "@/frontend/lib/currency";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
 
 type CurrencyAutocompleteSlotProps = NonNullable<AutocompleteProps<CurrencyOption, false, false, false>["slotProps"]>;
 

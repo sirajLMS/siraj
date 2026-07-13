@@ -1,6 +1,6 @@
-import type { ManagerDirectoryMetrics as GeneratedManagerDirectoryMetrics } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ManagerDirectoryMetrics as GeneratedManagerDirectoryMetrics } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
-export type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/types/shared.types";
+export type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 
 export type ManagerRole = "admin" | "staff";
 

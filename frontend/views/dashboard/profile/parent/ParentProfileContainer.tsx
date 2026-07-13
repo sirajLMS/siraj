@@ -3,16 +3,16 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { ErrorState } from "@/frontend/components/ui";
-import { ParentStatus, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { ParentStatus, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   changeParentLifecycleStatusMutationDocument,
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
-import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { syncViewerFromProfile } from "@/frontend/common/lib/sync-viewer-profile";
+import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import {
   type ParentAdminEditFormData,

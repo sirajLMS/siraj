@@ -2,8 +2,8 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { CountrySelect, type CountrySelectProps } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
-import { CountryCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CountryType, countries } from "@/frontend/lib/locale";
+import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type CountryType, countries } from "@/frontend/common/lib/locale";
 
 function CountrySelectStory({
   initialCountryCode,

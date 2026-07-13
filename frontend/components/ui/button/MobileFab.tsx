@@ -2,7 +2,7 @@
 
 import { Fab, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 
 export interface MobileFabProps {
   readonly icon: ReactNode;

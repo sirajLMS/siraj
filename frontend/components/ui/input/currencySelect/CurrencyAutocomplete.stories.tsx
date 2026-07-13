@@ -2,8 +2,8 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { CurrencyAutocomplete } from "@/frontend/components/ui/input/currencySelect/CurrencyAutocomplete";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyOptions } from "@/frontend/lib/currency";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyOptions } from "@/frontend/common/lib/currency";
 
 function CurrencyAutocompleteStory({
   initialCurrencyCode,

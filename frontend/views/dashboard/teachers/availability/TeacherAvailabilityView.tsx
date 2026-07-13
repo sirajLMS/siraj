@@ -1,7 +1,7 @@
 // cspell:disable
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { TeacherAvailabilityDesktopView } from "@/frontend/views/dashboard/teachers/availability/teacherAvailabilityView.desktop";
 import { TeacherAvailabilityMobileView } from "@/frontend/views/dashboard/teachers/availability/teacherAvailabilityView.mobile";
 import type {

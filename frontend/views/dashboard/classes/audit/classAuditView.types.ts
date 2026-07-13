@@ -1,4 +1,4 @@
-import type { GroupClassAudit } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { GroupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface ClassAuditLabels {
   readonly breadcrumbs: {

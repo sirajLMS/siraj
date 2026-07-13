@@ -4,8 +4,8 @@ import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import type { ComponentProps, ReactNode } from "react";
 import { useState } from "react";
-import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ProfileShell } from "@/frontend/views/dashboard/profile/core/ProfileShell";
 
 function StorybookPageFrame({ children }: { readonly children: ReactNode }) {

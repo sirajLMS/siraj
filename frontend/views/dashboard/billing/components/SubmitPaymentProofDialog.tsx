@@ -15,14 +15,14 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { UploadType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { UploadType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   markInvoicePaidMutationDocument,
   submitPaymentProofMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/billing-management.documents";
-import { prepareUploadMutationDocument } from "@/frontend/graphql/sharedDocuments/resources/learning-resource.documents";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments/billing/billing-management.documents";
+import { prepareUploadMutationDocument } from "@/frontend/common/graphql/sharedDocuments/resources/learning-resource.documents";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import type { MarkPaidInvoiceTarget } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 import { DisplayCurrencyHint } from "@/frontend/views/dashboard/components/DisplayCurrencyHint";
 import {

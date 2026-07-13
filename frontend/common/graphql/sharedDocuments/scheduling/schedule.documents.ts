@@ -1,0 +1,228 @@
+import { gql, type TypedDocumentNode } from "@apollo/client";
+import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+
+export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
+  Operations.AdminDashboardScheduleQuery,
+  Types.QueryAdminDashboardScheduleArgs
+> = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
+  query adminDashboardSchedule($input: AdminDashboardScheduleInput!) {
+    adminDashboardSchedule(input: $input) {
+      id
+      totalCount
+      metrics {
+        id
+        total
+        regular
+        trial
+        advance
+        rescheduled
+        suspended
+        taken
+        pending
+        activated
+        running
+        absent
+        leave
+      }
+      rows {
+        id
+        yourTime
+        teacherTime
+        studentTime
+        teacherTimezone
+        studentTimezone
+        duration
+        scheduledStartAt
+        scheduledEndAt
+        outcome
+        executionState
+        isFrozen
+        meetingJoinUrl
+        effectiveMeeting {
+          ...EffectiveMeetingFields
+        }
+        student {
+          id
+          name
+          avatarUrl
+        }
+        teacher {
+          id
+          name
+          avatarUrl
+        }
+        courseName
+        avatarUrl
+      }
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+export const dailyScheduleMetricsQueryDocument: TypedDocumentNode<
+  Operations.DailyScheduleMetricsQuery,
+  Types.QueryDailyScheduleMetricsArgs
+> = gql`
+  query dailyScheduleMetrics($date: String!, $teacherId: String) {
+    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {
+      id
+      total
+      regular
+      trial
+      advance
+      rescheduled
+      suspended
+      taken
+      pending
+      activated
+      running
+      absent
+      leave
+    }
+  }
+`;
+
+export const dailyScheduleListQueryDocument: TypedDocumentNode<
+  Operations.DailyScheduleListQuery,
+  Types.QueryDailyScheduleListArgs
+> = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
+  query dailyScheduleList($date: String!, $teacherId: String, $search: String, $metricFilter: String) {
+    dailyScheduleList(date: $date, teacherId: $teacherId, search: $search, metricFilter: $metricFilter) {
+      id
+      yourTime
+      teacherTime
+      studentTime
+      teacherTimezone
+      studentTimezone
+      duration
+      outcome
+      executionState
+      isFrozen
+      meetingJoinUrl
+      effectiveMeeting {
+        ...EffectiveMeetingFields
+      }
+      student {
+        id
+        name
+        avatarUrl
+      }
+      teacher {
+        id
+        name
+        avatarUrl
+      }
+      courseName
+      avatarUrl
+    }
+  }
+`;
+export const rescheduleTrackingRowsQueryDocument: TypedDocumentNode<
+  Operations.RescheduleTrackingRowsQuery,
+  Types.QueryRescheduleTrackingRowsArgs
+> = gql`
+  query rescheduleTrackingRows($search: String, $status: LeaveRequestStatus, $paginationArgs: PaginationArgs) {
+    rescheduleTrackingRows(search: $search, status: $status, paginationArgs: $paginationArgs) {
+      id
+      totalCount
+      rows {
+        id
+        originalClassId
+        teacherId
+        teacherName
+        teacherAvatarUrl
+        studentId
+        studentName
+        scheduledStartAt
+        scheduledEndAt
+        status
+        dateLabel
+        remarks
+      }
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+export const rescheduleTrackingMetricsQueryDocument: TypedDocumentNode<Operations.RescheduleTrackingMetricsQuery> = gql`
+  query rescheduleTrackingMetrics {
+    rescheduleTrackingMetrics {
+      id
+      pending
+      approved
+      leave
+      rescheduled
+      cancelled
+    }
+  }
+`;
+
+// ─── Status Tracking Schedule Query ───────────────────────────────────────────
+
+/**
+ * Fetches all class instances for the status tracking admin dashboard.
+ *
+ * Returns class rows for a given date, enriched with student status and
+ * isFrozen flag. Used by StatusTrackingContainer to display real data
+ * with correct session status badges and action button states.
+ *
+ * Permission required: SCHEDULE_VIEW_ALL or DASHBOARD_VIEW_METRICS
+ * (checked in ScheduleQueryService — unauthorized actors get an error)
+ *
+ * @param date - ISO date string (YYYY-MM-DD) for which to fetch classes
+ * @param search - Optional search filter (matches student name or teacher name)
+ * @param viewerTimezone - Optional IANA timezone for day boundary calculation
+ */
+export const statusTrackingScheduleQueryDocument: TypedDocumentNode<
+  Operations.StatusTrackingScheduleQuery,
+  Types.QueryStatusTrackingScheduleArgs
+> = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
+  query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: IanaTimezone) {
+    statusTrackingSchedule(date: $date, search: $search, viewerTimezone: $viewerTimezone) {
+      id
+      studentId
+      studentName
+      studentInitials
+      studentAvatarUrl
+      studentStatus
+      teacherId
+      teacherName
+      teacherAvatarUrl
+      courseName
+      avatarUrl
+      scheduledStartAt
+      scheduledEndAt
+      durationMinutes
+      executionState
+      outcome
+      isFrozen
+      meetingJoinUrl
+      effectiveMeeting {
+        ...EffectiveMeetingFields
+      }
+    }
+  }
+`;

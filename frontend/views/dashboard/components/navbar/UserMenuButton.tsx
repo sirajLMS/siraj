@@ -7,14 +7,14 @@ import { useTranslations } from "next-intl";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { UserAvatar } from "@/frontend/components/ui";
-import type { SimulatablePermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { simulatablePermissionGroupsQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useAuth } from "@/frontend/hooks/useAuth";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
-import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { ownProfileHref } from "@/frontend/utils/profileHref";
+import type { SimulatablePermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { simulatablePermissionGroupsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useAuth } from "@/frontend/common/hooks/useAuth";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/routing";
 
 export interface UserInfoSlotProps {

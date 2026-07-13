@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
-import { type CurrencyOption, getCurrencyDisplayName } from "@/frontend/lib/currency";
+import { type CurrencyOption, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 
 export type CurrencyOptionRowProps = {
   readonly currency: CurrencyOption;

@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ParentProfileEditForm } from "@/frontend/views/dashboard/profile/parent/ParentProfileEditForm";
 
 const ownParentData = {

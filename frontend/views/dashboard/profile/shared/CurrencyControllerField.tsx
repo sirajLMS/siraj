@@ -3,7 +3,7 @@
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/CurrencySelect";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/lib/currency";
+import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 
 type CurrencyControllerFieldProps<TFormValues extends FieldValues> = {
   readonly control: Control<TFormValues>;

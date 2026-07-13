@@ -1,8 +1,8 @@
 "use client";
 
 import { alpha, Box, Typography } from "@mui/material";
-import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
-import { formatUserRoleLabel } from "@/frontend/utils/formatUserRoleLabel";
+import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
+import { formatUserRoleLabel } from "@/frontend/common/utils/formatUserRoleLabel";
 import {
   LanguageSwitcher,
   NavbarChrome,

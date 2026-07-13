@@ -9,7 +9,7 @@ import { Link } from "@/shared/i18n/routing";
 export type RecurringSeriesMeetingPanelProps = {
   readonly recurringScheduleId: string;
   readonly effectiveMeeting?:
-    | import("@/frontend/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment
+    | import("@/frontend/common/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment
     | null;
 };
 

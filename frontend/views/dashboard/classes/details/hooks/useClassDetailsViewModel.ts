@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
 import { useClassActionHandlers } from "@/frontend/views/dashboard/classes/details/hooks/useClassActionHandlers";
 import { useClassDetailsContainerState } from "@/frontend/views/dashboard/classes/details/hooks/useClassDetailsContainerState";

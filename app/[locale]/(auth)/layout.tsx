@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
-import { getAuthenticatedAuthBounceHref } from "@/frontend/lib/redirectToLogin";
+import { getAuthenticatedAuthBounceHref } from "@/frontend/common/lib/redirectToLogin";
 import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
 
 export default async function AuthLayout({

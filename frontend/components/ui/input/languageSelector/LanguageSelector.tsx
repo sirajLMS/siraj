@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback } from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
-import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/lib/locale";
+import { getLanguageDisplayName, type LanguageType, languages } from "@/frontend/common/lib/locale";
 
 export type LanguageSelectorProps = {
   readonly language?: LanguageType;

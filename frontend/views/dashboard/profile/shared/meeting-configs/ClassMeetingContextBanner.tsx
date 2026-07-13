@@ -2,8 +2,8 @@
 
 import { Alert, Chip, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { EffectiveMeetingSource } from "@/frontend/types/meeting-class-config.graphql.types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 
 export type ClassMeetingContextBannerProps = {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;

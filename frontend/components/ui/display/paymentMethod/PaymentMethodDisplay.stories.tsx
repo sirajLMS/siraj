@@ -1,7 +1,7 @@
 import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { PaymentMethodDisplay } from "@/frontend/components/ui/display/paymentMethod/PaymentMethodDisplay";
-import { CurrencyCode, PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CurrencyCode, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const meta: Meta<typeof PaymentMethodDisplay> = {
   title: "UI/Display/PaymentMethodDisplay",

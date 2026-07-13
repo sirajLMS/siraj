@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import { useMemo, useState } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCatalogCardList } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogCardList";
 import { PermissionCatalogToolbar } from "@/frontend/views/dashboard/permissions/components/PermissionCatalogToolbar";
 

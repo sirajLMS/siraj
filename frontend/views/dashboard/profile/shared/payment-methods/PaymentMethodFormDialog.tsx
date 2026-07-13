@@ -19,17 +19,17 @@ import { useEffect, useMemo, useState } from "react";
 import { type Control, Controller, type UseFormReturn, useForm } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
-import { PaymentDirection } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   createUserPaymentMethodMutationDocument,
   updateUserPaymentMethodMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
+} from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 import {
   getPaymentDirectionOptions,
   getPaymentMethodCatalogOptionById,
   type PaymentMethodCatalogOption,
-} from "@/frontend/lib/payment-method";
+} from "@/frontend/common/lib/payment-method";
 import {
   formDetailsToInput,
   fragmentToFormValues,

@@ -3,8 +3,8 @@
 import { useQuery } from "@apollo/client/react";
 import type { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { classStatusEventsQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { logger } from "@/frontend/utils/logger";
+import { classStatusEventsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
 import type { ActionFeedbackState } from "@/frontend/views/dashboard/classes/details/types";
 
 export function useEventLogDownload(

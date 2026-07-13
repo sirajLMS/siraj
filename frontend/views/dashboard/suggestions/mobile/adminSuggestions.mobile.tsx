@@ -10,7 +10,7 @@ import {
   PageContainer,
   StatusBadge,
 } from "@/frontend/components/ui";
-import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
 import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";
 import { SuggestionsTabBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsTabBar";

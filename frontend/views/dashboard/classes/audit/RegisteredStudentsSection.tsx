@@ -7,9 +7,9 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ExportButton, PersonProfileLinkCell, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
-import type { GroupClassStudent } from "@/frontend/graphql/generated/gql/graphql-types";
-import { GroupClassAttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { studentHref } from "@/frontend/utils/profileHref";
+import type { GroupClassStudent } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { GroupClassAttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 
 interface RegisteredStudentsSectionProps {
   readonly students: readonly (GroupClassStudent | null)[] | null | undefined;

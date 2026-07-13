@@ -7,7 +7,7 @@ import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
 import { CountryDisplay } from "@/frontend/components/ui/display";
 import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
-import { getCountryByCode } from "@/frontend/lib/locale";
+import { getCountryByCode } from "@/frontend/common/lib/locale";
 import type { ParentAdminEditFormData } from "@/frontend/views/dashboard/profile/parent/parentProfileFormTypes";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
 import {

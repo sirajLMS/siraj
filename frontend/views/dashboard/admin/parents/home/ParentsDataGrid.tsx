@@ -15,8 +15,8 @@ import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { GridPagination, PersonProfileLinkCell } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { profileHrefForParent } from "@/frontend/utils/profileHref";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentAccountStatusKey,
   ParentDirectoryRow,

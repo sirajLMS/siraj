@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {

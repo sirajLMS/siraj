@@ -29,8 +29,8 @@ import {
   UpdateOutlined,
   VideocamOutlined,
 } from "@mui/icons-material";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PAGE_PERMISSIONS } from "@/frontend/types/page-permissions.types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 
 /**

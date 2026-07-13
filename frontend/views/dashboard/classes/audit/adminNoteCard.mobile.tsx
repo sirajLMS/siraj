@@ -4,7 +4,7 @@ import { StickyNote2Outlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
-import type { AdminNoteInfo } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface AdminNoteCardMobileProps {
   readonly note: AdminNoteInfo | null | undefined;

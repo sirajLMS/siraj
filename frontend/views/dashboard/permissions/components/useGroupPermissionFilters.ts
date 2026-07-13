@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 interface UseGroupPermissionFiltersProps {
   readonly group: PermissionGroup;

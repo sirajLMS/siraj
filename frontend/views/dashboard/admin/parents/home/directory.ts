@@ -1,4 +1,4 @@
-import { AccountStatus, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentLifecycleStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export type ParentAccountStatusKey = "activated" | "deactivated";

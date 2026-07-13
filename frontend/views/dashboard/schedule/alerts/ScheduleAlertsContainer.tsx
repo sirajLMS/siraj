@@ -3,10 +3,10 @@
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList as ScheduleRow } from "@/frontend/graphql/generated/gql/operations";
-import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useScheduleAlertsStore } from "@/frontend/stores/scheduleAlertsStore";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList as ScheduleRow } from "@/frontend/common/graphql/generated/gql/operations";
+import { adminDashboardScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useScheduleAlertsStore } from "@/frontend/common/stores/scheduleAlertsStore";
 import { ScheduleAlertsView } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertsView";
 import type {
   AcademicClassRow,

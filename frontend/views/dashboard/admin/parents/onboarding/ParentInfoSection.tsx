@@ -7,7 +7,7 @@ import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { CountrySelect } from "@/frontend/components/ui/input/countrySelect/CountrySelect";
-import { getCountryByCode } from "@/frontend/lib/locale";
+import { getCountryByCode } from "@/frontend/common/lib/locale";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { OnboardingIdentityFields } from "@/frontend/views/dashboard/components/onboarding/OnboardingIdentityFields";
 

@@ -7,7 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
   fontFamily: "JetBrains Mono, monospace",

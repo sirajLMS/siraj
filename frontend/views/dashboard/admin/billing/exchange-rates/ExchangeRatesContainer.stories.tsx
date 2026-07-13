@@ -1,13 +1,13 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { AppPermission, CurrencyCode, FxProvider, FxSyncStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode, FxProvider, FxSyncStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   exchangeRateHistoryQueryDocument,
   latestExchangeRatesQueryDocument,
   latestFxSyncRunQueryDocument,
   refreshExchangeRatesMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useUserStore } from "@/frontend/stores/userStore";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ExchangeRatesContainer } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ExchangeRatesContainer";
 
 const MOCK_RATES = [

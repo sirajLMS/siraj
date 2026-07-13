@@ -4,7 +4,7 @@ import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
-import { AccountStatus, type CurrencyCode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, type CurrencyCode, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreIdentitySection } from "@/frontend/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StaffProfileData } from "@/frontend/views/dashboard/profile/staff/sections/staffProfileTypes";

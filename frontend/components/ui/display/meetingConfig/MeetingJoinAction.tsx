@@ -7,9 +7,9 @@ import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Alert, Avatar, alpha, Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import { EffectiveMeetingSource } from "@/frontend/types/meeting-class-config.graphql.types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import { Link } from "@/shared/i18n/routing";
 
 export type MeetingJoinEmptyRole = "teacher" | "parent" | "class";

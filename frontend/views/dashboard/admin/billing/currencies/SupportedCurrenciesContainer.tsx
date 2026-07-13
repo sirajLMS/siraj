@@ -6,9 +6,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, currencies, getCurrencyDisplayName } from "@/frontend/lib/currency";
-import { getCountryDisplayName } from "@/frontend/lib/locale";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, currencies, getCurrencyDisplayName } from "@/frontend/common/lib/currency";
+import { getCountryDisplayName } from "@/frontend/common/lib/locale";
 
 export function SupportedCurrenciesContainer() {
   const t = useTranslations("dashboard.billing.supportedCurrencies");

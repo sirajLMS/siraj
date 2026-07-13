@@ -9,8 +9,8 @@ import type {
 import type { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
-export type { UserBillingProfileState } from "@/frontend/stores/userBillingProfileStore";
-export { DEFAULT_PAGE_SIZE } from "@/frontend/stores/userBillingProfileStore";
+export type { UserBillingProfileState } from "@/frontend/common/stores/userBillingProfileStore";
+export { DEFAULT_PAGE_SIZE } from "@/frontend/common/stores/userBillingProfileStore";
 
 export interface UserBillingProfileContainerProps {
   readonly userId: string;

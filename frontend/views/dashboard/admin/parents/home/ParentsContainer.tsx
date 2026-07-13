@@ -5,11 +5,11 @@ import { BlockOutlined, EventBusyOutlined, TimerOutlined, VerifiedUserOutlined }
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { type AccountStatus, AppPermission, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-directory.documents";
-import { useParentsStore } from "@/frontend/stores/parentsStore";
-import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
-import { profileHrefForParent } from "@/frontend/utils/profileHref";
+import { type AccountStatus, AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { parentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-directory.documents";
+import { useParentsStore } from "@/frontend/common/stores/parentsStore";
+import { exportParentDirectory } from "@/frontend/common/utils/excel-export/parent-directory-export";
+import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import {
   toParentAccountStatusKey,
   toParentLifecycleStatus,

@@ -4,7 +4,7 @@ import { FileDownloadOutlined } from "@mui/icons-material";
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { ExportButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { RescheduleTrackingDataGrid } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingDataGrid";
 import { getTrackingStatusLabel } from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { RescheduleTrackingViewProps } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getVisibleProfileTabs } from "@/frontend/views/dashboard/profile/core/profileTabs";
 
 function hasPermissions(permissions: readonly AppPermission[]) {

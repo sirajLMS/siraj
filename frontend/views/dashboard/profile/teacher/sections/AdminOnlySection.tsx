@@ -6,7 +6,7 @@ import { type Control, Controller, type UseFormRegister } from "react-hook-form"
 import { SectionPanel } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
-import { AccountStatus, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { InfoField } from "@/frontend/views/dashboard/profile/teacher/sections/InfoField";
 import {
   type TeacherAdminData,

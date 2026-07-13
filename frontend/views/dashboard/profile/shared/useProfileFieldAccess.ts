@@ -1,7 +1,7 @@
 "use client";
 
-import { type AppPermission, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { type AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { profileFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";
 

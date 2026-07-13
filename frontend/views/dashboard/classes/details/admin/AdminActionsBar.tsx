@@ -9,9 +9,9 @@ import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactElement } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { edgeToEdgeCardShellSx } from "@/frontend/utils/sx/edgeToEdgeSx";
-import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import {
   getForceActivateDisabledTooltip,
   getStopDisabledTooltip,

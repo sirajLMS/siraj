@@ -2,7 +2,7 @@
 
 import { Box, Link, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 
 export function ImpersonationBanner() {
   const t = useTranslations("auth.impersonation");

@@ -8,7 +8,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { canViewStudentProfileTab } from "@/frontend/views/dashboard/students/profile/studentProfileTabs";
 import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";

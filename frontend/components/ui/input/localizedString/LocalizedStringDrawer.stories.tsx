@@ -2,7 +2,7 @@ import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { LocalizedStringDrawer } from "@/frontend/components/ui/input/localizedString/LocalizedStringDrawer";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 
 const meta: Meta<typeof LocalizedStringDrawer> = {
   title: "UI/Input/LocalizedStringDrawer",

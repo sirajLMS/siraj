@@ -3,11 +3,11 @@
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useDashboardStore } from "@/frontend/stores/dashboardStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import type { AdminMetricKey } from "@/frontend/types/shared.types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { adminDashboardScheduleQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
 import { resolveDailyScheduleMetricFilter } from "@/frontend/views/dashboard/admin/home/utils/dailyScheduleMetricFilter";
 
 export const ADMIN_DASHBOARD_PAGE_SIZE = 10;

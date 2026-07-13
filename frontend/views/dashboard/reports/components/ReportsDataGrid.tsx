@@ -5,10 +5,10 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ReportLedgerRow, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { formatReportPaidAmounts } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
 

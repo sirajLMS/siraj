@@ -1,6 +1,6 @@
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { InstitutionalReportCardDesktop } from "@/frontend/views/dashboard/schedule/alerts/institutionalReportCard.desktop";
 import { InstitutionalReportCardMobile } from "@/frontend/views/dashboard/schedule/alerts/institutionalReportCard.mobile";
 

@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
 const ROOT = "/home/ahmed/Projects/siraj";
-const OLD_PREFIX = "@/frontend/graphql/sharedDocuments/";
+const OLD_PREFIX = "@/frontend/common/graphql/sharedDocuments/";
 
 const DIRMAP = {
   "auth.documents": "auth",

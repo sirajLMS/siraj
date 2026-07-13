@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import type { Control, FieldPath, UseFormRegister } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/components/ui";
 import { PhoneDisplay } from "@/frontend/components/ui/display/phoneDisplay/PhoneDisplay";
-import type { ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileFieldRow } from "@/frontend/views/dashboard/profile/shared/ProfileFieldRow";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";

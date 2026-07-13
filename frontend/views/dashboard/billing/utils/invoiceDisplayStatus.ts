@@ -1,4 +1,4 @@
-import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { AdminInvoiceStatus } from "@/shared/types/billing-view";
 
 export type ParentInvoiceDisplayStatus = InvoiceStatus | "OVERDUE";

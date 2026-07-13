@@ -1,4 +1,4 @@
-import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   BOTTOM_NAV_ITEMS,
   getNavItemsForPermissions,

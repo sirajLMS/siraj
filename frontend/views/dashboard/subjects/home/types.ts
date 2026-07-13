@@ -5,7 +5,7 @@ import type {
   ClassSubject,
   ClassSubjectCreateInput,
   ClassSubjectUpdateInput,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type CategoryItem = NonNullable<ClassCategory>;
 

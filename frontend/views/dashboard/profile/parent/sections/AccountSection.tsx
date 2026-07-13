@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { StatusBadge } from "@/frontend/components/ui";
-import { AccountStatus, type CurrencyCode, type ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus, type CurrencyCode, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { InfoField } from "@/frontend/views/dashboard/profile/parent/sections/InfoField";
 import type {
   ParentAdminData,

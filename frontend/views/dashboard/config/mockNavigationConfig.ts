@@ -26,9 +26,9 @@ import {
   TimelineOutlined,
   UpdateOutlined,
 } from "@mui/icons-material";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PAGE_PERMISSIONS } from "@/frontend/types/page-permissions.types";
-import { profileHrefForParent } from "@/frontend/utils/profileHref";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
+import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 
 /**

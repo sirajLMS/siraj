@@ -9,8 +9,8 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { getPaymentMethodCatalogOptionLabel, type PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getPaymentMethodCatalogOptionLabel, type PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 export type PaymentMethodOptionRowProps = {
   readonly option: PaymentMethodCatalogOption;

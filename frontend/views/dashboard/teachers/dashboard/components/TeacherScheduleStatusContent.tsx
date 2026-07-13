@@ -2,8 +2,8 @@
 
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { StatusBadge } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
 import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";

@@ -9,13 +9,13 @@ import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useMemo } from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
-import type { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   fromGraphqlIanaTimezone,
   getTimezoneOptions,
   type TimezoneOption,
   toGraphqlIanaTimezone,
-} from "@/frontend/lib/timezone";
+} from "@/frontend/common/lib/timezone";
 
 export type TimezoneSelectProps = {
   readonly value: IanaTimezone | null;

@@ -1,4 +1,4 @@
-import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export function mapStatusForBadge(status: SuggestionStatus): string {
   const mapping: Record<SuggestionStatus, string> = {

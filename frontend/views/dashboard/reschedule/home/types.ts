@@ -1,1 +1,1 @@
-export type { RescheduleSession } from "@/frontend/types/shared.types";
+export type { RescheduleSession } from "@/frontend/common/types/shared.types";

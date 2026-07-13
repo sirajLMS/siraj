@@ -7,10 +7,10 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AccountStatus, AppPermission, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { changeParentLifecycleStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-lifecycle.documents";
-import { parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-profile.documents";
-import { logger } from "@/frontend/utils/logger";
+import { AccountStatus, AppPermission, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { changeParentLifecycleStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-lifecycle.documents";
+import { parentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-profile.documents";
+import { logger } from "@/frontend/common/utils/logger";
 import { ParentLifecycleView } from "@/frontend/views/dashboard/parents/lifecycle/ParentLifecycleView";
 import type { ParentLifecyclePageData } from "@/frontend/views/dashboard/parents/lifecycle/types";
 

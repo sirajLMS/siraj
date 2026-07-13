@@ -7,11 +7,11 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
-import { AppPermission, CurrencyCode, IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useCreateParentOnboarding } from "@/frontend/hooks/useCreateParentOnboarding";
-import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
-import { logger } from "@/frontend/utils/logger";
-import { profileHrefForParent } from "@/frontend/utils/profileHref";
+import { AppPermission, CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useCreateParentOnboarding } from "@/frontend/common/hooks/useCreateParentOnboarding";
+import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
+import { logger } from "@/frontend/common/utils/logger";
+import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import { ParentOnboardingView } from "@/frontend/views/dashboard/admin/parents/onboarding/ParentOnboardingView";
 import {
   type ParentOnboardingFormData,

@@ -1,10 +1,10 @@
-import type { ResourceFileType, ResourceFilterType, ResourceSortBy } from "@/frontend/types/shared.types";
+import type { ResourceFileType, ResourceFilterType, ResourceSortBy } from "@/frontend/common/types/shared.types";
 import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 
 export type {
   LearningResourceRow as GqlLearningResourceRow,
   ResourceUploadInput,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 export type { ResourceFileType, ResourceFilterType, ResourceSortBy };
 
 /**

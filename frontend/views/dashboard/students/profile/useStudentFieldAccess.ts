@@ -1,7 +1,7 @@
 "use client";
 
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { studentFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";

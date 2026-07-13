@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/components/ui/display";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface PermissionCatalogDataGridProps {
   readonly permissions: readonly Permission[];

@@ -350,7 +350,7 @@ The `useXxViewModel()` hook encapsulates ALL business logic for a page/domain. I
 ```tsx
 // useXxViewModel.ts
 import { useTranslations } from "next-intl";
-import { useXxStore } from "@/frontend/stores/xxStore";
+import { useXxStore } from "@/frontend/common/stores/xxStore";
 
 export function useXxViewModel(): XxViewModel {
   const t = useTranslations("xx");
@@ -401,8 +401,8 @@ export function XxView(props: Readonly<XxViewModel>) {
 **NEVER inside `.mobile.tsx` or `.desktop.tsx` files:**
 
 - `import { useMediaQuery } from "@mui/material"` — the tier is decided by the parent switcher
-- `import { useViewport } from "@/frontend/hooks/useViewport"` — already tier-specific
-- `import { ViewportContext } from "@/frontend/context/ViewportContext"` — never read context directly
+- `import { useViewport } from "@/frontend/common/hooks/useViewport"` — already tier-specific
+- `import { ViewportContext } from "@/frontend/common/context/ViewportContext"` — never read context directly
 - Cross-tier imports: `.mobile.tsx` must not import `.desktop.tsx` and vice versa
 
 **ONLY in `xxView.tsx` switcher and `ResponsiveViewSwitch`:**
@@ -446,7 +446,7 @@ These three rule blocks live in `eslint.config.mjs` and enforce the isolation:
   rules: {
     "no-restricted-imports": ["error", {
       paths: [{ name: "@mui/material", importNames: ["useMediaQuery"], allowTypeImports: true, message: "Versioned files must not use useMediaQuery" }],
-      patterns: [{ group: ["@/frontend/hooks/useViewport", "@/frontend/context/ViewportContext"], message: "Versioned files must not read viewport context" }],
+      patterns: [{ group: ["@/frontend/common/hooks/useViewport", "@/frontend/common/context/ViewportContext"], message: "Versioned files must not read viewport context" }],
     }],
   },
 },
@@ -472,7 +472,7 @@ Example usage:
 ```tsx
 // resources.mobile.tsx
 import { MobilePageHeader, MobileContentStack, MobileCardList, MobileCardListItem } from "@/frontend/components/ui";
-import { logger } from "@/frontend/utils/logger";
+import { logger } from "@/frontend/common/utils/logger";
 
 export function ResourcesMobileView({ rows, loading, labels, onOpen }: Readonly<ResourcesViewModel>) {
   return (

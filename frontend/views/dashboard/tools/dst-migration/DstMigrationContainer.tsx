@@ -5,9 +5,9 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { executeDstBulkUpdateMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { logger } from "@/frontend/utils/logger";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { executeDstBulkUpdateMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
 import { DstMigrationView } from "@/frontend/views/dashboard/tools/dst-migration/DstMigrationView";
 import {
   type CheckedEmptyItem,

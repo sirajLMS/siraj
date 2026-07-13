@@ -6,7 +6,7 @@ import {
   AppPermission,
   ClassExecutionState,
   type ClassInstanceDetail,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ActivityHeatmap } from "@/frontend/views/dashboard/classes/details/admin/ActivityHeatmap";
 import { AdminActionsBar } from "@/frontend/views/dashboard/classes/details/admin/AdminActionsBar";
 import { ClassInfoCard } from "@/frontend/views/dashboard/classes/details/admin/ClassInfoCard";

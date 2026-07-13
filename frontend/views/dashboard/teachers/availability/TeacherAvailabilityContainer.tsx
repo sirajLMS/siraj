@@ -8,11 +8,11 @@ import { addDays, format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/graphql/generated/gql/graphql";
-import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
-import { logger } from "@/frontend/utils/logger";
+import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { logger } from "@/frontend/common/utils/logger";
 import { TeacherAvailabilityView } from "@/frontend/views/dashboard/teachers/availability/TeacherAvailabilityView";
 import type {
   AvailabilityEntry,

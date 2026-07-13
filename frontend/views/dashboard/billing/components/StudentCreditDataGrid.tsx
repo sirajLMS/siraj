@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, PersonProfileLinkCell, StatusBadge } from "@/frontend/components/ui";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { StudentCreditRow, StudentCreditStatus } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 export interface StudentCreditDataGridLabels {

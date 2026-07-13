@@ -5,7 +5,7 @@ import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { SectionPanel } from "@/frontend/components/ui";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 
 interface ProfileAdministrationPanelProps {
   readonly profileUserId: string;

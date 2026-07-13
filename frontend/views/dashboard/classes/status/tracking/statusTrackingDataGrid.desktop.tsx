@@ -10,7 +10,7 @@ import { PersonProfileLink, PersonProfileLinkCell } from "@/frontend/components/
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { profileHrefForTeacher, studentHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import { StatusAction } from "@/frontend/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
   computeSessionStatus,

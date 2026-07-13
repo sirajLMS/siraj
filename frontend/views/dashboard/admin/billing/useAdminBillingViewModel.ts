@@ -9,21 +9,21 @@ import {
   CurrencyCode,
   type InvoiceType as GqlInvoiceType,
   type StudentStatus as GqlStudentStatus,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   adminBillingSummaryQueryDocument,
   adminInvoicesQueryDocument,
   deleteInvoiceMutationDocument,
   sendPaymentReminderMutationDocument,
   studentCreditStatusQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
-import { formatCurrencyForDisplay } from "@/frontend/lib/fx-render";
-import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import { useAdminBillingStore } from "@/frontend/common/stores/adminBillingStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { buildBillingLabels } from "@/frontend/views/dashboard/admin/billing/utils/buildBillingLabels";
 import { useBillingPollInterval } from "@/frontend/views/dashboard/billing/hooks/useBillingPollInterval";
 import { useRefetchOnWindowFocus } from "@/frontend/views/dashboard/billing/hooks/useRefetchOnWindowFocus";

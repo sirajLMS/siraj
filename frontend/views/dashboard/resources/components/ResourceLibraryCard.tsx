@@ -3,7 +3,7 @@
 import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ResourceFileTypeIcon } from "@/frontend/views/dashboard/resources/components/ResourceFileTypeIcon";
 import type { ResourceLibraryCardProps } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 

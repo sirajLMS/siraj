@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { type Control, type FieldErrors, type UseFormHandleSubmit, type UseFormReset, useForm } from "react-hook-form";
-import { ComplaintCategory } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type ComplaintFormData,
   complaintFormSchema,

@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { create } from "zustand";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   StudentProgressFeedItem,
   TeacherDashboardState,
   TeacherScheduleRow,
-} from "@/frontend/stores/teacherDashboardTypes";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { getTodayScheduleFilterDate } from "@/frontend/utils/scheduleFilterDate";
+} from "@/frontend/common/stores/teacherDashboardTypes";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 import { TeacherDashboardView } from "@/frontend/views/dashboard/teachers/dashboard/teacherDashboardView";
 import { buildTeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardMetrics";

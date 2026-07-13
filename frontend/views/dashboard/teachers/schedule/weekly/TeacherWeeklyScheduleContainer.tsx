@@ -4,19 +4,19 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
   teacherDirectoryQueryDocument,
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
-import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
-import { useUserStore } from "@/frontend/stores/userStore";
-import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { CreateRecurringClassDialog } from "@/frontend/views/dashboard/teachers/schedule/weekly/components/CreateRecurringClassDialog";
 import TeacherWeeklyScheduleView from "@/frontend/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleContainerProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";

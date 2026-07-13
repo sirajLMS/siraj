@@ -4,7 +4,7 @@ import { AdminPanelSettingsOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
-import type { AdminNoteInfo } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export interface AdminNoteCardDesktopProps {
   readonly note: AdminNoteInfo | null | undefined;

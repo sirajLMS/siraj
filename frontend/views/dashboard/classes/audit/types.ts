@@ -4,7 +4,7 @@ export type {
   GroupClassAudit as ClassAuditData,
   GroupClassStudent as RegisteredStudent,
   OnlineMeetingInfo as MeetingInfo,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type AttendanceStatus = "pending" | "present" | "absent";
 

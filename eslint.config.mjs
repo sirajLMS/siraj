@@ -367,7 +367,7 @@ const eslintConfig = defineConfig([
           ],
           patterns: [
             {
-              group: ["@/frontend/hooks/useViewport", "@/frontend/context/ViewportContext"],
+              group: ["@/frontend/common/hooks/useViewport", "@/frontend/common/context/ViewportContext"],
               message: "Mobile/desktop components must not read viewport context — they are already tier-specific",
             },
           ],

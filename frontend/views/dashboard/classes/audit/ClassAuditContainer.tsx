@@ -19,9 +19,9 @@ import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { logger } from "@/frontend/utils/logger";
-import { studentProfileTabHref } from "@/frontend/utils/profileHref";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { logger } from "@/frontend/common/utils/logger";
+import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ClassAuditView } from "@/frontend/views/dashboard/classes/audit/ClassAuditView";
 import { useRouter } from "@/shared/i18n/routing";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { TeacherScheduleMobileCard } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleMobileCard";
 import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 

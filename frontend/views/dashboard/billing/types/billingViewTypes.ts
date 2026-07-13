@@ -1,4 +1,4 @@
-import type { InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   ParentBillingSummary,
   ParentInvoiceRow,

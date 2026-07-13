@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { PersonProfileLink } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/badge/StatusBadge";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "@/frontend/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";

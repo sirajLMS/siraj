@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { BookService } from "@/backend/services/resource/book.service";
-import { AvailabilityStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
+import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { BooksAndBagsClient } from "@/frontend/views/dashboard/resources/books-and-bags/BooksAndBagsClient";
 import type { BooksAndBagsPageProps } from "@/frontend/views/dashboard/resources/books-and-bags/booksAndBags.types";
 

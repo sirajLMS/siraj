@@ -1,7 +1,7 @@
 "use client";
 
-import type { AdminNoteInfo } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { AdminNoteCardDesktop } from "@/frontend/views/dashboard/classes/audit/adminNoteCard.desktop";
 import { AdminNoteCardMobile } from "@/frontend/views/dashboard/classes/audit/adminNoteCard.mobile";
 

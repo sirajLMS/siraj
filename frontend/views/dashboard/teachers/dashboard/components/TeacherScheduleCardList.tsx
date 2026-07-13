@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { TeacherScheduleMobileCardList } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleMobileCard";
 import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 

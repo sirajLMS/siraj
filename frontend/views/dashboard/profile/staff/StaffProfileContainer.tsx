@@ -3,15 +3,15 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ProfileMode, ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { syncSubjectProfileCache } from "@/frontend/lib/sync-subject-profile";
-import { syncViewerFromProfile } from "@/frontend/lib/sync-viewer-profile";
-import { ownProfileHref, profileHrefForUser } from "@/frontend/utils/profileHref";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { syncSubjectProfileCache } from "@/frontend/common/lib/sync-subject-profile";
+import { syncViewerFromProfile } from "@/frontend/common/lib/sync-viewer-profile";
+import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { NotificationPreferencesTab } from "@/frontend/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";

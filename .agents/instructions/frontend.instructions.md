@@ -97,13 +97,13 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Import pattern for documents:
   ```ts
   import { gql, type TypedDocumentNode } from "@apollo/client";
-  import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
-  import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+  import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
+  import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
   ```
 - Import generated TYPES from `graphql-types.ts`, NOT `operations.ts`:
   ```ts
-  import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";  // ✅ CORRECT — has all type definitions
-  import type * as Operations from "@/frontend/graphql/generated/gql/operations"; // ✅ CORRECT — only for operation result/variable types
+  import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";  // ✅ CORRECT — has all type definitions
+  import type * as Operations from "@/frontend/common/graphql/generated/gql/operations"; // ✅ CORRECT — only for operation result/variable types
   // ❌ WRONG — do NOT import entity types from operations.ts; it has poorer type definitions
   ```
 - `graphql-types.ts` has the complete and canonical type definitions (enums, interfaces, input types, etc.)

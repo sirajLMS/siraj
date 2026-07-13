@@ -12,7 +12,7 @@ import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/components/ui/display";
 import { PhoneCountryPicker } from "@/frontend/components/ui/input/phoneInput/PhoneCountryPicker";
 import { usePhoneInput } from "@/frontend/components/ui/input/phoneInput/usePhoneInput";
-import { LtrScope } from "@/frontend/providers/theme/LtrScope";
+import { LtrScope } from "@/frontend/common/providers/theme/LtrScope";
 
 export type PhoneInputProps = {
   readonly value: string | null;

@@ -12,8 +12,8 @@ import type {
   ProfileMode as GqlProfileMode,
   ProfileScope as GqlProfileScope,
   ProfileAudience,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
 

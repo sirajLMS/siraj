@@ -1,5 +1,5 @@
 // cspell:disable
-import type { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type ReportType = "by_teacher" | "by_student" | "by_date";
 

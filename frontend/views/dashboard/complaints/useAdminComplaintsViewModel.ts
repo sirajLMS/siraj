@@ -1,6 +1,6 @@
 "use client";
 
-import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
+import { useAdminComplaintsStore } from "@/frontend/common/stores/adminComplaintsStore";
 import type {
   AdminComplaintRow,
   AdminComplaintsSummary,

@@ -4,11 +4,11 @@ import { useMutation } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { useAuth } from "@/frontend/hooks/useAuth";
-import { useAuthToken } from "@/frontend/hooks/useAuthToken";
-import logger from "@/frontend/lib/logger";
-import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/lib/safeRedirect";
+import { demoLoginMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useAuth } from "@/frontend/common/hooks/useAuth";
+import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
+import logger from "@/frontend/common/lib/logger";
+import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/common/lib/safeRedirect";
 import { LoginView } from "@/frontend/views/auth/login/LoginView";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 

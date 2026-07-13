@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
-import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classDetailsSectionStackSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 import { ClassDetailsToolbarArea } from "@/frontend/views/dashboard/classes/details/components/ClassDetailsToolbarArea";
 import { ActionsPanel } from "@/frontend/views/dashboard/classes/details/teacher/ActionsPanel";

@@ -7,8 +7,8 @@ import {
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { create } from "zustand";
-import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
+import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { StatusTrackingView } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingView";
 import type { RawMetric, StatusTrackingRow } from "@/frontend/views/dashboard/classes/status/tracking/types";
 import { useRouter } from "@/shared/i18n/routing";

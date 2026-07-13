@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { RescheduleTrackingView } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingView";
 import { TRACKING_METRIC_DEFINITIONS } from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { TrackingRow } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";

@@ -8,16 +8,16 @@ import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
-import { AppPermission, CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   latestExchangeRatesQueryDocument,
   latestFxSyncRunQueryDocument,
   refreshExchangeRatesMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useImpersonation } from "@/frontend/hooks/useImpersonation";
-import { parseCurrencyCode } from "@/frontend/lib/currency";
-import { shouldShowFxStaleBanner } from "@/frontend/lib/fx-stale";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
+import { parseCurrencyCode } from "@/frontend/common/lib/currency";
+import { shouldShowFxStaleBanner } from "@/frontend/common/lib/fx-stale";
+import { logger } from "@/frontend/common/utils/logger";
 import { ExchangeRateHistorySection } from "@/frontend/views/dashboard/admin/billing/exchange-rates/ExchangeRateHistorySection";
 import {
   buildExchangeRateColumns,

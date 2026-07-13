@@ -2,9 +2,9 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import { isUrlAllowedByProvider } from "@/frontend/lib/meeting-config";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { MeetingConfigDetailsForm } from "@/frontend/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
 
 export type MeetingConfigFormEditInfo = {

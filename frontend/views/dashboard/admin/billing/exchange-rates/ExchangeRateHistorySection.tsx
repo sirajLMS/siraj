@@ -5,9 +5,9 @@ import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui
 import { useMemo, useState } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/dataGrid/AppDataGrid";
 import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { exchangeRateHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { parseCurrencyCode } from "@/frontend/lib/currency";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { exchangeRateHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import {
   buildExchangeRateColumns,
   type ExchangeRateRow,

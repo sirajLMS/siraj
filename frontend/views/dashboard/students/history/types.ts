@@ -1,6 +1,6 @@
 import type { Theme } from "@mui/material";
-import { AttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/graphql/types/meeting-class-config.operations";
+import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export function isJoinableClassSession(

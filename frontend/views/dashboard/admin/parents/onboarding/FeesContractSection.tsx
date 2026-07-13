@@ -11,10 +11,10 @@ import { CurrencySelect } from "@/frontend/components/ui/input/currencySelect/Cu
 import { PaymentMethodTypeFields } from "@/frontend/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import { TimezoneSelect } from "@/frontend/components/ui/input/timezoneSelect/TimezoneSelect";
-import { CurrencyCode, PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/lib/currency";
-import type { PaymentMethodCatalogOption } from "@/frontend/lib/payment-method";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/lib/timezone";
+import { CurrencyCode, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
+import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 import { usePaymentMethodCatalogs } from "@/frontend/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";

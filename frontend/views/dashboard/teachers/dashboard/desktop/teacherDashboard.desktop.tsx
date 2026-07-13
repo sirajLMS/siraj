@@ -2,7 +2,7 @@
 
 import { Alert, Box } from "@mui/material";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
 import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";
 import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";

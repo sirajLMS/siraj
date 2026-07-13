@@ -2,7 +2,7 @@
 
 import { Button, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ProfileMode } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
 
 type ProfileActionBarProps = {

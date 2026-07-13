@@ -10,9 +10,9 @@ import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useMemo } from "react";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { getPaymentMethodTypeLabel } from "@/frontend/lib/payment-method";
-import { userPaymentMethodToOptionLabel } from "@/frontend/lib/user-payment-method";
+import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import { userPaymentMethodToOptionLabel } from "@/frontend/common/lib/user-payment-method";
 
 export type UserPaymentMethodAutocompleteProps = {
   readonly value?: UserPaymentMethodFieldsFragment | null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useReportsStore } from "@/frontend/stores/reportsStore";
+import { useReportsStore } from "@/frontend/common/stores/reportsStore";
 import type { ReportFiltersFormLabels } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
 import type { ReportsDataGridLabels } from "@/frontend/views/dashboard/reports/components/ReportsDataGrid";
 import type {

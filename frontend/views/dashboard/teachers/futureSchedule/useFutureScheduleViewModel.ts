@@ -1,6 +1,6 @@
 "use client";
 
-import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ImportantNoteItem, SupportContactData } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 /**

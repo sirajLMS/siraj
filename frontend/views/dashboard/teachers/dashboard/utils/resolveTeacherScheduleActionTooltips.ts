@@ -1,4 +1,4 @@
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 export interface TeacherScheduleActionTooltips {

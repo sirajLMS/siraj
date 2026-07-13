@@ -1,8 +1,8 @@
 "use client";
 
-import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
-import { resolveLocalizedString } from "@/frontend/lib/localized-string";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
+import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { AssignGroupDialog } from "@/frontend/views/dashboard/permissions/components/AssignGroupDialog";
 import { DeleteGroupDialog } from "@/frontend/views/dashboard/permissions/components/DeleteGroupDialog";
 import { ManageOverridesDialog } from "@/frontend/views/dashboard/permissions/components/ManageOverridesDialog";

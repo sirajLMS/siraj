@@ -1,7 +1,7 @@
 "use client";
 
-import type { CommunicationLogEntry } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useViewport } from "@/frontend/hooks/useViewport";
+import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { CommunicationLogCardDesktop } from "@/frontend/views/dashboard/classes/audit/communicationLogCard.desktop";
 import { CommunicationLogCardMobile } from "@/frontend/views/dashboard/classes/audit/communicationLogCard.mobile";
 

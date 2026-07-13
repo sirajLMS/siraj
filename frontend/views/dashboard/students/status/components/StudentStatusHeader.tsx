@@ -1,6 +1,6 @@
 "use client";
 
-import { useViewport } from "@/frontend/hooks/useViewport";
+import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { StudentStatusHeaderDesktop } from "@/frontend/views/dashboard/students/status/components/studentStatusHeader.desktop";
 import { StudentStatusHeaderMobile } from "@/frontend/views/dashboard/students/status/components/studentStatusHeader.mobile";
 import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";

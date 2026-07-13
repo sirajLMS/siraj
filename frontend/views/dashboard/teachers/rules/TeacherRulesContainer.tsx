@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teacherHandbookUrlQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { teacherHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
 import { buildTeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 

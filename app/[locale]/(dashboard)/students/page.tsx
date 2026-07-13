@@ -5,7 +5,7 @@ import { AppPermission } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import { redirectToLogin } from "@/frontend/lib/redirectToLogin";
+import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentsContainer } from "@/frontend/views/dashboard/admin/parents/students/StudentsContainer";
 import { ParentStudentsContainer } from "@/frontend/views/dashboard/parent/students/ParentStudentsContainer";
 import { TeacherStudentsContainer } from "@/frontend/views/dashboard/teachers/students/TeacherStudentsContainer";

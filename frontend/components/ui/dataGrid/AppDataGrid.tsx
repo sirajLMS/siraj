@@ -5,7 +5,7 @@ import { DataGrid, type DataGridProps, type GridValidRowModel } from "@mui/x-dat
 import { useMemo } from "react";
 import { AppDataGridLoadingOverlay } from "@/frontend/components/ui/dataGrid/AppDataGridLoadingOverlay";
 import { AppDataGridNoRowsOverlay } from "@/frontend/components/ui/dataGrid/AppDataGridNoRowsOverlay";
-import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 

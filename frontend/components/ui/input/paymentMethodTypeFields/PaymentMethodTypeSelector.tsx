@@ -3,8 +3,8 @@
 import { Box, Button, ButtonGroup, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
-import { PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
-import { PAYMENT_METHOD_TYPES } from "@/frontend/lib/payment-method";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
 import type { PaymentMethodTypeSelectorLabels } from "@/shared/messages/types/ui/payment-method";
 
 export type PaymentMethodTypeSelectorProps = {

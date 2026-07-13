@@ -5,11 +5,11 @@ import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing/billing-alerts.documents";
-import { buildFxDisplayMessages } from "@/frontend/lib/buildFxDisplayMessages";
-import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/lib/formatBillingCurrencyTotals";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-alerts.documents";
+import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useRouter } from "@/shared/i18n/routing";
 
 export function UnpaidInvoicesSection() {

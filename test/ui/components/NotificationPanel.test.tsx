@@ -20,9 +20,9 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { notificationAlertsQueryDocument, unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { notificationAlertsQueryDocument, unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { NotificationPanel } from "@/frontend/views/dashboard/components/navbar/NotificationPanel";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { PersonProfileLinkCell } from "@/frontend/components/ui";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
-import { studentHref } from "@/frontend/utils/profileHref";
+import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 
 export function TeacherScheduleStudentCell({ row }: Readonly<{ row: TeacherScheduleRow }>) {
   return (

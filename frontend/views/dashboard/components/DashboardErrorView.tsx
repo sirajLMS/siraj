@@ -3,8 +3,8 @@
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import logger from "@/frontend/lib/logger";
-import { buildLoginHrefFromWindow } from "@/frontend/lib/safeRedirect";
+import logger from "@/frontend/common/lib/logger";
+import { buildLoginHrefFromWindow } from "@/frontend/common/lib/safeRedirect";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface DashboardErrorViewProps {

@@ -3,7 +3,7 @@
 import { Lock } from "@mui/icons-material";
 import { Box, Checkbox, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Permission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const StyledPermissionRowContainer = styled(Box, {
   shouldForwardProp: prop => prop !== "isSystem" && prop !== "isChecked",

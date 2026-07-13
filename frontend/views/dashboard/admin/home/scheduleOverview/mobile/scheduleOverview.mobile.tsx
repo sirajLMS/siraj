@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { MobileCardList, MobileCardListItem, PaginationControls, StatusBadge } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ScheduleFilters } from "@/frontend/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewMobileCard } from "@/frontend/views/dashboard/admin/home/scheduleOverview/mobile/components/scheduleOverviewCard.mobile";
 import type { ScheduleOverviewViewModel } from "@/frontend/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";

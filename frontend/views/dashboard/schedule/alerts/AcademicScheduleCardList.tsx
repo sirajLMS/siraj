@@ -11,7 +11,7 @@ import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationControls, PersonProfileLink, StatusBadge } from "@/frontend/components/ui";
 import { MeetingJoinAction } from "@/frontend/components/ui/display/meetingConfig/MeetingJoinAction";
-import { profileHrefForTeacher } from "@/frontend/utils/profileHref";
+import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { ClassSessionActionButton } from "@/frontend/views/dashboard/schedule/alerts/ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/views/dashboard/schedule/alerts/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";

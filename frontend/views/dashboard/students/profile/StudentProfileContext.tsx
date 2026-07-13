@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export type StudentProfileQueryData = NonNullable<Operations.StudentProfileQuery["studentProfile"]>;
 

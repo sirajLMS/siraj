@@ -4,7 +4,7 @@ import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
+} from "@/frontend/common/graphql/sharedDocuments";
 import { ClassAuditContainer } from "@/frontend/views/dashboard/classes/audit/ClassAuditContainer";
 
 const mockAuditData = {

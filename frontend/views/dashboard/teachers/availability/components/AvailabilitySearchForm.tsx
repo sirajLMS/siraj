@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { labelSx, outlinedInputSx, timeInputOutlinedSx } from "@/frontend/components/ui/form/field/formFieldStyles";
 import { AppTimePicker } from "@/frontend/components/ui/form/time/AppTimePicker";
-import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   AvailabilitySearchFormData,
   AvailabilitySearchFormProps,

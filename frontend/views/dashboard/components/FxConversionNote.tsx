@@ -3,8 +3,8 @@
 import { useQuery } from "@apollo/client/react";
 import { Alert } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { userQueryDocument } from "@/frontend/graphql/sharedDocuments";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 
 type FxConversionNoteMode = "viewer" | "subject";
 

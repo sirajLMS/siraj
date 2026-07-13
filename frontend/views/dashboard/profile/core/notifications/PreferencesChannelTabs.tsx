@@ -11,7 +11,7 @@ import {
   NotificationChannel,
   type NotificationChannel as NotificationChannelType,
   type NotificationEventType,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   buildPreferenceMap,
   NOTIFICATION_CHANNELS,

@@ -2,7 +2,7 @@
 
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SuggestionsCardListProps } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
 import { mapStatusForBadge, statusLabelKey } from "@/frontend/views/dashboard/suggestions/utils/suggestionStatusMap";
 

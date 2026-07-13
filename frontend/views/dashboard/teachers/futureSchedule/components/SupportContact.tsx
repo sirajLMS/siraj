@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { UserAvatar } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/card/BaseCard";
 import { PhoneDisplay } from "@/frontend/components/ui/display";
-import { logTeacherSupportRequestMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SupportContactProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
 
 export function SupportContact({ contact }: Readonly<SupportContactProps>) {

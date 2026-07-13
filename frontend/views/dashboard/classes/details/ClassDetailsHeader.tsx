@@ -3,7 +3,7 @@
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/frontend/components/ui";
-import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classDetailsContentPaddingSx } from "@/frontend/views/dashboard/classes/details/classDetailsMobileLayout";
 
 interface ClassDetailsHeaderProps {

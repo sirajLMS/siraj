@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { ProfileScope } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useProfileFieldAccess } from "@/frontend/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/views/dashboard/profile/teacher/sections/AccountSection";
 import { ContactSection } from "@/frontend/views/dashboard/profile/teacher/sections/ContactSection";

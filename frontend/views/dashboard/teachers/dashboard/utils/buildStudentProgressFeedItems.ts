@@ -1,4 +1,4 @@
-import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/types/shared.types";
+import type { StudentProgressFeedItem, TeacherProgressFeedEventKind } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 interface RawProgressFeedItem {

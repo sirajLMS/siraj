@@ -5,8 +5,8 @@ import {
   LanguageSelector,
   type LanguageSelectorProps,
 } from "@/frontend/components/ui/input/languageSelector/LanguageSelector";
-import { AppLanguage } from "@/frontend/graphql/generated/gql/graphql-types";
-import { type LanguageType, languages } from "@/frontend/lib/locale";
+import { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type LanguageType, languages } from "@/frontend/common/lib/locale";
 
 function LanguageSelectorStory({
   initialLanguageCode,

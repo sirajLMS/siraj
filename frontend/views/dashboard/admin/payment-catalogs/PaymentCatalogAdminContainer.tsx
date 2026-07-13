@@ -5,12 +5,12 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   SupportedMobileWalletFieldsFragment,
   SupportedOnlineAccountFieldsFragment,
   SupportedPaymentLinkFieldsFragment,
-} from "@/frontend/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deactivateSupportedMobileWalletMutationDocument,
   deactivateSupportedOnlineAccountMutationDocument,
@@ -18,8 +18,8 @@ import {
   supportedMobileWalletsQueryDocument,
   supportedOnlineAccountsQueryDocument,
   supportedPaymentLinksQueryDocument,
-} from "@/frontend/graphql/sharedDocuments/billing/payment-method.documents";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
+import { logger } from "@/frontend/common/utils/logger";
 import { CatalogDeleteDialog } from "@/frontend/views/dashboard/admin/payment-catalogs/components/CatalogDeleteDialog";
 import { CatalogEditDialog } from "@/frontend/views/dashboard/admin/payment-catalogs/components/CatalogEditDialog";
 import { PaymentCatalogAdminView } from "@/frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminView";

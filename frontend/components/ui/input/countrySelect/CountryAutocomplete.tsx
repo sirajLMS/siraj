@@ -13,7 +13,7 @@ import {
   getCountryAutocompletePaperSlotProps,
   getCountryAutocompletePopperSlotProps,
 } from "@/frontend/components/ui/input/countrySelect/countryAutocompletePopper";
-import { type CountryType, countries } from "@/frontend/lib/locale";
+import { type CountryType, countries } from "@/frontend/common/lib/locale";
 
 export type CountryAutocompleteProps = {
   readonly country?: CountryType;

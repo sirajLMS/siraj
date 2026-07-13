@@ -5,8 +5,8 @@ import { Stack, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ErrorState, LoadingState, PageContainer, PageHeader } from "@/frontend/components/ui";
-import { recurringScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
-import { useDocumentTitle } from "@/frontend/hooks/useDocumentTitle";
+import { recurringScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
+import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { ClassMeetingConfigsSection } from "@/frontend/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 
 export function RecurringScheduleDetailContainer() {

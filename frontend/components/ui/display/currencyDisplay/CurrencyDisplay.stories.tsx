@@ -5,8 +5,8 @@ import {
   CurrencyDisplayPart,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
 } from "@/frontend/components/ui/display/currencyDisplay/CurrencyDisplay";
-import { CurrencyCode } from "@/frontend/graphql/generated/gql/graphql-types";
-import { currencies } from "@/frontend/lib/currency";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { currencies } from "@/frontend/common/lib/currency";
 
 const currencyCodeOptions = currencies.map(currency => currency.code);
 const currencyDisplayPartOptions = Object.values(CurrencyDisplayPart);

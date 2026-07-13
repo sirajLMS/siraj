@@ -5,7 +5,7 @@ import { Box, InputAdornment, Paper, TextField, Typography } from "@mui/material
 import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel, StatusBadge } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ScheduleFilters } from "@/frontend/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewDataGrid } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { ScheduleOverviewViewModel } from "@/frontend/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";

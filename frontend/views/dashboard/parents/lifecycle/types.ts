@@ -1,4 +1,4 @@
-import type { AccountStatus, ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type ParentLifecyclePageData = {
   readonly id: string;

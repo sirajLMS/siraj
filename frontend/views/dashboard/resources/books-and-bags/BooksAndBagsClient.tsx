@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { BooksAndBagsGrid } from "@/frontend/views/dashboard/resources/books-and-bags/BooksAndBagsGrid";
 import type {
   BookItem,

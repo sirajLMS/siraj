@@ -7,8 +7,8 @@ import { SectionPanel } from "@/frontend/components/ui/container/SectionPanel";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { GenderSelector } from "@/frontend/components/ui/input/genderSelector/GenderSelector";
 import { LanguageSelector } from "@/frontend/components/ui/input/languageSelector/LanguageSelector";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { getLanguageByCode } from "@/frontend/lib/locale";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
 interface StudentInfoSectionProps {

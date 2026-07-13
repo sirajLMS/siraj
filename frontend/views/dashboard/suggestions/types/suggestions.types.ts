@@ -1,5 +1,5 @@
-import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export type {
   AdminSuggestionResult,
@@ -7,13 +7,13 @@ export type {
   Suggestion,
   SuggestionFilter,
   SuggestionMetrics,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export { SuggestionStatus };
 
 export type SearchResult = Operations.SearchSuggestionsQuery_searchSuggestions_SuggestionSearchResult;
 
-export type { AdminSuggestionsState } from "@/frontend/stores/adminSuggestionsStore";
+export type { AdminSuggestionsState } from "@/frontend/common/stores/adminSuggestionsStore";
 
 export interface AdminSuggestionsSummary {
   readonly pending: number;

@@ -1,4 +1,4 @@
-import { getRequestReturnPath } from "@/frontend/lib/redirectToLogin";
+import { getRequestReturnPath } from "@/frontend/common/lib/redirectToLogin";
 
 /**
  * @deprecated Prefer `getRequestReturnPath` from `@/frontend/lib/redirectToLogin`.

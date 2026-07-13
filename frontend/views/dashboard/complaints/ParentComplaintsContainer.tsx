@@ -6,15 +6,15 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ParentAssignedStudentsQuery, ParentComplaintsQuery } from "@/frontend/graphql/generated/gql/operations";
+import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ParentAssignedStudentsQuery, ParentComplaintsQuery } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   parentAssignedStudentsQueryDocument,
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useParentComplaintsStore } from "@/frontend/common/stores/parentComplaintsStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { ParentComplaintsView } from "@/frontend/views/dashboard/complaints/parentComplaintsView";
 import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
 import type {

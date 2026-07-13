@@ -3,7 +3,7 @@
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { InvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,

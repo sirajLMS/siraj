@@ -1,8 +1,8 @@
-import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote,
   TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_supportContact_SupportContact,
-} from "@/frontend/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/operations";
 
 export type ImportantNoteItem =
   TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote;

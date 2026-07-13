@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { parentHandbookUrlQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
 export function ParentRulesContainer() {
   const t = useTranslations("dashboard.parentRules");

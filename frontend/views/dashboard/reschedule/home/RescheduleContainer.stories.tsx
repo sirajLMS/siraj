@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { IanaTimezone } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
+import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { RescheduleView } from "@/frontend/views/dashboard/reschedule/home/RescheduleView";
 
 useRescheduleStore.setState({

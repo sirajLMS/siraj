@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { Permission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCategoryGroup } from "@/frontend/views/dashboard/permissions/components/PermissionCategoryGroup";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };

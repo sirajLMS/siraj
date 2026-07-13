@@ -1,4 +1,4 @@
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export function useClassDetailsPermissions(hasPermission: (permission: AppPermission) => boolean) {
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);

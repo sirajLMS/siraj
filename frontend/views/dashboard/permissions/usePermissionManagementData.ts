@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect } from "react";
-import type { OverrideState, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { OverrideState, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   assignPermissionGroupToUserMutationDocument,
   bulkAssignUsersToGroupMutationDocument,
@@ -15,10 +15,10 @@ import {
   updatePermissionGroupMutationDocument,
   updateUserOverridesMutationDocument,
   usersQueryDocument,
-} from "@/frontend/graphql/sharedDocuments";
-import { usePermissionManagementStore } from "@/frontend/stores/permissionManagementStore";
-import type { LocalizedString } from "@/frontend/types/localized-string.types";
-import { logger } from "@/frontend/utils/logger";
+} from "@/frontend/common/graphql/sharedDocuments";
+import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
+import type { LocalizedString } from "@/frontend/common/types/localized-string.types";
+import { logger } from "@/frontend/common/utils/logger";
 
 // Hook for handling queries
 const usePermissionQueries = () => {

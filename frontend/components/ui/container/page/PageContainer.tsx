@@ -2,9 +2,9 @@
 
 import { Box, LinearProgress, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
-import { useLanguageSwitch } from "@/frontend/hooks/useLanguageSwitch";
-import { useThemeMode } from "@/frontend/hooks/useThemeMode";
-import { mergeSx } from "@/frontend/utils/sx/mergeSx";
+import { useLanguageSwitch } from "@/frontend/common/hooks/useLanguageSwitch";
+import { useThemeMode } from "@/frontend/common/hooks/useThemeMode";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 interface PageContainerProps {
   readonly sx?: SxProps<Theme>;

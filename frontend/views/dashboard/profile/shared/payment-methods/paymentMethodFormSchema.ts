@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const detailsSchema = z.object({
   walletId: z.string().optional(),

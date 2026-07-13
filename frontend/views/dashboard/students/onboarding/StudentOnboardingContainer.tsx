@@ -9,12 +9,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
-import { AppPermission, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parents/parent-directory.documents";
-import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teachers/teacher.documents";
-import { useCreateStudentOnboarding } from "@/frontend/hooks/useCreateStudentOnboarding";
-import { logger } from "@/frontend/utils/logger";
-import { studentHref } from "@/frontend/utils/profileHref";
+import { AppPermission, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { parentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-directory.documents";
+import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher.documents";
+import { useCreateStudentOnboarding } from "@/frontend/common/hooks/useCreateStudentOnboarding";
+import { logger } from "@/frontend/common/utils/logger";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { ParentOption } from "@/frontend/views/dashboard/students/onboarding/ParentAssignmentSection";
 import { StudentOnboardingView } from "@/frontend/views/dashboard/students/onboarding/StudentOnboardingView";
 import {

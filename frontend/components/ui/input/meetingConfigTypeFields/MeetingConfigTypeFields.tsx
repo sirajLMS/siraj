@@ -3,8 +3,8 @@
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useTranslations } from "next-intl";
-import type { MeetingProviderFieldsFragment } from "@/frontend/graphql/generated/gql/operations";
-import { getVisibleMeetingConfigFields } from "@/frontend/lib/meeting-config";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
 
 export type MeetingConfigDetailsFormValue = {
   meetingUrl: string;
