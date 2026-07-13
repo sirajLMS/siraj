@@ -1,8 +1,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { CreateRecurringClassViewDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/createRecurringClassView.desktop";
 import { CreateRecurringClassViewMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/createRecurringClassView.mobile";
-import { CreateRecurringClassViewDesktop } from "@/frontend/views/dashboard/classes/recurring/createRecurringClassView.desktop";
 import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
 import type { RecurringMeetingConfigFormState } from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";

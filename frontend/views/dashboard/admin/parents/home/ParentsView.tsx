@@ -48,7 +48,7 @@ const lazyViews = createLazyView<ParentsViewProps>(
       default: m.ParentsViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/admin/parents/home/parentsView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/admin/parents/home/parentsView.desktop").then(m => ({
       default: m.ParentsViewDesktop,
     }))
 );

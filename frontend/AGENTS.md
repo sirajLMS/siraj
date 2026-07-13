@@ -35,7 +35,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Prefer Bun's built-in commands over npm equivalents
 - Use `~/.bun/bin/bun create` for scaffolding new projects
 - Use layer-specific test scripts (see `package.json`):
-  - `bun run test:graphql` — GraphQL integration tests (`frontend/graphql/test/`)
+  - `bun run test:graphql` — GraphQL integration tests (`frontend/common/graphql/test/`)
   - `bun run test:ui:components` — UI component tests (`test/ui/components/`)
   - `bun run test:ui:e2e` — UI end-to-end tests (`test/ui/e2e/`)
   - `bun run test:ui` — all UI tests (components + e2e)

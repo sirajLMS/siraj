@@ -200,11 +200,11 @@ Group findings by severity (CRITICAL first), then by group. **Count findings** b
 - `useLazyQuery` used (banned) → stateful `useQuery`
 - Apollo hooks from `"@apollo/client"` → must import from `"@apollo/client/react"`
 - Missing `id` field on object types → required for Apollo cache normalization
-- Custom inline types instead of generated from `frontend/graphql/generated/gql/`
+- Custom inline types instead of generated from `frontend/common/graphql/generated/gql/`
 - `TypedDocumentNode` not used or typed incorrectly
 - Document naming: must be `{entityName}QueryDocument` or `{entityName}MutationDocument`
-- Documents not in `frontend/graphql/sharedDocuments/<domain>.documents.ts`
-- Documents not exported from `frontend/graphql/sharedDocuments/index.ts`
+- Documents not in `frontend/common/graphql/sharedDocuments/<domain>.documents.ts`
+- Documents not exported from `frontend/common/graphql/sharedDocuments/index.ts`
 - Import from `"@apollo/client/core"` → `"@apollo/client"`
 
 **Zustand Stores:**

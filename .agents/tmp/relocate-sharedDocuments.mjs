@@ -60,12 +60,12 @@ const skip = p => {
   if (p.endsWith(".mjs")) return true;
   if (p.startsWith(`${ROOT}/.git`)) return true;
   if (p.startsWith(`${ROOT}/node_modules`)) return true;
-  if (p.startsWith(`${ROOT}/frontend/graphql/sharedDocuments`)) return true;
+  if (p.startsWith(`${ROOT}/frontend/common/graphql/sharedDocuments`)) return true;
   return false;
 };
 
 const files = execSync(
-  "cd /home/ahmed/Projects/siraj && git grep -l -I --full-name -e '@/frontend/graphql/sharedDocuments/' -- ':!/.git' ':!/node_modules' ':!/frontend/graphql/sharedDocuments'",
+  "cd /home/ahmed/Projects/siraj && git grep -l -I --full-name -e '@/frontend/common/graphql/sharedDocuments/' -- ':!/.git' ':!/node_modules' ':!/frontend/common/graphql/sharedDocuments'",
   { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 }
 )
   .split("\n")

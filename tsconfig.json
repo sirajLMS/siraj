@@ -52,7 +52,7 @@
   "exclude": [
     "node_modules",
     "draft",
-    "frontend/graphql/generated",
+    "frontend/common/graphql/generated",
     "**/unRefactored_tests",
     "**/.ai",
     ".next-test/**",

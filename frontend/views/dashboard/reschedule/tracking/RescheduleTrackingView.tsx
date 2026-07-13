@@ -10,7 +10,7 @@ const lazyViews = createLazyView<RescheduleTrackingViewProps>(
       default: m.RescheduleTrackingViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/reschedule/tracking/rescheduleTrackingView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/reschedule/tracking/rescheduleTrackingView.desktop").then(m => ({
       default: m.RescheduleTrackingViewDesktop,
     }))
 );

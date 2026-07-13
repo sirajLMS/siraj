@@ -33,7 +33,7 @@ Each sub-directory contains its own `index.ts` barrel that re-exports every `*.e
 
 ### Backend-Only
 - Enums in this directory are **backend-only**.
-- Frontend code must use GraphQL codegen enums from `@/frontend/graphql/generated/gql/graphql-types` instead of importing from `@/backend/enum`.
+- Frontend code must use GraphQL codegen enums from `@/frontend/common/graphql/generated/gql/graphql-types` instead of importing from `@/backend/enum`.
 - Shared layer code (`shared/`) must not import from `@/backend/enum` — shared code is used by both frontend and backend. Define cross-layer enums in `shared/constants/` instead; see `shared/AGENTS.md`.
 
 ### Import Convention

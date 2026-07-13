@@ -15,7 +15,7 @@ GraphQL enums MUST be backed by a real TypeScript `enum` defined in `backend/enu
 - Define the enum in `backend/enum/<subdir>/<entity>.enum.ts` (see `backend/enum/AGENTS.md`).
 - Register it with Pothos by passing the enum object: `gqlSchemaBuilder.enumType(MyEnum, { name: "MyEnum" })`.
 - All Pothos enum registrations live in `backend/graphql/pothos/shared/enum.pothos.ts`. Import the registered Pothos enum (e.g. `MyEnumPothosEnum`) from there into the domain Pothos files that reference it on a field — never re-register the same enum in a domain file.
-- Run `bun run generate:gqlSchema` then `bun codegen` after registering a new enum so the frontend codegen output (`@/frontend/graphql/generated/gql/graphql-types`) stays in sync.
+- Run `bun run generate:gqlSchema` then `bun codegen` after registering a new enum so the frontend codegen output (`@/frontend/common/graphql/generated/gql/graphql-types`) stays in sync.
 
 ```typescript
 // backend/enum/profiles/profile.enum.ts

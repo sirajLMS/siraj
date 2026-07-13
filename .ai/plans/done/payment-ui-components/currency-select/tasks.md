@@ -12,7 +12,7 @@
 - [x] Re-export from `backend/enum/index.ts`
 - [x] Register `CurrencyCodePothosObject` in `backend/graphql/pothos/enum.pothos.ts`
 - [x] Run `bun run generate:gqlSchema && bun codegen`
-- [x] Verify `CurrencyCode` enum in `frontend/graphql/generated/gql/graphql-types.ts` + `schema.graphql`
+- [x] Verify `CurrencyCode` enum in `frontend/common/graphql/generated/gql/graphql-types.ts` + `schema.graphql`
 
 ## Phase 2 — Frontend lib
 

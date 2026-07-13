@@ -10,9 +10,11 @@ const lazyViews = createLazyView<JumpToDateHeaderProps>(
       default: m.JumpToDateHeaderMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop").then(m => ({
-      default: m.JumpToDateHeaderDesktop,
-    }))
+    import("@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop").then(
+      m => ({
+        default: m.JumpToDateHeaderDesktop,
+      })
+    )
 );
 
 export function JumpToDateHeader(props: Readonly<JumpToDateHeaderProps>) {

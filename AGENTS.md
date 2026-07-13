@@ -68,7 +68,7 @@ The codebase follows strict layer separation. Each layer has its own `AGENTS.md`
 | Shared | `shared/` | `shared/AGENTS.md` |
 | Frontend Views | `frontend/views/` | `frontend/views/AGENTS.md` |
 | Frontend Stores | `frontend/stores/` | `frontend/stores/AGENTS.md` |
-| Frontend GraphQL | `frontend/graphql/` | `frontend/graphql/AGENTS.md` |
+| Frontend GraphQL | `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md` |
 | Backend Services | `backend/services/` | `backend/services/AGENTS.md` |
 | Backend GraphQL/Pothos | `backend/graphql/` | `backend/graphql/AGENTS.md` |
 | Database Repositories | `backend/db/repo/` | `backend/db/repo/AGENTS.md` |
@@ -122,7 +122,7 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 - Verify entity-setup helper signatures before use - they vary significantly
 
 ### GraphQL Document Conventions
-- Documents live in `frontend/graphql/sharedDocuments/<domain>.documents.ts`
+- Documents live in `frontend/common/graphql/sharedDocuments/<domain>.documents.ts`
 - Naming: `{entityName}QueryDocument`, `{entityName}MutationDocument`
 - **Always include `id` field** on every object type for Apollo cache normalization
 - **NO `useLazyQuery`** - use stateful `useQuery` exclusively
@@ -311,8 +311,8 @@ both `backend.instructions.md` and `tests.instructions.md`). Read ALL matching f
 | `shared/` | `shared/AGENTS.md` |
 | `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | `frontend/stores/` | `frontend/stores/AGENTS.md`, `frontend/AGENTS.md` |
-| `frontend/graphql/sharedDocuments/` | `frontend/graphql/sharedDocuments/AGENTS.md`, `frontend/graphql/AGENTS.md`, `frontend/AGENTS.md` |
-| `frontend/graphql/` | `frontend/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/common/graphql/sharedDocuments/` | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
 | `backend/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` |
 | `backend/graphql/` | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` |
 | `backend/db/repo/` | `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` |
@@ -363,8 +363,8 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `frontend/views/dashboard/` - Domain-organized page components
 - `frontend/stores/` - Zustand stores (mock stores for Storybook)
 - `frontend/components/ui/` - Shared UI components (AppDataGrid, MetricCard, PageContainer, etc.)
-- `frontend/graphql/sharedDocuments/` - GraphQL documents by domain
-- `frontend/graphql/generated/` - Auto-generated types (do not edit)
+- `frontend/common/graphql/sharedDocuments/` - GraphQL documents by domain
+- `frontend/common/graphql/generated/` - Auto-generated types (do not edit)
 
 ### Backend
 - `backend/db/schema/` - Drizzle table definitions
@@ -377,7 +377,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 ### Testing
 - `backend/db/test/repo/` - Repository unit tests (100% coverage required)
 - `backend/db/test/logic/` - Business logic integration tests
-- `frontend/graphql/test/` - GraphQL integration tests (use testClient, not raw fetch)
+- `frontend/common/graphql/test/` - GraphQL integration tests (use testClient, not raw fetch)
 - `test/ui/components/` - Component tests
 - `test/ui/e2e/` - End-to-end tests
 

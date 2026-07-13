@@ -227,7 +227,7 @@ Read before editing each path prefix:
 | `backend/db/seeds/` | `backend/db/seeds/AGENTS.md` |
 | `backend/services/` | `backend/services/AGENTS.md` |
 | `backend/graphql/` | `backend/graphql/AGENTS.md` |
-| `frontend/graphql/` | `frontend/graphql/AGENTS.md`, `frontend/graphql/sharedDocuments/AGENTS.md` |
+| `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` |
 | `frontend/components/ui/` | `frontend/AGENTS.md`, `frontend/COMPONENT_PATTERNS.md` |
 | `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | `**/*.test.ts` | `.agents/instructions/tests.instructions.md` |
@@ -379,7 +379,7 @@ Grouped by phase. Paths are relative to repo root.
 | `backend/graphql/pothos/teacher-portal.pothos.ts` | **Update** |
 | `backend/graphql/pothos/teacher-onboarding.pothos.ts` | **Update** — replace banking fields |
 | `backend/graphql/mutation/payment-method.mutation.ts` | **Create** |
-| `frontend/graphql/test/payment-method.test.ts` | **Create** |
+| `frontend/common/graphql/test/payment-method.test.ts` | **Create** |
 | `backend/graphql/mutation/onboarding.mutation.ts` | **Update** |
 | `backend/graphql/mutation/staff-profile.mutation.ts` | **Update** |
 
@@ -387,15 +387,15 @@ Grouped by phase. Paths are relative to repo root.
 
 | File | Action |
 |------|--------|
-| `frontend/graphql/sharedDocuments/payment-method.documents.ts` | **Create** |
-| `frontend/graphql/sharedDocuments/profile.documents.ts` | **Update** |
-| `frontend/graphql/sharedDocuments/parent-profile.documents.ts` | **Update** |
-| `frontend/graphql/sharedDocuments/staff-profile.documents.ts` | **Update** |
-| `frontend/graphql/sharedDocuments/teacher-portal.documents.ts` | **Update** |
-| `frontend/graphql/sharedDocuments/parent-onboarding.documents.ts` | **Update** |
-| `frontend/graphql/sharedDocuments/teacher-onboarding.documents.ts` | **Update** |
-| `frontend/graphql/sharedDocuments/profile.documents.test.ts` | **Update** |
-| `frontend/graphql/sharedDocuments/index.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/payment-method.documents.ts` | **Create** |
+| `frontend/common/graphql/sharedDocuments/profile.documents.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/parent-profile.documents.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/staff-profile.documents.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/teacher-portal.documents.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/parent-onboarding.documents.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/teacher-onboarding.documents.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/profile.documents.test.ts` | **Update** |
+| `frontend/common/graphql/sharedDocuments/index.ts` | **Update** |
 
 ### Phase 7 — UI composables + i18n
 

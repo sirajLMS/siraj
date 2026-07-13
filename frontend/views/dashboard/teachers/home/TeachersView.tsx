@@ -5,8 +5,8 @@ import type {
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { TeachersDesktopView } from "@/frontend/desktop/views/dashboard/teachers/home/teachersView.desktop";
 import { TeachersMobileView } from "@/frontend/mobile/views/dashboard/teachers/home/teachersView.mobile";
-import { TeachersDesktopView } from "@/frontend/views/dashboard/teachers/home/teachersView.desktop";
 
 export interface TeachersViewProps {
   readonly metrics: TeacherDirectoryMetrics | null | undefined;

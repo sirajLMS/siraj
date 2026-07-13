@@ -10,7 +10,7 @@ const lazyViews = createLazyView<SubjectsViewProps>(
       default: m.SubjectsViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/subjects/home/subjectsView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/subjects/home/subjectsView.desktop").then(m => ({
       default: m.SubjectsViewDesktop,
     }))
 );

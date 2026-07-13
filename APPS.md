@@ -91,7 +91,7 @@
 
 - [issue] **No production deployment** — app runs only locally. No Vercel config, no Dockerfile for production, no CI/CD pipeline.
 - [issue] **Dead Postgres compose** — `.container/postgres/docker-compose.yml` is fully commented out. Postgres runs natively (not containerized). New devs must install PG manually.
-- [issue] **Stale config paths** — `graphql.config.yml` and `apollo.config.json` reference `client/graphql/generated/schema.graphql` but actual path is `frontend/graphql/generated/schema.graphql`.
+- [issue] **Stale config paths** — `graphql.config.yml` and `apollo.config.json` reference `client/graphql/generated/schema.graphql` but actual path is `frontend/common/graphql/generated/schema.graphql`.
 - [issue] **No health monitoring in production** — no Sentry, no APM, no alerting. When deployed, there's no way to know it's broken.
 - [issue] **No secrets management** — `.env` file only. No vault, no parameter store. Secrets are local-only with no rotation mechanism.
 - [issue] **Signed URL cleanup cron has no external scheduler** — `/api/storage/cleanup` gated by `CRON_SECRET` exists but no scheduler calls it in production. FX rate refresh cron (`/api/fx/refresh`, daily 06:00 UTC) IS scheduled via `vercel.json` since the FX ingestion plan landed; storage cleanup remains unschedulable on Vercel cron.

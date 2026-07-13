@@ -12,7 +12,7 @@ const lazyViews = createLazyView<AdminSuggestionsViewModel>(
       default: m.AdminSuggestionsMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/suggestions/desktop/adminSuggestions.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/suggestions/adminSuggestions.desktop").then(m => ({
       default: m.AdminSuggestionsDesktopView,
     }))
 );

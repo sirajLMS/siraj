@@ -118,7 +118,7 @@ When modifying `scripts/run-test/run-test.ts`:
 - Test changes: `bun run scripts/run-test/run-test.ts scripts/run-test/tests/smoke.test.ts`
 - Run quality: `bun tsgo`, `bun biome:check scripts/run-test/`, and lint after changes
 
-### GraphQL Integration Tests (`frontend/graphql/test/`)
+### GraphQL Integration Tests (`frontend/common/graphql/test/`)
 
 - Use `testClient.query()`, NEVER raw `fetch` or string queries
 - Define queries as `TypedDocumentNode`, pass document node to testClient:

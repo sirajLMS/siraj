@@ -32,7 +32,7 @@ The system is permissions-driven and should not have a `role` concept for users.
    - `UserInfo` interface has `role: string`
    - Remove `role` field
 
-7. **`frontend/graphql/generated/gql/graphql-types.ts`**
+7. **`frontend/common/graphql/generated/gql/graphql-types.ts`**
    - Generated `User` type has `role` field
    - This is auto-generated; update the GraphQL schema/Pothos to stop exposing role
 

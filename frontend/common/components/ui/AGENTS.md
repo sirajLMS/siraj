@@ -85,7 +85,7 @@ frontend/components/ui/<component-name>/
 // frontend/components/ui/dataGrid/useAppDataGridViewModel.ts
 import { useAppDataGridStore } from '@/frontend/stores/appDataGridStore';
 import { useQuery } from '@apollo/client/react';
-import { AppDataGridQueryDocument } from '@/frontend/graphql/sharedDocuments/appDataGrid.documents';
+import { AppDataGridQueryDocument } from '@/frontend/common/graphql/sharedDocuments/appDataGrid.documents';
 
 export function useAppDataGridViewModel() {
   const { filters, pagination, setFilters, setPagination, openDialog, closeDialog } = useAppDataGridStore();

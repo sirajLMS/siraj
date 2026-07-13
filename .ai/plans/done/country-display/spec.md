@@ -39,7 +39,7 @@ So the user-facing outcome (`CountryDisplay` everywhere a country is rendered) i
 4. **Frontend forms already use `CountrySelect`** for `nationality` where applicable; we keep that and only swap the teacher `<Select>` of `countryCode` for `CountrySelect` (parity) + `CountryDisplay` on read-only surfaces.
 5. **`CountryDisplay` is the canonical read-only renderer** for any ISO-3166 country code on the frontend, mirroring how `PhoneDisplay` / `CurrencyDisplay` / `TimezoneDisplay` are already used.
 6. **No `console.*`, no hardcoded colors, MUI v9 `sx`-only,** theme callback for palette — per `AGENTS.md`.
-7. **Zero new ad-hoc types** — import from `@/backend/types` ↔ generated GraphQL types (`@/frontend/graphql/generated/gql/graphql-types`).
+7. **Zero new ad-hoc types** — import from `@/backend/types` ↔ generated GraphQL types (`@/frontend/common/graphql/generated/gql/graphql-types`).
 8. **Codegen is a hard gate** after every Pothos change: `bun run generate:gqlSchema && bun codegen`.
 
 ---
@@ -55,7 +55,7 @@ So the user-facing outcome (`CountryDisplay` everywhere a country is rendered) i
 | Pothos INPUT | `backend/graphql/pothos/parents/parent-onboarding.pothos.ts:30`, `backend/graphql/pothos/teachers/teacher-onboarding.pothos.ts:34`, `backend/graphql/pothos/profile/profile.pothos.ts:150` | `nationality: t.field({ type: CountryCodePothosObject })` |
 | Backend dead code | `backend/lib/enum.ts` `parseCountryCode` | Delete (now-unnecessary coercion — schema enforces enum) |
 | Codegen | — | `bun run generate:gqlSchema && bun codegen` |
-| Frontend GraphQL docs | `frontend/graphql/sharedDocuments/profile.documents.ts` (lines 69, 249), `parent-profile.documents.ts:21` | No doc edits — field selection unchanged |
+| Frontend GraphQL docs | `frontend/common/graphql/sharedDocuments/profile.documents.ts` (lines 69, 249), `parent-profile.documents.ts:21` | No doc edits — field selection unchanged |
 | Frontend types | `frontend/types/shared.types.ts:180`, `ParentProfileData`, `ParentOwnData`, `ParentAdminData` | Generated types propagate `CountryCode` automatically after codegen |
 | Frontend display — parent profile | `frontend/views/dashboard/parent/profile/ParentProfileDetails.tsx:78` | Replace bare string with `<CountryDisplay code={parent.nationality} fallback="" />` |
 | Frontend display — admin identity section | `frontend/views/dashboard/profile/parent/sections/IdentitySection.tsx:42` | Replace `toDisplayValue(props.adminData.nationality, ...)` with `<CountryDisplay code={props.adminData.nationality} fallback={tc("notSet")} />` |
@@ -124,6 +124,6 @@ So the user-facing outcome (`CountryDisplay` everywhere a country is rendered) i
 | Backend services | `backend/services/AGENTS.md` |
 | Pothos / GraphQL | `backend/graphql/AGENTS.md` |
 | Frontend views | `frontend/AGENTS.md`, `frontend/views/AGENTS.md` |
-| Frontend GraphQL documents | `frontend/graphql/AGENTS.md`, `frontend/graphql/sharedDocuments/AGENTS.md` |
+| Frontend GraphQL documents | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` |
 | Tests | `.github/instructions/tests.instructions.md`, `backend/db/test/AGENTS.md` (if DB tests touched — none expected here) |
 | Cross-cutting | Lint queue server (never direct `bun lint`); per-file verification loop; sonar-scan prohibition for sub-agents. |

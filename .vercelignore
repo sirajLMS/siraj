@@ -39,7 +39,7 @@ test/
 backend/db/test/
 backend/db/seeds/
 backend/db/scripts/
-frontend/graphql/test/
+frontend/common/graphql/test/
 docs/
 *.md
 *.ps1

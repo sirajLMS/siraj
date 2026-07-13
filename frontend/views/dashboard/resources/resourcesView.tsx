@@ -16,7 +16,7 @@ const lazyViews = createLazyView<ResourcesViewModel>(
       default: m.ResourcesMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/resources/desktop/resources.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/resources/resources.desktop").then(m => ({
       default: m.ResourcesDesktopView,
     }))
 );

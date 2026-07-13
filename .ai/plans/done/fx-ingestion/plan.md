@@ -192,7 +192,7 @@ _Rules:_ `backend/services/AGENTS.md` — `requirePermission` on manual path onl
 |---|------|--------|
 | 13.1 | **NEW** `backend/graphql/pothos/billing/fx-ingestion.pothos.ts` | `ExchangeRate`, `FxSyncRun`, `ExchangeRateHistoryConnection`; queries with `BILLING_VIEW_EXCHANGE_RATES`; mutation `refreshExchangeRates` with `BILLING_REFRESH_EXCHANGE_RATES` |
 | 13.2 | Register in billing pothos index | |
-| 13.3 | **NEW** `frontend/graphql/test/fx-ingestion.test.ts` | User without permission → forbidden; `academy_admin` with grant → view + refresh (spec §6 #7) |
+| 13.3 | **NEW** `frontend/common/graphql/test/fx-ingestion.test.ts` | User without permission → forbidden; `academy_admin` with grant → view + refresh (spec §6 #7) |
 
 **Verify:** `bun run generate:gqlSchema`; GraphQL permission test passes
 
@@ -214,9 +214,9 @@ bun run generate:gqlSchema && bun codegen
 
 | # | File | Change |
 |---|------|--------|
-| 15.1 | **NEW** `frontend/graphql/sharedDocuments/fx-ingestion.documents.ts` | Query + mutation documents with `id` fields |
+| 15.1 | **NEW** `frontend/common/graphql/sharedDocuments/fx-ingestion.documents.ts` | Query + mutation documents with `id` fields |
 
-_Rules:_ `frontend/graphql/sharedDocuments/AGENTS.md`
+_Rules:_ `frontend/common/graphql/sharedDocuments/AGENTS.md`
 
 ---
 

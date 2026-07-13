@@ -10,7 +10,7 @@ root = "backend/db/test/"
 # GraphQL integration tests: logger mock + env, NO happydom (no DOM needed)
 [test.graphql]
 preload = ["./backend/db/test/logger-mock.ts", "./backend/db/test/ensure-env.ts"]
-root = "frontend/graphql/test/"
+root = "frontend/common/graphql/test/"
 
 # UI component tests: full preload including happydom (DOM emulation required)
 [test.ui]

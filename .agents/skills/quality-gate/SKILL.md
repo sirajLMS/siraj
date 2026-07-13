@@ -91,8 +91,8 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while SONAR fix s
    | `app/` | `app/AGENTS.md` |
    | `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
    | `frontend/stores/` | `frontend/stores/AGENTS.md`, `frontend/AGENTS.md` |
-   | `frontend/graphql/sharedDocuments/` | `frontend/graphql/sharedDocuments/AGENTS.md`, `frontend/graphql/AGENTS.md`, `frontend/AGENTS.md` |
-   | `frontend/graphql/` | `frontend/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+   | `frontend/common/graphql/sharedDocuments/` | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+   | `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
    | `backend/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` |
    | `backend/graphql/` | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` |
    | `backend/db/repo/` | `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` |

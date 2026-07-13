@@ -30,7 +30,7 @@ const lazyViews = createLazyView<SearchScheduleFilterDrawerProps>(
       default: m.SearchScheduleFilterDrawerMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/search-schedule/searchScheduleFilterDrawer.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/search-schedule/searchScheduleFilterDrawer.desktop").then(m => ({
       default: m.SearchScheduleFilterDrawerDesktop,
     }))
 );

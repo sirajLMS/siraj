@@ -82,9 +82,9 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
   import { useQuery, useApolloClient } from "@apollo/client/react";     // hooks ONLY
   ```
 - `id` field on ALL object types in selection sets (Apollo cache normalization)
-- Shared Apollo Client instance from `frontend/graphql/`
-- Documents in `frontend/graphql/sharedDocuments/<domain>.documents.ts`
-- Export all documents from `frontend/graphql/sharedDocuments/index.ts`
+- Shared Apollo Client instance from `frontend/common/graphql/`
+- Documents in `frontend/common/graphql/sharedDocuments/<domain>.documents.ts`
+- Export all documents from `frontend/common/graphql/sharedDocuments/index.ts`
 - Document naming: `{entityName}QueryDocument` / `{entityName}MutationDocument`
 - TypedDocumentNode convention table:
 
@@ -109,7 +109,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - `graphql-types.ts` has the complete and canonical type definitions (enums, interfaces, input types, etc.)
 - `operations.ts` is only for operation-specific result/variable types (e.g., `DeleteBookMutationMutation`)
 - Zustand stores and other type consumers: always prefer `graphql-types.ts` for entity types
-- NEVER inline type literals - always use generated types from `frontend/graphql/generated/gql/`
+- NEVER inline type literals - always use generated types from `frontend/common/graphql/generated/gql/`
 - Codegen after schema/document changes (both steps required):
   ```bash
   ~/.bun/bin/bun run generate:gqlSchema

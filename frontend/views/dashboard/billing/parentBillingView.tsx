@@ -16,7 +16,7 @@ const lazyViews = createLazyView<ParentBillingViewModel>(
       default: m.ParentBillingMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/billing/desktop/parentBilling.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/billing/parentBilling.desktop").then(m => ({
       default: m.ParentBillingDesktopView,
     }))
 );

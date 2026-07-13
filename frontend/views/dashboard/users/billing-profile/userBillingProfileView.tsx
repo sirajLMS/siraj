@@ -16,7 +16,7 @@ const lazyViews = createLazyView<UserBillingProfileViewModel>(
       default: m.UserBillingProfileMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/users/billing-profile/desktop/userBillingProfile.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/users/billing-profile/userBillingProfile.desktop").then(m => ({
       default: m.UserBillingProfileDesktopView,
     }))
 );

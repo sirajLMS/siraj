@@ -1,8 +1,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { ScheduleAlertBannersDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/scheduleAlertBanners.desktop";
 import { ScheduleAlertBannersMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/scheduleAlertBanners.mobile";
-import { ScheduleAlertBannersDesktop } from "@/frontend/views/dashboard/schedule/alerts/scheduleAlertBanners.desktop";
 import type { ScheduleAlert, ScheduleAlertType } from "@/frontend/views/dashboard/schedule/alerts/types";
 
 interface ScheduleAlertBannersProps {

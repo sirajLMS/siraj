@@ -78,7 +78,7 @@ const lazyViews = createLazyView<ScheduleAlertsViewProps>(
       default: m.ScheduleAlertsViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/schedule/alerts/scheduleAlertsView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/schedule/alerts/scheduleAlertsView.desktop").then(m => ({
       default: m.ScheduleAlertsViewDesktop,
     }))
 );

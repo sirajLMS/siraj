@@ -8,8 +8,8 @@
  *   learn the local language: USD, EUR, GBP, CHF, CNY, JPY, INR, CAD, AUD.
  *
  * Add new entries here, then run `bun run generate:gqlSchema && bun codegen`
- * so the codegen enum in `frontend/graphql/generated/gql/graphql-types.ts`
- * and the SDL block in `frontend/graphql/generated/schema.graphql` stay in
+ * so the codegen enum in `frontend/common/graphql/generated/gql/graphql-types.ts`
+ * and the SDL block in `frontend/common/graphql/generated/schema.graphql` stay in
  * sync. The frontend currency lib (`frontend/lib/currency.ts`) and its
  * currency catalog must be updated in the same change to keep the option
  * list aligned with the enum (see `frontend/lib/currency.ts`).

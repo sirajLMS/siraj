@@ -16,7 +16,7 @@ const lazyViews = createLazyView<ParentDashboardViewModel>(
       default: m.ParentDashboardMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/parent/dashboard/desktop/parentDashboard.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/parent/dashboard/parentDashboard.desktop").then(m => ({
       default: m.ParentDashboardDesktopView,
     }))
 );

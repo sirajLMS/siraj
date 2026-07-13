@@ -92,11 +92,11 @@ _Rules:_ `AGENTS.md` (AI agent communication: dead code removal is fine, no SUMM
 | # | Step | Change |
 |---|------|--------|
 | 5.1 | Run `bun run generate:gqlSchema` | Regenerates `schema.graphql` |
-| 5.2 | Run `bun codegen` | Regenerates `frontend/graphql/generated/gql/*` |
+| 5.2 | Run `bun codegen` | Regenerates `frontend/common/graphql/generated/gql/*` |
 | 5.3 | Verify generated `graphql-types.ts` shows `nationality?: CountryCode \| null` (or `Maybe<CountryCode>`) on `ParentProfile`, `ParentOnboardingInput`, `TeacherOnboardingInput`, `ParentAdminProfileUpdateInput`. | |
 | 5.4 | Verify generated type for `TeacherOnboardingInput.countryCode` is already `Maybe<CountryCode>` (unchanged). | |
 
-_Rules:_ `frontend/graphql/AGENTS.md` — codegen is mandatory after schema changes.
+_Rules:_ `frontend/common/graphql/AGENTS.md` — codegen is mandatory after schema changes.
 
 ---
 
@@ -106,7 +106,7 @@ _Rules:_ `frontend/graphql/AGENTS.md` — codegen is mandatory after schema chan
 
 | # | File | Change |
 |---|------|--------|
-| 6.1 | `frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema.ts:11` | `nationality: z.custom<CountryCode>(...)` (mirror the existing `invoiceType` pattern) — import `CountryCode` from `@/frontend/graphql/generated/gql/graphql-types` |
+| 6.1 | `frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema.ts:11` | `nationality: z.custom<CountryCode>(...)` (mirror the existing `invoiceType` pattern) — import `CountryCode` from `@/frontend/common/graphql/generated/gql/graphql-types` |
 | 6.2 | `frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema.ts:27` | `nationality: z.custom<CountryCode>(...)` (same pattern as `countryCode`) |
 | 6.3 | `frontend/views/dashboard/profile/parent/parentProfileFormTypes.ts:18` | `nationality: z.custom<CountryCode>(...).optional()`; update `ParentEditData.nationality?: CountryCode \| null` (line 44) |
 | 6.4 | `frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema.ts:8` | `nationality: z.custom<CountryCode>(...).optional()` |
@@ -168,7 +168,7 @@ _Rules:_ `AGENTS.md` · `frontend/views/AGENTS.md` · MUI v9 — `CountryDisplay
 | 10.1 | `frontend/views/dashboard/profile/parent/ParentProfileView.test.tsx:86` | Replace the existing `expect(screen.getByText("Nationality")).toBeTruthy()` with a positive assertion on the rendered country name. After codegen + `useLocale()` shadowing in the test wrapper, `CountryDisplay` calls `getCountryDisplayName("SA", "en")` → `"Saudi Arabia"`. Assert `expect(screen.getByText("Saudi Arabia")).toBeTruthy()`. The label `Nationality` test stays. |
 | 10.2 | Add a null case — `ParentProfileView` Storybook already has `nationality: "SA"`; add a `nationality: null` story variant in `ParentProfileView.stories.tsx` (`AdminView` with `nationality: null`) and verify `CountryDisplay` renders the `"not set"` fallback. | |
 | 10.3 | Run `bun run test:ui:components` for `ParentProfileView.test.tsx` (via run-test wrapper) | |
-| 10.4 | Run `bun run test:graphql` for parent/teacher onboarding mutations — verify enum input is accepted, an invalid `nationality: "ZZ"` is rejected by Pothos at schema level. | (Optional: add one test case for invalid country code rejection in `frontend/graphql/test/` if onboarding tests exist; check first.) |
+| 10.4 | Run `bun run test:graphql` for parent/teacher onboarding mutations — verify enum input is accepted, an invalid `nationality: "ZZ"` is rejected by Pothos at schema level. | (Optional: add one test case for invalid country code rejection in `frontend/common/graphql/test/` if onboarding tests exist; check first.) |
 
 _Rules:_ `.github/instructions/tests.instructions.md` · run-test script for any captured-log test
 

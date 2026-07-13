@@ -44,7 +44,7 @@ Use the `Task` tool with `agent_type: "explore"` and `mode: "background"` for ea
 | 1 — Naming | Canonical type naming (SelectType, InsertType, ReturnType, SubmitInput) | backend/types/ |
 | 2 — Duplication | Type duplication across layers | backend/ + frontend/ |
 | 3 — Consistency | Type consistency across layers (Service↔Pothos↔Repo) | services/, graphql/, repo/ |
-| 4 — Imports | Import path conventions (@/backend/types, @/frontend/graphql/generated/) | All files |
+| 4 — Imports | Import path conventions (@/backend/types, @/frontend/common/graphql/generated/) | All files |
 | 5 — Canonical Object | Single canonical object type per entity | graphql/pothos/ |
 | 6 — Foundation | Foundation types ($inferSelect/$inferInsert) | backend/types/ |
 
@@ -90,7 +90,7 @@ Scan all changed files in scope and check for each of the following violations. 
 
 - Import paths using relative paths (e.g., `../../types/entity.types`, `../../../backend/types/...`) instead of alias `@/backend/types`.
 - Backend types imported using any alias other than `@/backend/types`.
-- GraphQL generated types in frontend not imported from `@/frontend/graphql/generated/gql/`.
+- GraphQL generated types in frontend not imported from `@/frontend/common/graphql/generated/gql/`.
 - Frontend documents importing from `"@apollo/client/core"` instead of `"@apollo/client"`.
 
 ### Single Canonical Object Type

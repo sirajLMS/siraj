@@ -40,10 +40,10 @@ Also read before implementation: [`frontend/COMPONENT_PATTERNS.md`](frontend/COM
 
 ### Container layer — `TeacherDashboardContainer.tsx`
 
-[`frontend/views/AGENTS.md`](frontend/views/AGENTS.md) + [`frontend/graphql/AGENTS.md`](frontend/graphql/AGENTS.md):
+[`frontend/views/AGENTS.md`](frontend/views/AGENTS.md) + [`frontend/common/graphql/AGENTS.md`](frontend/common/graphql/AGENTS.md):
 
 - **Container owns data**; view is presentational only — no `useQuery` in view components.
-- **Single dashboard query**: `useQuery(teacherDashboardQueryDocument, …)` from [`teacher-dashboard.documents.ts`](frontend/graphql/sharedDocuments/teacher-dashboard.documents.ts); import hooks from `"@apollo/client/react"`.
+- **Single dashboard query**: `useQuery(teacherDashboardQueryDocument, …)` from [`teacher-dashboard.documents.ts`](frontend/common/graphql/sharedDocuments/teacher-dashboard.documents.ts); import hooks from `"@apollo/client/react"`.
 - **No `useLazyQuery`**; stateful `useQuery` with `variables: { date: filterDate, pagination }`.
 - **`filterDate` drives everything**: Zustand `useTeacherDashboardStore` `filterDate` is the single source of truth for query variables and `DateNavigator` (per COMPONENT_PATTERNS DateNavigator section — same as admin).
 - **Metrics from query response only** — use generated operation types (`Operations.TeacherDashboardQuery_…_metrics_…`), not ad-hoc view DTOs or paginated-row math ([`frontend/stores/AGENTS.md`](frontend/stores/AGENTS.md): no complex mapping workarounds).
@@ -94,7 +94,7 @@ Also read before implementation: [`frontend/COMPONENT_PATTERNS.md`](frontend/COM
 
 ### GraphQL layer (read-only for this task)
 
-[`frontend/graphql/AGENTS.md`](frontend/graphql/AGENTS.md):
+[`frontend/common/graphql/AGENTS.md`](frontend/common/graphql/AGENTS.md):
 
 - **No schema/document changes expected** — existing `teacherDashboardQueryDocument` already returns `metrics` + `scheduleRows` + `progressFeed` with `id` fields.
 - **No codegen** unless documents change.
@@ -192,7 +192,7 @@ flowchart LR
   query --> rows
 ```
 
-**No new GraphQL query or backend changes required** unless integration tests reveal a metrics/date bug (existing [`teacher-dashboard.test.ts`](frontend/graphql/test/teacher-dashboard.test.ts) already asserts `metrics` is returned).
+**No new GraphQL query or backend changes required** unless integration tests reveal a metrics/date bug (existing [`teacher-dashboard.test.ts`](frontend/common/graphql/test/teacher-dashboard.test.ts) already asserts `metrics` is returned).
 
 ## 1. Extract shared `DashboardMetricsSection`
 

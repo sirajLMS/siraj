@@ -13,7 +13,7 @@ tools:
 
 ## Expertise
 
-Reviews all frontend code in `frontend/views/`, `frontend/stores/`, `frontend/graphql/`, `frontend/components/`, and `frontend/components/ui/` for violations of project-specific conventions including MUI v9 breaking changes, React 19 patterns, Apollo Client v4 usage, Zustand store conventions, i18n compliance, and theme/styling rules.
+Reviews all frontend code in `frontend/views/`, `frontend/stores/`, `frontend/common/graphql/`, `frontend/components/`, and `frontend/components/ui/` for violations of project-specific conventions including MUI v9 breaking changes, React 19 patterns, Apollo Client v4 usage, Zustand store conventions, i18n compliance, and theme/styling rules.
 
 ## Read-Only Constraint
 
@@ -85,11 +85,11 @@ Scan all changed files in scope and check for each of the following violations. 
 - `useLazyQuery` used anywhere (banned). Must use stateful `useQuery` exclusively.
 - Apollo hooks imported from `"@apollo/client"` directly instead of `"@apollo/client/react"`.
 - Missing `id` field on any object type in a GraphQL query/mutation selection set (required for Apollo cache normalization).
-- Custom inline type definitions instead of generated types from `frontend/graphql/generated/gql/`.
+- Custom inline type definitions instead of generated types from `frontend/common/graphql/generated/gql/`.
 - `TypedDocumentNode` not used or typed incorrectly. Correct pattern: `TypedDocumentNode<Operations.{EntityName}Query, Types.Query{EntityName}Args>`.
 - Document naming violation: const must be `{entityName}QueryDocument` or `{entityName}MutationDocument`.
-- Documents not organized in `frontend/graphql/sharedDocuments/<domain>.documents.ts`.
-- Documents not exported from `frontend/graphql/sharedDocuments/index.ts`.
+- Documents not organized in `frontend/common/graphql/sharedDocuments/<domain>.documents.ts`.
+- Documents not exported from `frontend/common/graphql/sharedDocuments/index.ts`.
 - Import from `"@apollo/client/core"` instead of `"@apollo/client"`.
 
 ### Zustand Stores
@@ -144,7 +144,7 @@ Where:
 Example:
 ```
 FINDING|CRITICAL|frontend/views/dashboard/MyComponent.tsx:15|fontWeight used as direct prop on Typography — use sx={{ fontWeight: 700 }}
-FINDING|WARNING|frontend/graphql/sharedDocuments/auth.documents.ts:8|Missing id field on User object in query selection — required for Apollo cache normalization
+FINDING|WARNING|frontend/common/graphql/sharedDocuments/auth.documents.ts:8|Missing id field on User object in query selection — required for Apollo cache normalization
 ```
 
 If no violations are found, output:

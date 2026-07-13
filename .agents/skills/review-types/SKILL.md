@@ -139,7 +139,7 @@ Once confirmed, dispatch investigations. ALL analysis work happens in subagents.
 | 1 — Naming | Canonical type naming (SelectType, InsertType, ReturnType, SubmitInput) | backend/types/ |
 | 2 — Duplication | Type duplication across layers | backend/ + frontend/ |
 | 3 — Consistency | Type consistency across layers (Service↔Pothos↔Repo) | services/, graphql/, repo/ |
-| 4 — Imports | Import path conventions (@/backend/types, @/frontend/graphql/generated/) | All files |
+| 4 — Imports | Import path conventions (@/backend/types, @/frontend/common/graphql/generated/) | All files |
 | 5 — Canonical Object | Single canonical object type per entity | graphql/pothos/ |
 | 6 — Foundation | Foundation types ($inferSelect/$inferInsert) | backend/types/ |
 
@@ -200,7 +200,7 @@ Group findings by severity (CRITICAL first), then by group. **Count findings** b
 **Import Path Conventions:**
 - Import paths using relative paths instead of `@/backend/types`
 - Backend types imported using any alias other than `@/backend/types`
-- Frontend GraphQL generated types not imported from `@/frontend/graphql/generated/gql/`
+- Frontend GraphQL generated types not imported from `@/frontend/common/graphql/generated/gql/`
 - Frontend documents importing from `"@apollo/client/core"` instead of `"@apollo/client"`
 
 **Single Canonical Object Type:**

@@ -9,7 +9,7 @@
 
 ## 1. Problem Statement
 
-Running the full GraphQL test suite (`bun test frontend/graphql/test/ --timeout=120000`) yields **242 pass, 7 fail**. All 7 failures are in `frontend/graphql/test/group-class.test.ts`, and they all cascade from the first test "provision test entities, class instance, and group class" failing to log in a newly-created super admin.
+Running the full GraphQL test suite (`bun test frontend/common/graphql/test/ --timeout=120000`) yields **242 pass, 7 fail**. All 7 failures are in `frontend/common/graphql/test/group-class.test.ts`, and they all cascade from the first test "provision test entities, class instance, and group class" failing to log in a newly-created super admin.
 
 Even when run **individually**, `group-class.test.ts` fails with the same error — this is NOT a parallel-execution race condition.
 
@@ -63,7 +63,7 @@ function getIpAddress(headersList: Headers): string {
 }
 ```
 
-The test client (`frontend/graphql/test/testClient.ts`) is an `ApolloClient` with `HttpLink` that **never sets** `x-forwarded-for` or `x-real-ip` headers. So every test request resolves to IP = `"unknown"`.
+The test client (`frontend/common/graphql/test/testClient.ts`) is an `ApolloClient` with `HttpLink` that **never sets** `x-forwarded-for` or `x-real-ip` headers. So every test request resolves to IP = `"unknown"`.
 
 ### The crash sequence
 
@@ -102,7 +102,7 @@ The test client (`frontend/graphql/test/testClient.ts`) is an `ApolloClient` wit
 | `backend/db/repo/ratelimit.repository.ts:61` | `${ipAddress}::inet` in raw SQL — crashes with "unknown" |
 | `backend/db/migration/auth_rate_limiting.sql` | SQL function parameter `p_ip_address INET` — requires valid IP |
 | `backend/graphql/gqlContextFactory.ts:26-30` | Falls back to `"unknown"` when no IP headers present |
-| `frontend/graphql/test/testClient.ts` | Never sets `x-forwarded-for` or `x-real-ip` headers |
+| `frontend/common/graphql/test/testClient.ts` | Never sets `x-forwarded-for` or `x-real-ip` headers |
 | `backend/graphql/mutation/auth.mutation.ts:142-184` | Calls `isLocked`, `recordAttempt`, `resetAttempts` with `ipAddress` from context |
 | DB query result | `auth_rate_limits` table has **0 rows** — "unknown" was never successfully stored |
 | Server log | `POST /api/graphql 400 in 33ms` — HTTP 400 on login attempts |
@@ -170,7 +170,7 @@ Add `x-forwarded-for: 127.0.0.1` header to the test Apollo Client:
 ## 6. Verification Steps
 
 After implementing the fix:
-1. Run `group-class.test.ts` individually: `~/.bun/bin/bun run scripts/run-test/run-test.ts frontend/graphql/test/group-class.test.ts`
+1. Run `group-class.test.ts` individually: `~/.bun/bin/bun run scripts/run-test/run-test.ts frontend/common/graphql/test/group-class.test.ts`
 2. Run full GraphQL test suite: `~/.bun/bin/bun run test:graphql` (expect 249/249 pass)
 3. Run `tsgo` type check
 4. Run `biome:check`
@@ -187,8 +187,8 @@ After implementing the fix:
 | `backend/db/repo/ratelimit.repository.ts` | Add IP validation before `::inet` cast (defense in depth) |
 
 ### Files NOT to modify
-- `frontend/graphql/test/group-class.test.ts` — test logic is correct
-- `frontend/graphql/test/helpers.ts` — retry logic is correct, the fix is server-side
+- `frontend/common/graphql/test/group-class.test.ts` — test logic is correct
+- `frontend/common/graphql/test/helpers.ts` — retry logic is correct, the fix is server-side
 - `backend/graphql/mutation/auth.mutation.ts` — logic is correct, issue is upstream (IP resolution)
 
 ---

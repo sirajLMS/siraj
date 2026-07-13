@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { ParentSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/desktop/parentSuggestions.desktop";
+import { ParentSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/parentSuggestions.desktop";
 import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { suggestionFormSchema } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { buildSuggestionsLabels } from "@/frontend/views/dashboard/suggestions/utils/buildSuggestionsLabels";

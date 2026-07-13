@@ -29,7 +29,7 @@ const lazyViews = createLazyView<ManagersViewProps>(
       default: m.ManagersViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/managers/home/managersView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/managers/home/managersView.desktop").then(m => ({
       default: m.ManagersViewDesktop,
     }))
 );

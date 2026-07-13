@@ -9,11 +9,11 @@ const LOCALIZED_STRING_TYPE = "Partial<Record<'ar' | 'en', string>>";
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: "./frontend/graphql/generated/schema.graphql",
-  documents: ["./frontend/graphql/sharedDocuments/**/*.ts", "./frontend/views/**/*.documents.ts"],
+  schema: "./frontend/common/graphql/generated/schema.graphql",
+  documents: ["./frontend/common/graphql/sharedDocuments/**/*.ts", "./frontend/views/**/*.documents.ts"],
   ignoreNoDocuments: true,
   generates: {
-    "./frontend/graphql/generated/gql/": {
+    "./frontend/common/graphql/generated/gql/": {
       preset: "client",
       presetConfig: {
         fragmentMasking: false,
@@ -42,7 +42,7 @@ const config: CodegenConfig = {
         },
       },
     },
-    "./frontend/graphql/generated/gql/graphql-types.ts": {
+    "./frontend/common/graphql/generated/gql/graphql-types.ts": {
       plugins: ["typescript"],
       config: {
         useTypeImports: true,
@@ -67,7 +67,7 @@ const config: CodegenConfig = {
       },
     },
 
-    "./frontend/graphql/generated/gql/operations.ts": {
+    "./frontend/common/graphql/generated/gql/operations.ts": {
       plugins: ["typescript-operations"],
       preset: "import-types",
       presetConfig: {

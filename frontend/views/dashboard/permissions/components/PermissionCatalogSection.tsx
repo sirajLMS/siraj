@@ -2,8 +2,8 @@
 
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { PermissionCatalogSectionDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCatalogSection.desktop";
 import { PermissionCatalogSectionMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionCatalogSection.mobile";
-import { PermissionCatalogSectionDesktop } from "@/frontend/views/dashboard/permissions/components/permissionCatalogSection.desktop";
 
 export interface PermissionCatalogSectionProps {
   readonly permissions: readonly Permission[];

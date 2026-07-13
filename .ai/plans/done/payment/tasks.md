@@ -104,20 +104,20 @@ Check off as completed. See [plan.md](./plan.md) for phase details and [spec.md]
 - [x] Update `backend/graphql/mutation/shared/onboarding.mutation.ts`
 - [x] Update `backend/graphql/mutation/teachers/staff-profile.mutation.ts` (no changes needed)
 - [x] `bun run generate:gqlSchema` (schema.graphql updated; full `codegen` blocked until Phase 6 document updates)
-- [x] Create `frontend/graphql/test/payment-method.test.ts`
+- [x] Create `frontend/common/graphql/test/payment-method.test.ts`
 - [x] Gate: `bun run test:graphql`
 
 ## Phase 6 — Frontend documents
 
-- [x] Create `frontend/graphql/sharedDocuments/payment-method.documents.ts`
-- [x] Update `frontend/graphql/sharedDocuments/profile.documents.ts`
-- [x] Update `frontend/graphql/sharedDocuments/parent-profile.documents.ts`
-- [x] Update `frontend/graphql/sharedDocuments/staff-profile.documents.ts`
-- [x] Update `frontend/graphql/sharedDocuments/teacher-portal.documents.ts`
-- [x] Update `frontend/graphql/sharedDocuments/parent-onboarding.documents.ts`
-- [x] Update `frontend/graphql/sharedDocuments/teacher-onboarding.documents.ts`
-- [x] Update `frontend/graphql/sharedDocuments/profile.documents.test.ts`
-- [x] Update `frontend/graphql/sharedDocuments/index.ts`
+- [x] Create `frontend/common/graphql/sharedDocuments/payment-method.documents.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/profile.documents.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/parent-profile.documents.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/staff-profile.documents.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/teacher-portal.documents.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/parent-onboarding.documents.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/teacher-onboarding.documents.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/profile.documents.test.ts`
+- [x] Update `frontend/common/graphql/sharedDocuments/index.ts`
 - [x] Re-run `bun codegen`
 
 ## Phase 7 — UI composables + i18n

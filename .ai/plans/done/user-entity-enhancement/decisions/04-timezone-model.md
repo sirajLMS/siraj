@@ -285,13 +285,13 @@ We are still in **early development**. Per Decision **8C**:
 | `frontend/components/ui/input/TimezoneSelect.tsx` | **Replace all ad-hoc timezone inputs** |
 | `frontend/components/ui/input/index.ts` | Export `TimezoneSelect` |
 | `frontend/lib/timezone.ts` | Options + display helpers for picker |
-| `frontend/graphql/sharedDocuments/profile.documents.ts` | Select/mutate `IanaTimezone` |
-| `frontend/graphql/sharedDocuments/parent-profile.documents.ts` | Same |
-| `frontend/graphql/sharedDocuments/staff-profile.documents.ts` | Same |
-| `frontend/graphql/sharedDocuments/schedule.documents.ts` | Same |
-| `frontend/graphql/sharedDocuments/class-session.documents.ts` | Same |
-| `frontend/graphql/sharedDocuments/availability-search.documents.ts` | Same |
-| `frontend/graphql/sharedDocuments/teacher-portal.documents.ts` | Same |
+| `frontend/common/graphql/sharedDocuments/profile.documents.ts` | Select/mutate `IanaTimezone` |
+| `frontend/common/graphql/sharedDocuments/parent-profile.documents.ts` | Same |
+| `frontend/common/graphql/sharedDocuments/staff-profile.documents.ts` | Same |
+| `frontend/common/graphql/sharedDocuments/schedule.documents.ts` | Same |
+| `frontend/common/graphql/sharedDocuments/class-session.documents.ts` | Same |
+| `frontend/common/graphql/sharedDocuments/availability-search.documents.ts` | Same |
+| `frontend/common/graphql/sharedDocuments/teacher-portal.documents.ts` | Same |
 | `frontend/views/dashboard/teachers/onboarding/**` | Wire `TimezoneSelect` |
 | `frontend/views/dashboard/profile/**` | Wire `TimezoneSelect` |
 | `frontend/views/dashboard/teachers/profile/**` | Wire `TimezoneSelect` |
@@ -300,7 +300,7 @@ We are still in **early development**. Per Decision **8C**:
 | `frontend/views/dashboard/search-schedule/**` | Display TZ (read-only; no picker unless filter added) |
 | `frontend/hooks/useCreateTeacherOnboarding.ts` | Input shape |
 | `frontend/hooks/useCreateParentOnboarding.ts` | Input shape |
-| `frontend/graphql/generated/**` | Regenerated via codegen (do not hand-edit) |
+| `frontend/common/graphql/generated/**` | Regenerated via codegen (do not hand-edit) |
 | `test/ui/components/**` | Component test for `TimezoneSelect` (optional) |
 
 ### Seeds, tests, i18n (as touched by implementation)
@@ -310,7 +310,7 @@ We are still in **early development**. Per Decision **8C**:
 | `backend/db/seeds/**` | Seed `users.timezone`; stop seeding role-table timezone |
 | `backend/db/test/**` | Entity setup + repo tests for users timezone / COALESCE |
 | `backend/services/**/*.test.ts` | Profile/onboarding/schedule tests |
-| `frontend/graphql/test/**` | GraphQL integration tests for enum args |
+| `frontend/common/graphql/test/**` | GraphQL integration tests for enum args |
 | `shared/messages/**` | `ui.timezoneSelect` label + validation copy |
 
 ### Explicitly unchanged (API)
@@ -318,7 +318,7 @@ We are still in **early development**. Per Decision **8C**:
 | File | Note |
 |------|------|
 | `backend/graphql/mutation/dst-migration.mutation.ts` | Args stay `offsetMinutes` + `description` |
-| `frontend/graphql/sharedDocuments/dst-migration.documents.ts` | Same |
+| `frontend/common/graphql/sharedDocuments/dst-migration.documents.ts` | Same |
 | DST run/entry tables | Unchanged |
 
 ---

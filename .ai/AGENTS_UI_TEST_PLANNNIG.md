@@ -38,7 +38,7 @@ Before planning, verify and document these facts against the current repository 
 
 1. **Test runner**: All tests use `bun:test` (`describe`, `test`, `expect`, `beforeAll`, `afterAll`). Vitest is installed but ONLY for Storybook component testing via `vitest.config.ts`.
 2. **Playwright**: `playwright` and `@playwright/test` are installed. No `playwright.config.ts` exists. E2E tests use the `playwright` library within `bun:test` files.
-3. **Existing test infrastructure**: Check `frontend/graphql/test/` for `lifecycle.ts`, `testServer.ts`, `testClient.ts`, `helpers.ts` — these are proven patterns to reuse.
+3. **Existing test infrastructure**: Check `frontend/common/graphql/test/` for `lifecycle.ts`, `testServer.ts`, `testClient.ts`, `helpers.ts` — these are proven patterns to reuse.
 4. **Dev server**: `testServer.ts` spawns `bun run next dev -p 3001` with reference counting. `lifecycle.ts` wraps it in `beforeAll`/`afterAll` hooks.
 5. **Auth flow**: Login sets httpOnly cookies (`access_token`, `refresh_token`, `session_id`). Access token also stored in React context memory. Apollo sends `Authorization: Bearer <token>`.
 6. **Demo users**: `shared/demo-users.ts` defines roles (superAdmin, academyAdmin, teacher, parent, staff) all with password `12345678`.
@@ -154,7 +154,7 @@ Include testing rules, layer separation, Next.js alignment, type safety, and the
 
 - [ ] **No `any`** — All test helpers, wrappers, and assertions are fully typed.
 - [ ] **No blind casts** — Use type narrowing, not `as any` or `as unknown as`.
-- [ ] **Generated types** — Import from `frontend/graphql/generated/gql/graphql-types.ts` for permission enums and GraphQL types.
+- [ ] **Generated types** — Import from `frontend/common/graphql/generated/gql/graphql-types.ts` for permission enums and GraphQL types.
 
 ### 1.5 Zero Incomplete Implementation Policy
 
@@ -324,11 +324,11 @@ Every task MUST include a "Test Execution Requirements" section specifying exact
 - Store Seeding: `useUserStore.setState()` to set permissions before rendering. Reset in `afterEach`.
 - Assertions: `@testing-library/jest-dom` matchers: `toBeVisible()`, `toBeInTheDocument()`, `toHaveTextContent()`, `toBeDisabled()`.
 - Only `"use client"` components can be tested with component tests.
-- Permission enums: Always import from `frontend/graphql/generated/gql/graphql-types.ts`, never hardcode permission strings.
+- Permission enums: Always import from `frontend/common/graphql/generated/gql/graphql-types.ts`, never hardcode permission strings.
 
 **Input Sources (What to Read):**
 - `frontend/components/auth/RequirePermission.tsx` — component under test (props, rendering logic, fallback behavior)
-- `frontend/graphql/generated/gql/graphql-types.ts` — `AppPermission` enum values (exact PascalCase keys)
+- `frontend/common/graphql/generated/gql/graphql-types.ts` — `AppPermission` enum values (exact PascalCase keys)
 - `frontend/stores/userStore.ts` — store shape for permission seeding (`permissions` field)
 - `test/manual/scenario/permissions/rbac-gates.md` — manual scenario being automated (test case table)
 
@@ -372,7 +372,7 @@ Every task MUST include a "Test Execution Requirements" section specifying exact
 
 **Layer-Specific Rules (E2E Tests — Flattened from Section 4.B):**
 - Browser: `playwright` library, `chromium.launch({ headless: true })`.
-- Dev Server: Reuses `setupTestServerLifecycle()` from `frontend/graphql/test/lifecycle.ts`. Port 3001.
+- Dev Server: Reuses `setupTestServerLifecycle()` from `frontend/common/graphql/test/lifecycle.ts`. Port 3001.
 - Context Isolation: Each test creates a fresh `BrowserContext` with `baseURL: "http://localhost:3001"`. Cookies/storage isolated per test.
 - Authentication: `loginAsDemoUser()` calls `demoLogin` GraphQL mutation via `page.evaluate(fetch(...))`, sets `access_token` cookie via `context.addCookies()`.
 - Navigation: `page.goto("/ar/[route]")` with `page.waitForURL()` for navigation assertions.
@@ -719,7 +719,7 @@ A table mapping every manual scenario file to the component tests and E2E tests 
 ### B. E2E Test Layer (`test/ui/e2e/`)
 
 - **Browser**: `playwright` library, `chromium.launch({ headless: true })`.
-- **Dev Server**: Reuses `setupTestServerLifecycle()` from `frontend/graphql/test/lifecycle.ts`. Port 3001.
+- **Dev Server**: Reuses `setupTestServerLifecycle()` from `frontend/common/graphql/test/lifecycle.ts`. Port 3001.
 - **Context Isolation**: Each test creates a fresh `BrowserContext` with `baseURL: "http://localhost:3001"`. Cookies/storage isolated per test.
 - **Authentication**: `loginAsDemoUser()` calls `demoLogin` GraphQL mutation via `page.evaluate(fetch(...))`, sets `access_token` cookie via `context.addCookies()`.
 - **Navigation**: `page.goto("/ar/[route]")` with `page.waitForURL()` for navigation assertions.
@@ -732,7 +732,7 @@ A table mapping every manual scenario file to the component tests and E2E tests 
 
 - **No cross-layer imports**: Component tests never import from `test/ui/e2e/`. E2E tests never import from `test/ui/components/`.
 - **Demo users**: `shared/demo-users.ts` is the single source of truth for test user credentials.
-- **Permission enums**: Always import from `frontend/graphql/generated/gql/graphql-types.ts`, never hardcode permission strings.
+- **Permission enums**: Always import from `frontend/common/graphql/generated/gql/graphql-types.ts`, never hardcode permission strings.
 - **Seed data**: E2E tests rely on existing seed data. Never create test data in E2E tests.
 
 ### D. Test File Naming Conventions

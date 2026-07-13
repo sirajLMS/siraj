@@ -68,7 +68,7 @@ const lazyViews = createLazyView<TeacherWeeklyScheduleViewProps>(
       default: m.TeacherWeeklyScheduleViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/teachers/schedule/weekly/teacherWeeklyScheduleView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/teachers/schedule/weekly/teacherWeeklyScheduleView.desktop").then(m => ({
       default: m.TeacherWeeklyScheduleViewDesktop,
     }))
 );

@@ -10,7 +10,7 @@ const lazyViews = createLazyView<FutureClassCardProps>(
       default: m.FutureClassCardMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop").then(m => ({
       default: m.FutureClassCardDesktop,
     }))
 );

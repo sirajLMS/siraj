@@ -2,8 +2,8 @@
 
 import type { OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { OnlineMeetingCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/onlineMeetingCard.desktop";
 import { OnlineMeetingCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/onlineMeetingCard.mobile";
-import { OnlineMeetingCardDesktop } from "@/frontend/views/dashboard/classes/audit/onlineMeetingCard.desktop";
 
 export interface OnlineMeetingCardProps {
   readonly meetingInfo: OnlineMeetingInfo | null | undefined;

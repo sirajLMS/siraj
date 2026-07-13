@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { AppPermission, SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/common/utils/logger";
+import { AdminSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/adminSuggestions.desktop";
 import { createMockAdminDecorator } from "@/frontend/views/dashboard/components/createMockAdminDecorator";
-import { AdminSuggestionsDesktopView } from "@/frontend/views/dashboard/suggestions/desktop/adminSuggestions.desktop";
 import type {
   AdminSuggestionRow,
   AdminSuggestionsSummary,

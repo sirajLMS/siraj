@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/common/utils/logger";
-import { AdminComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/desktop/adminComplaints.desktop";
+import { AdminComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/adminComplaints.desktop";
 import type {
   AdminComplaintRow,
   AdminComplaintsSummary,

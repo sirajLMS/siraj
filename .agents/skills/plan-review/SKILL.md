@@ -21,7 +21,7 @@ Map each file path to its architecture layer:
 | `app/` | `app/AGENTS.md` |
 | `frontend/views/` | `frontend/views/AGENTS.md` |
 | `frontend/stores/` | `frontend/stores/AGENTS.md` |
-| `frontend/graphql/` | `frontend/graphql/AGENTS.md` |
+| `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md` |
 | `backend/services/` | `backend/services/AGENTS.md` |
 | `backend/graphql/` | `backend/graphql/AGENTS.md` |
 | `backend/db/repo/` | `backend/db/repo/AGENTS.md` |

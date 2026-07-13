@@ -51,7 +51,7 @@ const eslintConfig = defineConfig([
     "*.lock",
     "*.log",
     "draft/**",
-    "frontend/graphql/generated/**",
+    "frontend/common/graphql/generated/**",
     "scratch/**",
     "**/unRefactored_tests/**",
     "*storybook.log",

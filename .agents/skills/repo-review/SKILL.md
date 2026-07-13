@@ -65,7 +65,7 @@ The project has 4 instruction files that define mandatory rules per file type. T
 
 | Agent ID | Scope | Focus |
 |---|---|---|
-| `review-frontend` | `frontend/views/`, `frontend/stores/`, `frontend/components/`, `frontend/graphql/` | MUI v9, React 19, Apollo, Zustand, i18n, theme, project conventions |
+| `review-frontend` | `frontend/views/`, `frontend/stores/`, `frontend/components/`, `frontend/common/graphql/` | MUI v9, React 19, Apollo, Zustand, i18n, theme, project conventions |
 | `review-backend` | `backend/services/`, `backend/graphql/`, `backend/db/repo/`, `backend/db/schema/`, `backend/lib/` | Architecture layers, types, Pothos, i18n, logging, repo conventions, tests |
 | `review-types` | `backend/types/`, cross-layer type usage across `frontend/` and `backend/` | Canonical naming, duplication, consistency, import paths |
 | `review-config` | `app/`, `scripts/`, `*.config.*`, `.github/` | Next.js 16 conventions, i18n routing, build/quality commands, env patterns, secret exposure |

@@ -19,7 +19,7 @@ The `CurrencyCode` GraphQL enum and the consumer-side UI components are already 
 - `backend/enum/currency.enum.ts` — the `CurrencyCode` TS enum with 32 codes (all Arabic-speaking countries + Turkey + USD/EUR/GBP/CHF/CNY/JPY/INR/CAD/AUD)
 - `backend/enum/index.ts` — barrel export of `CurrencyCode`
 - `backend/graphql/pothos/shared/enum.pothos.ts` — `CurrencyCodePothosObject` is already registered (around line 136)
-- codegen outputs: `frontend/graphql/generated/gql/graphql-types.ts` (~line 926) and `frontend/graphql/generated/schema.graphql` already expose the `CurrencyCode` enum
+- codegen outputs: `frontend/common/graphql/generated/gql/graphql-types.ts` (~line 926) and `frontend/common/graphql/generated/schema.graphql` already expose the `CurrencyCode` enum
 - `frontend/lib/currency.ts` — single flat file with `CurrencyOption` type, `currencies` catalog (note: EUR uses the EU flag `🇪🇺` + `countryCode: "EU"`), and helpers `getCurrencyByCode`, `getCurrencyFlag`, `getCurrencySymbol`, `getCurrencyDisplayName` (Intl.DisplayNames), `getCurrencyOptions`, `getCurrencyOptionLabel`, `getCurrencyOptionRowLabel`
 - `frontend/components/ui/input/currencySelect/` — 5-file split: `CurrencySelect.tsx`, `CurrencyAutocomplete.tsx`, `CurrencyOptionRow.tsx`, `currencyAutocompletePopper.ts`, `CurrencySelect.stories.tsx`. Start + end adornments (search icon + flag) are already wired. Re-exported from `frontend/components/ui/input/index.ts`.
 - `frontend/components/ui/display/currencyDisplay/` — `CurrencyDisplay.tsx` + stories. Re-exported from `frontend/components/ui/display/index.ts`.
@@ -51,7 +51,7 @@ Migrate every free `varchar(10)` currency column, every Pothos `t.string`/`t.exp
 
 - PG enum name: `currency_code`, registered via `createPgEnumFromEnum("currency_code", CurrencyCode)` in `backend/db/schema/enums.ts` next to `countryCodeEnum` (mirrors the existing pattern). This derives PG enum values from the TS enum so they stay synced — `CurrencyCode.EGP === "EGP"`.
 - Migration strategy: clean-slate via `bun db cleanGenerate` (Decision 8C). No incremental ALTER, no dual-write. `cleanGenerate` is action `8` in `scripts/dbActions/actions.ts` — it wipes `backend/drizzle/`, resets the DB, regenerates the extensions migration + main migration + bundles custom migrations under `backend/db/migration/` into one `combined_custom_logic` migration, migrates, and seeds.
-- Frontend lib source-of-truth: `CurrencyCode` from `@/frontend/graphql/generated/gql/graphql-types` (codegen enum — NOT the backend enum directly, per `backend/enum/AGENTS.md`).
+- Frontend lib source-of-truth: `CurrencyCode` from `@/frontend/common/graphql/generated/gql/graphql-types` (codegen enum — NOT the backend enum directly, per `backend/enum/AGENTS.md`).
 - Drizzle column shape: `currencyCodeEnum("...").$type<CurrencyCode>()` (nullable ones omit `.notNull()`; required ones add `.notNull()`).
 
 ## Rules enforcement (critical — this is the whole point of this plan)
@@ -97,7 +97,7 @@ Migrate every free `varchar(10)` currency column, every Pothos `t.string`/`t.exp
 5. After cleanGenerate + seed, all repo tests via `bun run scripts/run-test/run-test.ts` pass
 6. All logic tests touching FX (`billing-safeguards`, `exchange-rate`) pass after literal flip
 7. `bun run generate:gqlSchema && bun codegen` succeeds; the 12 generated-type currency fields read `Maybe<CurrencyCode>` / `CurrencyCode` (no more `Maybe<Scalars['String']['...']>`)
-8. `bun test frontend/graphql/test/` passes; `profile.documents.test.ts:55` `expect(mutationSource).toContain("currency")` still green
+8. `bun test frontend/common/graphql/test/` passes; `profile.documents.test.ts:55` `expect(mutationSource).toContain("currency")` still green
 9. All Storybook stories render
 10. `.ai/plans/user-entity-enhancement/ANALYSIS.md` §2.3 + §7.1 updated to mark the currency slice as "landed"
 

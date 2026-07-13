@@ -5,7 +5,7 @@
 GraphQL documents are organized **by domain** into sub-directories, each with an `index.ts` barrel that re-exports its `.documents.ts` files. The top-level `index.ts` re-exports all sub-directory barrels.
 
 ```
-frontend/graphql/sharedDocuments/
+frontend/common/graphql/sharedDocuments/
 ├── AGENTS.md             ← this file
 ├── index.ts              ← re-exports all sub-directory barrels
 ├── profile.documents.test.ts  ← co-located test (exception: stays at top level)
@@ -58,7 +58,7 @@ export * from "./teachers";
 | **Deep import** (also valid) | `import { fooQueryDocument } from "@/frontend/common/graphql/sharedDocuments/<subdir>/foo.documents";` |
 | **Never** (stale flat path) | `import { … } from "@/frontend/common/graphql/sharedDocuments/foo.documents";` ← broken after refactor |
 
-Both barrel and deep-import paths resolve to the same exports. Prefer the barrel (`@/frontend/graphql/sharedDocuments`) in views/hooks unless you need to avoid pulling in the full barrel tree.
+Both barrel and deep-import paths resolve to the same exports. Prefer the barrel (`@/frontend/common/graphql/sharedDocuments`) in views/hooks unless you need to avoid pulling in the full barrel tree.
 
 When adding a **new** document file:
 1. Create `<domain>.documents.ts` in the matching sub-directory.

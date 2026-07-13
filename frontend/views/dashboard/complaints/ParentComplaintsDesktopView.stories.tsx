@@ -11,7 +11,7 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { ParentComplaintsDesktopView } from "@/frontend/views/dashboard/complaints/desktop/parentComplaints.desktop";
+import { ParentComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop";
 import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
 import { complaintFormSchema } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
 import type {

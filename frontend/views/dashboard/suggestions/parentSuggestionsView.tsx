@@ -16,7 +16,7 @@ const lazyViews = createLazyView<ParentSuggestionsViewModel>(
       default: m.ParentSuggestionsMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/suggestions/desktop/parentSuggestions.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/suggestions/parentSuggestions.desktop").then(m => ({
       default: m.ParentSuggestionsDesktopView,
     }))
 );

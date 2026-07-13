@@ -2,8 +2,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { TeacherAvailabilityDesktopView } from "@/frontend/desktop/views/dashboard/teachers/availability/teacherAvailabilityView.desktop";
 import { TeacherAvailabilityMobileView } from "@/frontend/mobile/views/dashboard/teachers/availability/teacherAvailabilityView.mobile";
-import { TeacherAvailabilityDesktopView } from "@/frontend/views/dashboard/teachers/availability/teacherAvailabilityView.desktop";
 import type {
   AvailabilityEntry,
   AvailabilitySearchFormData,

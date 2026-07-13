@@ -16,7 +16,7 @@ const lazyViews = createLazyView<ScheduleOverviewViewModel>(
       default: m.ScheduleOverviewMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/admin/home/scheduleOverview/desktop/scheduleOverview.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop").then(m => ({
       default: m.ScheduleOverviewDesktopView,
     }))
 );

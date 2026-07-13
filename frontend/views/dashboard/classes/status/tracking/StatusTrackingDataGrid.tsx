@@ -22,7 +22,7 @@ const lazyViews = createLazyView<StatusTrackingDataGridProps>(
       default: m.StatusTrackingDataGridMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/classes/status/tracking/statusTrackingDataGrid.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/classes/status/tracking/statusTrackingDataGrid.desktop").then(m => ({
       default: m.StatusTrackingDataGridDesktop,
     }))
 );

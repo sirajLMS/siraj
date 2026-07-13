@@ -15,7 +15,7 @@ const lazyViews = createLazyView<ClassAuditViewProps>(
       default: m.ClassAuditViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/classes/audit/classAuditView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/classes/audit/classAuditView.desktop").then(m => ({
       default: m.ClassAuditViewDesktop,
     }))
 );

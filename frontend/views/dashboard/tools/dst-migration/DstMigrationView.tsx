@@ -1,6 +1,7 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { DstMigrationViewDesktop } from "@/frontend/desktop/views/dashboard/tools/dst-migration/dstMigrationView.desktop";
 import { DstMigrationViewMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/dstMigrationView.mobile";
 import type {
   CheckedEmptyItem,
@@ -9,7 +10,6 @@ import type {
   MigrationStatus,
   UpdatedSession,
 } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
-import { DstMigrationViewDesktop } from "@/frontend/views/dashboard/tools/dst-migration/dstMigrationView.desktop";
 
 export interface DstMigrationViewProps {
   readonly metrics: DstMigrationMetrics;

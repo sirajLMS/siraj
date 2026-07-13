@@ -1,8 +1,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { TeacherReassignmentViewDesktop } from "@/frontend/desktop/views/dashboard/teachers/reassignment/teacherReassignmentView.desktop";
 import { TeacherReassignmentViewMobile } from "@/frontend/mobile/views/dashboard/teachers/reassignment/teacherReassignmentView.mobile";
-import { TeacherReassignmentViewDesktop } from "@/frontend/views/dashboard/teachers/reassignment/teacherReassignmentView.desktop";
 import type {
   TeacherReassignmentViewModel,
   UseTeacherReassignmentViewModelProps,

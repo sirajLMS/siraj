@@ -1,6 +1,6 @@
 // ⚠️ Backend-only enum barrel file.
 // Frontend code MUST use GraphQL codegen enums from
-// `@/frontend/graphql/generated/gql/graphql-types` instead.
+// `@/frontend/common/graphql/generated/gql/graphql-types` instead.
 // Prefer deep imports (e.g. `import { StudentStatus } from "@/backend/enum/students/student-lifecycle.enum"`)
 // rather than importing from this index file.
 

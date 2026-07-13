@@ -1,8 +1,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { InstitutionalReportCardDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/institutionalReportCard.desktop";
 import { InstitutionalReportCardMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/institutionalReportCard.mobile";
-import { InstitutionalReportCardDesktop } from "@/frontend/views/dashboard/schedule/alerts/institutionalReportCard.desktop";
 
 interface InstitutionalReportCardProps {
   readonly title: string;

@@ -16,7 +16,7 @@ const lazyViews = createLazyView<ParentComplaintsViewModel>(
       default: m.ParentComplaintsMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/complaints/desktop/parentComplaints.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop").then(m => ({
       default: m.ParentComplaintsDesktopView,
     }))
 );

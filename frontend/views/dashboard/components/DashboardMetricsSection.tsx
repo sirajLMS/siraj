@@ -3,8 +3,8 @@
 import type { Breakpoint } from "@mui/material";
 import type { GridSize } from "@mui/material/Grid";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { DashboardMetricsSectionDesktop } from "@/frontend/desktop/views/dashboard/components/dashboardMetricsSection.desktop";
 import { DashboardMetricsSectionMobile } from "@/frontend/mobile/views/dashboard/components/dashboardMetricsSection.mobile";
-import { DashboardMetricsSectionDesktop } from "@/frontend/views/dashboard/components/dashboardMetricsSection.desktop";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };

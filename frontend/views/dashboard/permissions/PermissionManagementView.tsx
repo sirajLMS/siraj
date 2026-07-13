@@ -2,8 +2,8 @@
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
+import { PermissionManagementDesktopView } from "@/frontend/desktop/views/dashboard/permissions/permissionManagementView.desktop";
 import { PermissionManagementMobileView } from "@/frontend/mobile/views/dashboard/permissions/permissionManagementView.mobile";
-import { PermissionManagementDesktopView } from "@/frontend/views/dashboard/permissions/permissionManagementView.desktop";
 import {
   type PermissionManagementViewProps,
   usePermissionManagementViewModel,

@@ -12,7 +12,7 @@ const lazyViews = createLazyView<StudentsViewModel>(
       default: m.StudentsMobileView,
     })),
   () =>
-    import("@/frontend/views/dashboard/admin/parents/students/desktop/students.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/admin/parents/students/students.desktop").then(m => ({
       default: m.StudentsDesktopView,
     }))
 );

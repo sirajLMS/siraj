@@ -1,7 +1,7 @@
 {
   "client": {
     "service": {
-      "localSchemaFile": "./frontend/graphql/generated/schema.graphql"
+      "localSchemaFile": "./frontend/common/graphql/generated/schema.graphql"
     },
     "includes": ["./frontend/**/*.ts"]
   }

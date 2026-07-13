@@ -19,9 +19,9 @@
 | 5 | Repositories | `AGENTS.md` · `backend/db/repo/AGENTS.md` · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Repository Layer) |
 | 6 | Services | `AGENTS.md` · `backend/services/AGENTS.md` · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Service Layer) |
 | 7 | Pothos | `AGENTS.md` · `backend/graphql/AGENTS.md` · `backend/AGENTS.md` · `.agents/instructions/backend.instructions.md` (Pothos/GraphQL) |
-| 8 | Codegen | `AGENTS.md` · `frontend/AGENTS.md` · `frontend/graphql/sharedDocuments/AGENTS.md` · `frontend/graphql/AGENTS.md` · `.agents/instructions/{frontend,backend}.instructions.md` (Apollo & GraphQL sections) |
+| 8 | Codegen | `AGENTS.md` · `frontend/AGENTS.md` · `frontend/common/graphql/sharedDocuments/AGENTS.md` · `frontend/common/graphql/AGENTS.md` · `.agents/instructions/{frontend,backend}.instructions.md` (Apollo & GraphQL sections) |
 | 9 | Seeds | `AGENTS.md` · `backend/AGENTS.md` (Seeds section) · `.agents/instructions/backend.instructions.md` (Seeds CRITICAL) |
-| 10 | Frontend documents | `AGENTS.md` · `frontend/graphql/sharedDocuments/AGENTS.md` · `frontend/graphql/AGENTS.md` · `frontend/AGENTS.md` · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL) |
+| 10 | Frontend documents | `AGENTS.md` · `frontend/common/graphql/sharedDocuments/AGENTS.md` · `frontend/common/graphql/AGENTS.md` · `frontend/AGENTS.md` · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL) |
 | 11–13 | Frontend Zod / types / UI | `AGENTS.md` · `frontend/views/AGENTS.md` · `frontend/AGENTS.md` · `.agents/instructions/frontend.instructions.md` (MUI v9, React 19, Apollo, Theme & Styling) |
 | 14 | `users.displayCurrency` (Decision 3A part 2) | `AGENTS.md` · `backend/AGENTS.md` · `backend/types/AGENTS.md` (UserReturnType re-apply) · `.agents/instructions/backend.instructions.md` · `backend/db/repo/AGENTS.md` · `backend/services/AGENTS.md` · `backend/graphql/AGENTS.md` · `shared/AGENTS.md` · `frontend/stores/AGENTS.md` · `frontend/views/AGENTS.md` · `frontend/AGENTS.md` · `.agents/instructions/frontend.instructions.md` · `tests.instructions.md` |
 | 15 | FX-convert-on-render read path (Decision 3A part 3 + stale-FX rule) | `AGENTS.md` · `backend/AGENTS.md` · `backend/db/repo/AGENTS.md` · `backend/types/AGENTS.md` · `backend/services/AGENTS.md` · `backend/graphql/AGENTS.md` · `shared/AGENTS.md` · `.agents/instructions/frontend.instructions.md` · `frontend/AGENTS.md` · `frontend/views/AGENTS.md` · `tests.instructions.md` |
@@ -140,11 +140,11 @@ _Rules (read before editing):_ `AGENTS.md` (root) · `backend/graphql/AGENTS.md`
 
 - [x] **T8.1** Run `bun run generate:gqlSchema`.
 - [x] **T8.2** Run `bun codegen`.
-- [x] **T8.3** Verify in `frontend/graphql/generated/schema.graphql` that the 12 currency fields now read `CurrencyCode!`/`CurrencyCode` instead of `String!`/`String`.
-- [x] **T8.4** Verify in `frontend/graphql/generated/gql/graphql-types.ts` that the 12 fields now read `Maybe<CurrencyCode>`/`CurrencyCode`.
+- [x] **T8.3** Verify in `frontend/common/graphql/generated/schema.graphql` that the 12 currency fields now read `CurrencyCode!`/`CurrencyCode` instead of `String!`/`String`.
+- [x] **T8.4** Verify in `frontend/common/graphql/generated/gql/graphql-types.ts` that the 12 fields now read `Maybe<CurrencyCode>`/`CurrencyCode`.
 - [ ] Do NOT hand-edit generated files.
 
-_Rules (read before editing):_ `AGENTS.md` (root) · `frontend/AGENTS.md` (Code Quality + Apollo/GraphQL Codegen rule) · `frontend/graphql/sharedDocuments/AGENTS.md` ("Codegen" — `~/.bun/bin/bun run generate:gqlSchema` THEN `~/.bun/bin/bun codegen` after any schema or document change; never inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL → codegen after schema/document changes — both steps required) · `.agents/instructions/backend.instructions.md` ("GraphQL Schema Generation" — both `generate:gqlSchema` AND `codegen` required)
+_Rules (read before editing):_ `AGENTS.md` (root) · `frontend/AGENTS.md` (Code Quality + Apollo/GraphQL Codegen rule) · `frontend/common/graphql/sharedDocuments/AGENTS.md` ("Codegen" — `~/.bun/bin/bun run generate:gqlSchema` THEN `~/.bun/bin/bun codegen` after any schema or document change; never inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL → codegen after schema/document changes — both steps required) · `.agents/instructions/backend.instructions.md` ("GraphQL Schema Generation" — both `generate:gqlSchema` AND `codegen` required)
 
 ## Phase 9 — Seeds
 
@@ -159,15 +159,15 @@ _Rules (read before editing):_ `AGENTS.md` (root) · `backend/AGENTS.md` (Seeds 
 
 ## Phase 10 — Frontend GraphQL documents
 
-- [x] **T10.1** `frontend/graphql/sharedDocuments/billing-management.documents.ts:13` — `$currency: String!` → `$currency: CurrencyCode!`.
+- [x] **T10.1** `frontend/common/graphql/sharedDocuments/billing-management.documents.ts:13` — `$currency: String!` → `$currency: CurrencyCode!`.
 - [x] **T10.2** Verify (no edit) `parent-onboarding.documents.ts`, `billing-alerts.documents.ts`, `parent-billing-history.documents.ts`, `parent-profile.documents.ts`, `user-billing-profile.documents.ts`, `staff-profile.documents.ts`, `profile.documents.ts`, `teacher-portal.documents.ts` — all unchanged; field selections auto-typed via codegen.
-- [x] **T10.3** Verify `frontend/graphql/sharedDocuments/profile.documents.test.ts:55` (`expect(mutationSource).toContain("currency")`) still passes — no edit.
+- [x] **T10.3** Verify `frontend/common/graphql/sharedDocuments/profile.documents.test.ts:55` (`expect(mutationSource).toContain("currency")`) still passes — no edit.
 
-_Rules (read before editing):_ `AGENTS.md` (root) · `frontend/graphql/sharedDocuments/AGENTS.md` (one file per domain; import `gql` + `TypedDocumentNode` from `"@apollo/client"` NEVER `"@apollo/client/core"`; naming `{entityName}QueryDocument`/`{entityName}MutationDocument` → `TypedDocumentNode<Operations.X, Types.Y>`; **`id` field on EVERY object type in selection sets** for Apollo cache normalization; NO `useLazyQuery`; codegen after any document change) · `frontend/graphql/AGENTS.md` (Type Safety + Document Organization — all ops strongly typed via codegen; never custom inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — import `gql`+`TypedDocumentNode` from `"@apollo/client"`, hooks from `"@apollo/client/react"`; import TYPES from `graphql-types.ts` NOT `operations.ts`) · `frontend/AGENTS.md` (Apollo hooks rule)
+_Rules (read before editing):_ `AGENTS.md` (root) · `frontend/common/graphql/sharedDocuments/AGENTS.md` (one file per domain; import `gql` + `TypedDocumentNode` from `"@apollo/client"` NEVER `"@apollo/client/core"`; naming `{entityName}QueryDocument`/`{entityName}MutationDocument` → `TypedDocumentNode<Operations.X, Types.Y>`; **`id` field on EVERY object type in selection sets** for Apollo cache normalization; NO `useLazyQuery`; codegen after any document change) · `frontend/common/graphql/AGENTS.md` (Type Safety + Document Organization — all ops strongly typed via codegen; never custom inline type literals) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — import `gql`+`TypedDocumentNode` from `"@apollo/client"`, hooks from `"@apollo/client/react"`; import TYPES from `graphql-types.ts` NOT `operations.ts`) · `frontend/AGENTS.md` (Apollo hooks rule)
 
 ## Phase 11 — Frontend Zod schemas
 
-- [x] **T11.1** `frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema.ts:48` — `z.nativeEnum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired })` (add `CurrencyCode` import from `@/frontend/graphql/generated/gql/graphql-types`).
+- [x] **T11.1** `frontend/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema.ts:48` — `z.nativeEnum(CurrencyCode).refine(v => !!v, { message: validationLabels.currencyRequired })` (add `CurrencyCode` import from `@/frontend/common/graphql/generated/gql/graphql-types`).
 - [x] **T11.2** `frontend/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema.ts:26` — `z.nativeEnum(CurrencyCode).refine(...)` triggering `currencyRequired`.
 - [x] **T11.3** `frontend/views/dashboard/teachers/profile/schemas/teacherProfileSchema.ts:17` — `z.nativeEnum(CurrencyCode).optional()`.
 - [x] **T11.4** `frontend/views/dashboard/parent/profile/edit/parentProfileEditSchema.ts:23` — `z.nativeEnum(CurrencyCode).refine(...)`.
@@ -175,7 +175,7 @@ _Rules (read before editing):_ `AGENTS.md` (root) · `frontend/graphql/sharedDoc
 - [x] **T11.6** `frontend/views/dashboard/profile/parent/parentProfileFormTypes.ts:23, 49` — `z.nativeEnum(CurrencyCode).optional()` + `readonly currency?: CurrencyCode | null`.
 - [x] **T11.7** Per-file `tsgo` → biome → lint-queue on touched schemas (verified 2026-07-10).
 
-_Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop) · `frontend/views/AGENTS.md` (form/view types follow domain structure) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — `graphql-types.ts` is canonical for entity types, NOT `operations.ts`; NEVER inline type literals — always use codegen types; `CurrencyCode` from `@/frontend/graphql/generated/gql/graphql-types`) · `frontend/AGENTS.md` (Zustand-stores + type-consumers rule — if schema/FE misalign, fix the schema or query, never redefine types locally)
+_Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop) · `frontend/views/AGENTS.md` (form/view types follow domain structure) · `.agents/instructions/frontend.instructions.md` (Apollo & GraphQL — `graphql-types.ts` is canonical for entity types, NOT `operations.ts`; NEVER inline type literals — always use codegen types; `CurrencyCode` from `@/frontend/common/graphql/generated/gql/graphql-types`) · `frontend/AGENTS.md` (Zustand-stores + type-consumers rule — if schema/FE misalign, fix the schema or query, never redefine types locally)
 
 ## Phase 12 — Frontend form/view types
 
@@ -229,7 +229,7 @@ _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop,
 - [x] **T14.8** `backend/graphql/pothos/auth/user.pothos.ts:17-50` — add `displayCurrency: t.expose("displayCurrency", { type: CurrencyCodePothosObject, nullable: true })`.
 - [x] **T14.9** `backend/graphql/pothos/profile/profile.pothos.ts:114-122` — `CoreUserProfileFieldsInput` adds `displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false })`.
 - [x] **T14.10** Regenerate: `bun run generate:gqlSchema && bun codegen` — surfaces `displayCurrency: Maybe<CurrencyCode>` on `User`.
-- [x] **T14.11** `frontend/graphql/sharedDocuments/{user,profile,auth}.documents.ts` — add `displayCurrency` to user query selection; add to `UpdateOwnProfileInput`/`UpdateUserProfileInput.core`. Always include `id`.
+- [x] **T14.11** `frontend/common/graphql/sharedDocuments/{user,profile,auth}.documents.ts` — add `displayCurrency` to user query selection; add to `UpdateOwnProfileInput`/`UpdateUserProfileInput.core`. Always include `id`.
 - [x] **T14.12** `frontend/stores/userStore.ts:4-40` — `UserState` adds `displayCurrency: CurrencyCode | null`; initialize `null`; in `setUser` set `displayCurrency: user?.displayCurrency ?? null`. Mock store mirrors the field.
 - [x] **T14.13** `shared/messages/types/profile.ts:59, 109` (and `staff.fields` block) — add `readonly displayCurrency: string;`.
 - [x] **T14.14** `shared/messages/ar/profile.ts:61, 111` — add `displayCurrency: "عملة العرض",`.
@@ -241,7 +241,7 @@ _Rules (read before editing):_ `AGENTS.md` (root — per-file verification loop,
 - [x] **T14.20** `backend/db/seeds/seed-users.ts` (or factory) — add `displayCurrency: null` default. NO currency bias.
 - [x] **T14.21** Per-file verify: `tsgo` → `biome:check` → lint-queue-client on each touched file.
 - [x] **T14.22** `bun run scripts/run-test/run-test.ts backend/db/test/repo/user.repository.test.ts` — add `updateDisplayCurrency` round-trip test.
-- [x] **T14.23** `bun test frontend/graphql/test/profile.documents.test.ts` — add `displayCurrency` mutation assertion.
+- [x] **T14.23** `bun test frontend/common/graphql/test/profile.documents.test.ts` — add `displayCurrency` mutation assertion.
 
 **CROSS-FILE DEPENDENCIES (orchestrator-coordinated):** `User` GraphQL field (T14.8) BEFORE frontend documents (T14.11). Store change (T14.12) BEFORE Phase 15 UI swap reads `useUserStore.displayCurrency`. Staff `AccountSection` (T14.18) needs a NEW view-mode `<CurrencyDisplay>` row.
 
@@ -257,7 +257,7 @@ _Rules (read before editing):_ `AGENTS.md` (root — lint queue + per-file verif
 - [x] **T15.4** `backend/graphql/pothos/billing/fx-display.pothos.ts` NEW — `DisplayAmountPothosObject = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount").implement({ fields: t => ({ id: t.exposeID("id"), amount: t.exposeString("amount", { nullable: true }), currency: t.expose("currency", { type: CurrencyCodePothosObject }), stale: t.boolean({ resolve: parent => parent.stale }) }) })`. Separate from the fx-ingestion `ExchangeRatePothosObject` / `FxSyncRunPothosObject`.
 - [x] **T15.5** Money-bearing Pothos objects (`billing-history.pothos.ts`, `teacher-portal.pothos.ts`, `parent-profile.pothos.ts` — verify exact files) — add `displayAmount: t.field({ type: DisplayAmountPothosObject, nullable: true, resolve: async (parent, _args, ctx) => { const displayCurrency = ctx.user?.displayCurrency; if (!displayCurrency) return null; return FxDisplayService.convertForDisplay(parent.amount/parent.hourlyRate, parent.currency/parent.rateCurrency, displayCurrency, undefined, ctx.locale); } })`. Synthetic `id` = `displayAmount:<entityId>:<displayCurrency>`. Do NOT touch the fx-ingestion Pothos resolvers.
 - [x] **T15.6** Regenerate: `bun run generate:gqlSchema && bun codegen`. (The fx-ingestion schema additions already ran in fx-ingestion Phase 14 — this regen picks up the new `DisplayAmount` type.)
-- [x] **T15.7** `frontend/graphql/sharedDocuments/{billing-management,teacher-portal,parent-profile}.documents.ts` — add `displayAmount { id amount currency stale }` to money-object selections. Do NOT touch `frontend/graphql/sharedDocuments/fx-ingestion.documents.ts` (ingestion docs already shipped).
+- [x] **T15.7** `frontend/common/graphql/sharedDocuments/{billing-management,teacher-portal,parent-profile}.documents.ts` — add `displayAmount { id amount currency stale }` to money-object selections. Do NOT touch `frontend/common/graphql/sharedDocuments/fx-ingestion.documents.ts` (ingestion docs already shipped).
 - [x] **T15.8** `frontend/lib/currency.ts:14-19` (`CurrencyOption`) + `28-60` (catalog rows) — add `readonly decimals: number;`; populate ISO 4217 minor-unit count for all 32 codes (most = 2; BHD/IQD/JOD/KWD/LYD/OMR/TND = 3; JPY = 0).
 - [x] **T15.9** `frontend/lib/currency.ts` after `getCurrencySymbol` (~`74`) — NEW `getCurrencyDecimals(code: CurrencyCode | string): number` (fallback `2`).
 - [x] **T15.10** `frontend/lib/currency.ts` (or new `frontend/lib/fx-render.ts`) — NEW `formatCurrencyForDisplay(amount, lockedCurrency, displayCurrency, fxRate: number | null, stale: boolean, locale?): string`. (a) `displayCurrency == null || fxRate == null || stale || displayCurrency === lockedCurrency` → locked-only via `Intl.NumberFormat` with `getCurrencyDecimals`; (b) else → i18n `convertedAmount` template with `maximumFractionDigits: 2` on the converted value. **Lives in [`frontend/lib/currency.ts`](frontend/lib/currency.ts) (or sibling `frontend/lib/fx-render.ts`); REUSES existing `getCurrencySymbol`/`getCurrencyByCode`/`getCurrencyDecimals` helpers — composes `Intl.NumberFormat` with them, no re-implementation of those primitives.**
@@ -267,7 +267,7 @@ _Rules (read before editing):_ `AGENTS.md` (root — lint queue + per-file verif
 - [x] **T15.14** `shared/messages/ar/profile.ts:50` · `shared/messages/en.ts:254, 2456` · `shared/messages/ar/dashboard/teachers/own-profile.ts:11` — add `convertedAmount: "{lockedAmount} {lockedCurrency} (≈ {convertedApprox} {displayCurrency})"` (AR with "تقريباً").
 - [x] **T15.15** `shared/messages/types/errors/main.ts:24-25` · `shared/messages/ar/errors.ts:15-16` · `shared/messages/en/errors.ts:15-16` — add NEW `displayCurrencyFallback: "Rate unavailable — showing {lockedAmount} {lockedCurrency}"` (AR: `"السعر غير متوفر — عرض {lockedAmount} {lockedCurrency}"`). The fx-ingestion keys (`fxSyncAlreadyRunning`, `fxRefreshRateLimitExceeded`) are already landed — do NOT re-add.
 - [x] **T15.16** Orchestrator verifies `EXCHANGE_PAIRS` cardinality in `backend/db/seeds/lib` (cursorignored) before Phase 15 UI swap — USD-hub transitive path handles missing direct pairs.
-- [x] **T15.17** Per-file verify: `tsgo` → `biome:check` → lint-queue-client. Then `bun run scripts/run-test/run-test.ts backend/services/billing/fx-display.service.test.ts` (new test). Then `bun test frontend/graphql/test/billing-management.documents.test.ts` (if exists).
+- [x] **T15.17** Per-file verify: `tsgo` → `biome:check` → lint-queue-client. Then `bun run scripts/run-test/run-test.ts backend/services/billing/fx-display.service.test.ts` (new test). Then `bun test frontend/common/graphql/test/billing-management.documents.test.ts` (if exists).
 
 **CROSS-FILE DEPENDENCIES (orchestrator-coordinated — NOT per-file sub-agent fixes):**
 1. Reports currency-pair columns (`ReportsDataGrid.tsx:163`, `ReportsTotalsRow.tsx:23`, `PerformanceLedgerCard.tsx:156` + `backend/db/repo/books/report.repository.ts` + `backend/services/report/report.service.ts`) — `paidEgp`/`paidUsd` hardcoded columns + backing resolver MUST move to `{ amount, currency }` rows + `displayAmount` resolver BEFORE the frontend reports can honor `displayCurrency`. Orchestrator coordinates a wave across repo → service → Pothos → documents → UI; blocks T15.11's reports portion.

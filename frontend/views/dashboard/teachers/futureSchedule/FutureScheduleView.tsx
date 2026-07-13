@@ -14,7 +14,7 @@ const lazyViews = createLazyView<FutureScheduleViewModel>(
       default: m.FutureScheduleViewMobile,
     })),
   () =>
-    import("@/frontend/views/dashboard/teachers/futureSchedule/futureScheduleView.desktop").then(m => ({
+    import("@/frontend/desktop/views/dashboard/teachers/futureSchedule/futureScheduleView.desktop").then(m => ({
       default: m.FutureScheduleViewDesktop,
     }))
 );

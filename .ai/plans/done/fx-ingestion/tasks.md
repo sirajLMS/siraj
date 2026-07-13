@@ -19,8 +19,8 @@
 | 4–5 | Repositories + repo tests | `AGENTS.md` · `backend/db/repo/AGENTS.md` · `tests.instructions.md` · `backend/db/test/AGENTS.md` |
 | 6–9 | Provider adapters + factory | `AGENTS.md` · `backend/services/AGENTS.md` · `tests.instructions.md` |
 | 10–12 | Services + service/provider tests | `AGENTS.md` · `backend/services/AGENTS.md` · `tests.instructions.md` |
-| 13–14 | Pothos + codegen + GraphQL perm test | `AGENTS.md` · `backend/graphql/AGENTS.md` · `frontend/graphql/AGENTS.md` · `tests.instructions.md` |
-| 15–18 | Frontend docs + UI + i18n + Storybook | `AGENTS.md` · `frontend/views/AGENTS.md` · `frontend/graphql/sharedDocuments/AGENTS.md` · `frontend/AGENTS.md` · `shared/AGENTS.md` |
+| 13–14 | Pothos + codegen + GraphQL perm test | `AGENTS.md` · `backend/graphql/AGENTS.md` · `frontend/common/graphql/AGENTS.md` · `tests.instructions.md` |
+| 15–18 | Frontend docs + UI + i18n + Storybook | `AGENTS.md` · `frontend/views/AGENTS.md` · `frontend/common/graphql/sharedDocuments/AGENTS.md` · `frontend/AGENTS.md` · `shared/AGENTS.md` |
 | 19 | App route + cron | `app/AGENTS.md` · `backend/AGENTS.md` |
 | 20 | Env + docs | `AGENTS.md` |
 | 21 | Cross-plan edits | `AGENTS.md` (never create SUMMARY.md; editing existing plan docs is OK) |
@@ -170,7 +170,7 @@ _Rules (read before editing):_ `tests.instructions.md`
 
 - [x] **T13.1** **NEW** `fx-ingestion.pothos.ts` — types, queries, mutation with authScopes.
 - [x] **T13.2** Register in billing pothos index.
-- [x] **T13.3** **NEW** `frontend/graphql/test/fx-ingestion.test.ts` — forbidden without perm; academy_admin succeeds (spec §6 #7).
+- [x] **T13.3** **NEW** `frontend/common/graphql/test/fx-ingestion.test.ts` — forbidden without perm; academy_admin succeeds (spec §6 #7).
 - [x] **T13.4** Run `bun run generate:gqlSchema`.
 - [x] **T13.5** Per-file verify → tsgo → biome → lint-queue.
 
@@ -183,16 +183,16 @@ _Rules (read before editing):_ `backend/graphql/AGENTS.md`
 - [x] **T14.1** Run `bun run generate:gqlSchema && bun codegen`.
 - [x] **T14.2** Verify generated types include new operations + permissions.
 
-_Rules (read before editing):_ `frontend/graphql/AGENTS.md`
+_Rules (read before editing):_ `frontend/common/graphql/AGENTS.md`
 
 ---
 
 ## Phase 15 — Frontend GraphQL documents
 
-- [x] **T15.1** **NEW** `frontend/graphql/sharedDocuments/fx-ingestion.documents.ts` — query + mutation with `id` fields.
+- [x] **T15.1** **NEW** `frontend/common/graphql/sharedDocuments/fx-ingestion.documents.ts` — query + mutation with `id` fields.
 - [x] **T15.2** Per-file verify → tsgo → biome → lint-queue.
 
-_Rules (read before editing):_ `frontend/graphql/sharedDocuments/AGENTS.md`
+_Rules (read before editing):_ `frontend/common/graphql/sharedDocuments/AGENTS.md`
 
 ---
 
