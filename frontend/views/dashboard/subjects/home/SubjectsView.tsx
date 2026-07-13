@@ -6,7 +6,7 @@ import type { SubjectsViewProps } from "@/frontend/views/dashboard/subjects/home
 
 const lazyViews = createLazyView<SubjectsViewProps>(
   () =>
-    import("@/frontend/views/dashboard/subjects/home/subjectsView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/subjects/home/subjectsView.mobile").then(m => ({
       default: m.SubjectsViewMobile,
     })),
   () =>

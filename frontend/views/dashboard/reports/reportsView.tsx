@@ -12,7 +12,7 @@ export type { ReportsViewModel };
 
 const lazyViews = createLazyView<ReportsViewModel>(
   () =>
-    import("@/frontend/views/dashboard/reports/mobile/reports.mobile").then(m => ({ default: m.ReportsMobileView })),
+    import("@/frontend/mobile/views/dashboard/reports/reports.mobile").then(m => ({ default: m.ReportsMobileView })),
   () =>
     import("@/frontend/views/dashboard/reports/desktop/reports.desktop").then(m => ({ default: m.ReportsDesktopView }))
 );

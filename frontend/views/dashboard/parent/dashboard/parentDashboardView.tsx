@@ -12,7 +12,7 @@ export type { ParentDashboardViewModel };
 
 const lazyViews = createLazyView<ParentDashboardViewModel>(
   () =>
-    import("@/frontend/views/dashboard/parent/dashboard/mobile/parentDashboard.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/parent/dashboard/parentDashboard.mobile").then(m => ({
       default: m.ParentDashboardMobileView,
     })),
   () =>

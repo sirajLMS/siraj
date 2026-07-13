@@ -5,7 +5,7 @@ import InfoIcon from "@mui/icons-material/InfoOutlined";
 import WarningIcon from "@mui/icons-material/WarningOutlined";
 import { Box, Button, Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { MobileCardListItem } from "@/frontend/common/components/ui/card/MobileCardListItem";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui/card/MobileCardListItem";
 
 const meta: Meta<typeof MobileCardListItem> = {
   title: "UI/Card/MobileCardListItem",

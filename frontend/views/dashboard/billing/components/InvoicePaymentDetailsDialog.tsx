@@ -18,7 +18,10 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { InvoicePaymentSubmissionQuery, InvoicePaymentsQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  InvoicePaymentSubmissionQuery,
+  InvoicePaymentsQuery,
+} from "@/frontend/common/graphql/generated/gql/operations";
 import {
   approvePaymentProofMutationDocument,
   invoicePaymentSubmissionQueryDocument,

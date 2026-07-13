@@ -2,8 +2,9 @@
 
 import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, Grid, IconButton, Typography } from "@mui/material";
-import { MobileContentStack, MobilePageHeader, PageContainer } from "@/frontend/common/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { AcademicScheduleCardList } from "@/frontend/views/dashboard/schedule/alerts/AcademicScheduleCardList";
 import { InstitutionalReportCard } from "@/frontend/views/dashboard/schedule/alerts/InstitutionalReportCard";
 import { ScheduleAlertBanners } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertBanners";

@@ -14,7 +14,10 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/parents/parent-billing-history.documents";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import {
+  formatBillingCurrencyTotals,
+  mapBillingCurrencyBuckets,
+} from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

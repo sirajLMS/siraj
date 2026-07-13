@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { MobileContentStack, MobilePageHeader, PageContainer } from "@/frontend/common/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
+import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ComplaintQueueCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintQueueCardList";
 import { ComplaintsMetricsRow } from "@/frontend/views/dashboard/complaints/components/ComplaintsMetricsRow";
 import { ComplaintsSearchBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsSearchBar";

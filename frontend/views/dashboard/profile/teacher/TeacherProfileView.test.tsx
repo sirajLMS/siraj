@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { AccountStatus, CurrencyCode, Gender, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AccountStatus,
+  CurrencyCode,
+  Gender,
+  IanaTimezone,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   TeacherAdminData,
   TeacherOwnData,

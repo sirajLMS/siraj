@@ -8,7 +8,7 @@ export type { StudentsViewModel };
 
 const lazyViews = createLazyView<StudentsViewModel>(
   () =>
-    import("@/frontend/views/dashboard/admin/parents/students/mobile/students.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/admin/parents/students/students.mobile").then(m => ({
       default: m.StudentsMobileView,
     })),
   () =>

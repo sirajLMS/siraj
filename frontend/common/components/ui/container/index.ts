@@ -2,8 +2,6 @@ export { ExportButton, FilterButton, PrimaryPageAction } from "@/frontend/common
 export * from "@/frontend/common/components/ui/container/AdminControlPanel";
 export * from "@/frontend/common/components/ui/container/createLazyView";
 export * from "@/frontend/common/components/ui/container/HorizontalScrollRow";
-export * from "@/frontend/common/components/ui/container/MobileCardList";
-export * from "@/frontend/common/components/ui/container/MobileContentStack";
 export * from "@/frontend/common/components/ui/container/page";
 export * from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 export * from "@/frontend/common/components/ui/container/SectionPanel";

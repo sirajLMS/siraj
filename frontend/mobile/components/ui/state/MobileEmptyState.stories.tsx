@@ -1,7 +1,7 @@
 import { CheckCircleOutlined, ErrorOutlined, InboxOutlined, InfoOutlined, SearchOutlined } from "@mui/icons-material";
 import type { Theme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { MobileEmptyState } from "@/frontend/common/components/ui/state/MobileEmptyState";
+import { MobileEmptyState } from "@/frontend/mobile/components/ui/state/MobileEmptyState";
 
 const meta: Meta<typeof MobileEmptyState> = {
   title: "UI/State/MobileEmptyState",

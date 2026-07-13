@@ -15,7 +15,10 @@ import {
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import {
+  formatBillingCurrencyTotals,
+  mapBillingCurrencyBuckets,
+} from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useUserBillingProfileStore } from "@/frontend/common/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

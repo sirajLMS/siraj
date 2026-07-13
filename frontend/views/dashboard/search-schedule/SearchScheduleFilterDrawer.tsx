@@ -26,7 +26,7 @@ export interface SearchScheduleFilterDrawerProps {
  */
 const lazyViews = createLazyView<SearchScheduleFilterDrawerProps>(
   () =>
-    import("@/frontend/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile").then(m => ({
       default: m.SearchScheduleFilterDrawerMobile,
     })),
   () =>

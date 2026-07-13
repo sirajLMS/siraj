@@ -1,8 +1,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { StatusTrackingMobileView } from "@/frontend/mobile/views/dashboard/classes/status/tracking/statusTrackingView.mobile";
 import { StatusTrackingDesktopView } from "@/frontend/views/dashboard/classes/status/tracking/statusTrackingView.desktop";
-import { StatusTrackingMobileView } from "@/frontend/views/dashboard/classes/status/tracking/statusTrackingView.mobile";
 import type {
   CardListLabels,
   StatusTrackingViewProps,

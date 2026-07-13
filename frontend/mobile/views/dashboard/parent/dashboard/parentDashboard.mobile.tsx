@@ -3,18 +3,12 @@
 import { ChildCareOutlined, EventOutlined, PaymentsOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import type { ReactNode } from "react";
-import {
-  MobileCardList,
-  MobileContentStack,
-  PageContainer,
-  PaginationControls,
-  PrimaryPageAction,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+import { PageContainer, PaginationControls, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { ParentScheduleCardMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentScheduleCard.mobile";
 import { AcademicProgressSummary } from "@/frontend/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
 import { ParentWelcomeHero } from "@/frontend/views/dashboard/parent/dashboard/components/ParentWelcomeHero";
-import { ParentScheduleCardMobile } from "@/frontend/views/dashboard/parent/dashboard/mobile/components/parentScheduleCard.mobile";
 import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import type { ParentDashboardViewModel } from "@/frontend/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 

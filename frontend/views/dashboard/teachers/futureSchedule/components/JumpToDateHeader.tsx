@@ -6,7 +6,7 @@ import type { JumpToDateHeaderProps } from "@/frontend/views/dashboard/teachers/
 
 const lazyViews = createLazyView<JumpToDateHeaderProps>(
   () =>
-    import("@/frontend/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile").then(m => ({
       default: m.JumpToDateHeaderMobile,
     })),
   () =>

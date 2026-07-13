@@ -2,13 +2,8 @@
 
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
-import {
-  MobileContentStack,
-  MobileEmptyState,
-  MobileFab,
-  MobilePageHeader,
-  PageContainer,
-} from "@/frontend/common/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
+import { MobileContentStack, MobileEmptyState, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
 import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";

@@ -1,7 +1,10 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import { CountrySelect, type CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
+import {
+  CountrySelect,
+  type CountrySelectProps,
+} from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 

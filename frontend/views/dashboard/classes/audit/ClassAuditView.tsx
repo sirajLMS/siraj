@@ -11,7 +11,7 @@ export type {
 
 const lazyViews = createLazyView<ClassAuditViewProps>(
   () =>
-    import("@/frontend/views/dashboard/classes/audit/classAuditView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/classes/audit/classAuditView.mobile").then(m => ({
       default: m.ClassAuditViewMobile,
     })),
   () =>

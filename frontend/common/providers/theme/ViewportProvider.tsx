@@ -3,7 +3,11 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { ViewportContext, type ViewportContextType, type ViewportTier } from "@/frontend/common/context/ViewportContext";
+import {
+  ViewportContext,
+  type ViewportContextType,
+  type ViewportTier,
+} from "@/frontend/common/context/ViewportContext";
 
 interface ViewportProviderProps {
   readonly children: ReactNode;

@@ -44,7 +44,7 @@ export interface ParentsViewProps {
 
 const lazyViews = createLazyView<ParentsViewProps>(
   () =>
-    import("@/frontend/views/dashboard/admin/parents/home/parentsView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/admin/parents/home/parentsView.mobile").then(m => ({
       default: m.ParentsViewMobile,
     })),
   () =>

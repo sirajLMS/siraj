@@ -1,7 +1,10 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import { TimezoneSelect, type TimezoneSelectProps } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
+import {
+  TimezoneSelect,
+  type TimezoneSelectProps,
+} from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 

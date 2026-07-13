@@ -64,7 +64,7 @@ export function ScheduleFooterLegend({
 
 const lazyViews = createLazyView<TeacherWeeklyScheduleViewProps>(
   () =>
-    import("@/frontend/views/dashboard/teachers/schedule/weekly/teacherWeeklyScheduleView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/teachers/schedule/weekly/teacherWeeklyScheduleView.mobile").then(m => ({
       default: m.TeacherWeeklyScheduleViewMobile,
     })),
   () =>

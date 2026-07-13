@@ -5,7 +5,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { type BillingCurrencyBucket, formatBillingCurrencyTotals } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import {
+  type BillingCurrencyBucket,
+  formatBillingCurrencyTotals,
+} from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { aggregatePaidAmountTotals } from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";

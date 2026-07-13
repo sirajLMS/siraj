@@ -12,7 +12,7 @@ export type { UserBillingProfileViewModel };
 
 const lazyViews = createLazyView<UserBillingProfileViewModel>(
   () =>
-    import("@/frontend/views/dashboard/users/billing-profile/mobile/userBillingProfile.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/users/billing-profile/userBillingProfile.mobile").then(m => ({
       default: m.UserBillingProfileMobileView,
     })),
   () =>

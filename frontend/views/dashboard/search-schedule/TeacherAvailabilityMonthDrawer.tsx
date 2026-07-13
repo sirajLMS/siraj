@@ -7,7 +7,10 @@ import type { Theme } from "@mui/material/styles";
 import { addMonths, parse, subMonths } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { type AvailabilitySearchInput, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  type AvailabilitySearchInput,
+  AvailabilitySearchSortBy,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
 import type { SearchScheduleResultItem } from "@/frontend/views/dashboard/search-schedule/SearchScheduleView";

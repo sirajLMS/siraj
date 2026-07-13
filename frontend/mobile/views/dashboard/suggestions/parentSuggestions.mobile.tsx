@@ -1,13 +1,8 @@
 "use client";
 
 import { Box } from "@mui/material";
-import {
-  BaseCard,
-  MobileContentStack,
-  MobilePageHeader,
-  PageContainer,
-  PrimaryPageAction,
-} from "@/frontend/common/components/ui";
+import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { SuggestionFormFields } from "@/frontend/views/dashboard/suggestions/components/SuggestionFormFields";
 import { SuggestionHeroBanner } from "@/frontend/views/dashboard/suggestions/components/SuggestionHeroBanner";
 import { SuggestionSocialProof } from "@/frontend/views/dashboard/suggestions/components/SuggestionSocialProof";

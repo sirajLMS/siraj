@@ -13,7 +13,7 @@ export type { ManualInvoiceViewModel };
 
 const lazyViews = createLazyView<ManualInvoiceViewModel>(
   () =>
-    import("@/frontend/views/dashboard/billing/manual/mobile/manualInvoice.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/billing/manual/manualInvoice.mobile").then(m => ({
       default: m.ManualInvoiceMobileView,
     })),
   () =>

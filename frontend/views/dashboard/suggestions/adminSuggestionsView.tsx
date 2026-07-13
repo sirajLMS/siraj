@@ -8,7 +8,7 @@ export type { AdminSuggestionsViewModel };
 
 const lazyViews = createLazyView<AdminSuggestionsViewModel>(
   () =>
-    import("@/frontend/views/dashboard/suggestions/mobile/adminSuggestions.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/suggestions/adminSuggestions.mobile").then(m => ({
       default: m.AdminSuggestionsMobileView,
     })),
   () =>

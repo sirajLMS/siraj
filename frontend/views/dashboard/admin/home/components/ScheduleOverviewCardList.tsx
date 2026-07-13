@@ -7,7 +7,11 @@ import { useLocale } from "next-intl";
 import type * as React from "react";
 import { ActionIconLink, TimezoneDisplay } from "@/frontend/common/components/ui";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  type ClassExecutionState,
+  ClassOutcome,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";

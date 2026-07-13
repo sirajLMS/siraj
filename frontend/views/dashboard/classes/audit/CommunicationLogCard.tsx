@@ -2,8 +2,8 @@
 
 import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { CommunicationLogCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/communicationLogCard.mobile";
 import { CommunicationLogCardDesktop } from "@/frontend/views/dashboard/classes/audit/communicationLogCard.desktop";
-import { CommunicationLogCardMobile } from "@/frontend/views/dashboard/classes/audit/communicationLogCard.mobile";
 
 export interface CommunicationLogCardProps {
   readonly entries: readonly (CommunicationLogEntry | null)[] | null | undefined;

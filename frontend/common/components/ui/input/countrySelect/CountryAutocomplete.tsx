@@ -8,7 +8,10 @@ import { useLocale, useTranslations } from "next-intl";
 import type * as React from "react";
 import { useCallback, useState } from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
-import { CountryOptionRow, getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/CountryOptionRow";
+import {
+  CountryOptionRow,
+  getCountryOptionLabel,
+} from "@/frontend/common/components/ui/input/countrySelect/CountryOptionRow";
 import {
   getCountryAutocompletePaperSlotProps,
   getCountryAutocompletePopperSlotProps,

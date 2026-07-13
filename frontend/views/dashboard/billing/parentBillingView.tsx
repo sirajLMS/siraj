@@ -12,7 +12,7 @@ export type { ParentBillingViewModel };
 
 const lazyViews = createLazyView<ParentBillingViewModel>(
   () =>
-    import("@/frontend/views/dashboard/billing/mobile/parentBilling.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/billing/parentBilling.mobile").then(m => ({
       default: m.ParentBillingMobileView,
     })),
   () =>

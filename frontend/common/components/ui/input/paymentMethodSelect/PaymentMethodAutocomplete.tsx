@@ -16,7 +16,10 @@ import {
   getPaymentMethodAutocompletePopperSlotProps,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper";
 import type { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { getPaymentMethodCatalogOptionLabel, type PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
+import {
+  getPaymentMethodCatalogOptionLabel,
+  type PaymentMethodCatalogOption,
+} from "@/frontend/common/lib/payment-method";
 
 export type PaymentMethodAutocompleteProps = {
   readonly option?: PaymentMethodCatalogOption | null;

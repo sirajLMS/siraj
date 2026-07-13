@@ -3,7 +3,12 @@
 import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, ClassProfileLinkCell, GridPagination, PersonProfileLinkCell } from "@/frontend/common/components/ui";
+import {
+  AppDataGrid,
+  ClassProfileLinkCell,
+  GridPagination,
+  PersonProfileLinkCell,
+} from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";

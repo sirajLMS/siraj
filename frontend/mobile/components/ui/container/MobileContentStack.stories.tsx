@@ -1,6 +1,6 @@
 import { Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { MobileContentStack } from "@/frontend/common/components/ui/container/MobileContentStack";
+import { MobileContentStack } from "@/frontend/mobile/components/ui/container/MobileContentStack";
 
 const meta: Meta<typeof MobileContentStack> = {
   title: "UI/Container/MobileContentStack",

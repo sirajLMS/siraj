@@ -6,13 +6,12 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import {
   ExportButton,
   FilterButton,
-  MobileContentStack,
-  MobilePageHeader,
   PageContainer,
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
 import { ParentCardList } from "@/frontend/views/dashboard/admin/parents/home/ParentCardList";
 import { ParentsMetricGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsMetricGrid";

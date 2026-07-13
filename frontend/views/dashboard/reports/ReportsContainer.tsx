@@ -7,7 +7,10 @@ import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import type { AttendanceReportRow, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission, ReportGroupingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { generateAttendanceReportQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  generateAttendanceReportQueryDocument,
+  teachersQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import type { FormatCurrencyMessages } from "@/frontend/common/lib/fx-render";

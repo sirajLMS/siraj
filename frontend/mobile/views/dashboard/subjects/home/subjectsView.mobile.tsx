@@ -3,8 +3,9 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { MobilePageHeader, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { useSubjectManagementStore } from "@/frontend/common/stores/subjectManagementStore";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { CategoriesSection } from "@/frontend/views/dashboard/subjects/home/components/CategoriesSection";
 import { SubjectCard } from "@/frontend/views/dashboard/subjects/home/components/SubjectCard";
 import type { SubjectsViewProps } from "@/frontend/views/dashboard/subjects/home/types";

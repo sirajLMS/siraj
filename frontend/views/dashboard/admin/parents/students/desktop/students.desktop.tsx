@@ -3,7 +3,13 @@
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import {
+  FilterButton,
+  PageContainer,
+  PageHeader,
+  PrimaryPageAction,
+  SectionPanel,
+} from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentDirectoryDataGrid } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryDataGrid";
 import type { StudentsViewModel } from "@/frontend/views/dashboard/admin/parents/students/useStudentsViewModel";

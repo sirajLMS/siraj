@@ -1,6 +1,12 @@
 import { endOfMonth, format, startOfMonth } from "date-fns";
-import { type AvailabilitySearchInput, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { SearchScheduleDraftFilters, SearchScheduleTeacherOption } from "@/frontend/common/stores/searchScheduleStore";
+import {
+  type AvailabilitySearchInput,
+  AvailabilitySearchSortBy,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  SearchScheduleDraftFilters,
+  SearchScheduleTeacherOption,
+} from "@/frontend/common/stores/searchScheduleStore";
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";
 

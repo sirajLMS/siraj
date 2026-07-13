@@ -11,7 +11,11 @@ import {
   PaymentMethodList,
   type PaymentMethodRow,
 } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
-import { AppPermission, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  PaymentDirection,
+  PaymentMethodType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   deleteUserPaymentMethodMutationDocument,

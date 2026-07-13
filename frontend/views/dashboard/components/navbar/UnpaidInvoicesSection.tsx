@@ -8,7 +8,10 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-alerts.documents";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { formatBillingCurrencyTotals, mapBillingCurrencyBuckets } from "@/frontend/common/lib/formatBillingCurrencyTotals";
+import {
+  formatBillingCurrencyTotals,
+  mapBillingCurrencyBuckets,
+} from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useRouter } from "@/shared/i18n/routing";
 

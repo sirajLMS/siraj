@@ -1,8 +1,8 @@
 "use client";
 
 import { DateNavigatorDesktop } from "@/frontend/common/components/ui/filter/dateNavigator.desktop";
-import { DateNavigatorMobile } from "@/frontend/common/components/ui/filter/dateNavigator.mobile";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter/dateNavigator.mobile";
 
 export interface DateNavigatorProps {
   readonly dateValue: string;

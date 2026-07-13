@@ -12,7 +12,7 @@ export type { ParentSuggestionsViewModel };
 
 const lazyViews = createLazyView<ParentSuggestionsViewModel>(
   () =>
-    import("@/frontend/views/dashboard/suggestions/mobile/parentSuggestions.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/suggestions/parentSuggestions.mobile").then(m => ({
       default: m.ParentSuggestionsMobileView,
     })),
   () =>

@@ -74,7 +74,7 @@ export interface ScheduleAlertsViewProps {
 
 const lazyViews = createLazyView<ScheduleAlertsViewProps>(
   () =>
-    import("@/frontend/views/dashboard/schedule/alerts/scheduleAlertsView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/schedule/alerts/scheduleAlertsView.mobile").then(m => ({
       default: m.ScheduleAlertsViewMobile,
     })),
   () =>

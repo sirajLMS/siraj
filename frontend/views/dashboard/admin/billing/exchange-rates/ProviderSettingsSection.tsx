@@ -19,8 +19,15 @@ import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { AppPermission, FxProvider, FxProviderConfigSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { fxProviderConfigQueryDocument, updateFxProviderMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  AppPermission,
+  FxProvider,
+  FxProviderConfigSource,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  fxProviderConfigQueryDocument,
+  updateFxProviderMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ExchangeRatesLabels } from "@/shared/messages/types/dashboard/billing/exchange-rates";
 

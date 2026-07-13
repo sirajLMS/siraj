@@ -7,7 +7,10 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ParentAssignedStudentsQuery, ParentComplaintsQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ParentAssignedStudentsQuery,
+  ParentComplaintsQuery,
+} from "@/frontend/common/graphql/generated/gql/operations";
 import {
   parentAssignedStudentsQueryDocument,
   parentComplaintsQueryDocument,

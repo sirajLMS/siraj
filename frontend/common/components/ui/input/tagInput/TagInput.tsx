@@ -4,7 +4,10 @@ import { Box, Chip, InputBase, Paper, styled, Typography, useTheme } from "@mui/
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
-import { useTagInputDeletion, useTagInputEditing } from "@/frontend/common/components/ui/input/tagInput/useTagInputEditing";
+import {
+  useTagInputDeletion,
+  useTagInputEditing,
+} from "@/frontend/common/components/ui/input/tagInput/useTagInputEditing";
 
 export type TagInputProps = {
   readonly label?: string;

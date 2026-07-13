@@ -12,7 +12,7 @@ export type { RescheduleViewModel, UseRescheduleViewModelProps };
 
 const lazyViews = createLazyView<RescheduleViewModel>(
   () =>
-    import("@/frontend/views/dashboard/reschedule/home/rescheduleView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/reschedule/home/rescheduleView.mobile").then(m => ({
       default: m.RescheduleViewMobile,
     })),
   () =>

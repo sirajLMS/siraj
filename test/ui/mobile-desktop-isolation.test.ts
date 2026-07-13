@@ -16,6 +16,7 @@ import { join, relative, resolve } from "node:path";
  */
 
 const VIEWS_ROOT = resolve(import.meta.dirname, "../../frontend/views");
+const MOBILE_VIEWS_ROOT = resolve(import.meta.dirname, "../../frontend/mobile/views");
 
 const FORBIDDEN_USE_MEDIA_QUERY = /\buseMediaQuery\b/;
 const FROM_DESKTOP = /\.desktop\b/;
@@ -57,6 +58,7 @@ function collectVersionedFiles(): VersionedFile[] {
   const files: VersionedFile[] = [];
   const rawPaths: string[] = [];
   walkDir(VIEWS_ROOT, rawPaths);
+  walkDir(MOBILE_VIEWS_ROOT, rawPaths);
   for (const path of rawPaths) {
     const tier = isVersioned(path);
     if (tier === null) continue;

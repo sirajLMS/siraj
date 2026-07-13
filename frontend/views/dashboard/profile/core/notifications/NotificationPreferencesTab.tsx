@@ -11,8 +11,8 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { logger } from "@/frontend/common/utils/logger";
+import { NotificationPreferencesTabMobile } from "@/frontend/mobile/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile";
 import { NotificationPreferencesTabDesktop } from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferencesTab.desktop";
-import { NotificationPreferencesTabMobile } from "@/frontend/views/dashboard/profile/core/notifications/notificationPreferencesTab.mobile";
 import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_EVENT_TYPES,

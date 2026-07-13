@@ -4,6 +4,7 @@ import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import {
   MobileCardList,
   MobileCardListItem,
@@ -11,10 +12,8 @@ import {
   MobileEmptyState,
   MobileFab,
   MobilePageHeader,
-  PageContainer,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
-import { AdminInvoiceMobileCard } from "@/frontend/views/dashboard/admin/billing/mobile/components/adminInvoiceCard.mobile";
+} from "@/frontend/mobile/components/ui";
+import { AdminInvoiceMobileCard } from "@/frontend/mobile/views/dashboard/admin/billing/components/adminInvoiceCard.mobile";
 import type { AdminBillingViewModel } from "@/frontend/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";

@@ -2,7 +2,8 @@
 
 import { Alert, Box } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { MobilePageHeader, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { PermissionManagementDialogs } from "@/frontend/views/dashboard/permissions/components/PermissionManagementDialogs";
 import { PermissionTabContent } from "@/frontend/views/dashboard/permissions/components/PermissionTabContent";
 import { SingleGroupView } from "@/frontend/views/dashboard/permissions/components/SingleGroupView";

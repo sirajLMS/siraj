@@ -3,7 +3,8 @@
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { MobileContentStack, MobilePageHeader, PageContainer } from "@/frontend/common/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
+import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { CurrentTeacherCard } from "@/frontend/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
 import { ManagementControlsCard } from "@/frontend/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
 import { ReassignmentBentoGrid } from "@/frontend/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";

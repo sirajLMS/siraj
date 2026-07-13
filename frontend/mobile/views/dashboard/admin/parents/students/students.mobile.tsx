@@ -4,16 +4,11 @@ import { AddOutlined, FilterListOutlined, PersonAddAltOutlined, SearchOutlined }
 import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import {
-  MobileCardList,
-  MobileContentStack,
-  MobileFab,
-  MobilePageHeader,
-  PageContainer,
-} from "@/frontend/common/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileCardList, MobileContentStack, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { StudentDirectoryMobileCard } from "@/frontend/mobile/views/dashboard/admin/parents/students/components/studentDirectoryCard.mobile";
 import { StudentMobileMetricsScroll } from "@/frontend/views/dashboard/admin/parents/students/components/StudentMobileMetricsScroll";
-import { StudentDirectoryMobileCard } from "@/frontend/views/dashboard/admin/parents/students/mobile/components/studentDirectoryCard.mobile";
 import type { StudentsViewModel } from "@/frontend/views/dashboard/admin/parents/students/useStudentsViewModel";
 
 export function StudentsMobileView({

@@ -17,7 +17,7 @@ export type { AdminBillingViewModel };
 
 const lazyBillingViews = createLazyView<AdminBillingViewModel>(
   () =>
-    import("@/frontend/views/dashboard/admin/billing/mobile/adminBilling.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/admin/billing/adminBilling.mobile").then(m => ({
       default: m.AdminBillingMobileView,
     })),
   () =>

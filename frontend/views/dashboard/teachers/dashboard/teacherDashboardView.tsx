@@ -12,7 +12,7 @@ export type { TeacherDashboardViewModel };
 
 const lazyViews = createLazyView<TeacherDashboardViewModel>(
   () =>
-    import("@/frontend/views/dashboard/teachers/dashboard/mobile/teacherDashboard.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/teachers/dashboard/teacherDashboard.mobile").then(m => ({
       default: m.TeacherDashboardMobileView,
     })),
   () =>

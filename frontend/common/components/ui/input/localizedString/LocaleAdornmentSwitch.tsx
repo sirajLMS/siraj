@@ -25,7 +25,7 @@ export type LocaleAdornmentSwitchProps = {
 
 const lazyViews = createLazyView<LocaleAdornmentSwitchProps>(
   () =>
-    import("@/frontend/common/components/ui/input/localizedString/localeAdornmentSwitch.mobile").then(m => ({
+    import("@/frontend/mobile/components/ui/input/localizedString/localeAdornmentSwitch.mobile").then(m => ({
       default: m.LocaleAdornmentSwitchMobile,
     })),
   () =>

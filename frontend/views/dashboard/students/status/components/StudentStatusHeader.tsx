@@ -1,8 +1,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { StudentStatusHeaderMobile } from "@/frontend/mobile/views/dashboard/students/status/components/studentStatusHeader.mobile";
 import { StudentStatusHeaderDesktop } from "@/frontend/views/dashboard/students/status/components/studentStatusHeader.desktop";
-import { StudentStatusHeaderMobile } from "@/frontend/views/dashboard/students/status/components/studentStatusHeader.mobile";
 import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";
 
 export function StudentStatusHeader({ student, embedded = false }: Readonly<StudentStatusHeaderProps>) {

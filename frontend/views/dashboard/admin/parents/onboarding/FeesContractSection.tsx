@@ -11,7 +11,11 @@ import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySe
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import { CurrencyCode, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  CurrencyCode,
+  PaymentDirection,
+  PaymentMethodType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";

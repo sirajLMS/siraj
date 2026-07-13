@@ -12,7 +12,7 @@ export type { ScheduleOverviewViewModel };
 
 const lazyViews = createLazyView<ScheduleOverviewViewModel>(
   () =>
-    import("@/frontend/views/dashboard/admin/home/scheduleOverview/mobile/scheduleOverview.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/scheduleOverview.mobile").then(m => ({
       default: m.ScheduleOverviewMobileView,
     })),
   () =>

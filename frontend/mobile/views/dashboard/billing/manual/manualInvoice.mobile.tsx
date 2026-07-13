@@ -2,7 +2,8 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard, MobilePageHeader, PageContainer } from "@/frontend/common/components/ui";
+import { BaseCard, PageContainer } from "@/frontend/common/components/ui";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { BillingMonthSelector } from "@/frontend/views/dashboard/billing/manual/components/BillingMonthSelector";
 import { InvoiceDraftSummaryCard } from "@/frontend/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
 import { ManualInvoiceActions } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceActions";

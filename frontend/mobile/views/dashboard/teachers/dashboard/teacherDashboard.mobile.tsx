@@ -5,8 +5,6 @@ import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import {
   DateNavigator,
-  MobileCardList,
-  MobileContentStack,
   PageContainer,
   PaginationControls,
   PrimaryPageAction,
@@ -14,10 +12,11 @@ import {
 } from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleCard.mobile";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
 import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
 import { StudentProgressFeed } from "@/frontend/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
-import { TeacherScheduleCardMobile } from "@/frontend/views/dashboard/teachers/dashboard/mobile/components/teacherScheduleCard.mobile";
 import { MissedClassAlertBanner } from "@/frontend/views/dashboard/teachers/dashboard/shared/missedClassAlertBanner";
 import type { TeacherDashboardViewModel } from "@/frontend/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {

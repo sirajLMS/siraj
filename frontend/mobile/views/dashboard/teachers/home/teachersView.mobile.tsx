@@ -3,9 +3,13 @@
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { MobileContentStack, MobilePageHeader, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
-import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import type {
+  TeacherDirectoryMetrics,
+  TeacherDirectoryRow,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { TeacherCardList } from "@/frontend/views/dashboard/teachers/home/components/TeacherCardList";
 import { TeacherMetricsRow } from "@/frontend/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { Link } from "@/shared/i18n/routing";

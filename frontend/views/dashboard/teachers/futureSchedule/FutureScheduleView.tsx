@@ -10,7 +10,7 @@ import {
 
 const lazyViews = createLazyView<FutureScheduleViewModel>(
   () =>
-    import("@/frontend/views/dashboard/teachers/futureSchedule/futureScheduleView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/teachers/futureSchedule/futureScheduleView.mobile").then(m => ({
       default: m.FutureScheduleViewMobile,
     })),
   () =>

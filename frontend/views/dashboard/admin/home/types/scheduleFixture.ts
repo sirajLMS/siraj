@@ -1,4 +1,8 @@
-import type { ClassExecutionState, ClassOutcome, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  ClassExecutionState,
+  ClassOutcome,
+  IanaTimezone,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 
 export interface DailyScheduleRowOverrides {

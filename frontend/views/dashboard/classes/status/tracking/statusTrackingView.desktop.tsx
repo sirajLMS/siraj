@@ -4,7 +4,13 @@ import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Fab } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import {
+  FilterButton,
+  PageContainer,
+  PageHeader,
+  PrimaryPageAction,
+  SectionPanel,
+} from "@/frontend/common/components/ui";
 import { StatusTrackingDataGrid } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingDataGrid";
 import { SuspensionAnalytics } from "@/frontend/views/dashboard/classes/status/tracking/SuspensionAnalytics";
 import type { DesktopLayoutProps } from "@/frontend/views/dashboard/classes/status/tracking/types";

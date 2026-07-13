@@ -2,7 +2,8 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
-import { MobileContentStack, MobileFab, MobilePageHeader, PageContainer } from "@/frontend/common/components/ui";
+import { PageContainer } from "@/frontend/common/components/ui";
+import { MobileContentStack, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { StatusTrackingCardList } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingCardList";
 import type { MobileLayoutProps } from "@/frontend/views/dashboard/classes/status/tracking/types";
 

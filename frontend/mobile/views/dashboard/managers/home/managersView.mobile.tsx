@@ -1,7 +1,8 @@
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { MobilePageHeader, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ManagersCardList } from "@/frontend/views/dashboard/managers/home/ManagersCardList";
 import { ManagersFilterBar } from "@/frontend/views/dashboard/managers/home/ManagersFilterBar";
 import { ManagersMetrics } from "@/frontend/views/dashboard/managers/home/ManagersMetrics";

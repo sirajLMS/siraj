@@ -7,7 +7,10 @@ import { formatDistanceToNow } from "date-fns";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { studentByIdQueryDocument, updateStudentQuotaMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  studentByIdQueryDocument,
+  updateStudentQuotaMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import { ProfileRestrictedSection } from "@/frontend/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentProfileContext } from "@/frontend/views/dashboard/students/profile/StudentProfileContext";

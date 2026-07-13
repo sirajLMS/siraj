@@ -12,7 +12,7 @@ export type { ResourcesViewModel };
 
 const lazyViews = createLazyView<ResourcesViewModel>(
   () =>
-    import("@/frontend/views/dashboard/resources/mobile/resources.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/resources/resources.mobile").then(m => ({
       default: m.ResourcesMobileView,
     })),
   () =>

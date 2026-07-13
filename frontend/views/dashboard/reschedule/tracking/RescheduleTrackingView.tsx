@@ -6,7 +6,7 @@ import type { RescheduleTrackingViewProps } from "@/frontend/views/dashboard/res
 
 const lazyViews = createLazyView<RescheduleTrackingViewProps>(
   () =>
-    import("@/frontend/views/dashboard/reschedule/tracking/rescheduleTrackingView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/reschedule/tracking/rescheduleTrackingView.mobile").then(m => ({
       default: m.RescheduleTrackingViewMobile,
     })),
   () =>

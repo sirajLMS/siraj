@@ -25,7 +25,7 @@ interface ManagersViewProps {
 
 const lazyViews = createLazyView<ManagersViewProps>(
   () =>
-    import("@/frontend/views/dashboard/managers/home/managersView.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/managers/home/managersView.mobile").then(m => ({
       default: m.ManagersViewMobile,
     })),
   () =>

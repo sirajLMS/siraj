@@ -1,5 +1,8 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  ManagerOnboardingInput,
+  ManagerOnboardingResult,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useManagerOnboardingStore } from "@/frontend/common/stores/managerOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";

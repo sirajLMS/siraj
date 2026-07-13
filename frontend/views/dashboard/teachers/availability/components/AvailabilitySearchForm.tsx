@@ -5,7 +5,11 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
-import { labelSx, outlinedInputSx, timeInputOutlinedSx } from "@/frontend/common/components/ui/form/field/formFieldStyles";
+import {
+  labelSx,
+  outlinedInputSx,
+  timeInputOutlinedSx,
+} from "@/frontend/common/components/ui/form/field/formFieldStyles";
 import { AppTimePicker } from "@/frontend/common/components/ui/form/time/AppTimePicker";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {

@@ -2,8 +2,8 @@
 
 import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
 import { AdminNoteCardDesktop } from "@/frontend/views/dashboard/classes/audit/adminNoteCard.desktop";
-import { AdminNoteCardMobile } from "@/frontend/views/dashboard/classes/audit/adminNoteCard.mobile";
 
 export interface AdminNoteCardProps {
   readonly note: AdminNoteInfo | null | undefined;

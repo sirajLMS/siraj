@@ -1,8 +1,8 @@
 "use client";
 
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { UpdatedSessionsSectionMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsSection.mobile";
 import { UpdatedSessionsSectionDesktop } from "@/frontend/views/dashboard/tools/dst-migration/components/updatedSessionsSection.desktop";
-import { UpdatedSessionsSectionMobile } from "@/frontend/views/dashboard/tools/dst-migration/components/updatedSessionsSection.mobile";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 export interface UpdatedSessionsSectionProps {

@@ -15,9 +15,10 @@ import {
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { MobilePageHeader, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
+import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import MobileScheduleList from "@/frontend/views/dashboard/teachers/schedule/weekly/MobileScheduleList";
 import { ScheduleFooterLegend } from "@/frontend/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";

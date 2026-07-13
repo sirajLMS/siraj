@@ -12,7 +12,7 @@ export type { AdminComplaintsViewModel };
 
 const lazyViews = createLazyView<AdminComplaintsViewModel>(
   () =>
-    import("@/frontend/views/dashboard/complaints/mobile/adminComplaints.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/complaints/adminComplaints.mobile").then(m => ({
       default: m.AdminComplaintsMobileView,
     })),
   () =>

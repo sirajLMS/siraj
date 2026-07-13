@@ -6,7 +6,7 @@ import type { FutureClassCardProps } from "@/frontend/views/dashboard/teachers/f
 
 const lazyViews = createLazyView<FutureClassCardProps>(
   () =>
-    import("@/frontend/views/dashboard/teachers/futureSchedule/components/futureClassCard.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/futureClassCard.mobile").then(m => ({
       default: m.FutureClassCardMobile,
     })),
   () =>

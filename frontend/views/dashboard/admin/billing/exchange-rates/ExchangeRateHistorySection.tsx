@@ -4,7 +4,10 @@ import { useQuery } from "@apollo/client/react";
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
+import {
+  CurrencyDisplay,
+  CurrencyDisplayPart,
+} from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { exchangeRateHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";

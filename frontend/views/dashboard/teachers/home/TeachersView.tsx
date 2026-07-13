@@ -1,9 +1,12 @@
 "use client";
 
-import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  TeacherDirectoryMetrics,
+  TeacherDirectoryRow,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { TeachersMobileView } from "@/frontend/mobile/views/dashboard/teachers/home/teachersView.mobile";
 import { TeachersDesktopView } from "@/frontend/views/dashboard/teachers/home/teachersView.desktop";
-import { TeachersMobileView } from "@/frontend/views/dashboard/teachers/home/teachersView.mobile";
 
 export interface TeachersViewProps {
   readonly metrics: TeacherDirectoryMetrics | null | undefined;

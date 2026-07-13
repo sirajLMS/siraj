@@ -18,7 +18,7 @@ import type { StatusTrackingDataGridProps } from "@/frontend/views/dashboard/cla
  */
 const lazyViews = createLazyView<StatusTrackingDataGridProps>(
   () =>
-    import("@/frontend/views/dashboard/classes/status/tracking/statusTrackingDataGrid.mobile").then(m => ({
+    import("@/frontend/mobile/views/dashboard/classes/status/tracking/statusTrackingDataGrid.mobile").then(m => ({
       default: m.StatusTrackingDataGridMobile,
     })),
   () =>

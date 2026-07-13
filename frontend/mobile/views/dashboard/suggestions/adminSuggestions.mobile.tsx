@@ -1,16 +1,15 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
+import { PageContainer, StatusBadge } from "@/frontend/common/components/ui";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   MobileCardList,
   MobileCardListItem,
   MobileContentStack,
   MobileEmptyState,
   MobilePageHeader,
-  PageContainer,
-  StatusBadge,
-} from "@/frontend/common/components/ui";
-import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/mobile/components/ui";
 import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
 import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";
 import { SuggestionsTabBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsTabBar";

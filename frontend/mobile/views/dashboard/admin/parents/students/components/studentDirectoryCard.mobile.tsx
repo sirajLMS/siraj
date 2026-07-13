@@ -1,6 +1,6 @@
 "use client";
 
-import { MobileCardListItem } from "@/frontend/common/components/ui";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { StudentDirectoryCardFooter } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardFooter";
 import { StudentDirectoryCardHeader } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardHeader";
 import { StudentDirectoryCardStats } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardStats";

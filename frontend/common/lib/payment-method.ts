@@ -10,7 +10,11 @@
  */
 
 import type { PaymentMethodDisplayData } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
-import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  IdentifierKind,
+  PaymentDirection,
+  PaymentMethodType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodTransactionSnapshotFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { LocalizedString } from "@/shared/types/localized-string";
 

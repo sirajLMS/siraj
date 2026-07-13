@@ -6,7 +6,11 @@ export type {
   TeacherSessionStatus,
 } from "@/frontend/common/types/shared.types";
 
-import type { MissedClassAlert, TeacherDashboardMetrics, TeacherScheduleRow } from "@/frontend/common/types/shared.types";
+import type {
+  MissedClassAlert,
+  TeacherDashboardMetrics,
+  TeacherScheduleRow,
+} from "@/frontend/common/types/shared.types";
 
 export interface TeacherDashboardState {
   readonly metrics: TeacherDashboardMetrics;

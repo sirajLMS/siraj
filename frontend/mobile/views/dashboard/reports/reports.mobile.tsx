@@ -1,13 +1,12 @@
 "use client";
 
+import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import {
   MobileCardList,
   MobileCardListItem,
   MobileContentStack,
   MobilePageHeader,
-  PageContainer,
-  SectionPanel,
-} from "@/frontend/common/components/ui";
+} from "@/frontend/mobile/components/ui";
 import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
 import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
 import { PerformanceLedgerCard } from "@/frontend/views/dashboard/reports/components/PerformanceLedgerCard";

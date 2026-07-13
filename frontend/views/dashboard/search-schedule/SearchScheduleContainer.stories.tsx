@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { addDays, format } from "date-fns";
 import { StoryBookPageContainer } from "@/frontend/common/components/ui/story/StoryBookPageContainer";
 import { DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { searchTeacherAvailabilityQueryDocument, teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  searchTeacherAvailabilityQueryDocument,
+  teachersQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
 import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
 import { SearchScheduleContainer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleContainer";
 

@@ -14,7 +14,11 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  ClassExecutionState,
+  ClassOutcome,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   ScheduledClass,
   WeeklyScheduleGridProps,
