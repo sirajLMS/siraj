@@ -29,7 +29,7 @@ const lazyViews = createLazyView<LocaleAdornmentSwitchProps>(
       default: m.LocaleAdornmentSwitchMobile,
     })),
   () =>
-    import("@/frontend/common/components/ui/input/localizedString/localeAdornmentSwitch.desktop").then(m => ({
+    import("@/frontend/desktop/components/ui/input/localizedString/localeAdornmentSwitch.desktop").then(m => ({
       default: m.LocaleAdornmentSwitchDesktop,
     }))
 );

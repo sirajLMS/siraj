@@ -1,22 +1,22 @@
 "use client";
 
-import { DateNavigatorDesktop } from "@/frontend/common/components/ui/filter/dateNavigator.desktop";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
-import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter/dateNavigator.mobile";
+import type { DateNavigatorProps } from "./DateNavigator.types";
 
-export interface DateNavigatorProps {
-  readonly dateValue: string;
-  readonly todayLabel: string;
-  readonly previousDayLabel: string;
-  readonly nextDayLabel: string;
-  readonly dateLabel?: string;
-  readonly onDateChange: (date: string) => void;
-}
+const lazyViews = createLazyView<DateNavigatorProps>(
+  () =>
+    import("@/frontend/mobile/components/ui/filter/dateNavigator.mobile").then(m => ({
+      default: m.DateNavigatorMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/components/ui/filter/dateNavigator.desktop").then(m => ({
+      default: m.DateNavigatorDesktop,
+    }))
+);
 
 export function DateNavigator(props: Readonly<DateNavigatorProps>) {
-  const { isMobile } = useViewport();
-  if (isMobile) {
-    return <DateNavigatorMobile {...props} />;
-  }
-  return <DateNavigatorDesktop {...props} />;
+  useViewport();
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }

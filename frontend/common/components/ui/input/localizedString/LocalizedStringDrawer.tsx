@@ -42,7 +42,7 @@ const lazyViews = createLazyView<LocalizedStringDrawerProps>(
       default: m.LocalizedStringDrawerMobile,
     })),
   () =>
-    import("@/frontend/common/components/ui/input/localizedString/localizedStringDrawer.desktop").then(m => ({
+    import("@/frontend/desktop/components/ui/input/localizedString/localizedStringDrawer.desktop").then(m => ({
       default: m.LocalizedStringDrawerDesktop,
     }))
 );
