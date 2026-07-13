@@ -6,7 +6,7 @@ import { Box, Typography } from "@mui/material";
 import type { GridSize } from "@mui/material/Grid";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };
 

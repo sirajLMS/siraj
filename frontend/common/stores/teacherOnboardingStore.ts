@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { TeacherOnboardingCreateResult } from "@/frontend/views/dashboard/teachers/onboarding/types";
+import type { TeacherOnboardingCreateResult } from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 
 interface TeacherOnboardingState {
   readonly isSubmitting: boolean;

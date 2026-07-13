@@ -7,11 +7,11 @@ import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
+import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
-import { ScheduleFilters } from "@/frontend/views/dashboard/admin/home/components/ScheduleFilters";
-import type { ScheduleOverviewViewModel } from "@/frontend/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
   fontSize: 18,

@@ -2,16 +2,16 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { ManagersCardList } from "@/frontend/views/dashboard/managers/home/ManagersCardList";
-import { ManagersFilterBar } from "@/frontend/views/dashboard/managers/home/ManagersFilterBar";
-import { ManagersMetrics } from "@/frontend/views/dashboard/managers/home/ManagersMetrics";
+import { ManagersCardList } from "@/frontend/common/views/dashboard/managers/home/ManagersCardList";
+import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
+import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
 import type {
   Manager,
   ManagerRoleFilter,
   ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
-} from "@/frontend/views/dashboard/managers/home/types";
+} from "@/frontend/common/views/dashboard/managers/home/types";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n/routing";
 
 interface ManagersViewMobileProps {

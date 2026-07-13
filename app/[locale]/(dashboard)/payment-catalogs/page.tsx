@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { PaymentCatalogAdminContainer } from "@/frontend/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer";
+import { PaymentCatalogAdminContainer } from "@/frontend/common/views/dashboard/admin/payment-catalogs/PaymentCatalogAdminContainer";
 
 export async function generateMetadata({
   params,

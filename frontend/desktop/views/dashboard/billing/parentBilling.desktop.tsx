@@ -3,11 +3,11 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
-import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
-import type { ParentBillingViewModel } from "@/frontend/views/dashboard/billing/useParentBillingViewModel";
-import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
-import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
+import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import { ParentInvoicesDataGrid } from "@/frontend/common/views/dashboard/billing/components/ParentInvoicesDataGrid";
+import type { ParentBillingViewModel } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
+import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
+import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 
 export function ParentBillingDesktopView({
   labels,

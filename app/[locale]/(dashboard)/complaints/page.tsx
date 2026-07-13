@@ -4,7 +4,7 @@ import { getCachedParentIdForComplaints } from "@/backend/lib/auth/cached-parent
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { ParentComplaintsContainer } from "@/frontend/views/dashboard/complaints/ParentComplaintsContainer";
+import { ParentComplaintsContainer } from "@/frontend/common/views/dashboard/complaints/ParentComplaintsContainer";
 import { redirect } from "@/shared/i18n/routing";
 
 export async function generateMetadata({

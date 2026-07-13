@@ -11,7 +11,7 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
-import { StatusAction } from "@/frontend/views/dashboard/classes/status/tracking/StatusBadgeAction";
+import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
   computeSessionStatus,
   formatScheduleRange,
@@ -19,7 +19,7 @@ import {
   type StatusTrackingDataGridLabels,
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
-} from "@/frontend/views/dashboard/classes/status/tracking/types";
+} from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {

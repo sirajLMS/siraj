@@ -3,12 +3,12 @@
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard, PageContainer } from "@/frontend/common/components/ui";
+import { BillingMonthSelector } from "@/frontend/common/views/dashboard/billing/manual/components/BillingMonthSelector";
+import { InvoiceDraftSummaryCard } from "@/frontend/common/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
+import { ManualInvoiceActions } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceActions";
+import { ManualInvoiceFormFields } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceFormFields";
+import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
 import { MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { BillingMonthSelector } from "@/frontend/views/dashboard/billing/manual/components/BillingMonthSelector";
-import { InvoiceDraftSummaryCard } from "@/frontend/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
-import { ManualInvoiceActions } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceActions";
-import { ManualInvoiceFormFields } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceFormFields";
-import type { ManualInvoiceViewModel } from "@/frontend/views/dashboard/billing/manual/useManualInvoiceViewModel";
 
 const StyledFormFieldset = styled("fieldset")(({ theme }) => ({
   border: 0,

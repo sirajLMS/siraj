@@ -4,10 +4,10 @@ import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { RescheduleTrackingCardList } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingCardList";
-import { getTrackingStatusLabel } from "@/frontend/views/dashboard/reschedule/tracking/tracking.helpers";
-import type { RescheduleTrackingViewProps } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
-import { STATUS_FILTER_OPTIONS } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
+import { RescheduleTrackingCardList } from "@/frontend/common/views/dashboard/reschedule/tracking/RescheduleTrackingCardList";
+import { getTrackingStatusLabel } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
+import type { RescheduleTrackingViewProps } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
+import { STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 
 export function RescheduleTrackingViewMobile({
   metrics,

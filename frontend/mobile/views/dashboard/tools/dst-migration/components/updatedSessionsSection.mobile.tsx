@@ -4,8 +4,8 @@ import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { UpdatedSessionsCardList } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
-import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
+import { UpdatedSessionsCardList } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
+import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];

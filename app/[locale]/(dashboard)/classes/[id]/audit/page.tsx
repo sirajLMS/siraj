@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ClassAuditContainer } from "@/frontend/views/dashboard/classes/audit/ClassAuditContainer";
+import { ClassAuditContainer } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditContainer";
 
 export async function generateMetadata({
   params,

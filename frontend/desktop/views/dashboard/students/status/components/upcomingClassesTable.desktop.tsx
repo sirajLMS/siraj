@@ -8,7 +8,10 @@ import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGri
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
-import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "@/frontend/views/dashboard/students/status/types";
+import type {
+  UpcomingClassDisplay,
+  UpcomingClassesTableProps,
+} from "@/frontend/common/views/dashboard/students/status/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 

@@ -5,12 +5,12 @@ import { Grid } from "@mui/material";
 import type { ReactNode } from "react";
 import { PageContainer, PaginationControls, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
+import { AcademicProgressSummary } from "@/frontend/common/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
+import { ParentWelcomeHero } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentWelcomeHero";
+import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
+import type { ParentDashboardViewModel } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
 import { ParentScheduleCardMobile } from "@/frontend/mobile/views/dashboard/parent/dashboard/components/parentScheduleCard.mobile";
-import { AcademicProgressSummary } from "@/frontend/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
-import { ParentWelcomeHero } from "@/frontend/views/dashboard/parent/dashboard/components/ParentWelcomeHero";
-import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import type { ParentDashboardViewModel } from "@/frontend/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 
 function formatCount(value: number): string {
   return String(value).padStart(2, "0");

@@ -4,8 +4,8 @@ import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { BookService } from "@/backend/services/resource/book.service";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { BooksAndBagsClient } from "@/frontend/views/dashboard/resources/books-and-bags/BooksAndBagsClient";
-import type { BooksAndBagsPageProps } from "@/frontend/views/dashboard/resources/books-and-bags/booksAndBags.types";
+import { BooksAndBagsClient } from "@/frontend/common/views/dashboard/resources/books-and-bags/BooksAndBagsClient";
+import type { BooksAndBagsPageProps } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
 
 function mapAvailabilityStatus(status: string): AvailabilityStatus {
   if (status === "OUT_OF_STOCK") {

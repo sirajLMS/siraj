@@ -13,12 +13,12 @@ import {
   effectiveMeetingToDisplayData,
   MeetingConfigDisplay,
 } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
-import { ClassParticipantsSection } from "@/frontend/views/dashboard/reschedule/home/ClassParticipantsSection";
-import { NotificationPolicyCard } from "@/frontend/views/dashboard/reschedule/home/NotificationPolicyCard";
-import { QuickAdjustSection } from "@/frontend/views/dashboard/reschedule/home/QuickAdjustSection";
-import { RescheduleDateTimeSection } from "@/frontend/views/dashboard/reschedule/home/RescheduleDateTimeSection";
-import { TimezoneWarningBanner } from "@/frontend/views/dashboard/reschedule/home/TimezoneWarningBanner";
-import type { RescheduleViewModel } from "@/frontend/views/dashboard/reschedule/home/useRescheduleViewModel";
+import { ClassParticipantsSection } from "@/frontend/common/views/dashboard/reschedule/home/ClassParticipantsSection";
+import { NotificationPolicyCard } from "@/frontend/common/views/dashboard/reschedule/home/NotificationPolicyCard";
+import { QuickAdjustSection } from "@/frontend/common/views/dashboard/reschedule/home/QuickAdjustSection";
+import { RescheduleDateTimeSection } from "@/frontend/common/views/dashboard/reschedule/home/RescheduleDateTimeSection";
+import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/reschedule/home/TimezoneWarningBanner";
+import type { RescheduleViewModel } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import { Link } from "@/shared/i18n/routing";
 
 const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({

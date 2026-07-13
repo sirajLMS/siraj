@@ -3,15 +3,15 @@
 import { Box, Chip, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { AdminNoteCard } from "@/frontend/views/dashboard/classes/audit/AdminNoteCard";
-import { ClassAuditDetailsCard } from "@/frontend/views/dashboard/classes/audit/ClassAuditDetailsCard";
-import { CommunicationLogCard } from "@/frontend/views/dashboard/classes/audit/CommunicationLogCard";
+import { AdminNoteCard } from "@/frontend/common/views/dashboard/classes/audit/AdminNoteCard";
+import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
+import { CommunicationLogCard } from "@/frontend/common/views/dashboard/classes/audit/CommunicationLogCard";
 import type {
   ClassAuditDetailsLabels,
   ClassAuditViewProps,
-} from "@/frontend/views/dashboard/classes/audit/classAuditView.types";
-import { OnlineMeetingCard } from "@/frontend/views/dashboard/classes/audit/OnlineMeetingCard";
-import { RegisteredStudentsSection } from "@/frontend/views/dashboard/classes/audit/RegisteredStudentsSection";
+} from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import { OnlineMeetingCard } from "@/frontend/common/views/dashboard/classes/audit/OnlineMeetingCard";
+import { RegisteredStudentsSection } from "@/frontend/common/views/dashboard/classes/audit/RegisteredStudentsSection";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({

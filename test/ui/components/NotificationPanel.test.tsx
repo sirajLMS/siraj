@@ -26,7 +26,7 @@ import {
   unpaidInvoicesAlertQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { NotificationPanel } from "@/frontend/views/dashboard/components/navbar/NotificationPanel";
+import { NotificationPanel } from "@/frontend/common/views/dashboard/components/navbar/NotificationPanel";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {

@@ -1,4 +1,4 @@
-import type { TrackingRow } from "@/frontend/views/dashboard/reschedule/tracking/tracking.types";
+import type { TrackingRow } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 
 interface TrackingExportLabels {
   readonly pageTitle: string;

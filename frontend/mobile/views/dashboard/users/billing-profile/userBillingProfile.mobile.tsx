@@ -3,12 +3,12 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
+import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import { BillingMobileSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingMobileSearchBar";
+import { ParentInvoicesCardList } from "@/frontend/common/views/dashboard/billing/components/ParentInvoicesCardList";
+import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
+import type { UserBillingProfileViewModel } from "@/frontend/common/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
 import { MobileContentStack, MobileEmptyState, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
-import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
-import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";
-import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
-import type { UserBillingProfileViewModel } from "@/frontend/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
 
 export function UserBillingProfileMobileView({
   labels,

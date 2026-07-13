@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { ReportGroupingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 
 const DEFAULT_FROM_DATE = "2023-08-01";
 const DEFAULT_TO_DATE = "2023-08-31";

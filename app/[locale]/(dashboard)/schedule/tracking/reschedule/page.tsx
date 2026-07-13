@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { RescheduleTrackingContainer } from "@/frontend/views/dashboard/reschedule/tracking/RescheduleTrackingContainer";
+import { RescheduleTrackingContainer } from "@/frontend/common/views/dashboard/reschedule/tracking/RescheduleTrackingContainer";
 
 export async function generateMetadata({
   params,

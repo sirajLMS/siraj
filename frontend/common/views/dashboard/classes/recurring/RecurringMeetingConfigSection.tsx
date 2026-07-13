@@ -1,0 +1,261 @@
+"use client";
+
+import { useQuery } from "@apollo/client/react";
+import { Alert, FormControlLabel, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
+import { MeetingConfigSelect } from "@/frontend/common/components/ui/input/meetingConfigSelect/MeetingConfigSelect";
+import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
+import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
+import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
+import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import {
+  getRecurringMeetingConfigErrorKey,
+  resolveRecurringMeetingConfigErrorMessage,
+} from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
+
+export type RecurringMeetingConfigSectionProps = {
+  readonly teacherId: string;
+  readonly value: RecurringMeetingConfigFormState;
+  readonly onChangeAction: (next: RecurringMeetingConfigFormState) => void;
+  readonly disabled?: boolean;
+};
+
+function toSelectOption(config: UserMeetingConfigFieldsFragment): MeetingConfigSelectOption {
+  return {
+    id: config.id ?? "",
+    label: config.label,
+    provider: config.provider ?? null,
+    isDefault: config.isDefault ?? false,
+  };
+}
+
+type RecurringMeetingConfigNewModeFieldsProps = {
+  readonly value: RecurringMeetingConfigFormState;
+  readonly onChangeAction: (next: RecurringMeetingConfigFormState) => void;
+  readonly disabled?: boolean;
+  readonly urlError: string | null;
+  readonly fieldsError: string | null;
+  readonly onUrlErrorChange: (error: string | null) => void;
+  readonly onFieldsErrorChange: (error: string | null) => void;
+  readonly onValidateUrl: () => boolean;
+  readonly instructions: string | null;
+  readonly selectLabel: string;
+  readonly recurringFieldsRequiredLabel: string;
+  readonly labelFieldLabel: string;
+};
+
+function RecurringMeetingConfigNewModeFields({
+  value,
+  onChangeAction,
+  disabled,
+  urlError,
+  fieldsError,
+  onUrlErrorChange,
+  onFieldsErrorChange,
+  onValidateUrl,
+  instructions,
+  selectLabel,
+  recurringFieldsRequiredLabel,
+  labelFieldLabel,
+}: RecurringMeetingConfigNewModeFieldsProps) {
+  return (
+    <Stack spacing={2}>
+      <MeetingProviderSelect
+        value={value.newProvider}
+        onChangeAction={provider => {
+          onChangeAction({ ...value, newProvider: provider });
+          onUrlErrorChange(null);
+          onFieldsErrorChange(null);
+        }}
+        disabled={disabled}
+        label={selectLabel}
+      />
+      {!value.newProvider && (value.newMeetingUrl.trim() || value.newLabel.trim()) ? (
+        <Alert severity="warning">{recurringFieldsRequiredLabel}</Alert>
+      ) : null}
+      {instructions ? (
+        <Alert severity="info">
+          {value.newProvider?.name ? (
+            <LocalizedStringDisplay
+              value={value.newProvider.name}
+              typographyVariant="labelMd"
+              sx={{ fontWeight: 700 }}
+            />
+          ) : null}
+          <Typography sx={{ typography: "bodySm", mt: value.newProvider?.name ? 0.5 : 0 }}>{instructions}</Typography>
+        </Alert>
+      ) : null}
+      <TextField
+        label={labelFieldLabel}
+        value={value.newLabel}
+        onChange={e => onChangeAction({ ...value, newLabel: e.target.value })}
+        disabled={disabled}
+        size="small"
+        fullWidth
+      />
+      <MeetingConfigTypeFields
+        provider={value.newProvider}
+        value={{
+          meetingUrl: value.newMeetingUrl,
+          username: "",
+          password: "",
+          tenantId: "",
+        }}
+        onChangeAction={next => {
+          onChangeAction({ ...value, newMeetingUrl: next.meetingUrl });
+          onUrlErrorChange(null);
+          onFieldsErrorChange(null);
+        }}
+        onMeetingUrlBlur={onValidateUrl}
+        disabled={disabled}
+      />
+      {urlError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{urlError}</Typography> : null}
+      {fieldsError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{fieldsError}</Typography> : null}
+    </Stack>
+  );
+}
+
+export function RecurringMeetingConfigSection({
+  teacherId,
+  value,
+  onChangeAction,
+  disabled,
+}: RecurringMeetingConfigSectionProps) {
+  const t = useTranslations("ui.meetingConfig.classScope");
+  const tManager = useTranslations("ui.meetingConfig.manager");
+  const locale = useLocale();
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [fieldsError, setFieldsError] = useState<string | null>(null);
+  const { data, loading } = useQuery(userMeetingConfigsQueryDocument, {
+    variables: { userId: teacherId },
+    skip: !teacherId,
+  });
+
+  const configs = data?.userMeetingConfigs ?? [];
+  const options = configs
+    .filter((config): config is UserMeetingConfigFieldsFragment => Boolean(config.id))
+    .map(toSelectOption);
+
+  const mode = value.useTeacherDefault ? "default" : value.selectedConfig ? "existing" : "new";
+
+  const instructions = useMemo(() => {
+    if (!value.newProvider?.instructions) return null;
+    return resolveLocalizedString(value.newProvider.instructions, locale);
+  }, [locale, value.newProvider?.instructions]);
+
+  const validateNewModeFields = (): boolean => {
+    const errorKey = getRecurringMeetingConfigErrorKey(value);
+    const message = resolveRecurringMeetingConfigErrorMessage(errorKey, {
+      recurringFieldsRequired: t("recurringFieldsRequired"),
+      urlNotAllowed: tManager("urlNotAllowed"),
+    });
+
+    if (errorKey === "urlNotAllowed") {
+      setUrlError(message);
+      setFieldsError(null);
+      return false;
+    }
+
+    if (errorKey === "incomplete") {
+      setFieldsError(message);
+      setUrlError(null);
+      return false;
+    }
+
+    setUrlError(null);
+    setFieldsError(null);
+    return true;
+  };
+
+  const validateUrl = (): boolean => {
+    if (!value.newProvider || !value.newMeetingUrl.trim()) {
+      return validateNewModeFields();
+    }
+
+    const allowlist = value.newProvider.urlAllowlist ?? [];
+    if (allowlist.length === 0) {
+      setUrlError(null);
+      return true;
+    }
+
+    if (isUrlAllowedByProvider(value.newMeetingUrl.trim(), allowlist)) {
+      setUrlError(null);
+      return true;
+    }
+
+    setUrlError(tManager("urlNotAllowed"));
+    return false;
+  };
+
+  return (
+    <Stack spacing={2}>
+      <Typography sx={{ typography: "titleMd" }}>{t("recurringSectionTitle")}</Typography>
+      <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t("recurringSectionSubtitle")}</Typography>
+
+      <RadioGroup
+        value={mode}
+        onChange={(_event, next) => {
+          setUrlError(null);
+          setFieldsError(null);
+          if (next === "default") {
+            onChangeAction({ ...value, useTeacherDefault: true, selectedConfig: null });
+            return;
+          }
+          if (next === "existing") {
+            onChangeAction({ ...value, useTeacherDefault: false, newProvider: null, newMeetingUrl: "", newLabel: "" });
+            return;
+          }
+          onChangeAction({ ...value, useTeacherDefault: false, selectedConfig: null });
+        }}
+      >
+        <FormControlLabel value="default" control={<Radio />} label={t("useTeacherDefault")} disabled={disabled} />
+        <FormControlLabel
+          value="existing"
+          control={<Radio />}
+          label={t("selectLabel")}
+          disabled={disabled || options.length === 0}
+        />
+        <FormControlLabel value="new" control={<Radio />} label={t("createNewConfig")} disabled={disabled} />
+      </RadioGroup>
+
+      {mode === "existing" ? (
+        <MeetingConfigSelect
+          options={options}
+          loading={loading}
+          disabled={disabled}
+          allowEmpty={false}
+          value={value.selectedConfig ? toSelectOption(value.selectedConfig) : null}
+          onChangeAction={option => {
+            const match = configs.find(config => config.id === option?.id) as
+              | UserMeetingConfigFieldsFragment
+              | undefined;
+            onChangeAction({ ...value, useTeacherDefault: false, selectedConfig: match ?? null });
+          }}
+        />
+      ) : null}
+
+      {mode === "new" ? (
+        <RecurringMeetingConfigNewModeFields
+          value={value}
+          onChangeAction={onChangeAction}
+          disabled={disabled}
+          urlError={urlError}
+          fieldsError={fieldsError}
+          onUrlErrorChange={setUrlError}
+          onFieldsErrorChange={setFieldsError}
+          onValidateUrl={validateUrl}
+          instructions={instructions}
+          selectLabel={t("selectLabel")}
+          recurringFieldsRequiredLabel={t("recurringFieldsRequired")}
+          labelFieldLabel={tManager("label")}
+        />
+      ) : null}
+    </Stack>
+  );
+}

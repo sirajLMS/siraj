@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ManagerOnboardingContainer } from "@/frontend/views/dashboard/managers/onboarding/ManagerOnboardingContainer";
+import { ManagerOnboardingContainer } from "@/frontend/common/views/dashboard/managers/onboarding/ManagerOnboardingContainer";
 
 interface Props {
   params: Promise<{ locale: string }>;

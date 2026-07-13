@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { AdminSuggestionsContainer } from "@/frontend/views/dashboard/suggestions/AdminSuggestionsContainer";
+import { AdminSuggestionsContainer } from "@/frontend/common/views/dashboard/suggestions/AdminSuggestionsContainer";
 
 export async function generateMetadata({
   params,

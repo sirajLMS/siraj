@@ -1,9 +1,9 @@
 import type { FormatCurrencyMessages } from "@/frontend/common/lib/fx-render";
-import type { ReportLedgerRow, ReportsSummary } from "@/frontend/views/dashboard/reports/types/reportsTypes";
+import type { ReportLedgerRow, ReportsSummary } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import {
   aggregatePaidAmountTotals,
   formatReportPaidAmounts,
-} from "@/frontend/views/dashboard/reports/utils/formatReportPaidAmounts";
+} from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
 
 interface ReportExportLabels {
   readonly pageTitle: string;

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   getForceActivateDisabledTooltip,
   getStopDisabledTooltip,
-} from "@/frontend/views/dashboard/classes/details/admin/adminActionTooltips";
+} from "@/frontend/common/views/dashboard/classes/details/admin/adminActionTooltips";
 
 const forceActivateTooltips = {
   activated: "You cannot force activate because this class is already activated.",

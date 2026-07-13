@@ -4,11 +4,11 @@ import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Grid } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { CurrentTeacherCard } from "@/frontend/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
-import { ManagementControlsCard } from "@/frontend/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
-import { ReassignmentBentoGrid } from "@/frontend/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";
-import { StudentContextCard } from "@/frontend/views/dashboard/teachers/reassignment/components/StudentContextCard";
-import type { TeacherReassignmentViewModel } from "@/frontend/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
+import { CurrentTeacherCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/CurrentTeacherCard";
+import { ManagementControlsCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ManagementControlsCard";
+import { ReassignmentBentoGrid } from "@/frontend/common/views/dashboard/teachers/reassignment/components/ReassignmentBentoGrid";
+import { StudentContextCard } from "@/frontend/common/views/dashboard/teachers/reassignment/components/StudentContextCard";
+import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
 
 export function TeacherReassignmentViewDesktop({
   student,

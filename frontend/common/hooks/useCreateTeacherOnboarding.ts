@@ -10,11 +10,11 @@ import { createUserMeetingConfigMutationDocument } from "@/frontend/common/graph
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
-import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
+import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 import type {
   TeacherOnboardingCreateResult,
   TeacherOnboardingFormData,
-} from "@/frontend/views/dashboard/teachers/onboarding/types";
+} from "@/frontend/common/views/dashboard/teachers/onboarding/types";
 
 export function useCreateTeacherOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createTeacherMutationDocument);

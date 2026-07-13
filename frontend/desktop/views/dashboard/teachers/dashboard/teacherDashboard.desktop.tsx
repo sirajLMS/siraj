@@ -3,17 +3,17 @@
 import { Alert, Box } from "@mui/material";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
-import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";
-import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
-import { StudentProgressFeed } from "@/frontend/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
-import { TeacherDailyScheduleSection } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherDailyScheduleSection";
-import { MissedClassAlertBanner } from "@/frontend/views/dashboard/teachers/dashboard/shared/missedClassAlertBanner";
-import type { TeacherDashboardViewModel } from "@/frontend/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
+import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
+import { ParentSupportFab } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentSupportFab";
+import { ActivationPolicyPanel } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
+import { StudentProgressFeed } from "@/frontend/common/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
+import { TeacherDailyScheduleSection } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherDailyScheduleSection";
+import { MissedClassAlertBanner } from "@/frontend/common/views/dashboard/teachers/dashboard/shared/missedClassAlertBanner";
+import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
-} from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+} from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 
 export function TeacherDashboardDesktopView({
   userName,

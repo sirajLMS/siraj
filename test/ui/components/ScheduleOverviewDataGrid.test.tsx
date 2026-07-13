@@ -33,9 +33,9 @@ import {
   ClassOutcome,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { ScheduleOverviewDataGrid } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
-import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
+import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
+import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import { createDailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/scheduleFixture";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {

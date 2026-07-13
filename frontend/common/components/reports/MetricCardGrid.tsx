@@ -6,7 +6,7 @@ import Grid, { type GridSize } from "@mui/material/Grid";
 import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };
 

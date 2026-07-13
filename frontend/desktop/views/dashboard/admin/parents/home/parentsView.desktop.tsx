@@ -12,12 +12,12 @@ import {
   SectionPanel,
 } from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
-import { ParentsDataGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsDataGrid";
-import { ParentsMetricGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsMetricGrid";
-import type { ParentsViewLabels } from "@/frontend/views/dashboard/admin/parents/home/ParentsView";
-import { ParentFilterPanel } from "@/frontend/views/dashboard/admin/parents/home/parentFilterPanel";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
+import { ParentsDataGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsDataGrid";
+import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
+import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
+import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 export interface ParentsViewDesktopProps {
   readonly metrics: readonly MetricItem[];

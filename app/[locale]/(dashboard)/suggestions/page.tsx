@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ParentSuggestionsContainer } from "@/frontend/views/dashboard/suggestions/ParentSuggestionsContainer";
+import { ParentSuggestionsContainer } from "@/frontend/common/views/dashboard/suggestions/ParentSuggestionsContainer";
 
 export async function generateMetadata({
   params,

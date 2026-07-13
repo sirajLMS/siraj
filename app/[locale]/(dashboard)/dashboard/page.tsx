@@ -2,7 +2,7 @@ import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
-import { DashboardContainer } from "@/frontend/views/dashboard/dashboard/DashboardContainer";
+import { DashboardContainer } from "@/frontend/common/views/dashboard/dashboard/DashboardContainer";
 
 export async function generateMetadata({
   params,

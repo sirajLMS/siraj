@@ -6,7 +6,10 @@ import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { profileHrefForTeacher, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
-import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "@/frontend/views/dashboard/students/status/types";
+import type {
+  UpcomingClassDisplay,
+  UpcomingClassesTableProps,
+} from "@/frontend/common/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";

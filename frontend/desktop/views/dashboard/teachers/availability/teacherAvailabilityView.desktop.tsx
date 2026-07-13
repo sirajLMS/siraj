@@ -7,12 +7,12 @@ import { useTranslations } from "next-intl";
 import { FormProvider, useForm } from "react-hook-form";
 import { ExportButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { AvailabilityInsights } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilityInsights";
-import { AvailabilitySearchForm } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
-import { WeeklyAvailabilityGrid } from "@/frontend/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
-import { availabilitySearchSchema } from "@/frontend/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
-import type { AvailabilitySearchFormData } from "@/frontend/views/dashboard/teachers/availability/types";
-import type { TeacherAvailabilityViewModel } from "@/frontend/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
+import { AvailabilityInsights } from "@/frontend/common/views/dashboard/teachers/availability/components/AvailabilityInsights";
+import { AvailabilitySearchForm } from "@/frontend/common/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
+import { WeeklyAvailabilityGrid } from "@/frontend/common/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
+import { availabilitySearchSchema } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import type { AvailabilitySearchFormData } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 
 export function TeacherAvailabilityDesktopView({
   availability,

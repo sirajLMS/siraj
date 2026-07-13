@@ -11,8 +11,8 @@ import type {
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { TeacherDataGrid } from "@/frontend/views/dashboard/teachers/home/components/TeacherDataGrid";
-import { TeacherMetricsRow } from "@/frontend/views/dashboard/teachers/home/components/TeacherMetricsRow";
+import { TeacherDataGrid } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherDataGrid";
+import { TeacherMetricsRow } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { Link } from "@/shared/i18n/routing";
 
 export interface TeachersDesktopViewProps {

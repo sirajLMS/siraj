@@ -7,15 +7,15 @@ import { useTranslations } from "next-intl";
 import { FormProvider, useForm } from "react-hook-form";
 import { ExportButton, PageContainer, SectionPanel } from "@/frontend/common/components/ui";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { AvailabilitySearchForm } from "@/frontend/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
-import { WeeklyAvailabilityGrid } from "@/frontend/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
-import { availabilitySearchSchema } from "@/frontend/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import { AvailabilitySearchForm } from "@/frontend/common/views/dashboard/teachers/availability/components/AvailabilitySearchForm";
+import { WeeklyAvailabilityGrid } from "@/frontend/common/views/dashboard/teachers/availability/components/WeeklyAvailabilityGrid";
+import { availabilitySearchSchema } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {
   AvailabilitySearchFormData,
   TeacherAvailabilityInsights,
-} from "@/frontend/views/dashboard/teachers/availability/types";
-import type { TeacherAvailabilityViewModel } from "@/frontend/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
+} from "@/frontend/common/views/dashboard/teachers/availability/types";
+import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityViewModel, "insights"> {
   readonly insights?: TeacherAvailabilityInsights;

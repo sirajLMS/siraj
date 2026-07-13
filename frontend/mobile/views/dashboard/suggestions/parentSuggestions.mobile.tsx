@@ -2,12 +2,12 @@
 
 import { Box } from "@mui/material";
 import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { SuggestionFormFields } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionFormFields";
+import { SuggestionHeroBanner } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionHeroBanner";
+import { SuggestionSocialProof } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionSocialProof";
+import { SuggestionSupportCards } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionSupportCards";
+import type { ParentSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useParentSuggestionsViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { SuggestionFormFields } from "@/frontend/views/dashboard/suggestions/components/SuggestionFormFields";
-import { SuggestionHeroBanner } from "@/frontend/views/dashboard/suggestions/components/SuggestionHeroBanner";
-import { SuggestionSocialProof } from "@/frontend/views/dashboard/suggestions/components/SuggestionSocialProof";
-import { SuggestionSupportCards } from "@/frontend/views/dashboard/suggestions/components/SuggestionSupportCards";
-import type { ParentSuggestionsViewModel } from "@/frontend/views/dashboard/suggestions/useParentSuggestionsViewModel";
 
 export function ParentSuggestionsMobileView({
   labels,

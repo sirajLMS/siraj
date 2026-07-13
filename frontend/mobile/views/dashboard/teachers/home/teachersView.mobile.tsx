@@ -9,9 +9,9 @@ import type {
   TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { TeacherCardList } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherCardList";
+import { TeacherMetricsRow } from "@/frontend/common/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { TeacherCardList } from "@/frontend/views/dashboard/teachers/home/components/TeacherCardList";
-import { TeacherMetricsRow } from "@/frontend/views/dashboard/teachers/home/components/TeacherMetricsRow";
 import { Link } from "@/shared/i18n/routing";
 
 export interface TeachersMobileViewProps {

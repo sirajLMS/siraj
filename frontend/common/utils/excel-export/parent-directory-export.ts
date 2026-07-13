@@ -1,4 +1,4 @@
-import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 
 interface ParentDirectoryExportLabels {
   readonly pageTitle: string;

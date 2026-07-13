@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { getNavItemsForPermissions, SIDEBAR_NAV_ITEMS } from "@/frontend/views/dashboard/config/navigationConfig";
+import {
+  getNavItemsForPermissions,
+  SIDEBAR_NAV_ITEMS,
+} from "@/frontend/common/views/dashboard/config/navigationConfig";
 
 const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.AuthLogin,

@@ -1,0 +1,16 @@
+"use client";
+
+import { useViewport } from "@/frontend/common/hooks/useViewport";
+import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
+import { StudentStatusHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/status/components/studentStatusHeader.desktop";
+import { StudentStatusHeaderMobile } from "@/frontend/mobile/views/dashboard/students/status/components/studentStatusHeader.mobile";
+
+export function StudentStatusHeader({ student, embedded = false }: Readonly<StudentStatusHeaderProps>) {
+  const { isMobile } = useViewport();
+
+  if (isMobile) {
+    return <StudentStatusHeaderMobile student={student} embedded={embedded} />;
+  }
+
+  return <StudentStatusHeaderDesktop student={student} embedded={embedded} />;
+}

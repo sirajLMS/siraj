@@ -1,11 +1,11 @@
 "use client";
 
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { SuggestionsDataGrid } from "@/frontend/views/dashboard/suggestions/components/SuggestionsDataGrid";
-import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
-import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";
-import { SuggestionsTabBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsTabBar";
-import type { AdminSuggestionsViewModel } from "@/frontend/views/dashboard/suggestions/useAdminSuggestionsViewModel";
+import { SuggestionsDataGrid } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsDataGrid";
+import { SuggestionsMetricsRow } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsMetricsRow";
+import { SuggestionsSearchBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsSearchBar";
+import { SuggestionsTabBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsTabBar";
+import type { AdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";
 
 export function AdminSuggestionsDesktopView({
   labels,

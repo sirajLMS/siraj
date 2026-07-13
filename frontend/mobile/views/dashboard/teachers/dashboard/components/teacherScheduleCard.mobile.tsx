@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
-import { TeacherScheduleMobileCard } from "@/frontend/views/dashboard/teachers/dashboard/components/TeacherScheduleMobileCard";
-import type { TeacherDashboardViewLabels } from "@/frontend/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+import { TeacherScheduleMobileCard } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherScheduleMobileCard";
+import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
 export interface TeacherScheduleMobileCardItemProps {
   readonly row: TeacherScheduleRow;

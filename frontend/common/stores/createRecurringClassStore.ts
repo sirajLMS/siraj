@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import type { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { type DayScheduleConfig, DEFAULT_DAY_SCHEDULE } from "@/frontend/views/dashboard/classes/recurring/types";
+import {
+  type DayScheduleConfig,
+  DEFAULT_DAY_SCHEDULE,
+} from "@/frontend/common/views/dashboard/classes/recurring/types";
 
 interface CreateRecurringClassState {
   readonly isDialogOpen: boolean;

@@ -3,7 +3,7 @@ I have a design for a new page that I need to implement in my Next.js + Material
 1. `screen.png` - A screenshot/mockup of the page design
 2. `code.html` - HTML structure reference
 
-**IMPORTANT: Check `.ai/ux/01-in_progress/` for the files to focus on, refer to `.ai/siraj_lms_combined.txt` for complete UI specifications, and strictly follow the [NEW_PAGE_WORKFLOW.md](NEW_PAGE_WORKFLOW.md) for all implementation steps.**
+**IMPORTANT: Check `.ai/ux/01_in_progress/` for the files to focus on, refer to `.ai/siraj_lms_combined.txt` for complete UI specifications, and strictly follow the [NEW_PAGE_WORKFLOW.md](NEW_PAGE_WORKFLOW.md) for all implementation steps.**
 
 ## Architecture Principles
 
@@ -23,14 +23,14 @@ I have a design for a new page that I need to implement in my Next.js + Material
 
 ### Data Flow (Mandatory)
 
-- **Components are presentational only** - they receive ALL data via props
+- **Components are presentational only** — they receive ALL data via props
 - **Containers** connect Zustand stores to Views/Components
 - **Views** handle layout and composition, passing props down
 - **NO component should access stores directly**
 
 ```
 Store (Zustand) → Container → View → Components
-                      ↓
+                        ↓
                   Server Actions
 ```
 
@@ -55,7 +55,7 @@ Please implement this page following our project's patterns and standards:
 
 ## Implementation Requirements
 
-### 1. File Structure
+### 1. File Structure (Tier-Aware)
 
 **For Dashboard Pages** (most pages):
 
@@ -65,16 +65,27 @@ src/app/[locale]/(dashboard)/[feature]/
   ├── [id]/page.tsx                      # Dynamic routes
   └── [nested-path]/page.tsx             # Nested routes
 
-src/views/dashboard/[feature]/
+frontend/common/views/dashboard/[feature]/     # tier-neutral home (post-Block-2)
   ├── components/
-  │   ├── [ComponentName].tsx            # Presentational components
+  │   ├── [ComponentName].tsx            # Presentational components (viewport-agnostic)
   │   └── [AnotherComponent].tsx
   ├── schemas/
   │   └── [name]Schema.ts                # Zod validation
   ├── actions/
   │   └── [name].ts                      # Server actions
-  ├── [Feature]Container.tsx             # Connects store to view
-  └── [Feature]View.tsx                  # Layout + composition
+  ├── XxContainer.tsx                    # Connects store to view
+  ├── XxView.tsx                         # Layout + composition (switcher)
+  └── useXxViewModel.ts                  # Business logic hook
+
+frontend/mobile/views/dashboard/[feature]/     # mobile tier views
+  ├── xx.mobile.tsx                      # mobile view (pure presentation)
+  └── components/
+      └── xxCard.mobile.tsx              # mobile-only subcomponents
+
+frontend/desktop/views/dashboard/[feature]/    # desktop tier views
+  ├── xx.desktop.tsx                     # desktop view (pure presentation)
+  └── components/
+      └── xxGrid.desktop.tsx             # desktop-only subcomponents
 ```
 
 **For Auth Pages** (login, etc.):
@@ -83,31 +94,24 @@ src/views/dashboard/[feature]/
 src/app/[locale]/(auth)/[page]/
   └── page.tsx
 
-src/views/auth/[page]/
+frontend/views/auth/[page]/
   ├── components/
   ├── schemas/
   └── actions/
 ```
 
-**Feature Examples**:
-
-- `schedule/` - Schedule management
-- `students/` - Students directory and profiles
-- `teachers/` - Teachers directory and profiles
-- `classes/` - Class details and management
-- `billing/` - Invoices and payments
-- `reports/` - Analytics and reporting
-
-**Key Points**:
-
+**Key Points:**
 - All dashboard pages under `(dashboard)` group
 - Features organized by domain, not by user role
 - Shared dashboard components in `views/dashboard/components/`
 - Feature-specific components in `views/dashboard/[feature]/components/`
+- Tier-neutral home at `frontend/common/views/dashboard/<feature>/` contains: ViewModel hook, switcher, Container, shared types/schemas/utils, shared non-tiered components
+- Mobile views at `frontend/mobile/views/dashboard/<feature>/` (`.mobile.tsx` files)
+- Desktop views at `frontend/desktop/views/dashboard/<feature>/` (`.desktop.tsx` files)
 
 ### Theme and Styling Rules
 
-- **NO hardcoded colors allowed** - All colors MUST come from the theme palette defined in `providers/theme/types.ts`.
+- **NO hardcoded colors allowed** — All colors MUST come from the theme palette defined in `providers/theme/types.ts`.
 - **NEVER use hex colors, rgb/rgba values, or color names** (e.g., `#fff`, `#000000`, `rgb(255,0,0)`, `"white"`, `"red"`).
 - **NO Quotes for Colors**: Never use MUI's string-based palette access (e.g., `color="primary.main"` or `sx={{ color: 'primary.main' }}`).
 - **Theme Callback Pattern**: Use the theme callback pattern ONLY when theme-specific values are needed:
@@ -153,10 +157,11 @@ interface ScheduleViewProps {
 
 export function ScheduleView({ schedules, filters, onFilterChange, onRefresh }: ScheduleViewProps) {
   return (
-    <Box sx={{ p: 3 }}>
+    <PageContainer>
+      <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       <ScheduleFilters filters={filters} onChange={onFilterChange} />
       <ScheduleTable schedules={schedules} onRefresh={onRefresh} />
-    </Box>
+    </PageContainer>
   );
 }
 ```
@@ -183,7 +188,7 @@ export function ScheduleTable({ schedules, onRefresh }: ScheduleTableProps) {
 **Page Component** (route entry):
 
 ```tsx
-import { ScheduleContainer } from "@/frontend/views/dashboard/schedule/ScheduleContainer";
+import { ScheduleContainer } from "@/frontend/common/views/dashboard/schedule/ScheduleContainer";
 
 export default function SchedulePage() {
   return <ScheduleContainer />;
@@ -244,7 +249,7 @@ export type FormData = z.infer<ReturnType<typeof createSchema>>;
 
 Add translations to both language files organized by feature:
 
-**src/messages/en.ts**:
+**shared/messages/en.ts**:
 
 ```ts
 dashboard: {
@@ -275,21 +280,9 @@ auth: {
 },
 ```
 
-**src/messages/ar.ts**: (Provide Arabic translations)
+**shared/messages/ar.ts**: (Provide Arabic translations)
 
-```ts
-dashboard: {
-  schedule: {
-    title: "نظرة عامة على الجدول",
-    filters: {
-      date: "التاريخ",
-      teacher: "المعلم",
-    },
-  },
-},
-```
-
-Update **src/types/message.ts** to include the new keys in the `MessageSchema` type.
+Update **shared/messages/types/message.ts** to include the new keys in the `MessageSchema` type.
 
 **Usage in components**:
 
@@ -379,7 +372,7 @@ Use MUI icons:
 
 **Adding navigation items** (if this page should appear in sidebar):
 
-Edit `src/views/dashboard/config/navigationConfig.ts`:
+Edit `frontend/views/dashboard/config/navigationConfig.ts`:
 
 ```ts
 export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
@@ -412,7 +405,7 @@ function getNavItemsForPermissions(items: readonly NavItem[], permissions: reado
 If creating a new store for this feature:
 
 ```ts
-// src/stores/[feature]Store.ts
+// frontend/common/stores/[feature]Store.ts
 import { create } from "zustand";
 
 interface FeatureState {

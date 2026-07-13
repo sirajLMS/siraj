@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ParentBillingContainer } from "@/frontend/views/dashboard/billing/ParentBillingContainer";
+import { ParentBillingContainer } from "@/frontend/common/views/dashboard/billing/ParentBillingContainer";
 
 export async function generateMetadata({
   params,

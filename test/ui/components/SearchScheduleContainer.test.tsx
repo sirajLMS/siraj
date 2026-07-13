@@ -27,7 +27,7 @@ import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graph
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { SearchScheduleContainer } from "@/frontend/views/dashboard/search-schedule/SearchScheduleContainer";
+import { SearchScheduleContainer } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleContainer";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const fromDate = format(new Date(), "yyyy-MM-dd");

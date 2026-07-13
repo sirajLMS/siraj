@@ -2,8 +2,37 @@
 
 When tasked with implementing a new page in the Siraj LMS project, strictly follow this **Research -> Plan -> Execute -> Validate** workflow. Use this document as your primary entry point to ensure zero regressions in code quality and consistency.
 
+## Phase 0: Tier-aware Scaffolding (Mobile/Desktop Isolation)
+
+New pages follow the tier-isolated architecture. **Before writing any component code**, read these for the tier contract:
+
+- `frontend/mobile/AGENTS.md` — Mobile* primitives (3 behavioral categories: viewport-gated null-return, hybrid responsive, pure presentational)
+- `frontend/desktop/AGENTS.md` — Desktop tier-paired `.desktop.*` variants only
+- `.agents/instructions/mobile-desktop.instructions.md` — Full switcher pattern, ViewModel pattern, ESLint rules
+- `frontend/common/views/AGENTS.md` — Switcher/Container/ViewModel relocation home (post-Block-2)
+
+**Tier scaffold structure:**
+```
+frontend/common/views/dashboard/<feature>/
+  useXxViewModel.ts          # business logic hook (viewport-agnostic)
+  XxView.tsx                 # switcher — createLazyView + ResponsiveViewSwitch
+  XxContainer.tsx            # calls hook, passes view model
+  types/, schemas/, utils/   # shared non-tiered
+  components/                # shared non-tiered components
+
+frontend/mobile/views/dashboard/<feature>/
+  xx.mobile.tsx              # mobile tier view (pure presentation)
+  components/                # mobile-only subcomponents
+
+frontend/desktop/views/dashboard/<feature>/
+  xx.desktop.tsx             # desktop tier view (pure presentation)
+  components/                # desktop-only subcomponents
+```
+
 ## Phase 1: Mandatory Research & Rule Review
+
 Before writing a single line of code, you **MUST** read and acknowledge the following files to align with project standards:
+
 1.  **[GEMINI.md](GEMINI.md)**: Core mandates and system instructions.
 2.  **[AGENTS.md](AGENTS.md)**: Quality gates, automated checks, and SonarQube priorities.
 3.  **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)**: The architectural roadmap and page organization.
@@ -11,16 +40,18 @@ Before writing a single line of code, you **MUST** read and acknowledge the foll
 5.  **[IMPLEMENTATION_LEARNINGS.md](IMPLEMENTATION_LEARNINGS.md)**: **CRITICAL.** A record of past errors to prevent recurrence.
 
 ## Phase 2: Design Analysis
-1.  Locate the desktop and mobile HTML mockups in `.ai/ux/01-in_progress/`.
+
+1.  Locate the desktop and mobile HTML mockups in `.ai/ux/01_in_progress/`.
 2.  Identify all UI strings and register them in:
-    - `src/types/message.ts` (Strict schema definition).
-    - `src/messages/en.ts` (English values).
-    - `src/messages/ar.ts` (Arabic values).
+    - `shared/messages/types/message.ts` (Strict schema definition).
+    - `shared/messages/en.ts` (English values).
+    - `shared/messages/ar.ts` (Arabic values).
 3.  **Navigation & Permissions:**
-    - Register the new route in `src/views/dashboard/config/navigationConfig.ts`.
-    - Add the required permission key to the `permissions` array in `src/stores/userStore.ts` for development visibility.
+    - Register the new route in `frontend/views/dashboard/config/navigationConfig.ts` (will move to `frontend/common/views/dashboard/config/navigationConfig.ts` in Block 2).
+    - Add the required permission key to the `permissions` array in `frontend/common/stores/userStore.ts` for development visibility.
 
 ## Phase 3: Implementation Strategy (The "Zero-Error" Mandate)
+
 While implementing, you must adhere to these specific rules derived from previous session failures:
 
 ### 1. Zero Hardcoded Colors
@@ -37,15 +68,16 @@ While implementing, you must adhere to these specific rules derived from previou
 ### 3. React & Library Best Practices
 - **No Array Index Keys:** Every mapped item must have a unique, stable `id`.
 - **React Compiler Compatibility:** Never use `methods.watch()`. Use the `useWatch` hook from `react-hook-form`.
-- **Shared Pickers:** Never use `<input type="date">`. Use the shared `AppDatePicker` and `AppTimePicker` from `@/frontend/components/ui/form`.
+- **Shared Pickers:** Never use `<input type="date">`. Use the shared `AppDatePicker` and `AppTimePicker` from `@/frontend/common/components/ui/form`.
 
 ### 4. CodeScene "Perfect Health" Strategy
 - **Abstract Sub-components:** If a file exceeds 150 lines, proactively extract sub-components (e.g., `FormFields`, `PageHeaderBlock`) into separate files in the `components/` directory.
 
 ## Phase 4: Validation Quality Gate
-You are not finished until you run `bun quality-gate` and it completes with **"ALL QUALITY GATES PASSED"**. 
 
-This automated script orchestrates the sequential verification stages: `BASIC_CHECKS` -> `CODESCENE` -> `SONAR_SCAN` -> `SONAR_RESULTS`. 
+You are not finished until you run `bun quality-gate` and it completes with **"ALL QUALITY GATES PASSED"**.
+
+This automated script orchestrates the sequential verification stages: `BASIC_CHECKS` -> `CODESCENE` -> `SONAR_SCAN` -> `SONAR_RESULTS`.
 
 **Key Features:**
 - **State Persistence:** Progress is saved. If a stage fails, fix the issue and rerun to resume.

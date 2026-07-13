@@ -5,17 +5,17 @@ import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { AdminBillingViewModel } from "@/frontend/views/dashboard/admin/billing/useAdminBillingViewModel";
+import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import type {
   AdminInvoiceRow,
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
-} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import {
   isDeletableInvoiceStatus,
   isPayableUnpaidStatus,
   shouldShowViewRejection,
-} from "@/frontend/views/dashboard/billing/utils/invoiceDisplayStatus";
+} from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 
 const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
   width: 40,

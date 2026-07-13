@@ -8,8 +8,8 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
-import { useStudentFieldAccess } from "@/frontend/views/dashboard/students/profile/useStudentFieldAccess";
-import type { StudentStatusHeaderProps } from "@/frontend/views/dashboard/students/status/types";
+import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
+import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
 import { useRouter } from "@/shared/i18n/routing";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {

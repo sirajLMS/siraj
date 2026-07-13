@@ -20,7 +20,7 @@ import type {
   TeacherOnboardingInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import type { OnboardingPaymentMethodFormValues } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
+import type { OnboardingPaymentMethodFormValues } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 // --- Parent Complaints ---
 

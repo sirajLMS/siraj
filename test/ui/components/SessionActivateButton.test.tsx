@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 
 expect.extend(matchers);
 
-import { SessionActivateButton } from "@/frontend/views/dashboard/teachers/dashboard/components/SessionActivateButton";
+import { SessionActivateButton } from "@/frontend/common/views/dashboard/teachers/dashboard/components/SessionActivateButton";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {

@@ -3,13 +3,13 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
+import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import { BillingMobileSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingMobileSearchBar";
+import { ParentInvoicesCardList } from "@/frontend/common/views/dashboard/billing/components/ParentInvoicesCardList";
+import type { ParentBillingViewModel } from "@/frontend/common/views/dashboard/billing/useParentBillingViewModel";
+import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
+import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import { MobileContentStack, MobileEmptyState, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
-import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
-import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";
-import type { ParentBillingViewModel } from "@/frontend/views/dashboard/billing/useParentBillingViewModel";
-import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
-import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
 
 export function ParentBillingMobileView({
   labels,

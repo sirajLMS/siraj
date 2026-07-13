@@ -6,9 +6,9 @@ import type { ReactNode } from "react";
 import { MeetingJoinAction, StatusBadge } from "@/frontend/common/components/ui";
 import { PersonProfileLink } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLink";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
+import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
+import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui";
-import type { ParentDashboardLabels } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardLabels";
-import type { ParentScheduleRow } from "@/frontend/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export interface ParentScheduleMobileCardItemProps {

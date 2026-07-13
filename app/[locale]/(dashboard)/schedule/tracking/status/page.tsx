@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { StatusTrackingContainer } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingContainer";
+import { StatusTrackingContainer } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingContainer";
 
 export async function generateMetadata({
   params,

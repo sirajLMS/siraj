@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ScheduleAlertsContainer } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertsContainer";
+import { ScheduleAlertsContainer } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsContainer";
 
 export async function generateMetadata({
   params,

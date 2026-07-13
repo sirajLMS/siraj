@@ -6,10 +6,10 @@ import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentMobileMetricsScroll } from "@/frontend/common/views/dashboard/admin/parents/students/components/StudentMobileMetricsScroll";
+import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
 import { MobileCardList, MobileContentStack, MobileFab, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { StudentDirectoryMobileCard } from "@/frontend/mobile/views/dashboard/admin/parents/students/components/studentDirectoryCard.mobile";
-import { StudentMobileMetricsScroll } from "@/frontend/views/dashboard/admin/parents/students/components/StudentMobileMetricsScroll";
-import type { StudentsViewModel } from "@/frontend/views/dashboard/admin/parents/students/useStudentsViewModel";
 
 export function StudentsMobileView({
   labels,

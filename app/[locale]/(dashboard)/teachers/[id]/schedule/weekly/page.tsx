@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import TeacherWeeklyScheduleContainer from "@/frontend/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleContainer";
+import TeacherWeeklyScheduleContainer from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleContainer";
 
 interface PageProps {
   readonly params: Promise<{

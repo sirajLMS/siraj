@@ -3,18 +3,18 @@
 import { Grid, Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { CheckedEmptyPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/CheckedEmptyPanel";
-import { ConflictErrorsPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
-import { DstMigrationMetricsRow } from "@/frontend/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
-import { UpdatedSessionsSection } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsSection";
-import { UpdateSchedulesButton } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdateSchedulesButton";
+import { CheckedEmptyPanel } from "@/frontend/common/views/dashboard/tools/dst-migration/components/CheckedEmptyPanel";
+import { ConflictErrorsPanel } from "@/frontend/common/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
+import { DstMigrationMetricsRow } from "@/frontend/common/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
+import { UpdatedSessionsSection } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsSection";
+import { UpdateSchedulesButton } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdateSchedulesButton";
 import type {
   CheckedEmptyItem,
   ConflictGroup,
   DstMigrationMetrics,
   MigrationStatus,
   UpdatedSession,
-} from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
+} from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly metrics: DstMigrationMetrics;

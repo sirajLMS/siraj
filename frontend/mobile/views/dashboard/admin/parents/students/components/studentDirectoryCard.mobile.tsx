@@ -1,13 +1,13 @@
 "use client";
 
-import { MobileCardListItem } from "@/frontend/mobile/components/ui";
-import { StudentDirectoryCardFooter } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardFooter";
-import { StudentDirectoryCardHeader } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardHeader";
-import { StudentDirectoryCardStats } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryCardStats";
+import { StudentDirectoryCardFooter } from "@/frontend/common/views/dashboard/admin/parents/students/components/StudentDirectoryCardFooter";
+import { StudentDirectoryCardHeader } from "@/frontend/common/views/dashboard/admin/parents/students/components/StudentDirectoryCardHeader";
+import { StudentDirectoryCardStats } from "@/frontend/common/views/dashboard/admin/parents/students/components/StudentDirectoryCardStats";
 import type {
   StudentDirectoryCardLabels,
   StudentDirectoryRowExtended,
-} from "@/frontend/views/dashboard/admin/parents/students/types";
+} from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui";
 
 export interface StudentDirectoryMobileCardProps {
   readonly row: StudentDirectoryRowExtended;

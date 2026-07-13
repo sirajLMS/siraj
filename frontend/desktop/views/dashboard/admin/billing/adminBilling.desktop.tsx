@@ -4,16 +4,16 @@ import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { AdminInvoicesDataGrid } from "@/frontend/views/dashboard/admin/billing/components/AdminInvoicesDataGrid";
-import type { AdminBillingViewModel } from "@/frontend/views/dashboard/admin/billing/useAdminBillingViewModel";
-import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
-import { BillingSearchBar } from "@/frontend/views/dashboard/billing/components/BillingSearchBar";
-import { StudentCreditDataGrid } from "@/frontend/views/dashboard/billing/components/StudentCreditDataGrid";
-import { buildAdminMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
+import { AdminInvoicesDataGrid } from "@/frontend/common/views/dashboard/admin/billing/components/AdminInvoicesDataGrid";
+import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
+import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import { BillingSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingSearchBar";
+import { StudentCreditDataGrid } from "@/frontend/common/views/dashboard/billing/components/StudentCreditDataGrid";
+import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
   getAdminInvoiceGridLabels,
   getStudentCreditGridLabels,
-} from "@/frontend/views/dashboard/billing/utils/label-mappers";
+} from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import { Link } from "@/shared/i18n/routing";
 
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({

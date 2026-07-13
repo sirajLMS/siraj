@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { SubjectsContainer } from "@/frontend/views/dashboard/subjects/home/SubjectsContainer";
+import { SubjectsContainer } from "@/frontend/common/views/dashboard/subjects/home/SubjectsContainer";
 
 export async function generateMetadata({
   params,

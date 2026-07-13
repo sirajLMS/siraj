@@ -12,17 +12,17 @@ import {
 } from "@/frontend/common/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
-import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleCard.mobile";
-import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
-import { ActivationPolicyPanel } from "@/frontend/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
-import { StudentProgressFeed } from "@/frontend/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
-import { MissedClassAlertBanner } from "@/frontend/views/dashboard/teachers/dashboard/shared/missedClassAlertBanner";
-import type { TeacherDashboardViewModel } from "@/frontend/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
+import { DashboardMetricsSection } from "@/frontend/common/views/dashboard/components/DashboardMetricsSection";
+import { ActivationPolicyPanel } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ActivationPolicyPanel";
+import { StudentProgressFeed } from "@/frontend/common/views/dashboard/teachers/dashboard/components/StudentProgressFeed";
+import { MissedClassAlertBanner } from "@/frontend/common/views/dashboard/teachers/dashboard/shared/missedClassAlertBanner";
+import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import {
   teacherDashboardContentPaddingSx,
   teacherDashboardPageContainerSx,
-} from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+} from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+import { MobileCardList, MobileContentStack } from "@/frontend/mobile/components/ui";
+import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleCard.mobile";
 
 interface MobileWelcomeHeaderProps {
   readonly userName: string;

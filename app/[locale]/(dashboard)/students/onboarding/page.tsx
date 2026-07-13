@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { StudentOnboardingContainer } from "@/frontend/views/dashboard/students/onboarding/StudentOnboardingContainer";
+import { StudentOnboardingContainer } from "@/frontend/common/views/dashboard/students/onboarding/StudentOnboardingContainer";
 
 export async function generateMetadata({
   params,

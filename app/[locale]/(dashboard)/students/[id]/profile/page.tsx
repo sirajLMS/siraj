@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getStudentPageTitle } from "@/backend/lib/titles/cached-page-title";
-import { StudentProfilePageClient } from "@/frontend/views/dashboard/students/profile/StudentProfilePageClient";
+import { StudentProfilePageClient } from "@/frontend/common/views/dashboard/students/profile/StudentProfilePageClient";
 
 export async function generateMetadata({
   params,

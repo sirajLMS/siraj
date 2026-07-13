@@ -2,15 +2,15 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ManagersDataGrid } from "@/frontend/views/dashboard/managers/home/ManagersDataGrid";
-import { ManagersFilterBar } from "@/frontend/views/dashboard/managers/home/ManagersFilterBar";
-import { ManagersMetrics } from "@/frontend/views/dashboard/managers/home/ManagersMetrics";
+import { ManagersDataGrid } from "@/frontend/common/views/dashboard/managers/home/ManagersDataGrid";
+import { ManagersFilterBar } from "@/frontend/common/views/dashboard/managers/home/ManagersFilterBar";
+import { ManagersMetrics } from "@/frontend/common/views/dashboard/managers/home/ManagersMetrics";
 import type {
   Manager,
   ManagerRoleFilter,
   ManagerStatusFilter,
   NonNullableManagerDirectoryMetrics,
-} from "@/frontend/views/dashboard/managers/home/types";
+} from "@/frontend/common/views/dashboard/managers/home/types";
 import { Link } from "@/shared/i18n/routing";
 
 interface ManagersViewDesktopProps {

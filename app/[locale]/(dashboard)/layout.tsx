@@ -10,7 +10,7 @@ import {
   type User,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { DashboardLayoutContainer } from "@/frontend/views/dashboard/components/DashboardLayoutContainer";
+import { DashboardLayoutContainer } from "@/frontend/common/views/dashboard/components/DashboardLayoutContainer";
 import { type AppLocale, locales } from "@/shared/i18n/routing";
 
 export default async function DashboardLayout({

@@ -10,8 +10,8 @@ import { createUserMeetingConfigMutationDocument } from "@/frontend/common/graph
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
-import { formDetailsToInput } from "@/frontend/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
+import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);

@@ -3,10 +3,10 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
-import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
-import { getParentInvoiceGridLabels } from "@/frontend/views/dashboard/billing/utils/label-mappers";
-import type { UserBillingProfileViewModel } from "@/frontend/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
+import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import { ParentInvoicesDataGrid } from "@/frontend/common/views/dashboard/billing/components/ParentInvoicesDataGrid";
+import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
+import type { UserBillingProfileViewModel } from "@/frontend/common/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
 
 export function UserBillingProfileDesktopView({
   labels,

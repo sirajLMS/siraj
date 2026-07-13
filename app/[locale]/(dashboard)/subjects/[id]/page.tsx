@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getSubjectPageTitle } from "@/backend/lib/titles/cached-page-title";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { SubjectDetailContainer } from "@/frontend/views/dashboard/subjects/detail/SubjectDetailContainer";
+import { SubjectDetailContainer } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
 
 export async function generateMetadata({
   params,

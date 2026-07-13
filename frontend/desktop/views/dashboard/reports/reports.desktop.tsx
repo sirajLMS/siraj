@@ -3,12 +3,12 @@
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { BaseCard, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
-import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
-import { ReportFiltersForm } from "@/frontend/views/dashboard/reports/components/ReportFiltersForm";
-import { ReportsDataGrid } from "@/frontend/views/dashboard/reports/components/ReportsDataGrid";
-import { ReportsTotalsSection } from "@/frontend/views/dashboard/reports/components/ReportsTotalsSection";
-import type { ReportsViewModel } from "@/frontend/views/dashboard/reports/useReportsViewModel";
+import { EngagementRateCard } from "@/frontend/common/views/dashboard/reports/components/EngagementRateCard";
+import { FinancialDistributionCard } from "@/frontend/common/views/dashboard/reports/components/FinancialDistributionCard";
+import { ReportFiltersForm } from "@/frontend/common/views/dashboard/reports/components/ReportFiltersForm";
+import { ReportsDataGrid } from "@/frontend/common/views/dashboard/reports/components/ReportsDataGrid";
+import { ReportsTotalsSection } from "@/frontend/common/views/dashboard/reports/components/ReportsTotalsSection";
+import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 
 export function ReportsDesktopView({
   labels,

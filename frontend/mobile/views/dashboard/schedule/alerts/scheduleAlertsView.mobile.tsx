@@ -4,15 +4,19 @@ import { FilterListOutlined, IosShareOutlined } from "@mui/icons-material";
 import { Box, Grid, IconButton, Typography } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
-import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { AcademicScheduleCardList } from "@/frontend/views/dashboard/schedule/alerts/AcademicScheduleCardList";
-import { InstitutionalReportCard } from "@/frontend/views/dashboard/schedule/alerts/InstitutionalReportCard";
-import { ScheduleAlertBanners } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertBanners";
+import { AcademicScheduleCardList } from "@/frontend/common/views/dashboard/schedule/alerts/AcademicScheduleCardList";
+import { InstitutionalReportCard } from "@/frontend/common/views/dashboard/schedule/alerts/InstitutionalReportCard";
+import { ScheduleAlertBanners } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertBanners";
 import type {
   CardListLabels,
   ScheduleAlertsLabels,
-} from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertsView";
-import type { AcademicClassRow, AlertsMetric, ScheduleAlert } from "@/frontend/views/dashboard/schedule/alerts/types";
+} from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
+import type {
+  AcademicClassRow,
+  AlertsMetric,
+  ScheduleAlert,
+} from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
 export interface ScheduleAlertsViewMobileProps {
   readonly alerts: readonly ScheduleAlert[];

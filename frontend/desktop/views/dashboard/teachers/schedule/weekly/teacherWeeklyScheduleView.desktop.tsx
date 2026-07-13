@@ -18,9 +18,9 @@ import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
-import { ScheduleFooterLegend } from "@/frontend/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
-import type { TeacherWeeklyScheduleViewProps } from "@/frontend/views/dashboard/teachers/schedule/weekly/types";
-import WeeklyScheduleGrid from "@/frontend/views/dashboard/teachers/schedule/weekly/WeeklyScheduleGrid";
+import { ScheduleFooterLegend } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleView";
+import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import WeeklyScheduleGrid from "@/frontend/common/views/dashboard/teachers/schedule/weekly/WeeklyScheduleGrid";
 
 export function TeacherWeeklyScheduleViewDesktop({
   schedule,

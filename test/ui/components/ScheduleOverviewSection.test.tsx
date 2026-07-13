@@ -25,8 +25,8 @@ import {
   ClassOutcome,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { ScheduleOverviewView } from "@/frontend/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView";
-import type { UseScheduleOverviewViewModelProps } from "@/frontend/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import { ScheduleOverviewView } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/scheduleOverviewView";
+import type { UseScheduleOverviewViewModelProps } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {

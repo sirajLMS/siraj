@@ -1,6 +1,6 @@
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
-import { createDailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/scheduleFixture";
+import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import { createDailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/scheduleFixture";
 
 export interface MockScheduleSeed {
   readonly id: string;

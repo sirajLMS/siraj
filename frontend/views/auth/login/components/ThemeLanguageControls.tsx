@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { LanguageSwitcher, ThemeSwitcher } from "@/frontend/views/dashboard/components/navbar";
+import { LanguageSwitcher, ThemeSwitcher } from "@/frontend/common/views/dashboard/components/navbar";
 
 // Main container positioned at top-right with flex layout
 const StyledContainer = styled(Box)({

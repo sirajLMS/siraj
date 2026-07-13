@@ -3,6 +3,16 @@
 import { Box, Button, Typography } from "@mui/material";
 import { PageContainer, StatusBadge } from "@/frontend/common/components/ui";
 import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { SuggestionsMetricsRow } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsMetricsRow";
+import { SuggestionsSearchBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsSearchBar";
+import { SuggestionsTabBar } from "@/frontend/common/views/dashboard/suggestions/components/SuggestionsTabBar";
+import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
+import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
+import type { AdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";
+import {
+  mapStatusForBadge,
+  statusLabelKey,
+} from "@/frontend/common/views/dashboard/suggestions/utils/suggestionStatusMap";
 import {
   MobileCardList,
   MobileCardListItem,
@@ -10,13 +20,6 @@ import {
   MobileEmptyState,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
-import { SuggestionsMetricsRow } from "@/frontend/views/dashboard/suggestions/components/SuggestionsMetricsRow";
-import { SuggestionsSearchBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsSearchBar";
-import { SuggestionsTabBar } from "@/frontend/views/dashboard/suggestions/components/SuggestionsTabBar";
-import type { AdminSuggestionRow } from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
-import type { SuggestionsAdminLabels } from "@/frontend/views/dashboard/suggestions/types/suggestionsView.types";
-import type { AdminSuggestionsViewModel } from "@/frontend/views/dashboard/suggestions/useAdminSuggestionsViewModel";
-import { mapStatusForBadge, statusLabelKey } from "@/frontend/views/dashboard/suggestions/utils/suggestionStatusMap";
 
 interface SuggestionCardActionsProps {
   readonly row: AdminSuggestionRow;

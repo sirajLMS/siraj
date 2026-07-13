@@ -3,11 +3,11 @@
 import { Alert, Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { PermissionManagementDialogs } from "@/frontend/views/dashboard/permissions/components/PermissionManagementDialogs";
-import { PermissionTabContent } from "@/frontend/views/dashboard/permissions/components/PermissionTabContent";
-import { SingleGroupView } from "@/frontend/views/dashboard/permissions/components/SingleGroupView";
-import type { PermissionManagementViewModel } from "@/frontend/views/dashboard/permissions/usePermissionManagementViewModel";
-import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import { PermissionManagementDialogs } from "@/frontend/common/views/dashboard/permissions/components/PermissionManagementDialogs";
+import { PermissionTabContent } from "@/frontend/common/views/dashboard/permissions/components/PermissionTabContent";
+import { SingleGroupView } from "@/frontend/common/views/dashboard/permissions/components/SingleGroupView";
+import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
+import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 
 function PermissionErrorAlert({
   error,

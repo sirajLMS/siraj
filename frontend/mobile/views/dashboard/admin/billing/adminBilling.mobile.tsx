@@ -5,6 +5,11 @@ import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
+import { BillingMetricsRow } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
+import { BillingMobileSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingMobileSearchBar";
+import { StudentCreditCardList } from "@/frontend/common/views/dashboard/billing/components/StudentCreditCardList";
+import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
   MobileCardList,
   MobileCardListItem,
@@ -14,11 +19,6 @@ import {
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 import { AdminInvoiceMobileCard } from "@/frontend/mobile/views/dashboard/admin/billing/components/adminInvoiceCard.mobile";
-import type { AdminBillingViewModel } from "@/frontend/views/dashboard/admin/billing/useAdminBillingViewModel";
-import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
-import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
-import { StudentCreditCardList } from "@/frontend/views/dashboard/billing/components/StudentCreditCardList";
-import { buildAdminMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { Link } from "@/shared/i18n/routing";
 
 const StyledCreditFooterBox = styled(Box)(({ theme }) => ({

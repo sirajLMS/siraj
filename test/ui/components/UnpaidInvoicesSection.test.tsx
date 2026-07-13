@@ -25,7 +25,7 @@ expect.extend(matchers);
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { UnpaidInvoicesSection } from "@/frontend/views/dashboard/components/navbar/UnpaidInvoicesSection";
+import { UnpaidInvoicesSection } from "@/frontend/common/views/dashboard/components/navbar/UnpaidInvoicesSection";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {

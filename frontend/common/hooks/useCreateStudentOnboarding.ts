@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import type { StudentOnboardingInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createStudentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
-import type { StudentOnboardingFormData } from "@/frontend/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
+import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
 export function useCreateStudentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createStudentMutationDocument);

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { AdminComplaintsContainer } from "@/frontend/views/dashboard/complaints/AdminComplaintsContainer";
+import { AdminComplaintsContainer } from "@/frontend/common/views/dashboard/complaints/AdminComplaintsContainer";
 
 export async function generateMetadata({
   params,

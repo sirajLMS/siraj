@@ -1,19 +1,19 @@
 "use client";
 
 import { PageContainer, SectionPanel } from "@/frontend/common/components/ui";
+import { EngagementRateCard } from "@/frontend/common/views/dashboard/reports/components/EngagementRateCard";
+import { FinancialDistributionCard } from "@/frontend/common/views/dashboard/reports/components/FinancialDistributionCard";
+import { PerformanceLedgerCard } from "@/frontend/common/views/dashboard/reports/components/PerformanceLedgerCard";
+import { ReportFiltersCollapsible } from "@/frontend/common/views/dashboard/reports/components/ReportFiltersCollapsible";
+import { ReportsTotalsSection } from "@/frontend/common/views/dashboard/reports/components/ReportsTotalsSection";
+import type { ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { ReportsViewModel } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
 import {
   MobileCardList,
   MobileCardListItem,
   MobileContentStack,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
-import { EngagementRateCard } from "@/frontend/views/dashboard/reports/components/EngagementRateCard";
-import { FinancialDistributionCard } from "@/frontend/views/dashboard/reports/components/FinancialDistributionCard";
-import { PerformanceLedgerCard } from "@/frontend/views/dashboard/reports/components/PerformanceLedgerCard";
-import { ReportFiltersCollapsible } from "@/frontend/views/dashboard/reports/components/ReportFiltersCollapsible";
-import { ReportsTotalsSection } from "@/frontend/views/dashboard/reports/components/ReportsTotalsSection";
-import type { ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
-import type { ReportsViewModel } from "@/frontend/views/dashboard/reports/useReportsViewModel";
 
 export function ReportsMobileView({
   labels,

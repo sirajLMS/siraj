@@ -249,5 +249,5 @@ bun quality-gate
     xxView.tsx          (switcher)
   ```
 - **ESLint enforcement**: `no-restricted-imports` rules block cross-imports and `useMediaQuery` usage in versioned files (see `eslint.config.mjs`).
-- **Existing patterns**: See `frontend/views/AGENTS.md` for ViewModel conventions and `frontend/stores/AGENTS.md` for serialization rules.
-- **Cross-reference**: See `frontend/views/AGENTS.md`, `frontend/stores/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`.
+- **Existing patterns**: See `frontend/views/AGENTS.md` for ViewModel conventions and `frontend/common/stores/AGENTS.md` for serialization rules.
+- **Cross-reference**: See `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`.

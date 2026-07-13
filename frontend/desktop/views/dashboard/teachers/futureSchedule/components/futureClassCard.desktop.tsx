@@ -7,7 +7,7 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { FutureClassCardProps } from "@/frontend/views/dashboard/teachers/futureSchedule/types";
+import type { FutureClassCardProps } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import { isFutureClassJoinable } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {

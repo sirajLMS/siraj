@@ -2,12 +2,12 @@
 
 import { Box } from "@mui/material";
 import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { ComplaintFormFields } from "@/frontend/common/views/dashboard/complaints/components/ComplaintFormFields";
+import { ComplaintPolicyPanel } from "@/frontend/common/views/dashboard/complaints/components/ComplaintPolicyPanel";
+import { ComplaintRecordCardList } from "@/frontend/common/views/dashboard/complaints/components/ComplaintRecordCardList";
+import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
+import { SubmissionSuccessBanner } from "@/frontend/common/views/dashboard/shared/SubmissionSuccessBanner";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { ComplaintFormFields } from "@/frontend/views/dashboard/complaints/components/ComplaintFormFields";
-import { ComplaintPolicyPanel } from "@/frontend/views/dashboard/complaints/components/ComplaintPolicyPanel";
-import { ComplaintRecordCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintRecordCardList";
-import type { ParentComplaintsViewModel } from "@/frontend/views/dashboard/complaints/useParentComplaintsViewModel";
-import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 
 export function ParentComplaintsMobileView({
   labels,

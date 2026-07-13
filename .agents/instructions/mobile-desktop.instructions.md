@@ -116,7 +116,7 @@ export function XxView(props: Readonly<UseXxViewModelProps>) {
 - `createLazyView<T>(mobileImporter, desktopImporter, options?)` — Returns `{ mobile, desktop }` lazy component references. Uses `next/dynamic` internally. `options.ssr` defaults to `true`.
 - `<ResponsiveViewSwitch mobile={...} desktop={...} props={...} fallback={...} errorFallback={...} />` — Reads `useViewport()` internally (the ONLY component that does), wraps in `Suspense` with a `CircularProgress` fallback by default, and an `ErrorBoundary` with a retry button by default. Both `fallback` and `errorFallback` are optional.
 
-### Mobile Shared Components (`frontend/components/ui/`)
+### Mobile Primitives (`frontend/mobile/components/ui/`)
 
 These non-versioned components are used BY mobile views, not by both tiers:
 

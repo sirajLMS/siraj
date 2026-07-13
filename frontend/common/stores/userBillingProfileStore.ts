@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
-} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 
 const DEFAULT_PAGE_SIZE = 10;
 

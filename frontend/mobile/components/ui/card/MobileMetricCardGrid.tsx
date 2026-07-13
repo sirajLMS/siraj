@@ -5,7 +5,7 @@ import { Grid } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 
 export interface MobileMetricCardGridProps {
   readonly metrics: readonly MetricItem[];

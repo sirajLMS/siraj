@@ -4,16 +4,16 @@ import { ReportProblemOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
-import { ConflictErrorsPanel } from "@/frontend/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
-import { DstMigrationMetricsRow } from "@/frontend/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
-import { UpdatedSessionsCardList } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
-import { UpdateSchedulesButtonMobile } from "@/frontend/views/dashboard/tools/dst-migration/components/UpdateSchedulesButton";
+import { ConflictErrorsPanel } from "@/frontend/common/views/dashboard/tools/dst-migration/components/ConflictErrorsPanel";
+import { DstMigrationMetricsRow } from "@/frontend/common/views/dashboard/tools/dst-migration/components/DstMigrationMetricsRow";
+import { UpdatedSessionsCardList } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdatedSessionsCardList";
+import { UpdateSchedulesButtonMobile } from "@/frontend/common/views/dashboard/tools/dst-migration/components/UpdateSchedulesButton";
 import type {
   ConflictGroup,
   DstMigrationMetrics,
   MigrationStatus,
   UpdatedSession,
-} from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
+} from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly metrics: DstMigrationMetrics;

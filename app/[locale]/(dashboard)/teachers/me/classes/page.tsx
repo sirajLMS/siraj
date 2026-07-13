@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { TeacherClassListContainer } from "@/frontend/views/dashboard/teachers/classes/TeacherClassListContainer";
+import { TeacherClassListContainer } from "@/frontend/common/views/dashboard/teachers/classes/TeacherClassListContainer";
 
 interface PageProps {
   readonly params: Promise<{ readonly locale: string }>;

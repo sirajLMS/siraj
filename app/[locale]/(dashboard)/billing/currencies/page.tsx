@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { SupportedCurrenciesContainer } from "@/frontend/views/dashboard/admin/billing/currencies/SupportedCurrenciesContainer";
+import { SupportedCurrenciesContainer } from "@/frontend/common/views/dashboard/admin/billing/currencies/SupportedCurrenciesContainer";
 
 export async function generateMetadata({
   params,

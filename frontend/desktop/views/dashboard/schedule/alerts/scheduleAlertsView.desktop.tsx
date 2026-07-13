@@ -7,11 +7,15 @@ import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import {
   AcademicScheduleDataGrid,
   type AcademicScheduleDataGridLabels,
-} from "@/frontend/views/dashboard/schedule/alerts/AcademicScheduleDataGrid";
-import { InstitutionalReportCard } from "@/frontend/views/dashboard/schedule/alerts/InstitutionalReportCard";
-import { ScheduleAlertBanners } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertBanners";
-import type { ScheduleAlertsLabels } from "@/frontend/views/dashboard/schedule/alerts/ScheduleAlertsView";
-import type { AcademicClassRow, AlertsMetric, ScheduleAlert } from "@/frontend/views/dashboard/schedule/alerts/types";
+} from "@/frontend/common/views/dashboard/schedule/alerts/AcademicScheduleDataGrid";
+import { InstitutionalReportCard } from "@/frontend/common/views/dashboard/schedule/alerts/InstitutionalReportCard";
+import { ScheduleAlertBanners } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertBanners";
+import type { ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsView";
+import type {
+  AcademicClassRow,
+  AlertsMetric,
+  ScheduleAlert,
+} from "@/frontend/common/views/dashboard/schedule/alerts/types";
 
 export interface ScheduleAlertsViewDesktopProps {
   readonly alerts: readonly ScheduleAlert[];

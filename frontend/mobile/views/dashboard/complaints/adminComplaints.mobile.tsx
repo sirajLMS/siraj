@@ -2,12 +2,12 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { PageContainer } from "@/frontend/common/components/ui";
+import { ComplaintQueueCardList } from "@/frontend/common/views/dashboard/complaints/components/ComplaintQueueCardList";
+import { ComplaintsMetricsRow } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsMetricsRow";
+import { ComplaintsSearchBar } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsSearchBar";
+import { ComplaintsTabBar } from "@/frontend/common/views/dashboard/complaints/components/ComplaintsTabBar";
+import type { AdminComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useAdminComplaintsViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { ComplaintQueueCardList } from "@/frontend/views/dashboard/complaints/components/ComplaintQueueCardList";
-import { ComplaintsMetricsRow } from "@/frontend/views/dashboard/complaints/components/ComplaintsMetricsRow";
-import { ComplaintsSearchBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsSearchBar";
-import { ComplaintsTabBar } from "@/frontend/views/dashboard/complaints/components/ComplaintsTabBar";
-import type { AdminComplaintsViewModel } from "@/frontend/views/dashboard/complaints/useAdminComplaintsViewModel";
 
 export function AdminComplaintsMobileView({
   labels,

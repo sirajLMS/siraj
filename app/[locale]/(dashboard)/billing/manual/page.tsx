@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ManualInvoiceContainer } from "@/frontend/views/dashboard/billing/manual/ManualInvoiceContainer";
+import { ManualInvoiceContainer } from "@/frontend/common/views/dashboard/billing/manual/ManualInvoiceContainer";
 
 export async function generateMetadata({
   params,

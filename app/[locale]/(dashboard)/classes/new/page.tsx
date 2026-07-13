@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { CreateRecurringClassContainer } from "@/frontend/views/dashboard/classes/recurring/CreateRecurringClassContainer";
+import { CreateRecurringClassContainer } from "@/frontend/common/views/dashboard/classes/recurring/CreateRecurringClassContainer";
 
 export async function generateMetadata({
   params,

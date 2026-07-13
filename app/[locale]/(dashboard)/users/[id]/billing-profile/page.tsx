@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getUserPageTitle } from "@/backend/lib/titles/cached-page-title";
-import { UserBillingProfileContainer } from "@/frontend/views/dashboard/users/billing-profile/UserBillingProfileContainer";
+import { UserBillingProfileContainer } from "@/frontend/common/views/dashboard/users/billing-profile/UserBillingProfileContainer";
 
 interface BillingProfilePageProps {
   readonly params: Promise<{ id: string; locale: string }>;

@@ -5,12 +5,12 @@ import { ArrowBackOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { BillingMonthSelector } from "@/frontend/views/dashboard/billing/manual/components/BillingMonthSelector";
-import { InvoiceDraftSummaryCard } from "@/frontend/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
-import { ManualInvoiceActions } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceActions";
-import { ManualInvoiceFormFields } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceFormFields";
-import { ManualInvoiceSupportCards } from "@/frontend/views/dashboard/billing/manual/components/ManualInvoiceSupportCards";
-import type { ManualInvoiceViewModel } from "@/frontend/views/dashboard/billing/manual/useManualInvoiceViewModel";
+import { BillingMonthSelector } from "@/frontend/common/views/dashboard/billing/manual/components/BillingMonthSelector";
+import { InvoiceDraftSummaryCard } from "@/frontend/common/views/dashboard/billing/manual/components/InvoiceDraftSummaryCard";
+import { ManualInvoiceActions } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceActions";
+import { ManualInvoiceFormFields } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceFormFields";
+import { ManualInvoiceSupportCards } from "@/frontend/common/views/dashboard/billing/manual/components/ManualInvoiceSupportCards";
+import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
 
 const StyledBackButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.main,

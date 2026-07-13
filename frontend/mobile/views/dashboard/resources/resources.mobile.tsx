@@ -3,13 +3,13 @@
 import { CloudUploadOutlined, ExpandMoreOutlined } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, Box } from "@mui/material";
 import { BaseCard, PageContainer } from "@/frontend/common/components/ui";
+import { ResourceDeleteDialog } from "@/frontend/common/views/dashboard/resources/components/ResourceDeleteDialog";
+import { ResourceGovernancePanel } from "@/frontend/common/views/dashboard/resources/components/ResourceGovernancePanel";
+import { ResourceLibraryList } from "@/frontend/common/views/dashboard/resources/components/ResourceLibraryList";
+import { ResourceUploadForm } from "@/frontend/common/views/dashboard/resources/components/ResourceUploadForm";
+import { ResourceUploadGuidelines } from "@/frontend/common/views/dashboard/resources/components/ResourceUploadGuidelines";
+import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import { ResourceDeleteDialog } from "@/frontend/views/dashboard/resources/components/ResourceDeleteDialog";
-import { ResourceGovernancePanel } from "@/frontend/views/dashboard/resources/components/ResourceGovernancePanel";
-import { ResourceLibraryList } from "@/frontend/views/dashboard/resources/components/ResourceLibraryList";
-import { ResourceUploadForm } from "@/frontend/views/dashboard/resources/components/ResourceUploadForm";
-import { ResourceUploadGuidelines } from "@/frontend/views/dashboard/resources/components/ResourceUploadGuidelines";
-import type { ResourcesViewModel } from "@/frontend/views/dashboard/resources/useResourcesViewModel";
 
 export function ResourcesMobileView({
   labels,

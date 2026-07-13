@@ -9,15 +9,15 @@ import { ActionIconLink, TimezoneDisplay } from "@/frontend/common/components/ui
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { type ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
-import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
-import { StyledScheduleNameLink } from "@/frontend/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
-import type { ScheduleOverviewViewModel } from "@/frontend/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/home/types/schedule";
+import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
+import { StyledScheduleNameLink } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
+import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import {
   formatDurationMinutes,
   formatScheduleTimeOnly,
   formatScheduleYourTime,
-} from "@/frontend/views/dashboard/admin/home/utils/formatScheduleTime";
+} from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 

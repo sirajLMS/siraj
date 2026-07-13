@@ -11,8 +11,8 @@ import {
   SectionPanel,
 } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { StudentDirectoryDataGrid } from "@/frontend/views/dashboard/admin/parents/students/components/StudentDirectoryDataGrid";
-import type { StudentsViewModel } from "@/frontend/views/dashboard/admin/parents/students/useStudentsViewModel";
+import { StudentDirectoryDataGrid } from "@/frontend/common/views/dashboard/admin/parents/students/components/StudentDirectoryDataGrid";
+import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
 
 export function StudentsDesktopView({
   labels,

@@ -3,12 +3,12 @@
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/common/components/ui";
-import { FutureClassCard } from "@/frontend/views/dashboard/teachers/futureSchedule/components/FutureClassCard";
-import { ImportantNotes } from "@/frontend/views/dashboard/teachers/futureSchedule/components/ImportantNotes";
-import { JumpToDateHeader } from "@/frontend/views/dashboard/teachers/futureSchedule/components/JumpToDateHeader";
-import { MiniCalendar } from "@/frontend/views/dashboard/teachers/futureSchedule/components/MiniCalendar";
-import { SupportContact } from "@/frontend/views/dashboard/teachers/futureSchedule/components/SupportContact";
-import type { FutureScheduleViewModel } from "@/frontend/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
+import { FutureClassCard } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/FutureClassCard";
+import { ImportantNotes } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/ImportantNotes";
+import { JumpToDateHeader } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/JumpToDateHeader";
+import { MiniCalendar } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/MiniCalendar";
+import { SupportContact } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/SupportContact";
+import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
 
 export function FutureScheduleViewMobile({
   classes,

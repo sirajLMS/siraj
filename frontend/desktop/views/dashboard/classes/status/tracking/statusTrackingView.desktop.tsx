@@ -11,9 +11,9 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/common/components/ui";
-import { StatusTrackingDataGrid } from "@/frontend/views/dashboard/classes/status/tracking/StatusTrackingDataGrid";
-import { SuspensionAnalytics } from "@/frontend/views/dashboard/classes/status/tracking/SuspensionAnalytics";
-import type { DesktopLayoutProps } from "@/frontend/views/dashboard/classes/status/tracking/types";
+import { StatusTrackingDataGrid } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingDataGrid";
+import { SuspensionAnalytics } from "@/frontend/common/views/dashboard/classes/status/tracking/SuspensionAnalytics";
+import type { DesktopLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 
 const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(2),

@@ -6,8 +6,8 @@ expect.extend(matchers);
 
 import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import type { UserBillingProfileViewProps } from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
-import { UserBillingProfileView } from "@/frontend/views/dashboard/users/billing-profile/userBillingProfileView";
+import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
+import { UserBillingProfileView } from "@/frontend/common/views/dashboard/users/billing-profile/userBillingProfileView";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 

@@ -14,7 +14,7 @@ import type {
   ProfileAudience,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { ProfilePageClient } from "@/frontend/views/dashboard/profile/core/ProfilePageClient";
+import { ProfilePageClient } from "@/frontend/common/views/dashboard/profile/core/ProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

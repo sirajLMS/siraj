@@ -3,12 +3,12 @@
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid } from "@mui/material";
 import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { AcademicProgressSummary } from "@/frontend/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
-import { ParentDashboardMetricsRow } from "@/frontend/views/dashboard/parent/dashboard/components/ParentDashboardMetrics";
-import { ParentScheduleDataGrid } from "@/frontend/views/dashboard/parent/dashboard/components/ParentScheduleDataGrid";
-import { ParentSupportFab } from "@/frontend/views/dashboard/parent/dashboard/components/ParentSupportFab";
-import { WorkshopPromoCard } from "@/frontend/views/dashboard/parent/dashboard/components/WorkshopPromoCard";
-import type { ParentDashboardViewModel } from "@/frontend/views/dashboard/parent/dashboard/useParentDashboardViewModel";
+import { AcademicProgressSummary } from "@/frontend/common/views/dashboard/parent/dashboard/components/AcademicProgressSummary";
+import { ParentDashboardMetricsRow } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentDashboardMetrics";
+import { ParentScheduleDataGrid } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentScheduleDataGrid";
+import { ParentSupportFab } from "@/frontend/common/views/dashboard/parent/dashboard/components/ParentSupportFab";
+import { WorkshopPromoCard } from "@/frontend/common/views/dashboard/parent/dashboard/components/WorkshopPromoCard";
+import type { ParentDashboardViewModel } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 
 export function ParentDashboardDesktopView({
   metrics,

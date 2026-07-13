@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ActionFeedbackState } from "@/frontend/views/dashboard/classes/details/types";
+import type { ActionFeedbackState } from "@/frontend/common/views/dashboard/classes/details/types";
 
 interface ClassDetailsState {
   readonly isWarningDismissed: boolean;

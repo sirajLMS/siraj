@@ -11,13 +11,13 @@ import {
   SectionPanel,
 } from "@/frontend/common/components/ui";
 import { AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
+import { ParentCardList } from "@/frontend/common/views/dashboard/admin/parents/home/ParentCardList";
+import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
+import type { ParentsViewLabels } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsView";
+import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
+import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import { MobileContentStack, MobilePageHeader } from "@/frontend/mobile/components/ui";
-import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
-import { ParentCardList } from "@/frontend/views/dashboard/admin/parents/home/ParentCardList";
-import { ParentsMetricGrid } from "@/frontend/views/dashboard/admin/parents/home/ParentsMetricGrid";
-import type { ParentsViewLabels } from "@/frontend/views/dashboard/admin/parents/home/ParentsView";
-import { ParentFilterPanel } from "@/frontend/views/dashboard/admin/parents/home/parentFilterPanel";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 export interface ParentsViewMobileProps {
   readonly metrics: readonly MetricItem[];

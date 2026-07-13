@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ParentLifecycleContainer } from "@/frontend/views/dashboard/parents/lifecycle/ParentLifecycleContainer";
+import { ParentLifecycleContainer } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleContainer";
 
 export async function generateMetadata({
   params,

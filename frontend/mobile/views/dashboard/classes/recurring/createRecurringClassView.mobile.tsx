@@ -8,14 +8,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/common/components/ui";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
-import { RecurringClassForm } from "@/frontend/views/dashboard/classes/recurring/RecurringClassForm";
-import type { RecurringClassFormData } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
-import { createRecurringClassSchema } from "@/frontend/views/dashboard/classes/recurring/recurringClassSchema";
-import { DEFAULT_DAY_SCHEDULE } from "@/frontend/views/dashboard/classes/recurring/types";
+import { RecurringClassForm } from "@/frontend/common/views/dashboard/classes/recurring/RecurringClassForm";
+import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import { createRecurringClassSchema } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import { DEFAULT_DAY_SCHEDULE } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   emptyRecurringMeetingConfigState,
   type RecurringMeetingConfigFormState,
-} from "@/frontend/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+} from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 
 interface CreateRecurringClassViewMobileProps {
