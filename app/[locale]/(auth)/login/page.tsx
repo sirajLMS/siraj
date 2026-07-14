@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import { LoginContainer } from "@/frontend/views/auth/login";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "auth.login" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "auth");
+  return { title: t.login.pageTitle };
 }
 
 export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {

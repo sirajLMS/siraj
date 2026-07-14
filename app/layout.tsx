@@ -3,14 +3,16 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
+import { getTranslations as getIntlTranslations, getMessages } from "next-intl/server";
 import type { ReactNode } from "react";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
+import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import MuiProvider from "@/frontend/common/providers/theme/MuiProvider";
 import "@/app/index.css";
 import { AppApolloProvider } from "@/frontend/common/context";
 import { AuthProvider } from "@/frontend/common/providers/apollo/AuthProvider";
+import { getTranslations } from "@/shared/locale/server";
 
 async function getLocale() {
   const cookieStore = await cookies();
@@ -22,7 +24,8 @@ async function getLocale() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("common");
+  // Still using next-intl for "common" until that namespace is migrated
+  const t = await getIntlTranslations("common");
   return {
     metadataBase: new URL(NEXT_PUBLIC_BASE_URL),
     title: {
@@ -49,6 +52,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = await getLocale();
   const messages = await getMessages({ locale });
 
+  // Load migrated namespaces server-side for LocaleProvider.
+  // Add more namespaces here as they are migrated from next-intl.
+  const authTranslations = await getTranslations(locale, "auth");
+  const dashboardAdminTranslations = await getTranslations(locale, "dashboard.admin");
+
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get(THEME_COOKIE_NAME);
   const initialTheme = getThemeFromCookies(themeCookie?.value);
@@ -68,12 +76,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           defaultMode={initialTheme}
           modeStorageKey="theme" // match the existing localStorage key from `theme-detection.ts`
         />
+        {/* next-intl provider — kept until all namespaces are migrated */}
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <MuiProvider initialTheme={initialTheme}>
-            <AppApolloProvider>
-              <AuthProvider>{children}</AuthProvider>
-            </AppApolloProvider>
-          </MuiProvider>
+          {/* Our compile-time locale provider — grows as namespaces are migrated */}
+          <LocaleProvider translations={{ auth: authTranslations, "dashboard.admin": dashboardAdminTranslations }}>
+            <MuiProvider initialTheme={initialTheme}>
+              <AppApolloProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </AppApolloProvider>
+            </MuiProvider>
+          </LocaleProvider>
         </NextIntlClientProvider>
         <SpeedInsights />
       </body>

@@ -15,7 +15,6 @@ import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backen
 import { setAuthCookies as applyAuthCookies } from "@/backend/lib/auth/cookies";
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBooleanEnv } from "@/backend/lib/env";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
@@ -138,12 +137,13 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: async (_parent, args, ctx) => {
       const { email, password } = args.input;
       const ipAddress = ctx.ipAddress || "127.0.0.1";
-      const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      const tErrors = await ctx.t("errors");
 
       // 0. Enforce auth rate limit before any credential checks
       const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
       if (!rateLimitResult.success) {
-        throw new GraphQLError(t("auth.tooManyLoginAttempts"), {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          // ← compile-time ✅
           extensions: { code: "TOO_MANY_ATTEMPTS" },
         });
       }
@@ -151,7 +151,8 @@ gqlSchemaBuilder.mutationFields(t => ({
       // 1. Check if already locked
       const isLocked = await RateLimitRepository.isLocked(ipAddress, email.value);
       if (isLocked) {
-        throw new GraphQLError(t("auth.tooManyLoginAttempts"), {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          // ← compile-time ✅
           extensions: { code: "TOO_MANY_ATTEMPTS" },
         });
       }
@@ -161,7 +162,8 @@ gqlSchemaBuilder.mutationFields(t => ({
         user = (await UserRepository.findByEmail(email.value)) ?? null;
       } catch (err) {
         logger.error(err);
-        throw new GraphQLError(t("auth.serviceUnavailable"), {
+        throw new GraphQLError(tErrors.auth.serviceUnavailable, {
+          // ← compile-time ✅
           extensions: { code: "SERVICE_UNAVAILABLE" },
         });
       }
@@ -169,7 +171,8 @@ gqlSchemaBuilder.mutationFields(t => ({
       if (!user) {
         // Still record attempt even if user doesn't exist to prevent enumeration
         await RateLimitRepository.recordAttempt(ipAddress, email.value);
-        throw new GraphQLError(t("auth.invalidCredentials"), {
+        throw new GraphQLError(tErrors.auth.invalidCredentials, {
+          // ← compile-time ✅
           extensions: { code: "INVALID_CREDENTIALS" },
         });
       }
@@ -181,17 +184,20 @@ gqlSchemaBuilder.mutationFields(t => ({
         // Record failed attempt
         const result = await RateLimitRepository.recordAttempt(ipAddress, email.value);
         if (result.isLocked) {
-          throw new GraphQLError(t("auth.accountLocked"), {
+          throw new GraphQLError(tErrors.auth.accountLocked, {
+            // ← compile-time ✅
             extensions: { code: "TOO_MANY_ATTEMPTS" },
           });
         }
-        throw new GraphQLError(t("auth.invalidCredentials"), {
+        throw new GraphQLError(tErrors.auth.invalidCredentials, {
+          // ← compile-time ✅
           extensions: { code: "INVALID_CREDENTIALS" },
         });
       }
 
       if (user.status === AccountStatus.DEACTIVATED) {
-        throw new GraphQLError(t("auth.accountDeactivated"), {
+        throw new GraphQLError(tErrors.auth.accountDeactivated, {
+          // ← compile-time ✅
           extensions: { code: "ACCOUNT_DEACTIVATED" },
         });
       }
@@ -240,10 +246,11 @@ gqlSchemaBuilder.mutationFields(t => ({
       input: t.arg({ type: DemoLoginInputPothosObject, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      const tErrors = await ctx.t("errors");
       const isDemo = getBooleanEnv("IS_DEMO");
       if (!isDemo) {
-        throw new GraphQLError(t("auth.demoLoginNotEnabled"), {
+        throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
+          // ← compile-time ✅
           extensions: { code: "UNAUTHENTICATED" },
         });
       }
@@ -260,7 +267,8 @@ gqlSchemaBuilder.mutationFields(t => ({
       } catch (error) {
         const err = error as Error;
         logger.error("Demo login failed", { error: err });
-        throw new GraphQLError(t("auth.demoLoginFailed"), {
+        throw new GraphQLError(tErrors.auth.demoLoginFailed, {
+          // ← compile-time ✅
           extensions: { code: "UNAUTHENTICATED" },
         });
       }

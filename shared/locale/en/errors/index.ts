@@ -1,0 +1,41 @@
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+
+export const errors: ErrorsLabels = {
+  auth: {
+    // ─── No-param strings ────────────────────────────────────────────
+    invalidRoleTab: "The selected role tab is invalid.",
+    passwordMinLength: "Password must be at least 8 characters long.",
+    passwordRequiresUppercase: "Password must contain at least one uppercase letter.",
+    passwordRequiresLowercase: "Password must contain at least one lowercase letter.",
+    passwordRequiresDigit: "Password must contain at least one digit.",
+    passwordRequiresSpecialChar: "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
+    tooManyLoginAttempts: "Too many login attempts. Please try again later.",
+    serviceUnavailable: "Authentication service temporarily unavailable",
+    invalidCredentials: "Invalid email or password",
+    accountDeactivated: "This account has been deactivated. Please contact support.",
+    accountLocked: "Too many login attempts. Your account has been temporarily locked.",
+    demoLoginNotEnabled: "Demo login is not enabled",
+    demoLoginFailed: "Demo login failed",
+    impersonationNotAllowed: "You are not allowed to impersonate users",
+    cannotImpersonateSelf: "You cannot impersonate yourself",
+    cannotImpersonateSuperAdmin: "You cannot impersonate another super administrator",
+    impersonationTargetNotFound: "The user to impersonate was not found",
+    impersonationTargetInactive: "The user to impersonate is inactive or deleted",
+    impersonationSessionInvalid: "Your session is invalid for impersonation",
+    impersonationNotActive: "No active impersonation session",
+    impersonationExpired: "The impersonation session has expired",
+    impersonationNotAllowedDuringSession: "This action is not allowed while impersonating a user",
+    groupSimulationNotAllowed: "You are not allowed to simulate permission groups",
+    groupSimulationSessionInvalid: "Your session is invalid for permission group simulation",
+    groupSimulationNotActive: "No active permission group simulation",
+    groupSimulationNotAllowedDuringSession: "This action is not allowed while simulating a permission group",
+    groupSimulationNotAllowedWhileImpersonating: "End impersonation before simulating a permission group",
+    groupSimulationAlreadyHasGroup: "You already have this permission group; choose a different group to simulate",
+    // ─── Functions (were {param} strings) ────────────────────────────
+    demoGroupNotFound: groupSlug => `Demo group not found: ${groupSlug}`,
+    demoGroupNoUser: groupSlug => `No user found for demo group: ${groupSlug}`,
+  },
+  rateLimitExceeded: "Too many requests. Please try again later.",
+  duplicateRequest: "Duplicate request detected. This operation has already been processed.",
+  internalServerError: "An unexpected error occurred. Please try again later.",
+};

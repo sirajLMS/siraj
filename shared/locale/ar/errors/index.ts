@@ -1,0 +1,41 @@
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+
+export const errors: ErrorsLabels = {
+  auth: {
+    // ─── No-param strings ────────────────────────────────────────────
+    invalidRoleTab: "علامة التبويب المحددة للدور غير صالحة.",
+    passwordMinLength: "يجب أن تكون كلمة المرور ٨ أحرف على الأقل.",
+    passwordRequiresUppercase: "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
+    passwordRequiresLowercase: "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
+    passwordRequiresDigit: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
+    passwordRequiresSpecialChar: "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
+    tooManyLoginAttempts: "عدد محاولات تسجيل الدخول كثيرة جداً. يرجى المحاولة لاحقاً.",
+    serviceUnavailable: "خدمة المصادقة غير متاحة مؤقتاً",
+    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صالحة",
+    accountDeactivated: "تم إلغاء تفعيل هذا الحساب. يرجى التواصل مع الدعم.",
+    accountLocked: "عدد محاولات تسجيل الدخول كثيرة جداً. تم قفل حسابك مؤقتاً.",
+    demoLoginNotEnabled: "تسجيل الدخول التجريبي غير مفعل",
+    demoLoginFailed: "فشل تسجيل الدخول التجريبي",
+    impersonationNotAllowed: "غير مسموح لك بانتحال هوية المستخدمين",
+    cannotImpersonateSelf: "لا يمكنك انتحال هويتك",
+    cannotImpersonateSuperAdmin: "لا يمكنك انتحال هوية مسؤول نظام آخر",
+    impersonationTargetNotFound: "المستخدم المراد انتحال هويته غير موجود",
+    impersonationTargetInactive: "المستخدم المراد انتحال هويته غير نشط أو محذوف",
+    impersonationSessionInvalid: "جلستك غير صالحة لانتحال الهوية",
+    impersonationNotActive: "لا توجد جلسة انتحال هوية نشطة",
+    impersonationExpired: "انتهت جلسة انتحال الهوية",
+    impersonationNotAllowedDuringSession: "هذا الإجراء غير مسموح أثناء انتحال هوية مستخدم",
+    groupSimulationNotAllowed: "غير مسموح لك بمحاكاة مجموعات الأذونات",
+    groupSimulationSessionInvalid: "جلستك غير صالحة لمحاكاة مجموعة الأذونات",
+    groupSimulationNotActive: "لا توجد محاكاة نشطة لمجموعة أذونات",
+    groupSimulationNotAllowedDuringSession: "هذا الإجراء غير مسموح أثناء محاكاة مجموعة أذونات",
+    groupSimulationNotAllowedWhileImpersonating: "أنهِ انتحال الهوية قبل محاكاة مجموعة أذونات",
+    groupSimulationAlreadyHasGroup: "لديك هذه المجموعة بالفعل؛ اختر مجموعة أخرى للمحاكاة",
+    // ─── Functions (were {param} strings) ────────────────────────────
+    demoGroupNotFound: groupSlug => `مجموعة العرض غير موجودة: ${groupSlug}`,
+    demoGroupNoUser: groupSlug => `لم يتم العثور على مستخدم لمجموعة العرض: ${groupSlug}`,
+  },
+  rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
+  duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
+  internalServerError: "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.",
+};

@@ -68,3 +68,167 @@ When moving logic from `frontend/` or `backend/` into `shared/`:
 - Message label types in `shared/messages/types/` must not reference frontend view types or GraphQL codegen types.
 - Define canonical status/key unions in `shared/types/` or `shared/constants/` and use those in message type definitions.
 - Example: `BillingMonthId` lives in `@/shared/constants/billing-months`; `AdminInvoiceStatus` in `@/shared/types/billing-view`.
+
+## Translation System (Compile-Time i18n)
+
+### Overview
+Siraj is migrating from `next-intl` (runtime `t("x.y")`) to a custom **compile-time TypeScript i18n system** in `shared/locale/` that provides:
+- **Compile-time safety**: `t.x.y` instead of `t("x.y")` — IDE autocomplete + TypeScript errors on missing keys
+- **Native TypeScript pluralization**: `(count: number) => string` functions instead of ICU strings
+- **Lazy loading**: standard dynamic `import()` per namespace — only loads needed translations
+- **SSR & API support**: `getTranslations(locale, namespace)` for server components / API routes
+- **GraphQL context integration**: `ctx.t("namespace")` bound to `ctx.locale`
+- **SEO routing preserved**: Next.js native `[locale]` segments + middleware (no `next-intl` routing dependency)
+
+### File Structure
+```
+shared/locale/
+├── AppLocale.ts              ← locale enum & type
+├── server.ts                 ← getTranslations<K>(locale, namespace) for SSR/API
+├── server-graphql.ts         ← getServerTranslations<K>(locale, namespace) for GraphQL/scripts
+├── client.ts                 ← useAppTranslation<K>(namespace) hook for client components
+├── index.ts                  ← re-exports
+│
+├── types/                    ← TypeScript interfaces (the "schema")
+│   ├── auth/index.ts
+│   ├── common/index.ts
+│   ├── dashboard/<domain>/...
+│   ├── errors/index.ts
+│   ├── ui/index.ts
+│   ├── profile.ts
+│   ├── session/index.ts
+│   └── message.ts            ← MessageSchema (top-level map of all namespaces)
+│
+├── ar/                       ← Arabic implementations
+│   ├── auth/index.ts
+│   ├── common/index.ts
+│   ├── dashboard/<domain>/...
+│   ├── errors.ts
+│   ├── ui/index.ts
+│   └── profile.ts
+│
+└── en/                       ← English implementations
+    ├── auth/index.ts
+    ├── common/index.ts
+    ├── dashboard/<domain>/...
+    ├── errors.ts
+    ├── ui/index.ts
+    └── profile.ts
+```
+
+### Rules for All Layers
+
+#### Server Components (`app/**/*.tsx`)
+```typescript
+// ✅ Correct
+import { getTranslations } from "@/shared/locale/server";
+const t = await getTranslations(locale, "auth");
+return <h1>{t.login.pageTitle}</h1>;
+
+// ❌ Forbidden
+import { getTranslations } from "next-intl/server";
+const t = await getTranslations({ locale, namespace: "auth.login" });
+return <h1>{t("pageTitle")}</h1>;
+```
+
+#### Client Components (`frontend/**/*.tsx`)
+```typescript
+// ✅ Correct
+import { useAppTranslation } from "@/shared/locale/client";
+const t = useAppTranslation("auth").login;
+return <input placeholder={t.email} />;
+
+// ❌ Forbidden
+import { useTranslations } from "next-intl";
+const t = useTranslations("auth.login");
+return <input placeholder={t("email")} />;
+```
+
+#### GraphQL Resolvers (`backend/graphql/**/*.mutation.ts`, `*.query.ts`)
+```typescript
+// ✅ Correct
+resolve: async (_parent, args, ctx) => {
+  const tErrors = await ctx.t("errors");
+  throw new GraphQLError(tErrors.auth.invalidCredentials, ...);
+};
+
+// ❌ Forbidden
+import { getBackendTranslations } from "@/backend/lib/intl";
+const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+throw new GraphQLError(t("auth.invalidCredentials"), ...);
+```
+
+#### API Routes / Scripts / Tests (`app/api/**`, `scripts/**`, `backend/db/test/**`)
+```typescript
+// ✅ Correct
+import { getServerTranslations } from "@/shared/locale/server-graphql";
+const t = await getServerTranslations(locale, "errors");
+return NextResponse.json({ error: t.auth.notFound }, { status: 404 });
+```
+
+### Pluralization Pattern
+Replace ICU strings with TypeScript functions in the type schema and implementations:
+
+```typescript
+// types/dashboard/students.ts
+export interface StudentDirectoryLabels {
+  title: string;
+  studentCount: (count: number) => string; // Typed function — compile-time safe!
+}
+
+// ar/dashboard/students.ts
+export const studentDirectory: StudentDirectoryLabels = {
+  title: "الطلاب",
+  studentCount: (count) => {
+    if (count === 0) return "لا يوجد طلاب";
+    if (count === 1) return "طالب واحد";
+    if (count === 2) return "طالبان";
+    if (count >= 3 && count <= 10) return `${count} طلاب`;
+    return `${count} طالباً`;
+  },
+};
+
+// en/dashboard/students.ts
+export const studentDirectory: StudentDirectoryLabels = {
+  title: "Students",
+  studentCount: (count) =>
+    count === 0 ? "No students" : count === 1 ? "1 student" : `${count} students`,
+};
+```
+
+**Usage:** `t.studentDirectory.studentCount(42)` → `"42 طالباً"`
+
+### Interpolation Pattern
+Replace `{placeholder}` ICU strings with typed template functions:
+
+```typescript
+// types/auth/index.ts
+export interface AuthImpersonationLabels {
+  bannerLoggedInAs: (name: string) => string;  // was: string with {name}
+  bannerViewingAs: (name: string, email: string) => string;
+  // static strings stay as string
+  returnToNormalLogin: string;
+}
+
+// ar/auth/index.ts
+export const auth: AuthLabels = {
+  impersonation: {
+    bannerLoggedInAs: (name) => `أنت مسجل الدخول باسم ${name}.`,
+    bannerViewingAs: (name, email) => `أنت تعرض لوحة التحكم باسم ${name} (${email})`,
+  }
+};
+```
+
+**Usage:** `t.impersonation.bannerLoggedInAs("أحمد")`
+
+### Namespace Registration (Required for each new namespace)
+1. Add interface to `shared/locale/types/<namespace>/index.ts`
+2. Add implementations to `shared/locale/ar/<namespace>/index.ts` and `shared/locale/en/<namespace>/index.ts`
+3. Export in `shared/locale/types/message.ts` (add to `MessageSchema`)
+4. Add path mapping in `shared/locale/server.ts` (`namespacePaths` map)
+5. If used in layout SSR, add to `LocaleProvider` translations in `app/[locale]/layout.tsx`
+
+### Migration Status
+- **Pilot complete**: `auth` namespace fully migrated (login page + 4 components + GraphQL auth mutation)
+- **In progress**: 16-wave plan with 8 parallel subagents per wave (see `.ai/plans/i18n/migration-plan-v2.md`)
+- **Legacy intact**: `next-intl` still in `package.json`, `NextIntlClientProvider` in layout, `shared/messages/` untouched for non-migrated namespaces

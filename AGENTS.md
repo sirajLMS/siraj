@@ -9,7 +9,7 @@ Siraj is a Next.js 16 (App Router) full-stack application using:
 - **Frontend**: React 19, MUI v9, Apollo Client v4, Zustand
 - **Backend**: Pothos GraphQL, Drizzle ORM, PostgreSQL
 - **Testing**: Bun test runner, Vitest for Storybook, Playwright for E2E
-- **i18n**: next-intl with locale-based routing (`/[locale]/...`)
+- **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (migrating from `next-intl` — see `shared/AGENTS.md` for rules). Next.js native `[locale]` routing preserved.
 
 ## Essential Commands
 
@@ -136,9 +136,15 @@ All layers use types from `backend/types/{entity}.types.ts`:
 - Single canonical GraphQL object type per entity
 
 ### i18n / Localized Errors
-- All user-facing error messages must use `next-intl` via `getBackendTranslations`
-- Accept optional `locale?: string` parameter in services/repositories
-- Never hardcode error strings
+- All user-facing error messages must use the **compile-time translation system** in `shared/locale/`
+- **Server Components**: use `getTranslations(locale, "namespace")` from `@/shared/locale/server`
+- **Client Components**: use `useAppTranslation("namespace")` from `@/shared/locale/client`
+- **GraphQL Resolvers**: use `ctx.t("namespace")` — already bound to `ctx.locale`
+- **API Routes / Scripts / Tests**: use `getServerTranslations(locale, "namespace")` from `@/shared/locale/server-graphql`
+- **Pluralization**: define as `(count: number) => string` in type schema, implement in each locale file
+- **Interpolation**: define as `(param: string, ...) => string` in type schema, implement with template literals
+- **Never hardcode error strings** — always use typed translation functions
+- Legacy: `next-intl` remains in `package.json` until migration complete; `shared/messages/` still used by non-migrated namespaces
 
 ### Theme & Styling
 - **NO hardcoded colors** - all colors from theme palette

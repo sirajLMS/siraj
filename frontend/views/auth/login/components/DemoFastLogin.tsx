@@ -2,7 +2,7 @@
 
 import { AdminPanelSettings, Badge, FamilyRestroom, Group as GroupIcon, School } from "@mui/icons-material";
 import { Box, Button, type ButtonProps, Divider, styled, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useAppTranslation } from "@/shared/locale/client";
 
 // Main container for the demo fast login section
 const StyledContainer = styled(Box)({
@@ -64,7 +64,7 @@ const getGroupIcon = (slug: string) => {
 };
 
 export function DemoFastLogin({ groups, onFastLogin }: Readonly<DemoFastLoginProps>) {
-  const t = useTranslations("auth.login");
+  const t = useAppTranslation("auth").login;
 
   if (!groups || groups.length === 0) return null;
 
@@ -72,7 +72,7 @@ export function DemoFastLogin({ groups, onFastLogin }: Readonly<DemoFastLoginPro
     <StyledContainer sx={{ mt: 3, mb: 1 }}>
       <Divider sx={{ mb: 2 }}>
         <StyledDividerLabel variant="bodyMd" sx={{ px: 1 }}>
-          {t("orQuickLogin")}
+          {t.orQuickLogin}
         </StyledDividerLabel>
       </Divider>
 

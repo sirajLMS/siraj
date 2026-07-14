@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Alert, Box, Button, CircularProgress, IconButton, InputAdornment, Link, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm } from "react-hook-form";
 import { mockLogin } from "@/frontend/views/auth/login/actions/mockLogin";
 import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
+import { useAppTranslation } from "@/shared/locale/client";
 
 // Person icon for email field with secondary color
 const StyledPersonIcon = styled(Person)(({ theme }) => ({
@@ -53,7 +53,7 @@ const FormFields = ({
   showPassword: boolean;
   setShowPassword: (show: boolean) => void;
 }) => {
-  const t = useTranslations("auth.login");
+  const t = useAppTranslation("auth").login;
 
   return (
     <>
@@ -63,7 +63,7 @@ const FormFields = ({
         render={({ field }) => (
           <TextField
             {...field}
-            label={t("email")}
+            label={t.email}
             type="email"
             error={!!errors.email}
             helperText={errors.email?.message}
@@ -88,7 +88,7 @@ const FormFields = ({
         render={({ field }) => (
           <TextField
             {...field}
-            label={t("password")}
+            label={t.password}
             type={showPassword ? "text" : "password"}
             error={!!errors.password}
             helperText={errors.password?.message}
@@ -125,12 +125,12 @@ const FormFields = ({
 };
 
 const FormActions = ({ isSubmitting: _isSubmitting }: { isSubmitting: boolean }) => {
-  const t = useTranslations("auth.login");
+  const t = useAppTranslation("auth").login;
 
   return (
     <StyledFormActionsContainer>
       <StyledForgotPasswordLink href="#" underline="hover">
-        {t("forgotPassword")}
+        {t.forgotPassword}
       </StyledForgotPasswordLink>
     </StyledFormActionsContainer>
   );
@@ -142,7 +142,7 @@ export interface LoginFormProps {
 }
 
 export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProps = {}) {
-  const t = useTranslations("auth.login");
+  const t = useAppTranslation("auth").login;
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginResult, setLoginResult] = useState<{
@@ -151,10 +151,10 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
   } | null>(null);
 
   const loginSchema = createLoginSchema({
-    emailRequired: t("emailRequired"),
-    emailInvalid: t("emailInvalid"),
-    passwordRequired: t("passwordRequired"),
-    passwordMinLength: t("passwordMinLength"),
+    emailRequired: t.emailRequired,
+    emailInvalid: t.emailInvalid,
+    passwordRequired: t.passwordRequired,
+    passwordMinLength: t.passwordMinLength,
   });
 
   const {
@@ -178,7 +178,7 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
         .catch(() => {
           setLoginResult({
             type: "error",
-            message: t("loginError"),
+            message: t.loginError,
           });
         })
         .finally(() => {
@@ -190,19 +190,19 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
           if (response.success) {
             setLoginResult({
               type: "success",
-              message: t("loginSuccess"),
+              message: t.loginSuccess,
             });
           } else {
             setLoginResult({
               type: "error",
-              message: t("invalidCredentials"),
+              message: t.invalidCredentials,
             });
           }
         })
         .catch(() => {
           setLoginResult({
             type: "error",
-            message: t("loginError"),
+            message: t.loginError,
           });
         })
         .finally(() => {
@@ -250,7 +250,7 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
         fullWidth
         sx={{ mt: 1 }}
       >
-        {isSubmitting ? <CircularProgress size={24} color="inherit" /> : t("signIn")}
+        {isSubmitting ? <CircularProgress size={24} color="inherit" /> : t.signIn}
       </StyledSubmitButton>
     </Box>
   );

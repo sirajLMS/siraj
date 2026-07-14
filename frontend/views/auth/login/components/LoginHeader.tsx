@@ -3,7 +3,7 @@
 import { School } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useTranslations } from "next-intl";
+import { useAppTranslation } from "@/shared/locale/client";
 
 // Main container for the login header section - centers content vertically
 const StyledHeaderContainer = styled(Box)({
@@ -43,7 +43,7 @@ const StyledSubtitle = styled(Typography)(({ theme }) => ({
 }));
 
 export function LoginHeader() {
-  const t = useTranslations("auth.login");
+  const t = useAppTranslation("auth").login;
 
   return (
     <StyledHeaderContainer sx={{ mb: 4 }}>
@@ -51,9 +51,9 @@ export function LoginHeader() {
         <StyledSchoolIcon />
       </StyledIconContainer>
       <StyledTitle variant="headlineLg" sx={{ mb: 0.5 }}>
-        {t("title")}
+        {t.title}
       </StyledTitle>
-      <StyledSubtitle variant="bodyMd">{t("subtitle")}</StyledSubtitle>
+      <StyledSubtitle variant="bodyMd">{t.subtitle}</StyledSubtitle>
     </StyledHeaderContainer>
   );
 }

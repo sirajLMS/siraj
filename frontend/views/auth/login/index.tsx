@@ -2,7 +2,6 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { demoLoginMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAuth } from "@/frontend/common/hooks/useAuth";
@@ -11,13 +10,14 @@ import logger from "@/frontend/common/lib/logger";
 import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/common/lib/safeRedirect";
 import { LoginView } from "@/frontend/views/auth/login/LoginView";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export interface LoginContainerProps {
   demoGroups?: { slug: string; name: string; description: string | null }[];
 }
 
 export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
-  const t = useTranslations("auth.login");
+  const t = useAppTranslation("auth").login;
   const searchParams = useSearchParams();
   const { login, error: authError, isAuthenticated } = useAuth();
   const { updateAuthToken } = useAuthToken();
@@ -57,12 +57,12 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
     try {
       const success = await login({ input: { email: data.email, password: data.password } }, redirectUrl);
       if (success) {
-        setLoginResult({ type: "success", message: t("loginSuccess") });
+        setLoginResult({ type: "success", message: t.loginSuccess });
       } else {
-        setLoginResult({ type: "error", message: authError ?? t("invalidCredentials") });
+        setLoginResult({ type: "error", message: authError ?? t.invalidCredentials });
       }
     } catch (e) {
-      setLoginResult({ type: "error", message: t("loginError") });
+      setLoginResult({ type: "error", message: t.loginError });
       throw e; // Rethrow to let LoginForm know it failed
     }
   };
@@ -85,10 +85,10 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
         });
         globalThis.location.href = targetUrl;
       } else {
-        setLoginResult({ type: "error", message: t("invalidCredentials") });
+        setLoginResult({ type: "error", message: t.invalidCredentials });
       }
     } catch {
-      setLoginResult({ type: "error", message: t("loginError") });
+      setLoginResult({ type: "error", message: t.loginError });
     }
   };
 
