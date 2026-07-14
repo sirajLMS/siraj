@@ -1,6 +1,5 @@
 import { BillingRepository, ParentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   AdminBillingSummaryResult,
@@ -9,21 +8,24 @@ import type {
   ParentBillingSummaryResult,
   StudentCreditRow,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace BillingHistoryService {
-  async function assertBillingViewPermission(actorUserId: string, locale?: string): Promise<void> {
+  async function assertBillingViewPermission(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
     if (hasPermission) return;
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
+    throw new Error(tErrors.insufficientPermissions);
   }
 
-  async function resolveParentId(parentId: string | null, fallbackUserId: string, locale?: string): Promise<string> {
+  async function resolveParentId(
+    parentId: string | null,
+    fallbackUserId: string,
+    tErrors: ErrorsLabels
+  ): Promise<string> {
     if (parentId) return parentId;
     const parent = await ParentRepository.findByUserId(fallbackUserId);
     if (!parent) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("parentNotFound"));
+      throw new Error(tErrors.billing.parentNotFound);
     }
     return parent.id;
   }
@@ -34,10 +36,10 @@ export namespace BillingHistoryService {
     userId: string | null | undefined,
     pagination: PaginationArgs | null = null,
     search: string | null | undefined = null,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<InvoiceHistoryPaginatedResult> {
-    await assertBillingViewPermission(actorUserId, locale);
-    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, locale);
+    await assertBillingViewPermission(actorUserId, tErrors);
+    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, tErrors);
 
     const result = await BillingRepository.getInvoicesForParent(resolvedParentId, pagination, search);
 
@@ -53,22 +55,25 @@ export namespace BillingHistoryService {
     actorUserId: string,
     pagination: PaginationArgs | null = null,
     search: string | null | undefined = null,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<InvoiceHistoryPaginatedResult> {
-    await assertBillingViewPermission(actorUserId, locale);
+    await assertBillingViewPermission(actorUserId, tErrors);
     return BillingRepository.getAllInvoices(pagination, search);
   }
 
   export async function getAdminBillingSummary(
     actorUserId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<AdminBillingSummaryResult> {
-    await assertBillingViewPermission(actorUserId, locale);
+    await assertBillingViewPermission(actorUserId, tErrors);
     return BillingRepository.getAdminBillingSummary();
   }
 
-  export async function getStudentCreditStatus(actorUserId: string, locale?: string): Promise<StudentCreditRow[]> {
-    await assertBillingViewPermission(actorUserId, locale);
+  export async function getStudentCreditStatus(
+    actorUserId: string,
+    tErrors: ErrorsLabels
+  ): Promise<StudentCreditRow[]> {
+    await assertBillingViewPermission(actorUserId, tErrors);
     return BillingRepository.getStudentsWithCreditStatus();
   }
 
@@ -76,10 +81,10 @@ export namespace BillingHistoryService {
     actorUserId: string,
     parentId: string | null,
     userId: string | null | undefined,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<ParentBillingSummaryResult> {
-    await assertBillingViewPermission(actorUserId, locale);
-    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, locale);
+    await assertBillingViewPermission(actorUserId, tErrors);
+    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, tErrors);
     return BillingRepository.getParentBillingSummary(resolvedParentId);
   }
 }

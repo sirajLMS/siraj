@@ -1,73 +1,71 @@
 import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ClassCategoryReturnType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace ClassCategoryService {
-  export async function listCategories(userId: string, locale?: string): Promise<ClassCategoryReturnType[]> {
+  export async function listCategories(userId: string, tErrors?: ErrorsLabels): Promise<ClassCategoryReturnType[]> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_LIST);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(tErrors?.unauthorizedAction ?? "You are not authorized to perform this action.");
     }
 
     return await ClassCategoryRepository.listCategories();
   }
 
-  export async function getCategoryById(userId: string, id: string, locale?: string): Promise<ClassCategoryReturnType> {
+  export async function getCategoryById(
+    userId: string,
+    id: string,
+    tErrors?: ErrorsLabels
+  ): Promise<ClassCategoryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_LIST);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(tErrors?.unauthorizedAction ?? "You are not authorized to perform this action.");
     }
 
-    return await ClassCategoryRepository.getCategoryById(id, locale);
+    return await ClassCategoryRepository.getCategoryById(id);
   }
 
   export async function createCategory(
     userId: string,
     input: ClassCategorySubmitInput,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassCategoryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.CATEGORIES_CREATE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(tErrors?.unauthorizedAction ?? "You are not authorized to perform this action.");
     }
 
-    return await ClassCategoryRepository.createCategory(input, locale);
+    return await ClassCategoryRepository.createCategory(input);
   }
 
   export async function updateCategory(
     userId: string,
     id: string,
     input: ClassCategoryUpdateInput,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassCategoryReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.CATEGORIES_UPDATE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(tErrors?.unauthorizedAction ?? "You are not authorized to perform this action.");
     }
 
-    return await ClassCategoryRepository.updateCategory(id, input, locale);
+    return await ClassCategoryRepository.updateCategory(id, input);
   }
 
-  export async function deleteCategory(userId: string, id: string, locale?: string): Promise<{ id: string }> {
+  export async function deleteCategory(userId: string, id: string, tErrors?: ErrorsLabels): Promise<{ id: string }> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.CATEGORIES_DELETE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(tErrors?.unauthorizedAction ?? "You are not authorized to perform this action.");
     }
 
     const subjects = await ClassSubjectRepository.listSubjects(id);
     if (subjects.length > 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("categoryHasSubjects"));
+      throw new Error(tErrors?.categoryHasSubjects ?? "Category has subjects and cannot be deleted.");
     }
 
-    return await ClassCategoryRepository.deleteCategory(id, locale);
+    return await ClassCategoryRepository.deleteCategory(id);
   }
 }

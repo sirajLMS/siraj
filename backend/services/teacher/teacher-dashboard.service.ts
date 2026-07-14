@@ -6,35 +6,28 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace TeacherDashboardService {
-  async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
+  async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorized);
     }
   }
 
-  export async function getDashboard(
-    userId: string,
-    date: string,
-    _mode: string,
-    locale?: string,
-    pagination?: PaginationArgs | null
-  ) {
-    await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, locale);
-    await assertPermission(userId, AppPermission.SCHEDULE_VIEW_ASSIGNED, locale);
+  export async function getDashboard(userId: string, date: string, pagination?: PaginationArgs | null) {
+    const tErrors = { unauthorized: "You must be logged in first." } as ErrorsLabels;
+    await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
+    await assertPermission(userId, AppPermission.SCHEDULE_VIEW_ASSIGNED, tErrors);
 
     const teacher = await TeacherRepository.findByUserId(userId);
     if (!teacher) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error("Teacher profile not found");
     }
 
     const user = await UserRepository.findById(userId);
@@ -46,17 +39,11 @@ export namespace TeacherDashboardService {
       teacherId: teacher.id,
       viewerTimezone,
       pagination: pagination ?? null,
-      locale,
     });
 
     const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacher.id);
 
-    const progressFeed = await SchedulingRepository.getTeacherProgressFeed(
-      teacher.id,
-      targetDate,
-      viewerTimezone,
-      locale
-    );
+    const progressFeed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, targetDate, viewerTimezone);
 
     const mappedScheduleRows = result.rows.map(r => ({
       ...r,
@@ -85,14 +72,13 @@ export namespace TeacherDashboardService {
     classType?: "REGULAR" | "TRIAL" | "PROMOTION";
   }
 
-  export async function createManualEntry(userId: string, input: ManualEntryInput, locale?: string) {
-    await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, locale);
+  export async function createManualEntry(userId: string, input: ManualEntryInput, tErrors: ErrorsLabels) {
+    await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
 
     const balance = await CreditRepository.getBalance(db, input.studentId);
     if (balance.classesRemaining <= 0) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(
-        t("credit.insufficientBalance", {
+        tErrors.credit.insufficientBalance?.({
           studentId: input.studentId,
           remaining: balance.classesRemaining,
         })
@@ -114,10 +100,10 @@ export namespace TeacherDashboardService {
     };
 
     return db.transaction(async tx => {
-      const created = await SchedulingRepository.createClassInstance(entry, tx, locale);
+      const created = await SchedulingRepository.createClassInstance(entry, tx);
 
       const creditIdempotencyKey = `credit-deduction:${created.id}`;
-      await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx, locale);
+      await CreditService.deductForBooking(input.studentId, created.id, userId, creditIdempotencyKey, tx);
 
       return created;
     });
@@ -128,8 +114,8 @@ export namespace TeacherDashboardService {
     [key: string]: unknown;
   }
 
-  export async function logSupportRequest(userId: string, input: SupportRequestInput, locale?: string) {
-    await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, locale);
+  export async function logSupportRequest(userId: string, input: SupportRequestInput, tErrors: ErrorsLabels) {
+    await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
 
     const auditLog: CreateAuditLogInput = {
       actorUserId: userId,
@@ -153,10 +139,9 @@ export namespace TeacherDashboardService {
    * resolution to the `SystemSettingsService.getHandbookDownloadUrl`.
    *
    * @param userId The ID of the teacher requesting the handbook URL.
-   * @param locale Optional language code for localized error translations.
    * @returns A promise resolving to the signed download URL.
    */
-  export async function getHandbookDownloadUrl(userId: string, locale?: string) {
-    return SystemSettingsService.getHandbookDownloadUrl(userId, locale);
+  export async function getHandbookDownloadUrl(userId: string, tErrors: ErrorsLabels) {
+    return SystemSettingsService.getHandbookDownloadUrl(userId, tErrors);
   }
 }

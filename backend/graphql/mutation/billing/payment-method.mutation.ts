@@ -25,6 +25,7 @@ import type {
   UpdateSupportedOnlineAccountInput,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types/billing/payment-method.types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
   t.field({
@@ -35,6 +36,7 @@ gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentMethodService.createUserPaymentMethod(
         actorUserId,
         {
@@ -45,7 +47,7 @@ gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
           label: args.input.label,
           details: normalizePaymentMethodDetailsInput(args.input.details),
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -61,6 +63,7 @@ gqlSchemaBuilder.mutationField("updateUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentMethodService.updateUserPaymentMethod(
         actorUserId,
         args.id,
@@ -70,7 +73,7 @@ gqlSchemaBuilder.mutationField("updateUserPaymentMethod", t =>
           ...(args.input.label !== undefined ? { label: args.input.label } : {}),
           ...(args.input.details != null ? { details: normalizePaymentMethodDetailsInput(args.input.details) } : {}),
         },
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -85,7 +88,8 @@ gqlSchemaBuilder.mutationField("deleteUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      await PaymentMethodService.deleteUserPaymentMethod(actorUserId, args.id, ctx.locale);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      await PaymentMethodService.deleteUserPaymentMethod(actorUserId, args.id, tErrors);
       return true;
     },
   })
@@ -100,7 +104,8 @@ gqlSchemaBuilder.mutationField("setDefaultUserPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return PaymentMethodService.setDefaultUserPaymentMethod(actorUserId, args.id, ctx.locale);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      return PaymentMethodService.setDefaultUserPaymentMethod(actorUserId, args.id, tErrors);
     },
   })
 );
@@ -114,7 +119,8 @@ gqlSchemaBuilder.mutationField("verifyBankTransferPaymentMethod", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return PaymentMethodService.verifyBankTransferPaymentMethod(actorUserId, args.id, ctx.locale);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      return PaymentMethodService.verifyBankTransferPaymentMethod(actorUserId, args.id, tErrors);
     },
   })
 );
@@ -128,10 +134,11 @@ gqlSchemaBuilder.mutationField("createSupportedMobileWallet", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentCatalogService.createMobileWallet(
         actorUserId,
         args.input as SupportedMobileWalletSubmitInput,
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -147,11 +154,12 @@ gqlSchemaBuilder.mutationField("updateSupportedMobileWallet", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentCatalogService.updateMobileWallet(
         actorUserId,
         args.id,
         args.input as UpdateSupportedMobileWalletInput,
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -166,7 +174,8 @@ gqlSchemaBuilder.mutationField("deactivateSupportedMobileWallet", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return PaymentCatalogService.deactivateMobileWallet(actorUserId, args.id, ctx.locale);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      return PaymentCatalogService.deactivateMobileWallet(actorUserId, args.id, tErrors);
     },
   })
 );
@@ -180,10 +189,11 @@ gqlSchemaBuilder.mutationField("createSupportedPaymentLink", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentCatalogService.createPaymentLink(
         actorUserId,
         args.input as SupportedPaymentLinkSubmitInput,
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -199,11 +209,12 @@ gqlSchemaBuilder.mutationField("updateSupportedPaymentLink", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentCatalogService.updatePaymentLink(
         actorUserId,
         args.id,
         args.input as UpdateSupportedPaymentLinkInput,
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -218,7 +229,8 @@ gqlSchemaBuilder.mutationField("deactivateSupportedPaymentLink", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return PaymentCatalogService.deactivatePaymentLink(actorUserId, args.id, ctx.locale);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      return PaymentCatalogService.deactivatePaymentLink(actorUserId, args.id, tErrors);
     },
   })
 );
@@ -232,10 +244,11 @@ gqlSchemaBuilder.mutationField("createSupportedOnlineAccount", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentCatalogService.createOnlineAccount(
         actorUserId,
         args.input as SupportedOnlineAccountSubmitInput,
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -251,11 +264,12 @@ gqlSchemaBuilder.mutationField("updateSupportedOnlineAccount", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
       return PaymentCatalogService.updateOnlineAccount(
         actorUserId,
         args.id,
         args.input as UpdateSupportedOnlineAccountInput,
-        ctx.locale
+        tErrors
       );
     },
   })
@@ -270,7 +284,8 @@ gqlSchemaBuilder.mutationField("deactivateSupportedOnlineAccount", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return PaymentCatalogService.deactivateOnlineAccount(actorUserId, args.id, ctx.locale);
+      const tErrors = await getServerTranslations(ctx.locale, "errors");
+      return PaymentCatalogService.deactivateOnlineAccount(actorUserId, args.id, tErrors);
     },
   })
 );

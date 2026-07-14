@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository, ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
   CreditBalanceReturnType,
@@ -12,6 +12,7 @@ import type {
   CreditTransactionSubmitInput,
   PaginationArgs,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 function deriveBookingIdempotencyKey(input: {
   studentId: string;
@@ -22,19 +23,17 @@ function deriveBookingIdempotencyKey(input: {
   return createHash("sha256").update(parts.join(":")).digest("hex");
 }
 
-async function requirePermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
+async function requirePermission(actorUserId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
   if (!hasPermission) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
+    throw new Error(tErrors.insufficientPermissions);
   }
 }
 
-async function assertStudentExists(studentId: string, locale?: string): Promise<void> {
+async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Promise<void> {
   const existing = await StudentRepository.findById(studentId);
   if (!existing) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("studentNotFound", { id: studentId }));
+    throw new Error(tErrors.studentNotFound(studentId));
   }
 }
 
@@ -69,16 +68,14 @@ export namespace CreditService {
     actorUserId: string,
     input: CreditTransactionSubmitInput,
     idempotencyKey: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType | null> {
     if (!input.studentId || input.studentId.trim().length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidInput"));
+      throw new Error(tErrors.credit.invalidInput);
     }
 
     if (!Number.isFinite(input.hours) || input.hours <= 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidInput"));
+      throw new Error(tErrors.credit.invalidInput);
     }
 
     const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
@@ -88,7 +85,7 @@ export namespace CreditService {
     }
 
     const created = await db.transaction(async tx => {
-      await assertStudentExists(input.studentId, locale);
+      await assertStudentExists(input.studentId, tErrors);
       const ledgerRow = await CreditRepository.createPurchase(tx, {
         studentId: input.studentId,
         changeAmount: input.hours,
@@ -98,7 +95,7 @@ export namespace CreditService {
         idempotencyKey,
       });
 
-      await StudentRepository.addClasses(input.studentId, input.hours, undefined, tx, locale);
+      await StudentRepository.addClasses(input.studentId, input.hours, undefined, tx);
       return ledgerRow;
     });
 
@@ -115,18 +112,16 @@ export namespace CreditService {
   export async function recordPurchase(
     actorUserId: string,
     input: CreditTransactionSubmitInput,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType> {
-    await requirePermission(actorUserId, AppPermission.CREDITS_MANAGE, locale);
+    await requirePermission(actorUserId, AppPermission.CREDITS_MANAGE, tErrors);
 
     if (!input.studentId || input.studentId.trim().length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidInput"));
+      throw new Error(tErrors.credit.invalidInput);
     }
 
     if (!Number.isFinite(input.hours) || input.hours <= 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidInput"));
+      throw new Error(tErrors.credit.invalidInput);
     }
 
     const idempotencyKey = CreditRepository.generateIdempotencyKey({
@@ -137,12 +132,11 @@ export namespace CreditService {
 
     try {
       const created = await db.transaction(async tx => {
-        await assertStudentExists(input.studentId, locale);
+        await assertStudentExists(input.studentId, tErrors);
 
         const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey], tx);
         if (existing.length > 0) {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("credit.duplicatePurchase"));
+          throw new Error(tErrors.credit.duplicatePurchase);
         }
 
         const ledgerRow = await CreditRepository.createPurchase(tx, {
@@ -154,7 +148,7 @@ export namespace CreditService {
           idempotencyKey,
         });
 
-        await StudentRepository.addClasses(input.studentId, input.hours, undefined, tx, locale);
+        await StudentRepository.addClasses(input.studentId, input.hours, undefined, tx);
 
         return ledgerRow;
       });
@@ -179,15 +173,14 @@ export namespace CreditService {
   export async function getStudentBalance(
     actorUserId: string,
     studentId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<CreditBalanceReturnType> {
-    await assertStudentExists(studentId, locale);
+    await assertStudentExists(studentId, tErrors);
 
     const isAssociated = await resolveAssociatedViewer(actorUserId, studentId);
     const hasCreditsPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
     if (!isAssociated && !hasCreditsPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const balance = await CreditRepository.getBalance(db, studentId);
@@ -202,15 +195,14 @@ export namespace CreditService {
     actorUserId: string,
     studentId: string,
     paginationArgs: PaginationArgs | null,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{ rows: CreditTransactionReturnType[]; totalCount: number }> {
-    await assertStudentExists(studentId, locale);
+    await assertStudentExists(studentId, tErrors);
 
     const isAssociated = await resolveAssociatedViewer(actorUserId, studentId);
     const hasCreditsPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
     if (!isAssociated && !hasCreditsPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const [rows, totalCount] = await Promise.all([
@@ -230,13 +222,12 @@ export namespace CreditService {
     creditedByUserId: string,
     idempotencyKey: string,
     tx: DBTransaction,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
     const balance = await CreditRepository.getBalance(tx, studentId);
     if (balance.classesRemaining <= 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(
-        tFunc("credit.insufficientBalance", {
+        tErrors.credit.insufficientBalance({
           studentId,
           remaining: balance.classesRemaining,
         })
@@ -258,7 +249,7 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: ledgerKey,
         });
-        await StudentRepository.deductClasses(studentId, 1, undefined, tx, locale);
+        await StudentRepository.deductClasses(studentId, 1, undefined, tx);
       }
 
       logger.info("Credit deducted for booking", {
@@ -281,8 +272,7 @@ export namespace CreditService {
     classInstanceId: string,
     creditedByUserId: string,
     idempotencyKey: string,
-    tx: DBTransaction,
-    locale?: string
+    tx: DBTransaction
   ): Promise<void> {
     const ledgerKey = deriveBookingIdempotencyKey({
       studentId,
@@ -299,7 +289,7 @@ export namespace CreditService {
           creditedByUserId,
           idempotencyKey: ledgerKey,
         });
-        await StudentRepository.addClasses(studentId, 1, undefined, tx, locale);
+        await StudentRepository.addClasses(studentId, 1, undefined, tx);
       }
 
       logger.info("Credit refunded on cancel", {

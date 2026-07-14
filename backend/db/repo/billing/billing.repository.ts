@@ -15,7 +15,7 @@ import {
 } from "@/backend/db/schema";
 import { CurrencyCode, StudentStatus } from "@/backend/enum";
 import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type * as Types from "@/backend/types";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;
@@ -30,7 +30,7 @@ export namespace BillingRepository {
   async function getExistingInvoiceOrThrow(
     t: DBTransaction,
     invoiceId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> {
     await acquireInvoiceLock(t, invoiceId);
 
@@ -41,8 +41,7 @@ export namespace BillingRepository {
       .limit(1);
 
     if (existing.length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
+      throw new Error(tErrors.billing.invoiceNotFound(invoiceId));
     }
 
     return existing[0];
@@ -53,13 +52,13 @@ export namespace BillingRepository {
     currency: CurrencyCode,
     snapshot?: string | null,
     source?: string | null,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{ snapshot: string | null; source: string | null }> {
     if (snapshot || currency === CurrencyCode.USD) {
       return { snapshot: snapshot ?? null, source: source ?? null };
     }
 
-    const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, t as DBTransaction, locale);
+    const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, t as DBTransaction, tErrors);
     return {
       snapshot: rate.rate,
       source: rate.source || "SYSTEM_AUTO",
@@ -77,14 +76,14 @@ export namespace BillingRepository {
       exchangeRateSnapshot?: string | null;
       exchangeRateSource?: string | null;
     } & Record<string, unknown>,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<R> {
     const { snapshot, source } = await resolveExchangeRateSnapshot(
       t,
       input.currency,
       input.exchangeRateSnapshot,
       input.exchangeRateSource,
-      locale
+      tErrors
     );
 
     const results = await t
@@ -108,7 +107,7 @@ export namespace BillingRepository {
     fromCurrency: CurrencyCode,
     toCurrency: CurrencyCode,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
     const t = tx || db;
     const results = await t
@@ -121,15 +120,13 @@ export namespace BillingRepository {
       .limit(1);
 
     if (results.length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("noExchangeRate", { fromCurrency, toCurrency }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "currency_exchange_rates", entityId: `${fromCurrency}_${toCurrency}` }) ?? `No exchange rate found for ${fromCurrency} to ${toCurrency}`);
     }
     const latest = results[0];
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     if (latest.effectiveDate < twentyFourHoursAgo) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("exchangeRateStale", { fromCurrency, toCurrency }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "currency_exchange_rates", entityId: `${fromCurrency}_${toCurrency}` }) ?? `Exchange rate stale for ${fromCurrency} to ${toCurrency}`);
     }
 
     return latest;
@@ -381,9 +378,9 @@ export namespace BillingRepository {
   export const createInvoice = async (
     input: InvoiceCreateInput,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> => {
-    const runner = async (t: DBTransaction) => createBillingEntity<Types.InvoiceSelectType>(t, invoices, input, locale);
+    const runner = async (t: DBTransaction) => createBillingEntity<Types.InvoiceSelectType>(t, invoices, input, tErrors);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -393,9 +390,9 @@ export namespace BillingRepository {
   export const recordPayment = async (
     input: PaymentRecordInput,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.PaymentSelectType> => {
-    const runner = async (t: DBTransaction) => createBillingEntity<Types.PaymentSelectType>(t, payments, input, locale);
+    const runner = async (t: DBTransaction) => createBillingEntity<Types.PaymentSelectType>(t, payments, input, tErrors);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -431,26 +428,24 @@ export namespace BillingRepository {
     paidDate?: Date | null,
     expectedVersion?: number,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireInvoiceLock(t, invoiceId);
 
       const results = await t.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
       if (results.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
+        throw new Error(tErrors!.billing.invoiceNotFound(invoiceId) ?? `Invoice not found: ${invoiceId}`);
       }
       const current = results[0];
 
       if (expectedVersion !== undefined && current.version !== expectedVersion) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(
-          tFunc("invoiceVersionMismatch", {
+          tErrors!.billing.invoiceVersionMismatch({
             id: invoiceId,
             expectedVersion,
             gotVersion: current.version,
-          })
+          }) ?? `Invoice version mismatch: expected ${expectedVersion}, got ${current.version}`
         );
       }
 
@@ -1062,13 +1057,13 @@ export namespace BillingRepository {
     );
   };
 
-  export const deleteInvoice = async (
+export const deleteInvoice = async (
     invoiceId: string,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
-      await getExistingInvoiceOrThrow(t, invoiceId, locale);
+      await getExistingInvoiceOrThrow(t, invoiceId, tErrors!);
 
       const now = new Date();
       const [deleted] = await t
@@ -1104,33 +1099,31 @@ export namespace BillingRepository {
     invoiceId: string,
     expectedVersion?: number,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> => {
-    return updateInvoiceStatus(invoiceId, "PAYMENT_PENDING", null, expectedVersion, tx, locale);
+    return updateInvoiceStatus(invoiceId, "PAYMENT_PENDING", null, expectedVersion, tx, tErrors);
   };
 
   export const markInvoiceAsPaid = async (
     invoiceId: string,
     expectedVersion?: number,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
-      const current = await getExistingInvoiceOrThrow(t, invoiceId, locale);
+      const current = await getExistingInvoiceOrThrow(t, invoiceId, tErrors!);
 
       if (current.status !== "UNPAID" && current.status !== "PAYMENT_PENDING") {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("invoiceAlreadyPaid", { id: invoiceId, status: current.status }));
+        throw new Error(tErrors!.billing.invoiceAlreadyPaid({ id: invoiceId, status: current.status }) ?? `Invoice ${invoiceId} is already ${current.status.toLowerCase()}.`);
       }
 
       if (expectedVersion !== undefined && current.version !== expectedVersion) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(
-          tFunc("invoiceVersionMismatch", {
+          tErrors!.billing.invoiceVersionMismatch({
             id: invoiceId,
             expectedVersion,
             gotVersion: current.version,
-          })
+          }) ?? `Invoice version mismatch: expected ${expectedVersion}, got ${current.version}`
         );
       }
 

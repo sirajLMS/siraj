@@ -2,12 +2,12 @@ import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurr
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { parseIanaTimezone } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { RecurringScheduleDetailReturnType } from "@/backend/types/scheduling/recurring-schedule-detail.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace RecurringScheduleDetailService {
-  async function assertViewAccess(userId: string, teacherId: string, locale?: string) {
+  async function assertViewAccess(userId: string, teacherId: string, tErrors: ErrorsLabels) {
     const canManageClass = await PermissionsService.hasPermission(userId, AppPermission.MEETING_CONFIGS_MANAGE_CLASS);
     const canViewAll = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_ALL);
 
@@ -20,22 +20,20 @@ export namespace RecurringScheduleDetailService {
       return;
     }
 
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("unauthorizedAction"));
+    throw new Error(tErrors.unauthorizedAction);
   }
 
   export async function getDetail(
     userId: string,
     recurringScheduleId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<RecurringScheduleDetailReturnType> {
     const row = await RecurringScheduleRepository.findById(recurringScheduleId);
     if (!row) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
-    await assertViewAccess(userId, row.schedule.teacherId, locale);
+    await assertViewAccess(userId, row.schedule.teacherId, tErrors);
 
     const dayRows = await RecurringScheduleRepository.findDaysByScheduleId(recurringScheduleId);
 

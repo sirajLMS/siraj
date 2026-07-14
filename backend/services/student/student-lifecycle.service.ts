@@ -1,46 +1,37 @@
 import { StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { AppPermission, StudentStatus } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace StudentLifecycleService {
   export async function reassignTeacher(
     actorUserId: string,
     studentId: string,
     newTeacherId: string,
-    expectedVersion?: number,
-    locale?: string
+    tErrors: ErrorsLabels,
+    expectedVersion?: number
   ): Promise<ReassignStudentTeacherResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_REASSIGN_TEACHER);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const teacher = await TeacherRepository.findById(newTeacherId);
     if (!teacher) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("teacherNotFound", { id: newTeacherId }));
+      throw new Error(tErrors.teacherNotFound(newTeacherId));
     }
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("studentNotFound", { id: studentId }));
+      throw new Error(tErrors.studentNotFound(studentId));
     }
 
     try {
-      const updated = await StudentRepository.reassignTeacher(
-        studentId,
-        newTeacherId,
-        expectedVersion,
-        undefined,
-        locale
-      );
+      const updated = await StudentRepository.reassignTeacher(studentId, newTeacherId, expectedVersion, undefined);
 
       logger.info("Student teacher reassigned", {
         actorUserId,
@@ -69,19 +60,18 @@ export namespace StudentLifecycleService {
     actorUserId: string,
     studentId: string,
     newStatus: StudentStatus,
-    expectedVersion?: number,
-    locale?: string
+    tErrors: ErrorsLabels,
+    expectedVersion?: number
   ): Promise<ChangeStudentStatusResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
       assertStudentFieldEdit(fieldCtx, "student_academic");
     } catch {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     try {
-      const updated = await StudentRepository.changeStatus(studentId, newStatus, expectedVersion, undefined, locale);
+      const updated = await StudentRepository.changeStatus(studentId, newStatus, expectedVersion, undefined);
 
       logger.info("Student status changed", {
         actorUserId,

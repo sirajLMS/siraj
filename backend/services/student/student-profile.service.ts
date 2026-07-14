@@ -1,7 +1,6 @@
 import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db";
 import { AppPermission, StudentStatus } from "@/backend/enum";
 import { parseAppLanguage, parseGender, parseStudentStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 import {
@@ -11,6 +10,7 @@ import {
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
 import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 import type { StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type GetProfileOptions = {
   readonly year?: number | null;
@@ -22,7 +22,7 @@ async function hasAnyStudentViewPermission(actorUserId: string): Promise<boolean
   return PermissionsService.hasAnyPermission(actorUserId, viewKeys);
 }
 
-async function assertCanViewStudentProfile(actorUserId: string, locale?: string): Promise<void> {
+async function assertCanViewStudentProfile(actorUserId: string, tErrors?: ErrorsLabels): Promise<void> {
   const hasLegacy = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED);
   if (hasLegacy) {
     return;
@@ -30,8 +30,7 @@ async function assertCanViewStudentProfile(actorUserId: string, locale?: string)
   if (await hasAnyStudentViewPermission(actorUserId)) {
     return;
   }
-  const t = await getBackendTranslations({ locale, namespace: "errors" });
-  throw new Error(t("insufficientPermissions"));
+  throw new Error(tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action.");
 }
 
 async function resolveIsAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
@@ -118,14 +117,13 @@ export namespace StudentProfileService {
     actorUserId: string,
     studentId: string,
     options: GetProfileOptions = {},
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<StudentProfileReturnType> {
-    await assertCanViewStudentProfile(actorUserId, locale);
+    await assertCanViewStudentProfile(actorUserId, tErrors);
 
     const row = await StudentRepository.findProfileById(studentId);
     if (!row) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("studentNotFound", { id: studentId }));
+      throw new Error(tErrors?.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
     }
 
     const isAssociatedViewer = await resolveIsAssociatedViewer(actorUserId, studentId);
@@ -139,7 +137,7 @@ export namespace StudentProfileService {
 
     let upcomingClasses: Awaited<ReturnType<typeof StudentStatusService.getUpcomingClasses>> | null;
     try {
-      upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, locale);
+      upcomingClasses = await StudentStatusService.getUpcomingClasses(actorUserId, studentId, tErrors!);
     } catch {
       upcomingClasses = null;
     }
@@ -152,7 +150,7 @@ export namespace StudentProfileService {
           studentId,
           options.year,
           options.month,
-          locale
+          tErrors!
         );
       } catch {
         classHistory = null;

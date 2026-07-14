@@ -5,10 +5,10 @@ import { SessionRepository } from "@/backend/db/repo";
 import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace DemoAuthService {
   /**
@@ -46,18 +46,19 @@ export namespace DemoAuthService {
    * @drizzle `db.select().from(userPermissionGroups).innerJoin(users)`
    * @drizzle `db.select().from(users)`
    * @param groupSlug The unique slug of the permission group to authenticate as.
+   * @param tErrors Translated error labels (passed from GraphQL resolver via ctx.t("errors"))
    * @returns The user entity along with newly generated access and refresh tokens.
    */
   export async function loginWithGroupSlug(
     groupSlug: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{
     user: SafeUser;
     accessToken: string;
     refreshToken: string;
     sessionId: string;
   }> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const t = tErrors;
 
     const [group] = await db.select().from(permissionGroups).where(eq(permissionGroups.slug, groupSlug)).limit(1);
 
@@ -69,7 +70,7 @@ export namespace DemoAuthService {
           return proceedWithUser(superAdmin);
         }
       }
-      throw new Error(t("auth.demoGroupNotFound", { groupSlug }));
+      throw new Error(t.auth.demoGroupNotFound(groupSlug));
     }
 
     const [assignment] = await db
@@ -82,7 +83,7 @@ export namespace DemoAuthService {
       .limit(1);
 
     if (!assignment?.user) {
-      throw new Error(t("auth.demoGroupNoUser", { groupSlug }));
+      throw new Error(t.auth.demoGroupNoUser(groupSlug));
     }
 
     return proceedWithUser(assignment.user);

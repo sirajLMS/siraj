@@ -97,12 +97,8 @@ export namespace StudentRepository {
     return row?.id ?? null;
   };
 
-  export const create = async (
-    input: Types.StudentCreateInput,
-    locale?: string,
-    tx?: DBTransaction
-  ): Promise<Types.StudentEntity> => {
-    const err = await StudentUtils.validateName(input.name, locale);
+  export const create = async (input: Types.StudentCreateInput, tx?: DBTransaction): Promise<Types.StudentEntity> => {
+    const err = await StudentUtils.validateName(input.name);
     if (err) throw new Error(err);
 
     const insertInput: Types.StudentEntityInput = {
@@ -125,7 +121,7 @@ export namespace StudentRepository {
       const [createdStudent] = await executor.insert(students).values(insertInput).returning();
       return createdStudent;
     } catch {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      const t = await getBackendTranslations({ namespace: "errors" });
       throw new Error(t("studentCreateFailed"));
     }
   };
@@ -147,14 +143,11 @@ export namespace StudentRepository {
     });
   };
 
-  export const createList = async (
-    input: Types.StudentCreateInput[],
-    locale?: string
-  ): Promise<Types.StudentEntity[]> => {
+  export const createList = async (input: Types.StudentCreateInput[]): Promise<Types.StudentEntity[]> => {
     if (input.length === 0) return [];
     try {
       for (const item of input) {
-        const nameErr = await StudentUtils.validateName(item.name, locale);
+        const nameErr = await StudentUtils.validateName(item.name);
         if (nameErr) throw new Error(nameErr);
       }
       const values: Types.StudentEntityInput[] = input.map(item => ({
@@ -174,17 +167,17 @@ export namespace StudentRepository {
       }));
       return await db.insert(students).values(values).returning();
     } catch (error) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      // const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("studentCreateFailed"), {
         cause: error,
       });
     }
   };
 
-  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.Student | Error)[]> => {
+  export const loadByIds = async (ids: string[]): Promise<(Types.Student | Error)[]> => {
     if (ids.length === 0) return [];
     const foundStudents = await db.select().from(students).where(inArray(students.id, ids));
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    // const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
@@ -278,20 +271,19 @@ export namespace StudentRepository {
     t: DBTransaction,
     studentId: string,
     updateFn: (current: Types.StudentEntity) => Record<string, unknown> | Promise<Record<string, unknown>>,
-    expectedVersion?: number,
-    locale?: string
+    expectedVersion?: number
   ): Promise<Types.StudentEntity> {
     await acquireStudentLock(t, studentId);
 
     const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
     if (results.length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      // const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("studentNotFound", { id: studentId }));
     }
     const current = results[0];
 
     if (expectedVersion !== undefined && current.version !== expectedVersion) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      // const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(
         tFunc("studentVersionMismatch", {
           id: studentId,
@@ -318,8 +310,7 @@ export namespace StudentRepository {
     studentId: string,
     amount: number = 1,
     expectedVersion?: number,
-    tx?: DBTransaction,
-    locale?: string
+    tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
@@ -327,7 +318,7 @@ export namespace StudentRepository {
         studentId,
         async current => {
           if (current.classesRemaining < amount) {
-            const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+            // const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
             throw new Error(
               tFunc("insufficientClasses", {
                 id: studentId,
@@ -338,8 +329,7 @@ export namespace StudentRepository {
           }
           return { classesRemaining: sql`${students.classesRemaining} - ${amount}` };
         },
-        expectedVersion,
-        locale
+        expectedVersion
       );
 
     return tx ? runner(tx) : db.transaction(runner);
@@ -349,8 +339,7 @@ export namespace StudentRepository {
     studentId: string,
     amount: number = 1,
     expectedVersion?: number,
-    tx?: DBTransaction,
-    locale?: string
+    tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
@@ -360,8 +349,7 @@ export namespace StudentRepository {
           classesRemaining: sql`${students.classesRemaining} + ${amount}`,
           classesTotal: sql`${students.classesTotal} + ${amount}`,
         }),
-        expectedVersion,
-        locale
+        expectedVersion
       );
 
     return tx ? runner(tx) : db.transaction(runner);
@@ -400,8 +388,7 @@ export namespace StudentRepository {
     studentId: string,
     newStatus: StudentStatus,
     expectedVersion?: number,
-    tx?: DBTransaction,
-    locale?: string
+    tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
@@ -411,7 +398,7 @@ export namespace StudentRepository {
           const currentStatus = parseStudentStatus(current.status) ?? StudentStatus.REGULAR;
           const allowedTargets = ALLOWED_STATUS_TRANSITIONS[currentStatus] ?? [];
           if (!allowedTargets.includes(newStatus)) {
-            const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+            const tFunc = await getBackendTranslations({ namespace: "errors" });
             throw new Error(
               tFunc("invalidStatusTransition", {
                 currentStatus: current.status,
@@ -421,8 +408,7 @@ export namespace StudentRepository {
           }
           return { status: newStatus };
         },
-        expectedVersion,
-        locale
+        expectedVersion
       );
 
     return tx ? runner(tx) : db.transaction(runner);

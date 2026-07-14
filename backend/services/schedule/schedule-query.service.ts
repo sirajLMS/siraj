@@ -1,10 +1,10 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import type { StatusTrackingRow } from "@/backend/db/repo/scheduling/queries";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 /**
  * ScheduleQueryService — thin service layer for schedule-related read queries.
@@ -31,14 +31,14 @@ export namespace ScheduleQueryService {
    * @param actorUserId - The ID of the requesting user (must hold SCHEDULE_VIEW_ALL or DASHBOARD_VIEW_METRICS)
    * @param date - The date to fetch classes for (day boundaries computed from viewerTimezone)
    * @param options - Optional search filter and timezone
-   * @param locale - Optional locale for i18n error messages
+   * @param tErrors - ErrorsLabels for i18n error messages
    * @returns Array of StatusTrackingRow objects
    */
   export async function getStatusTrackingSchedule(
     actorUserId: string,
     date: Date,
-    options?: { search?: string; viewerTimezone?: string },
-    locale?: string
+    tErrors: ErrorsLabels,
+    options?: { search?: string; viewerTimezone?: string }
   ): Promise<StatusTrackingRow[]> {
     const hasPermission = await PermissionsService.hasAnyPermission(actorUserId, [
       AppPermission.SCHEDULE_VIEW_ALL,
@@ -47,8 +47,7 @@ export namespace ScheduleQueryService {
 
     if (!hasPermission) {
       logger.warn("Unauthorized access to status tracking schedule", { userId: actorUserId });
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     const rows = await SchedulingRepository.getStatusTrackingRows(date, options);

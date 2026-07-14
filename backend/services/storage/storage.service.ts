@@ -6,7 +6,7 @@ import {
   TeacherRepository,
 } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations, logger } from "@/backend/lib";
+import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
   DirectoryPermissionsUpdateInput,
@@ -16,6 +16,7 @@ import type {
   StorageUploadValidationParams,
 } from "@/backend/types";
 import type { SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 // --- Extended StorageService ---
 export namespace StorageService {
@@ -29,11 +30,10 @@ export namespace StorageService {
    * Require that the user has STORAGE_MANAGE permission.
    * Throws a localized error if the user lacks the permission.
    */
-  export async function requireStorageManage(userId: string, locale?: string): Promise<void> {
+  export async function requireStorageManage(userId: string, tErrors: ErrorsLabels): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STORAGE_MANAGE);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 
@@ -42,15 +42,18 @@ export namespace StorageService {
    * Ownership is determined by checking file usages for a user reference.
    * Throws a localized error if neither condition is met.
    */
-  export async function requireStorageManageOrOwner(userId: string, filePath: string, locale?: string): Promise<void> {
+  export async function requireStorageManageOrOwner(
+    userId: string,
+    filePath: string,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STORAGE_MANAGE);
     if (hasPermission) return;
 
     const usages = await StorageDbRepository.getFileUsages(filePath);
     const isOwner = usages.some(u => u.referenceTable === "users" && u.referenceId === userId);
     if (!isOwner) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 
@@ -300,12 +303,16 @@ export namespace StorageService {
 
 // --- Legacy exports (for backward compatibility) ---
 export namespace StorageAuthService {
-  export async function requireStorageManage(userId: string, locale?: string): Promise<void> {
-    return StorageService.requireStorageManage(userId, locale);
+  export async function requireStorageManage(userId: string, tErrors: ErrorsLabels): Promise<void> {
+    return StorageService.requireStorageManage(userId, tErrors);
   }
 
-  export async function requireStorageManageOrOwner(userId: string, filePath: string, locale?: string): Promise<void> {
-    return StorageService.requireStorageManageOrOwner(userId, filePath, locale);
+  export async function requireStorageManageOrOwner(
+    userId: string,
+    filePath: string,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
+    return StorageService.requireStorageManageOrOwner(userId, filePath, tErrors);
   }
 }
 

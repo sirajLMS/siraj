@@ -2,14 +2,13 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
-import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
 import type { TeacherCreateResult } from "@/backend/types/teachers/teacher.types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
-import type { ErrorsLabels } from "@/shared/messages/types/errors";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export interface TeacherOnboardingInput {
   readonly name: string;
@@ -78,13 +77,13 @@ export namespace TeacherOnboardingService {
   async function assignTeacherPermissionGroup(
     user: UserReturnType,
     actorUserId: string,
-    t: TranslationFn<ErrorsLabels>,
+    tErrors: ErrorsLabels,
     txObj: DBTransaction
   ): Promise<void> {
     const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
     const targetGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.TEACHER_DEFAULT);
     if (!targetGroup) {
-      throw new Error(t("permission.groupNotFound"));
+      throw new Error(tErrors.permissionGroupNotFound);
     }
     await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
   }

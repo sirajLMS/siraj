@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { currencyHedges } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   CurrencyHedgeInsertType,
   CurrencyHedgeReturnType,
@@ -48,7 +48,7 @@ export namespace CurrencyHedgeRepository {
     id: string,
     input: CurrencyHedgeUpdateInput,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<CurrencyHedgeReturnType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -58,20 +58,18 @@ export namespace CurrencyHedgeRepository {
       .returning();
 
     if (!updated) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("recordNotFound", { tableName: "currency_hedges", entityId: id }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ?? `Currency hedge not found: ${id}`);
     }
 
     return updated;
   }
 
-  export async function deleteById(id: string, tx?: DBTransaction, locale?: string): Promise<boolean> {
+  export async function deleteById(id: string, tx?: DBTransaction, tErrors?: ErrorsLabels): Promise<boolean> {
     const client = tx ?? db;
     const [deleted] = await client.delete(currencyHedges).where(eq(currencyHedges.id, id)).returning();
 
     if (!deleted) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("recordNotFound", { tableName: "currency_hedges", entityId: id }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "currency_hedges", entityId: id }) ?? `Currency hedge not found: ${id}`);
     }
 
     return true;

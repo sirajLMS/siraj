@@ -1,9 +1,9 @@
 import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace StudentHistoryService {
   async function resolveIsAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
@@ -30,7 +30,7 @@ export namespace StudentHistoryService {
     return false;
   }
 
-  async function assertCanViewStudentHistory(userId: string, studentId: string, locale?: string): Promise<void> {
+  async function assertCanViewStudentHistory(userId: string, studentId: string, tErrors: ErrorsLabels): Promise<void> {
     const hasLegacy = await PermissionsService.hasPermission(userId, AppPermission.HISTORY_VIEW_CALENDAR);
     if (hasLegacy) {
       return;
@@ -46,15 +46,13 @@ export namespace StudentHistoryService {
       return;
     }
 
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("unauthorizedAction"));
+    throw new Error(tErrors.unauthorizedAction);
   }
 
-  async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
+  async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, permission);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
   }
 
@@ -63,12 +61,12 @@ export namespace StudentHistoryService {
     studentId: string,
     year: number,
     month: number,
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
-    await assertCanViewStudentHistory(userId, studentId, locale);
+    await assertCanViewStudentHistory(userId, studentId, tErrors);
 
     const metrics = await StudentHistoryRepository.getMonthlyMetrics(studentId, year, month);
-    const rawSessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month, locale);
+    const rawSessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month);
 
     const sessions = await Promise.all(
       rawSessions.map(async session => {
@@ -84,8 +82,7 @@ export namespace StudentHistoryService {
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
     return {
@@ -96,13 +93,12 @@ export namespace StudentHistoryService {
     };
   }
 
-  export async function getStudentClassSessionDetail(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.HISTORY_VIEW_DETAILS, locale);
+  export async function getStudentClassSessionDetail(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
+    await assertPermission(userId, AppPermission.HISTORY_VIEW_DETAILS, tErrors);
 
-    const detail = await StudentHistoryRepository.getSessionDetail(classInstanceId, locale);
+    const detail = await StudentHistoryRepository.getSessionDetail(classInstanceId);
     if (!detail) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
     const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(classInstanceId);

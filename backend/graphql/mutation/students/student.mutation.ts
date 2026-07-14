@@ -7,16 +7,14 @@ import {
   StudentPothosObject,
 } from "@/backend/graphql/pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 
-async function requireStudentManageStatus(userId: string, locale?: string): Promise<void> {
+async function requireStudentManageStatus(userId: string, tErrors: { insufficientPermissions: string }): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STUDENT_MANAGE_STATUS);
   if (!hasPermission) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
+    throw new Error(tErrors.insufficientPermissions);
   }
 }
 
@@ -32,6 +30,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_query, args, ctx) => {
       const userId = await requireAuth(ctx);
+      const tErrors = await ctx.t("errors");
       const input: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(args.input)) {
         if (value !== null) {
@@ -41,8 +40,8 @@ gqlSchemaBuilder.mutationFields(t => ({
       const typedInput = input as Types.PartialStudentUpdateInput;
       const { status, ...restInput } = typedInput;
       if (status) {
-        await requireStudentManageStatus(userId, ctx.locale);
-        await StudentRepository.changeStatus(typedInput.id, status, undefined, undefined, ctx.locale);
+        await requireStudentManageStatus(userId, tErrors);
+        await StudentRepository.changeStatus(typedInput.id, status, undefined, undefined);
       }
       return await StudentRepository.partiallyUpdate(restInput as Types.PartialStudentUpdateInput).then(s =>
         StudentUtils.mapEntityToDto(s)
@@ -58,7 +57,8 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_query, args, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStudentManageStatus(userId, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      await requireStudentManageStatus(userId, tErrors);
       return await StudentRepository.deleteById(args.id).then(s => StudentUtils.mapEntityToDto(s));
     },
   }),

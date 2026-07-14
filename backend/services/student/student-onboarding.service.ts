@@ -10,34 +10,33 @@ import {
 } from "@/backend/db/repo";
 import { AppPermission, StudentStatus, SystemPermissionGroupSlug } from "@/backend/enum";
 import { parseStudentStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace StudentOnboardingService {
   export async function createStudent(
     actorUserId: string,
     input: StudentOnboardingInput,
+    tErrors: ErrorsLabels,
     locale?: string,
     tx?: DBTransaction
   ): Promise<StudentOnboardingResult> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENTS_CREATE);
     if (!hasPermission) {
-      throw new Error(t("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     const parent = await ParentRepository.getParentProfile(input.parentId);
     if (!parent) {
-      throw new Error(t("parentNotFound", { id: input.parentId }));
+      throw new Error(tErrors.parentNotFound);
     }
 
     if (input.primaryTeacherId) {
       const teacher = await TeacherRepository.findById(input.primaryTeacherId);
       if (!teacher) {
-        throw new Error(t("teacherNotFound", { id: input.primaryTeacherId }));
+        throw new Error(tErrors.teacherNotFound(input.primaryTeacherId));
       }
     }
 
@@ -46,15 +45,15 @@ export namespace StudentOnboardingService {
     const email = input.email?.trim() || null;
     const password = input.password ?? null;
     if (!email) {
-      throw new Error(t("studentEmailRequired"));
+      throw new Error(tErrors.studentEmailRequired);
     }
     if (!password) {
-      throw new Error(t("studentPasswordRequired"));
+      throw new Error(tErrors.studentPasswordRequired);
     }
 
     const emailExists = await UserRepository.existsByEmail(email);
     if (emailExists) {
-      throw new Error(t("user.emailAlreadyExists"));
+      throw new Error(tErrors.userEmailExists);
     }
 
     const run = async (txObj: DBTransaction): Promise<StudentOnboardingResult> => {
@@ -69,7 +68,7 @@ export namespace StudentOnboardingService {
       const groups = await PermissionManagementRepository.listAllGroups(undefined, txObj);
       const studentGroup = groups.find(g => g.slug === SystemPermissionGroupSlug.STUDENT_DEFAULT);
       if (!studentGroup) {
-        throw new Error(t("permission.groupNotFound"));
+        throw new Error(tErrors.permissionGroupNotFound);
       }
       await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], studentGroup.id, actorUserId, txObj);
 
@@ -88,7 +87,6 @@ export namespace StudentOnboardingService {
           classesRemaining: input.classesRemaining ?? 0,
           idempotencyKey: randomUUID(),
         },
-        locale,
         txObj
       );
 

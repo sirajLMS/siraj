@@ -17,7 +17,7 @@ async function resolveTeacherDashboard(
     throw new Error(tErrors.unauthorized);
   }
   const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
-  const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher", ctx.locale, pagination);
+  const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, pagination);
   return {
     ...result,
     scheduleRows: result.scheduleRows.map(r => ({
@@ -57,7 +57,8 @@ gqlSchemaBuilder.queryField("teacherHandbookUrl", t =>
         const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
-      const url = await TeacherDashboardService.getHandbookDownloadUrl(ctx.user.id, ctx.locale);
+      const tErrors = await ctx.t("errors");
+      const url = await TeacherDashboardService.getHandbookDownloadUrl(ctx.user.id, tErrors);
       return { id: `handbook-${ctx.user.id}`, url };
     },
   })

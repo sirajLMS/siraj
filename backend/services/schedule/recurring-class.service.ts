@@ -9,11 +9,11 @@ import {
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { AppPermission, type IanaTimezone } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import type { RecurringScheduleDayEntity, RecurringScheduleEntity } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export interface CreateRecurringClassInput {
   studentId: string;
@@ -34,35 +34,30 @@ export interface CreateRecurringClassInput {
 }
 
 export namespace RecurringClassService {
-  export async function createRecurringClass(userId: string, input: CreateRecurringClassInput, locale?: string) {
+  export async function createRecurringClass(userId: string, input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
     try {
       const hasCreateAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
       if (!hasCreateAccess) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
 
       if (!input.days || input.days.length === 0) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("invalidInput"));
+        throw new Error(tErrors.invalidInput);
       }
 
       if (input.durationMinutes <= 0) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("invalidInput"));
+        throw new Error(tErrors.invalidInput);
       }
 
       const activeDays = input.days.filter(d => d.isActive);
       if (activeDays.length === 0) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("invalidInput"));
+        throw new Error(tErrors.invalidInput);
       }
 
       const balance = await CreditRepository.getBalance(db, input.studentId);
       if (balance.classesRemaining <= 0) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(
-          t("credit.insufficientBalance", {
+          tErrors.credit.insufficientBalance({
             studentId: input.studentId,
             remaining: balance.classesRemaining,
           })
@@ -85,13 +80,12 @@ export namespace RecurringClassService {
             generateInstancesForWeeks: input.generateInstancesForWeeks,
             quotaDeducted: true,
           },
-          tx,
-          locale
+          tx
         );
 
         for (const classInstanceId of created.classInstanceIds) {
           const idempotencyKey = `credit-deduction:${classInstanceId}`;
-          await CreditService.deductForBooking(input.studentId, classInstanceId, userId, idempotencyKey, tx, locale);
+          await CreditService.deductForBooking(input.studentId, classInstanceId, userId, idempotencyKey, tx, tErrors);
         }
 
         return created;

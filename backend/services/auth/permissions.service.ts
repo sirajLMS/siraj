@@ -2,7 +2,6 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { groupPermissions, permissionGroups, permissions, userPermissionGroups, users } from "@/backend/db/schema";
 import { type AppPermission, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 
 export type UserPermissionContext = {
@@ -94,7 +93,7 @@ export namespace PermissionsService {
     return UserRole.USER;
   }
 
-  export async function getPermissionGroupContext(groupSlug: string, locale?: string): Promise<UserPermissionContext> {
+  export async function getPermissionGroupContext(groupSlug: string): Promise<UserPermissionContext> {
     try {
       const normalizedSlug = groupSlug.trim();
       const [group] = await db
@@ -104,8 +103,7 @@ export namespace PermissionsService {
         .limit(1);
 
       if (!group) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("permission.groupNotFound"));
+        throw new Error("Permission group not found");
       }
 
       const groupPermissionRows = await db

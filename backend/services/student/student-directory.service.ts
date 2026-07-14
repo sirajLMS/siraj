@@ -1,8 +1,8 @@
 import { StudentRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services";
 import type { PaginationArgs, StudentDirectoryResult, StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace StudentDirectoryService {
   /**
@@ -13,14 +13,13 @@ export namespace StudentDirectoryService {
   export async function getStudentDirectory(
     actorUserId: string,
     paginationArgs: PaginationArgs | null,
+    tErrors: ErrorsLabels,
     filters?: StudentFilterArgs | null,
     orderBy?: StudentsOrderByClause[] | null,
-    locale?: string
   ): Promise<StudentDirectoryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENTS_LIST);
     if (!hasPermission) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.insufficientPermissions);
     }
 
     return await StudentRepository.getDirectoryRows(paginationArgs, filters, orderBy);

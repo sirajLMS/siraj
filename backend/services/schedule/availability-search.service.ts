@@ -1,9 +1,9 @@
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { CrossStaffSearchInput } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 function getUtcDateString(date: Date): string {
   return date.toISOString().split("T")[0];
@@ -29,12 +29,11 @@ function withSearchDefaults(input: CrossStaffSearchInput): CrossStaffSearchInput
 }
 
 export namespace AvailabilitySearchService {
-  export async function searchAvailability(userId: string, input: CrossStaffSearchInput, locale?: string) {
+  export async function searchAvailability(userId: string, input: CrossStaffSearchInput, tErrors: ErrorsLabels) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_SEARCH_AVAILABILITY);
       if (!isAuthorized) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
 
       return await TeacherAvailabilityRepository.searchCrossStaffAvailability(withSearchDefaults(input));

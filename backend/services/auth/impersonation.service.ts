@@ -5,11 +5,11 @@ import { AccountStatus } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { generateAccessToken, generateImpersonationAccessToken } from "@/backend/lib/auth/jwt";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { clearOptionalRedisGroupSimulation } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
 
@@ -51,11 +51,10 @@ async function writeAdminAuditLog(
   });
 }
 
-async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, locale?: string): Promise<void> {
-  const t = await getBackendTranslations({ locale, namespace: "errors" });
+async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
   const session = await SessionRepository.findSessionById(rawSessionId);
   if (session?.userId !== actorUserId) {
-    throw new Error(t("auth.impersonationSessionInvalid"));
+    throw new Error(tErrors.auth.impersonationSessionInvalid);
   }
 }
 
@@ -94,48 +93,45 @@ export namespace ImpersonationService {
   export async function assertCanImpersonate(
     actorUserId: string,
     targetUserId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
     if (actorUserId === targetUserId) {
-      throw new Error(t("auth.cannotImpersonateSelf"));
+      throw new Error(tErrors.auth.cannotImpersonateSelf);
     }
 
     const actorContext = await PermissionsService.getUserContext(actorUserId);
     if (!actorContext.isSuperAdmin) {
-      throw new Error(t("auth.impersonationNotAllowed"));
+      throw new Error(tErrors.auth.impersonationNotAllowed);
     }
 
     const targetUser = await UserRepository.findById(targetUserId);
     if (!targetUser) {
-      throw new Error(t("auth.impersonationTargetNotFound"));
+      throw new Error(tErrors.auth.impersonationTargetNotFound);
     }
 
     if (targetUser.deletedAt) {
-      throw new Error(t("auth.impersonationTargetInactive"));
+      throw new Error(tErrors.auth.impersonationTargetInactive);
     }
 
     if (targetUser.status === AccountStatus.DEACTIVATED) {
-      throw new Error(t("auth.impersonationTargetInactive"));
+      throw new Error(tErrors.auth.impersonationTargetInactive);
     }
 
     if (targetUser.isSuperAdmin) {
-      throw new Error(t("auth.cannotImpersonateSuperAdmin"));
+      throw new Error(tErrors.auth.cannotImpersonateSuperAdmin);
     }
   }
 
   export async function startImpersonation(
     input: Types.StartImpersonationInput,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<Types.StartImpersonationReturnType> {
-    await assertCanImpersonate(input.actorUserId, input.targetUserId, locale);
-    await assertActorOwnsSession(input.sessionId, input.actorUserId, locale);
+    await assertCanImpersonate(input.actorUserId, input.targetUserId, tErrors);
+    await assertActorOwnsSession(input.sessionId, input.actorUserId, tErrors);
 
     const targetUser = await UserRepository.findById(input.targetUserId);
     if (!targetUser) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("auth.impersonationTargetNotFound"));
+      throw new Error(tErrors.auth.impersonationTargetNotFound);
     }
 
     const hashedSessionId = hashSessionId(input.sessionId);
@@ -195,15 +191,14 @@ export namespace ImpersonationService {
   export async function endImpersonation(
     actorUserId: string,
     rawSessionId: string,
-    locale?: string,
+    tErrors: ErrorsLabels,
     ipAddress?: string | null
   ): Promise<Types.EndImpersonationReturnType> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    await assertActorOwnsSession(rawSessionId, actorUserId, locale);
+    await assertActorOwnsSession(rawSessionId, actorUserId, tErrors);
 
     const active = await getActiveDbImpersonation(rawSessionId, actorUserId);
     if (!active) {
-      throw new Error(t("auth.impersonationNotActive"));
+      throw new Error(tErrors.auth.impersonationNotActive);
     }
 
     await ImpersonationRepository.endById(active.row.id);
@@ -211,7 +206,7 @@ export namespace ImpersonationService {
 
     const actorUser = await UserRepository.findById(actorUserId);
     if (!actorUser) {
-      throw new Error(t("auth.impersonationSessionInvalid"));
+      throw new Error(tErrors.auth.impersonationSessionInvalid);
     }
 
     const token = await generateAccessToken(actorUser.id, actorUser.email);

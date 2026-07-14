@@ -4,7 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { supportedMobileWallets } from "@/backend/db/schema";
 import type { CountryCode } from "@/backend/enum";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   SupportedMobileWalletInsertType,
   SupportedMobileWalletSelectType,
@@ -101,7 +101,7 @@ export namespace SupportedMobileWalletRepository {
     id: string,
     input: UpdateSupportedMobileWalletInput,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<SupportedMobileWalletSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -111,8 +111,7 @@ export namespace SupportedMobileWalletRepository {
       .returning();
 
     if (!updated) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("recordNotFound", { tableName: "supported_mobile_wallets", entityId: id }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "supported_mobile_wallets", entityId: id }) ?? `Supported mobile wallet not found: ${id}`);
     }
 
     return toSelectType(updated);
@@ -121,9 +120,9 @@ export namespace SupportedMobileWalletRepository {
   export async function deactivate(
     id: string,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<SupportedMobileWalletSelectType> {
-    return update(id, { isActive: false }, tx, locale);
+    return update(id, { isActive: false }, tx, tErrors);
   }
 
   export async function listByIds(

@@ -1,9 +1,9 @@
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const HANDBOOK_SETTING_KEY = "teacher_handbook_url";
 const PARENT_HANDBOOK_SETTING_KEY = "parent_handbook_url";
@@ -18,21 +18,19 @@ export namespace SystemSettingsService {
    * then delegates to the active storage provider to retrieve a signed download URL.
    *
    * @param userId The ID of the user requesting the handbook URL.
-   * @param locale Optional language code for localized error translations.
+   * @param tErrors Translated error labels.
    * @returns A promise resolving to the signed download URL.
    */
-  export async function getHandbookDownloadUrl(userId: string, locale?: string): Promise<string> {
+  export async function getHandbookDownloadUrl(userId: string, tErrors: ErrorsLabels): Promise<string> {
     const isTeacher = await PermissionsService.hasPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD);
     const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.TEACHERS_EDIT);
     if (!isTeacher && !isAdmin) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     const setting = await SystemSettingsRepository.getByKey(HANDBOOK_SETTING_KEY);
     if (!setting?.value) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
     const path = setting.value;
@@ -40,33 +38,29 @@ export namespace SystemSettingsService {
     const storageService = await getStorageService();
     const fileInfo = await storageService.fileInfoByPath(path);
     if (!fileInfo?.url) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
     return fileInfo.url;
   }
 
-  export async function getParentHandbookDownloadUrl(userId: string, locale?: string): Promise<string> {
+  export async function getParentHandbookDownloadUrl(userId: string, tErrors: ErrorsLabels): Promise<string> {
     const isParent = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_FAMILY);
     const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.PARENTS_EDIT);
     if (!isParent && !isAdmin) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     const setting = await SystemSettingsRepository.getByKey(PARENT_HANDBOOK_SETTING_KEY);
     if (!setting?.value) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
     const path = setting.value;
     const storageService = await getStorageService();
     const fileInfo = await storageService.fileInfoByPath(path);
     if (!fileInfo?.url) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound"));
+      throw new Error(tErrors.notFound);
     }
 
     return fileInfo.url;
@@ -76,14 +70,13 @@ export namespace SystemSettingsService {
     userId: string | null,
     fileName: string,
     fileBuffer: Buffer,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
     if (userId) {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.RESOURCES_UPLOAD);
       const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.PARENTS_EDIT);
       if (!isAuthorized && !isAdmin) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
     }
 
@@ -116,20 +109,19 @@ export namespace SystemSettingsService {
    * @param userId The user ID of the actor initiating the upload, or `null` for system-level bypass.
    * @param fileName The desired filename (e.g. "teacher-handbook.pdf").
    * @param fileBuffer The raw PDF file buffer.
-   * @param locale Optional language code for localized error translations.
+   * @param tErrors Translated error labels.
    */
   export async function uploadHandbook(
     userId: string | null,
     fileName: string,
     fileBuffer: Buffer,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
     if (userId) {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.RESOURCES_UPLOAD);
       const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.TEACHERS_EDIT);
       if (!isAuthorized && !isAdmin) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
     }
 
@@ -162,15 +154,14 @@ export namespace SystemSettingsService {
    * deletes the setting record from the system settings repository.
    *
    * @param userId The user ID of the actor initiating the deletion, or `null` for system-level bypass.
-   * @param locale Optional language code for localized error translations.
+   * @param tErrors Translated error labels.
    */
-  export async function deleteHandbook(userId: string | null, locale?: string): Promise<void> {
+  export async function deleteHandbook(userId: string | null, tErrors: ErrorsLabels): Promise<void> {
     if (userId) {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.RESOURCES_DELETE);
       const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.TEACHERS_EDIT);
       if (!isAuthorized && !isAdmin) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
     }
 

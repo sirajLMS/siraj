@@ -1,30 +1,30 @@
 import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
 import { ClassOutcome, StudentStatus } from "@/backend/enum";
 import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { assertStudentFieldView, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace StudentStatusService {
   export async function getUpcomingClasses(
     actorUserId: string,
     studentId: string,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<StudentUpcomingClassesResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
       assertStudentFieldView(fieldCtx, "student_schedule");
     } catch {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(
+        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+      );
     }
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("studentNotFound", { id: studentId }));
+      throw new Error(tErrors?.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
     }
 
     const classes = await SchedulingRepository.getUpcomingClassesForStudent(studentId);

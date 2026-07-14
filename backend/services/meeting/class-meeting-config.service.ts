@@ -6,7 +6,6 @@ import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-pro
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -20,22 +19,22 @@ import type {
   EffectiveMeetingReturnType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace ClassMeetingConfigService {
-  async function assertCanManageClass(actorUserId: string, locale?: string): Promise<void> {
+  async function assertCanManageClass(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
     const canManage = await PermissionsService.hasPermission(actorUserId, AppPermission.MEETING_CONFIGS_MANAGE_CLASS);
     if (!canManage) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
   }
 
   export async function listClassMeetingConfigs(
     actorUserId: string,
     classInstanceId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType[]> {
-    await assertCanManageClass(actorUserId, locale);
+    await assertCanManageClass(actorUserId, tErrors);
     const rows = await ClassMeetingConfigRepository.listByScope({ classInstanceId });
     return buildMaskedClassMeetingConfigs(rows, true);
   }
@@ -43,39 +42,38 @@ export namespace ClassMeetingConfigService {
   export async function listRecurringMeetingConfigs(
     actorUserId: string,
     recurringScheduleId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType[]> {
-    await assertCanManageClass(actorUserId, locale);
+    await assertCanManageClass(actorUserId, tErrors);
     const rows = await ClassMeetingConfigRepository.listByScope({ recurringScheduleId });
     return buildMaskedClassMeetingConfigs(rows, true);
   }
 
-  async function loadConfigForActor(actorUserId: string, id: string, locale?: string) {
-    await assertCanManageClass(actorUserId, locale);
-    const config = await ClassMeetingConfigRepository.getByIdOrThrow(id, undefined, locale);
+  async function loadConfigForActor(actorUserId: string, id: string, tErrors: ErrorsLabels) {
+    await assertCanManageClass(actorUserId, tErrors);
+    const config = await ClassMeetingConfigRepository.getByIdOrThrow(id, undefined, tErrors);
     return config;
   }
 
   export async function getClassMeetingConfig(
     actorUserId: string,
     id: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
-    const config = await loadConfigForActor(actorUserId, id, locale);
+    const config = await loadConfigForActor(actorUserId, id, tErrors);
     return buildMaskedClassMeetingConfig(config, true);
   }
 
   export async function createClassMeetingConfig(
     actorUserId: string,
     input: ClassMeetingConfigSubmitInput,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
-    await assertCanManageClass(actorUserId, locale);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, undefined, locale);
+    await assertCanManageClass(actorUserId, tErrors);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(input.providerId, undefined, tErrors);
 
     if (!provider.isActive) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("meetingProviderInactive"));
+      throw new Error(tErrors.meetingProviderInactive);
     }
 
     const details = parseMeetingConfigDetails(provider, input.details);
@@ -91,7 +89,7 @@ export namespace ClassMeetingConfigService {
         encryptedSecret: input.password ?? null,
       },
       undefined,
-      locale
+      tErrors
     );
 
     return buildMaskedClassMeetingConfig(created, true);
@@ -101,11 +99,11 @@ export namespace ClassMeetingConfigService {
     actorUserId: string,
     id: string,
     input: UpdateClassMeetingConfigInput & { providerId?: string },
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
-    const existing = await loadConfigForActor(actorUserId, id, locale);
+    const existing = await loadConfigForActor(actorUserId, id, tErrors);
     const providerId = input.providerId ?? existing.providerId;
-    const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, undefined, locale);
+    const provider = await MeetingProviderRepository.getByIdOrThrow(providerId, undefined, tErrors);
 
     const details = input.details !== undefined ? parseMeetingConfigDetails(provider, input.details) : undefined;
 
@@ -119,7 +117,7 @@ export namespace ClassMeetingConfigService {
         providerId: input.providerId,
       },
       undefined,
-      locale
+      tErrors
     );
 
     return buildMaskedClassMeetingConfig(updated, true);
@@ -128,20 +126,20 @@ export namespace ClassMeetingConfigService {
   export async function deleteClassMeetingConfig(
     actorUserId: string,
     id: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<{ id: string }> {
-    await loadConfigForActor(actorUserId, id, locale);
-    await ClassMeetingConfigRepository.deleteConfig(id, undefined, locale);
+    await loadConfigForActor(actorUserId, id, tErrors);
+    await ClassMeetingConfigRepository.deleteConfig(id, undefined, tErrors);
     return { id };
   }
 
   export async function setDefaultClassMeetingConfig(
     actorUserId: string,
     id: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<ClassMeetingConfigReturnType> {
-    await loadConfigForActor(actorUserId, id, locale);
-    const updated = await ClassMeetingConfigRepository.setDefault(id, undefined, locale);
+    await loadConfigForActor(actorUserId, id, tErrors);
+    const updated = await ClassMeetingConfigRepository.setDefault(id, undefined, tErrors);
     return buildMaskedClassMeetingConfig(updated, true);
   }
 }

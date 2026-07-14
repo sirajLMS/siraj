@@ -1,7 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { DstMigrationRepository } from "@/backend/db/repo";
 import { AppPermission, DstMigrationResult, type MigrationStatus } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   DstCheckedEmptyItemReturnType,
@@ -12,13 +11,13 @@ import type {
   DstMigrationRunSelectType,
   DstUpdatedSessionReturnType,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace DstMigrationService {
-  async function ensurePermission(actorUserId: string, locale?: string): Promise<void> {
+  async function ensurePermission(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SYSTEM_BULK_UPDATE_DST);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 
@@ -110,9 +109,9 @@ export namespace DstMigrationService {
     actorUserId: string,
     offsetMinutes: number,
     description: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<DstMigrationReportReturnType> {
-    await ensurePermission(actorUserId, locale);
+    await ensurePermission(actorUserId, tErrors);
 
     return DstMigrationRepository.runTransaction(async tx => {
       const run = await DstMigrationRepository.createMigrationRun(actorUserId, offsetMinutes, description, tx);

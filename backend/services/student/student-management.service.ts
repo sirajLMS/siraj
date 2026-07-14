@@ -1,6 +1,6 @@
 import { StudentRepository } from "@/backend/db/repo";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export interface EditQuotaResult {
   readonly id: string;
@@ -24,45 +24,35 @@ export namespace StudentManagementService {
     studentId: string,
     newClassesRemaining: number,
     expectedVersion?: number,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<EditQuotaResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
       assertStudentFieldEdit(fieldCtx, "student_quota_edit");
     } catch {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
+      throw new Error(
+        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+      );
     }
 
     if (!Number.isInteger(newClassesRemaining) || newClassesRemaining < 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("quotaMustBeNonNegative"));
+      throw new Error(tErrors?.invalidInput ?? "Invalid input.");
     }
 
     // Fetch current student to validate newValue <= classesTotal
     const current = await StudentRepository.findById(studentId);
     if (!current) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("studentNotFound", { id: studentId }));
+      throw new Error(tErrors?.studentNotFound(studentId) ?? `Student not found: ${studentId}`);
     }
 
     if (newClassesRemaining > current.classesTotal) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(
-        tFunc("quotaExceedsTotal", {
-          requested: newClassesRemaining,
-          total: current.classesTotal,
-        })
+        tErrors?.quotaExceedsTotal({ requested: newClassesRemaining, total: current.classesTotal }) ??
+          `Quota ${newClassesRemaining} exceeds total ${current.classesTotal}`
       );
     }
 
-    const updated = await StudentRepository.setClassesRemaining(
-      studentId,
-      newClassesRemaining,
-      expectedVersion,
-      undefined,
-      locale
-    );
+    const updated = await StudentRepository.setClassesRemaining(studentId, newClassesRemaining, expectedVersion);
 
     return {
       id: updated.id,

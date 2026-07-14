@@ -6,12 +6,12 @@ import { adminAuditLogs, permissionGroups } from "@/backend/db/schema";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { generateAccessToken, generateGroupSimulationAccessToken } from "@/backend/lib/auth/jwt";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import type { RedisGroupSimulationSessionData } from "@/backend/types/auth/auth.types";
 import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
 
@@ -48,11 +48,10 @@ async function writeAdminAuditLog(
   });
 }
 
-async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, locale?: string): Promise<void> {
-  const t = await getBackendTranslations({ locale, namespace: "errors" });
+async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
   const session = await SessionRepository.findSessionById(rawSessionId);
   if (session?.userId !== actorUserId) {
-    throw new Error(t("auth.groupSimulationSessionInvalid"));
+    throw new Error(tErrors.auth.groupSimulationSessionInvalid);
   }
 }
 
@@ -130,33 +129,34 @@ export namespace PermissionGroupSimulationService {
       });
   }
 
-  export async function assertCanSimulateGroup(actorUserId: string, groupSlug: string, locale?: string): Promise<void> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
+  export async function assertCanSimulateGroup(
+    actorUserId: string,
+    groupSlug: string,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
     const actorContext = await PermissionsService.getUserContext(actorUserId);
     if (!actorContext.isSuperAdmin) {
-      throw new Error(t("auth.groupSimulationNotAllowed"));
+      throw new Error(tErrors.auth.groupSimulationNotAllowed);
     }
 
     const ownedSlugs = await getOwnedGroupSlugs(actorUserId);
     if (ownedSlugs.has(groupSlug)) {
-      throw new Error(t("auth.groupSimulationAlreadyHasGroup"));
+      throw new Error(tErrors.auth.groupSimulationAlreadyHasGroup);
     }
 
-    await PermissionsService.getPermissionGroupContext(groupSlug, locale);
+    await PermissionsService.getPermissionGroupContext(groupSlug);
   }
 
   export async function startSimulation(
     input: Types.StartPermissionGroupSimulationInput,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<Types.StartPermissionGroupSimulationReturnType> {
-    await assertCanSimulateGroup(input.actorUserId, input.groupSlug, locale);
-    await assertActorOwnsSession(input.sessionId, input.actorUserId, locale);
+    await assertCanSimulateGroup(input.actorUserId, input.groupSlug, tErrors);
+    await assertActorOwnsSession(input.sessionId, input.actorUserId, tErrors);
 
     const actorUser = await UserRepository.findById(input.actorUserId);
     if (!actorUser) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("auth.groupSimulationSessionInvalid"));
+      throw new Error(tErrors.auth.groupSimulationSessionInvalid);
     }
 
     await ImpersonationRepository.endActiveForActor(input.actorUserId);
@@ -201,25 +201,24 @@ export namespace PermissionGroupSimulationService {
   export async function endSimulation(
     actorUserId: string,
     rawSessionId: string,
-    locale?: string,
+    tErrors: ErrorsLabels,
     ipAddress?: string | null,
     activeGroupSlug?: string | null
   ): Promise<Types.EndPermissionGroupSimulationReturnType> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    await assertActorOwnsSession(rawSessionId, actorUserId, locale);
+    await assertActorOwnsSession(rawSessionId, actorUserId, tErrors);
 
     const active = await getActiveGroupSimulation(rawSessionId, actorUserId);
     const groupSlug = active?.data.groupSlug ?? activeGroupSlug ?? undefined;
 
     if (!groupSlug) {
-      throw new Error(t("auth.groupSimulationNotActive"));
+      throw new Error(tErrors.auth.groupSimulationNotActive);
     }
 
     await clearOptionalRedisGroupSimulation(rawSessionId);
 
     const actorUser = await UserRepository.findById(actorUserId);
     if (!actorUser) {
-      throw new Error(t("auth.groupSimulationSessionInvalid"));
+      throw new Error(tErrors.auth.groupSimulationSessionInvalid);
     }
 
     const token = await generateAccessToken(actorUser.id, actorUser.email);

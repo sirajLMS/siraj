@@ -3,13 +3,13 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { classMeetingConfigs } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type ClassScope = { readonly classInstanceId: string };
 type RecurringScope = { readonly recurringScheduleId: string };
@@ -47,12 +47,14 @@ export namespace ClassMeetingConfigRepository {
   export async function getByIdOrThrow(
     id: string,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
-    const row = await getById(id, tx, locale);
+    const row = await getById(id, tx);
     if (!row) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("meetingConfigNotFound", { id }));
+      const msg = tErrors?.meetingConfigNotFound
+        ? tErrors.meetingConfigNotFound(id)
+        : `Meeting config not found: ${id}`;
+      throw new Error(msg);
     }
     return row;
   }
@@ -104,7 +106,7 @@ export namespace ClassMeetingConfigRepository {
   export async function create(
     input: ClassMeetingConfigInsertType,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
       const scope = resolveScope(input);
@@ -130,8 +132,8 @@ export namespace ClassMeetingConfigRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("meetingConfigCreateFailed"));
+        const msg = tErrors?.meetingConfigCreateFailed ?? "Failed to create meeting configuration.";
+        throw new Error(msg);
       }
 
       logger.info("Class meeting config created", {
@@ -156,10 +158,10 @@ export namespace ClassMeetingConfigRepository {
       providerId?: string;
     },
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
-      const existing = await getByIdOrThrow(id, t, locale);
+      const existing = await getByIdOrThrow(id, t, tErrors);
       const scope = resolveScope(existing);
 
       if (input.isDefault === true) {
@@ -180,8 +182,8 @@ export namespace ClassMeetingConfigRepository {
         .returning();
 
       if (!result) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("meetingConfigUpdateFailed"));
+        const msg = tErrors?.meetingConfigUpdateFailed ?? "Failed to update meeting configuration.";
+        throw new Error(msg);
       }
 
       return result;
@@ -196,13 +198,13 @@ export namespace ClassMeetingConfigRepository {
   export async function setDefault(
     id: string,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType> {
     const run = async (t: DBTransaction): Promise<ClassMeetingConfigSelectType> => {
-      const existing = await getByIdOrThrow(id, t, locale);
+      const existing = await getByIdOrThrow(id, t, tErrors);
       const scope = resolveScope(existing);
       await clearDefault(scope, t);
-      return update(id, { isDefault: true }, t, locale);
+      return update(id, { isDefault: true }, t, tErrors);
     };
 
     if (tx) {
@@ -211,9 +213,9 @@ export namespace ClassMeetingConfigRepository {
     return db.transaction(run);
   }
 
-  export async function deleteConfig(id: string, tx?: DBTransaction, locale?: string): Promise<void> {
+  export async function deleteConfig(id: string, tx?: DBTransaction, tErrors?: ErrorsLabels): Promise<void> {
     const run = async (t: DBTransaction): Promise<void> => {
-      await getByIdOrThrow(id, t, locale);
+      await getByIdOrThrow(id, t, tErrors);
       await t.delete(classMeetingConfigs).where(eq(classMeetingConfigs.id, id));
     };
 
@@ -246,7 +248,7 @@ export namespace ClassMeetingConfigRepository {
   export async function upsertMany(
     inputs: readonly ClassMeetingConfigInsertType[],
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassMeetingConfigSelectType[]> {
     return upsertManyWith(
       inputs,
@@ -255,7 +257,7 @@ export namespace ClassMeetingConfigRepository {
         return findByScopeProviderLabel(scope, input.providerId, input.label, t);
       },
       create,
-      (id, input, t, loc) =>
+      (id, input, t) =>
         update(
           id,
           {
@@ -266,10 +268,10 @@ export namespace ClassMeetingConfigRepository {
             providerId: input.providerId,
           },
           t,
-          loc
+          tErrors
         ),
       tx,
-      locale
+      tErrors
     );
   }
 }

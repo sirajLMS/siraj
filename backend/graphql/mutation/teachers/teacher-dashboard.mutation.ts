@@ -24,6 +24,7 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
         const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
+      const tErrors = await ctx.t("errors");
       const created = await TeacherDashboardService.createManualEntry(
         ctx.user.id,
         {
@@ -34,9 +35,9 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
           durationMinutes: args.input.durationMinutes,
           classType: (args.input.classType as "REGULAR" | "TRIAL" | "PROMOTION" | undefined) ?? undefined,
         },
-        ctx.locale
+        tErrors
       );
-      return ClassSessionService.getClassInstanceDetail(ctx.user.id, created.id, ctx.locale);
+      return ClassSessionService.getClassInstanceDetail(ctx.user.id, created.id);
     },
   })
 );
@@ -53,10 +54,11 @@ gqlSchemaBuilder.mutationField("logTeacherSupportRequest", t =>
         const tErrors = await ctx.t("errors");
         throw new Error(tErrors.unauthorized);
       }
+      const tErrors = await ctx.t("errors");
       const result = await TeacherDashboardService.logSupportRequest(
         ctx.user.id,
         { reason: args.input.reason },
-        ctx.locale
+        tErrors
       );
       return { id: result.id, success: true };
     },

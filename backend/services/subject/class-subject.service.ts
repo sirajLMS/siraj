@@ -1,7 +1,6 @@
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { SubjectResourceRepository } from "@/backend/db/repo/classes/subject-resource.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   ClassSubjectReturnType,
@@ -10,65 +9,71 @@ import type {
   SubjectResourceAttachInput,
   SubjectResourceReturnType,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace ClassSubjectService {
-  async function assertPermission(userId: string, permission: AppPermission, locale?: string): Promise<void> {
+  async function assertPermission(userId: string, permission: AppPermission, tErrors?: ErrorsLabels): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(userId, permission);
     if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
+      throw new Error(
+        tErrors?.insufficientPermissions ?? "You do not have sufficient permissions to perform this action."
+      );
     }
   }
 
   export async function listSubjects(
     userId: string,
     categoryId?: string,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassSubjectReturnType[]> {
-    await assertPermission(userId, AppPermission.SUBJECTS_LIST, locale);
+    await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
     return await ClassSubjectRepository.listSubjects(categoryId);
   }
 
-  export async function getSubjectById(userId: string, id: string, locale?: string): Promise<ClassSubjectReturnType> {
-    await assertPermission(userId, AppPermission.SUBJECTS_LIST, locale);
+  export async function getSubjectById(
+    userId: string,
+    id: string,
+    tErrors?: ErrorsLabels
+  ): Promise<ClassSubjectReturnType> {
+    await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
-    return await ClassSubjectRepository.getSubjectById(id, locale);
+    return await ClassSubjectRepository.getSubjectById(id);
   }
 
   export async function createSubject(
     userId: string,
     input: ClassSubjectSubmitInput,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassSubjectReturnType> {
-    await assertPermission(userId, AppPermission.SUBJECTS_CREATE, locale);
+    await assertPermission(userId, AppPermission.SUBJECTS_CREATE, tErrors);
 
-    return await ClassSubjectRepository.createSubject(input, locale);
+    return await ClassSubjectRepository.createSubject(input);
   }
 
   export async function updateSubject(
     userId: string,
     id: string,
     input: ClassSubjectUpdateInput,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<ClassSubjectReturnType> {
-    await assertPermission(userId, AppPermission.SUBJECTS_UPDATE, locale);
+    await assertPermission(userId, AppPermission.SUBJECTS_UPDATE, tErrors);
 
-    return await ClassSubjectRepository.updateSubject(id, input, locale);
+    return await ClassSubjectRepository.updateSubject(id, input);
   }
 
-  export async function deleteSubject(userId: string, id: string, locale?: string): Promise<{ id: string }> {
-    await assertPermission(userId, AppPermission.SUBJECTS_DELETE, locale);
+  export async function deleteSubject(userId: string, id: string, tErrors?: ErrorsLabels): Promise<{ id: string }> {
+    await assertPermission(userId, AppPermission.SUBJECTS_DELETE, tErrors);
 
-    return await ClassSubjectRepository.deleteSubject(id, locale);
+    return await ClassSubjectRepository.deleteSubject(id);
   }
 
   export async function getSubjectResources(
     userId: string,
     subjectId: string,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<SubjectResourceReturnType[]> {
-    await assertPermission(userId, AppPermission.SUBJECTS_VIEW_RESOURCES, locale);
+    await assertPermission(userId, AppPermission.SUBJECTS_VIEW_RESOURCES, tErrors);
 
     return await SubjectResourceRepository.listResourcesForSubject(subjectId);
   }
@@ -76,21 +81,21 @@ export namespace ClassSubjectService {
   export async function attachResource(
     userId: string,
     input: SubjectResourceAttachInput,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<SubjectResourceReturnType> {
-    await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, locale);
+    await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, tErrors);
 
-    return await SubjectResourceRepository.attachResource(input, locale);
+    return await SubjectResourceRepository.attachResource(input);
   }
 
   export async function detachResource(
     userId: string,
     subjectId: string,
     learningResourceId: string,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<{ id: string }> {
-    await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, locale);
+    await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, tErrors);
 
-    return await SubjectResourceRepository.detachResource(subjectId, learningResourceId, locale);
+    return await SubjectResourceRepository.detachResource(subjectId, learningResourceId);
   }
 }

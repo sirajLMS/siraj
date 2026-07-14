@@ -1,16 +1,18 @@
 import { BillingRepository } from "@/backend/db/repo/billing/billing.repository";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace BillingAlertsService {
-  export async function getUnpaidInvoices(userId: string, locale?: string) {
+  export async function getUnpaidInvoices(
+    userId: string,
+    tErrors: ErrorsLabels
+  ): Promise<ReturnType<typeof BillingRepository.getUnpaidInvoicesSummary>> {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.BILLING_VIEW_UNPAID_INVOICES);
       if (!isAuthorized) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
 
       return await BillingRepository.getUnpaidInvoicesSummary();

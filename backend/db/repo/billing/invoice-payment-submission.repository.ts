@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, invoicePaymentSubmissions } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type * as Types from "@/backend/types";
 
 export namespace InvoicePaymentSubmissionRepository {
@@ -48,7 +48,7 @@ export namespace InvoicePaymentSubmissionRepository {
     reviewedByUserId: string,
     rejectionReason: string | null,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.InvoicePaymentSubmissionSelectType> {
     const queryDb = tx ?? db;
     const now = new Date();
@@ -65,8 +65,7 @@ export namespace InvoicePaymentSubmissionRepository {
       .returning();
 
     if (!row) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("recordNotFound", { tableName: "invoice_payment_submissions", entityId: submissionId }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "invoice_payment_submissions", entityId: submissionId }) ?? `Invoice payment submission not found: ${submissionId}`);
     }
 
     return row;
@@ -77,13 +76,13 @@ export namespace InvoicePaymentSubmissionRepository {
     reviewedByUserId: string,
     rejectionReason: string | null,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<Types.InvoicePaymentSubmissionSelectType | null> {
     const pending = await getPendingByInvoiceId(invoiceId, tx);
     if (!pending) {
       return null;
     }
-    return updateSubmissionStatus(pending.id, "rejected", reviewedByUserId, rejectionReason, tx, locale);
+    return updateSubmissionStatus(pending.id, "rejected", reviewedByUserId, rejectionReason, tx, tErrors);
   }
 
   export async function findByInvoiceIds(

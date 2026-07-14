@@ -6,7 +6,7 @@ import {
   StorageDbRepository,
 } from "@/backend/db/repo";
 import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { getBackendTranslations, NotFoundError } from "@/backend/lib";
+import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
 import type {
   PaymentProofSnapshot,
@@ -14,6 +14,7 @@ import type {
 } from "@/backend/types/billing/payment-method.types";
 import { INVOICE_FILE_USAGE } from "@/shared/constants/billing/invoice-file-usage";
 import { isAllowedPaymentProofMimeType } from "@/shared/constants/billing/payment-proof";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import { extToMime } from "@/shared/utils/storage.utils";
 
 function inferMimeFromPath(path: string): string | null {
@@ -27,18 +28,16 @@ function inferMimeFromPath(path: string): string | null {
 export async function validateProofFile(
   proofFileId: string,
   invoiceId: string,
-  tx: DBTransaction,
-  locale?: string
+  tx: DBTransaction
 ): Promise<{ filePath: string; mimeType: string }> {
-  const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
   const file = await StorageDbRepository.fileById(proofFileId);
   if (!file) {
-    throw new NotFoundError("FILE", tFunc("recordNotFound", { tableName: "storage_file", entityId: proofFileId }));
+    throw new NotFoundError("FILE", "Storage file not found");
   }
 
   const mimeType = inferMimeFromPath(file.path);
   if (!mimeType || !isAllowedPaymentProofMimeType(mimeType)) {
-    throw new Error(tFunc("invalidFileType"));
+    throw new Error("Invalid file type");
   }
 
   const existingInvoiceFiles = await StorageDbRepository.getFilesForInvoice(
@@ -50,7 +49,7 @@ export async function validateProofFile(
   if (!alreadyLinkedToInvoice) {
     const pending = await InvoicePaymentSubmissionRepository.getPendingByInvoiceId(invoiceId, tx);
     if (pending && pending.fileId !== proofFileId) {
-      throw new Error(tFunc("invoicePaymentProofPending"));
+      throw new Error("A payment proof is already pending review for this invoice.");
     }
   }
 
@@ -85,7 +84,6 @@ export async function recordProofPayment(
   invoice: Types.InvoiceSelectType,
   proof: PaymentProofSnapshot,
   tx: DBTransaction,
-  locale?: string
 ): Promise<Types.PaymentSelectType> {
   const snapshot = buildProofTransactionSnapshot(proof);
   return BillingRepository.recordPayment(
@@ -104,19 +102,17 @@ export async function recordProofPayment(
       idempotencyKey: `proof:${invoice.id}`,
     },
     tx,
-    locale
   );
 }
 
 export async function assertInvoiceBelongsToParentUser(
   actorUserId: string,
   invoice: Types.InvoiceSelectType,
-  locale?: string
+  tErrors: ErrorsLabels
 ): Promise<void> {
   const parent = await ParentRepository.findByUserId(actorUserId);
-  const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
   if (!parent || parent.id !== invoice.parentId) {
-    throw new Error(tFunc("insufficientPermissions"));
+    throw new Error(tErrors.insufficientPermissions);
   }
 }
 

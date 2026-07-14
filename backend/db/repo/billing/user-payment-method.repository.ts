@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { userPaymentMethods } from "@/backend/db/schema";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type {
   UserPaymentMethodInsertType,
   UserPaymentMethodSelectType,
@@ -75,7 +75,7 @@ export namespace UserPaymentMethodRepository {
     id: string,
     input: Partial<UserPaymentMethodInsertType>,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<UserPaymentMethodSelectType> {
     const client = tx ?? db;
     const [updated] = await client
@@ -85,14 +85,13 @@ export namespace UserPaymentMethodRepository {
       .returning();
 
     if (!updated) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("recordNotFound", { tableName: "user_payment_methods", entityId: id }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }) ?? `User payment method not found: ${id}`);
     }
 
     return toSelectType(updated);
   }
 
-  export async function deleteById(id: string, tx?: DBTransaction, locale?: string): Promise<void> {
+  export async function deleteById(id: string, tx?: DBTransaction, tErrors?: ErrorsLabels): Promise<void> {
     const client = tx ?? db;
     const [deleted] = await client
       .delete(userPaymentMethods)
@@ -100,8 +99,7 @@ export namespace UserPaymentMethodRepository {
       .returning({ id: userPaymentMethods.id });
 
     if (!deleted) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("recordNotFound", { tableName: "user_payment_methods", entityId: id }));
+      throw new Error(tErrors?.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }) ?? `User payment method not found: ${id}`);
     }
   }
 
@@ -123,7 +121,7 @@ export namespace UserPaymentMethodRepository {
     id: string,
     verifiedByUserId: string,
     tx?: DBTransaction,
-    locale?: string
+    tErrors?: ErrorsLabels
   ): Promise<UserPaymentMethodSelectType> {
     return update(
       id,
@@ -132,7 +130,7 @@ export namespace UserPaymentMethodRepository {
         verifiedByUserId,
       },
       tx,
-      locale
+      tErrors
     );
   }
 

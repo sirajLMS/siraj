@@ -12,7 +12,6 @@ import {
   parseClassTypeOrNull,
   parseIanaTimezone,
 } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
@@ -26,7 +25,7 @@ import type {
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
 import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
-import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace ScheduleService {
   async function resolveViewerTimezone(userId: string): Promise<IanaTimezone> {
@@ -39,9 +38,8 @@ export namespace ScheduleService {
     return parseIanaTimezone(defaultTimezone);
   }
 
-  async function mapDailyScheduleListItem(item: DailyScheduleResult, locale?: string) {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    const unknownName = t("unknownName");
+  async function mapDailyScheduleListItem(item: DailyScheduleResult, tErrors: ErrorsLabels) {
+    const unknownName = tErrors.unknownName;
     const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(item.id);
     return {
       id: item.id,
@@ -77,21 +75,19 @@ export namespace ScheduleService {
   async function assertDailyScheduleListAccess(
     userId: string,
     options: { search?: string; metricFilter?: string },
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
     if (!isAuthorized) {
       logger.warn("Unauthorized access to daily schedule", { userId });
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedViewList"));
+      throw new Error(tErrors.unauthorizedViewList);
     }
 
     if (options.search) {
       const canSearch = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_SEARCH);
       if (!canSearch) {
         logger.warn("Unauthorized search access to daily schedule", { userId });
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedSearch"));
+        throw new Error(tErrors.unauthorizedSearch);
       }
     }
 
@@ -102,8 +98,7 @@ export namespace ScheduleService {
           userId,
           metricFilter: options.metricFilter,
         });
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
     }
   }
@@ -117,14 +112,13 @@ export namespace ScheduleService {
       metricFilter?: string | null;
       paginationArgs?: PaginationArgs | null;
     },
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
         logger.warn("Unauthorized access to daily metrics", { userId });
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedViewMetrics"));
+        throw new Error(tErrors.unauthorizedViewMetrics);
       }
 
       await assertDailyScheduleListAccess(
@@ -133,7 +127,7 @@ export namespace ScheduleService {
           search: input.search || undefined,
           metricFilter: input.metricFilter || undefined,
         },
-        locale
+        tErrors
       );
 
       const viewerTimezone = await resolveViewerTimezone(userId);
@@ -149,10 +143,9 @@ export namespace ScheduleService {
         viewerTimezone,
         metricFilter,
         pagination: input.paginationArgs ?? null,
-        locale,
       });
 
-      const mappedRows = await Promise.all(rows.map(row => mapDailyScheduleListItem(row, locale)));
+      const mappedRows = await Promise.all(rows.map(row => mapDailyScheduleListItem(row, tErrors)));
 
       return {
         id: `admin-dashboard-${input.date}-${teacherId || "all"}-${search || ""}`,
@@ -170,13 +163,12 @@ export namespace ScheduleService {
     }
   }
 
-  export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string, locale?: string) {
+  export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string, tErrors?: ErrorsLabels) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
         logger.warn("Unauthorized access to daily metrics", { userId });
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedViewMetrics"));
+        throw new Error(tErrors?.unauthorizedViewMetrics ?? "Unauthorized to view metrics");
       }
 
       const viewerTimezone = await resolveViewerTimezone(userId);
@@ -195,13 +187,13 @@ export namespace ScheduleService {
   export async function getDailySchedule(
     userId: string,
     targetDate: Date,
+    tErrors: ErrorsLabels,
     teacherId?: string,
     search?: string,
     metricFilter?: string,
-    locale?: string
   ) {
     try {
-      await assertDailyScheduleListAccess(userId, { search, metricFilter }, locale);
+      await assertDailyScheduleListAccess(userId, { search, metricFilter }, tErrors);
 
       const viewerTimezone = await resolveViewerTimezone(userId);
 
@@ -212,7 +204,7 @@ export namespace ScheduleService {
         metricFilter,
       });
 
-      return await Promise.all(list.map(item => mapDailyScheduleListItem(item, locale)));
+      return await Promise.all(list.map(item => mapDailyScheduleListItem(item, tErrors)));
     } catch (error) {
       logger.error("Error fetching daily schedule", { userId, error });
       throw error;
@@ -223,22 +215,20 @@ export namespace ScheduleService {
     userId: string,
     input: RescheduleTrackingInput,
     pagination: PaginationArgs | null = null,
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     return SchedulingRepository.getRescheduleTrackingRows(input, pagination);
   }
 
-  export async function getRescheduleTrackingMetrics(userId: string, locale?: string) {
+  export async function getRescheduleTrackingMetrics(userId: string, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
     if (!isAuthorized) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+      throw new Error(tErrors.unauthorizedAction);
     }
 
     const metrics = await SchedulingRepository.getRescheduleTrackingMetrics();
@@ -251,7 +241,7 @@ export namespace ScheduleService {
   async function resolveTeacherId(
     userId: string,
     requestedTeacherId: string | null | undefined,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<string> {
     const isAdmin = await PermissionsService.hasAnyPermission(userId, [
       AppPermission.STAFF_VIEW_DIRECTORY,
@@ -267,8 +257,7 @@ export namespace ScheduleService {
       return actorTeacher.id;
     }
 
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("unauthorizedAction"));
+    throw new Error(tErrors.unauthorizedAction);
   }
 
   async function resolveSupportContact(): Promise<SupportContactReturnType | null> {
@@ -293,7 +282,7 @@ export namespace ScheduleService {
     now: Date,
     usedLeaves: number,
     maxLeaves: number,
-    locale?: string
+    _tErrors: ErrorsLabels
   ) {
     const classStart = new Date(cls.scheduledStartAt);
     const isPast = classStart < now;
@@ -311,7 +300,7 @@ export namespace ScheduleService {
     }
 
     const formatTime = (date: Date): string =>
-      date.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
+      date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
@@ -345,10 +334,10 @@ export namespace ScheduleService {
 
   export async function getTeacherFutureSchedule(
     userId: string,
+    tErrors: ErrorsLabels,
     teacherId?: string,
-    locale?: string
   ): Promise<TeacherFutureScheduleReturnType> {
-    const resolvedTeacherId = await resolveTeacherId(userId, teacherId ?? null, locale);
+    const resolvedTeacherId = await resolveTeacherId(userId, teacherId ?? null, tErrors);
 
     const now = new Date();
     const fromDate = new Date(now);
@@ -365,11 +354,11 @@ export namespace ScheduleService {
     const futureClasses = await SchedulingRepository.getTeacherFutureClasses(resolvedTeacherId, fromDate, toDate);
 
     const classes = await Promise.all(
-      futureClasses.map(cls => mapFutureClassItem(cls, now, usedLeaves, maxLeaves, locale))
+      futureClasses.map(cls => mapFutureClassItem(cls, now, usedLeaves, maxLeaves, tErrors))
     );
 
     const [importantNotes, supportContact] = await Promise.all([
-      TeacherNotesService.getActiveNotes(userId, resolvedTeacherId, locale).catch(
+      TeacherNotesService.getActiveNotes(userId, resolvedTeacherId, tErrors).catch(
         (): TeacherImportantNoteReturnType[] => []
       ),
       resolveSupportContact(),

@@ -6,11 +6,11 @@ import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository
 import { AppPermission } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace WeeklyScheduleService {
   function getWeekBoundaries(date: Date): { weekStart: Date; weekEnd: Date } {
@@ -26,7 +26,11 @@ export namespace WeeklyScheduleService {
     return { weekStart, weekEnd };
   }
 
-  async function resolveTeacherId(userId: string, requestedTeacherId: string | null, locale?: string): Promise<string> {
+  async function resolveTeacherId(
+    userId: string,
+    requestedTeacherId: string | null,
+    tErrors: ErrorsLabels
+  ): Promise<string> {
     const isAdmin = await PermissionsService.hasAnyPermission(userId, [
       AppPermission.STAFF_VIEW_DIRECTORY,
       AppPermission.SCHEDULE_VIEW_ALL,
@@ -41,19 +45,22 @@ export namespace WeeklyScheduleService {
       return actorTeacher.id;
     }
 
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(t("unauthorizedAction"));
+    throw new Error(tErrors.unauthorizedAction);
   }
 
-  export async function getWeeklySchedule(userId: string, teacherId: string | null, weekDate: string, locale?: string) {
+  export async function getWeeklySchedule(
+    userId: string,
+    teacherId: string | null,
+    weekDate: string,
+    tErrors: ErrorsLabels
+  ) {
     try {
       const hasWeeklyAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_WEEKLY);
       if (!hasWeeklyAccess) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedAction"));
+        throw new Error(tErrors.unauthorizedAction);
       }
 
-      const resolvedTeacherId = await resolveTeacherId(userId, teacherId, locale);
+      const resolvedTeacherId = await resolveTeacherId(userId, teacherId, tErrors);
       const targetDate = new Date(weekDate);
       const { weekStart, weekEnd } = getWeekBoundaries(targetDate);
 
@@ -67,7 +74,7 @@ export namespace WeeklyScheduleService {
             studentName: row.studentName,
             studentId: row.studentId,
             duration: row.durationMinutes,
-            startTime: row.scheduledStartAt.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
+            startTime: row.scheduledStartAt.toLocaleTimeString(getLatnLocaleTag("en"), {
               hour: "2-digit",
               minute: "2-digit",
               hour12: true,
@@ -103,16 +110,15 @@ export namespace WeeklyScheduleService {
     userId: string,
     teacherId: string | null,
     weekDate: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     try {
       const hasWorkloadAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_WORKLOAD);
       if (!hasWorkloadAccess) {
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedViewMetrics"));
+        throw new Error(tErrors.unauthorizedViewMetrics);
       }
 
-      const resolvedTeacherId = await resolveTeacherId(userId, teacherId, locale);
+      const resolvedTeacherId = await resolveTeacherId(userId, teacherId, tErrors);
       const targetDate = new Date(weekDate);
       const { weekStart, weekEnd } = getWeekBoundaries(targetDate);
 

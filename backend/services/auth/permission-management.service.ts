@@ -4,7 +4,6 @@ import { PermissionManagementRepository } from "@/backend/db/repo";
 import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
-import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   GroupWithPermissionIds,
@@ -14,57 +13,52 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-import { DEFAULT_CONTENT_LOCALE } from "@/backend/types/shared/localized-string.types";
-import type { ErrorsLabels } from "@/shared/messages/types/errors";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 export namespace PermissionManagementService {
   // ─── Private Guards ───────────────────────────────────────────────────────
 
-  async function requireManageAccess(actorUserId: string, locale?: string): Promise<void> {
+  async function requireManageAccess(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
     const context = await PermissionsService.getUserContext(actorUserId);
     if (!context.isSuperAdmin && !context.permissions.includes(AppPermission.PERMISSION_GROUPS_MANAGE)) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorized"));
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 
-  async function requireAssignAccess(actorUserId: string, locale?: string): Promise<void> {
+  async function requireAssignAccess(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
     const context = await PermissionsService.getUserContext(actorUserId);
     if (!context.isSuperAdmin && !context.permissions.includes(AppPermission.PERMISSION_GROUPS_ASSIGN)) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorized"));
+      throw new Error(tErrors.insufficientPermissions);
     }
   }
 
   // ─── Private Helpers ──────────────────────────────────────────────────────
 
-  async function requireUserExists(userId: string, t: TranslationFn<ErrorsLabels>) {
+  async function requireUserExists(userId: string, tErrors: ErrorsLabels) {
     const [user] = await db.select({ id: users.id }).from(users).where(eq(users.id, userId)).limit(1);
-    if (!user) throw new Error(t("userNotFound", { id: userId }));
+    if (!user) throw new Error(tErrors.permissionManagement.userNotFound(userId));
     return user;
   }
 
-  async function requireUserExistsFull(userId: string, t: TranslationFn<ErrorsLabels>) {
+  async function requireUserExistsFull(userId: string, tErrors: ErrorsLabels) {
     const [user] = await db
       .select({ id: users.id, isSuperAdmin: users.isSuperAdmin })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
-    if (!user) throw new Error(t("userNotFound", { id: userId }));
+    if (!user) throw new Error(tErrors.permissionManagement.userNotFound(userId));
     return user;
   }
 
-  async function requireGroupExists(groupId: string, t: TranslationFn<ErrorsLabels>, locale?: string) {
-    const group = await PermissionManagementRepository.getGroupById(groupId, locale);
-    if (!group) throw new Error(t("permissionGroupNotFound", { id: groupId }));
+  async function requireGroupExists(groupId: string, tErrors: ErrorsLabels, ) {
+    const group = await PermissionManagementRepository.getGroupById(groupId, );
+    if (!group) throw new Error(tErrors.permissionManagement.permissionGroupNotFound(groupId));
     return group;
   }
 
-  async function requireBulkGroupSetup(actorUserId: string, groupId: string, locale?: string) {
-    await requireAssignAccess(actorUserId, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    await requireGroupExists(groupId, t, locale);
-    return t;
+  async function requireBulkGroupSetup(actorUserId: string, groupId: string, tErrors: ErrorsLabels,) {
+    await requireAssignAccess(actorUserId, tErrors);
+    await requireGroupExists(groupId, tErrors, );
   }
 
   async function requireUserSetup(
@@ -72,40 +66,38 @@ export namespace PermissionManagementService {
     userId: string,
     accessType: "assign" | "manage",
     checkType: "exists" | "existsFull" | "nonSuperAdmin",
-    locale?: string
+    tErrors: ErrorsLabels
   ) {
     if (accessType === "assign") {
-      await requireAssignAccess(actorUserId, locale);
+      await requireAssignAccess(actorUserId, tErrors);
     } else {
-      await requireManageAccess(actorUserId, locale);
+      await requireManageAccess(actorUserId, tErrors);
     }
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
     if (checkType === "exists") {
-      await requireUserExists(userId, t);
+      await requireUserExists(userId, tErrors);
     } else if (checkType === "existsFull") {
-      await requireUserExistsFull(userId, t);
+      await requireUserExistsFull(userId, tErrors);
     } else if (checkType === "nonSuperAdmin") {
-      await requireNonSuperAdmin(userId, t);
+      await requireNonSuperAdmin(userId, tErrors);
     }
-    return t;
   }
 
-  async function validateGroupName(name: LocalizedString, t: TranslationFn<ErrorsLabels>) {
+  async function validateGroupName(name: LocalizedString, tErrors: ErrorsLabels) {
     const resolvedName = resolveLocalized(name, DEFAULT_CONTENT_LOCALE);
     const trimmedName = resolvedName.trim();
-    if (!trimmedName) throw new Error(t("permissionGroupNameRequired"));
-    if (trimmedName.length > 255) throw new Error(t("permissionGroupNameTooLong"));
+    if (!trimmedName) throw new Error(tErrors.permissionManagement.permissionGroupNameRequired);
+    if (trimmedName.length > 255) throw new Error(tErrors.permissionManagement.permissionGroupNameTooLong);
 
     const slug = generateSlug(trimmedName);
-    if (!slug) throw new Error(t("permissionGroupInvalidName"));
+    if (!slug) throw new Error(tErrors.permissionManagement.permissionGroupInvalidName);
 
     return { trimmedName, slug };
   }
 
-  async function requireNonSuperAdmin(userId: string, t: TranslationFn<ErrorsLabels>) {
-    const user = await requireUserExistsFull(userId, t);
+  async function requireNonSuperAdmin(userId: string, tErrors: ErrorsLabels) {
+    const user = await requireUserExistsFull(userId, tErrors);
     if (user.isSuperAdmin) {
-      throw new Error(t("cannotModifySuperAdmin"));
+      throw new Error(tErrors.permissionManagement.cannotModifySuperAdmin);
     }
     return user;
   }
@@ -158,24 +150,29 @@ export namespace PermissionManagementService {
    * Creating new system permissions or converting existing custom permissions to system permissions is strictly
    * prohibited by the database schema. All system permissions are seeded and immutable.
    */
-  export async function listPermissions(actorUserId: string, locale?: string): Promise<PermissionEntity[]> {
-    await requireManageAccess(actorUserId, locale);
-    return PermissionManagementRepository.listAllPermissions(locale);
+  export async function listPermissions(
+    actorUserId: string,
+    tErrors: ErrorsLabels,
+  ): Promise<PermissionEntity[]> {
+    await requireManageAccess(actorUserId, tErrors);
+    return PermissionManagementRepository.listAllPermissions();
   }
 
-  export async function listGroups(actorUserId: string, locale?: string): Promise<GroupWithPermissionIds[]> {
-    await requireManageAccess(actorUserId, locale);
-    return PermissionManagementRepository.listAllGroups(locale);
+  export async function listGroups(
+    actorUserId: string,
+    tErrors: ErrorsLabels,
+  ): Promise<GroupWithPermissionIds[]> {
+    await requireManageAccess(actorUserId, tErrors);
+    return PermissionManagementRepository.listAllGroups();
   }
 
   export async function getGroup(
     actorUserId: string,
     groupId: string,
-    locale?: string
+    tErrors: ErrorsLabels,
   ): Promise<GroupWithPermissionIds> {
-    await requireManageAccess(actorUserId, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    return requireGroupExists(groupId, t, locale);
+    await requireManageAccess(actorUserId, tErrors);
+    return requireGroupExists(groupId, tErrors, );
   }
 
   // ─── Write Operations ─────────────────────────────────────────────────────
@@ -183,12 +180,11 @@ export namespace PermissionManagementService {
   export async function createGroup(
     actorUserId: string,
     input: { name: LocalizedString; description?: LocalizedString | null; permissionIds: string[] },
-    locale?: string
+    tErrors: ErrorsLabels,
   ): Promise<GroupWithPermissionIds> {
-    await requireManageAccess(actorUserId, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    await requireManageAccess(actorUserId, tErrors);
 
-    const { slug: baseSlug } = await validateGroupName(input.name, t);
+    const { slug: baseSlug } = await validateGroupName(input.name, tErrors);
 
     let slug = baseSlug;
     let counter = 1;
@@ -211,7 +207,6 @@ export namespace PermissionManagementService {
         permissionIds: input.permissionIds,
         createdByUserId: actorUserId,
       },
-      locale
     );
   }
 
@@ -223,15 +218,14 @@ export namespace PermissionManagementService {
       description?: LocalizedString | null;
       permissionIds?: string[];
     },
-    locale?: string
+    tErrors: ErrorsLabels,
   ): Promise<GroupWithPermissionIds> {
-    await requireManageAccess(actorUserId, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    await requireManageAccess(actorUserId, tErrors);
 
     let slug: string | undefined;
 
     if (input.name !== undefined) {
-      const validated = await validateGroupName(input.name, t);
+      const validated = await validateGroupName(input.name, tErrors);
       slug = validated.slug;
     }
 
@@ -243,35 +237,42 @@ export namespace PermissionManagementService {
         description: trimLocalizedString(input.description),
         permissionIds: input.permissionIds,
       },
-      locale
     );
   }
 
-  export async function deleteGroup(actorUserId: string, groupId: string, locale?: string): Promise<void> {
-    await requireManageAccess(actorUserId, locale);
-    await PermissionManagementRepository.deleteGroup(groupId, locale);
+  export async function deleteGroup(
+    actorUserId: string,
+    groupId: string,
+    tErrors: ErrorsLabels,
+  ): Promise<void> {
+    await requireManageAccess(actorUserId, tErrors);
+    await PermissionManagementRepository.deleteGroup(groupId);
   }
 
   export async function assignGroupToUser(
     actorUserId: string,
     input: { userId: string; groupId: string },
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
-    await requireUserSetup(actorUserId, input.userId, "assign", "existsFull", locale);
+    await requireUserSetup(actorUserId, input.userId, "assign", "existsFull", tErrors);
     await PermissionManagementRepository.bulkAssignUsersToGroup([input.userId], input.groupId, actorUserId);
   }
 
   export async function revokeGroupFromUser(
     actorUserId: string,
     input: { userId: string; groupId: string },
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
-    await requireUserSetup(actorUserId, input.userId, "assign", "nonSuperAdmin", locale);
+    await requireUserSetup(actorUserId, input.userId, "assign", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.bulkRevokeUsersFromGroup([input.userId], input.groupId);
   }
 
-  export async function listGroupsForUser(actorUserId: string, userId: string, locale?: string): Promise<string[]> {
-    await requireAssignAccess(actorUserId, locale);
+  export async function listGroupsForUser(
+    actorUserId: string,
+    userId: string,
+    tErrors: ErrorsLabels
+  ): Promise<string[]> {
+    await requireAssignAccess(actorUserId, tErrors);
     const rows = await db
       .select({ groupId: userPermissionGroups.groupId })
       .from(userPermissionGroups)
@@ -282,14 +283,14 @@ export namespace PermissionManagementService {
   export async function bulkAssignUsersToGroup(
     actorUserId: string,
     input: { userIds: string[]; groupId: string },
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
     // Using the new helper
-    const t = await requireBulkGroupSetup(actorUserId, input.groupId, locale);
+    await requireBulkGroupSetup(actorUserId, input.groupId, tErrors);
     if (input.userIds.length === 0) return;
 
     const foundUsers = await db.select({ id: users.id }).from(users).where(inArray(users.id, input.userIds));
-    if (foundUsers.length !== input.userIds.length) throw new Error(t("userNotFound"));
+    if (foundUsers.length !== input.userIds.length) throw new Error(tErrors.permissionManagement.userNotFound(""));
 
     await PermissionManagementRepository.bulkAssignUsersToGroup(input.userIds, input.groupId, actorUserId);
   }
@@ -297,9 +298,9 @@ export namespace PermissionManagementService {
   export async function bulkRevokeUsersFromGroup(
     actorUserId: string,
     input: { userIds: string[]; groupId: string },
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
-    await requireBulkGroupSetup(actorUserId, input.groupId, locale);
+    await requireBulkGroupSetup(actorUserId, input.groupId, tErrors);
     if (input.userIds.length === 0) return;
 
     const targetUsers = await db
@@ -316,32 +317,31 @@ export namespace PermissionManagementService {
   export async function listUserOverrides(
     actorUserId: string,
     userId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<UserOverrideEntity[]> {
-    await requireUserSetup(actorUserId, userId, "manage", "exists", locale);
+    await requireUserSetup(actorUserId, userId, "manage", "exists", tErrors);
     return PermissionManagementRepository.getUserOverrides(userId);
   }
 
   export async function updateUserOverrides(
     actorUserId: string,
     input: { userId: string; overrides: UserOverrideInput[] },
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<void> {
-    await requireUserSetup(actorUserId, input.userId, "manage", "nonSuperAdmin", locale);
+    await requireUserSetup(actorUserId, input.userId, "manage", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.setUserOverrides(input.userId, input.overrides, actorUserId);
   }
 
   export async function getEffectiveUserPermissions(
     actorUserId: string,
     userId: string,
-    locale?: string
+    tErrors: ErrorsLabels
   ): Promise<AppPermission[]> {
-    await requireManageAccess(actorUserId, locale);
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-    const user = await requireUserExistsFull(userId, t);
+    await requireManageAccess(actorUserId, tErrors);
+    const user = await requireUserExistsFull(userId, tErrors);
 
     if (user.isSuperAdmin) {
-      const allPerms = await PermissionManagementRepository.listAllPermissions(locale);
+      const allPerms = await PermissionManagementRepository.listAllPermissions();
       return allPerms.map(p => p.key);
     }
 
@@ -353,7 +353,7 @@ export namespace PermissionManagementService {
     const overrides = await PermissionManagementRepository.getUserOverrides(userId);
     if (overrides.length === 0) return [...effectiveSet];
 
-    const allPerms = await PermissionManagementRepository.listAllPermissions(locale);
+    const allPerms = await PermissionManagementRepository.listAllPermissions();
     const permMap = new Map(allPerms.map(p => [p.id, p.key]));
 
     for (const override of overrides) {
