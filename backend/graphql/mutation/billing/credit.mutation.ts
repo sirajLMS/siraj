@@ -2,7 +2,6 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CreditPurchaseResultPothosObject } from "@/backend/graphql/pothos/billing/credit.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { getBackendTranslations } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import { CreditService } from "@/backend/services/billing/credit.service";
 
@@ -20,8 +19,8 @@ gqlSchemaBuilder.mutationField("recordCreditPurchase", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.CREDITS_MANAGE);
       if (!hasPermission) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.insufficientPermissions);
       }
 
       return CreditService.recordPurchase(

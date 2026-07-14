@@ -4,7 +4,6 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaymentPothosObject } from "@/backend/graphql/pothos/billing/billing-payments.pothos";
 import { setBillingFxDisplayCurrencyForInvoiceParent } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { getBackendTranslations } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("invoicePayments", t =>
@@ -20,8 +19,8 @@ gqlSchemaBuilder.queryField("invoicePayments", t =>
         (await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY)) ||
         (await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID));
       if (!canView) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.insufficientPermissions);
       }
 
       await setBillingFxDisplayCurrencyForInvoiceParent(ctx, args.invoiceId, actorUserId);

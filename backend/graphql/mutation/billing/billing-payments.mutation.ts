@@ -6,7 +6,6 @@ import {
 } from "@/backend/graphql/pothos/billing/billing-payments.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { getBackendTranslations } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 
@@ -28,8 +27,8 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
         AppPermission.BILLING_UPDATE_STATUS_PAID
       );
       if (!hasPermission) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.insufficientPermissions);
       }
 
       const payment = await PaymentMethodService.recordPayin(

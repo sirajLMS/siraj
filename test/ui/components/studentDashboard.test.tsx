@@ -62,8 +62,8 @@ mock.module("@/frontend/common/views/dashboard/student/dashboard/studentDashboar
               <span data-testid={`report-${report.id}-date`}>{report.lessonDate}</span>
               <span data-testid={`report-${report.id}-duration`}>{report.durationMinutes} min</span>
               <span data-testid={`report-${report.id}-completion`}>{report.completionPercentage}%</span>
-              <span data-testid={`report-${report.id}-attendance`}>{report.attendanceEvaluation}</span>
-              <span data-testid={`report-${report.id}-status`}>{report.status}</span>
+              <span data-testid={`report-${report.id}-attendance`}>{report.attendanceEvaluation ?? ""}</span>
+              <span data-testid={`report-${report.id}-status`}>{report.status ?? ""}</span>
               <span data-testid={`report-${report.id}-reflection`}>{props.labels.addReflection}</span>
             </div>
           ))}
@@ -232,7 +232,7 @@ function createMocks(): MockLink.MockedResponse[] {
     {
       request: {
         query: studentCreditBalanceQueryDocument,
-        variables: { studentId },
+        variables: { studentId: "student-1" },
       },
       result: { data: creditBalanceMockData },
     },
@@ -240,7 +240,7 @@ function createMocks(): MockLink.MockedResponse[] {
       request: {
         query: pendingLessonReportsQueryDocument,
         variables: {
-          studentId,
+          studentId: "student-1",
           teacherId: null,
           paginationArgs: {
             first: 5,
@@ -279,6 +279,10 @@ describe("StudentDashboardContainer", () => {
       expect(screen.getByTestId("next-class")).toBeInTheDocument();
     });
 
+    await waitFor(() => {
+      expect(screen.getByTestId("classes-remaining")).toHaveTextContent("Classes Remaining: 8");
+    });
+
     expect(screen.getByTestId("next-class-label")).toHaveTextContent("Next Class");
     expect(screen.getByTestId("next-class-instructor")).toHaveTextContent(instructorName);
     expect(screen.getByTestId("next-class-duration")).toHaveTextContent("60 min");
@@ -287,16 +291,20 @@ describe("StudentDashboardContainer", () => {
     expect(screen.getByTestId("classes-remaining")).toHaveTextContent("Classes Remaining: 8");
     expect(screen.getByTestId("classes-total")).toHaveTextContent("Total Classes: 20");
 
-    expect(screen.getByTestId("report-1")).toBeInTheDocument();
-    expect(screen.getByTestId("report-1-date")).toHaveTextContent("2026-07-10");
-    expect(screen.getByTestId("report-1-duration")).toHaveTextContent("45 min");
-    expect(screen.getByTestId("report-1-completion")).toHaveTextContent("80%");
-    expect(screen.getByTestId("report-1-attendance")).toHaveTextContent("PRESENT");
-    expect(screen.getByTestId("report-1-status")).toHaveTextContent("APPROVED");
+    // Wait for lesson reports to load
+    await waitFor(() => {
+      expect(screen.getByTestId("report-report-1")).toBeInTheDocument();
+    });
 
-    expect(screen.getByTestId("report-2")).toBeInTheDocument();
-    expect(screen.getByTestId("report-2-date")).toHaveTextContent("2026-07-12");
-    expect(screen.getByTestId("report-2-completion")).toHaveTextContent("50%");
-    expect(screen.getByTestId("report-2-status")).toHaveTextContent("PENDING_REVIEW");
+    expect(screen.getByTestId("report-report-1-date")).toHaveTextContent("2026-07-10");
+    expect(screen.getByTestId("report-report-1-duration")).toHaveTextContent("45 min");
+    expect(screen.getByTestId("report-report-1-completion")).toHaveTextContent("80%");
+    expect(screen.getByTestId("report-report-1-attendance")).toHaveTextContent("PRESENT");
+    expect(screen.getByTestId("report-report-1-status")).toHaveTextContent("APPROVED");
+
+    expect(screen.getByTestId("report-report-2")).toBeInTheDocument();
+    expect(screen.getByTestId("report-report-2-date")).toHaveTextContent("2026-07-12");
+    expect(screen.getByTestId("report-report-2-completion")).toHaveTextContent("50%");
+    expect(screen.getByTestId("report-report-2-status")).toHaveTextContent("PENDING_REVIEW");
   });
 });

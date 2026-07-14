@@ -31,6 +31,8 @@ export const errors: ErrorsLabels = {
     groupSimulationNotAllowedDuringSession: "This action is not allowed while simulating a permission group",
     groupSimulationNotAllowedWhileImpersonating: "End impersonation before simulating a permission group",
     groupSimulationAlreadyHasGroup: "You already have this permission group; choose a different group to simulate",
+    insufficientPermissions: "You do not have sufficient permissions to perform this action.",
+    impersonationNotAllowedWhileImpersonating: "You cannot impersonate while already impersonating another user.",
     // ─── Functions (were {param} strings) ────────────────────────────
     demoGroupNotFound: groupSlug => `Demo group not found: ${groupSlug}`,
     demoGroupNoUser: groupSlug => `No user found for demo group: ${groupSlug}`,
@@ -38,4 +40,9 @@ export const errors: ErrorsLabels = {
   rateLimitExceeded: "Too many requests. Please try again later.",
   duplicateRequest: "Duplicate request detected. This operation has already been processed.",
   internalServerError: "An unexpected error occurred. Please try again later.",
+  insufficientPermissions: "You do not have sufficient permissions to perform this action.",
+  unauthorized: "You must be logged in first.",
+  studentNotFound: id => `Student not found: ${id}`,
+  categoryNotFound: id => `Category not found: ${id}`,
+  unknownName: "Unknown",
 };

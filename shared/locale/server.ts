@@ -17,8 +17,14 @@ import type { MessageSchema } from "@/shared/locale/types/message";
  */
 const namespacePaths: Record<keyof MessageSchema, string> = {
   auth: "auth/index",
+  common: "common/index",
   errors: "errors/index",
   "dashboard.admin": "dashboard/admin/index",
+  "dashboard.core.layout": "dashboard/core/layout",
+  "dashboard.core.notifications": "dashboard/core/notifications",
+  profile: "profile",
+  session: "session/index",
+  ui: "ui/index",
 };
 
 /**
@@ -44,6 +50,22 @@ export async function getLocale(): Promise<AppLocale> {
 }
 
 /**
+ * Internal helper: loads a translation namespace from disk.
+ * Shared by getTranslations (SSR/API) and getServerTranslations (GraphQL/scripts).
+ */
+async function loadTranslation<K extends keyof MessageSchema>(
+  safeLocale: AppLocale,
+  namespace: K
+): Promise<MessageSchema[K]> {
+  const filePath = namespacePaths[namespace];
+  const mod = await import(`@/shared/locale/${safeLocale}/${filePath}`);
+
+  const segments = filePath.split("/");
+  const exportName = segments.length >= 2 ? segments[segments.length - 2] : segments[0];
+  return mod[exportName] as MessageSchema[K];
+}
+
+/**
  * Lazily loads a single translation namespace for a given locale.
  *
  * Usage in Server Components:
@@ -59,14 +81,7 @@ export async function getTranslations<K extends keyof MessageSchema>(
   namespace: K
 ): Promise<MessageSchema[K]> {
   const safeLocale: AppLocale = (locales as readonly string[]).includes(locale) ? (locale as AppLocale) : defaultLocale;
-
-  const filePath = namespacePaths[namespace];
-  const mod = await import(`@/shared/locale/${safeLocale}/${filePath}`);
-
-  // The exported name is the last path segment before "index" (e.g. "auth", "admin", "errors")
-  const segments = filePath.split("/");
-  const exportName = segments.length >= 2 ? segments[segments.length - 2] : segments[0];
-  return mod[exportName] as MessageSchema[K];
+  return loadTranslation(safeLocale, namespace);
 }
 
 /**
@@ -93,11 +108,5 @@ export async function getServerTranslations<K extends keyof MessageSchema>(
 ): Promise<MessageSchema[K]> {
   // Reuse the same lazy-loading logic — just skip the cookie/header step
   const safeLocale: AppLocale = (locales as readonly string[]).includes(locale) ? (locale as AppLocale) : defaultLocale;
-
-  const filePath = namespacePaths[namespace];
-  const mod = await import(`@/shared/locale/${safeLocale}/${filePath}`);
-
-  const segments = filePath.split("/");
-  const exportName = segments.length >= 2 ? segments[segments.length - 2] : segments[0];
-  return mod[exportName] as MessageSchema[K];
+  return loadTranslation(safeLocale, namespace);
 }

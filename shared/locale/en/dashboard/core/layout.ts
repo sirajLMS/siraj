@@ -1,0 +1,23 @@
+import type { DashboardCoreLayoutLabels } from "@/shared/locale/types/dashboard/core";
+
+export const layout: DashboardCoreLayoutLabels = {
+  // ─── Static strings ────────────────────────────────────────────────
+  appTitle: "Siraj LMS",
+  notifications: "Notifications",
+  comingSoon: "Coming soon...",
+  studentTodayClasses: "Today's Classes",
+  studentSchedule: "My Schedule",
+  studentCredits: "My Credits",
+  studentHistory: "Lesson History",
+  studentProfile: "My Profile",
+  lessonReports: "Lesson Reports",
+  lessonReportDetail: "Lesson Report Detail",
+  supervisorHome: "Dashboard",
+  pendingReviews: "Pending Reviews",
+  teacherDues: "Teacher Dues",
+  monthlyReports: "Monthly Reports",
+  supervisorProfile: "My Profile",
+
+  // ─── Interpolated → typed functions ────────────────────────────────
+  welcomeUser: name => `Welcome ${name}`,
+};

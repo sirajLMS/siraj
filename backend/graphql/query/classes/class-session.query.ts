@@ -4,7 +4,6 @@ import {
   ClassStatusEventPothosObject,
   TeacherFutureSchedulePothosObject,
 } from "@/backend/graphql/pothos/classes/class-session.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 
@@ -15,8 +14,8 @@ gqlSchemaBuilder.queryField("classInstance", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       return ClassSessionService.getClassInstanceDetail(ctx.user.id, args.id, ctx.locale);
     },
@@ -30,8 +29,8 @@ gqlSchemaBuilder.queryField("classStatusEvents", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       return ClassSessionService.getClassStatusEvents(ctx.user.id, args.classInstanceId, ctx.locale);
     },
@@ -47,8 +46,8 @@ gqlSchemaBuilder.queryField("teacherFutureSchedule", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       return ScheduleService.getTeacherFutureSchedule(ctx.user.id, args.teacherId ?? undefined, ctx.locale);
     },

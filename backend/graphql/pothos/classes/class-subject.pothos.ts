@@ -1,7 +1,6 @@
 import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ClassCategoryPothosObject } from "@/backend/graphql/pothos/classes/class-category.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
 import type { ClassSubjectReturnType, SubjectResourceReturnType } from "@/backend/types";
 
@@ -37,8 +36,8 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
       load: async (ids: string[], ctx) => {
         const categories = await ClassCategoryRepository.loadByIds(ids);
         const map = new Map(categories.map(c => [c.id, c]));
-        const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        return ids.map(id => map.get(id) ?? new Error(t("categoryNotFound", { id })));
+        const tErrors = await ctx.t("errors");
+        return ids.map(id => map.get(id) ?? new Error(tErrors.categoryNotFound(id)));
       },
       resolve: parent => parent.categoryId,
     }),

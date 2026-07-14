@@ -3,7 +3,6 @@ import {
   CreateRecurringClassInputPothosObject,
   CreateRecurringClassResultPothosObject,
 } from "@/backend/graphql/pothos/classes/recurring-class.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 
 gqlSchemaBuilder.mutationField("createRecurringClass", t =>
@@ -15,8 +14,8 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
     authScopes: { superAdmin: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user?.id) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
 
       return await RecurringClassService.createRecurringClass(

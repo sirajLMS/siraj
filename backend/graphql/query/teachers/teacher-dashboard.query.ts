@@ -1,20 +1,20 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import {
   TeacherDashboardPothosObject,
   TeacherHandbookUrlPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 import { PaginationArgs } from "@/backend/types";
 
 async function resolveTeacherDashboard(
-  ctx: { user?: { id: string } | null; locale?: string },
+  ctx: BaseContext,
   args: { date: string; pagination?: Record<string, unknown> | null }
 ) {
   if (!ctx.user) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
+    const tErrors = await ctx.t("errors");
+    throw new Error(tErrors.unauthorized);
   }
   const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
   const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher", ctx.locale, pagination);
@@ -54,8 +54,8 @@ gqlSchemaBuilder.queryField("teacherHandbookUrl", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       const url = await TeacherDashboardService.getHandbookDownloadUrl(ctx.user.id, ctx.locale);
       return { id: `handbook-${ctx.user.id}`, url };

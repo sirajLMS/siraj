@@ -7,7 +7,6 @@ import {
   CreateManualClassEntryInputPothosObject,
   LogSupportRequestInputPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 
@@ -22,8 +21,8 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       const created = await TeacherDashboardService.createManualEntry(
         ctx.user.id,
@@ -51,8 +50,8 @@ gqlSchemaBuilder.mutationField("logTeacherSupportRequest", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       const result = await TeacherDashboardService.logSupportRequest(
         ctx.user.id,

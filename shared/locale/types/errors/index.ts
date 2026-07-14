@@ -34,6 +34,8 @@ export interface AuthErrors {
   readonly groupSimulationNotAllowedDuringSession: string;
   readonly groupSimulationNotAllowedWhileImpersonating: string;
   readonly groupSimulationAlreadyHasGroup: string;
+  readonly insufficientPermissions: string;
+  readonly impersonationNotAllowedWhileImpersonating: string;
 
   // ─── Functions (were {param} strings) ──────────────────────────────
   readonly demoGroupNotFound: (groupSlug: string) => string;
@@ -51,4 +53,9 @@ export interface ErrorsLabels {
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;
   readonly internalServerError: string;
+  readonly insufficientPermissions: string;
+  readonly unauthorized: string;
+  readonly studentNotFound: (id: string) => string;
+  readonly categoryNotFound: (id: string) => string;
+  readonly unknownName: string;
 }

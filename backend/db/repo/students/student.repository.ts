@@ -633,6 +633,8 @@ export namespace StudentRepository {
     readonly id: string;
     readonly userId: string;
     readonly name: string;
+    readonly email: string | null;
+    readonly phone: string | null;
     readonly status: StudentStatus;
     readonly avatarUrl: string | null;
     readonly dateOfBirth: Date | null;
@@ -641,6 +643,8 @@ export namespace StudentRepository {
     readonly parentId: string;
     readonly parentUserId: string | null;
     readonly parentName: string | null;
+    readonly parentEmail: string | null;
+    readonly parentPhone: string | null;
     readonly primaryTeacherId: string | null;
     readonly teacherUserId: string | null;
     readonly teacherName: string | null;
@@ -655,12 +659,15 @@ export namespace StudentRepository {
   export const findProfileById = async (studentId: string, tx?: DBTransaction): Promise<StudentProfileRow | null> => {
     const queryDb = tx ?? db;
     const parentUser = alias(users, "parent_user");
+    const studentUser = alias(users, "student_user");
 
     const results = await queryDb
       .select({
         id: students.id,
         userId: students.userId,
         name: students.name,
+        email: studentUser.email,
+        phone: studentUser.phone,
         status: students.status,
         avatarUrl: students.avatarUrl,
         dateOfBirth: students.dateOfBirth,
@@ -669,6 +676,8 @@ export namespace StudentRepository {
         parentId: students.parentId,
         parentUserId: parentUser.id,
         parentName: parentUser.name,
+        parentEmail: parentUser.email,
+        parentPhone: parentUser.phone,
         primaryTeacherId: students.primaryTeacherId,
         teacherUserId: teachers.userId,
         teacherName: users.name,
@@ -684,6 +693,7 @@ export namespace StudentRepository {
       .leftJoin(parentUser, eq(parents.userId, parentUser.id))
       .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
       .leftJoin(users, eq(teachers.userId, users.id))
+      .leftJoin(studentUser, eq(students.userId, studentUser.id))
       .where(eq(students.id, studentId))
       .limit(1);
 
@@ -696,6 +706,8 @@ export namespace StudentRepository {
       id: row.id,
       userId: row.userId,
       name: row.name,
+      email: row.email,
+      phone: row.phone,
       status: parseStudentStatus(row.status) ?? StudentStatus.REGULAR,
       avatarUrl: row.avatarUrl,
       dateOfBirth: row.dateOfBirth,
@@ -704,6 +716,8 @@ export namespace StudentRepository {
       parentId: row.parentId,
       parentUserId: row.parentUserId,
       parentName: row.parentName,
+      parentEmail: row.parentEmail,
+      parentPhone: row.parentPhone,
       primaryTeacherId: row.primaryTeacherId,
       teacherUserId: row.teacherUserId,
       teacherName: row.teacherName,

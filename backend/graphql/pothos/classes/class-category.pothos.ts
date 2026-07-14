@@ -1,6 +1,5 @@
 import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassCategoryReturnType } from "@/backend/types";
 
 export const ClassCategoryPothosObject = gqlSchemaBuilder
@@ -8,8 +7,8 @@ export const ClassCategoryPothosObject = gqlSchemaBuilder
     load: async (ids: string[], ctx) => {
       const categories = await ClassCategoryRepository.loadByIds(ids);
       const map = new Map(categories.map(c => [c.id, c]));
-      const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-      return ids.map(id => map.get(id) ?? new Error(t("categoryNotFound", { id })));
+      const tErrors = await ctx.t("errors");
+      return ids.map(id => map.get(id) ?? new Error(tErrors.categoryNotFound(id)));
     },
     sort: c => c.id,
   })

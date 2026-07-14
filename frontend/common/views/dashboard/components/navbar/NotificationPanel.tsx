@@ -13,12 +13,12 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { notificationAlertsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/notifications/notification-alerts.documents";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { UnpaidInvoicesSection } from "@/frontend/common/views/dashboard/components/navbar/UnpaidInvoicesSection";
+import { useAppTranslation } from "@/shared/locale/client";
 
 function getSeverityColor(
   severity: string | null | undefined,
@@ -41,7 +41,7 @@ function getSeverityIcon(severity: string) {
 }
 
 export function NotificationPanel() {
-  const t = useTranslations("dashboard.notifications");
+  const t = useAppTranslation("dashboard.core.notifications");
   const { data, loading, error } = useQuery(notificationAlertsQueryDocument);
 
   if (loading) {
@@ -56,7 +56,7 @@ export function NotificationPanel() {
     return (
       <Box sx={{ p: 2 }}>
         <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
-          {t("errorLoading")}
+          {t.errorLoading}
         </Typography>
       </Box>
     );
@@ -68,7 +68,7 @@ export function NotificationPanel() {
     <Box sx={{ width: 360, maxHeight: 480, overflowY: "auto" }}>
       <Box sx={{ px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          {t("title")}
+          {t.title}
         </Typography>
         {data?.notificationAlerts?.unreadCount !== undefined &&
           data.notificationAlerts.unreadCount !== null &&
@@ -101,7 +101,7 @@ export function NotificationPanel() {
         <Box sx={{ p: 3, textAlign: "center" }}>
           <NotificationsOutlined sx={{ fontSize: 40, opacity: 0.4 }} />
           <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary, mt: 1 })}>
-            {t("noAlerts")}
+            {t.noAlerts}
           </Typography>
         </Box>
       ) : (

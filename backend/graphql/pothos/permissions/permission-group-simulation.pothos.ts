@@ -7,7 +7,6 @@ import {
   StartPermissionGroupSimulationResponsePothosObject,
 } from "@/backend/graphql/pothos/permissions/permission-group-simulation.objects.pothos";
 import { setAuthCookies } from "@/backend/lib/auth/cookies";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 
 export {
@@ -61,10 +60,10 @@ gqlSchemaBuilder.mutationFields(t => ({
       groupSlug: t.arg.string({ required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      const tErrors = await ctx.t("errors");
       const actorUserId = ctx.realUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
-        throw new GraphQLError(tErrors("auth.groupSimulationSessionInvalid"), {
+        throw new GraphQLError(tErrors.auth.groupSimulationSessionInvalid, {
           extensions: { code: "FORBIDDEN" },
         });
       }
@@ -93,10 +92,10 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: EndPermissionGroupSimulationResponsePothosObject,
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
-      const tErrors = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      const tErrors = await ctx.t("errors");
       const actorUserId = ctx.realUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
-        throw new GraphQLError(tErrors("auth.groupSimulationSessionInvalid"), {
+        throw new GraphQLError(tErrors.auth.groupSimulationSessionInvalid, {
           extensions: { code: "FORBIDDEN" },
         });
       }

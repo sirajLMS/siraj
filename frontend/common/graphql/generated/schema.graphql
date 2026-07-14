@@ -3705,15 +3705,19 @@ type StudentProfile {
   classesTotal: Int
   createdAt: DateTime
   dateOfBirth: DateTime
+  email: String
   gender: Gender
   hoursPerWeek: Float
   id: String
   isAssociatedViewer: Boolean
   language: AppLanguage
   name: String
+  parentEmail: String
   parentId: String
   parentName: String
+  parentPhone: String
   parentUserId: String
+  phone: String
   primaryTeacherId: String
   status: StudentStatus
   teacherName: String

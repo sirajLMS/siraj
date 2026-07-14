@@ -3,7 +3,6 @@ import { UserRepository } from "@/backend/db/repo";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UserPothosObject } from "@/backend/graphql/pothos/auth/user.pothos";
 import { setAuthCookies } from "@/backend/lib/auth/cookies";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import type {
   EndImpersonationReturnType,
@@ -94,15 +93,15 @@ gqlSchemaBuilder.mutationFields(t => ({
       reason: t.arg.string({ required: false }),
     },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      const tErrors = await ctx.t("errors");
       if (ctx.isImpersonating) {
-        throw new GraphQLError(tErrors("auth.impersonationNotAllowedDuringSession"), {
+        throw new GraphQLError(tErrors.auth.impersonationNotAllowedDuringSession, {
           extensions: { code: "FORBIDDEN" },
         });
       }
       const actorUserId = ctx.actorUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
-        throw new GraphQLError(tErrors("auth.impersonationSessionInvalid"), {
+        throw new GraphQLError(tErrors.auth.impersonationSessionInvalid, {
           extensions: { code: "FORBIDDEN" },
         });
       }
@@ -136,10 +135,10 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: EndImpersonationResponsePothosObject,
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
-      const tErrors = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      const tErrors = await ctx.t("errors");
       const actorUserId = ctx.actorUserId ?? ctx.user?.id;
       if (!actorUserId || !ctx.sessionId) {
-        throw new GraphQLError(tErrors("auth.impersonationSessionInvalid"), {
+        throw new GraphQLError(tErrors.auth.impersonationSessionInvalid, {
           extensions: { code: "FORBIDDEN" },
         });
       }

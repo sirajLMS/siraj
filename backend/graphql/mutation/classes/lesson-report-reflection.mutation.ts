@@ -2,7 +2,6 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { LessonReportPothosObject } from "@/backend/graphql/pothos/classes/lesson-report.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { getBackendTranslations } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 
@@ -22,8 +21,8 @@ gqlSchemaBuilder.mutationField("submitStudentLessonReportReflection", t =>
         AppPermission.STUDENT_VIEW_OWN_DASHBOARD
       );
       if (!hasPermission) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.insufficientPermissions);
       }
       return LessonReportService.submitStudentReflection(
         actorUserId,

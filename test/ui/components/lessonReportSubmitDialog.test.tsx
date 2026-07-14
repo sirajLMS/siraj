@@ -48,9 +48,9 @@ describe("LessonReportSubmitDialog", () => {
     expect(screen.getByText("Submit Lesson Report")).toBeVisible();
     expect(screen.getByText("Attendance")).toBeVisible();
     expect(screen.getByText("Duration (min)")).toBeVisible();
-    expect(screen.getByText("Teacher Notes")).toBeVisible();
-    expect(screen.getByText("Submit")).toBeVisible();
-    expect(screen.getByText("Cancel")).toBeVisible();
+    expect(screen.getByLabelText("Teacher Notes")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Submit" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible();
   });
 
   test("calls onSubmit with form data when submitted", async () => {
@@ -80,7 +80,7 @@ describe("LessonReportSubmitDialog", () => {
       attendanceEvaluation: AttendanceEvaluation.Present,
       durationMinutes: 60,
       completionPercentage: 100,
-      teacherNotes: null,
+      teacherNotes: "",
     });
 
     await waitFor(() => {

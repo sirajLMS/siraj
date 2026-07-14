@@ -17,9 +17,13 @@ export const studentProfileQueryDocument: TypedDocumentNode<
       dateOfBirth
       gender
       language
+      email
+      phone
       parentId
       parentUserId
       parentName
+      parentEmail
+      parentPhone
       isAssociatedViewer
       primaryTeacherId
       teacherUserId

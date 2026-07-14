@@ -153,7 +153,7 @@ describe("PendingReviewsContainer", () => {
     });
 
     const approveButtons = await screen.findAllByRole("button", { name: "Approve" });
-    expect(approveButtons.length).toBe(2);
+    expect(approveButtons).toHaveLength(2);
     expect(approveButtons[0]).toBeVisible();
     expect(approveButtons[1]).toBeVisible();
   });
@@ -167,7 +167,7 @@ describe("PendingReviewsContainer", () => {
     });
 
     const rejectButtons = await screen.findAllByRole("button", { name: "Reject" });
-    expect(rejectButtons.length).toBe(2);
+    expect(rejectButtons).toHaveLength(2);
     expect(rejectButtons[0]).toBeVisible();
     expect(rejectButtons[1]).toBeVisible();
   });

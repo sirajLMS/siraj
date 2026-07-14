@@ -1,6 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentUpcomingClassesResultPothosObject } from "@/backend/graphql/pothos/students/student-status.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { StudentStatusService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("studentUpcomingClasses", t =>
@@ -12,8 +11,8 @@ gqlSchemaBuilder.queryField("studentUpcomingClasses", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       return StudentStatusService.getUpcomingClasses(ctx.user.id, args.studentId, ctx.locale);
     },

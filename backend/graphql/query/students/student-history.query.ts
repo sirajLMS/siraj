@@ -4,7 +4,6 @@ import {
   StudentClassHistoryPothosObject,
   StudentSessionDetailPothosObject,
 } from "@/backend/graphql/pothos/students/student-history.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 
 gqlSchemaBuilder.queryField("studentClassHistory", t =>
@@ -18,15 +17,15 @@ gqlSchemaBuilder.queryField("studentClassHistory", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       let studentId = args.studentId;
       if (!studentId) {
         studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
         if (!studentId) {
-          const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-          throw new Error(tFunc("studentNotFound", { id: ctx.user.id }));
+          const tErrors = await ctx.t("errors");
+          throw new Error(tErrors.studentNotFound(ctx.user.id));
         }
       }
       return StudentHistoryService.getStudentClassHistory(ctx.user.id, studentId, args.year, args.month, ctx.locale);
@@ -41,8 +40,8 @@ gqlSchemaBuilder.queryField("studentClassSessionDetail", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       return StudentHistoryService.getStudentClassSessionDetail(ctx.user.id, args.classInstanceId, ctx.locale);
     },

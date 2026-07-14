@@ -10,9 +10,13 @@ export type StudentProfileReturnType = {
   readonly dateOfBirth: Date | null;
   readonly gender: Gender | null;
   readonly language: AppLanguage | null;
+  readonly email: string | null;
+  readonly phone: string | null;
   readonly parentId: string | null;
   readonly parentUserId: string | null;
   readonly parentName: string | null;
+  readonly parentEmail: string | null;
+  readonly parentPhone: string | null;
   readonly isAssociatedViewer: boolean;
   readonly primaryTeacherId: string | null;
   readonly teacherUserId: string | null;

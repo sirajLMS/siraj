@@ -2,7 +2,7 @@ import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import { UserRepository } from "@/backend/db/repo";
 import { type AppPermission, type CurrencyCode, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { getServerTranslations } from "@/shared/locale/server";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { MessageSchema } from "@/shared/locale/types/message";
 
 export type BaseContext = {

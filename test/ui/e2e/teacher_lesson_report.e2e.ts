@@ -17,6 +17,20 @@ afterEach(async () => {
   }
 });
 
+async function isVisible(
+  locator:
+    | ReturnType<Page["getByRole"]>
+    | ReturnType<Page["locator"]>
+    | ReturnType<Page["getByLabel"]>
+    | ReturnType<Page["getByRole"]>
+): Promise<boolean> {
+  try {
+    return await locator.isVisible();
+  } catch {
+    return false;
+  }
+}
+
 describe("Teacher Lesson Report E2E Flow", () => {
   test("Teacher submits lesson report and supervisor approves it", async () => {
     // ========================================================================
@@ -39,29 +53,29 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     // 4. Find and click "Mark Completed" button for a class instance
     const markCompletedButton = page.getByRole("button", { name: /mark\s+completed|mark\s+complete|إكمال/i }).first();
-    
+
     // Check if there's at least one mark completed button available
-    const hasMarkCompletedButton = await markCompletedButton.isVisible().catch(() => false);
-    
+    const hasMarkCompletedButton = await isVisible(markCompletedButton);
+
     if (hasMarkCompletedButton) {
       // Button is enabled - click it to open the dialog
       await markCompletedButton.click();
-      
+
       // 5. Wait for LessonReportSubmitDialog to open
       const dialog = page.getByRole("dialog", { name: /lesson\s+report|تقرير\s+الدرس/i });
       await dialog.waitFor({ state: "visible", timeout: 5000 });
-      
+
       // 6. Fill the lesson report form
       // Attendance evaluation: Select "Present" / "حاضر"
       const attendanceSelect = dialog.getByLabel(/attendance\s+evaluation|تقييم\s+الحضور/i);
       await attendanceSelect.waitFor({ state: "visible" });
-      await attendanceSelect.selectOption("Present");
-      
+      await attendanceSelect.selectOption({ label: "Present" });
+
       // Duration minutes: 60
       const durationInput = dialog.getByLabel(/duration\s*\(minutes\)|مدة\s*\(دقائق\)|duration\s+minutes/i);
       await durationInput.waitFor({ state: "visible" });
       await durationInput.fill("60");
-      
+
       // Completion percentage: 100 (slider)
       const completionSlider = dialog.getByRole("slider", { name: /completion\s+percentage|نسبة\s+الإكمال/i });
       await completionSlider.waitFor({ state: "visible" });
@@ -70,21 +84,21 @@ describe("Teacher Lesson Report E2E Flow", () => {
         el.dispatchEvent(new Event("input", { bubbles: true }));
         el.dispatchEvent(new Event("change", { bubbles: true }));
       });
-      
+
       // Teacher notes: "Test lesson report"
       const notesInput = dialog.getByLabel(/teacher\s+notes|ملاحظات\s+المعلم/i);
       await notesInput.waitFor({ state: "visible" });
       await notesInput.fill("Test lesson report");
-      
+
       // 7. Click Submit button
       const submitButton = dialog.getByRole("button", { name: /submit|إرسال/i }).first();
       await submitButton.waitFor({ state: "visible" });
       await submitButton.click();
-      
+
       // Wait for dialog to close and mutation to complete
       await dialog.waitFor({ state: "hidden", timeout: 10000 });
       await page.waitForLoadState("networkidle");
-      
+
       // Verify success - look for success snackbar or toast
       const successSnackbar = page.getByRole("status", { name: /success|successfully|تم\s+بنجاح/i });
       try {
@@ -101,7 +115,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     // 8. Logout as teacher
     const logoutButton = page.getByRole("button", { name: /logout|sign\s+out|تسجيل\s+الخروج/i }).first();
-    if (await logoutButton.isVisible().catch(() => false)) {
+    if (await isVisible(logoutButton)) {
       await logoutButton.click();
       await page.waitForURL("**/login**");
     } else {
@@ -128,22 +142,27 @@ describe("Teacher Lesson Report E2E Flow", () => {
     expect(page.url()).toContain("/lesson-reports");
 
     // 11. Verify pending reviews page loads
-    const reviewsTitle = page.getByRole("heading", { name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i });
+    const reviewsTitle = page.getByRole("heading", {
+      name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i,
+    });
     await reviewsTitle.first().waitFor({ state: "visible", timeout: 10000 });
 
     // 12. Find the submitted report in the queue
-    const reportRow = page.locator('[role="row"]').filter({ hasText: /Test lesson report|تقرير\s+درس\s+اختباري/i }).first();
-    const hasReport = await reportRow.isVisible().catch(() => false);
-    
+    const reportRow = page
+      .locator('[role="row"]')
+      .filter({ hasText: /Test lesson report|تقرير\s+درس\s+اختباري/i })
+      .first();
+    const hasReport = await isVisible(reportRow);
+
     if (hasReport) {
       // 13. Click "Approve" button in that row
       const approveButton = reportRow.getByRole("button", { name: /approve|موافقة/i }).first();
       await approveButton.waitFor({ state: "visible" });
       await approveButton.click();
-      
+
       // Wait for mutation to complete
       await page.waitForLoadState("networkidle");
-      
+
       // 14. Verify report status changes to APPROVED or success snackbar appears
       const successSnackbar = page.getByRole("status", { name: /approved|تم\s+الموافقة|success|نجاح/i });
       try {
@@ -166,7 +185,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     // 15. Logout as supervisor
     const supervisorLogout = page.getByRole("button", { name: /logout|sign\s+out|تسجيل\s+الخروج/i }).first();
-    if (await supervisorLogout.isVisible().catch(() => false)) {
+    if (await isVisible(supervisorLogout)) {
       await supervisorLogout.click();
       await page.waitForURL("**/login**");
     }
@@ -211,7 +230,9 @@ describe("Teacher Lesson Report E2E Flow", () => {
     expect(page.url()).toContain("/lesson-reports");
 
     // Verify page loads with pending reviews container
-    const pageTitle = page.getByRole("heading", { name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i });
+    const pageTitle = page.getByRole("heading", {
+      name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i,
+    });
     await pageTitle.first().waitFor({ state: "visible", timeout: 10000 });
   });
 });

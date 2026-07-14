@@ -1,0 +1,30 @@
+import type { CommonLabels } from "@/shared/locale/types/common";
+
+export const common: CommonLabels = {
+  title: "Siraj",
+  description:
+    "Welcome to Siraj. This app is successfully initialized with Next.js and Material-UI, fully customized with your brand aesthetics.",
+  documentTitleTemplate: (title: string) => `${title} | Siraj`,
+  welcome: "Welcome!",
+  subtitle: "Siraj Design System",
+  toggleTheme: "Toggle theme",
+  languageSwitcher: "Switch language",
+  langAr: "Arabic",
+  langEn: "English",
+  langArShort: "EN",
+  langEnShort: "EN",
+  themeDark: "Dark",
+  themeLight: "Light",
+  activeTheme: "Current theme: ",
+  themeTooltip: "Theme settings",
+  languageTooltip: "Language settings",
+  notifications: "Notifications",
+  serverConnectionLost: "Server connection lost",
+  retry: "Retry",
+  checkNetworkConnection: "Please check your network connection",
+  connectionRestored: "Connection restored",
+  somethingWentWrong: "Something went wrong. Please try again.",
+  operationFailed: "Operation failed. Please try again.",
+  loadFailed: "Failed to load data. Please try again.",
+  loading: "Loading...",
+};

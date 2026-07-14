@@ -31,6 +31,8 @@ export const errors: ErrorsLabels = {
     groupSimulationNotAllowedDuringSession: "هذا الإجراء غير مسموح أثناء محاكاة مجموعة أذونات",
     groupSimulationNotAllowedWhileImpersonating: "أنهِ انتحال الهوية قبل محاكاة مجموعة أذونات",
     groupSimulationAlreadyHasGroup: "لديك هذه المجموعة بالفعل؛ اختر مجموعة أخرى للمحاكاة",
+    insufficientPermissions: "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
+    impersonationNotAllowedWhileImpersonating: "لا يمكنك انتحال هوية أثناء انتحال هوية أخرى.",
     // ─── Functions (were {param} strings) ────────────────────────────
     demoGroupNotFound: groupSlug => `مجموعة العرض غير موجودة: ${groupSlug}`,
     demoGroupNoUser: groupSlug => `لم يتم العثور على مستخدم لمجموعة العرض: ${groupSlug}`,
@@ -38,4 +40,9 @@ export const errors: ErrorsLabels = {
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
   duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
   internalServerError: "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.",
+  insufficientPermissions: "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
+  unauthorized: "يجب تسجيل الدخول أولاً.",
+  studentNotFound: id => `الطالب غير موجود: ${id}`,
+  categoryNotFound: id => `الفئة غير موجودة: ${id}`,
+  unknownName: "غير معروف",
 };

@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
-import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-alerts.documents";
@@ -14,12 +13,12 @@ import {
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useRouter } from "@/shared/i18n/routing";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export function UnpaidInvoicesSection() {
-  const t = useTranslations("dashboard.notifications");
-  const tProfile = useTranslations("profile");
-  const tErrors = useTranslations("errors");
-  const locale = useLocale();
+  const t = useAppTranslation("dashboard.core.notifications");
+  const tProfile = useAppTranslation("profile");
+  const tErrors = useAppTranslation("errors");
   const router = useRouter();
   const displayCurrency = useUserStore(state => state.displayCurrency);
 
@@ -29,7 +28,7 @@ export function UnpaidInvoicesSection() {
     return (
       <Box sx={{ px: 2, py: 1.5 }}>
         <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t("loadingBilling")}
+          {t.loadingBilling}
         </Typography>
       </Box>
     );
@@ -39,7 +38,7 @@ export function UnpaidInvoicesSection() {
     return (
       <Box sx={{ px: 2, py: 1.5 }}>
         <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
-          {t("errorLoading")}
+          {t.errorLoading}
         </Typography>
       </Box>
     );
@@ -51,7 +50,7 @@ export function UnpaidInvoicesSection() {
     return (
       <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
         <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t("noUnpaidInvoices")}
+          {t.noUnpaidInvoices}
         </Typography>
       </Box>
     );
@@ -62,11 +61,14 @@ export function UnpaidInvoicesSection() {
   };
 
   const items = summary.items ?? [];
-  const fxMessages = buildFxDisplayMessages(tProfile, tErrors);
+  const fxMessages = buildFxDisplayMessages(
+    key => tProfile[key as keyof typeof tProfile] as string,
+    key => tErrors[key as keyof typeof tErrors] as string
+  );
 
   const globalTotalLabel = formatBillingCurrencyTotals(
     mapBillingCurrencyBuckets(summary.overdueAmountsByCurrency),
-    locale,
+    "en",
     fxMessages
   ).primary;
 
@@ -75,7 +77,7 @@ export function UnpaidInvoicesSection() {
       <Box sx={{ px: 2, py: 1, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <PaymentsOutlined fontSize="small" />
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-          {t("unpaidInvoicesTitle")}
+          {t.unpaidInvoicesTitle}
         </Typography>
         <Typography
           variant="caption"
@@ -91,7 +93,7 @@ export function UnpaidInvoicesSection() {
           {summary.totalOverdueInvoices}
         </Typography>
         <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, ml: "auto" })}>
-          {t("totalOverdueLabel")}: {globalTotalLabel}
+          {t.totalOverdueLabel}: {globalTotalLabel}
         </Typography>
       </Box>
       {displayCurrency ? (
@@ -99,14 +101,14 @@ export function UnpaidInvoicesSection() {
           variant="caption"
           sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary })}
         >
-          {t("unpaidInvoicesFxNote")}
+          {t.unpaidInvoicesFxNote}
         </Typography>
       ) : (
         <Typography
           variant="caption"
           sx={theme => ({ display: "block", px: 2, pb: 0.5, color: theme.palette.text.secondary, fontStyle: "italic" })}
         >
-          ({t("noDisplayCurrencyNote")})
+          ({t.noDisplayCurrencyNote})
         </Typography>
       )}
 
@@ -114,7 +116,7 @@ export function UnpaidInvoicesSection() {
         {items.map(item => {
           const amountLabel = formatBillingCurrencyTotals(
             mapBillingCurrencyBuckets(item.amountsByCurrency),
-            locale,
+            "en",
             fxMessages
           ).primary;
 

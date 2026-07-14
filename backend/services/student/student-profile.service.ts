@@ -60,7 +60,32 @@ async function resolveIsAssociatedViewer(actorUserId: string, studentId: string)
 
 function mapProfileRow(
   row: NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>
-): Omit<StudentProfileReturnType, "upcomingClasses" | "classHistory" | "isAssociatedViewer"> {
+): Pick<
+  StudentProfileReturnType,
+  | "id"
+  | "name"
+  | "status"
+  | "avatarUrl"
+  | "dateOfBirth"
+  | "gender"
+  | "language"
+  | "email"
+  | "phone"
+  | "parentId"
+  | "parentUserId"
+  | "parentName"
+  | "parentEmail"
+  | "parentPhone"
+  | "primaryTeacherId"
+  | "teacherUserId"
+  | "teacherName"
+  | "hoursPerWeek"
+  | "classesRemaining"
+  | "classesTotal"
+  | "version"
+  | "createdAt"
+  | "updatedAt"
+> {
   return {
     id: row.id,
     name: row.name,
@@ -69,9 +94,13 @@ function mapProfileRow(
     dateOfBirth: row.dateOfBirth,
     gender: row.gender ? (parseGender(row.gender) ?? null) : null,
     language: row.language ? (parseAppLanguage(row.language) ?? null) : null,
+    email: row.email,
+    phone: row.phone,
     parentId: row.parentId,
     parentUserId: row.parentUserId,
     parentName: row.parentName,
+    parentEmail: row.parentEmail,
+    parentPhone: row.parentPhone,
     primaryTeacherId: row.primaryTeacherId,
     teacherUserId: row.teacherUserId,
     teacherName: row.teacherName,

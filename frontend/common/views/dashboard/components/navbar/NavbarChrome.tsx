@@ -2,9 +2,9 @@
 
 import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { MobileMenuButton } from "@/frontend/common/views/dashboard/components/client/MobileMenuButton";
+import { useAppTranslation } from "@/shared/locale/client";
 
 interface NavbarChromeProps {
   readonly roleLabel: string;
@@ -12,7 +12,7 @@ interface NavbarChromeProps {
 }
 
 export function NavbarChrome({ roleLabel, rightSlot }: Readonly<NavbarChromeProps>) {
-  const t = useTranslations("dashboard");
+  const t = useAppTranslation("dashboard.core.layout");
 
   return (
     <AppBar
@@ -56,7 +56,7 @@ export function NavbarChrome({ roleLabel, rightSlot }: Readonly<NavbarChromeProp
                 lineHeight: 1.2,
               }}
             >
-              {t("layout.appTitle")}
+              {t.appTitle}
             </Typography>
             <Typography
               variant="labelMd"

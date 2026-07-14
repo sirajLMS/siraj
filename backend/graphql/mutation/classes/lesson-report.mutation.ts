@@ -5,7 +5,6 @@ import {
   LessonReportSubmitInput,
 } from "@/backend/graphql/pothos/classes/lesson-report.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { getBackendTranslations } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 
@@ -22,8 +21,8 @@ gqlSchemaBuilder.mutationField("submitLessonReport", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.LESSON_REPORTS_SUBMIT);
       if (!hasPermission) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.insufficientPermissions);
       }
 
       return LessonReportService.submitReport(
@@ -53,8 +52,8 @@ gqlSchemaBuilder.mutationField("approveLessonReport", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.LESSON_REPORTS_APPROVE);
       if (!hasPermission) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.insufficientPermissions);
       }
 
       return LessonReportService.approveReport(actorUserId, args.reportId, ctx.locale);
@@ -75,8 +74,8 @@ gqlSchemaBuilder.mutationField("rejectLessonReport", t =>
       const actorUserId = await requireAuth(ctx);
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.LESSON_REPORTS_REJECT);
       if (!hasPermission) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.insufficientPermissions);
       }
 
       return LessonReportService.rejectReport(

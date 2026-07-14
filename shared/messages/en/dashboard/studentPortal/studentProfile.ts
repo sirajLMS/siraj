@@ -1,0 +1,27 @@
+import type { StudentProfileLabels } from "@/shared/messages/types/dashboard/studentPortal/studentProfile";
+
+export const studentProfile: StudentProfileLabels = {
+  pageTitle: "My Profile",
+  personalInfo: "Personal Information",
+  fullName: "Full Name",
+  email: "Email",
+  phone: "Phone",
+  dateOfBirth: "Date of Birth",
+  gender: "Gender",
+  language: "Language",
+  parentInfo: "Parent Information",
+  parentName: "Parent Name",
+  parentEmail: "Parent Email",
+  parentPhone: "Parent Phone",
+  academicInfo: "Academic Information",
+  teacher: "Teacher",
+  hoursPerWeek: "Hours/Week",
+  classesRemaining: "Classes Remaining",
+  classesTotal: "Total Classes",
+  editProfile: "Edit Profile",
+  saveChanges: "Save Changes",
+  cancel: "Cancel",
+  loadingMessage: "Loading...",
+  saveSuccess: "Profile updated successfully",
+  saveError: "Failed to update profile",
+};

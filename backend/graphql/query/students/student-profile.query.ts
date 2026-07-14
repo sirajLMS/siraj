@@ -1,7 +1,6 @@
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentProfilePothosObject } from "@/backend/graphql/pothos/students/student-profile.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { StudentProfileService } from "@/backend/services/student/student-profile.service";
 
 gqlSchemaBuilder.queryField("studentProfile", t =>
@@ -15,15 +14,15 @@ gqlSchemaBuilder.queryField("studentProfile", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
+        const tErrors = await ctx.t("errors");
+        throw new Error(tErrors.unauthorized);
       }
       let studentId = args.studentId;
       if (!studentId) {
         studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
         if (!studentId) {
-          const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-          throw new Error(tFunc("studentNotFound", { id: ctx.user.id }));
+          const tErrors = await ctx.t("errors");
+          throw new Error(tErrors.studentNotFound(ctx.user.id));
         }
       }
       return StudentProfileService.getProfile(

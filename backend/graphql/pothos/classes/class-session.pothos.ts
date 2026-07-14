@@ -13,7 +13,6 @@ import {
   SupportContactPothosObject,
   TeacherImportantNotePothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-notes.pothos";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type {
   ClassInstanceDetailReturnType,
@@ -241,8 +240,8 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
       type: ClassInstanceDetailPothosObject,
       resolve: async (parent, _args, ctx) => {
         if (!ctx.user) {
-          const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-          throw new Error(tFunc("unauthorized"));
+          const tErrors = await ctx.t("errors");
+          throw new Error(tErrors.unauthorized);
         }
         return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.completedInstanceId, ctx.locale);
       },
@@ -251,8 +250,8 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
       type: ClassInstanceDetailPothosObject,
       resolve: async (parent, _args, ctx) => {
         if (!ctx.user) {
-          const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-          throw new Error(tFunc("unauthorized"));
+          const tErrors = await ctx.t("errors");
+          throw new Error(tErrors.unauthorized);
         }
         return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.rescheduledInstanceId, ctx.locale);
       },

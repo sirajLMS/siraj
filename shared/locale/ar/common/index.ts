@@ -1,0 +1,30 @@
+import type { CommonLabels } from "@/shared/locale/types/common";
+
+export const common: CommonLabels = {
+  title: "سراج",
+  description:
+    "مرحبًا بك في سراج. تم تهيئة هذا التطبيق بنجاح مع Next.js و Material-UI وتم تخصيصه بالكامل بجماليات علامتك التجارية الفاخرة.",
+  documentTitleTemplate: (title: string) => `${title} | سراج`,
+  welcome: "مرحبًا بالعالم!",
+  subtitle: "نظام تصميم سراج",
+  toggleTheme: "تغيير المظهر",
+  languageSwitcher: "تغيير اللغة",
+  langAr: "العربية",
+  langEn: "English",
+  langArShort: "ع",
+  langEnShort: "EN",
+  themeDark: "داكن",
+  themeLight: "فاتح",
+  activeTheme: "المظهر الحالي: ",
+  themeTooltip: "إعدادات المظهر",
+  languageTooltip: "إعدادات اللغة",
+  notifications: "الإشعارات",
+  serverConnectionLost: "فقد الاتصال بالخادم",
+  retry: "إعادة المحاولة",
+  checkNetworkConnection: "يرجى التحقق من اتصال الشبكة الخاص بك",
+  connectionRestored: "تمت استعادة الاتصال",
+  somethingWentWrong: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  operationFailed: "فشلت العملية. يرجى المحاولة مرة أخرى.",
+  loadFailed: "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
+  loading: "جارٍ التحميل...",
+};

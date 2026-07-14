@@ -8,10 +8,11 @@ import {
   parseIanaTimezone,
   parseIanaTimezoneOrNull,
 } from "@/backend/lib/enum";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { SessionLabels } from "@/shared/locale/types/session";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
 
@@ -88,13 +89,12 @@ function buildPerformanceBlock(perf: ClassInstancePerformanceSelectType | null) 
 export async function buildClassInstanceDetail(
   instance: ClassInstanceWithRelations,
   perf: ClassInstancePerformanceSelectType | null,
-  locale?: string
+  tSession: SessionLabels,
+  tErrors: ErrorsLabels
 ): Promise<ClassInstanceDetailReturnType> {
-  const t = await getBackendTranslations({ locale, namespace: "session" });
-  const tErrors = await getBackendTranslations({ locale, namespace: "errors" });
-  const unknownName = tErrors("unknownName");
+  const unknownName = tErrors.unknownName;
   const classType = parseClassType(instance.classType);
-  const courseName = t(`classTypes.${classType}`);
+  const courseName = tSession.classTypes[classType];
 
   const start = instance.scheduledStartAt;
   const end = instance.scheduledEndAt;

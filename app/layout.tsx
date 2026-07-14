@@ -2,8 +2,6 @@ import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { NextIntlClientProvider } from "next-intl";
-import { getTranslations as getIntlTranslations, getMessages } from "next-intl/server";
 import type { ReactNode } from "react";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
@@ -24,37 +22,38 @@ async function getLocale() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Still using next-intl for "common" until that namespace is migrated
-  const t = await getIntlTranslations("common");
+  // Migrated to compile-time i18n - use getTranslations for "common" namespace
+  const locale = await getLocale();
+  const t = await getTranslations(locale, "common");
   return {
     metadataBase: new URL(NEXT_PUBLIC_BASE_URL),
     title: {
-      default: t("title"),
-      template: t("documentTitleTemplate"),
+      default: t.title,
+      template: t.documentTitleTemplate("%s"),
     },
-    description: t("description"),
-    applicationName: t("title"),
+    description: t.description,
+    applicationName: t.title,
     openGraph: {
-      title: t("title"),
-      description: t("description"),
-      siteName: t("title"),
+      title: t.title,
+      description: t.description,
+      siteName: t.title,
       type: "website",
     },
     twitter: {
       card: "summary",
-      title: t("title"),
-      description: t("description"),
+      title: t.title,
+      description: t.description,
     },
   };
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const locale = await getLocale();
-  const messages = await getMessages({ locale });
 
   // Load migrated namespaces server-side for LocaleProvider.
   // Add more namespaces here as they are migrated from next-intl.
   const authTranslations = await getTranslations(locale, "auth");
+  const commonTranslations = await getTranslations(locale, "common");
   const dashboardAdminTranslations = await getTranslations(locale, "dashboard.admin");
 
   const cookieStore = await cookies();
@@ -76,17 +75,20 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           defaultMode={initialTheme}
           modeStorageKey="theme" // match the existing localStorage key from `theme-detection.ts`
         />
-        {/* next-intl provider — kept until all namespaces are migrated */}
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          {/* Our compile-time locale provider — grows as namespaces are migrated */}
-          <LocaleProvider translations={{ auth: authTranslations, "dashboard.admin": dashboardAdminTranslations }}>
-            <MuiProvider initialTheme={initialTheme}>
-              <AppApolloProvider>
-                <AuthProvider>{children}</AuthProvider>
-              </AppApolloProvider>
-            </MuiProvider>
-          </LocaleProvider>
-        </NextIntlClientProvider>
+        {/* Our compile-time locale provider — grows as namespaces are migrated */}
+        <LocaleProvider
+          translations={{
+            auth: authTranslations,
+            common: commonTranslations,
+            "dashboard.admin": dashboardAdminTranslations,
+          }}
+        >
+          <MuiProvider initialTheme={initialTheme}>
+            <AppApolloProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </AppApolloProvider>
+          </MuiProvider>
+        </LocaleProvider>
         <SpeedInsights />
       </body>
     </html>

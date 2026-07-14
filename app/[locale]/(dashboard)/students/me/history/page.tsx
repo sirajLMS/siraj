@@ -1,7 +1,8 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { StudentHistoryContainer } from "@/frontend/common/views/dashboard/student/history/StudentHistoryContainer";
 
 export async function generateMetadata({
   params,
@@ -22,12 +23,7 @@ export default function StudentHistoryPage() {
         </Box>
       }
     >
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4">Student History</Typography>
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          Coming soon...
-        </Typography>
-      </Box>
+      <StudentHistoryContainer />
     </Suspense>
   );
 }
