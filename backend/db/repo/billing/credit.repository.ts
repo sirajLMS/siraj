@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
@@ -186,6 +186,10 @@ export namespace CreditRepository {
       hours: input.hours,
       notes: input.notes ?? "",
     });
-    return `${randomUUID()}-credit-${Buffer.from(content).toString("base64").slice(0, 24)}`;
+    // Deterministic prefix: sha256 of the source content. Using a random UUID
+    // prefix would break idempotency (two calls with identical inputs would
+    // produce different keys, defeating the unique-contract dedup mechanism).
+    const prefix = createHash("sha256").update(content).digest("hex").slice(0, 36);
+    return `${prefix}-credit-${Buffer.from(content).toString("base64").slice(0, 24)}`;
   };
 }

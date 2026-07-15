@@ -1,5 +1,5 @@
-import { boolean, index, inet, pgTable, text, timestamp, uuid, varchar, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { boolean, index, inet, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { users } from "@/backend/db/schema/users/users";
 
 export const impersonationSessions = pgTable(
@@ -25,6 +25,8 @@ export const impersonationSessions = pgTable(
     index("impersonation_sessions_target_idx").on(table.targetUserId),
     index("impersonation_sessions_session_idx").on(table.sessionId),
     index("impersonation_sessions_active_actor_idx").on(table.actorUserId, table.isActive),
-    uniqueIndex("impersonation_sessions_one_active_per_actor").on(table.actorUserId).where(sql`${table.isActive} = true`),
+    uniqueIndex("impersonation_sessions_one_active_per_actor")
+      .on(table.actorUserId)
+      .where(sql`${table.isActive} = true`),
   ]
 );
