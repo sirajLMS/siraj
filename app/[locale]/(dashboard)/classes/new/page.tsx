@@ -9,8 +9,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations(locale, "dashboard.teacherCreateRecurringClass");
-  // TODO: i18n dynamic lookup — namespace "dashboard.createRecurringClass" has no pageTitle field
-  // in the new schema; TeacherCreateRecurringClassLabels only provides dialogTitle.
   return { title: t.dialogTitle };
 }
 

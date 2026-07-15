@@ -45,6 +45,8 @@ export const errors: ErrorsLabels = {
     permissionGroupNameTooLong: "Permission group name is too long (max 255 characters).",
     permissionGroupInvalidName: "Invalid permission group name.",
     cannotModifySuperAdmin: "Cannot modify super admin user.",
+    cannotModifySystemPermissionGroup: "Cannot modify core properties of system permission groups",
+    cannotDeleteSystemPermissionGroup: "Cannot delete a system permission or group",
   },
   billing: {
     invoiceNotFound: (id: string) => `Invoice not found: ${id}`,
@@ -66,6 +68,8 @@ export const errors: ErrorsLabels = {
       expectedVersion: number;
       gotVersion: number;
     }) => `Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
+    exchangeRateStale: ({ fromCurrency, toCurrency }: { fromCurrency: string; toCurrency: string }) =>
+      `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`,
   },
   credit: {
     duplicatePurchase: "This credit purchase has already been processed.",

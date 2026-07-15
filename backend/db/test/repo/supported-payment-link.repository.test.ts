@@ -36,13 +36,19 @@ describe("SupportedPaymentLinkRepository", () => {
       tx
     );
 
+    expect(created).toBeDefined();
+    expect(created.slug).toBe(slug);
+    expect(created.id).toBeDefined();
+
     const fetched = await SupportedPaymentLinkRepository.getById(created.id, tx);
+    expect(fetched).toBeDefined();
     expect(fetched?.urlAllowlist).toEqual(["paypal.com"]);
 
     const active = await SupportedPaymentLinkRepository.listActive({ direction: PaymentDirection.PAYOUT }, tx);
     expect(active.some(row => row.id === created.id)).toBe(true);
 
     const deactivated = await SupportedPaymentLinkRepository.deactivate(created.id, tErrors, tx);
+    expect(deactivated).toBeDefined();
     expect(deactivated.isActive).toBe(false);
   });
 

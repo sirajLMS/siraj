@@ -25,48 +25,67 @@ const paymentMethodBaseSchema = z.object({
   details: detailsSchema,
 });
 
+function addRequiredIssue(ctx: z.RefinementCtx, path: string): void {
+  ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: [path] });
+}
+
+function validateMobileWallet(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+  if (!details.walletId?.trim()) {
+    addRequiredIssue(ctx, "details.walletId");
+  }
+  if (!details.phone?.trim()) {
+    addRequiredIssue(ctx, "details.phone");
+  }
+}
+
+function validatePaymentLink(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+  if (!details.paymentLinkId?.trim()) {
+    addRequiredIssue(ctx, "details.paymentLinkId");
+  }
+  if (!details.url?.trim()) {
+    addRequiredIssue(ctx, "details.url");
+  }
+}
+
+function validateOnlineAccount(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+  if (!details.onlineAccountId?.trim()) {
+    addRequiredIssue(ctx, "details.onlineAccountId");
+  }
+  if (!details.identifier?.trim()) {
+    addRequiredIssue(ctx, "details.identifier");
+  }
+}
+
+function validateBankTransfer(details: typeof detailsSchema._type, ctx: z.RefinementCtx): void {
+  const hasRouting =
+    Boolean(details.iban?.trim()) ||
+    Boolean(details.accountNumber?.trim()) ||
+    Boolean(details.bankName?.trim()) ||
+    Boolean(details.beneficiaryName?.trim());
+  if (!hasRouting) {
+    addRequiredIssue(ctx, "details.iban");
+  }
+}
+
 const paymentMethodRefinement = (
   value: Pick<z.infer<typeof paymentMethodBaseSchema>, "type" | "details">,
   ctx: z.RefinementCtx
 ) => {
   const { type, details } = value;
 
-  if (type === PaymentMethodType.MobileWallet) {
-    if (!details.walletId?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "walletId"] });
-    }
-    if (!details.phone?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "phone"] });
-    }
-  }
-
-  if (type === PaymentMethodType.PaymentLink) {
-    if (!details.paymentLinkId?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "paymentLinkId"] });
-    }
-    if (!details.url?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "url"] });
-    }
-  }
-
-  if (type === PaymentMethodType.OnlineAccount) {
-    if (!details.onlineAccountId?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "onlineAccountId"] });
-    }
-    if (!details.identifier?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "identifier"] });
-    }
-  }
-
-  if (type === PaymentMethodType.BankTransfer) {
-    const hasRouting =
-      Boolean(details.iban?.trim()) ||
-      Boolean(details.accountNumber?.trim()) ||
-      Boolean(details.bankName?.trim()) ||
-      Boolean(details.beneficiaryName?.trim());
-    if (!hasRouting) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "required", path: ["details", "iban"] });
-    }
+  switch (type) {
+    case PaymentMethodType.MobileWallet:
+      validateMobileWallet(details, ctx);
+      break;
+    case PaymentMethodType.PaymentLink:
+      validatePaymentLink(details, ctx);
+      break;
+    case PaymentMethodType.OnlineAccount:
+      validateOnlineAccount(details, ctx);
+      break;
+    case PaymentMethodType.BankTransfer:
+      validateBankTransfer(details, ctx);
+      break;
   }
 };
 

@@ -15,6 +15,17 @@ import { type DemoUserUpsertInput, UserBootstrapService } from "@/backend/servic
 import type { GroupWithPermissionIds, UserSelectType } from "@/backend/types";
 import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 
+function resolvePlainPassword(
+  spec:
+    | Pick<SeedUserSpec, "name" | "email" | "plainPassword" | "isSuperAdmin" | "groupSlug">
+    | (typeof INTERNAL_DEMO_USERS)[number]
+): string {
+  if (!("plainPassword" in spec)) {
+    return DEFAULT_SEED_ADMIN_PASSWORD;
+  }
+  return spec.plainPassword ?? DEFAULT_SEED_ADMIN_PASSWORD;
+}
+
 function toDemoUserInput(
   spec:
     | Pick<SeedUserSpec, "name" | "email" | "plainPassword" | "isSuperAdmin" | "groupSlug">
@@ -23,8 +34,7 @@ function toDemoUserInput(
   return {
     name: spec.name,
     email: spec.email,
-    plainPassword:
-      "plainPassword" in spec ? (spec.plainPassword ?? DEFAULT_SEED_ADMIN_PASSWORD) : DEFAULT_SEED_ADMIN_PASSWORD,
+    plainPassword: resolvePlainPassword(spec),
     isSuperAdmin: spec.isSuperAdmin,
     groupSlug: spec.groupSlug,
   };

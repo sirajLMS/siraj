@@ -145,6 +145,63 @@ export function assertProfileEditFieldGroups(ctx: FieldFilterContext, submittedG
   }
 }
 
+const KEY_INCLUDES = <T extends string>(keys: readonly T[], key: string): boolean => keys.includes(key as T);
+
+function collectCoreGroups(core: Record<string, unknown>, groups: Set<string>): void {
+  if (["name", "email", "avatarUrl", "displayCurrency"].some(key => key in core)) {
+    groups.add("core_identity");
+  }
+  if ("phone" in core) {
+    groups.add("core_contact");
+  }
+}
+
+function collectTeacherGroups(
+  teacher: Record<string, unknown>,
+  scope: ProfileScope,
+  groups: Set<string>
+): void {
+  const teacherKeys = Object.keys(teacher);
+
+  if (teacherKeys.some(key => ["qualifications", "hourlyRate", "rateCurrency"].includes(key))) {
+    groups.add("teacher_professional");
+  }
+  if (teacherKeys.some(key => ["nationalId", "dateOfBirth", "gender", "address", "timezone", "status"].includes(key))) {
+    groups.add(scope === ProfileScope.OTHER ? "teacher_identity" : "teacher_professional");
+  }
+  if (KEY_INCLUDES(teacherKeys, "phone")) {
+    groups.add("core_contact");
+  }
+}
+
+function collectParentGroups(parent: Record<string, unknown>, groups: Set<string>): void {
+  const parentKeys = Object.keys(parent);
+
+  if (parentKeys.some(key => ["facebook", "whatsapp", "twitter"].includes(key))) {
+    groups.add("parent_social");
+  }
+  if (parentKeys.some(key => ["nationality", "address", "timezone"].includes(key))) {
+    groups.add("parent_identity");
+  }
+  if (parentKeys.some(key => ["invoiceType", "feeAmount", "currency", "lifecycleStatus"].includes(key))) {
+    groups.add("parent_billing");
+  }
+  if (KEY_INCLUDES(parentKeys, "phone")) {
+    groups.add("core_contact");
+  }
+}
+
+function collectStaffGroups(staff: Record<string, unknown>, groups: Set<string>): void {
+  const staffKeys = Object.keys(staff);
+
+  if (KEY_INCLUDES(staffKeys, "phone")) {
+    groups.add("core_contact");
+  }
+  if (KEY_INCLUDES(staffKeys, "status") || staffKeys.some(key => ["hourlyRate", "rateCurrency"].includes(key))) {
+    groups.add("staff_role");
+  }
+}
+
 export function collectProfileEditGroupsFromUpdate(
   audience: ProfileAudience,
   scope: ProfileScope,
@@ -158,56 +215,16 @@ export function collectProfileEditGroupsFromUpdate(
   const groups = new Set<string>();
 
   if (input.core) {
-    if ("name" in input.core || "email" in input.core || "avatarUrl" in input.core || "displayCurrency" in input.core) {
-      groups.add("core_identity");
-    }
-    if ("phone" in input.core) {
-      groups.add("core_contact");
-    }
+    collectCoreGroups(input.core, groups);
   }
-
   if (input.teacher && audience === ProfileAudience.TEACHER) {
-    const teacherKeys = Object.keys(input.teacher);
-    if (teacherKeys.some(key => ["qualifications", "hourlyRate", "rateCurrency"].includes(key))) {
-      groups.add("teacher_professional");
-    }
-    if (
-      teacherKeys.some(key => ["nationalId", "dateOfBirth", "gender", "address", "timezone", "status"].includes(key))
-    ) {
-      groups.add(scope === ProfileScope.OTHER ? "teacher_identity" : "teacher_professional");
-    }
-    if (teacherKeys.includes("phone")) {
-      groups.add("core_contact");
-    }
+    collectTeacherGroups(input.teacher, scope, groups);
   }
-
   if (input.parent && audience === ProfileAudience.PARENT) {
-    const parentKeys = Object.keys(input.parent);
-    if (parentKeys.some(key => ["facebook", "whatsapp", "twitter"].includes(key))) {
-      groups.add("parent_social");
-    }
-    if (parentKeys.some(key => ["nationality", "address", "timezone"].includes(key))) {
-      groups.add("parent_identity");
-    }
-    if (parentKeys.some(key => ["invoiceType", "feeAmount", "currency", "lifecycleStatus"].includes(key))) {
-      groups.add("parent_billing");
-    }
-    if (parentKeys.includes("phone")) {
-      groups.add("core_contact");
-    }
+    collectParentGroups(input.parent, groups);
   }
-
   if (input.staff && audience === ProfileAudience.STAFF) {
-    const staffKeys = Object.keys(input.staff);
-    if (staffKeys.includes("phone")) {
-      groups.add("core_contact");
-    }
-    if (staffKeys.includes("status")) {
-      groups.add("staff_role");
-    }
-    if (staffKeys.some(key => ["hourlyRate", "rateCurrency"].includes(key))) {
-      groups.add("staff_role");
-    }
+    collectStaffGroups(input.staff, groups);
   }
 
   return [...groups];

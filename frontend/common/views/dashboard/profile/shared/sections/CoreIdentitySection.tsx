@@ -6,7 +6,7 @@ import { Stack, TextField } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, UserAvatar } from "@/frontend/common/components/ui";
-import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
+import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";

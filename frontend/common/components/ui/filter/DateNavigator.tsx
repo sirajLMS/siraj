@@ -3,7 +3,7 @@
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
-import type { DateNavigatorProps } from "./DateNavigator.types";
+import type { DateNavigatorProps } from "@/frontend/common/components/ui/filter/DateNavigator.types";
 
 const lazyViews = createLazyView<DateNavigatorProps>(
   () =>

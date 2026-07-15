@@ -45,6 +45,8 @@ export const errors: ErrorsLabels = {
     permissionGroupNameTooLong: "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
     permissionGroupInvalidName: "اسم المجموعة غير صالح.",
     cannotModifySuperAdmin: "لا يمكن تعديل المستخدم المسؤول الأعلى.",
+    cannotModifySystemPermissionGroup: "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام",
+    cannotDeleteSystemPermissionGroup: "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام",
   },
   billing: {
     invoiceNotFound: (id: string) => `الفاتورة غير موجودة: ${id}`,
@@ -66,6 +68,8 @@ export const errors: ErrorsLabels = {
       expectedVersion: number;
       gotVersion: number;
     }) => `عدم تطابق في إصدار الفاتورة ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
+    exchangeRateStale: ({ fromCurrency, toCurrency }: { fromCurrency: string; toCurrency: string }) =>
+      `سعر الصرف لـ ${fromCurrency} إلى ${toCurrency} قديم (أقدم من 24 ساعة)`,
   },
   credit: {
     duplicatePurchase: "تمت معالجة عملية شراء الرصيد هذه بالفعل.",

@@ -8,12 +8,17 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { randomUUID } from "node:crypto";
 
 let tErrors: ErrorsLabels;
 
 beforeAll(async () => {
   tErrors = await getServerTranslations("en", "errors");
 });
+
+function generateTestPassword(): string {
+  return `TestPassword-${randomUUID().slice(0, 8)}!`;
+}
 
 describe("TeacherOnboardingService.createTeacher", () => {
   test("rejects unauthorized user", async () => {
@@ -26,7 +31,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
         {
           name: "Test",
           email: "test@test.com",
-          password: "TestPassword1!",
+          password: generateTestPassword(),
           timezone: "UTC",
         },
         tErrors
@@ -52,7 +57,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
         {
           name: "New Teacher",
           email: "newteacher@test.com",
-          password: "TestPassword1!",
+          password: generateTestPassword(),
           timezone: IanaTimezone.America_New_York,
           nationality: "US",
           phone: "+1234567890",
@@ -99,7 +104,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
         {
           name: "Dup Teacher",
           email: "existing@test.com",
-          password: "TestPassword1!",
+          password: generateTestPassword(),
           timezone: "UTC",
         },
         tErrors
@@ -131,7 +136,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
         {
           name: "Rollback Teacher",
           email: createdEmail,
-          password: "TestPassword1!",
+          password: generateTestPassword(),
           timezone: "UTC",
         },
         tErrors

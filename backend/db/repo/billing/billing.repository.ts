@@ -132,9 +132,9 @@ export namespace BillingRepository {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     if (latest.effectiveDate < twentyFourHoursAgo) {
       throw new Error(
-        tErrors.file.recordNotFound({
-          tableName: "currency_exchange_rates",
-          entityId: `${fromCurrency}_${toCurrency}`,
+        tErrors.billing.exchangeRateStale({
+          fromCurrency,
+          toCurrency,
         })
       );
     }

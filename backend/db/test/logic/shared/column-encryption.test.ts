@@ -50,7 +50,7 @@ describe("Column-Level Encryption", () => {
       const now = new Date();
       const uniqueSuffix = randomUUID();
       const plainNationalId = "NID-999-888-777";
-      const plainPassword = "zoom-secret-password";
+      const plainPassword = `zoom-secret-${randomUUID()}`;
 
       const user = await createTestUser(tx, uniqueSuffix, now);
       const teacher = await insertTeacherDetails({ tx, userId: user.id, plainNationalId, now });
@@ -78,6 +78,29 @@ describe("Column-Level Encryption", () => {
       expect(drizzleConfig?.encryptedSecret).toBe(plainPassword);
 
       testLogger.info("Successfully verified column-level encryption and decryption.");
+    });
+  });
+
+  test("verifies encryption produces different ciphertexts for same plaintext", async () => {
+    await runInRollback(async tx => {
+      const now = new Date();
+      const uniqueSuffix1 = randomUUID();
+      const uniqueSuffix2 = randomUUID();
+      const plainNationalId = "NID-SAME-111-222";
+
+      const user1 = await createTestUser(tx, uniqueSuffix1, now);
+      const teacher1 = await insertTeacherDetails({ tx, userId: user1.id, plainNationalId, now });
+
+      const user2 = await createTestUser(tx, uniqueSuffix2, now);
+      const teacher2 = await insertTeacherDetails({ tx, userId: user2.id, plainNationalId, now });
+
+      const raw1 = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher1.id}`);
+      const raw2 = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher2.id}`);
+      const row1 = "rows" in raw1 ? raw1.rows : (raw1 as unknown as Record<string, unknown>[]);
+      const row2 = "rows" in raw2 ? raw2.rows : (raw2 as unknown as Record<string, unknown>[]);
+
+      expect(row1[0]?.national_id).not.toBe(row2[0]?.national_id);
+      expect(String(row1[0]?.national_id)).not.toBe(String(row2[0]?.national_id));
     });
   });
 });

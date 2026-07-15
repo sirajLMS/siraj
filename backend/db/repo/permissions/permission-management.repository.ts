@@ -347,7 +347,7 @@ export namespace PermissionManagementRepository {
       }
 
       if (existing.isSystem) {
-        throw new Error(tFunc("cannotModifySystemPermissionGroup"));
+        throw new Error(tFunc("permissionManagement.cannotModifySystemPermissionGroup"));
       }
 
       const now = new Date();
@@ -418,7 +418,7 @@ export namespace PermissionManagementRepository {
       }
 
       if (existing.isSystem) {
-        throw new Error(tFunc("cannotDeleteSystemPermissionGroup"));
+        throw new Error(tFunc("permissionManagement.cannotDeleteSystemPermissionGroup"));
       }
 
       await t.delete(permissionGroups).where(eq(permissionGroups.id, groupId));

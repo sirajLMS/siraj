@@ -3,7 +3,7 @@ import { ForbiddenError, getServerUserContext, logger, NotFoundError } from "@/b
 import { BillingManagementService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: invoiceId } = await params;
 
   const { userId, context } = await getServerUserContext();
@@ -11,8 +11,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // todo: use locale from request headers instead of hardcoding "ar"
-  const tErrors = await getServerTranslations("ar", "errors");
+  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] || "ar";
+  const tErrors = await getServerTranslations(locale, "errors");
 
   try {
     await BillingManagementService.verifyInvoiceAccess(userId, invoiceId, context, tErrors);

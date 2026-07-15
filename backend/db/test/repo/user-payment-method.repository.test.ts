@@ -48,6 +48,7 @@ describe("UserPaymentMethodRepository", () => {
       tx
     );
 
+    expect(created).toBeDefined();
     expect(created.id).toBeDefined();
     expect(created.userId).toBe(user.id);
 
@@ -55,9 +56,11 @@ describe("UserPaymentMethodRepository", () => {
     expect(listed.some(row => row.id === created.id)).toBe(true);
 
     const fetched = await UserPaymentMethodRepository.getById(created.id, tx);
+    expect(fetched).toBeDefined();
     expect(fetched?.label).toBe("Cash at office");
 
     const updated = await UserPaymentMethodRepository.update(created.id, { label: "Updated label" }, tErrors, tx);
+    expect(updated).toBeDefined();
     expect(updated.label).toBe("Updated label");
 
     await UserPaymentMethodRepository.deleteById(created.id, tErrors, tx);
@@ -95,6 +98,8 @@ describe("UserPaymentMethodRepository", () => {
     const payinAfter = await UserPaymentMethodRepository.getById(payinDefault.id, tx);
     const payoutAfter = await UserPaymentMethodRepository.getById(payoutDefault.id, tx);
 
+    expect(payinAfter).toBeDefined();
+    expect(payoutAfter).toBeDefined();
     expect(payinAfter?.isDefault).toBe(false);
     expect(payoutAfter?.isDefault).toBe(true);
   });
@@ -115,6 +120,7 @@ describe("UserPaymentMethodRepository", () => {
     );
 
     const verified = await UserPaymentMethodRepository.setVerified(method.id, admin.id, tErrors, tx);
+    expect(verified).toBeDefined();
     expect(verified.verifiedAt).not.toBeNull();
     expect(verified.verifiedByUserId).toBe(admin.id);
   });

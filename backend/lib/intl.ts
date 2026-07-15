@@ -1,4 +1,5 @@
 import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { logger } from "@/backend/lib/logger";
 import type { CommonLabels } from "@/shared/locale/types/common";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { MessageSchema } from "@/shared/locale/types/message";
@@ -7,7 +8,7 @@ import type { SessionLabels } from "@/shared/locale/types/session";
 /**
  * Compatibility wrapper: provides the old string-key API on top of the new typed objects.
  * Usage: const t = await getBackendTranslations({ locale, namespace: "errors" });
- *        t("auth.unauthorizedAction") // works like old next-intl
+   10|  *        t("auth.unauthorizedAction") // works like old next-intl
  *
  * Also supports dotted namespace paths like "emails.complaintResponse" for backwards compatibility.
  */
@@ -39,7 +40,7 @@ export async function getBackendTranslations(opts: {
       if (targetTranslations && typeof targetTranslations === "object" && part in targetTranslations) {
         targetTranslations = (targetTranslations as Record<string, unknown>)[part];
       } else {
-        console.warn(`[getBackendTranslations] Missing translation sub-path: ${subPath} in namespace ${namespace}`);
+        logger.warn(`[getBackendTranslations] Missing translation sub-path: ${subPath} in namespace ${namespace}`);
         targetTranslations = {};
         break;
       }
@@ -54,7 +55,7 @@ export async function getBackendTranslations(opts: {
       if (current && typeof current === "object" && part in current) {
         current = (current as Record<string, unknown>)[part];
       } else {
-        console.warn(`[getBackendTranslations] Missing translation key: ${key} in namespace ${opts.namespace}`);
+        logger.warn(`[getBackendTranslations] Missing translation key: ${key} in namespace ${opts.namespace}`);
         return key;
       }
     }

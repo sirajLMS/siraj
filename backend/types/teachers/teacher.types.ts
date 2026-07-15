@@ -18,8 +18,6 @@ export type TeacherEntityInput = typeof teachers.$inferInsert;
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
 export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;
 
-export type TeacherPaymentReturnType = TeacherPaymentSelectType;
-
 export type CreateTeacherPaymentInput = {
   readonly teacherId: string;
   readonly amount: string;

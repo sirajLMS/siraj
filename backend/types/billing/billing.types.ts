@@ -38,8 +38,6 @@ export type InvoiceSubmitInput = Omit<
 export type PaymentSelectType = typeof payments.$inferSelect;
 export type PaymentInsertType = typeof payments.$inferInsert;
 
-export type PaymentReturnType = PaymentSelectType;
-
 export type PaymentSubmitInput = Omit<
   PaymentInsertType,
   | "id"
@@ -132,8 +130,6 @@ export type UpsertManualExchangeRateResult = {
 
 export type CurrencyHedgeSelectType = typeof currencyHedges.$inferSelect;
 export type CurrencyHedgeInsertType = typeof currencyHedges.$inferInsert;
-
-export type CurrencyHedgeReturnType = CurrencyHedgeSelectType;
 
 export type CurrencyHedgeSubmitInput = Omit<CurrencyHedgeInsertType, "id" | "createdAt" | "updatedAt">;
 

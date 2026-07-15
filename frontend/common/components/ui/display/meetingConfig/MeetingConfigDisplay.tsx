@@ -54,6 +54,69 @@ function resolveSourceLabel(
   return t.sourceNone;
 }
 
+function getDetailRows(
+  config: MeetingConfigDisplayData,
+  t: MeetingConfigDisplayLabels,
+  locale: string
+): React.ReactNode[] {
+  const details = config.details ?? {};
+  const rows: React.ReactNode[] = [];
+
+  if (config.label) {
+    rows.push(
+      <DetailRow key="label" label={t.label}>
+        <Typography sx={{ typography: "bodyMd" }}>{config.label}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.meetingUrl) {
+    rows.push(
+      <DetailRow key="meetingUrl" label={t.display.meetingUrl}>
+        <Typography sx={{ typography: "bodyMd" }} dir="ltr">
+          {config.masked ? "••••••••" : details.meetingUrl}
+        </Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.username) {
+    rows.push(
+      <DetailRow key="username" label={t.display.username}>
+        <Typography sx={{ typography: "bodyMd" }}>{details.username}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.tenantId) {
+    rows.push(
+      <DetailRow key="tenantId" label={t.display.tenantId}>
+        <Typography sx={{ typography: "bodyMd" }}>{details.tenantId}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (config.meetingId) {
+    rows.push(
+      <DetailRow key="meetingId" label={t.display.meetingId}>
+        <Typography sx={{ typography: "bodyMd" }} dir="ltr">
+          {config.meetingId}
+        </Typography>
+      </DetailRow>
+    );
+  }
+
+  if (config.showSource && config.source) {
+    rows.push(
+      <DetailRow key="source" label={t.display.source}>
+        <Typography sx={{ typography: "bodyMd" }}>{resolveSourceLabel(config.source, t.display)}</Typography>
+      </DetailRow>
+    );
+  }
+
+  return rows;
+}
+
 export function effectiveMeetingToDisplayData(meeting: EffectiveMeetingFieldsFragment): MeetingConfigDisplayData {
   return {
     providerSlug: meeting.providerSlug,
@@ -75,7 +138,7 @@ export function MeetingConfigDisplay({
   const details = config.details ?? {};
   const providerTitle = config.providerName
     ? resolveLocalizedString(config.providerName, locale)
-    : (config.providerSlug ?? config.label ?? "");
+    : config.providerSlug ?? config.label ?? "";
 
   if (!details.meetingUrl && !providerTitle) {
     return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t.display.noMeeting}</Typography>;
@@ -93,42 +156,7 @@ export function MeetingConfigDisplay({
         {config.hasSecret ? <Chip size="small" variant="outlined" label={t.display.passwordProtected} /> : null}
       </Stack>
 
-      <Stack spacing={0.75}>
-        {config.label ? (
-          <DetailRow label={t.label}>
-            <Typography sx={{ typography: "bodyMd" }}>{config.label}</Typography>
-          </DetailRow>
-        ) : null}
-        {details.meetingUrl ? (
-          <DetailRow label={t.display.meetingUrl}>
-            <Typography sx={{ typography: "bodyMd" }} dir="ltr">
-              {config.masked ? "••••••••" : details.meetingUrl}
-            </Typography>
-          </DetailRow>
-        ) : null}
-        {details.username ? (
-          <DetailRow label={t.display.username}>
-            <Typography sx={{ typography: "bodyMd" }}>{details.username}</Typography>
-          </DetailRow>
-        ) : null}
-        {details.tenantId ? (
-          <DetailRow label={t.display.tenantId}>
-            <Typography sx={{ typography: "bodyMd" }}>{details.tenantId}</Typography>
-          </DetailRow>
-        ) : null}
-        {config.meetingId ? (
-          <DetailRow label={t.display.meetingId}>
-            <Typography sx={{ typography: "bodyMd" }} dir="ltr">
-              {config.meetingId}
-            </Typography>
-          </DetailRow>
-        ) : null}
-        {showSource && config.source ? (
-          <DetailRow label={t.display.source}>
-            <Typography sx={{ typography: "bodyMd" }}>{resolveSourceLabel(config.source, t.display)}</Typography>
-          </DetailRow>
-        ) : null}
-      </Stack>
+      <Stack spacing={0.75}>{getDetailRows(config, t, locale)}</Stack>
     </Stack>
   );
 }

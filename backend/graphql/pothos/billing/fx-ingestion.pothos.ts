@@ -216,8 +216,7 @@ gqlSchemaBuilder.queryField("latestFxSyncRun", t =>
       if (!syncRun) {
         return null;
       }
-      const { providerResponse: _providerResponse, ...rest } = syncRun;
-      void _providerResponse;
+      const { providerResponse, ...rest } = syncRun;
       return {
         ...rest,
         provider: syncRun.provider as FxProvider,

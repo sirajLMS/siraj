@@ -16,12 +16,6 @@ function loc(en: string) {
   return { en, ar: en };
 }
 
-function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
-  test(name, async () => {
-    await runInRollback(fn);
-  });
-}
-
 const badTx = {
   select: () => {
     throw new Error("Mock database error");
@@ -47,18 +41,23 @@ describe("SupportedMobileWalletRepository", () => {
       tx
     );
 
+    expect(created).toBeDefined();
     expect(created.slug).toBe(slug);
+    expect(created.id).toBeDefined();
 
     const bySlug = await SupportedMobileWalletRepository.getBySlug(slug, tx);
+    expect(bySlug).toBeDefined();
     expect(bySlug?.id).toBe(created.id);
 
     const active = await SupportedMobileWalletRepository.listActive({ direction: PaymentDirection.PAYIN }, tx);
     expect(active.some(row => row.id === created.id)).toBe(true);
 
     const updated = await SupportedMobileWalletRepository.update(created.id, { phoneRegion: "EG" }, tErrors, tx);
+    expect(updated).toBeDefined();
     expect(updated.phoneRegion).toBe("EG");
 
     const deactivated = await SupportedMobileWalletRepository.deactivate(created.id, tErrors, tx);
+    expect(deactivated).toBeDefined();
     expect(deactivated.isActive).toBe(false);
   });
 

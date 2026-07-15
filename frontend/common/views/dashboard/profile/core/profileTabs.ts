@@ -31,6 +31,64 @@ export const profileTabs: readonly ProfileTabDefinition[] = [
   { id: "permissions", i18nKey: "shell.tabs.permissions" },
 ] as const;
 
+function isPermissionsTabVisible(
+  audience: ProfileAudience,
+  scope: ProfileScope,
+  hasPermission: (permission: AppPermission) => boolean,
+): boolean {
+  const staffPermissions =
+    audience === "STAFF" && scope === ProfileScope.Other
+      ? hasPermission(AppPermission.ProfileStaffPermissionsViewOther)
+      : false;
+  const legacyEdit = hasPermission(AppPermission.UserEditProfile);
+  return staffPermissions || legacyEdit;
+}
+
+function isStudentsTabVisible(hasPermission: (permission: AppPermission) => boolean): boolean {
+  return hasPermission(AppPermission.ProfileTeacherStudentsViewOther);
+}
+
+function isPaymentMethodsTabVisible(
+  scope: ProfileScope,
+  hasPermission: (permission: AppPermission) => boolean,
+): boolean {
+  const viewPermission =
+    scope === ProfileScope.Own
+      ? AppPermission.ProfilePaymentMethodsViewOwn
+      : AppPermission.ProfilePaymentMethodsViewOther;
+  return hasPermission(viewPermission);
+}
+
+function isMeetingTabVisible(scope: ProfileScope, hasPermission: (permission: AppPermission) => boolean): boolean {
+  const viewPermission =
+    scope === ProfileScope.Own
+      ? AppPermission.ProfileMeetingConfigsViewOwn
+      : AppPermission.ProfileMeetingConfigsViewOther;
+  const managePermission =
+    scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
+  return hasPermission(viewPermission) || hasPermission(managePermission);
+}
+
+function isTabPermitted(
+  tab: ProfileTabDefinition,
+  audience: ProfileAudience,
+  scope: ProfileScope,
+  hasPermission: (permission: AppPermission) => boolean,
+): boolean {
+  switch (tab.id) {
+    case "permissions":
+      return isPermissionsTabVisible(audience, scope, hasPermission);
+    case "students":
+      return isStudentsTabVisible(hasPermission);
+    case "paymentMethods":
+      return isPaymentMethodsTabVisible(scope, hasPermission);
+    case "meeting":
+      return isMeetingTabVisible(scope, hasPermission);
+    default:
+      return true;
+  }
+}
+
 export function getVisibleProfileTabs({
   audience,
   scope,
@@ -46,44 +104,6 @@ export function getVisibleProfileTabs({
     if (!TAB_VISIBILITY[tab.id].includes(visibilityKey)) {
       return false;
     }
-
-    if (tab.id === "permissions") {
-      const staffPermissions =
-        audience === "STAFF" && scope === ProfileScope.Other
-          ? hasPermission(AppPermission.ProfileStaffPermissionsViewOther)
-          : false;
-      const legacyEdit = hasPermission(AppPermission.UserEditProfile);
-      if (!staffPermissions && !legacyEdit) {
-        return false;
-      }
-    }
-
-    if (tab.id === "students" && !hasPermission(AppPermission.ProfileTeacherStudentsViewOther)) {
-      return false;
-    }
-
-    if (tab.id === "paymentMethods") {
-      const viewPermission =
-        scope === ProfileScope.Own
-          ? AppPermission.ProfilePaymentMethodsViewOwn
-          : AppPermission.ProfilePaymentMethodsViewOther;
-      if (!hasPermission(viewPermission)) {
-        return false;
-      }
-    }
-
-    if (tab.id === "meeting") {
-      const viewPermission =
-        scope === ProfileScope.Own
-          ? AppPermission.ProfileMeetingConfigsViewOwn
-          : AppPermission.ProfileMeetingConfigsViewOther;
-      const managePermission =
-        scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
-      if (!hasPermission(viewPermission) && !hasPermission(managePermission)) {
-        return false;
-      }
-    }
-
-    return true;
+    return isTabPermitted(tab, audience, scope, hasPermission);
   });
 }

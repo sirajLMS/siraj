@@ -7,7 +7,7 @@ import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGri
 import {
   CurrencyDisplay,
   CurrencyDisplayPart,
-} from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
+} from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { exchangeRateHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";

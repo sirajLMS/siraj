@@ -63,6 +63,117 @@ function DetailRow({ label, children }: { readonly label: string; readonly child
   );
 }
 
+function getDetailRows(
+  method: PaymentMethodDisplayData,
+  tDisplay: ReturnType<typeof useAppTranslation>["display"],
+  tType: Record<string, string>,
+  tDirection: Record<string, string>
+): React.ReactNode[] {
+  const details = method.details ?? {};
+  const rows: React.ReactNode[] = [];
+
+  const typeLabel = method.type
+    ? getPaymentMethodTypeLabel(method.type, key => tType[key as keyof typeof tType] ?? "")
+    : "";
+  const directionLabel = method.direction
+    ? getPaymentMethodDirectionLabel(method.direction, key => tDirection[key as keyof typeof tDirection] ?? "")
+    : "";
+
+  if (typeLabel) {
+    rows.push(
+      <DetailRow key="type" label={tDisplay.columnType}>
+        <Typography sx={{ typography: "bodyMd" }}>{typeLabel}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (directionLabel) {
+    rows.push(
+      <DetailRow key="direction" label={tDisplay.columnDirection}>
+        <Typography sx={{ typography: "bodyMd" }}>{directionLabel}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (method.countryCode) {
+    rows.push(
+      <DetailRow key="country" label={tDisplay.country}>
+        <CountryDisplay code={method.countryCode} />
+      </DetailRow>
+    );
+  }
+
+  if (method.currencyCode) {
+    rows.push(
+      <DetailRow key="currency" label={tDisplay.currency}>
+        <CurrencyDisplay code={method.currencyCode} />
+      </DetailRow>
+    );
+  }
+
+  if (details.phone) {
+    rows.push(
+      <DetailRow key="phone" label={tDisplay.phone}>
+        <PhoneDisplay phone={details.phone} masked={method.masked} />
+      </DetailRow>
+    );
+  }
+
+  if (details.url) {
+    rows.push(
+      <DetailRow key="url" label={tDisplay.url}>
+        <Typography sx={{ typography: "bodyMd" }} dir="ltr">
+          {details.url}
+        </Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.identifier) {
+    rows.push(
+      <DetailRow key="identifier" label={tDisplay.identifier}>
+        <Typography sx={{ typography: "bodyMd" }}>{details.identifier}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.bankName) {
+    rows.push(
+      <DetailRow key="bankName" label={tDisplay.bankName}>
+        <Typography sx={{ typography: "bodyMd" }}>{details.bankName}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.beneficiaryName) {
+    rows.push(
+      <DetailRow key="beneficiaryName" label={tDisplay.beneficiaryName}>
+        <Typography sx={{ typography: "bodyMd" }}>{details.beneficiaryName}</Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.iban) {
+    rows.push(
+      <DetailRow key="iban" label={tDisplay.iban}>
+        <Typography sx={{ typography: "bodyMd" }} dir="ltr">
+          {method.masked ? "••••••••" : details.iban}
+        </Typography>
+      </DetailRow>
+    );
+  }
+
+  if (details.note) {
+    rows.push(
+      <DetailRow key="note" label={tDisplay.note}>
+        <Typography sx={{ typography: "bodyMd" }}>{details.note}</Typography>
+      </DetailRow>
+    );
+  }
+
+  return rows;
+}
+
 export function PaymentMethodDisplay({
   method,
   showStatus = true,
@@ -103,65 +214,7 @@ export function PaymentMethodDisplay({
       </Stack>
 
       <Stack spacing={0.75}>
-        {typeLabel ? (
-          <DetailRow label={t.list.columnType}>
-            <Typography sx={{ typography: "bodyMd" }}>{typeLabel}</Typography>
-          </DetailRow>
-        ) : null}
-        {showDirection && directionLabel ? (
-          <DetailRow label={t.list.columnDirection}>
-            <Typography sx={{ typography: "bodyMd" }}>{directionLabel}</Typography>
-          </DetailRow>
-        ) : null}
-        {method.countryCode ? (
-          <DetailRow label={t.typeFields.country}>
-            <CountryDisplay code={method.countryCode} />
-          </DetailRow>
-        ) : null}
-        {method.currencyCode ? (
-          <DetailRow label={t.typeFields.currency}>
-            <CurrencyDisplay code={method.currencyCode} />
-          </DetailRow>
-        ) : null}
-        {details.phone ? (
-          <DetailRow label={tDisplay.phone}>
-            <PhoneDisplay phone={details.phone} masked={method.masked} />
-          </DetailRow>
-        ) : null}
-        {details.url ? (
-          <DetailRow label={tDisplay.url}>
-            <Typography sx={{ typography: "bodyMd" }} dir="ltr">
-              {details.url}
-            </Typography>
-          </DetailRow>
-        ) : null}
-        {details.identifier ? (
-          <DetailRow label={tDisplay.identifier}>
-            <Typography sx={{ typography: "bodyMd" }}>{details.identifier}</Typography>
-          </DetailRow>
-        ) : null}
-        {details.bankName ? (
-          <DetailRow label={tDisplay.bankName}>
-            <Typography sx={{ typography: "bodyMd" }}>{details.bankName}</Typography>
-          </DetailRow>
-        ) : null}
-        {details.beneficiaryName ? (
-          <DetailRow label={tDisplay.beneficiaryName}>
-            <Typography sx={{ typography: "bodyMd" }}>{details.beneficiaryName}</Typography>
-          </DetailRow>
-        ) : null}
-        {details.iban ? (
-          <DetailRow label={tDisplay.iban}>
-            <Typography sx={{ typography: "bodyMd" }} dir="ltr">
-              {method.masked ? "••••••••" : details.iban}
-            </Typography>
-          </DetailRow>
-        ) : null}
-        {details.note ? (
-          <DetailRow label={tDisplay.note}>
-            <Typography sx={{ typography: "bodyMd" }}>{details.note}</Typography>
-          </DetailRow>
-        ) : null}
+        {getDetailRows(method, tDisplay, t.type, t.direction)}
       </Stack>
     </Stack>
   );

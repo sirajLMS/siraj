@@ -208,7 +208,10 @@ describe("PermissionManagementService Business Logic", () => {
   describe("Access Control (Authorization Guards)", () => {
     test("listPermissions should throw unauthorized for non-admin", async () => {
       mockContext = userContext();
-      await assertThrows(() => PermissionManagementService.listPermissions(regularUser.id, tErrors), "Unauthorized");
+      await assertThrows(
+        () => PermissionManagementService.listPermissions(regularUser.id, tErrors),
+        "You do not have sufficient permissions to perform this action."
+      );
     });
 
     test("listPermissions should allow admin with manage permission", async () => {
@@ -246,7 +249,7 @@ describe("PermissionManagementService Business Logic", () => {
             { name: loc("a".repeat(256)), permissionIds: [] },
             tErrors
           ),
-        "Permission group name cannot exceed 255 characters"
+        "Permission group name is too long (max 255 characters)."
       );
     });
 
@@ -379,7 +382,7 @@ describe("PermissionManagementService Business Logic", () => {
           },
           tErrors
         ),
-      "Cannot modify permissions of a SuperAdmin user"
+      "Cannot modify super admin user."
     );
   });
 

@@ -9,28 +9,13 @@ import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
-
-export const CurrencyDisplayPart = {
-  Flag: "flag",
-  Label: "label",
-  Symbol: "symbol",
-  Code: "code",
-} as const;
-
-export type CurrencyDisplayPart = (typeof CurrencyDisplayPart)[keyof typeof CurrencyDisplayPart];
-
-/** Fixed render order regardless of the order in `parts`. */
-export const CURRENCY_DISPLAY_PART_ORDER: readonly CurrencyDisplayPart[] = [
-  CurrencyDisplayPart.Flag,
-  CurrencyDisplayPart.Label,
-  CurrencyDisplayPart.Symbol,
-  CurrencyDisplayPart.Code,
-];
-
-export const DEFAULT_CURRENCY_DISPLAY_PARTS: readonly CurrencyDisplayPart[] = [
-  CurrencyDisplayPart.Flag,
-  CurrencyDisplayPart.Symbol,
-];
+import {
+  CurrencyDisplayPart,
+  CURRENCY_DISPLAY_PART_ORDER,
+  DEFAULT_CURRENCY_DISPLAY_PARTS,
+  resolveCurrencyDisplayParts,
+  type CurrencyDisplayPartValue,
+} from "@/frontend/common/components/ui/display/currencyDisplay/currencyDisplay.constants";
 
 export type CurrencyDisplayProps = {
   readonly code?: CurrencyCode | string | null;
@@ -40,16 +25,11 @@ export type CurrencyDisplayProps = {
    *
    * When omitted or empty, defaults to flag + symbol.
    */
-  readonly parts?: readonly CurrencyDisplayPart[];
+  readonly parts?: readonly CurrencyDisplayPartValue[];
   readonly fallback?: string;
   readonly typographyVariant?: TypographyProps["variant"];
   readonly sx?: SxProps<Theme>;
 };
-
-function resolveCurrencyDisplayParts(parts?: readonly CurrencyDisplayPart[]): Set<CurrencyDisplayPart> {
-  const resolved = parts && parts.length > 0 ? parts : DEFAULT_CURRENCY_DISPLAY_PARTS;
-  return new Set(resolved);
-}
 
 export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   code,

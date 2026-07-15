@@ -4,7 +4,7 @@ import { MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
-import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
+import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";

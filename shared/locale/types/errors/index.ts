@@ -53,6 +53,8 @@ export interface PermissionManagementErrors {
   readonly permissionGroupNameTooLong: string;
   readonly permissionGroupInvalidName: string;
   readonly cannotModifySuperAdmin: string;
+  readonly cannotModifySystemPermissionGroup: string;
+  readonly cannotDeleteSystemPermissionGroup: string;
 }
 
 /**
@@ -69,6 +71,7 @@ export interface BillingErrors {
   readonly invalidInvoiceAmount: string;
   readonly parentNotFound: string;
   readonly invoiceVersionMismatch: (params: { id: string; expectedVersion: number; gotVersion: number }) => string;
+  readonly exchangeRateStale: (params: { fromCurrency: string; toCurrency: string }) => string;
 }
 
 /**
@@ -252,4 +255,5 @@ export interface ErrorsLabels {
   readonly studentBooked: string;
   readonly meetingUrlInUse: string;
   readonly sessionNotActivated: string;
+  readonly exchangeRateStale: (params: { fromCurrency: string; toCurrency: string }) => string;
 }

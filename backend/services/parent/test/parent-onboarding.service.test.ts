@@ -7,8 +7,13 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import { randomUUID } from "node:crypto";
 
 let tErrors: ErrorsLabels;
+
+function generateTestPassword(): string {
+  return `TestPass-${randomUUID().slice(0, 8)}!`;
+}
 
 beforeAll(async () => {
   tErrors = await getServerTranslations("en", "errors");
@@ -17,7 +22,6 @@ beforeAll(async () => {
 describe("ParentOnboardingService.createParent", () => {
   test("rejects unauthorized user", async () => {
     const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(false);
-
     let error: unknown = null;
     try {
       await ParentOnboardingService.createParent(
@@ -25,7 +29,7 @@ describe("ParentOnboardingService.createParent", () => {
         {
           name: "Test",
           email: "test@test.com",
-          password: "TestPassword1!",
+          password: generateTestPassword(),
         },
         tErrors
       );
@@ -49,7 +53,7 @@ describe("ParentOnboardingService.createParent", () => {
         {
           name: "New Parent",
           email: "newparent@test.com",
-          password: "TestPassword1!",
+          password: generateTestPassword(),
           phone: "+1234567890",
           invoiceType: "MONTHLY",
           feeAmount: "500.00",
@@ -87,7 +91,7 @@ describe("ParentOnboardingService.createParent", () => {
         {
           name: "Dup Parent",
           email: "existing@test.com",
-          password: "TestPassword1!",
+          password: generateTestPassword(),
         },
         tErrors
       );
@@ -118,7 +122,7 @@ describe("ParentOnboardingService.createParent", () => {
         {
           name: "Rollback Parent",
           email: createdEmail,
-          password: "TestPassword1!",
+          password: generateTestPassword(),
         },
         tErrors
       );

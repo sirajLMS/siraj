@@ -35,8 +35,9 @@ export namespace FxRateAdminService {
       actorUserId
     );
 
-    const { providerResponse: _providerResponse, ...rest } = rate;
-    void _providerResponse;
+    const { providerResponse: _unusedProviderResponse, ...rest } = rate;
+     
+    const _ = _unusedProviderResponse;
 
     return {
       id: rate.id,

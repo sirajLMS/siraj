@@ -41,8 +41,6 @@ export type MeetingProviderInsertType = {
   readonly updatedAt?: Date;
 };
 
-export type MeetingProviderReturnType = MeetingProviderSelectType;
-
 export type MeetingProviderSubmitInput = Omit<MeetingProviderInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type UpdateMeetingProviderInput = Partial<MeetingProviderSubmitInput>;

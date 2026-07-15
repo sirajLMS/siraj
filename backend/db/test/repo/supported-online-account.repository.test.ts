@@ -37,7 +37,12 @@ describe("SupportedOnlineAccountRepository", () => {
       tx
     );
 
+    expect(created).toBeDefined();
+    expect(created.slug).toBe(slug);
+    expect(created.id).toBeDefined();
+
     const bySlug = await SupportedOnlineAccountRepository.getBySlug(slug, tx);
+    expect(bySlug).toBeDefined();
     expect(bySlug?.identifierKind).toBe(IdentifierKind.EMAIL);
 
     const active = await SupportedOnlineAccountRepository.listActive({ direction: PaymentDirection.PAYIN }, tx);
@@ -49,6 +54,7 @@ describe("SupportedOnlineAccountRepository", () => {
       tErrors,
       tx
     );
+    expect(updated).toBeDefined();
     expect(updated.logoUrl).toBe("https://example.com/logo.png");
   });
 

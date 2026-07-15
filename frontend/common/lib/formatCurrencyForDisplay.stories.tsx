@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import {
   CurrencyDisplay,
   CurrencyDisplayPart,
-} from "@/frontend/common/components/ui/display/currencyDisplay/CurrencyDisplay";
+} from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
