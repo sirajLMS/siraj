@@ -54,6 +54,7 @@ const eslintConfig = defineConfig([
     "frontend/common/graphql/generated/**",
     "scratch/**",
     "**/unRefactored_tests/**",
+    ".agents/**",
     "*storybook.log",
     "storybook-static/**",
     ".playwright-mcp/**",
