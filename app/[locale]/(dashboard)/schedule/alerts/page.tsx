@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { ScheduleAlertsContainer } from "@/frontend/common/views/dashboard/schedule/alerts/ScheduleAlertsContainer";
+import { getTranslations } from "@/shared/locale/server";
 
 export async function generateMetadata({
   params,
@@ -8,8 +8,8 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.scheduleAlerts" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "dashboard.core.scheduleAlerts");
+  return { title: t.pageTitle };
 }
 
 export default function ScheduleAlertsPage() {

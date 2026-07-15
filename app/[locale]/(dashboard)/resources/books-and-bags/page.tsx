@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { BookService } from "@/backend/services/resource/book.service";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { BooksAndBagsClient } from "@/frontend/common/views/dashboard/resources/books-and-bags/BooksAndBagsClient";
 import type { BooksAndBagsPageProps } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
+import { getTranslations } from "@/shared/locale/server";
 
 function mapAvailabilityStatus(status: string): AvailabilityStatus {
   if (status === "OUT_OF_STOCK") {
@@ -20,13 +20,12 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "dashboard.booksAndBags" });
-  return { title: t("pageTitle") };
+  const t = await getTranslations(locale, "dashboard.booksAndBags");
+  return { title: t.pageTitle };
 }
 
 export default async function BooksAndBagsPage({ params }: BooksAndBagsPageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const { userId } = await getServerUserContext();
 

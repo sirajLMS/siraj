@@ -17,7 +17,7 @@ export async function generateMetadata({
 }
 
 export default async function ManagerOnboardingPage({ params }: Readonly<Props>) {
-  const { locale } = await params;
+  await params;
 
   return <ManagerOnboardingContainer />;
 }
