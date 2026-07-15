@@ -6,7 +6,7 @@ import type {
   ParentComplaintRecord,
   ParentStudentOption,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
 
 export type { ComplaintsLabels };
 

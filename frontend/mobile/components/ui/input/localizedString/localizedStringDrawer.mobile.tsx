@@ -22,14 +22,16 @@ import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/
 import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
 import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
+import type { LocalizedStringLabels } from "@/shared/locale/types/ui";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
+import type { LocalizedStringLabels } from "@/shared/locale/types/ui";
 
 type HelperTextParams = {
   readonly draft: LocalizedString;
   readonly required: boolean;
   readonly resolvedRequired: readonly AppLocale[];
   readonly uiLocale: string;
-  readonly t: ReturnType<typeof useAppTranslation>;
+  readonly t: LocalizedStringLabels;
 };
 
 function buildHelperText({ draft, required, resolvedRequired, uiLocale, t }: HelperTextParams): string | undefined {
@@ -118,7 +120,7 @@ type LocaleFieldProps = {
   readonly minRows: number | undefined;
   readonly disabled: boolean;
   readonly onChange: (locale: AppLocale, text: string) => void;
-  readonly t: ReturnType<typeof useAppTranslation>;
+  readonly t: LocalizedStringLabels;
 };
 
 const LocaleField: React.FC<LocaleFieldProps> = ({
@@ -178,7 +180,7 @@ type DrawerFooterProps = {
   readonly onSaveAction: (next: LocalizedString) => void;
   readonly draft: LocalizedString;
   readonly onCancelAction: () => void;
-  readonly t: ReturnType<typeof useAppTranslation>;
+  readonly t: LocalizedStringLabels;
 };
 
 const DrawerFooter: React.FC<DrawerFooterProps> = ({ canSave, saving, onSaveAction, draft, onCancelAction, t }) => {
@@ -259,7 +261,7 @@ export const LocalizedStringDrawerMobile: React.FC<LocalizedStringDrawerProps> =
     [autosave, dismissAction, canSave, draft, onSaveAction, onCancelAction]
   );
 
-  const headerTitle = useMemo(() => title ?? t.localizedString.editTranslations, [title, t]);
+  const headerTitle = useMemo(() => title ?? t.editTranslations, [title, t]);
   const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequired), [resolvedRequired]);
   const helperText = useMemo(
     () => buildHelperText({ draft, required, resolvedRequired, uiLocale, t }),

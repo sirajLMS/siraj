@@ -8,7 +8,7 @@ export const localizedString: LocalizedStringLabels = {
   drawerSubtitle: "تعديل كل الترجمات",
   switchLocale: "تبديل اللغة",
   atLeastOneTranslationRequired: "أدخل ترجمة واحدة على الأقل",
-  localeRequired: "{localeName} مطلوب لهذا الحقل",
-  localesRequired: "{localeNames} مطلوبة لهذا الحقل",
-  localeRequiredEntry: "{localeName} مطلوب",
+  localeRequired: (localeName: string) => `${localeName} مطلوب لهذا الحقل`,
+  localesRequired: (localeNames: string) => `${localeNames} مطلوبة لهذا الحقل`,
+  localeRequiredEntry: (localeName: string) => `${localeName} مطلوب`,
 };

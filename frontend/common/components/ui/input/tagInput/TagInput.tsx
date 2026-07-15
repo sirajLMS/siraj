@@ -116,7 +116,7 @@ function TagInputChipList({
 }
 
 export function TagInput({ label, placeholder, onChange, initialTags = [] }: TagInputProps) {
-  const t = useAppTranslation("ui").tagInput;
+  const t = useAppTranslation("ui.tagInput");
   const [tags, setTags] = useState<string[]>(initialTags);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);

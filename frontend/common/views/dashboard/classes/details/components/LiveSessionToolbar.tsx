@@ -367,10 +367,10 @@ export function LiveSessionToolbar({
         onLeaveClick={handleLeaveClick}
         onResetClick={handleResetClick}
         labels={{
-          startButton: t("startButton"),
-          absentButton: t("absentButton"),
-          leaveButton: t("leaveButton"),
-          resetButton: t("resetButton"),
+          startButton: t.startButton,
+          absentButton: t.absentButton,
+          leaveButton: t.leaveButton,
+          resetButton: t.resetButton,
         }}
       />
 
@@ -382,10 +382,10 @@ export function LiveSessionToolbar({
         onSubmit={handleAbsentSubmit}
         submitColor="warning"
         labels={{
-          title: t("absentDialogTitle"),
-          confirmation: t("absentConfirmation"),
-          cancel: t("cancel"),
-          submit: t("absentConfirm"),
+          title: t.absentDialogTitle,
+          confirmation: t.absentConfirmation,
+          cancel: t.cancel,
+          submit: t.absentConfirm,
         }}
       />
 
@@ -398,10 +398,10 @@ export function LiveSessionToolbar({
         onClose={handleLeaveClose}
         onSubmit={handleLeaveSubmit}
         labels={{
-          title: t("leaveDialogTitle"),
-          reasonLabel: t("leaveReasonLabel"),
-          cancel: t("cancel"),
-          submit: t("leaveSubmit"),
+          title: t.leaveDialogTitle,
+          reasonLabel: t.leaveReasonLabel,
+          cancel: t.cancel,
+          submit: t.leaveSubmit,
         }}
       />
 
@@ -413,10 +413,10 @@ export function LiveSessionToolbar({
         onSubmit={handleResetSubmit}
         submitColor="error"
         labels={{
-          title: t("resetDialogTitle"),
-          confirmation: t("resetConfirmation"),
-          cancel: t("cancel"),
-          submit: t("resetConfirm"),
+          title: t.resetDialogTitle,
+          confirmation: t.resetConfirmation,
+          cancel: t.cancel,
+          submit: t.resetConfirm,
         }}
       />
     </Box>

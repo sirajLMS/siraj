@@ -8,6 +8,7 @@ import { LocaleAdornmentSwitch } from "@/frontend/common/components/ui/input/loc
 import { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringDrawer";
 import { useLocaleSwitchSuccess } from "@/frontend/common/components/ui/input/localizedString/useLocaleSwitchSuccess";
 import { useNarrowContainer } from "@/frontend/common/components/ui/input/localizedString/useNarrowContainer";
+import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
 import { pickInitialActiveLocale, setLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import type { AppLocale, LocalizedString } from "@/frontend/common/types/localized-string.types";
@@ -223,7 +224,7 @@ const useLocalizedStringInputState = ({
   const inlineHelperText =
     errorMessage ??
     (activeRequired && fieldValue.trim() === "" && required
-      ? t.localeRequiredEntry({ localeName: t.locale[activeLocale as keyof typeof t.locale] })
+      ? t.localeRequiredEntry(getLanguageDisplayName(activeLocale, uiLocale))
       : helperText);
 
   const drawerResolvedTitle = drawerTitle ?? label ?? t.editTranslations;

@@ -111,7 +111,6 @@ const namespacePaths: Record<keyof MessageSchema, string> = {
   "ui.phoneInput": "ui/phoneInput",
   "ui.tagInput": "ui/tagInput",
   "ui.timezoneSelect": "ui/timezoneSelect",
-  ui: "ui/index",
 };
 
 /**

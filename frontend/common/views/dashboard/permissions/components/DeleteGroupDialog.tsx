@@ -34,7 +34,7 @@ export function DeleteGroupDialog({
     >
       <DialogTitle id="delete-group-dialog-title">{t.deleteConfirmTitle}</DialogTitle>
       <DialogContent>
-        <DialogContentText sx={{ mt: 1 }}>{t.deleteConfirmBody({ name: groupName })}</DialogContentText>
+        <DialogContentText sx={{ mt: 1 }}>{t.deleteConfirmBody(groupName)}</DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button

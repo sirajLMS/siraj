@@ -36,6 +36,7 @@ export interface PermissionsLabels {
   readonly actionAssign: string;
   readonly cancel: string;
   readonly save: string;
+  readonly saveOverrides: string;
   readonly deleteConfirmTitle: string;
   readonly deleteConfirmBody: (name: string) => string;
   readonly createGroupTitle: string;

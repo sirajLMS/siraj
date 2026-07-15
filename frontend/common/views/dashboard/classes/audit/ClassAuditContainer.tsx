@@ -100,8 +100,8 @@ function useAuditLabels(
     meetingInfo: {
       title: t.meeting.title,
       joinMeeting: t.meeting.joinMeeting,
-      capacityBadge: t.venue.capacityBadge({ count: 0 }),
-      capacity: t.venue.capacity({ count: 0 }),
+      capacityBadge: t.venue.capacityBadge(0),
+      capacity: t.venue.capacity(0),
       meetingIdLabel: t.meetingIdLabel,
       online: t.online,
       meetingIdNA: t.meetingIdNA,

@@ -21,6 +21,7 @@ export const directory: ParentsDirectoryLabels = {
     accountStatus: "Account",
     unpaidInvoices: "Unpaid Invoices",
     options: "Options",
+    guardianOf: name => `Guardian of ${name}`,
   },
   card: {
     guardianOf: name => `Guardian of ${name}`,

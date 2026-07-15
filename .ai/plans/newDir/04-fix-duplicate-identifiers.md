@@ -1,17 +1,17 @@
 ---
-name: "04: Fix duplicate identifiers in shared/locale/types/errors/index.ts"
-overview: "Remove duplicate 'sessionNotActivated' declaration"
+name: "04: Fix duplicate sessionNotActivated in errors/index.ts"
+overview: "Remove duplicate identifier in shared/locale/types/errors/index.ts"
 todos:
   - id: "1"
-    content: Remove duplicate sessionNotActivated line in shared/locale/types/errors/index.ts (line 152)
-    status: "pending"
+    content: Remove duplicate sessionNotActivated line 152 in errors/index.ts
+    status: "completed"
 isProject: false
 ---
 
 # Plan 04: Fix Duplicate Identifiers
 
-## Files to Modify
-- `shared/locale/types/errors/index.ts`
+## File to Modify
+- `shared/locale/types/errors/index.ts` - Line 134 and 152 both declare `sessionNotActivated`
 
-## Details
-Line 134 and line 152 both declare `readonly sessionNotActivated: string;`. Remove the duplicate at line 152.
+## Fix
+Remove the duplicate entry on line 152 (the second occurrence).

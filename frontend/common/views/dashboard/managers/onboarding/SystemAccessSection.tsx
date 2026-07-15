@@ -46,6 +46,7 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
         <StyledAccountTypeContainer>
           {ACCOUNT_TYPES.map(type => {
             const isSelected = field.value === type;
+            const labelKey = type.toLowerCase() as "manager" | "admin";
             return (
               <StyledAccountTypeButton
                 key={type}
@@ -56,7 +57,7 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
                   field.onChange(type);
                 }}
               >
-                {t.options.accountType[type.toLowerCase()]}
+                {t.options.accountType[labelKey]}
               </StyledAccountTypeButton>
             );
           })}
@@ -75,10 +76,20 @@ interface Props {
 export function SystemAccessSection({ register, control, errors }: Props) {
   const t = useAppTranslation("dashboard.managerOnboarding");
   const accountType = useWatch({ control, name: "accountType" });
-  const descriptionKey =
-    accountType === ManagerAccountType.Admin
-      ? "options.accountTypeDescriptions.admin"
-      : "options.accountTypeDescriptions.manager";
+
+  const getDescription = (): string => {
+    if (accountType === ManagerAccountType.Admin) {
+      return t.options.accountTypeDescriptions.admin;
+    }
+    return t.options.accountTypeDescriptions.manager;
+  };
+
+  const getPasswordError = (): string | undefined => {
+    if (!errors.password) return undefined;
+    const message = errors.password.message;
+    if (typeof message !== "string") return undefined;
+    return t.validation[message as keyof typeof t.validation];
+  };
 
   return (
     <SectionPanel title={t.sections.systemAccess}>
@@ -87,7 +98,7 @@ export function SystemAccessSection({ register, control, errors }: Props) {
           <FieldWrapper label={t.fields.accountType}>
             <AccountTypeToggle control={control} />
             <Typography variant="bodyMd" sx={theme => ({ mt: 1.5, color: theme.palette.text.secondary })}>
-              {t[descriptionKey]}
+              {getDescription()}
             </Typography>
           </FieldWrapper>
         </Grid>
@@ -95,7 +106,7 @@ export function SystemAccessSection({ register, control, errors }: Props) {
           <FieldWrapper
             label={t.fields.password}
             required
-            error={errors.password ? t[`validation.${errors.password.message}`] : undefined}
+            error={getPasswordError()}
           >
             <Input
               {...register("password")}

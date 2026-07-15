@@ -88,7 +88,7 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuItem onClick={() => handleAction(onAssignGroup)} id={`group-card-action-assign-${group.id}`}>
                 <PersonAddOutlined fontSize="small" sx={{ mr: 1 }} />
-                {t("actionAssign")}
+                {t.actionAssign}
               </MenuItem>
               <MenuItem
                 onClick={() => handleAction(onEditGroup)}
@@ -96,7 +96,7 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
                 id={`group-card-action-edit-${group.id}`}
               >
                 <EditOutlined fontSize="small" sx={{ mr: 1 }} />
-                {t("actionEdit")}
+                {t.actionEdit}
               </MenuItem>
               <MenuItem
                 onClick={() => handleAction(onDeleteGroup)}
@@ -107,7 +107,7 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
                 })}
               >
                 <DeleteOutlined fontSize="small" sx={{ mr: 1 }} />
-                {t("actionDelete")}
+                {t.actionDelete}
               </MenuItem>
             </Menu>
           </Box>
@@ -136,10 +136,10 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
           <StatusBadge
             category="session"
             status={group.isSystem ? "active" : "pending"}
-            label={group.isSystem ? t("systemBadge") : t("customBadge")}
+            label={group.isSystem ? t.systemBadge : t.customBadge}
           />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {permissionsCount} {t("columnPermissionsCount")}
+            {permissionsCount} {t.columnPermissionsCount}
           </Typography>
         </Box>
       </Box>

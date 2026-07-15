@@ -24,7 +24,7 @@ import {
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import { useRouter } from "@/shared/i18n/routing";
-import type { useAppTranslation } from "@/shared/locale/client";
+import { useAppTranslation } from "@/shared/locale/client";
 
 type TranslationFn = ReturnType<typeof useAppTranslation>;
 
@@ -125,8 +125,8 @@ function useRecurringClassSubmit(params: SubmitHookParams) {
 
       const meetingErrorKey = getRecurringMeetingConfigErrorKey(meetingConfig);
       const meetingErrorMessage = resolveRecurringMeetingConfigErrorMessage(meetingErrorKey, {
-        recurringFieldsRequired: tClassScope("recurringFieldsRequired"),
-        urlNotAllowed: tMeeting("urlNotAllowed"),
+        recurringFieldsRequired: tClassScope.recurringFieldsRequired,
+        urlNotAllowed: tMeeting.urlNotAllowed,
       });
       if (meetingErrorMessage) {
         setErrorMessage(meetingErrorMessage);
@@ -185,10 +185,10 @@ function useRecurringClassSubmit(params: SubmitHookParams) {
 }
 
 export function CreateRecurringClassContainer() {
-  const t = useTranslations("dashboard.createRecurringClass");
-  const tMeeting = useTranslations("ui.meetingConfig.manager");
-  const tClassScope = useTranslations("ui.meetingConfig.classScope");
-  const tRecurring = useTranslations("ui.meetingConfig.recurringSchedule");
+  const t = useAppTranslation("dashboard.createRecurringClass");
+  const tMeeting = useAppTranslation("ui.meetingConfig").manager;
+  const tClassScope = useAppTranslation("ui.meetingConfig").classScope;
+  const tRecurring = useAppTranslation("ui.meetingConfig").recurringSchedule;
   const router = useRouter();
   const client = useApolloClient();
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
@@ -244,8 +244,8 @@ export function CreateRecurringClassContainer() {
       showSuccess={showSuccess}
       errorMessage={errorMessage}
       meetingConfigWarning={meetingConfigWarning}
-      meetingConfigWarningMessage={tMeeting("postCreateFailure")}
-      goToClassLabel={tRecurring("goToClass")}
+      meetingConfigWarningMessage={tMeeting.postCreateFailure}
+      goToClassLabel={tRecurring.goToClass}
       onGoToCreatedClass={handleGoToCreatedClass}
       labels={labels}
       onClose={handleClose}

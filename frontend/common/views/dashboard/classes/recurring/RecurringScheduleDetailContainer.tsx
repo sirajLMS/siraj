@@ -10,8 +10,8 @@ import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/pr
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function RecurringScheduleDetailContainer() {
-  const t = useAppTranslation("ui").meetingConfig.recurringSchedule;
-  const tManager = useAppTranslation("ui").meetingConfig.manager;
+  const t = useAppTranslation("ui.meetingConfig.recurringSchedule");
+  const tManager = useAppTranslation("ui.meetingConfig.manager");
   const params = useParams();
   const rawId = params?.id;
   const id = typeof rawId === "string" ? rawId : "";

@@ -127,8 +127,8 @@ export function RecurringMeetingConfigSection({
   onChangeAction,
   disabled,
 }: RecurringMeetingConfigSectionProps) {
-  const t = useAppTranslation("ui").meetingConfig.classScope;
-  const tManager = useAppTranslation("ui").meetingConfig.manager;
+  const t = useAppTranslation("ui.meetingConfig.classScope");
+  const tManager = useAppTranslation("ui.meetingConfig.manager");
   const locale = useAppLocale();
   const [urlError, setUrlError] = useState<string | null>(null);
   const [fieldsError, setFieldsError] = useState<string | null>(null);

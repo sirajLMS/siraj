@@ -58,7 +58,7 @@ export function OverridesDataGrid({
     return [
       {
         field: "key",
-        headerName: t("columnPermission"),
+        headerName: t.columnPermission,
         flex: 1,
         minWidth: 200,
         renderCell: params => {
@@ -73,7 +73,7 @@ export function OverridesDataGrid({
       },
       {
         field: "baseline",
-        headerName: t("columnGroupBaseline"),
+        headerName: t.columnGroupBaseline,
         flex: 1.5,
         minWidth: 200,
         sortable: false,
@@ -86,8 +86,8 @@ export function OverridesDataGrid({
           );
           const isAllowedByGroup = baselineGroups.length > 0;
           const baselineText = isAllowedByGroup
-            ? t("allowedViaGroups", { groups: baselineGroups.map(g => g.name).join(", ") })
-            : t("notSet");
+            ? t.allowedViaGroups({ groups: baselineGroups.map(g => g.name).join(", ") })
+            : t.notSet;
 
           return (
             <StyledBaselineText variant="bodyMd" isAllowed={isAllowedByGroup}>
@@ -98,7 +98,7 @@ export function OverridesDataGrid({
       },
       {
         field: "override",
-        headerName: t("columnOverrideControl"),
+        headerName: t.columnOverrideControl,
         width: 320,
         sortable: false,
         renderCell: params => {

@@ -83,7 +83,7 @@ export function PermissionRow({ perm, isChecked, onTogglePermission, isLoading }
             {perm.key}
           </StyledPermissionKeyText>
           {perm.isSystem && (
-            <Tooltip title={t("corePermissionTooltip")}>
+            <Tooltip title={t.corePermissionTooltip}>
               <Lock fontSize="small" color="error" />
             </Tooltip>
           )}

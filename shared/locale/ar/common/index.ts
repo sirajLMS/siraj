@@ -27,4 +27,5 @@ export const common: CommonLabels = {
   operationFailed: "فشلت العملية. يرجى المحاولة مرة أخرى.",
   loadFailed: "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
   loading: "جارٍ التحميل...",
+  errors: "أخطاء",
 };

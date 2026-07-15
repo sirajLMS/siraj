@@ -49,7 +49,7 @@ export function ParentInfoSection({ register, control, errors }: Props) {
           <FieldWrapper
             label={t.fields.address}
             required
-            error={errors.address ? t.validation[errors.address.message as keyof typeof t.validation] : undefined}
+            error={t.validation[errors.address?.message as keyof typeof t.validation]}
           >
             <Input
               {...register("address")}

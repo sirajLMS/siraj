@@ -5,7 +5,6 @@ import { PersonProfileLink } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { formatStudentDisplayId } from "@/frontend/common/utils/formatStudentDisplayId";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import type {
@@ -14,7 +13,7 @@ import type {
 } from "@/frontend/common/views/dashboard/students/status/types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
-import { useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale, useAppTranslation } from "@/shared/locale/client";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
@@ -146,10 +145,7 @@ export function UpcomingClassesTableDesktop({ classes, studentId }: Readonly<Upc
       headerName: t.table.subjectInstructor,
       flex: 1.5,
       renderCell: params => (
-        <InstructorCell
-          row={params.row}
-          minutesLabel={t.table.minutesShort(params.row.durationMinutes)}
-        />
+        <InstructorCell row={params.row} minutesLabel={t.table.minutesShort(params.row.durationMinutes)} />
       ),
     },
     {

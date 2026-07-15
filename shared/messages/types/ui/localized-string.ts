@@ -30,15 +30,19 @@ export interface LocalizedStringLabels {
    * Helper text shown when exactly one required locale is missing.
    * `{ localeName }` interpolates the locale's display name in the UI locale.
    */
-  readonly localeRequired: string;
+  readonly localeRequired: (localeName: string) => string;
   /**
    * Helper text shown when more than one required locale is missing.
    * `{ localeNames }` interpolates a comma-separated list of display names.
    */
-  readonly localesRequired: string;
+  readonly localesRequired: (localeNames: string) => string;
   /**
    * Per-field error helper shown inside the drawer / inline input when a
    * single required-locale entry is empty. `{ localeName }` interpolates.
    */
-  readonly localeRequiredEntry: string;
+  readonly localeRequiredEntry: (localeName: string) => string;
+  /**
+   * Locale display names for locale switcher.
+   */
+  readonly locale: Record<string, string>;
 }

@@ -21,6 +21,7 @@ export const directory: ParentsDirectoryLabels = {
     accountStatus: "الحساب",
     unpaidInvoices: "الفواتير غير المدفوعة",
     options: "خيارات",
+    guardianOf: name => `ولي أمر ${name}`,
   },
   card: {
     guardianOf: name => `ولي أمر ${name}`,

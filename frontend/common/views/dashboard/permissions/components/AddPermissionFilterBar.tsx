@@ -3,6 +3,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, MenuItem, Select, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
 
 const StyledFilterContainer = styled("div")(({ theme }) => ({
   padding: theme.spacing(2),
@@ -39,7 +40,7 @@ interface AddPermissionFilterBarProps {
   readonly selectedCategory: string;
   readonly onCategoryChange: (value: string) => void;
   readonly addCategories: readonly string[];
-  readonly t: (key: string) => string;
+  readonly t: PermissionsLabels;
 }
 
 export function AddPermissionFilterBar({
@@ -55,7 +56,7 @@ export function AddPermissionFilterBar({
       {/* Search Field */}
       <StyledSearchField
         size="small"
-        placeholder={t("searchPermissionsPlaceholder")}
+        placeholder={t.searchPermissionsPlaceholder}
         value={searchQuery}
         onChange={e => onSearchChange(e.target.value)}
         slotProps={{
@@ -70,7 +71,7 @@ export function AddPermissionFilterBar({
       />
       {/* Category Filter */}
       <StyledCategorySelect size="small" value={selectedCategory} onChange={e => onCategoryChange(e.target.value)}>
-        <MenuItem value="all">{t("allCategoriesOption")}</MenuItem>
+        <MenuItem value="all">{t.allCategoriesOption}</MenuItem>
         {addCategories.map(cat => (
           <MenuItem key={cat} value={cat}>
             {cat}

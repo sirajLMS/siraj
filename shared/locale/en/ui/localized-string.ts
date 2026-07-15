@@ -9,4 +9,8 @@ export const localizedString = {
   localeRequired: (localeName: string) => `${localeName} is required for this field`,
   localesRequired: (localeNames: string) => `${localeNames} are required for this field`,
   localeRequiredEntry: (localeName: string) => `${localeName} is required`,
+  locale: {
+    ar: "Arabic",
+    en: "English",
+  },
 };

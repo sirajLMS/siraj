@@ -56,7 +56,7 @@ export function OverridesToolbar({ mode, onModeChange, searchQuery, onSearchChan
           isActive={mode === "effective"}
           onClick={() => onModeChange("effective")}
         >
-          {t("effectivePermissions")}
+          {t.effectivePermissions}
         </StyledModeToggleButton>
         <StyledModeToggleButton
           variant="text"
@@ -64,14 +64,14 @@ export function OverridesToolbar({ mode, onModeChange, searchQuery, onSearchChan
           isActive={mode === "edit"}
           onClick={() => onModeChange("edit")}
         >
-          {t("editOverrides")}
+          {t.editOverrides}
         </StyledModeToggleButton>
       </StyledModeToggleContainer>
 
       {/* Search Box */}
       <TextField
         size="small"
-        placeholder={t("filterPermissions")}
+        placeholder={t.filterPermissions}
         value={searchQuery}
         onChange={e => onSearchChange(e.target.value)}
         slotProps={{

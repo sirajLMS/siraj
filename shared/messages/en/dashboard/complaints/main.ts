@@ -16,7 +16,7 @@ export const complaints: ComplaintsLabels = {
     policyBody:
       "We aim to respond to all parent complaints within 48 academic hours. Urgent matters should be reported directly to the administration office.",
     recordTitle: "Complaint Record",
-    totalRecords: "{count} Total Records",
+    totalRecords: count => `${count} Total Records`,
     loadOlder: "Load Older Records",
     waitingMessage: "Waiting for Admin to review and provide a response...",
     adminResponse: "Admin Response",

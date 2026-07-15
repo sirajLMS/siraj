@@ -12,17 +12,31 @@ interface IdentityFieldShape {
   readonly phone?: string;
 }
 
+interface TranslationObject {
+  readonly fields: {
+    readonly fullName: string;
+    readonly email: string;
+    readonly phone: string;
+  };
+  readonly placeholders: {
+    readonly fullName: string;
+    readonly email: string;
+    readonly phone: string;
+  };
+  readonly validation: Record<string, string>;
+}
+
 interface Props<T extends IdentityFieldShape & FieldValues> {
   readonly register: UseFormRegister<T>;
   readonly control: Control<T>;
   readonly errors: FieldErrors<T>;
-  readonly translate: (key: string) => string;
+  readonly translate: TranslationObject;
   readonly phoneRequired?: boolean;
 }
 
-function validationMessage(translate: (key: string) => string, message: string | undefined): string | undefined {
+function validationMessage(translate: TranslationObject, message: string | undefined): string | undefined {
   if (!message) return undefined;
-  return translate(`validation.${message}`);
+  return translate.validation[message];
 }
 
 export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldValues>({
@@ -42,13 +56,13 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
     <>
       <Grid size={{ xs: 12, md: 6 }}>
         <FieldWrapper
-          label={translate("fields.fullName")}
+          label={translate.fields.fullName}
           required
           error={validationMessage(translate, nameError?.message as string | undefined)}
         >
           <Input
             {...register(nameField)}
-            placeholder={translate("placeholders.fullName")}
+            placeholder={translate.placeholders.fullName}
             error={!!nameError}
             fullWidth
             sx={standardInputSx}
@@ -57,13 +71,13 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <FieldWrapper
-          label={translate("fields.email")}
+          label={translate.fields.email}
           required
           error={validationMessage(translate, errors.email?.message as string | undefined)}
         >
           <Input
             {...register(emailField)}
-            placeholder={translate("placeholders.email")}
+            placeholder={translate.placeholders.email}
             error={!!errors.email}
             fullWidth
             type="email"
@@ -72,13 +86,13 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
         </FieldWrapper>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FieldWrapper label={translate("fields.phone")} required={phoneRequired}>
+        <FieldWrapper label={translate.fields.phone} required={phoneRequired}>
           <PhoneFormField
             name={phoneField}
             control={control}
             hideLabel
             required={phoneRequired}
-            placeholder={translate("placeholders.phone")}
+            placeholder={translate.placeholders.phone}
             error={!!errors.phone}
             helperText={validationMessage(translate, errors.phone?.message as string | undefined)}
           />

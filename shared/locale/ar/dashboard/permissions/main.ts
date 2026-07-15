@@ -38,6 +38,7 @@ export const main: PermissionsLabels = {
   actionAssign: "تعيين مستخدمين",
   cancel: "إلغاء",
   save: "حفظ",
+  saveOverrides: "حفظ التخصيصات",
   deleteConfirmTitle: "حذف مجموعة الصلاحيات",
   deleteConfirmBody: name =>
     `هل أنت متأكد من حذف مجموعة الصلاحيات "${name}"؟ لا يمكن التراجع عن هذا الإجراء وسيخسر جميع المستخدمين المعينين هذه الصلاحيات.`,

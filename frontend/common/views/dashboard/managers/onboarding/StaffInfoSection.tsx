@@ -16,10 +16,16 @@ interface Props {
 export function StaffInfoSection({ register, control, errors }: Readonly<Props>) {
   const t = useAppTranslation("dashboard.managerOnboarding");
 
+  const translate = {
+    fields: t.fields,
+    placeholders: t.placeholders,
+    validation: t.validation,
+  };
+
   return (
     <SectionPanel title={t.sections.staffInfo}>
       <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
-        <OnboardingIdentityFields register={register} control={control} errors={errors} translate={t} />
+        <OnboardingIdentityFields register={register} control={control} errors={errors} translate={translate} />
       </Grid>
     </SectionPanel>
   );

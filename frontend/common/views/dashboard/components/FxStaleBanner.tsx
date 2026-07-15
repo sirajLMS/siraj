@@ -4,14 +4,12 @@ import { useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link, usePathname } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
 
 export function FxStaleBanner(): React.ReactNode {
   const pathname = usePathname();
-  const _locale = useAppLocale();
   const displayCurrency = useUserStore(state => state.displayCurrency);
   const hasPermission = useUserStore(state => state.hasPermission);
   const isAdmin = hasPermission(AppPermission.BillingViewExchangeRates);

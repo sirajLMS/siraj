@@ -38,6 +38,7 @@ export const main: PermissionsLabels = {
   actionAssign: "Assign Users",
   cancel: "Cancel",
   save: "Save",
+  saveOverrides: "Save Overrides",
   deleteConfirmTitle: "Delete Permission Group",
   deleteConfirmBody: name =>
     `Are you sure you want to delete permission group "${name}"? This action cannot be undone and all assigned users will lose this group's permissions.`,

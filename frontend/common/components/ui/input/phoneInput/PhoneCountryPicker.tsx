@@ -18,7 +18,7 @@ export const PhoneCountryPicker: React.FC<PhoneCountryPickerProps> = ({
   country,
   onSelectAction,
 }: PhoneCountryPickerProps): React.ReactNode => {
-  const t = useAppTranslation("ui").phoneInput;
+  const t = useAppTranslation("ui.phoneInput");
 
   return (
     <Box

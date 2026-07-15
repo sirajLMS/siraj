@@ -12,6 +12,7 @@ import {
 import { LiveSessionToolbar } from "@/frontend/common/views/dashboard/classes/details/components/LiveSessionToolbar";
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+import { useAppTranslation } from "@/shared/locale/client";
 
 export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin";
 
@@ -67,10 +68,10 @@ export function ClassDetailsToolbarArea({
   isResetting,
   error,
 }: ClassDetailsToolbarAreaProps) {
-  const tJoin = useTranslations("ui.meetingConfig.join");
+  const tJoin = useAppTranslation("ui.meetingConfig").join;
   const meeting = instance.effectiveMeeting;
   const joinUrl = meeting?.joinUrl?.trim() || instance.meetingJoinUrl?.trim();
-  const joinLabel = tJoin("joinMeeting");
+  const joinLabel = tJoin.joinMeeting;
   const instanceId = instance.id ?? "";
   const emptyState = resolveJoinEmptyState(viewMode, instanceId);
   const showJoin = isJoinableClassInstance(instance.executionState, instance.outcome, {

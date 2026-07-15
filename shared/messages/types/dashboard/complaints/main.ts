@@ -20,7 +20,7 @@ export interface ComplaintsParentLabels {
   readonly policyTitle: string;
   readonly policyBody: string;
   readonly recordTitle: string;
-  readonly totalRecords: string;
+  readonly totalRecords: (count: number) => string;
   readonly loadOlder: string;
   readonly waitingMessage: string;
   readonly adminResponse: string;

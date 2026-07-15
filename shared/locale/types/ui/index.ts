@@ -46,6 +46,7 @@ export interface LocalizedStringLabels {
   readonly localeRequired: (localeName: string) => string;
   readonly localesRequired: (localeNames: string) => string;
   readonly localeRequiredEntry: (localeName: string) => string;
+  readonly locale: Record<string, string>;
 }
 
 export interface MeetingConfigDisplayLabels {

@@ -77,7 +77,7 @@ export function ComplaintRecordCardList({
   totalCount,
   onPageChange,
 }: Readonly<ComplaintRecordCardListProps>) {
-  const totalLabel = labels.totalRecords.replace("{count}", String(totalCount ?? records.length));
+  const totalLabel = labels.totalRecords(totalCount ?? records.length);
   const showPagination = totalCount !== undefined && onPageChange !== undefined && totalCount > 0;
   const pageCount = pageSize > 0 ? Math.ceil((totalCount ?? 0) / pageSize) : 0;
 

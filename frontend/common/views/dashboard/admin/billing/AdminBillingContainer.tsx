@@ -15,7 +15,7 @@ interface AdminBillingContainerProps {
 }
 
 export function AdminBillingContainer(_props: AdminBillingContainerProps) {
-  const t = useAppTranslation("dashboard").billing;
+  const t = useAppTranslation("dashboard.billing");
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
 
   return (

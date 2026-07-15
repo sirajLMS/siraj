@@ -9,6 +9,7 @@ import type {
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { createMockAdminDecorator } from "@/frontend/common/views/dashboard/components/createMockAdminDecorator";
 import { AdminComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/adminComplaints.desktop";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const MOCK_ADMIN_COMPLAINT_ROWS: readonly AdminComplaintRow[] = [
   {
@@ -105,7 +106,7 @@ function AdminComplaintsDesktopStoryRenderer({
   deleteComplaintId,
   isDeletingComplaint,
 }: Readonly<AdminComplaintsDesktopStoryProps>) {
-  const t = useTranslations("dashboard.complaints");
+  const t = useAppTranslation("dashboard.complaints");
   const labels = buildComplaintsLabels(t).admin;
 
   return (

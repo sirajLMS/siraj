@@ -91,15 +91,15 @@ export const useApolloConnectivity = () => {
 
   const notifyIfDisconnected = useCallback(() => {
     if (!isConnectedRef.current) {
-      notifications.show(`${t.errors.serverConnectionLost}. ${t.errors.checkNetworkConnection}.`, {
+      notifications.show(`${t.serverConnectionLost}. ${t.checkNetworkConnection}.`, {
         severity: "error",
         autoHideDuration: 5000,
-        actionText: t.errors.retry,
+        actionText: t.retry,
         onAction: () => {
           reconnectAttemptRef.current = 0;
           checkConnectivity().then(connected => {
             if (connected) {
-              notifications.show(t.errors.connectionRestored, {
+              notifications.show(t.connectionRestored, {
                 severity: "success",
                 autoHideDuration: 3000,
               });

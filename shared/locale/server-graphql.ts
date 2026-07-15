@@ -105,7 +105,6 @@ async function loadTranslation<K extends keyof MessageSchema>(
     "ui.phoneInput": "ui/phoneInput",
     "ui.tagInput": "ui/tagInput",
     "ui.timezoneSelect": "ui/timezoneSelect",
-    ui: "ui/index",
   };
 
   const filePath = namespacePaths[namespace];

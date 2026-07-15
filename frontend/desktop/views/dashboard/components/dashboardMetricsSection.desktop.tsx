@@ -2,9 +2,12 @@
 
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import type { GridSize } from "@mui/material/Grid";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import type { MetricItem } from "@/frontend/common/views/dashboard/types/dashboard";
+
+type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in import("@mui/material").Breakpoint]?: T | null };
 
 interface DashboardMetricsSectionDesktopProps {
   readonly title: string;
@@ -13,6 +16,7 @@ interface DashboardMetricsSectionDesktopProps {
   readonly onMetricClick?: (key: string) => void;
   readonly selectedMetricKey?: string;
   readonly withSectionMargin?: boolean;
+  readonly gridSize?: ResponsiveStyleValue<GridSize>;
 }
 
 export function DashboardMetricsSectionDesktop({
@@ -22,6 +26,7 @@ export function DashboardMetricsSectionDesktop({
   onMetricClick,
   selectedMetricKey,
   withSectionMargin = false,
+  gridSize,
 }: Readonly<DashboardMetricsSectionDesktopProps>) {
   const section = (
     <SectionPanel
@@ -41,7 +46,12 @@ export function DashboardMetricsSectionDesktop({
           py: { xs: 2, md: 2.5 },
         }}
       >
-        <MetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
+        <MetricCardGrid
+          metrics={metrics}
+          onMetricClick={onMetricClick}
+          selectedKey={selectedMetricKey}
+          size={gridSize}
+        />
       </Box>
     </SectionPanel>
   );

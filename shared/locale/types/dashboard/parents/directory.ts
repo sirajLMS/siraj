@@ -19,6 +19,7 @@ export interface ParentsDirectoryLabels {
     readonly accountStatus: string;
     readonly unpaidInvoices: string;
     readonly options: string;
+    readonly guardianOf: (name: string) => string;
   };
   readonly card: {
     readonly guardianOf: (name: string) => string;

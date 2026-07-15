@@ -5,7 +5,6 @@ import { Badge, type IconButtonProps, Popover } from "@mui/material";
 import { type MouseEvent, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { NavbarIcon } from "@/frontend/common/views/dashboard/components/navbar/NavbarIcon";
 import { NotificationPanel } from "@/frontend/common/views/dashboard/components/navbar/NotificationPanel";
 import { useAppTranslation } from "@/shared/locale/client";
@@ -16,7 +15,6 @@ interface NotificationButtonProps extends Omit<IconButtonProps, "children" | "ti
 
 export function NotificationButton({ notificationCount, ...props }: Readonly<NotificationButtonProps>) {
   const t = useAppTranslation("common");
-  const _locale = useAppLocale();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {

@@ -38,7 +38,7 @@ export function MeetingConfigSelect({
   allowEmpty = false,
   emptyOptionLabel,
 }: MeetingConfigSelectProps) {
-  const t = useAppTranslation("ui").meetingConfig.classScope;
+  const t = useAppTranslation("ui.meetingConfig.classScope");
   const locale = useAppLocale();
   const resolvedLabel = label ?? t.selectLabel;
   const resolvedPlaceholder = placeholder ?? t.selectPlaceholder;

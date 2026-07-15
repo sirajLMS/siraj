@@ -16,7 +16,7 @@ export const complaints: ComplaintsLabels = {
     policyBody:
       "نهدف للرد على جميع شكاوى أولياء الأمور خلال 48 ساعة أكاديمية. يجب الإبلاغ عن الأمور العاجلة مباشرة إلى مكتب الإدارة.",
     recordTitle: "سجل الشكاوى",
-    totalRecords: "{count} سجل إجمالي",
+    totalRecords: (count: number) => `${count} سجل إجمالي`,
     loadOlder: "تحميل السجلات الأقدم",
     waitingMessage: "في انتظار مراجعة الإدارة وتقديم الرد...",
     adminResponse: "رد الإدارة",
