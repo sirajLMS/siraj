@@ -85,8 +85,8 @@ function ParentComplaintsDesktopStoryRenderer({
   showSuccess,
   canSubmit,
 }: Readonly<ParentComplaintsDesktopStoryProps>) {
-  const t = useAppTranslation("dashboard.complaints").parent;
-  const labels = buildComplaintsLabels({ parent: t, admin: {} as any }).parent;
+  const t = useAppTranslation("dashboard.complaints");
+  const labels = buildComplaintsLabels(t).parent;
   const {
     control,
     formState: { errors },

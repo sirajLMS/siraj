@@ -95,7 +95,7 @@ export function PermissionFilterBar({
       </StyledInputGroup>
 
       {/* Selected Count Badge */}
-      <StyledSelectedCountBadge>{t.itemsSelectedLabel({ count: selectedCount })}</StyledSelectedCountBadge>
+      <StyledSelectedCountBadge>{t.itemsSelectedLabel(selectedCount)}</StyledSelectedCountBadge>
     </StyledFilterContainer>
   );
 }

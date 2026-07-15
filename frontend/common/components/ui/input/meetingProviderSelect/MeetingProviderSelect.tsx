@@ -31,7 +31,7 @@ export function MeetingProviderSelect({
   helperText,
 }: MeetingProviderSelectProps) {
   const locale = useAppLocale();
-  const t = useAppTranslation("ui").meetingConfig.providerSelect;
+  const t = useAppTranslation("ui.meetingConfig.providerSelect");
   const { hasPermission } = useUserStore();
   const canManageCatalog = hasPermission(AppPermission.MeetingProvidersManageCatalog);
   const { data, loading } = useQuery(meetingProvidersQueryDocument, {

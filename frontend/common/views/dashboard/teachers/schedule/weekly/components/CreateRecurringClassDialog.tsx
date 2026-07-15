@@ -526,9 +526,9 @@ function DialogFormContent({
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
   const t = useAppTranslation("dashboard.teacherCreateRecurringClass");
-  const tMeeting = useAppTranslation("ui").meetingConfig.manager;
-  const tRecurringSchedule = useAppTranslation("ui").meetingConfig.recurringSchedule;
-  const tClassScope = useAppTranslation("ui").meetingConfig.classScope;
+  const tMeeting = useAppTranslation("ui.meetingConfig.manager");
+  const tRecurringSchedule = useAppTranslation("ui.meetingConfig.recurringSchedule");
+  const tClassScope = useAppTranslation("ui.meetingConfig.classScope");
   const notifications = useNotifications();
   const client = useApolloClient();
   const router = useRouter();

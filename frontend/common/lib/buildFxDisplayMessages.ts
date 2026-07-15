@@ -1,5 +1,4 @@
-type TranslateFn = (key: string, values?: Record<string, string>) => string;
-
+// Removed unused TranslateFn type
 export type FxDisplayMessages = {
   readonly convertedAmount: (values: {
     lockedAmount: string;
@@ -14,16 +13,33 @@ export type FxDisplayMessages = {
 };
 
 export function buildFxDisplayMessages(
-  tConverted: TranslateFn,
-  tErrors: TranslateFn,
-  tConvertedTotal?: TranslateFn
+  tConverted: {
+    convertedAmount: (
+      lockedAmount: string,
+      lockedCurrency: string,
+      convertedApprox: string,
+      displayCurrency: string
+    ) => string;
+  },
+  tErrors: {
+    displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+    displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+    displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  },
+  tConvertedTotal: { convertedTotalApprox: (convertedApprox: string, displayCurrency: string) => string }
 ): FxDisplayMessages {
-  const totalT = tConvertedTotal ?? tConverted;
   return {
-    convertedAmount: values => tConverted("convertedAmount", values),
-    convertedTotalApprox: values => totalT("convertedTotalApprox", values),
-    displayCurrencyNotSet: values => tErrors("displayCurrencyNotSet", values),
-    displayCurrencyStale: values => tErrors("displayCurrencyStale", values),
-    displayCurrencyMixed: values => tErrors("displayCurrencyMixed", values),
+    convertedAmount: values =>
+      tConverted.convertedAmount(
+        values.lockedAmount,
+        values.lockedCurrency,
+        values.convertedApprox,
+        values.displayCurrency
+      ),
+    convertedTotalApprox: values =>
+      tConvertedTotal.convertedTotalApprox(values.convertedApprox, values.displayCurrency),
+    displayCurrencyNotSet: values => tErrors.displayCurrencyNotSet(values),
+    displayCurrencyStale: values => tErrors.displayCurrencyStale(values),
+    displayCurrencyMixed: values => tErrors.displayCurrencyMixed(values),
   };
 }

@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionCategoryGroup } from "@/frontend/common/views/dashboard/permissions/components/PermissionCategoryGroup";
-import { useAppTranslation } from "@/shared/locale/client";
+import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
 
 type ValidPermission = Permission & { id: string; key: string; category: string };
 
@@ -15,6 +15,7 @@ interface PermissionCategoryListProps {
   readonly onSelectAllCategory: (categoryPerms: Array<Permission & { id: string }>, checked: boolean) => void;
   readonly onTogglePermission: (permId: string, isSystem: boolean) => void;
   readonly isLoading: boolean;
+  readonly t: PermissionsLabels;
 }
 
 export function PermissionCategoryList({
@@ -25,9 +26,8 @@ export function PermissionCategoryList({
   onSelectAllCategory,
   onTogglePermission,
   isLoading,
+  t,
 }: Readonly<PermissionCategoryListProps>) {
-  const t = useAppTranslation("dashboard.permissions");
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {Object.keys(groupedPermissions).length === 0 ? (

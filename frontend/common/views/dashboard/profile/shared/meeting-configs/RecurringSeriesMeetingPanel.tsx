@@ -17,7 +17,7 @@ export function RecurringSeriesMeetingPanel({
   recurringScheduleId,
   effectiveMeeting,
 }: RecurringSeriesMeetingPanelProps) {
-  const t = useAppTranslation("ui").meetingConfig.classScope;
+  const t = useAppTranslation("ui.meetingConfig.classScope");
 
   return (
     <SectionPanel title={t.seriesSectionTitle} subTitle={t.seriesSectionSubtitle}>

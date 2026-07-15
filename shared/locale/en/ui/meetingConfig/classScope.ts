@@ -1,0 +1,18 @@
+export const classScope = {
+  sectionTitle: "Class Meeting Config",
+  sectionSubtitle: "Override teacher default meeting config for this class or recurring schedule.",
+  selectLabel: "Meeting Config",
+  selectPlaceholder: "Select meeting config",
+  useTeacherDefault: "Use teacher default",
+  noConfigs: "No meeting configs for this scope",
+  inheritedFromTeacher: "Uses teacher default",
+  overrideActive: "Class override active",
+  effectiveSourceBanner: (source: string) => `Effective meeting source: ${source}`,
+  recurringSectionTitle: "Recurring Schedule Meeting",
+  recurringSectionSubtitle: "Optional override for all classes in this recurring schedule.",
+  createNewConfig: "Create new meeting config",
+  recurringFieldsRequired: "Select a provider and enter meeting URL.",
+  seriesSectionTitle: "Series Meeting Config",
+  seriesSectionSubtitle: "Applies to all future classes in this recurring schedule.",
+  manageSeriesLink: "Manage full series configs",
+};

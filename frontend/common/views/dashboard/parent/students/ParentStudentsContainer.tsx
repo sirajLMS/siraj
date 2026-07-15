@@ -43,21 +43,18 @@ export function ParentStudentsContainer() {
                 >
                   <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{row.name}</Typography>
                   <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                    {t.statusLabel({ status: row.status ?? "" })}
+                    {t.statusLabel(row.status ?? "")}
                   </Typography>
                   {row.teacherName ? (
                     <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                      {t.teacherLabel({ teacher: row.teacherName })}
+                      {t.teacherLabel(row.teacherName)}
                     </Typography>
                   ) : null}
                   <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                    {t.quotaLabel({
-                      remaining: row.classesRemaining ?? 0,
-                      total: row.classesTotal ?? 0,
-                    })}
+                    {t.quotaLabel(row.classesRemaining ?? 0, row.classesTotal ?? 0)}
                   </Typography>
                   <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-                    {t.hoursLabel({ hours: row.hoursPerWeek ?? 0 })}
+                    {t.hoursLabel(Number(row.hoursPerWeek ?? 0))}
                   </Typography>
                 </Box>
               ))

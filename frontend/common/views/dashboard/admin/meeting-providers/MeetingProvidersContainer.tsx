@@ -233,7 +233,7 @@ export function MeetingProvidersContainer() {
   const [deleteMeetingProvider, { loading: deleting }] = useMutation(deleteMeetingProviderMutationDocument, {
     onError: error => {
       logger.error("Delete meeting provider failed:", { error });
-      notifications.showError(t("operationFailed"));
+      notifications.showError(t.operationFailed);
     },
   });
 

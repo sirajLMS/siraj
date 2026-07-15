@@ -2,11 +2,9 @@ import type {
   ParentBookingStatus,
   ParentLiveClassStatus,
 } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import type { ParentDashboardLabels as NewParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
 
-type ParentDashboardMessages = MessageSchema["dashboard"]["parentDashboard"];
-
-export type ParentDashboardLabels = Omit<ParentDashboardMessages, "bookingStatus" | "liveClassStatus"> & {
+export type ParentDashboardLabels = Omit<NewParentDashboardLabels, "bookingStatus" | "liveClassStatus"> & {
   readonly bookingStatus: Record<ParentBookingStatus, string>;
   readonly liveClassStatus: Record<ParentLiveClassStatus, string>;
 };

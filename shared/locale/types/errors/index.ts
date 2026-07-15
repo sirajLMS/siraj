@@ -90,6 +90,89 @@ export interface FileErrors {
 }
 
 /**
+ * MeetingProviderErrors — meeting provider specific errors.
+ */
+export interface MeetingProviderErrors {
+  readonly meetingProviderInactive: string;
+  readonly meetingConfigNotFound: (id: string) => string;
+  readonly meetingConfigCreateFailed: string;
+  readonly meetingConfigUpdateFailed: string;
+  readonly meetingProviderNotFound: (id: string) => string;
+  readonly meetingProviderCreateFailed: string;
+  readonly meetingProviderUpdateFailed: string;
+  readonly meetingProviderInUse: string;
+}
+
+/**
+ * TeacherErrors — teacher specific errors.
+ */
+export interface TeacherErrors {
+  readonly teacherNotFound: (id: string) => string;
+  readonly staffProfileNotFound: string;
+  readonly quotaMustBeNonNegative: string;
+  readonly quotaExceedsTotal: (params: { requested: number; total: number }) => string;
+}
+
+/**
+ * StudentErrors — student specific errors.
+ */
+export interface StudentErrors {
+  readonly studentNotFound: (id: string) => string;
+  readonly studentCreateFailed: string;
+  readonly studentUpdateFailed: (id: string) => string;
+  readonly studentVersionMismatch: (params: { id: string; expectedVersion: number; gotVersion: number }) => string;
+  readonly insufficientClasses: (params: { id: string; remaining: number; required: number }) => string;
+  readonly invalidStatusTransition: (params: { currentStatus: string; newStatus: string }) => string;
+  readonly studentEmailRequired: string;
+  readonly studentPasswordRequired: string;
+}
+
+/**
+ * CategoryErrors — category specific errors.
+ */
+export interface CategoryErrors {
+  readonly categoryNotFound: (id: string) => string;
+  readonly categoryCreateFailed: string;
+  readonly categoryHasSubjects: string;
+}
+
+/**
+ * UserErrors — user specific errors.
+ */
+export interface UserErrors {
+  readonly userNotFound: (id: string) => string;
+  readonly userEmailExists: string;
+  readonly cannotModifyBankingFields: string;
+  readonly parentNotFound: string;
+}
+
+/**
+ * SchedulingErrors — scheduling specific errors.
+ */
+export interface SchedulingErrors {
+  readonly cannotRescheduleToSelf: string;
+  readonly cannotRescheduleCompleted: string;
+  readonly cannotRescheduleAlreadyRescheduled: string;
+  readonly outOfQuota: string;
+  readonly leaveQuotaExceeded: (params: { maxLeaves: string }) => string;
+  readonly classInstanceNotFound: (params: { id: string }) => string;
+  readonly originalClassNotFound: string;
+  readonly invalidTransition: string;
+  readonly teacherNotAssigned: (params: { teacherId: string; studentId: string; startTime: string }) => string;
+  readonly teacherBooked: string;
+  readonly studentBooked: string;
+  readonly meetingUrlInUse: string;
+  readonly sessionNotActivated: string;
+}
+
+/**
+ * PermissionGroupErrors — permission group specific errors.
+ */
+export interface PermissionGroupErrors {
+  readonly permissionGroupNotFound: string;
+}
+
+/**
  * ErrorsLabels — the top-level errors namespace.
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
@@ -100,6 +183,13 @@ export interface ErrorsLabels {
   readonly billing: BillingErrors;
   readonly credit: CreditErrors;
   readonly file: FileErrors;
+  readonly meetingProvider: MeetingProviderErrors;
+  readonly teacher: TeacherErrors;
+  readonly student: StudentErrors;
+  readonly category: CategoryErrors;
+  readonly user: UserErrors;
+  readonly scheduling: SchedulingErrors;
+  readonly permissionGroup: PermissionGroupErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;
@@ -111,37 +201,44 @@ export interface ErrorsLabels {
   readonly unauthorizedSearch: string;
   readonly unauthorizedViewMetrics: string;
   readonly notFound: string;
+  readonly unknownName: string;
+  readonly invalidInput: string;
+  readonly permissionGroupNotFound: string;
+
+  // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
+  readonly displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  readonly displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+  readonly displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) => string;
+
+  // ─── Flattened error properties for backward compatibility ───────────
+  // These are proxies to the nested namespace properties
+  readonly categoryNotFound: (id: string) => string;
+  readonly categoryCreateFailed: string;
+  readonly categoryHasSubjects: string;
+  readonly meetingProviderNotFound: (id: string) => string;
+  readonly meetingProviderCreateFailed: string;
+  readonly meetingProviderUpdateFailed: string;
+  readonly meetingProviderInUse: string;
+  readonly meetingProviderInactive: string;
+  readonly meetingConfigNotFound: (id: string) => string;
+  readonly meetingConfigCreateFailed: string;
+  readonly meetingConfigUpdateFailed: string;
   readonly studentNotFound: (id: string) => string;
   readonly studentCreateFailed: string;
   readonly studentUpdateFailed: (id: string) => string;
   readonly studentVersionMismatch: (params: { id: string; expectedVersion: number; gotVersion: number }) => string;
   readonly insufficientClasses: (params: { id: string; remaining: number; required: number }) => string;
   readonly invalidStatusTransition: (params: { currentStatus: string; newStatus: string }) => string;
-  readonly categoryNotFound: (id: string) => string;
-  readonly categoryCreateFailed: string;
-  readonly unknownName: string;
-  readonly meetingProviderInactive: string;
-  readonly meetingConfigNotFound: (id: string) => string;
-  readonly meetingConfigCreateFailed: string;
-  readonly meetingConfigUpdateFailed: string;
-  readonly meetingProviderNotFound: (id: string) => string;
-  readonly meetingProviderCreateFailed: string;
-  readonly meetingProviderUpdateFailed: string;
-  readonly meetingProviderInUse: string;
-  readonly userNotFound: (id: string) => string;
-  readonly cannotModifyBankingFields: string;
-  readonly invalidInput: string;
-  readonly sessionNotActivated: string;
+  readonly studentEmailRequired: string;
+  readonly studentPasswordRequired: string;
   readonly teacherNotFound: (id: string) => string;
   readonly staffProfileNotFound: string;
   readonly quotaMustBeNonNegative: string;
   readonly quotaExceedsTotal: (params: { requested: number; total: number }) => string;
-  readonly parentNotFound: string;
-  readonly studentEmailRequired: string;
-  readonly studentPasswordRequired: string;
+  readonly userNotFound: (id: string) => string;
   readonly userEmailExists: string;
-  readonly permissionGroupNotFound: string;
-  readonly categoryHasSubjects: string;
+  readonly cannotModifyBankingFields: string;
+  readonly parentNotFound: string;
   readonly cannotRescheduleToSelf: string;
   readonly cannotRescheduleCompleted: string;
   readonly cannotRescheduleAlreadyRescheduled: string;
@@ -150,9 +247,9 @@ export interface ErrorsLabels {
   readonly classInstanceNotFound: (params: { id: string }) => string;
   readonly originalClassNotFound: string;
   readonly invalidTransition: string;
-  // ─── Scheduling-specific errors ──────────────────────────────────────
   readonly teacherNotAssigned: (params: { teacherId: string; studentId: string; startTime: string }) => string;
   readonly teacherBooked: string;
   readonly studentBooked: string;
   readonly meetingUrlInUse: string;
+  readonly sessionNotActivated: string;
 }

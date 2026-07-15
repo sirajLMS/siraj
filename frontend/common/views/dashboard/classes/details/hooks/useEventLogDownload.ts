@@ -12,7 +12,7 @@ export function useEventLogDownload(
   shouldLoadEvents: boolean,
   setShouldLoadEvents: (value: boolean) => void,
   setFeedbackState: (state: ActionFeedbackState | null) => void,
-  t: ReturnType<typeof useAppTranslation>
+  t: ReturnType<typeof useAppTranslation<"dashboard.classDetails">>
 ) {
   const { data: eventsData, error: eventsError } = useQuery(classStatusEventsQueryDocument, {
     variables: { classInstanceId: id },

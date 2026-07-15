@@ -86,7 +86,7 @@ export function OverridesDataGrid({
           );
           const isAllowedByGroup = baselineGroups.length > 0;
           const baselineText = isAllowedByGroup
-            ? t.allowedViaGroups({ groups: baselineGroups.map(g => g.name).join(", ") })
+            ? t.allowedViaGroups(baselineGroups.map(g => g.name).join(", "))
             : t.notSet;
 
           return (

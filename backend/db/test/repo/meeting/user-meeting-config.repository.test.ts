@@ -79,7 +79,7 @@ describe("UserMeetingConfigRepository", () => {
 
   configTest("getByIdOrThrow throws when config is missing", async (tx, tErrors) => {
     const error = await expectRepoError(() => UserMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx));
-    expect(error.message).toContain(NIL_UUID);
+    expect(error.message).toContain("not found");
   });
 
   configTest("listByUserId returns configs for the user ordered by createdAt", async tx => {

@@ -45,7 +45,7 @@ export const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
   error,
   helperText,
 }: TimezoneSelectProps): React.ReactNode => {
-  const t = useAppTranslation("ui").timezoneSelect;
+  const t = useAppTranslation("ui.timezoneSelect");
   const locale = useAppLocale();
 
   const options = useMemo(() => getTimezoneOptions(locale), [locale]);

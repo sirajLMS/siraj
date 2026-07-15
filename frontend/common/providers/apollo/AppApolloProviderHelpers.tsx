@@ -12,7 +12,7 @@ interface InitializingUIProps {
 }
 
 export function InitializingUI({ error, onRetry, t }: InitializingUIProps) {
-  const common = t.common;
+  const common = t;
   return (
     <Box
       sx={{

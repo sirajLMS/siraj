@@ -14,7 +14,7 @@ function PermissionErrorAlert({
   t,
 }: {
   readonly error: string | null;
-  readonly t: ReturnType<typeof useAppTranslation>;
+  readonly t: import("@/shared/locale/types/dashboard/permissions").PermissionsLabels;
 }) {
   if (!error) return null;
   return (

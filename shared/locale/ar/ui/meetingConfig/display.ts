@@ -1,0 +1,16 @@
+export const display = {
+  defaultBadge: "افتراضي",
+  meetingUrl: "رابط الاجتماع",
+  username: "اسم المستخدم",
+  tenantId: "معرّف المستأجر",
+  provider: "المزود",
+  label: "التسمية",
+  meetingId: "معرّف الاجتماع",
+  source: "المصدر",
+  sourceClass: "إعدادات الحصة",
+  sourceRecurring: "إعدادات الجدول المتكرر",
+  sourceTeacher: "إعدادات المعلم الافتراضية",
+  sourceNone: "غير متوفر",
+  noMeeting: "لا يوجد اجتماع عبر الإنترنت",
+  passwordProtected: "محمي بكلمة مرور",
+};

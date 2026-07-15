@@ -69,4 +69,13 @@ export const nav: DashboardNavigationLabels = {
   teacherDues: "Teacher Dues",
   monthlyReports: "Monthly Reports",
   supervisorProfile: "My Profile",
+  nav: {
+    logout: "Logout",
+    impersonation: {
+      returnToNormalLogin: "Return to normal login",
+    },
+    groupSimulation: {
+      returnToNormalRole: "Return to normal role",
+    },
+  },
 };

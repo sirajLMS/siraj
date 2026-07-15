@@ -69,4 +69,13 @@ export const nav: DashboardNavigationLabels = {
   teacherDues: "مستحقات المعلمين",
   monthlyReports: "التقارير الشهرية",
   supervisorProfile: "ملفي",
+  nav: {
+    logout: "تسجيل الخروج",
+    impersonation: {
+      returnToNormalLogin: "العودة لتسجيل الدخول العادي",
+    },
+    groupSimulation: {
+      returnToNormalRole: "العودة للدور العادي",
+    },
+  },
 };

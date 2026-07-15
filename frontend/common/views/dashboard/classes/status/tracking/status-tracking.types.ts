@@ -19,13 +19,13 @@ export interface StatusTrackingLabels {
   readonly filters: string;
   readonly newReport: string;
   readonly todaysClassSchedule: string;
-  readonly totalSessions: string;
+  readonly totalSessions: (total: number) => string;
   readonly studentClass: string;
   readonly teacher: string;
   readonly schedule: string;
   readonly status: string;
   readonly actions: string;
-  readonly showingOf: string;
+  readonly showingOf: (shown: number, total: number) => string;
   readonly previous: string;
   readonly next: string;
   readonly joinSession: string;
@@ -49,12 +49,13 @@ export interface StatusTrackingLabels {
   readonly suspensionAnalytics: string;
   readonly analyticsNote: string;
   readonly urgentTask: string;
-  readonly accountsLocked: string;
+  readonly accountsLocked: (count: number) => string;
   readonly auditDescription: string;
   readonly openAuditLogs: string;
   readonly noEntries: string;
   readonly errorNoStudentId: string;
   readonly errorAuditLogsComingSoon: string;
+  readonly errorFailedToLoad: string;
   readonly days: readonly string[];
 }
 

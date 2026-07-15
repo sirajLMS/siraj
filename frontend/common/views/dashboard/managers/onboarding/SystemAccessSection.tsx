@@ -88,7 +88,7 @@ export function SystemAccessSection({ register, control, errors }: Props) {
     if (!errors.password) return undefined;
     const message = errors.password.message;
     if (typeof message !== "string") return undefined;
-    return t.validation[message as keyof typeof t.validation];
+    return t.validation[message as keyof typeof t.validation] ?? undefined;
   };
 
   return (
@@ -103,11 +103,7 @@ export function SystemAccessSection({ register, control, errors }: Props) {
           </FieldWrapper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <FieldWrapper
-            label={t.fields.password}
-            required
-            error={getPasswordError()}
-          >
+          <FieldWrapper label={t.fields.password} required error={getPasswordError()}>
             <Input
               {...register("password")}
               type="password"

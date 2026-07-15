@@ -107,9 +107,9 @@ function useDashboardLabels(t: ReturnType<typeof useAppTranslation>, userName: s
   return useMemo(
     () => ({
       pageTitle: t.pageTitle,
-      welcome: t.welcome({ name: userName }),
+      welcome: t.welcome(userName),
       welcomeBack: t.welcomeBack,
-      pendingMessages: t.pendingMessages({ count: pendingMessages }),
+      pendingMessages: t.pendingMessages(pendingMessages),
       metrics: {
         totalStudents: t.metrics.totalStudents,
         todaysClasses: t.metrics.todaysClasses,
@@ -130,8 +130,8 @@ function useDashboardLabels(t: ReturnType<typeof useAppTranslation>, userName: s
         status: t.schedule.status,
         contact: t.schedule.contact,
         classStatus: t.schedule.classStatus,
-        duration: t.schedule.duration({ minutes: "{minutes}" }),
-        teacherLabel: t.schedule.teacherLabel({ name: "{name}" }),
+        duration: t.schedule.duration(0),
+        teacherLabel: t.schedule.teacherLabel(""),
         joinVideo: t.schedule.joinVideo,
         frozen: t.schedule.frozen,
         contactAdmin: t.schedule.contactAdmin,
@@ -149,7 +149,7 @@ function useDashboardLabels(t: ReturnType<typeof useAppTranslation>, userName: s
       progress: {
         title: t.progress.title,
         subtitle: t.progress.subtitle,
-        completion: t.progress.completion({ percent: "{percent}" }),
+        completion: t.progress.completion(0),
         downloadReport: t.progress.downloadReport,
       },
       workshop: {

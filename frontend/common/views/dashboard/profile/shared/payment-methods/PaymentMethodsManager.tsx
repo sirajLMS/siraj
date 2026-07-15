@@ -190,8 +190,8 @@ function useMethodMutations(refetch: () => Promise<unknown>): PaymentMethodMutat
 }
 
 export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
-  const t = useAppTranslation("ui").paymentMethod.manager;
-  const tType = useAppTranslation("ui").paymentMethod;
+  const t = useAppTranslation("ui.paymentMethod.manager");
+  const tType = useAppTranslation("ui.paymentMethod");
   const { hasPermission } = useUserStore();
   const canVerify = hasPermission(AppPermission.PaymentMethodsVerifyBankTransfer);
 

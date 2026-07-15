@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-history.documents";

@@ -45,9 +45,13 @@ export const localizedString = {
   drawerSubtitle: "Edit all translations",
   switchLocale: "Switch locale",
   atLeastOneTranslationRequired: "Enter at least one translation",
-  localeRequired: "{localeName} is required for this field",
-  localesRequired: "{localeNames} are required for this field",
-  localeRequiredEntry: "{localeName} is required",
+  localeRequired: (localeName: string) => `${localeName} is required for this field`,
+  localesRequired: (localeNames: string) => `${localeNames} are required for this field`,
+  localeRequiredEntry: (localeName: string) => `${localeName} is required`,
+  locale: {
+    ar: "Arabic",
+    en: "English",
+  },
 };
 
 export const phoneInput = {

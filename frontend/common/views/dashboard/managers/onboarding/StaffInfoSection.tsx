@@ -17,8 +17,16 @@ export function StaffInfoSection({ register, control, errors }: Readonly<Props>)
   const t = useAppTranslation("dashboard.managerOnboarding");
 
   const translate = {
-    fields: t.fields,
-    placeholders: t.placeholders,
+    fields: {
+      fullName: t.fields.fullName,
+      email: t.fields.email,
+      phone: t.fields.phone,
+    },
+    placeholders: {
+      fullName: t.placeholders.fullName,
+      email: t.placeholders.email,
+      phone: t.placeholders.phone,
+    },
     validation: t.validation,
   };
 

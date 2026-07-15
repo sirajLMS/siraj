@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MessageSchema } from "@/shared/messages/types/message";
+import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
-export const createStatusUpdateSchema = (messages: MessageSchema["dashboard"]["studentStatus"]["validation"]) =>
+export const createStatusUpdateSchema = (messages: StudentStatusLabels["validation"]) =>
   z.object({
     status: z.enum(StudentStatus),
     reason: z.string().min(5, { message: messages.reasonMinLength }),

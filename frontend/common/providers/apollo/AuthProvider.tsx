@@ -51,7 +51,7 @@ function LoadingUI({ onRetry, error, t }: LoadingUIProps) {
             {error}
           </Typography>
           <Button variant="contained" onClick={onRetry} sx={{ mt: 2 }}>
-            {t("tryAgain")}
+            {t.tryAgain}
           </Button>
         </>
       ) : (

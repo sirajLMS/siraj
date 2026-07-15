@@ -150,10 +150,10 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
           color: theme.palette.primary.main,
         })}
       >
-        {t.pageTitle({ name: studentName })}
+        {t.pageTitle(studentName)}
       </Typography>
       <Typography variant="bodyMd" sx={theme => ({ mt: 0.5, color: theme.palette.onSurfaceVariant })}>
-        {t.pageSubtitle({ month: monthStr })}
+        {t.pageSubtitle(monthStr)}
       </Typography>
     </Box>
   );
@@ -173,25 +173,25 @@ function HistoryMobileMetricsGrid({
       }}
     >
       <MobileMetric
-        title={t.metrics.totalClasses({ count: metrics.totalClasses })}
+        title={t.metrics.totalClasses(metrics.totalClasses)}
         icon={<School sx={theme => ({ color: theme.palette.onPrimaryContainer, fontSize: 18 })} />}
         value={metrics.totalClasses}
         bg={theme => theme.palette.primaryContainer}
       />
       <MobileMetric
-        title={t.metrics.attendanceRate({ rate: metrics.attendanceRate })}
+        title={t.metrics.attendanceRate(metrics.attendanceRate)}
         icon={<VerifiedUser sx={theme => ({ color: theme.palette.onSecondaryContainer, fontSize: 18 })} />}
         value={`${metrics.attendanceRate}%`}
         bg={theme => theme.palette.secondaryContainer}
       />
       <MobileMetric
-        title={t.metrics.hoursStudied({ hours: metrics.hoursStudied })}
+        title={t.metrics.hoursStudied(metrics.hoursStudied)}
         icon={<Timer sx={theme => ({ color: theme.palette.onTertiaryContainer, fontSize: 18 })} />}
         value={`${metrics.hoursStudied}h`}
         bg={theme => theme.palette.tertiaryContainer}
       />
       <MobileMetric
-        title={t.metrics.performance({ score: metrics.performance })}
+        title={t.metrics.performance(metrics.performance)}
         icon={<TrendingUp sx={theme => ({ color: theme.palette.onErrorContainer, fontSize: 18 })} />}
         value={`${metrics.performance}%`}
         bg={theme => theme.palette.errorContainer}
@@ -216,7 +216,7 @@ function HistoryMobileActions({
   canGoNext: boolean;
 }>) {
   const t = useAppTranslation("dashboard.studentHistory");
-  const locale = useLocale();
+  const locale = useAppTranslation<"common">("common");
   const monthStr = currentMonth.toLocaleString(getLatnLocaleTag(locale), { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();
 

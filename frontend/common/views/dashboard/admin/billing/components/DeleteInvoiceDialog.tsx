@@ -12,7 +12,7 @@ export type DeleteInvoiceDialogProps = {
 };
 
 export function DeleteInvoiceDialog({ open, invoiceId, isLoading, onClose, onConfirm }: DeleteInvoiceDialogProps) {
-  const t = useAppTranslation("dashboard").billing.deleteInvoiceDialog;
+  const t = useAppTranslation("dashboard.billing");
   const tc = useAppTranslation("common");
 
   const displayId = invoiceId ? invoiceId.replace("inv-", "INV-").toUpperCase() : "";
@@ -23,10 +23,10 @@ export function DeleteInvoiceDialog({ open, invoiceId, isLoading, onClose, onCon
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isLoading}
-      title={t.title}
-      body={t.body(displayId)}
+      title={t.deleteInvoiceDialog.title}
+      body={t.deleteInvoiceDialog.body(displayId)}
       cancelLabel={tc.cancel}
-      confirmLabel={t.confirm}
+      confirmLabel={t.deleteInvoiceDialog.confirm}
     />
   );
 }

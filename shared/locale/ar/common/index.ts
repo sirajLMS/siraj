@@ -28,4 +28,5 @@ export const common: CommonLabels = {
   loadFailed: "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
   loading: "جارٍ التحميل...",
   errors: "أخطاء",
+  notSet: "غير محدد",
 };

@@ -10,8 +10,8 @@ interface ParentsMetricGridProps {
 }
 
 export function ParentsMetricGrid({ metrics }: Readonly<ParentsMetricGridProps>) {
-  const t = useAppTranslation("dashboard.parents");
-  const parents = t.directory;
+  const t = useAppTranslation("dashboard.parentsDirectory");
+  const parents = t;
 
   return (
     <Grid container spacing={2} sx={{ mb: 4 }}>

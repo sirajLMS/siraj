@@ -11,7 +11,7 @@ import {
 import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/components/BillingMetricsRow";
 import type { AdminBillingSummary } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { ParentBillingSummary } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
-import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 
 export function buildAdminMetrics(summary: AdminBillingSummary, labels: BillingLabels): BillingMetricItem[] {
   return [

@@ -46,7 +46,7 @@ export function RescheduleViewMobile({
   onDismissSuccess,
 }: Readonly<RescheduleViewModel>) {
   const t = useAppTranslation("dashboard.rescheduleForm");
-  const tMeeting = useAppTranslation("ui").meetingConfig;
+  const tMeeting = useAppTranslation("ui.meetingConfig");
 
   return (
     <PageContainer sx={{ maxWidth: 900, mx: "auto" }}>

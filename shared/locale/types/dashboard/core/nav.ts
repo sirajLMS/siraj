@@ -72,4 +72,13 @@ export interface DashboardNavigationLabels {
   readonly teacherDues: string;
   readonly monthlyReports: string;
   readonly supervisorProfile: string;
+  readonly nav: {
+    readonly logout: string;
+    readonly impersonation: {
+      readonly returnToNormalLogin: string;
+    };
+    readonly groupSimulation: {
+      readonly returnToNormalRole: string;
+    };
+  };
 }

@@ -158,7 +158,7 @@ function useStudentStatusData({
   const handleMutationError = useCallback(
     (error: unknown) => {
       logger.error("Change student status failed:", { error });
-      notifications.show(tc("operationFailed"), {
+      notifications.show(tc.operationFailed, {
         severity: "error",
         autoHideDuration: 5000,
       });
@@ -238,7 +238,7 @@ export function StudentStatusContainer() {
 
   if (!useUnifiedProfile && (studentError || upcomingError)) {
     logger.error("Error loading student status:", { studentError, upcomingError });
-    return <ErrorMessage message={tc("loadFailed")} />;
+    return <ErrorMessage message={tc.loadFailed} />;
   }
 
   if (!student) {

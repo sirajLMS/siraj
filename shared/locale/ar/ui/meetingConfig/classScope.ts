@@ -1,0 +1,18 @@
+export const classScope = {
+  sectionTitle: "إعدادات اجتماع الحصة",
+  sectionSubtitle: "تجاوز إعدادات المعلم الافتراضية لهذه الحصة أو الجدول المتكرر.",
+  selectLabel: "إعداد الاجتماع",
+  selectPlaceholder: "اختر إعداد اجتماع",
+  useTeacherDefault: "استخدام إعداد المعلم الافتراضي",
+  noConfigs: "لا توجد إعدادات اجتماع لهذا النطاق",
+  inheritedFromTeacher: "يستخدم إعداد المعلم الافتراضي",
+  overrideActive: "تجاوز الحصة نشط",
+  effectiveSourceBanner: (source: string) => `مصدر الاجتماع الفعلي: ${source}`,
+  recurringSectionTitle: "اجتماع الجدول المتكرر",
+  recurringSectionSubtitle: "تجاوز اختياري لجميع حصص هذا الجدول المتكرر.",
+  createNewConfig: "إنشاء إعداد اجتماع جديد",
+  recurringFieldsRequired: "اختر مزوداً وأدخل رابط الاجتماع.",
+  seriesSectionTitle: "إعدادات اجتماع السلسلة",
+  seriesSectionSubtitle: "تنطبق على جميع الحصص المستقبلية من هذا الجدول المتكرر.",
+  manageSeriesLink: "إدارة إعدادات السلسلة الكاملة",
+};

@@ -34,5 +34,6 @@ export interface CommonLabels {
   readonly operationFailed: string;
   readonly loadFailed: string;
   readonly loading: string;
+  readonly notSet: string;
   readonly errors: string;
 }

@@ -8,7 +8,7 @@ const MIN_STREAK_HEIGHT = 16;
 const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 export function PerformanceStreak({ streakDays }: Readonly<PerformanceStreakProps>) {
-  const t = useAppTranslation("dashboard.studentHistory.performanceStreak");
+  const t = useAppTranslation<"dashboard.studentHistory">("dashboard.studentHistory").performanceStreak;
 
   return (
     <Box

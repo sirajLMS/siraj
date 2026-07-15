@@ -97,14 +97,20 @@ async function loadTranslation<K extends keyof MessageSchema>(
     "ui.meetingConfig.classScope": "ui/meetingConfig/classScope",
     "ui.meetingConfig.display": "ui/meetingConfig/display",
     "ui.meetingConfig.summary": "ui/meetingConfig/summary",
+    "ui.meetingConfig.fields": "ui/meetingConfig/fields",
+    "ui.meetingConfig.join": "ui/meetingConfig/join",
+    "ui.meetingConfig.providerSelect": "ui/meetingConfig/providerSelect",
+    "ui.meetingConfig.recurringSchedule": "ui/meetingConfig/recurringSchedule",
     "ui.paymentMethod": "ui/paymentMethod",
     "ui.paymentMethod.manager": "ui/paymentMethod/manager",
     "ui.paymentMethod.display": "ui/paymentMethod/display",
     "ui.paymentMethod.list": "ui/paymentMethod/list",
     "ui.paymentMethod.typeSelector": "ui/paymentMethod/typeSelector",
+    "ui.paymentMethod.typeFields": "ui/paymentMethod/typeFields",
     "ui.phoneInput": "ui/phoneInput",
     "ui.tagInput": "ui/tagInput",
     "ui.timezoneSelect": "ui/timezoneSelect",
+    ui: "ui/index",
   };
 
   const filePath = namespacePaths[namespace];

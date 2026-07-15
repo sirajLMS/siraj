@@ -192,6 +192,9 @@ export const main: BillingLabels = {
   adminBillingFxNote: "Metrics use your display currency; each invoice uses its parent's currency",
   displayCurrencyMixed: lockedAmount =>
     `Multiple display currencies detected; showing locked amounts only: ${lockedAmount}`,
+  displayCurrencyNotSet: (lockedAmount, lockedCurrency) =>
+    `${lockedAmount} ${lockedCurrency} (display currency not set)`,
+  displayCurrencyStale: (lockedAmount, lockedCurrency) => `${lockedAmount} ${lockedCurrency} (rates may be stale)`,
   currencyHedges,
   supportedCurrencies,
 };

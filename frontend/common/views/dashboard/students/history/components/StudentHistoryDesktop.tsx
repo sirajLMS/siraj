@@ -40,8 +40,8 @@ export function StudentHistoryDesktop({
     <Box sx={{ display: { xs: "none", md: "block" } }}>
       <Box sx={{ mb: 4 }}>
         <PageHeader
-          title={t.pageTitle({ name: studentName })}
-          subtitle={t.pageSubtitle({ month: monthStr })}
+          title={t.pageTitle(studentName)}
+          subtitle={t.pageSubtitle(monthStr)}
           titleVariant="headlineMd"
           breadcrumbs={[{ label: t.breadcrumbs.archive }]}
           actions={
@@ -86,25 +86,25 @@ export function StudentHistoryDesktop({
       <Box sx={theme => ({ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: theme.layout.gutter, mb: 4 })}>
         <MetricCard
           icon={School}
-          label={t.metrics.totalClasses({ count: metrics.totalClasses })}
+          label={t.metrics.totalClasses(metrics.totalClasses)}
           value={metrics.totalClasses}
           variant="default"
         />
         <MetricCard
           icon={VerifiedUser}
-          label={t.metrics.attendanceRate({ rate: metrics.attendanceRate })}
+          label={t.metrics.attendanceRate(metrics.attendanceRate)}
           value={`${metrics.attendanceRate}%`}
           variant="default"
         />
         <MetricCard
           icon={Timer}
-          label={t.metrics.hoursStudied({ hours: metrics.hoursStudied })}
+          label={t.metrics.hoursStudied(metrics.hoursStudied)}
           value={`${metrics.hoursStudied}h`}
           variant="default"
         />
         <MetricCard
           icon={TrendingUp}
-          label={t.metrics.performance({ score: metrics.performance })}
+          label={t.metrics.performance(metrics.performance)}
           value={`${metrics.performance}%`}
           variant="default"
         />

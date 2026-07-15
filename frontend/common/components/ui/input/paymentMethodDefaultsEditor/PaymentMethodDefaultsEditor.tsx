@@ -60,8 +60,8 @@ export function PaymentMethodDefaultsEditor({
   successOpen = false,
   onSuccessCloseAction,
 }: PaymentMethodDefaultsEditorProps) {
-  const t = useAppTranslation("ui").paymentMethod;
-  const tDefaults = useAppTranslation("ui").paymentMethod.defaultsEditor;
+  const t = useAppTranslation("ui.paymentMethod");
+  const tDefaults = t.defaultsEditor;
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const payinMethods = filterMethodsForDirection(methods, "payin");
@@ -69,9 +69,11 @@ export function PaymentMethodDefaultsEditor({
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = method.type ? getPaymentMethodTypeLabel(method.type, key => t(key as never)) : "";
+      const typeLabel = method.type
+        ? getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "")
+        : "";
       const directionLabel = method.direction
-        ? getPaymentMethodDirectionLabel(method.direction, key => t(key as never))
+        ? getPaymentMethodDirectionLabel(method.direction, key => t.direction[key as keyof typeof t.direction] ?? "")
         : "";
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
@@ -81,7 +83,7 @@ export function PaymentMethodDefaultsEditor({
 
   return (
     <Stack spacing={2}>
-      <FieldWrapper label={tDefaults.paynDefault}>
+      <FieldWrapper label={tDefaults.payinDefault}>
         <TextField
           select
           fullWidth

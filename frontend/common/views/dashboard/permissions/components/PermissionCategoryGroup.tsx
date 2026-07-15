@@ -5,7 +5,7 @@ import { styled } from "@mui/material/styles";
 import { labelSx } from "@/frontend/common/components/ui/form";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PermissionRow } from "@/frontend/common/views/dashboard/permissions/components/PermissionRow";
-import { useAppTranslation } from "@/shared/locale/client";
+import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions";
 
 const StyledCategoryContainer = styled(Box)(({ theme }) => ({
   border: `1px solid ${theme.palette.outlineVariant}`,
@@ -38,6 +38,7 @@ interface PermissionCategoryGroupProps {
   readonly onSelectAllCategory: (categoryPerms: Array<Permission & { id: string }>, checked: boolean) => void;
   readonly onTogglePermission: (permId: string, isSystem: boolean) => void;
   readonly isLoading: boolean;
+  readonly t: PermissionsLabels;
 }
 
 export function PermissionCategoryGroup({
@@ -49,8 +50,8 @@ export function PermissionCategoryGroup({
   onSelectAllCategory,
   onTogglePermission,
   isLoading,
+  t,
 }: Readonly<PermissionCategoryGroupProps>) {
-  const t = useAppTranslation("dashboard.permissions");
   return (
     <StyledCategoryContainer>
       {/* Category Header with Select All */}

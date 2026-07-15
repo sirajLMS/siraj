@@ -81,11 +81,7 @@ export function StatusTrackingDesktopView({
 
       <SectionPanel
         title={labels.todaysClassSchedule}
-        actions={
-          <StyledTotalSessionsBadge>
-            {labels.totalSessions.replace("{total}", String(totalSessions))}
-          </StyledTotalSessionsBadge>
-        }
+        actions={<StyledTotalSessionsBadge>{labels.totalSessions(totalSessions)}</StyledTotalSessionsBadge>}
       >
         <StatusTrackingDataGrid
           rows={rows}

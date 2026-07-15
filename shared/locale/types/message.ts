@@ -20,7 +20,6 @@ import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/
 import type { DashboardCoreNotificationsLabels } from "@/shared/locale/types/dashboard/core/notifications";
 import type { ParentDashboardLabels } from "@/shared/locale/types/dashboard/core/parentDashboard";
 import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core/scheduleAlerts";
-import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core/statusTracking";
 import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
@@ -82,14 +81,20 @@ import type {
   LocalizedStringLabels,
   MeetingConfigClassScopeLabels,
   MeetingConfigDisplayLabels,
+  MeetingConfigFieldsLabels,
+  MeetingConfigJoinLabels,
   MeetingConfigLabels,
   MeetingConfigManagerLabels,
+  MeetingConfigProviderSelectLabels,
+  MeetingConfigRecurringScheduleLabels,
   MeetingConfigSummaryLabels,
   PaymentMethodDisplayLabels,
   PaymentMethodLabels,
   PaymentMethodListLabels,
   PaymentMethodManagerLabels,
   PaymentMethodTypeSelectorLabels,
+  PaymentMethodTypeFieldsLabels,
+  PaymentMethodDefaultsEditorLabels,
   PhoneInputLabels,
   TagInputLabels,
   TimezoneSelectLabels,
@@ -183,11 +188,17 @@ export type MessageSchema = {
   "ui.meetingConfig.classScope": MeetingConfigClassScopeLabels;
   "ui.meetingConfig.display": MeetingConfigDisplayLabels;
   "ui.meetingConfig.summary": MeetingConfigSummaryLabels;
+  "ui.meetingConfig.fields": MeetingConfigFieldsLabels;
+  "ui.meetingConfig.join": MeetingConfigJoinLabels;
+  "ui.meetingConfig.providerSelect": MeetingConfigProviderSelectLabels;
+  "ui.meetingConfig.recurringSchedule": MeetingConfigRecurringScheduleLabels;
   "ui.paymentMethod": PaymentMethodLabels;
   "ui.paymentMethod.manager": PaymentMethodManagerLabels;
   "ui.paymentMethod.display": PaymentMethodDisplayLabels;
   "ui.paymentMethod.list": PaymentMethodListLabels;
   "ui.paymentMethod.typeSelector": PaymentMethodTypeSelectorLabels;
+  "ui.paymentMethod.typeFields": PaymentMethodTypeFieldsLabels;
+  "ui.paymentMethod.defaultsEditor": PaymentMethodDefaultsEditorLabels;
   "ui.phoneInput": PhoneInputLabels;
   "ui.tagInput": TagInputLabels;
   "ui.timezoneSelect": TimezoneSelectLabels;

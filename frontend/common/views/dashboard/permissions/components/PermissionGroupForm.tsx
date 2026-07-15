@@ -259,6 +259,7 @@ function PermissionGroupFormContent({
               onSelectAllCategory={handleSelectAllCategory}
               onTogglePermission={handleTogglePermission}
               isLoading={isLoading}
+              t={t}
             />
           </Box>
         </SectionPanel>

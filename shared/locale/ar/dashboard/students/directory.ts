@@ -52,4 +52,7 @@ export const directory: StudentDirectoryLabels = {
   registrationComingSoonDescription: "تسجيل الطالب سيكون متاحاً قريباً.",
   registrationComingSoonNotice: "تسجيل الطالب قريباً. يرجى التحقق لاحقاً.",
   loadFailed: "فشل تحميل دليل الطلاب.",
+  errors: {
+    loadFailed: "فشل تحميل دليل الطلاب.",
+  },
 };

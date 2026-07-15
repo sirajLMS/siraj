@@ -53,7 +53,7 @@ function testVersionMismatch(name: string, action: (tx: Tx, student: TestStudent
     await runInRollback(async tx => {
       const { student } = await makeStudent(tx, `VM_${name.slice(0, 6)}`);
       const error = await expectRepoError(() => action(tx, student));
-      expect(error.message).toContain("Version mismatch");
+      expect(error.message).toContain("version mismatch");
     });
   });
 }

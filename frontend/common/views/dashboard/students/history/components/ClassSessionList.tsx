@@ -68,7 +68,7 @@ function ClassSessionCard({
   statusLabel: string;
   durationLabel: string;
 }>) {
-  const t = useAppTranslation("dashboard.studentHistory.classDetails");
+  const t = useAppTranslation("dashboard.studentHistory").classDetails;
   const [timeValue, timePeriod] = session.time.split(" ");
   const showJoin = isJoinableClassSession(session.executionState, session.outcome, { isFrozen: session.isFrozen });
 
@@ -157,7 +157,7 @@ function ClassSessionCard({
           joinUrl={session.meetingJoinUrl}
           meeting={session.effectiveMeeting}
           emptyRole="parent"
-          label={t("classDetails.joinSession")}
+          label={t.joinSession}
         />
       ) : null}
     </Box>
@@ -165,7 +165,7 @@ function ClassSessionCard({
 }
 
 export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
-  const t = useAppTranslation("dashboard.studentHistory.classDetails");
+  const t = useAppTranslation("dashboard.studentHistory").classDetails;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -183,7 +183,7 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
           <ClassSessionCard
             key={session.id}
             session={session}
-            statusLabel={t(`status.${session.status}`)}
+            statusLabel={t.status[session.status as keyof typeof t.status] ?? session.status}
             durationLabel={formatDuration(session.duration)}
           />
         ))

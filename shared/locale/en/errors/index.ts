@@ -34,41 +34,125 @@ export const errors: ErrorsLabels = {
     insufficientPermissions: "You do not have sufficient permissions to perform this action.",
     impersonationNotAllowedWhileImpersonating: "You cannot impersonate while already impersonating another user.",
     // ─── Functions (were {param} strings) ────────────────────────────
-    demoGroupNotFound: groupSlug => `Demo group not found: ${groupSlug}`,
-    demoGroupNoUser: groupSlug => `No user found for demo group: ${groupSlug}`,
+    demoGroupNotFound: (groupSlug: string) => `Demo group not found: ${groupSlug}`,
+    demoGroupNoUser: (groupSlug: string) => `No user found for demo group: ${groupSlug}`,
   },
   permissionManagement: {
     unauthorized: "You do not have sufficient permissions to perform this action.",
-    userNotFound: id => `User not found: ${id}`,
-    permissionGroupNotFound: id => `Permission group not found: ${id}`,
+    userNotFound: (id: string) => `User not found: ${id}`,
+    permissionGroupNotFound: (id: string) => `Permission group not found: ${id}`,
     permissionGroupNameRequired: "Permission group name is required.",
     permissionGroupNameTooLong: "Permission group name is too long (max 255 characters).",
     permissionGroupInvalidName: "Invalid permission group name.",
     cannotModifySuperAdmin: "Cannot modify super admin user.",
   },
   billing: {
-    invoiceNotFound: id => `Invoice not found: ${id}`,
-    invoiceNotPendingReview: id => `Invoice is not pending review: ${id}`,
-    invoicePaymentProofNotFound: id => `Payment proof not found for invoice: ${id}`,
-    invoiceAlreadyPaid: ({ id, status }) => `Invoice ${id} is already ${status.toLowerCase()}.`,
+    invoiceNotFound: (id: string) => `Invoice not found: ${id}`,
+    invoiceNotPendingReview: (id: string) => `Invoice is not pending review: ${id}`,
+    invoicePaymentProofNotFound: (id: string) => `Payment proof not found for invoice: ${id}`,
+    invoiceAlreadyPaid: ({ id, status }: { id: string; status: string }) =>
+      `Invoice ${id} is already ${status.toLowerCase()}.`,
     paymentProofRequired: "Payment proof is required.",
-    cannotDeletePaidInvoice: id => `Cannot delete invoice ${id} because it has been paid.`,
+    cannotDeletePaidInvoice: (id: string) => `Cannot delete invoice ${id} because it has been paid.`,
     invalidParentId: "Invalid parent ID.",
     invalidInvoiceAmount: "Invalid invoice amount.",
     parentNotFound: "Parent not found.",
-    invoiceVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
-      `Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
+    invoiceVersionMismatch: ({
+      id,
+      expectedVersion,
+      gotVersion,
+    }: {
+      id: string;
+      expectedVersion: number;
+      gotVersion: number;
+    }) => `Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
   },
   credit: {
     duplicatePurchase: "This credit purchase has already been processed.",
-    insufficientBalance: ({ studentId, remaining }) =>
+    insufficientBalance: ({ studentId, remaining }: { studentId: string; remaining: number }) =>
       `Insufficient balance for student ${studentId}. Remaining: ${remaining}`,
     invalidInput: "Invalid input.",
   },
   file: {
-    recordNotFound: ({ tableName, entityId }) => `${tableName} not found: ${entityId}`,
+    recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>
+      `${tableName} not found: ${entityId}`,
     invalidFileType: "Invalid file type. Only PDF, JPG, PNG, and HEIC files are allowed.",
     invoicePaymentProofPending: "A payment proof is already pending review for this invoice.",
+  },
+  meetingProvider: {
+    meetingProviderInactive: "Meeting provider is inactive.",
+    meetingConfigNotFound: (id: string) => `Meeting config not found: ${id}`,
+    meetingConfigCreateFailed: "Failed to create meeting config.",
+    meetingConfigUpdateFailed: "Failed to update meeting config.",
+    meetingProviderNotFound: (id: string) => `Meeting provider not found: ${id}`,
+    meetingProviderCreateFailed: "Failed to create meeting provider.",
+    meetingProviderUpdateFailed: "Failed to update meeting provider.",
+    meetingProviderInUse: "Meeting provider is in use and cannot be deleted.",
+  },
+  teacher: {
+    teacherNotFound: (id: string) => `Teacher not found: ${id}`,
+    staffProfileNotFound: "Staff profile not found.",
+    quotaMustBeNonNegative: "Quota must be a non-negative number.",
+    quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
+      `Quota (${requested}) exceeds total (${total}).`,
+  },
+  student: {
+    studentNotFound: (id: string) => `Student not found: ${id}`,
+    studentCreateFailed: "Failed to create student.",
+    studentUpdateFailed: (id: string) => `Failed to update student (id: ${id}).`,
+    studentVersionMismatch: ({
+      id,
+      expectedVersion,
+      gotVersion,
+    }: {
+      id: string;
+      expectedVersion: number;
+      gotVersion: number;
+    }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
+    insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
+      `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`,
+    invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
+      `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
+    studentEmailRequired: "Student email is required.",
+    studentPasswordRequired: "Student password is required.",
+  },
+  category: {
+    categoryNotFound: (id: string) => `Category not found: ${id}`,
+    categoryCreateFailed: "Failed to create class category.",
+    categoryHasSubjects: "Cannot delete category because it has associated subjects.",
+  },
+  user: {
+    userNotFound: (id: string) => `User not found: ${id}`,
+    userEmailExists: "User with this email already exists.",
+    cannotModifyBankingFields: "Cannot modify banking fields.",
+    parentNotFound: "Parent not found.",
+  },
+  scheduling: {
+    cannotRescheduleToSelf: "Cannot reschedule to self.",
+    cannotRescheduleCompleted: "Cannot reschedule a completed session.",
+    cannotRescheduleAlreadyRescheduled: "Cannot reschedule a session that has already been rescheduled.",
+    outOfQuota: "Out of quota.",
+    leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
+      `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
+    classInstanceNotFound: ({ id }: { id: string }) => `Class instance not found: ${id}`,
+    originalClassNotFound: "Original class not found.",
+    invalidTransition: "Invalid transition.",
+    teacherNotAssigned: ({
+      teacherId,
+      studentId,
+      startTime,
+    }: {
+      teacherId: string;
+      studentId: string;
+      startTime: string;
+    }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`,
+    teacherBooked: "Teacher is already booked at this time.",
+    studentBooked: "Student is already booked at this time.",
+    meetingUrlInUse: "Meeting URL is already in use.",
+    sessionNotActivated: "Session is not activated.",
+  },
+  permissionGroup: {
+    permissionGroupNotFound: "Permission group not found.",
   },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "Too many requests. Please try again later.",
@@ -81,52 +165,68 @@ export const errors: ErrorsLabels = {
   unauthorizedSearch: "You are not authorized to search.",
   unauthorizedViewMetrics: "You are not authorized to view metrics.",
   notFound: "The requested resource was not found.",
-  studentNotFound: id => `Student not found: ${id}`,
-  studentCreateFailed: "Failed to create student.",
-  studentUpdateFailed: id => `Failed to update student (id: ${id}).`,
-  studentVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
-    `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
-  insufficientClasses: ({ id, remaining, required }) =>
-    `Insufficient classes remaining for student ${id}: ${remaining} left, ${required} required.`,
-  invalidStatusTransition: ({ currentStatus, newStatus }) =>
-    `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
-  categoryNotFound: id => `Category not found: ${id}`,
-  categoryCreateFailed: "Failed to create class category.",
   unknownName: "Unknown",
-  meetingProviderInactive: "The meeting provider is inactive.",
-  meetingConfigNotFound: id => `Meeting config not found: ${id}`,
-  meetingConfigCreateFailed: "Failed to create meeting config.",
-  meetingConfigUpdateFailed: "Failed to update meeting config.",
-  meetingProviderNotFound: id => `Meeting provider not found: ${id}`,
+  invalidInput: "Invalid input.",
+
+  // ─── Flattened error properties for backward compatibility ───────────
+  categoryNotFound: (id: string) => `Category not found: ${id}`,
+  categoryCreateFailed: "Failed to create class category.",
+  categoryHasSubjects: "Cannot delete category because it has associated subjects.",
+  meetingProviderNotFound: (id: string) => `Meeting provider not found: ${id}`,
   meetingProviderCreateFailed: "Failed to create meeting provider.",
   meetingProviderUpdateFailed: "Failed to update meeting provider.",
   meetingProviderInUse: "Meeting provider is in use and cannot be deleted.",
-  userNotFound: id => `User not found: ${id}`,
-  cannotModifyBankingFields: "Cannot modify banking fields.",
-  invalidInput: "Invalid input.",
-  sessionNotActivated: "Session not activated.",
-  teacherNotFound: id => `Teacher not found: ${id}`,
-  staffProfileNotFound: "Staff profile not found.",
-  quotaMustBeNonNegative: "Quota must be a non-negative number.",
-  quotaExceedsTotal: ({ requested, total }) => `Quota (${requested}) exceeds total (${total}).`,
-  parentNotFound: "Parent not found.",
+  meetingProviderInactive: "Meeting provider is inactive.",
+  meetingConfigNotFound: (id: string) => `Meeting config not found: ${id}`,
+  meetingConfigCreateFailed: "Failed to create meeting config.",
+  meetingConfigUpdateFailed: "Failed to update meeting config.",
+  studentNotFound: (id: string) => `Student not found: ${id}`,
+  studentCreateFailed: "Failed to create student.",
+  studentUpdateFailed: (id: string) => `Failed to update student (id: ${id}).`,
+  studentVersionMismatch: ({
+    id,
+    expectedVersion,
+    gotVersion,
+  }: {
+    id: string;
+    expectedVersion: number;
+    gotVersion: number;
+  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
+  insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
+    `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`,
+  invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
+    `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
   studentEmailRequired: "Student email is required.",
   studentPasswordRequired: "Student password is required.",
-  userEmailExists: "A user with this email already exists.",
-  permissionGroupNotFound: "Permission group not found.",
-  categoryHasSubjects: "Cannot delete category because it has subjects.",
+  teacherNotFound: (id: string) => `Teacher not found: ${id}`,
+  staffProfileNotFound: "Staff profile not found.",
+  quotaMustBeNonNegative: "Quota must be a non-negative number.",
+  quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
+    `Quota (${requested}) exceeds total (${total}).`,
+  userNotFound: (id: string) => `User not found: ${id}`,
+  userEmailExists: "User with this email already exists.",
+  cannotModifyBankingFields: "Cannot modify banking fields.",
+  parentNotFound: "Parent not found.",
   cannotRescheduleToSelf: "Cannot reschedule to self.",
-  cannotRescheduleCompleted: "Cannot reschedule completed session.",
-  cannotRescheduleAlreadyRescheduled: "Cannot reschedule already rescheduled session.",
+  cannotRescheduleCompleted: "Cannot reschedule a completed session.",
+  cannotRescheduleAlreadyRescheduled: "Cannot reschedule a session that has already been rescheduled.",
   outOfQuota: "Out of quota.",
-  leaveQuotaExceeded: ({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
-  classInstanceNotFound: (params: { id: string }) => `Class instance not found: ${params.id}`,
+  leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
+    `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
+  classInstanceNotFound: ({ id }: { id: string }) => `Class instance not found: ${id}`,
   originalClassNotFound: "Original class not found.",
   invalidTransition: "Invalid transition.",
-  // ─── Scheduling-specific errors ──────────────────────────────────────
-  teacherNotAssigned: ({ teacherId, studentId, startTime }) =>
-    `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`,
+  teacherNotAssigned: ({
+    teacherId,
+    studentId,
+    startTime,
+  }: {
+    teacherId: string;
+    studentId: string;
+    startTime: string;
+  }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`,
   teacherBooked: "Teacher is already booked at this time.",
   studentBooked: "Student is already booked at this time.",
   meetingUrlInUse: "Meeting URL is already in use.",
+  sessionNotActivated: "Session is not activated.",
 };

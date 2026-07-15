@@ -13,6 +13,7 @@ import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/
 import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { userPaymentMethodToOptionLabel } from "@/frontend/common/lib/user-payment-method";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { PaymentMethodLabels } from "@/shared/locale/types/ui";
 
 export type UserPaymentMethodAutocompleteProps = {
   readonly value?: UserPaymentMethodFieldsFragment | null;
@@ -29,6 +30,19 @@ export type UserPaymentMethodAutocompleteProps = {
   readonly onBlurAction?: () => void;
   readonly style?: React.CSSProperties;
 };
+
+function resolvePaymentMethodLabel(t: PaymentMethodLabels, key: string): string {
+  const parts = key.split(".");
+  let current: unknown = t;
+  for (const part of parts) {
+    if (current && typeof current === "object" && part in current) {
+      current = (current as Record<string, unknown>)[part];
+    } else {
+      return key;
+    }
+  }
+  return typeof current === "string" ? current : key;
+}
 
 const filterOptions = createFilterOptions<UserPaymentMethodFieldsFragment>({
   matchFrom: "any",
@@ -50,11 +64,12 @@ export function UserPaymentMethodAutocomplete({
   onBlurAction,
   style,
 }: UserPaymentMethodAutocompleteProps): React.ReactNode {
-  const tUi = useAppTranslation("ui").paymentMethod;
-  const tSelect = useAppTranslation("ui").paymentMethod.select;
+  const tUi = useAppTranslation("ui.paymentMethod");
+  const tSelect = tUi.select;
 
   const getOptionLabel = useCallback(
-    (method: UserPaymentMethodFieldsFragment) => userPaymentMethodToOptionLabel(method, key => tUi(key as never)),
+    (method: UserPaymentMethodFieldsFragment) =>
+      userPaymentMethodToOptionLabel(method, key => resolvePaymentMethodLabel(tUi, key)),
     [tUi]
   );
 
@@ -86,12 +101,14 @@ export function UserPaymentMethodAutocomplete({
       filterOptions={filterOptions}
       renderOption={(props, method) => {
         const { key, ...optionProps } = props;
-        const typeLabel = method.type ? getPaymentMethodTypeLabel(method.type, key => tUi(key as never)) : "";
+        const typeLabel = method.type
+          ? getPaymentMethodTypeLabel(method.type, key => resolvePaymentMethodLabel(tUi, key))
+          : "";
         return (
           <Box key={key} component="li" sx={{ px: 2, py: 1 }} {...optionProps}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
               <Typography variant="bodyMd" sx={{ flex: 1, minWidth: 0 }} noWrap>
-                {userPaymentMethodToOptionLabel(method, key => tUi(key as never))}
+                {userPaymentMethodToOptionLabel(method, key => resolvePaymentMethodLabel(tUi, key))}
               </Typography>
               {method.isDefault ? <Chip size="small" label={tUi.display.defaultBadge} /> : null}
               {typeLabel ? (

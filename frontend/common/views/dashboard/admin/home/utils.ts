@@ -4,7 +4,7 @@ import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboar
 import { useAppTranslation } from "@/shared/locale/client";
 
 export const useAdminDashboardLabels = () => {
-  const t = useAppTranslation("dashboard").admin;
+  const t = useAppTranslation("dashboard.admin");
 
   const headers = {
     student: t.student,

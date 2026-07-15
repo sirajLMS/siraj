@@ -136,7 +136,7 @@ export function ManagersDataGrid({
         rows={managers}
         columns={columns}
         getRowId={row => row.userId}
-        emptyMessage={t("noEntries")}
+        emptyMessage={t.noEntries}
         loading={loading}
         autoHeight
         rowHeight={80}

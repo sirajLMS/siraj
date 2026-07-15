@@ -126,7 +126,7 @@ function PaymentMethodFormFields({
   setSelectedPaymentLink,
   setSelectedOnlineAccount,
 }: PaymentMethodFormFieldsProps) {
-  const t = useAppTranslation("ui").paymentMethod.manager;
+  const t = useAppTranslation("ui.paymentMethod.manager");
 
   return (
     <Stack spacing={2.5} sx={{ pt: 1 }}>
@@ -311,8 +311,8 @@ export function PaymentMethodFormDialog({
   onClose,
   onSaved,
 }: PaymentMethodFormDialogProps) {
-  const t = useAppTranslation("ui").paymentMethod.manager;
-  const tDir = useAppTranslation("ui").paymentMethod;
+  const t = useAppTranslation("ui.paymentMethod.manager");
+  const tDir = useAppTranslation("ui.paymentMethod");
   const _locale = useAppLocale();
   const isEdit = editMethod?.id != null;
 

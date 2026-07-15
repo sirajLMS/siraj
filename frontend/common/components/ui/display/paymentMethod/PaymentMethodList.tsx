@@ -45,7 +45,7 @@ export function PaymentMethodList({
     return [
       {
         field: "label",
-        headerName: tList("columnLabel"),
+        headerName: tList.columnLabel,
         flex: 1.2,
         minWidth: 180,
         renderCell: params => (

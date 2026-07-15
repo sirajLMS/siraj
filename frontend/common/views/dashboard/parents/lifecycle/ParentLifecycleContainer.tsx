@@ -9,7 +9,6 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AccountStatus, AppPermission, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { changeParentLifecycleStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-lifecycle.documents";
 import { parentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-profile.documents";
-import { useAppLocale } from "@/frontend/common/providers/LocaleProvider";
 import { logger } from "@/frontend/common/utils/logger";
 import { ParentLifecycleView } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleView";
 import type { ParentLifecyclePageData } from "@/frontend/common/views/dashboard/parents/lifecycle/types";
@@ -18,7 +17,6 @@ import { useAppTranslation } from "@/shared/locale/client";
 export function ParentLifecycleContainer() {
   const t = useAppTranslation("dashboard.parentLifecycle");
   const tc = useAppTranslation("common");
-  const _locale = useAppLocale();
   const params = useParams();
   const parentId = typeof params?.id === "string" ? params.id : "";
   const notifications = useNotifications();
@@ -38,7 +36,7 @@ export function ParentLifecycleContainer() {
     },
     onError: mutationError => {
       logger.error("Change parent lifecycle status failed:", { error: mutationError });
-      notifications.show(tc.errors.operationFailed, {
+      notifications.show(tc.operationFailed, {
         severity: "error",
         autoHideDuration: 5000,
       });

@@ -1,0 +1,16 @@
+export const display = {
+  defaultBadge: "Default",
+  meetingUrl: "Meeting URL",
+  username: "Username",
+  tenantId: "Tenant ID",
+  provider: "Provider",
+  label: "Label",
+  meetingId: "Meeting ID",
+  source: "Source",
+  sourceClass: "Class Config",
+  sourceRecurring: "Recurring Schedule Config",
+  sourceTeacher: "Teacher Default Config",
+  sourceNone: "None",
+  noMeeting: "No online meeting",
+  passwordProtected: "Password Protected",
+};

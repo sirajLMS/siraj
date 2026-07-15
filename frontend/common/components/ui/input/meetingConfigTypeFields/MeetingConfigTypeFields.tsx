@@ -30,7 +30,7 @@ export function MeetingConfigTypeFields({
   passwordHelperText,
   onMeetingUrlBlur,
 }: MeetingConfigTypeFieldsProps) {
-  const t = useAppTranslation("ui").meetingConfig.fields;
+  const { fields: t } = useAppTranslation("ui.meetingConfig");
 
   if (!provider) {
     return null;

@@ -98,9 +98,9 @@ function AccessDeniedView() {
 }
 
 export function ParentComplaintsContainer({ parentId }: ParentComplaintsContainerProps) {
-  const tComplaints = useAppTranslation("dashboard.complaints").parent;
+  const tComplaints = useAppTranslation("dashboard.complaints");
   const tCommon = useAppTranslation("common");
-  const labels = buildComplaintsLabels({ parent: tComplaints, admin: {} as any });
+  const labels = buildComplaintsLabels(tComplaints);
 
   const isSubmitting = useParentComplaintsStore(state => state.isSubmitting);
   const showSuccess = useParentComplaintsStore(state => state.showSuccess);

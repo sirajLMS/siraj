@@ -26,7 +26,7 @@ type FxStoryProps = {
 
 function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStoryProps) {
   const locale = useAppLocale();
-  const t = useAppTranslation("profile").teacher;
+  const t = useAppTranslation("profile");
   const tErrors = useAppTranslation("errors");
   const displayCurrency = useUserStore(state => state.displayCurrency);
 
@@ -35,7 +35,7 @@ function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStory
     lockedCurrency,
     displayAmount,
     locale,
-    buildFxDisplayMessages(t, tErrors)
+    buildFxDisplayMessages(t.teacher, tErrors)
   );
 
   return (

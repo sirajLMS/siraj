@@ -191,6 +191,8 @@ export const main: BillingLabels = {
   fxConversionNoteSubject: code => `تستخدم المبالغ المحوّلة عملة عرض هذا المستخدم (${code})`,
   adminBillingFxNote: "تستخدم المقاييس عملة العرض الخاصة بك؛ تستخدم كل فاتورة عملة ولي الأمر",
   displayCurrencyMixed: lockedAmount => `تم اكتشاف عدة عملات عرض؛ عرض المبالغ المقفلة فقط: ${lockedAmount}`,
+  displayCurrencyNotSet: (lockedAmount, lockedCurrency) => `${lockedAmount} ${lockedCurrency} (عملة العرض غير محددة)`,
+  displayCurrencyStale: (lockedAmount, lockedCurrency) => `${lockedAmount} ${lockedCurrency} (قد تكون الأسعار قديمة)`,
   currencyHedges,
   supportedCurrencies,
 };

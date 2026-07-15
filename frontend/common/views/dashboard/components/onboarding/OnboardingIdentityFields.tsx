@@ -17,11 +17,13 @@ interface TranslationObject {
     readonly fullName: string;
     readonly email: string;
     readonly phone: string;
+    [key: string]: string;
   };
   readonly placeholders: {
     readonly fullName: string;
     readonly email: string;
     readonly phone: string;
+    [key: string]: string;
   };
   readonly validation: Record<string, string>;
 }

@@ -50,4 +50,7 @@ export interface StudentDirectoryLabels {
   readonly registrationComingSoonDescription: string;
   readonly registrationComingSoonNotice: string;
   readonly loadFailed: string;
+  readonly errors: {
+    readonly loadFailed: string;
+  };
 }

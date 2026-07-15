@@ -18,7 +18,7 @@ export function PaymentMethodDeleteDialog({
   onClose,
   onConfirm,
 }: PaymentMethodDeleteDialogProps) {
-  const t = useAppTranslation("ui").paymentMethod.manager;
+  const t = useAppTranslation("ui.paymentMethod.manager");
 
   return (
     <BaseDeleteDialog

@@ -52,4 +52,7 @@ export const directory: StudentDirectoryLabels = {
   registrationComingSoonDescription: "Student registration will be available soon.",
   registrationComingSoonNotice: "Student registration coming soon. Please check back later.",
   loadFailed: "Failed to load student directory.",
+  errors: {
+    loadFailed: "Failed to load student directory.",
+  },
 };

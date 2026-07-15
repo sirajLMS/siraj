@@ -83,7 +83,7 @@ function useAuditLabels(
     statusRescheduled: t.status.regularRescheduled,
     classDetails: t.fields.classDetails,
     registeredStudents: {
-      title: t.students.title({ count: audit?.registeredStudentCount ?? 0 }),
+      title: t.students.title(audit?.registeredStudentCount ?? 0),
       exportList: t.students.exportList,
       studentName: t.students.studentName,
       idNumber: t.students.idNumber,
@@ -91,7 +91,7 @@ function useAuditLabels(
       actions: t.students.actions,
       student: t.students.student,
       status: t.students.status,
-      viewAll: t.students.viewAll({ count: audit?.registeredStudentCount ?? 0 }),
+      viewAll: t.students.viewAll(audit?.registeredStudentCount ?? 0),
       pending: t.students.pending,
       present: t.students.present,
       absent: t.students.absent,
@@ -113,7 +113,7 @@ function useAuditLabels(
     adminNote: {
       title: t.adminNote.title,
       titleMobile: t.adminNote.titleMobile,
-      lastUpdated: t.adminNote.lastUpdated({ time: audit?.adminNote?.lastUpdated ?? "" }),
+      lastUpdated: t.adminNote.lastUpdated(audit?.adminNote?.lastUpdated ?? ""),
       update: t.adminNote.update,
       edit: t.adminNote.edit,
     },

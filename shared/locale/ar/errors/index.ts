@@ -34,40 +34,125 @@ export const errors: ErrorsLabels = {
     insufficientPermissions: "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
     impersonationNotAllowedWhileImpersonating: "لا يمكنك انتحال هوية أثناء انتحال هوية أخرى.",
     // ─── Functions (were {param} strings) ────────────────────────────
-    demoGroupNotFound: groupSlug => `مجموعة العرض غير موجودة: ${groupSlug}`,
-    demoGroupNoUser: groupSlug => `لم يتم العثور على مستخدم لمجموعة العرض: ${groupSlug}`,
+    demoGroupNotFound: (groupSlug: string) => `مجموعة العرض غير موجودة: ${groupSlug}`,
+    demoGroupNoUser: (groupSlug: string) => `لم يتم العثور على مستخدم لمجموعة العرض: ${groupSlug}`,
   },
   permissionManagement: {
     unauthorized: "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
-    userNotFound: id => `المستخدم غير موجود: ${id}`,
-    permissionGroupNotFound: id => `مجموعة الأذونات غير موجودة: ${id}`,
-    permissionGroupNameRequired: "اسم مجموعة الأذونات مطلوب.",
-    permissionGroupNameTooLong: "اسم مجموعة الأذونات طويل جداً (255 حرف كحد أقصى).",
-    permissionGroupInvalidName: "اسم مجموعة الأذونات غير صالح.",
-    cannotModifySuperAdmin: "لا يمكن تعديل المستخدم المسؤول العام.",
+    userNotFound: (id: string) => `المستخدم غير موجود: ${id}`,
+    permissionGroupNotFound: (id: string) => `مجموعة الأذونات غير موجودة: ${id}`,
+    permissionGroupNameRequired: "اسم المجموعة مطلوب.",
+    permissionGroupNameTooLong: "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
+    permissionGroupInvalidName: "اسم المجموعة غير صالح.",
+    cannotModifySuperAdmin: "لا يمكن تعديل المستخدم المسؤول الأعلى.",
   },
   billing: {
-    invoiceNotFound: id => `الفاتورة غير موجودة: ${id}`,
-    invoiceNotPendingReview: id => `الفاتورة ليست قيد المراجعة: ${id}`,
-    invoicePaymentProofNotFound: id => `إثبات الدفع غير موجود للفاتورة: ${id}`,
-    invoiceAlreadyPaid: ({ id, status }) => `الفاتورة ${id} تم دفعها بالفعل (${status.toLowerCase()}).`,
+    invoiceNotFound: (id: string) => `الفاتورة غير موجودة: ${id}`,
+    invoiceNotPendingReview: (id: string) => `الفاتورة ليست في حالة انتظار المراجعة: ${id}`,
+    invoicePaymentProofNotFound: (id: string) => `إثبات الدفع للفاتورة ${id} غير موجود`,
+    invoiceAlreadyPaid: ({ id, status }: { id: string; status: string }) =>
+      `الفاتورة ${id} بالفعل في حالة ${status.toLowerCase()}.`,
     paymentProofRequired: "إثبات الدفع مطلوب.",
-    cannotDeletePaidInvoice: id => `لا يمكن حذف الفاتورة ${id} لأنها تم دفعها.`,
+    cannotDeletePaidInvoice: (id: string) => `لا يمكن حذف الفاتورة ${id} لأنها مدفوعة.`,
     invalidParentId: "معرف ولي الأمر غير صالح.",
     invalidInvoiceAmount: "مبلغ الفاتورة غير صالح.",
     parentNotFound: "ولي الأمر غير موجود.",
-    invoiceVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
-      `عدم تطابق في إصدار الفاتورة ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
+    invoiceVersionMismatch: ({
+      id,
+      expectedVersion,
+      gotVersion,
+    }: {
+      id: string;
+      expectedVersion: number;
+      gotVersion: number;
+    }) => `عدم تطابق في إصدار الفاتورة ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
   },
   credit: {
     duplicatePurchase: "تمت معالجة عملية شراء الرصيد هذه بالفعل.",
-    insufficientBalance: ({ studentId, remaining }) => `رصيد غير كافٍ للطالب ${studentId}. المتبقي: ${remaining}`,
+    insufficientBalance: ({ studentId, remaining }: { studentId: string; remaining: number }) =>
+      `رصيد الطالب ${studentId} غير كافٍ. المتبقي: ${remaining}`,
     invalidInput: "إدخال غير صالح.",
   },
   file: {
-    recordNotFound: ({ tableName, entityId }) => `${tableName} غير موجود: ${entityId}`,
-    invalidFileType: "نوع ملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
-    invoicePaymentProofPending: "يوجد إثبات دفع قيد المراجعة لهذه الفاتورة بالفعل.",
+    recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>
+      `${tableName} غير موجود: ${entityId}`,
+    invalidFileType: "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
+    invoicePaymentProofPending: "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل.",
+  },
+  meetingProvider: {
+    meetingProviderInactive: "موفر الاجتماعات غير نشط.",
+    meetingConfigNotFound: (id: string) => `تكوين الاجتماع غير موجود: ${id}`,
+    meetingConfigCreateFailed: "فشل إنشاء تكوين الاجتماع.",
+    meetingConfigUpdateFailed: "فشل تحديث تكوين الاجتماع.",
+    meetingProviderNotFound: (id: string) => `موفر الاجتماعات غير موجود: ${id}`,
+    meetingProviderCreateFailed: "فشل إنشاء موفر الاجتماعات.",
+    meetingProviderUpdateFailed: "فشل تحديث موفر الاجتماعات.",
+    meetingProviderInUse: "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
+  },
+  teacher: {
+    teacherNotFound: (id: string) => `المعلم غير موجود: ${id}`,
+    staffProfileNotFound: "ملف الموظف غير موجود.",
+    quotaMustBeNonNegative: "الحصة يجب أن تكون رقمًا غير سالب.",
+    quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
+      `الحصة (${requested}) تتجاوز الإجمالي (${total}).`,
+  },
+  student: {
+    studentNotFound: (id: string) => `الطالب غير موجود: ${id}`,
+    studentCreateFailed: "فشل إنشاء الطالب.",
+    studentUpdateFailed: (id: string) => `فشل تحديث الطالب (المعرف: ${id}).`,
+    studentVersionMismatch: ({
+      id,
+      expectedVersion,
+      gotVersion,
+    }: {
+      id: string;
+      expectedVersion: number;
+      gotVersion: number;
+    }) => `عدم تطابق في إصدار الطالب ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
+    insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
+      `رصيد الحصص غير كافٍ للطالب ${id}: متبقٍ ${remaining}، مطلوب ${required}.`,
+    invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
+      `انتقال حالة غير صالح: ${currentStatus} -> ${newStatus}.`,
+    studentEmailRequired: "بريد الطالب الإلكتروني مطلوب.",
+    studentPasswordRequired: "كلمة مرور الطالب مطلوبة.",
+  },
+  category: {
+    categoryNotFound: (id: string) => `الفئة غير موجودة: ${id}`,
+    categoryCreateFailed: "فشل إنشاء فئة الحصة.",
+    categoryHasSubjects: "لا يمكن حذف الفئة لأن لديها مواد مرتبطة بها.",
+  },
+  user: {
+    userNotFound: (id: string) => `المستخدم غير موجود: ${id}`,
+    userEmailExists: "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
+    cannotModifyBankingFields: "لا يمكن تعديل الحقول المصرفية.",
+    parentNotFound: "ولي الأمر غير موجود.",
+  },
+  scheduling: {
+    cannotRescheduleToSelf: "لا يمكن إعادة الجدولة للذات.",
+    cannotRescheduleCompleted: "لا يمكن إعادة جدولة جلسة مكتملة.",
+    cannotRescheduleAlreadyRescheduled: "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
+    outOfQuota: "نفدت الحصة.",
+    leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
+      `تم تجاوز حصة الإجازة: الحد الأقصى ${maxLeaves} إجازات مسموح بها.`,
+    classInstanceNotFound: ({ id }: { id: string }) => `مثيل الفصل غير موجود: ${id}`,
+    originalClassNotFound: "الفصل الأصلي غير موجود.",
+    invalidTransition: "انتقال غير صالح.",
+    teacherNotAssigned: ({
+      teacherId,
+      studentId,
+      startTime,
+    }: {
+      teacherId: string;
+      studentId: string;
+      startTime: string;
+    }) => `المعلم ${teacherId} غير معين للطالب ${studentId} في ${startTime}.`,
+    teacherBooked: "المعلم محجوز بالفعل في هذا الوقت.",
+    studentBooked: "الطالب محجوز بالفعل في هذا الوقت.",
+    meetingUrlInUse: "رابط الاجتماع مستخدم بالفعل.",
+    sessionNotActivated: "الجلسة غير مفعلة.",
+  },
+  permissionGroup: {
+    permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
   },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
@@ -80,51 +165,69 @@ export const errors: ErrorsLabels = {
   unauthorizedSearch: "غير مصرح لك بالبحث.",
   unauthorizedViewMetrics: "غير مصرح لك بعرض المقاييس.",
   notFound: "المورد المطلوب غير موجود.",
-  studentNotFound: id => `الطالب غير موجود: ${id}`,
-  studentCreateFailed: "فشل في إنشاء الطالب.",
-  studentUpdateFailed: id => `فشل في تحديث الطالب (المعرف: ${id}).`,
-  studentVersionMismatch: ({ id, expectedVersion, gotVersion }) =>
-    `عدم تطابق في إصدار الطالب ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
-  insufficientClasses: ({ id, remaining, required }) =>
-    `رصيد الحصص غير كافٍ للطالب ${id}: متبقٍ ${remaining}، مطلوب ${required}.`,
-  invalidStatusTransition: ({ currentStatus, newStatus }) => `انتقال حالة غير صالح: ${currentStatus} -> ${newStatus}.`,
-  categoryNotFound: id => `الفئة غير موجودة: ${id}`,
-  categoryCreateFailed: "فشل إنشاء فئة الحصة.",
   unknownName: "غير معروف",
-  meetingProviderInactive: "موفر الاجتماعات غير نشط.",
-  meetingConfigNotFound: id => `تكوين الاجتماع غير موجود: ${id}`,
-  meetingConfigCreateFailed: "فشل إنشاء تكوين الاجتماع.",
-  meetingConfigUpdateFailed: "فشل تحديث تكوين الاجتماع.",
-  meetingProviderNotFound: id => `موفر الاجتماعات غير موجود: ${id}`,
+  invalidInput: "إدخال غير صالح.",
+  permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
+
+  // ─── Flattened error properties for backward compatibility ───────────
+  categoryNotFound: (id: string) => `الفئة غير موجودة: ${id}`,
+  categoryCreateFailed: "فشل إنشاء فئة الحصة.",
+  categoryHasSubjects: "لا يمكن حذف الفئة لأن لديها مواد مرتبطة بها.",
+  meetingProviderNotFound: (id: string) => `موفر الاجتماعات غير موجود: ${id}`,
   meetingProviderCreateFailed: "فشل إنشاء موفر الاجتماعات.",
   meetingProviderUpdateFailed: "فشل تحديث موفر الاجتماعات.",
   meetingProviderInUse: "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
-  userNotFound: id => `المستخدم غير موجود: ${id}`,
-  cannotModifyBankingFields: "لا يمكن تعديل الحقول المصرفية.",
-  invalidInput: "إدخال غير صالح.",
-  sessionNotActivated: "الجلسة غير مفعلة.",
-  teacherNotFound: id => `المعلم غير موجود: ${id}`,
-  staffProfileNotFound: "ملف الموظف غير موجود.",
-  quotaMustBeNonNegative: "الحصة يجب أن تكون رقمًا غير سالب.",
-  quotaExceedsTotal: ({ requested, total }) => `الحصة (${requested}) تتجاوز الإجمالي (${total}).`,
-  parentNotFound: "ولي الأمر غير موجود.",
+  meetingProviderInactive: "موفر الاجتماعات غير نشط.",
+  meetingConfigNotFound: (id: string) => `تكوين الاجتماع غير موجود: ${id}`,
+  meetingConfigCreateFailed: "فشل إنشاء تكوين الاجتماع.",
+  meetingConfigUpdateFailed: "فشل تحديث تكوين الاجتماع.",
+  studentNotFound: (id: string) => `الطالب غير موجود: ${id}`,
+  studentCreateFailed: "فشل في إنشاء الطالب.",
+  studentUpdateFailed: (id: string) => `فشل في تحديث الطالب (المعرف: ${id}).`,
+  studentVersionMismatch: ({
+    id,
+    expectedVersion,
+    gotVersion,
+  }: {
+    id: string;
+    expectedVersion: number;
+    gotVersion: number;
+  }) => `عدم تطابق في إصدار الطالب ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
+  insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
+    `رصيد الحصص غير كافٍ للطالب ${id}: متبقٍ ${remaining}، مطلوب ${required}.`,
+  invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
+    `انتقال حالة غير صالح: ${currentStatus} -> ${newStatus}.`,
   studentEmailRequired: "بريد الطالب الإلكتروني مطلوب.",
   studentPasswordRequired: "كلمة مرور الطالب مطلوبة.",
+  teacherNotFound: (id: string) => `المعلم غير موجود: ${id}`,
+  staffProfileNotFound: "ملف الموظف غير موجود.",
+  quotaMustBeNonNegative: "الحصة يجب أن تكون رقمًا غير سالب.",
+  quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
+    `الحصة (${requested}) تتجاوز الإجمالي (${total}).`,
+  userNotFound: (id: string) => `المستخدم غير موجود: ${id}`,
   userEmailExists: "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
-  permissionGroupNotFound: "مجموعة الأذونات غير موجودة.",
-  categoryHasSubjects: "لا يمكن حذف الفئة لأن لديها مواد مرتبطة بها.",
+  cannotModifyBankingFields: "لا يمكن تعديل الحقول المصرفية.",
+  parentNotFound: "ولي الأمر غير موجود.",
   cannotRescheduleToSelf: "لا يمكن إعادة الجدولة للذات.",
   cannotRescheduleCompleted: "لا يمكن إعادة جدولة جلسة مكتملة.",
   cannotRescheduleAlreadyRescheduled: "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
   outOfQuota: "نفدت الحصة.",
-  leaveQuotaExceeded: ({ maxLeaves }) => `تم تجاوز حصة الإجازة: الحد الأقصى ${maxLeaves} إجازات مسموح بها.`,
-  classInstanceNotFound: (params: { id: string }) => `مثيل الفصل غير موجود: ${params.id}`,
+  leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
+    `تم تجاوز حصة الإجازة: الحد الأقصى ${maxLeaves} إجازات مسموح بها.`,
+  classInstanceNotFound: ({ id }: { id: string }) => `مثيل الفصل غير موجود: ${id}`,
   originalClassNotFound: "الفصل الأصلي غير موجود.",
   invalidTransition: "انتقال غير صالح.",
-  // ─── Scheduling-specific errors ──────────────────────────────────────
-  teacherNotAssigned: ({ teacherId, studentId, startTime }) =>
-    `المعلم ${teacherId} غير معين للطالب ${studentId} في ${startTime}.`,
+  teacherNotAssigned: ({
+    teacherId,
+    studentId,
+    startTime,
+  }: {
+    teacherId: string;
+    studentId: string;
+    startTime: string;
+  }) => `المعلم ${teacherId} غير معين للطالب ${studentId} في ${startTime}.`,
   teacherBooked: "المعلم محجوز بالفعل في هذا الوقت.",
   studentBooked: "الطالب محجوز بالفعل في هذا الوقت.",
   meetingUrlInUse: "رابط الاجتماع مستخدم بالفعل.",
+  sessionNotActivated: "الجلسة غير مفعلة.",
 };

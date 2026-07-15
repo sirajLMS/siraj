@@ -26,7 +26,7 @@ interface PermissionsOverridesGridProps {
 }
 
 function PermissionsOverridesGrid({ overrides }: Readonly<PermissionsOverridesGridProps>) {
-  const tp = useAppTranslation("profile.staff").permissions;
+  const tp = useAppTranslation("profile").staff.permissions;
 
   const columns = useMemo<GridColDef<StaffPermissionOverride>[]>(
     () => [
@@ -71,8 +71,8 @@ export function PermissionsSection({
   permissionOverrides,
   isOwnScope = false,
 }: PermissionsSectionProps) {
-  const t = useAppTranslation("profile").staff;
-  const tp = useAppTranslation("profile.staff").permissions;
+  const t = useAppTranslation("profile");
+  const tp = t.staff.permissions;
   const groups = permissionGroups ?? [];
   const overrides = permissionOverrides ?? [];
   const hasGroups = groups.length > 0;
@@ -80,7 +80,7 @@ export function PermissionsSection({
 
   if (!hasGroups && !hasOverrides) {
     return (
-      <SectionPanel title={t.sections.permissions}>
+      <SectionPanel title={tp.inheritedGroups}>
         <Stack
           spacing={1}
           sx={{
@@ -101,7 +101,7 @@ export function PermissionsSection({
   }
 
   return (
-    <SectionPanel title={t.sections.permissions}>
+    <SectionPanel title={tp.inheritedGroups}>
       <Stack spacing={2}>
         {hasGroups ? (
           <Box>

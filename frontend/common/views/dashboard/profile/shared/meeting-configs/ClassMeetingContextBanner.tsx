@@ -19,8 +19,8 @@ function resolveSourceKey(source: EffectiveMeetingSource | string | null | undef
 }
 
 export function ClassMeetingContextBanner({ effectiveMeeting, hasScopeConfigs }: ClassMeetingContextBannerProps) {
-  const t = useAppTranslation("ui").meetingConfig.classScope;
-  const tDisplay = useAppTranslation("ui").meetingConfig.display;
+  const t = useAppTranslation("ui.meetingConfig.classScope");
+  const tDisplay = useAppTranslation("ui.meetingConfig.display");
 
   if (!effectiveMeeting && !hasScopeConfigs) return null;
 

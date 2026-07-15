@@ -53,7 +53,7 @@ function formatTimestamp(value: string | null | undefined, locale: string): stri
 }
 
 export function CurrencyHedgesContainer() {
-  const t = useAppTranslation("dashboard.billing").currencyHedges;
+  const t = useAppTranslation("dashboard.billing.currencyHedges");
   const locale = useAppLocale();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -157,35 +157,35 @@ export function CurrencyHedgesContainer() {
     () => [
       {
         field: "currency",
-        headerName: t("columns.currency"),
+        headerName: t.columns.currency,
         flex: 1,
         minWidth: 120,
         valueFormatter: value => getCurrencyDisplayName(String(value), locale),
       },
-      { field: "amount", headerName: t("columns.amount"), flex: 1, minWidth: 120 },
-      { field: "hedgeType", headerName: t("columns.hedgeType"), flex: 1, minWidth: 140 },
-      { field: "notes", headerName: t("columns.notes"), flex: 1.5, minWidth: 180 },
+      { field: "amount", headerName: t.columns.amount, flex: 1, minWidth: 120 },
+      { field: "hedgeType", headerName: t.columns.hedgeType, flex: 1, minWidth: 140 },
+      { field: "notes", headerName: t.columns.notes, flex: 1.5, minWidth: 180 },
       {
         field: "updatedAt",
-        headerName: t("columns.updatedAt"),
+        headerName: t.columns.updatedAt,
         flex: 1,
         minWidth: 160,
         valueFormatter: value => formatTimestamp(String(value), locale),
       },
       {
         field: "actions",
-        headerName: t("columns.actions"),
+        headerName: t.columns.actions,
         width: 120,
         sortable: false,
         filterable: false,
         renderCell: ({ row }) => (
           <Stack direction="row" spacing={0.5}>
-            <IconButton size="small" aria-label={t("editHedge")} onClick={() => openEdit(row)}>
+            <IconButton size="small" aria-label={t.editHedge} onClick={() => openEdit(row)}>
               <EditOutlined fontSize="small" />
             </IconButton>
             <IconButton
               size="small"
-              aria-label={t("deleteHedge")}
+              aria-label={t.deleteHedge}
               onClick={() => {
                 setDeletingRow(row);
                 setDeleteOpen(true);
@@ -204,11 +204,11 @@ export function CurrencyHedgesContainer() {
     <RequirePermission permissions={AppPermission.BillingManageCurrencyHedges}>
       <PageContainer>
         <PageHeader
-          title={t("pageTitle")}
-          subtitle={t("pageSubtitle")}
+          title={t.pageTitle}
+          subtitle={t.pageSubtitle}
           actions={
             <PrimaryPageAction onClick={openCreate} startIcon={<AddOutlined />}>
-              {t("addHedge")}
+              {t.addHedge}
             </PrimaryPageAction>
           }
         />
@@ -217,41 +217,41 @@ export function CurrencyHedgesContainer() {
             rows={rows}
             columns={columns}
             loading={loading}
-            emptyMessage={t("empty")}
+            emptyMessage={t.empty}
             getRowId={row => row.id}
           />
         </Box>
 
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
-          <DialogTitle>{editingRow ? t("editHedge") : t("addHedge")}</DialogTitle>
+          <DialogTitle>{editingRow ? t.editHedge : t.addHedge}</DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ pt: 1 }}>
               <CurrencySelect
                 currency={getCurrencyByCode(currency) ?? null}
                 setCurrencyAction={option => setCurrency(option.code)}
-                label={t("fields.currency")}
+                label={t.fields.currency}
                 fullWidth
               />
               <TextField
-                label={t("fields.amount")}
+                label={t.fields.amount}
                 value={amount}
                 onChange={event => setAmount(event.target.value)}
                 fullWidth
               />
               <FormControl fullWidth>
-                <InputLabel id="hedge-type-label">{t("fields.hedgeType")}</InputLabel>
+                <InputLabel id="hedge-type-label">{t.fields.hedgeType}</InputLabel>
                 <Select
                   labelId="hedge-type-label"
-                  label={t("fields.hedgeType")}
+                  label={t.fields.hedgeType}
                   value={hedgeType}
                   onChange={event => setHedgeType(event.target.value)}
                 >
-                  <MenuItem value={HEDGE_TYPE_LONG}>{t("hedgeTypes.long")}</MenuItem>
-                  <MenuItem value={HEDGE_TYPE_SHORT}>{t("hedgeTypes.short")}</MenuItem>
+                  <MenuItem value={HEDGE_TYPE_LONG}>{t.hedgeTypes.long}</MenuItem>
+                  <MenuItem value={HEDGE_TYPE_SHORT}>{t.hedgeTypes.short}</MenuItem>
                 </Select>
               </FormControl>
               <TextField
-                label={t("fields.notes")}
+                label={t.fields.notes}
                 value={notes}
                 onChange={event => setNotes(event.target.value)}
                 fullWidth
@@ -261,20 +261,20 @@ export function CurrencyHedgesContainer() {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>{t("cancel")}</Button>
+            <Button onClick={() => setDialogOpen(false)}>{t.cancel}</Button>
             <Button variant="contained" onClick={() => void handleSave()} disabled={creating || updating}>
-              {t("save")}
+              {t.save}
             </Button>
           </DialogActions>
         </Dialog>
 
         <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-          <DialogTitle>{t("deleteHedge")}</DialogTitle>
-          <DialogContent>{t("deleteConfirm")}</DialogContent>
+          <DialogTitle>{t.deleteHedge}</DialogTitle>
+          <DialogContent>{t.deleteConfirm}</DialogContent>
           <DialogActions>
-            <Button onClick={() => setDeleteOpen(false)}>{t("cancel")}</Button>
+            <Button onClick={() => setDeleteOpen(false)}>{t.cancel}</Button>
             <Button color="error" variant="contained" onClick={() => void handleDelete()} disabled={deleting}>
-              {t("deleteHedge")}
+              {t.deleteHedge}
             </Button>
           </DialogActions>
         </Dialog>

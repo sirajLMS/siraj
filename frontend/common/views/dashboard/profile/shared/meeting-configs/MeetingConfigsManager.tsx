@@ -33,7 +33,7 @@ function configLabel(config: UserMeetingConfigFieldsFragment, locale: string): s
 }
 
 function useMeetingConfigsState(targetUserId: string) {
-  const t = useAppTranslation("ui").meetingConfig.manager;
+  const t = useAppTranslation("ui.meetingConfig.manager");
   const locale = useAppLocale();
 
   const { data, loading, error, refetch } = useQuery(userMeetingConfigsQueryDocument, {

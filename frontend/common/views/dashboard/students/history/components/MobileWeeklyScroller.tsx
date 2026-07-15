@@ -68,7 +68,7 @@ export function MobileWeeklyScroller({
   onSelectWeek,
   onSelectDay,
 }: Readonly<MobileWeeklyScrollerProps>) {
-  const t = useAppTranslation("dashboard.studentHistory.calendar");
+  const t = useAppTranslation<"dashboard.studentHistory">("dashboard.studentHistory").calendar;
 
   const weekDays = useMemo(
     () => computeWeekDays(currentMonth, selectedWeek, classes),
@@ -91,7 +91,7 @@ export function MobileWeeklyScroller({
           {t.weeklyAttendance}
         </Typography>
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t.week({ number: selectedWeek })}
+          {t.week(selectedWeek)}
         </Typography>
       </Box>
 

@@ -25,60 +25,61 @@ import {
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import { useRouter } from "@/shared/i18n/routing";
 import { useAppTranslation } from "@/shared/locale/client";
+import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass";
 
 type TranslationFn = ReturnType<typeof useAppTranslation>;
 
 function useRecurringClassLabels(t: TranslationFn): CreateRecurringClassLabels {
   return useMemo(
     () => ({
-      pageTitle: t("pageTitle"),
-      title: t("title"),
-      subtitle: t("subtitle"),
+      pageTitle: t.pageTitle,
+      title: t.title,
+      subtitle: t.subtitle,
       breadcrumbs: {
-        dashboard: t("breadcrumbs.dashboard"),
-        classes: t("breadcrumbs.classes"),
+        dashboard: t.breadcrumbs.dashboard,
+        classes: t.breadcrumbs.classes,
       },
-      add: t("add"),
-      addClass: t("addClass"),
-      addedSuccessfully: t("addedSuccessfully"),
-      close: t("close"),
-      students: t("students"),
-      studentsPlaceholder: t("studentsPlaceholder"),
-      teacher: t("teacher"),
-      teacherPlaceholder: t("teacherPlaceholder"),
-      defaultStartTime: t("defaultStartTime"),
-      duration: t("duration"),
-      durationHours: t("durationHours"),
-      durationMinutes: t("durationMinutes"),
-      hours: t("hours"),
-      minutes: t("minutes"),
-      daysSelection: t("daysSelection"),
-      classSchedule: t("classSchedule"),
-      timeOverride: t("timeOverride"),
-      weekendOff: t("weekendOff"),
-      timezone: t("timezone"),
-      timezonePlaceholder: t("timezonePlaceholder"),
-      classType: t("classType"),
-      classTypePlaceholder: t("classTypePlaceholder"),
+      add: t.add,
+      addClass: t.addClass,
+      addedSuccessfully: t.addedSuccessfully,
+      close: t.close,
+      students: t.students,
+      studentsPlaceholder: t.studentsPlaceholder,
+      teacher: t.teacher,
+      teacherPlaceholder: t.teacherPlaceholder,
+      defaultStartTime: t.defaultStartTime,
+      duration: t.duration,
+      durationHours: t.durationHours,
+      durationMinutes: t.durationMinutes,
+      hours: t.hours,
+      minutes: t.minutes,
+      daysSelection: t.daysSelection,
+      classSchedule: t.classSchedule,
+      timeOverride: t.timeOverride,
+      weekendOff: t.weekendOff,
+      timezone: t.timezone,
+      timezonePlaceholder: t.timezonePlaceholder,
+      classType: t.classType,
+      classTypePlaceholder: t.classTypePlaceholder,
       days: {
-        monday: t("days.monday"),
-        tuesday: t("days.tuesday"),
-        wednesday: t("days.wednesday"),
-        thursday: t("days.thursday"),
-        friday: t("days.friday"),
-        saturday: t("days.saturday"),
-        sunday: t("days.sunday"),
+        monday: t.days.monday,
+        tuesday: t.days.tuesday,
+        wednesday: t.days.wednesday,
+        thursday: t.days.thursday,
+        friday: t.days.friday,
+        saturday: t.days.saturday,
+        sunday: t.days.sunday,
       },
       validation: {
-        studentRequired: t("validation.studentRequired"),
-        teacherRequired: t("validation.teacherRequired"),
-        startTimeRequired: t("validation.startTimeRequired"),
-        durationRequired: t("validation.durationRequired"),
-        daysRequired: t("validation.daysRequired"),
-        durationHoursMax: t("validation.durationHoursMax"),
-        durationMinutesMax: t("validation.durationMinutesMax"),
-        timezoneRequired: t("validation.timezoneRequired"),
-        creationFailed: t("validation.creationFailed"),
+        studentRequired: t.validation.studentRequired,
+        teacherRequired: t.validation.teacherRequired,
+        startTimeRequired: t.validation.startTimeRequired,
+        durationRequired: t.validation.durationRequired,
+        daysRequired: t.validation.daysRequired,
+        durationHoursMax: t.validation.durationHoursMax,
+        durationMinutesMax: t.validation.durationMinutesMax,
+        timezoneRequired: t.validation.timezoneRequired,
+        creationFailed: t.validation.creationFailed,
       },
     }),
     [t]
@@ -170,12 +171,12 @@ function useRecurringClassSubmit(params: SubmitHookParams) {
             }, 1500);
           }
         } else {
-          setErrorMessage(t("validation.creationFailed"));
+          setErrorMessage(t.validation.creationFailed);
         }
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         logger.error("Error creating recurring class", { err: error });
-        setErrorMessage(t("validation.creationFailed"));
+        setErrorMessage(t.validation.creationFailed);
       } finally {
         setSubmitting(false);
       }

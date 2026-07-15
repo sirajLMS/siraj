@@ -262,7 +262,7 @@ export function AssignedUsersTab({
       {selectedAssignedUserIds.length > 0 && (
         <StyledBulkActionBar>
           <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-            {t.usersSelected({ count: selectedAssignedUserIds.length })}
+            {t.usersSelected(selectedAssignedUserIds.length)}
           </Typography>
           <StyledRemoveSelectedButton
             variant="contained"

@@ -104,7 +104,7 @@ export function ManageOverridesDialog({
       <StyledDialogTitle id="manage-overrides-dialog-title">
         <Box>
           <Typography variant="headlineMd" sx={{ fontWeight: 600 }}>
-            {t("editOverrides")}
+            {t.editOverrides}
           </Typography>
           <StyledSubtitle variant="bodyMd">
             Configuring explicit rules for {user.name} ({user.email})

@@ -19,8 +19,13 @@ export function useDocumentTitle(
     if (title) {
       documentTitle = `${title} | ${APP_NAME}`;
     } else if (fallbackKey) {
-      const translated = values ? t[fallbackKey as keyof typeof t](values as never) : t[fallbackKey as keyof typeof t];
-      documentTitle = `${translated} | ${APP_NAME}`;
+      const translation = t[fallbackKey as keyof typeof t];
+      if (typeof translation === "function") {
+        // Handle function translations (like documentTitleTemplate)
+        documentTitle = `${translation(values as never)} | ${APP_NAME}`;
+      } else {
+        documentTitle = `${translation} | ${APP_NAME}`;
+      }
     } else {
       return;
     }
